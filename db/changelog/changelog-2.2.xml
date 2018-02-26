@@ -1313,4 +1313,45 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id=2</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3678 -->
+    <changeSet id="2.2-apronin-2" author="apronin">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3756 В справочнике АСНУ в наименовании АС "Back Office" лишний пробел в конце-->
+	<changeSet id="2.2-rnurgaleev-20" author="rnurgaleev">
+        <update tableName="ref_book_asnu">
+            <column name="name"
+                    value="АС &quot;Back Office&quot;"/>
+            <where>code='8000'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-21" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+            <where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-1449 Добавить в XSD РНУ НДФЛ допустимое значение "00.00.0000" для элемента СрокПрчслНал вернул прежнюю версию до 9f785268c7df43310e6fc2402c407210e6071b46-->
+    <changeSet id="2.2-rnurgaleev-22" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
+            <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3757 -->
+    <changeSet id="2.2-apronin-2" author="apronin">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

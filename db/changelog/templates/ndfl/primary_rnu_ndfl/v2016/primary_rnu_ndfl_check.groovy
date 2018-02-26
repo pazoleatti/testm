@@ -1670,6 +1670,48 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
+                // "Сумма Граф 16"
+                BigDecimal calculatedTaxSum = new BigDecimal(0)
+                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
+                    if (ndflPersonIncomeCurrent.calculatedTax != null && ndflPersonIncomeCurrent.operationId == operationId) {
+                        calculatedTaxSum = calculatedTaxSum.add(ndflPersonIncomeCurrent.calculatedTax)
+                    }
+                }
+                // "Сумма Граф 17"
+                BigDecimal withholdingTaxSum = new BigDecimal(0)
+                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
+                    if (ndflPersonIncomeCurrent.withholdingTax != null && ndflPersonIncomeCurrent.operationId == operationId)
+                        withholdingTaxSum = withholdingTaxSum.add(ndflPersonIncomeCurrent.withholdingTax)
+                }
+                // "Сумма Граф 18"
+                BigDecimal notHoldingTaxSum = new BigDecimal(0)
+                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
+                    if (ndflPersonIncomeCurrent.notHoldingTax != null && ndflPersonIncomeCurrent.operationId == operationId) {
+                        notHoldingTaxSum = notHoldingTaxSum.add(ndflPersonIncomeCurrent.notHoldingTax)
+                    }
+                }
+                // "Сумма Граф 19"
+                BigDecimal overholdingTaxSum = new BigDecimal(0)
+                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
+                    if (ndflPersonIncomeCurrent.overholdingTax != null) {
+                        overholdingTaxSum = overholdingTaxSum.add(ndflPersonIncomeCurrent.overholdingTax)
+                    }
+                }
+                // "Сумма Граф 20"
+                Long refoundTaxSum = 0L
+                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
+                    if (ndflPersonIncomeCurrent.refoundTax != null) {
+                        refoundTaxSum += ndflPersonIncomeCurrent.refoundTax
+                    }
+                }
+                // "Сумма Граф 24"
+                Long taxSum = 0L
+                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
+                    if (ndflPersonIncomeCurrent.taxSumm != null) {
+                        taxSum += ndflPersonIncomeCurrent.taxSumm
+                    }
+                }
+
                 // СведДох7 НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
                 if (ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
                     // СведДох7.1
@@ -1679,8 +1721,8 @@ class Check extends AbstractScriptClass {
                             && (ndflPersonIncome.overholdingTax == null || ndflPersonIncome.overholdingTax == 0)
                     ) {
                         // «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2»
-                        if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax
-                                && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
+                        if (!(withholdingTaxSum == calculatedTaxSum
+                                && withholdingTaxSum == taxSum ?: 0)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значениям гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
                                     C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
@@ -1772,40 +1814,6 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
-                // "Сумма Граф 16"
-                BigDecimal calculatedTaxSum = new BigDecimal(0)
-                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.calculatedTax != null && ndflPersonIncomeCurrent.operationId == operationId) {
-                        calculatedTaxSum = calculatedTaxSum.add(ndflPersonIncomeCurrent.calculatedTax)
-                    }
-                }
-                // "Сумма Граф 17"
-                BigDecimal withholdingTaxSum = new BigDecimal(0)
-                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.withholdingTax != null && ndflPersonIncomeCurrent.operationId == operationId)
-                        withholdingTaxSum = withholdingTaxSum.add(ndflPersonIncomeCurrent.withholdingTax)
-                }
-                // "Сумма Граф 18"
-                BigDecimal notHoldingTaxSum = new BigDecimal(0)
-                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.notHoldingTax != null && ndflPersonIncomeCurrent.operationId == operationId) {
-                        notHoldingTaxSum = notHoldingTaxSum.add(ndflPersonIncomeCurrent.notHoldingTax)
-                    }
-                }
-                // "Сумма Граф 19"
-                BigDecimal overholdingTaxSum = new BigDecimal(0)
-                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.overholdingTax != null) {
-                        overholdingTaxSum = overholdingTaxSum.add(ndflPersonIncomeCurrent.overholdingTax)
-                    }
-                }
-                // "Сумма Граф 20"
-                Long refoundTaxSum = 0L
-                ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.refoundTax != null) {
-                        refoundTaxSum += ndflPersonIncomeCurrent.refoundTax
-                    }
-                }
                 // "Сумма Граф 24"
                 // Отменил изменения https://jira.aplana.com/browse/SBRFNDFL-1307, поскольку они привели к https://jira.aplana.com/browse/SBRFNDFL-1483
                 //Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
@@ -1857,7 +1865,13 @@ class Check extends AbstractScriptClass {
                     dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             // Все подпункты, кроме 11-го
-                            if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
+                            boolean check;
+                            if (dateConditionData.checker instanceof Column6EqualsColumn7){
+                                check = new Column6EqualsColumn7().check(ndflPersonIncomeCurrentByPersonIdAndOperationIdList)
+                            }else {
+                                check = dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)
+                            }
+                            if (!check) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format(dateConditionData.conditionMessage,
                                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : "",
@@ -2509,6 +2523,22 @@ class Check extends AbstractScriptClass {
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
             String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
             String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
+            return accrued == payout
+        }
+
+        boolean check(List<NdflPersonIncome> ndflPersonIncomes) {
+            Date accuredDate = null;
+            Date payoutDate = null;
+            for(NdflPersonIncome ndflPersonIncome : ndflPersonIncomes){
+                if (accuredDate == null && ndflPersonIncome.incomeAccruedDate != null){
+                    accuredDate = ndflPersonIncome.incomeAccruedDate
+                }
+                if (payoutDate == null && ndflPersonIncome.incomePayoutDate != null){
+                    payoutDate = ndflPersonIncome.incomePayoutDate
+                }
+            }
+            String accrued = accuredDate?.format("dd.MM.yyyy")
+            String payout = payoutDate?.format("dd.MM.yyyy")
             return accrued == payout
         }
     }
