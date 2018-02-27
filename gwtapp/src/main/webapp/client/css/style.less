@@ -1509,23 +1509,26 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
       }
     }
     div.cbr-picker {
-      width: 150px;
+      width: 98px;
       .cbr-picker-button, .cbr-picker-input {
         display: inline-block;
         vertical-align: top;
       }
       .cbr-picker-button {
-        width: 37px;
+        width: 22px;
       }
       .cbr-picker-input {
-        width: 107px;
-        margin: 0 0 0 -6px;
+        width: 63px;
+        margin: 0 0 0 -1px;
+        input{
+
+        }
       }
 
     }
     .date-to-label {
       .control-label {
-        width: 24px;
+        width: 34px;
       }
     }
   }
@@ -1536,6 +1539,11 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
   .report-content {
     height: 496px;
+  }
+  .small-label, .info-wrapper .datepicker-block .date-from-label{
+    float: right;
+    margin: 0;
+    line-height: 13px;
   }
 }
 
@@ -1681,6 +1689,10 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 .pull-control-label-right .control-label {
   width: 100%;
   text-align: right;
+  line-height: 12px;
+  vertical-align: middle;
+  margin-bottom: -4px;
+
 }
 
 .flex-column {
