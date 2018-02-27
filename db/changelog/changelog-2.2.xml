@@ -1401,4 +1401,10 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
                 newDataType="varchar2(100 char)"
         />
     </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-27" author="rnurgaleev">
+        <sql>
+            update ref_book_attribute set max_length=100 where ref_book_id=901 and alias in ('DISTRICT','CITY','LOCALITY','STREET');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
