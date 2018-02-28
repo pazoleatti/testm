@@ -1424,4 +1424,20 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id in (select jrxml from declaration_template where id=103)</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3789 2.2 Параметры асинхронных заданий: некорректное название операций "Расчет", "Идентификация", "Консолидация"-->
+	<changeSet id="2.2-rnurgaleev-29" author="rnurgaleev">
+		<update tableName="async_task_type">
+            <column name="name" value="Идентификация ФЛ налоговой формы"/>
+            <where>id = 8</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2-rnurgaleev-30" author="rnurgaleev">
+		<update tableName="async_task_type">
+            <column name="name" value="Консолидация налоговой формы"/>
+            <where>id = 9</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
