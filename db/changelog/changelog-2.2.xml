@@ -1415,4 +1415,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id=2</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3704 НДФЛ: Обновить печатное представление 6-НДФЛ-->
+	<changeSet id="2.2-rnurgaleev-28" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template where id=103)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
