@@ -1407,4 +1407,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             update ref_book_attribute set max_length=100 where ref_book_id=901 and alias in ('DISTRICT','CITY','LOCALITY','STREET');
         </sql>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3678 -->
+    <changeSet id="2.2-apronin-3" author="apronin">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
