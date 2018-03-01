@@ -561,7 +561,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Transactional
-    private ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds, Permission permission) {
+    protected ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds, Permission permission) {
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
@@ -3355,21 +3355,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome) {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
+        reportService.deleteDec(declarationDataId, DeclarationDataReportType.SPECIFIC_REPORT_DEC);
     }
 
     @Override
+    @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction) {
         ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
+        reportService.deleteDec(declarationDataId, DeclarationDataReportType.SPECIFIC_REPORT_DEC);
     }
 
     @Override
+    @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment) {
         ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
+        reportService.deleteDec(declarationDataId, DeclarationDataReportType.SPECIFIC_REPORT_DEC);
     }
 
     private String getDeclarationDescription(long declarationDataId) {

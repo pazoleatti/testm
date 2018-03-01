@@ -27,6 +27,7 @@ public class DeclarationDataReportType implements Serializable {
     public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(AsyncTaskType.IMPORT_TF_DEC, null);
     public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(AsyncTaskType.EDIT_FILE_COMMENT_DEC, null);
     public static final DeclarationDataReportType TO_CREATE_DEC = new DeclarationDataReportType(AsyncTaskType.TO_CREATE_DEC, null);
+    public static final DeclarationDataReportType SPECIFIC_REPORT_DEC = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
 
     /**
      * Тип задачи
