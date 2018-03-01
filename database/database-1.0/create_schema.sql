@@ -1,19 +1,13 @@
--- Change password for user NDFL
-CREATE USER NDFL IDENTIFIED BY ndfl;
+-- Change password and tablespace for user NDFL
+CREATE USER NDFL IDENTIFIED BY пароль DEFAULT TABLESPACE табличное_пространство;
+ALTER USER NDFL QUOTA UNLIMITED ON табличное_пространство;
+
 GRANT CREATE SESSION TO NDFL;
 GRANT CREATE TABLE TO NDFL;
 GRANT CREATE PROCEDURE TO NDFL;
-GRANT CREATE TRIGGER TO NDFL;
 GRANT CREATE VIEW TO NDFL;
 GRANT CREATE SEQUENCE TO NDFL;
-
-
--- Grant/Revoke role privileges 
-grant connect to NDFL;
-grant resource to NDFL;
--- Grant/Revoke system privileges 
-grant advisor to NDFL;
-grant create any view to NDFL;
-grant select any sequence to NDFL;
-grant select any table to NDFL;
-grant create materialized view to NDFL;
+GRANT CREATE SYNONYM TO NDFL;
+GRANT CREATE TRIGGER TO NDFL;
+GRANT CREATE MATERIALIZED VIEW TO NDFL;
+GRANT CREATE JOB TO NDFL;
