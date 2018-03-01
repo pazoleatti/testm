@@ -1456,4 +1456,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3761 НДФЛ: 2.2 6НДФЛ: неверное название листов в xlsx-отчете-->
+	<changeSet id="2.2-rnurgaleev-31" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template where id=103)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
