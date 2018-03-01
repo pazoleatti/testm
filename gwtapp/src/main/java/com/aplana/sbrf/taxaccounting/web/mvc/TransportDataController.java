@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,10 +24,13 @@ public class TransportDataController {
 
     private final SecurityService securityService;
     private final UploadTransportDataService uploadTransportDataService;
+    private final LoadRefBookDataService loadRefBookDataService;
 
-    public TransportDataController(SecurityService securityService, UploadTransportDataService uploadTransportDataService) {
+    public TransportDataController(SecurityService securityService, UploadTransportDataService uploadTransportDataService,
+                                   LoadRefBookDataService loadRefBookDataService) {
         this.securityService = securityService;
         this.uploadTransportDataService = uploadTransportDataService;
+        this.loadRefBookDataService = loadRefBookDataService;
     }
 
 
@@ -47,7 +52,11 @@ public class TransportDataController {
         InputStream inputStream = file.getInputStream();
         String fileName = file.getOriginalFilename();
 
-        return uploadTransportDataService.upload(userInfo, fileName, inputStream, logger);
+        if (fileName.startsWith("FL") && "xml".equals(FilenameUtils.getExtension(fileName))) {
+            return loadRefBookDataService.createTaskToImportXml(userInfo, fileName, inputStream, logger);
+        } else {
+            return uploadTransportDataService.upload(userInfo, fileName, inputStream, logger);
+        }
     }
 
     /**

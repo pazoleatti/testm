@@ -96,10 +96,10 @@
                         <!--Основная информация-->
                         <div class="header-details">
                             <div class="info-wrapper row-fluid pull-control-label-right">
-                                <div class="span3" style="min-width: 413px;">
+                                <div class="span3" style="min-width: 382px;">
                                     <div class="row-fluid">
                                         <div class="span3">
-                                            <label class="control-label">{{::'title.department' | translate}}:</label>
+                                            <label class="control-label margin-left-minus5">{{::'title.department' | translate}}:</label>
                                         </div>
                                         <div class="span9">
                                             <label class="font-normal info-text" style="line-height: 11px;">{{declarationData.department}}</label>
@@ -182,7 +182,8 @@
                     <div data-ng-controller="CommonFilterCtrl">
                         <div id="ndfl_filter" style="padding: 0 12px 0 12px;"
                              data-aplana-collapse data-is-collapsed="true"
-                             data-label="(!searchFilter.isClear ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate">
+                             data-label="(!searchFilter.isClear ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate"
+                             class="child-margin0">
                             <form id="ndfl_group_filter" class="info-wrapper" novalidate>
                                 <div class="row-fluid">
                                     <div class="span11">
@@ -280,7 +281,7 @@
                 </div>
 
                 <div id="ndfl_tabs" class="flex-fill"
-                     style="margin: 10px 12px 14px; min-height: 300px; position: relative;"
+                     style="margin: 0 12px 14px; min-height: 300px; position: relative;"
                      data-aplana-tabs="ndflTabsCtrl"
                      data-tab-model="ndflTabs">
                 </div>

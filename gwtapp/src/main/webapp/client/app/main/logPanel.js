@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: 300px; min-height: 296px;'>" +
+                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: 300px; min-height: 329px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -168,13 +168,13 @@
                                 // тут стоит делать $rootScope.$broadcast('UPDATE_GIRD_HEIGHT'), но он тормозит
                                 bottomDiv.find('.ui-jqgrid-bdiv').css({
                                     height: startHeight - my - 136,
-                                    maxHeight: topDiv.height() - 172,
-                                    minHeight: 166
+                                    maxHeight: topDiv.height() - 138,
+                                    minHeight: 192
                                 });
 
                                 bottomDiv.css({
                                     height: startHeight - my,
-                                    maxHeight: container.height() - 34
+                                    maxHeight: container.height() - 3
                                 });
                             }
 

@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,17 @@ public interface LoadRefBookDataService {
      */
     void saveRefBookRecords(long refBookId, Long uniqueRecordId, Long recordId, Long sourceUniqueRecordId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Запускает новую задачу на загрузку данных из xml-файла в справочник ФЛ
+     *
+     * @param userInfo    пользователь, запустивший задачу
+     * @param fileName    имя файла
+     * @param inputStream данные файла
+     * @param logger      логгер
+     * @return результат запуска задачи
+     */
+    ActionResult createTaskToImportXml(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger);
 
     /**
      * Загрузка данных из xml в справочник

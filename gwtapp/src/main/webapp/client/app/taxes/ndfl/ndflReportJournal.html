@@ -1,9 +1,9 @@
 <div class="flex-column">
     <div>
-        <div class="header-col" style="margin-left: 25px;">
+        <div class="header-col" style="margin-left: 0;">
             <h1>{{::'header.ndflReportJournal.forms' | translate}}</h1>
         </div>
-        <div style="float: right; margin-top: 15px; margin-right: 35px;">
+        <div style="float: right; margin-top: 5px; margin-right: 0;  margin-bottom: 6px;">
             <button type="button" class="btn btn-default"
                     data-ng-click="createReport()"
                     data-ng-show="reportCreateAllowed">
@@ -27,14 +27,6 @@
                             <span data-translate-once="button.check"></span>
                         </button>
                     </span>
-                    <!--Удалить-->
-                    <span>
-                        <button type="button" class="btn btn-default"
-                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)"
-                                data-ng-click="delete()">
-                            <span data-translate-once="button.delete"></span>
-                        </button>
-                    </span>
                     <!--Принять -->
                     <span>
                         <button type="button" class="btn btn-default"
@@ -49,6 +41,14 @@
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)"
                                 data-ng-click="returnToCreated()">
                             <span data-translate-once="button.return"></span>
+                        </button>
+                    </span>
+                    <!--Удалить-->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)"
+                                data-ng-click="delete()">
+                            <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
                     <!--Выгрузить отчетность-->

@@ -326,7 +326,7 @@ class Report6Ndfl extends AbstractScriptClass {
         builder.Файл(
                 ИдФайл: fileName,
                 ВерсПрог: applicationVersion,
-                ВерсФорм: "5.01"
+                ВерсФорм: "5.02"
         ) {
             Документ(
                     КНД: "1151099",
@@ -567,12 +567,14 @@ class Report6Ndfl extends AbstractScriptClass {
                                 withholdingTaxSumByGroup.put(grouping, withholdingTaxfromMap)
                             }
                             groups.each { grouping ->
+                                def factIncome = ScriptUtils.round(payoutSumByGroup.get(grouping), 2)
+                                def holdTax = withholdingTaxSumByGroup.get(grouping)
                                 СумДата(
-                                        ДатаФактДох: formatDate(grouping.incomeAccruedDate),
-                                        ДатаУдержНал: formatDate(grouping.taxDate),
-                                        СрокПрчслНал: formatDate(grouping.transferDate),
-                                        ФактДоход: ScriptUtils.round(payoutSumByGroup.get(grouping), 2),
-                                        УдержНал: withholdingTaxSumByGroup.get(grouping)
+                                        ДатаФактДох: factIncome != 0 ? formatDate(grouping.incomeAccruedDate) : "00.00.0000",
+                                        ДатаУдержНал: holdTax != 0 ? formatDate(grouping.taxDate) : "00.00.0000",
+                                        СрокПрчслНал: holdTax != 0 ? formatDate(grouping.transferDate) : "00.00.0000",
+                                        ФактДоход: factIncome,
+                                        УдержНал: holdTax
                                 ) {}
                             }
                         }

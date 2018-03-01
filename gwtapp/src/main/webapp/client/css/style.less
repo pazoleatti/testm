@@ -1105,7 +1105,7 @@ div [ui-view] {
 #app-header {
   width: 100%;
   height: 56px;
-  min-width: 1300px;
+  min-width: 1280px;
 }
 
 /**
@@ -1116,7 +1116,7 @@ div [ui-view] {
   flex: 1;
   height: 100%;
   width: 100%;
-  min-width: 1300px;
+  min-width: 1280px;
   overflow: hidden;
   padding: 12px 12px 0 12px;
   z-index: 10;
@@ -1301,6 +1301,7 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
   white-space: nowrap;
   font-family: Tahoma, helvetica, arial, sans-serif !important;
   min-width: 630px;
+  line-height: 31px;
 }
 
 .caret {
@@ -1475,8 +1476,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
       }
     }
     .datepicker-block {
-      margin: 0 !important;
-      width: 319px !important;
       .date-from-label {
         margin-bottom: -8px;
       }
@@ -1489,7 +1488,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
     }
     .long-label {
       .date-from-label {
-        margin: 0 0 0 31px;
         width: 202px;
       }
       .date-to-block {
@@ -1508,23 +1506,26 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
       }
     }
     div.cbr-picker {
-      width: 150px;
+      width: 98px;
       .cbr-picker-button, .cbr-picker-input {
         display: inline-block;
         vertical-align: top;
       }
       .cbr-picker-button {
-        width: 37px;
+        width: 22px;
       }
       .cbr-picker-input {
-        width: 107px;
-        margin: 0 0 0 -6px;
+        width: 60px;
+        margin: 0 0 0 2px;
+        input{
+
+        }
       }
 
     }
     .date-to-label {
       .control-label {
-        width: 24px;
+        width: 34px;
       }
     }
   }
@@ -1535,6 +1536,14 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
   .report-content {
     height: 496px;
+  }
+  .small-label, .info-wrapper .datepicker-block .date-from-label{
+    float: right;
+    margin: 0;
+    line-height: 13px;
+  }
+  .margin-left-minus5{
+     margin: 0 0 0 -5px;
   }
 }
 
@@ -1681,7 +1690,14 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   width: 100%;
   text-align: right;
 }
+form .pull-control-label-right .control-label {
+  width: 100%;
+  text-align: right;
+  line-height: 12px;
+  vertical-align: middle;
+  margin-bottom: -4px;
 
+}
 .flex-column {
   display: flex;
   flex-flow: column;
@@ -1701,4 +1717,9 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 }
 .datetimepicker table tr td.active.active{
   background: @greenDarker!important;
+}
+/*child-margin0*/
+
+.child-margin0 a.collapse-link{
+  margin-bottom: 0;
 }

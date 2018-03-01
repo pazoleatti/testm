@@ -41,15 +41,15 @@ public class PreLoadCheckRefBookHandler extends AbstractActionHandler<PreLoadChe
     public PreLoadCheckRefBookResult execute(PreLoadCheckRefBookAction action, ExecutionContext context) throws ActionException {
         PreLoadCheckRefBookResult result = new PreLoadCheckRefBookResult();
         Logger logger = new Logger();
-        //TODO: Убрал, т.к не используется
+        //TODO: Убрал, т.к импорт в этом проекте не используется
         //loadRefBookDataService.preLoadCheck(action.getRefBookId(), action.getFileName(), action.getDateFrom(), action.getDateTo(), securityService.currentUserInfo(), logger);
-        /*if (refBookFactory.get(action.getRefBookId()).isVersioned()) {
+        if (refBookFactory.get(action.getRefBookId()).isVersioned()) {
             if (action.getDateFrom() == null) {
                 logger.error("Дата начала действия новых версий должна быть заполнена!");
             } else if (action.getDateTo() != null && action.getDateFrom().compareTo(action.getDateTo()) == 1) {
                 logger.error("Дата начала действия новых версий должна быть не больше даты окончания!");
             }
-        }*/
+        }
         if (logger.containsLevel(LogLevel.ERROR)) {
             result.setError(true);
         }
