@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
@@ -28,7 +29,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     @Autowired
     protected TAUserService taUserService;
     @Autowired
-    DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
+    protected DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     /**
      * Право на создание декларации вручную
@@ -486,11 +487,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            DepartmentReportPeriod drp = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             return DeclarationDataPermission.VIEW.isGranted(user, targetDomainObject, logger) &&
                     DeclarationDataPermission.CREATE.isGranted(user, targetDomainObject, logger) &&
                     declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind() == DeclarationFormKind.PRIMARY &&
-                    targetDomainObject.getState() == State.CREATED &&
-                    targetDomainObject.getManuallyCreated();
+                    targetDomainObject.getState() == State.CREATED && drp.isActive();
         }
     }
 

@@ -1716,6 +1716,55 @@ public final class ScriptUtils {
     }
 
     /**
+     * Работает аналогично {@link ScriptUtils#checkAndReadFile(InputStream, String, List, List, String, String, int, Map)}
+     * Однако читает данные не с первого листа, а с диапазона листов.
+     * @param inputStream       потом данных
+     * @param allValues         список для хранения списков значении каждой строки данных
+     * @param headerValues      список для хранения списков значении каждой строки шапки таблицы
+     * @param tableStartValue   начальное значение, с которого начинается сбор данных
+     * @param tableEndValue     конечное значение, с которого прекращается сбор данных
+     * @param headerRowCount    количество строк в шапке таблицы
+     * @param paramsMap         мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+     * @param startSheetIndex   индекс начального листа, не должен быть null
+     * @param endSheetIndex     индекс последнего листа включительно. Может быть равен null, тогда будут обрабатываться
+     *                          все листы с индексом больше начального
+     * @throws IOException
+     * @throws OpenXML4JException
+     * @throws SAXException
+     */
+    public static void readSheetsRange(InputStream inputStream, List<List<String>> allValues, List<List<String>>headerValues,
+                           String tableStartValue, String tableEndValue, int headerRowCount,
+                           Map<String, Object> paramsMap, Integer startSheetIndex, Integer endSheetIndex) throws IOException, OpenXML4JException, SAXException {
+        if (startSheetIndex == null) {
+            throw new IllegalArgumentException("Начальный индекс не должен быть равен null");
+        }
+        InputStream sheet = null;
+        InputSource sheetSource = null;
+
+        OPCPackage pkg = OPCPackage.open(inputStream);
+        XSSFReader r = new XSSFReader(pkg);
+        SharedStringsTable sst = r.getSharedStringsTable();
+        XMLReader parser = XMLReaderFactory.createXMLReader();
+        StylesTable styles = r.getStylesTable();
+        ContentHandler handler = new SheetHandler(sst, styles, allValues, headerValues, tableStartValue, tableEndValue, headerRowCount, paramsMap);
+        parser.setContentHandler(handler);
+        Iterator<InputStream> sheets = r.getSheetsData();
+        int i = 0;
+        while(sheets.hasNext()) {
+            if (i >= startSheetIndex) {
+                if (endSheetIndex == null || endSheetIndex <= i) {
+                    sheet = sheets.next();
+                    sheetSource = new InputSource(sheet);
+                    parser.parse(sheetSource);
+                }
+            } else {
+                sheets.next();
+            }
+            i++;
+        }
+    }
+
+    /**
      * Проставление индексов у набора строк
      *
      * @param dataRows
@@ -2319,7 +2368,7 @@ public final class ScriptUtils {
                         if (rowValues != null && rowValues.size() < maxColumnCount) {
                             int n = maxColumnCount - rowValues.size();
                             for (int i = 1; i <= n; i++) {
-                                rowValues.add("");
+                                rowValues.add(null);
                             }
                         }
                         int rowIndex = getRowIndex(position);

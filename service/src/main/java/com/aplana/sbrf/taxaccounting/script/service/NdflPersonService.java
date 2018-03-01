@@ -123,6 +123,27 @@ public interface NdflPersonService {
     List<NdflPersonPrepayment> findPrepayments(long ndflPersonId);
 
     /**
+     * Найти идентификаторы доходов относящиеся к ФЛ
+     * @param ndflPersonId идентификатор фл формы
+     * @return список идентификаторов доходов
+     */
+    List<Long> fetchIncomeIdByNdflPerson(long ndflPersonId);
+
+    /**
+     * Найти идентификаторы вычетов относящиеся к ФЛ
+     * @param ndflPersonId идентификатор фл формы
+     * @return список идентификаторов вычетов
+     */
+    List<Long> fetchDeductionIdByNdflPerson(long ndflPersonId);
+
+    /**
+     * Найти идентификаторы авансов относящиеся к ФЛ
+     * @param ndflPersonId идентификатор фл формы
+     * @return список идентификаторов авансов
+     */
+    List<Long> fetchPrepaymentIdByNdflPerson(long ndflPersonId);
+
+    /**
      * Найти NdflPerson привязанные к декларации для построения отчета.  Если найдено больше 1 запись, метод выкидывает исключение ServiceExeption
      *
      * @param declarationDataId   идентификатор декларации
@@ -369,5 +390,104 @@ public interface NdflPersonService {
      * @return
      */
     Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId);
+
+    /**
+     * Найти идентификаторы операций в указанном диапазоне в алфавитном порядке
+     * @param startOperationId  начало диапазона
+     * @param endOperationId    конец диапазона
+     * @return  список идентификторов операций
+     */
+    List<String> fetchIncomeOperationIdRange(String startOperationId, String endOperationId);
+
+    /**
+     * Найти идентификаторы доходов по иденитфикатору операции.
+     * @param operationIdList список идентификаторов доходов
+     * @return список найденных идентификаторов
+     */
+    List<String> findIncomeOperationId(List<String> operationIdList);
+
+    /**
+     * Удалить несколько доходов
+     * @param ids список идентификаторов доходов
+     */
+    void deleteNdflPersonIncome(List<Long> ids);
+
+    /**
+     * Удалить несколько вычетов
+     * @param ids список идентификаторов вычетов
+     */
+    void deleteNdflPersonDeduction(List<Long> ids);
+
+    /**
+     * Удалить несколько авансов
+     * @param ids список идентификаторов авансов
+     */
+    void deleteNdflPersonPrepayment(List<Long> ids);
+
+    /**
+     * Удалить несколько фл
+     * @param ids список идентификаторов фл
+     */
+    void deleteNdflPersonBatch(List<Long> ids);
+
+    /**
+     * Проеряет наличие дохода в налоговой форме
+     * @param ndflPersonIncomeId    идентификатор дохода
+     * @param declarationDataId     идентификатор налоговой формы
+     * @return true если существует
+     */
+    boolean checkIncomeExists(long ndflPersonIncomeId, long declarationDataId);
+
+    /**
+     * Проеряет наличие вычета в налоговой форме
+     * @param ndflPersonDeductionId   идентификатор вычета
+     * @param declarationDataId       идентификатор налоговой формы
+     * @return true если существует
+     */
+    boolean checkDeductionExists(long ndflPersonDeductionId, long declarationDataId);
+
+    /**
+     * Проеряет наличие аванса в налоговой форме
+     * @param ndflPersonPrepaymentId   идентификатор авнса
+     * @param declarationDataId        идентификатор налоговой формы
+     * @return true если существует
+     */
+    boolean checkPrepaymentExists(long ndflPersonPrepaymentId, long declarationDataId);
+
+    /**
+     * Сохраняет доходы
+     * @param incomes список объектов доходов
+     */
+    void saveIncomes(List<NdflPersonIncome> incomes);
+
+    /**
+     * Сохраняет вычеты
+     * @param deductions список объектов вычетов
+     */
+    void saveDeductions(List<NdflPersonDeduction> deductions);
+
+    /**
+     * Сохраняет авансы
+     * @param prepayments список объектов авансов
+     */
+    void savePrepayments(List<NdflPersonPrepayment> prepayments);
+
+    /**
+     * Обновляет доходы
+     * @param incomes список объектов доходов
+     */
+    void updateIncomes(List<NdflPersonIncome> incomes);
+
+    /**
+     * Обновляет вычеты
+     * @param deductions список объектов вычетов
+     */
+    void updateDeductions(List<NdflPersonDeduction> deductions);
+
+    /**
+     * Обновляет авансы
+     * @param prepayments список объектов авансов
+     */
+    void updatePrepayments(List<NdflPersonPrepayment> prepayments);
 }
 

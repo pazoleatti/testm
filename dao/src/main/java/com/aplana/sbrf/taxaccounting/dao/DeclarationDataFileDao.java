@@ -39,6 +39,12 @@ public interface DeclarationDataFileDao extends PermissionDao {
     long deleteByDeclarationDataIdAndType(long declarationDataId, AttachFileType type);
 
     /**
+     * Удаляет у формы ТФ с расширением xlsx
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void deleteTransportFileExcel(long declarationDataId);
+
+    /**
      * Находит файл с максимальным "весом" https://conf.aplana.com/pages/viewpage.action?pageId=27184983
      * @param declarationDataId идентификатор налоговой формы
      * @return объект хранящий информацию о файлах налоговой формы

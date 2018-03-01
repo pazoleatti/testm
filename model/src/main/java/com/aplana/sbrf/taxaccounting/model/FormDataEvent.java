@@ -21,6 +21,7 @@ public enum FormDataEvent implements Serializable {
 	IMPORT(7, "Импорт данных"),
 	GET_LEVEL0(8, "Получение данных"),
 	GET_LEVEL1(9, "Получение защищенных данных"),
+	DATA_MODIFYING(10, "Изменение данных"),
     AFTER_CREATE(12, "После создания"),
     GET_SOURCES (14, "Получение источников-приемников"),
 	PREPARE_SPECIFIC_REPORT(15, "Подготовить данные для спец. отчета"),

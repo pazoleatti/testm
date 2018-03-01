@@ -31,7 +31,7 @@ public class DeclarationDataFileDaoTest {
     @Test
     public void getFilesTest() {
         List<DeclarationDataFile> files = declarationDataFileDao.fetchByDeclarationDataId(1);
-        assertEquals(2, files.size());
+        assertEquals(3, files.size());
         assertEquals(1, files.get(0).getDeclarationDataId());
         assertEquals("uuid_1", files.get(0).getUuid());
         assertEquals("file_1", files.get(0).getFileName());
@@ -125,7 +125,7 @@ public class DeclarationDataFileDaoTest {
                 assertEquals("f", file.getNote());
             } else if (file.getUuid().equals("uuid_5")) {
                 assertEquals(2, file.getDeclarationDataId());
-                assertEquals("file_5", file.getFileName());
+                assertEquals("file_5.xlsx", file.getFileName());
                 assertEquals("Контролер", file.getUserName());
                 assertEquals("Банк", file.getUserDepartmentName());
                 assertEquals("", file.getNote());
@@ -193,7 +193,7 @@ public class DeclarationDataFileDaoTest {
     @Test
     public void testDeleteByDeclarationDataIdAndTypeSuccess() {
         long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TYPE_1);
-        assertEquals(1L, result);
+        assertEquals(2L, result);
         assertEquals(1, declarationDataFileDao.fetchByDeclarationDataId(1).size());
     }
 
@@ -201,6 +201,13 @@ public class DeclarationDataFileDaoTest {
     public void testDeleteByDeclarationDataIdAndTypeFail() {
         long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TYPE_6);
         assertEquals(0L, result);
-        assertEquals(2, declarationDataFileDao.fetchByDeclarationDataId(1).size());
+        assertEquals(3, declarationDataFileDao.fetchByDeclarationDataId(1).size());
+    }
+
+    @Test
+    public void testDeleteTransportFileExcel() {
+        declarationDataFileDao.deleteTransportFileExcel(1L);
+        List<DeclarationDataFile> result = declarationDataFileDao.fetchByDeclarationDataId(1L);
+        Assert.assertEquals(2, result.size());
     }
 }
