@@ -238,4 +238,16 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
             return new ArrayList<DeclarationDataFile>();
         }
     }
+
+    @Override
+    public void deleteTransportFileExcel(long declarationDataId) {
+        String query = "delete from DECLARATION_DATA_FILE ddf " +
+                "where ddf.DECLARATION_DATA_ID = :declarationDataId " +
+                "and ddf.FILE_TYPE_ID = :type " +
+                "and ddf.blob_data_id = (select id from blob_data bd where bd.id = ddf.blob_data_id and bd.name like '%.xlsx')";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId);
+        params.addValue("type", AttachFileType.TYPE_1.getId());
+        getNamedParameterJdbcTemplate().update(query, params);
+    }
 }

@@ -3227,23 +3227,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private String getExcelTemplateFileName(DeclarationData declaration) {
-        Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
-        String asnuName = "";
-        if (declaration.getAsnuId() != null) {
-            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-            asnuName = asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue();
-        }
-        return String.format("ТФ_%s_%s %s%s_%s_%s.xlsx",
-                declaration.getId(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
-                getCorrectionDateString(reportPeriod),
-                department.getCode(),
-                asnuName);
-    }
-
     @Override
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
     public ImportDeclarationExcelResult createTaskToImportExcel(final long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force) {
@@ -3251,11 +3234,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final TAUser user = userInfo.getUser();
         Logger logger = new Logger();
         fileName = FilenameUtils.getName(fileName);
-
-        LockData decLockData = doLock(declarationDataId, userInfo);
+        LockData decLockData = null;
+        try {
+           decLockData = doLock(declarationDataId, userInfo);
+        } catch (Throwable e) {
+            LOG.error(e);
+            logger.error("При блокировке Налоговой формы %s возникла ошибка: %s", getDeclarationDescription(declarationDataId), e);
+            logger.error(String.format("Загрузка файла \"%s\" не может быть выполнена.", fileName));
+            String notifMessage = String.format("Произошла ошибка при загрузке файла \"%s\"", fileName);
+            sendNotification(notifMessage, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+            return result;
+        }
         if (decLockData != null && decLockData.getUserId() != user.getId()) {
             logger.error(String.format("Налоговая форма %s заблокирована.", getDeclarationDescription(declarationDataId)));
             logger.error(String.format("Загрузка файла \"%s\" не может быть выполнена.", fileName));
+            String notifMessage = String.format("Произошла ошибка при загрузке файла \"%s\"", fileName);
+            sendNotification(notifMessage, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
         } else {
             String asyncLockKey = LockData.LockObjects.IMPORT_DECLARATION_EXCEL.name() + "_" + declarationDataId;
             Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
@@ -3297,9 +3291,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     unlock(declarationDataId, userInfo);
                 }
             }
+            result.setUuid(logEntryService.save(logger.getEntries()));
         }
-
-        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
@@ -3316,6 +3309,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } else {
                 LOG.info(String.format("Загрузка данных из Excel-файла в налоговую форму %s", declarationDataId));
                 DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+                int ndflPersonCount = ndflPersonDao.getNdflPersonCount(declarationDataId);
+                reportService.deleteDec(declarationDataId);
                 Map<String, Object> params = new HashMap<>();
                 params.put("fileName", blobData.getName());
                 params.put("inputStream", blobData.getInputStream());
@@ -3329,7 +3324,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
                     reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.XML_DEC);
                 }
-                declarationDataFileDao.deleteByDeclarationDataIdAndType(declarationDataId, AttachFileType.TYPE_1);
+                declarationDataFileDao.deleteTransportFileExcel(declarationDataId);
 
                 DeclarationDataFile declarationDataFile = new DeclarationDataFile();
                 declarationDataFile.setDeclarationDataId(declarationData.getId());
@@ -3345,7 +3340,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                 String note = "Загрузка данных из файла \"" + blobData.getName() + "\" в налоговую форму";
                 logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
-                auditService.add(formDataEvent, userInfo, declarationData, note, null);
+                if (ndflPersonCount == 0) {
+                    auditService.add(formDataEvent, userInfo, declarationData, note, null);
+                    logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
+                } else {
+                    auditService.add(FormDataEvent.DATA_MODIFYING, userInfo, declarationData, note, null);
+                    logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.DATA_MODIFYING, note);
+                }
                 declarationDataDao.updateLastDataModified(declarationDataId);
             }
         } finally {

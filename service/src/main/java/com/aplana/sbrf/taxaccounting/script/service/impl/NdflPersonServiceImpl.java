@@ -238,4 +238,94 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId) {
         return ndflPersonDao.findMissingRowNumMap(tableName, declarationDataId);
     }
+
+    @Override
+    public List<String> fetchIncomeOperationIdRange(String startOperationId, String endOperationId) {
+        return ndflPersonDao.fetchIncomeOperationIdRange(startOperationId, endOperationId);
+    }
+
+    @Override
+    public List<String> findIncomeOperationId(List<String> operationIdList) {
+        return ndflPersonDao.findIncomeOperationId(operationIdList);
+    }
+
+    @Override
+    public List<Long> fetchIncomeIdByNdflPerson(long ndflPersonId) {
+        return ndflPersonDao.fetchIncomeIdByNdflPerson(ndflPersonId);
+    }
+
+    @Override
+    public List<Long> fetchDeductionIdByNdflPerson(long ndflPersonId) {
+        return ndflPersonDao.fetchDeductionIdByNdflPerson(ndflPersonId);
+    }
+
+    @Override
+    public List<Long> fetchPrepaymentIdByNdflPerson(long ndflPersonId) {
+        return ndflPersonDao.fetchPrepaymentIdByNdflPerson(ndflPersonId);
+    }
+
+    @Override
+    public void deleteNdflPersonIncome(List<Long> ids) {
+        ndflPersonDao.deleteNdflPersonIncomeBatch(ids);
+    }
+
+    @Override
+    public void deleteNdflPersonDeduction(List<Long> ids) {
+        ndflPersonDao.deleteNdflPersonDeductionBatch(ids);
+    }
+
+    @Override
+    public void deleteNdflPersonPrepayment(List<Long> ids) {
+        ndflPersonDao.deleteNdflPersonPrepaymentBatch(ids);
+    }
+
+    @Override
+    public void deleteNdflPersonBatch(List<Long> ids) {
+        ndflPersonDao.deleteNdflPersonBatch(ids);
+    }
+
+    @Override
+    public boolean checkIncomeExists(long ndflPersonIncomeId, long declarationDataId) {
+        return ndflPersonDao.checkIncomeExists(ndflPersonIncomeId, declarationDataId);
+    }
+
+    @Override
+    public boolean checkDeductionExists(long ndflPersonDeductionId, long declarationDataId) {
+        return ndflPersonDao.checkDeductionExists(ndflPersonDeductionId, declarationDataId);
+    }
+
+    @Override
+    public boolean checkPrepaymentExists(long ndflPersonPrepaymentId, long declarationDataId) {
+        return ndflPersonDao.checkPrepaymentExists(ndflPersonPrepaymentId, declarationDataId);
+    }
+
+    @Override
+    public void saveIncomes(List<NdflPersonIncome> incomes) {
+        ndflPersonDao.saveIncomes(incomes);
+    }
+
+    @Override
+    public void saveDeductions(List<NdflPersonDeduction> deductions) {
+        ndflPersonDao.saveDeductions(deductions);
+    }
+
+    @Override
+    public void savePrepayments(List<NdflPersonPrepayment> prepayments) {
+        ndflPersonDao.savePrepayments(prepayments);
+    }
+
+    @Override
+    public void updateIncomes(List<NdflPersonIncome> incomes) {
+        ndflPersonDao.updateIncomes(incomes);
+    }
+
+    @Override
+    public void updateDeductions(List<NdflPersonDeduction> deductions) {
+        ndflPersonDao.updateDeductions(deductions);
+    }
+
+    @Override
+    public void updatePrepayments(List<NdflPersonPrepayment> prepayments) {
+        ndflPersonDao.updatePrepayments(prepayments);
+    }
 }

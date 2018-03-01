@@ -35,7 +35,7 @@ insert into blob_data (id, name, data, creation_date) values ('uuid_1', 'file_1'
 insert into blob_data (id, name, data, creation_date) values ('uuid_2', 'file_2', 'b2', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_3', 'file_3', 'b3', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_4', 'file_4', 'b4', sysdate);
-insert into blob_data (id, name, data, creation_date) values ('uuid_5', 'file_5', 'b5', sysdate);
+insert into blob_data (id, name, data, creation_date) values ('uuid_5', 'file_5.xlsx', 'b5', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_6', 'file_6', 'b6', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_7', 'file_7', 'b7', sysdate);
 
@@ -43,3 +43,4 @@ insert into declaration_data_file (blob_data_id, declaration_data_id, user_name,
 insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_2', 1, 'name2', 'dep2', 'str', 21657300);
 insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_3', 2, 'name3', 'подр3', null, 21657400);
 insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_4', 2, 'name3', 'подр3', 'test', 21657500);
+insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_5', 1, 'name5', 'dep5', null, 21657200);
