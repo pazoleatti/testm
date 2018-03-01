@@ -18,5 +18,8 @@ prompt fill async_task_type
 prompt fill configuration
 @@configuration.sql;
 
+prompt fill event
+@@event.sql;
+
 commit;
 exit;
