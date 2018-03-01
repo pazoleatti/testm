@@ -505,7 +505,24 @@
                     });
                 };
             }
+        ])
 
+        /**
+         * Контроллер для выбора ОКТМО
+         */
+        .controller('SelectOktmoCtrl', ['$scope', 'GetSelectOption',
+            function ($scope, GetSelectOption) {
+                $scope.oktmoSelect = {};
 
+                /**
+                 * Инициализация полного списка ОКТМО
+                 */
+                $scope.initSelectWithAllOktmo = function () {
+                    $scope.oktmoSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/96", {}, {
+                        property: "name",
+                        direction: "asc"
+                    }, "oktmoFormatter");
+                };
+            }
         ]);
 }());

@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Реквизиты"
      */
         .controller('ndflFLCtrl', [
-            '$scope', '$stateParams', 'NdflPersonResource', '$filter', 'APP_CONSTANTS',
-            function ($scope, $stateParams, NdflPersonResource, $filter, APP_CONSTANTS) {
+            '$scope', '$stateParams', 'NdflPersonResource', '$filter', 'APP_CONSTANTS', '$rootScope',
+            function ($scope, $stateParams, NdflPersonResource, $filter, APP_CONSTANTS, $rootScope) {
 
                 var tab = $scope.ndfFLTab;
 
@@ -23,10 +23,16 @@
 
                 // Обработчик на активацию таба
                 $scope.$watch("ndfFLTab.active", function (newValue, oldValue) {
+                    $rootScope.$emit("selectedRowCountChanged", 0);
                     if (newValue && !oldValue) {
                         $scope.submitSearch();
                     }
                 });
+
+                // Получение номера раздела, который отображается на вкладке
+                tab.getSection = function () {
+                    return 1
+                };
 
                 $scope.ndflPersonGrid = {
                     ctrl: {},

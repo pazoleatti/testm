@@ -2205,11 +2205,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationLockResult lockResult = new DeclarationLockResult();
 
         LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, null));
-        if (lockData == null) {
+        if (lockData == null || lockData.getUserId() == userInfo.getUser().getId()) {
             lockResult.setDeclarationDataLocked(true);
         } else {
             TAUser lockOwner = taUserService.getUser(lockData.getUserId());
             Logger logger = new Logger();
+            //TODO: (dloshkarev) тут не должно быть какой то бизнес-логики, метод должен только устанавливать блокировку (как и следует из названия)
             logger.info("Прикрепление файлов и редактирование комментариев недоступно, так как файлы и комментарии данного экземпляра налоговой формы " +
                     "в текущий момент редактируются пользователем \"%s\" (с %s)", lockOwner.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()));
             lockResult.setUuid(logEntryService.save(logger.getEntries()));
@@ -3350,6 +3351,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } finally {
             unlock(declarationDataId, userInfo);
         }
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
+    public void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome) {
+        ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
+    public void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction) {
+        ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
+    public void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment) {
+        ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
     }
 
     private String getDeclarationDescription(long declarationDataId) {

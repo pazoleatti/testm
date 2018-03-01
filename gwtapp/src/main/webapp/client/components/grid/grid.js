@@ -1249,6 +1249,9 @@
                                 if (scope.gridCtrl.onSelectRow) {
                                     scope.gridCtrl.onSelectRow(rowId, status, e);
                                 }
+                                if (scope.gridOptions.onSelectRow) {
+                                    scope.gridOptions.onSelectRow(rowId, status, e);
+                                }
                                 if (ngModel) {
                                     read();
                                     if ((!scope.$$phase) && (!scope.$root.$$phase)) {

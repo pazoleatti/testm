@@ -67,4 +67,11 @@ public interface NdflPersonService {
      * @return список NdflPersonPrepayment заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_PREPAYMENT
      */
     PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByFilter(NdflFilter ndflFilter, PagingParams pagingParams);
+
+    /**
+     * Получает название ДУЛ для ФЛ по его коду
+     * @param idDocType Документ удостоверяющий личность.Код (Графа 10)
+     * @return название ДУЛ
+     */
+    String getPersonDocTypeName(long idDocType);
 }

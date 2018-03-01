@@ -84,6 +84,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> CONSOLIDATE = new ConsolidatePermission(1 << 12);
 
+    /**
+     * Право на редактирование строк формы
+     */
+    public static final Permission<DeclarationData> EDIT = new EditPermission(1 << 13);
+
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public DeclarationDataPermission(long mask) {
@@ -92,11 +97,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
     /**
      * Добавляет в логгер ошибку о недопустимом типе формы
-     * @param departmentReportPeriod    отчетный период подразделения
-     * @param operationName             название операции
-     * @param declarationData           налоговая форма
-     * @param declarationFormKind       тип налоговой формы
-     * @param logger                    объект для логгирования информации
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param operationName          название операции
+     * @param declarationData        налоговая форма
+     * @param declarationFormKind    тип налоговой формы
+     * @param logger                 объект для логгирования информации
      */
     protected void logFormKindError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                     DeclarationData declarationData, DeclarationFormKind declarationFormKind, Logger logger) {
@@ -116,10 +122,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
     /**
      * Добавляет в логгер ошибку о закрытом периоде
-     * @param departmentReportPeriod    отчетный период подразделения
-     * @param operationName             название операции
-     * @param declarationData           налоговая форма
-     * @param logger                    объект для логгирования информации
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param operationName          название операции
+     * @param declarationData        налоговая форма
+     * @param logger                 объект для логгирования информации
      */
     protected void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                   DeclarationData declarationData, Logger logger) {
@@ -136,11 +143,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     }
 
     /**
-     *  Добавляет в логгер ошибку о недопустимом состоянии
-     * @param departmentReportPeriod    отчетный период подразделения
-     * @param operationName             название операции
-     * @param declarationData           налоговая форма
-     * @param logger                    объект для логгирования информации
+     * Добавляет в логгер ошибку о недопустимом состоянии
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param operationName          название операции
+     * @param declarationData        налоговая форма
+     * @param logger                 объект для логгирования информации
      */
     protected void logStateError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                  DeclarationData declarationData, Logger logger) {
@@ -158,11 +166,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     }
 
     /**
-     *  Добавляет в логгер ошибку о недостаточности прав для выполнения операции
-     * @param departmentReportPeriod    отчетный период подразделения
-     * @param operationName             название операции
-     * @param declarationData           налоговая форма
-     * @param logger                    объект для логгирования информации
+     * Добавляет в логгер ошибку о недостаточности прав для выполнения операции
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param operationName          название операции
+     * @param declarationData        налоговая форма
+     * @param logger                 объект для логгирования информации
      */
     protected void logCredentialsError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                        DeclarationData declarationData, Logger logger) {
@@ -578,6 +587,42 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             }
 
             return true;
+        }
+    }
+
+    /**
+     * Право на редактирование строк налоговой формы
+     */
+    public static final class EditPermission extends DeclarationDataPermission {
+
+        private final static String OPERATION_NAME = "Редактирование";
+
+        public EditPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            TAUser taUser = taUserService.getUser(user.getUsername());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+
+            boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
+            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+
+            if (targetDomainObject.getState() == State.CREATED && canView && hasRoles) {
+                DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+                DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+
+                if (declarationFormKind != DeclarationFormKind.CONSOLIDATED || !departmentReportPeriod.isActive()) {
+                    logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                    return false;
+                }
+
+                return true;
+            } else {
+                logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
         }
     }
 }

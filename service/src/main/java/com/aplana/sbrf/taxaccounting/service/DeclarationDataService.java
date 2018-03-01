@@ -810,4 +810,31 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе
      */
     void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
+     *
+     * @param declarationDataId идентификатор формы, строка которой редактируется
+     * @param taUserInfo пользователь, выполняющий изменения
+     * @param personIncome данные строки раздела 2
+     */
+    void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome);
+
+    /**
+     * Обновляет данные строки для раздела 3 (Сведения о вычетах)
+     *
+     * @param declarationDataId идентификатор формы, строка которой редактируется
+     * @param taUserInfo пользователь, выполняющий изменения
+     * @param personDeduction данные строки раздела 3
+     */
+    void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction);
+
+    /**
+     * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
+     *
+     * @param declarationDataId идентификатор формы, строка которой редактируется
+     * @param taUserInfo пользователь, выполняющий изменения
+     * @param personPrepayment данные строки раздела 4
+     */
+    void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment);
 }

@@ -264,5 +264,15 @@
                 return value === 0 ? "" : value;
             };
         })
+
+        /**
+         * @description Форматтер для получения наименования ОКТМО в нужном формате "код: наименование"
+         * @param oktmo запись из справочника ОКТМО
+         */
+        .filter('oktmoFormatter', function () {
+            return function (oktmo) {
+                return oktmo ? oktmo.code + ": " + oktmo.name : "";
+            };
+        })
     ;
 }());
