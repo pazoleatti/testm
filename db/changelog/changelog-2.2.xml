@@ -1473,4 +1473,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3791 -->
+    <changeSet id="2.2-aokunev-3" author="aokunev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+            <where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
