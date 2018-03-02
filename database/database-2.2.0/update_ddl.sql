@@ -1,5 +1,9 @@
 set serveroutput on;
 
+-- create tables
+prompt create_tmp
+@@create_tmp.sql;
+
 --alter tables
 prompt alter tables
 @@alter_tables.sql;
