@@ -17,7 +17,7 @@ public class NdflPersonDeductionFilter {
     /**
      * Код дохода
      */
-    private String incomeCode;
+    private String deductionIncomeCode;
     /**
      * Дата начисления дохода с
      */
@@ -51,12 +51,12 @@ public class NdflPersonDeductionFilter {
         this.deductionCode = deductionCode;
     }
 
-    public String getIncomeCode() {
-        return incomeCode;
+    public String getDeductionIncomeCode() {
+        return deductionIncomeCode;
     }
 
-    public void setIncomeCode(String incomeCode) {
-        this.incomeCode = incomeCode;
+    public void setDeductionIncomeCode(String deductionIncomeCode) {
+        this.deductionIncomeCode = deductionIncomeCode;
     }
 
     public Date getIncomeAccruedDateFrom() {

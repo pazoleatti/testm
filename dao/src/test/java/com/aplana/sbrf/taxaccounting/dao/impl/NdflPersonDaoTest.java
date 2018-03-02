@@ -439,7 +439,7 @@ public class NdflPersonDaoTest {
     public void testFindPersonDeductionByParametersIncomeCode() {
         NdflFilter filter = new NdflFilter();
         filter.setDeclarationDataId(1);
-        filter.getDeduction().setIncomeCode("0000");
+        filter.getDeduction().setDeductionIncomeCode("0000");
 
         PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeCode");
         List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);

@@ -793,9 +793,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append("and lower(npd.type_code) like concat(concat('%', :typeCode), '%') ");
             params.addValue("typeCode", ndflPersonDeductionFilter.getDeductionCode().toLowerCase());
         }
-        if (ndflPersonDeductionFilter.getIncomeCode() != null) {
+        if (ndflPersonDeductionFilter.getDeductionIncomeCode() != null) {
             queryBuilder.append("and lower(npd.income_code) like concat(concat('%', :incomeCode), '%') ");
-            params.addValue("incomeCode", ndflPersonDeductionFilter.getIncomeCode().toLowerCase());
+            params.addValue("incomeCode", ndflPersonDeductionFilter.getDeductionIncomeCode().toLowerCase());
         }
         if (ndflPersonDeductionFilter.getIncomeAccruedDateFrom() != null) {
             queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued >= trunc(:incomeAccruedDateFrom)) ");
