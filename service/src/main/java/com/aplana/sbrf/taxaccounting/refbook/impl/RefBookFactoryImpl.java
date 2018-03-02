@@ -62,7 +62,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             DOCUMENT_CODES.getId(), PERSON_ADDRESS.getId(), ID_DOC.getId(), TAXPAYER_STATUS.getId(), PERSON.getId(),
             ID_TAX_PAYER.getId(), DEDUCTION_TYPE.getId(), INCOME_CODE.getId(), REGION.getId(), PRESENT_PLACE.getId(),
             OKVED.getId(), REORGANIZATION.getId(), FILL_BASE.getId(), TARIFF_PAYER.getId(), HARD_WORK.getId(),
-            KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), NDFL_REFERENCES.getId(),
+            KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), NDFL_REFERENCES.getId(), INCOME_KIND.getId(),
 
             // справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
             // аналогично Справочник: "Признак кода вычета", реализован как нередактируемый
