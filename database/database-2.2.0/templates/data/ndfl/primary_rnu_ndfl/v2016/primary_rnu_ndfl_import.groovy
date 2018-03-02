@@ -242,17 +242,17 @@ class Import extends AbstractScriptClass {
             List<NdflPersonPrepayment> prepaymentsForUpdate = []
             // Ведем поиск полностью совпадающих ФЛ из ТФ и БД, сначала по хеш-коду полей, затем по equals
             for (NdflPerson ndflPerson : ndflPersons) {
-                if (ndflPerson.snils.isEmpty()) ndflPerson.snils = null
-                if (ndflPerson.middleName.isEmpty()) ndflPerson.middleName = null
-                if (ndflPerson.innNp.isEmpty()) ndflPerson.innNp = null
-                if (ndflPerson.innForeign.isEmpty()) ndflPerson.innForeign = null
-                if (ndflPerson.area.isEmpty()) ndflPerson.area = null
-                if (ndflPerson.city.isEmpty()) ndflPerson.city = null
-                if (ndflPerson.locality.isEmpty()) ndflPerson.locality = null
-                if (ndflPerson.street.isEmpty()) ndflPerson.street = null
-                if (ndflPerson.house.isEmpty()) ndflPerson.house = null
-                if (ndflPerson.building.isEmpty()) ndflPerson.building = null
-                if (ndflPerson.flat.isEmpty()) ndflPerson.flat = null
+                if (ndflPerson.snils?.isEmpty()) ndflPerson.snils = null
+                if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
+                if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
+                if (ndflPerson.innForeign?.isEmpty()) ndflPerson.innForeign = null
+                if (ndflPerson.area?.isEmpty()) ndflPerson.area = null
+                if (ndflPerson.city?.isEmpty()) ndflPerson.city = null
+                if (ndflPerson.locality?.isEmpty()) ndflPerson.locality = null
+                if (ndflPerson.street?.isEmpty()) ndflPerson.street = null
+                if (ndflPerson.house?.isEmpty()) ndflPerson.house = null
+                if (ndflPerson.building?.isEmpty()) ndflPerson.building = null
+                if (ndflPerson.flat?.isEmpty()) ndflPerson.flat = null
                 int hash = Objects.hash(ndflPerson.inp, ndflPerson.lastName, ndflPerson.firstName, ndflPerson.middleName,
                         ndflPerson.birthDay, ndflPerson.snils, ndflPerson.citizenship, ndflPerson.innNp,
                         ndflPerson.innForeign, ndflPerson.idDocType, ndflPerson.idDocNumber, ndflPerson.status,
@@ -280,9 +280,9 @@ class Import extends AbstractScriptClass {
                                 incomesForCreate << income
                                 incomesCreateCount++
                             } else {
-                                if (income.incomeCode.isEmpty()) income.incomeCode = null
-                                if (income.incomeType.isEmpty()) income.incomeType = null
-                                if (income.paymentNumber.isEmpty()) income.paymentNumber = null
+                                if (income.incomeCode?.isEmpty()) income.incomeCode = null
+                                if (income.incomeType?.isEmpty()) income.incomeType = null
+                                if (income.paymentNumber?.isEmpty()) income.paymentNumber = null
                                 boolean updated = false
                                 if (income.operationId != persistedIncome.operationId) {
                                     messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_OPERATION_ID, persistedIncome.operationId, income.operationId)
@@ -605,7 +605,7 @@ class Import extends AbstractScriptClass {
                            "Код налогового органа, выдавшего уведомление"]
 
     void checkHeaders(List<List<String>> headersActual) {
-        if (headersActual == null || headersActual.isEmpty() || headersActual[0] == null || headersActual[0].isEmpty()) {
+        if (headersActual == null || headersActual?.isEmpty() || headersActual[0] == null || headersActual[0]?.isEmpty()) {
             logger.error("Ошибка при загрузке файла \"$fileName\". Не удалось распознать заголовок таблицы.")
             return
         }
