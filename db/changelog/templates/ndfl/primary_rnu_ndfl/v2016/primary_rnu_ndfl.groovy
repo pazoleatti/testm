@@ -854,7 +854,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         for (NdflPerson ndflPerson : context.getNdflPersonList()) {
             int maxOperationSize = [ndflPerson.incomes.size(), ndflPerson.deductions.size(), ndflPerson.prepayments.size()].max()
             counter += maxOperationSize
-            if (counter >= 20) {
+            if (counter > 1_000_000) {
                 counter = 2
                 sheetIndex++
                 workbook.cloneSheet(1)
@@ -1997,7 +1997,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
         // Указатель на индекс позиции строки
         int pointer = OFFSET
         // Максимальное количество строк для заполнеиния на одном листе
-        final int MAX_ROWS = 20
+        final int MAX_ROWS = 1_000_000
         // Индекс листа
         int sheetIndex = 1
         Sheet sheet = wb.getSheetAt(sheetIndex)
