@@ -1729,13 +1729,13 @@ class Check extends AbstractScriptClass {
                             && (ndflPersonIncome.overholdingTax == null || ndflPersonIncome.overholdingTax == 0)
                     ) {
                         // «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2»
-                        if (!(withholdingTaxSum == calculatedTaxSum
-                                && withholdingTaxSum == taxSum ?: 0)) {
+                        if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax
+                                && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значениям гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
-                                    C_WITHHOLDING_TAX, withholdingTaxSum ?: 0,
-                                    C_CALCULATED_TAX, calculatedTaxSum ?: 0,
-                                    C_TAX_SUMM, taxSum ?: 0
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                    C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                    C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
