@@ -159,5 +159,98 @@ BEGIN
 	if v_count>0 then
 		dbms_output.put_line('Column REF_BOOK_ADDRESS.STREET modified');
 	end if;
+		
+	--https://jira.aplana.com/browse/SBRFNDFL-3818
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_income_kind' and lower(column_name)='version';
+	IF v_count=0 THEN
+		dbms_output.put_line('add column version to table ref_book_income_kind');
+		EXECUTE IMMEDIATE 'alter table ref_book_income_kind add version date default to_date(''01.01.0001'',''DD.MM.YYYY'') not null';
+		
+		select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_income_kind' and lower(column_name)='version';
+		IF v_count>0 THEN
+			dbms_output.put_line('Column version was added to table ref_book_income_kind');
+		END IF; 
+	END IF; 
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_income_kind' and lower(column_name)='status';
+	IF v_count=0 THEN
+		dbms_output.put_line('add column status to table ref_book_income_kind');
+		EXECUTE IMMEDIATE 'alter table ref_book_income_kind add status number(1) default 0 not null';
+		
+		select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_income_kind' and lower(column_name)='status';
+		IF v_count>0 THEN
+			dbms_output.put_line('Column status was added to table ref_book_income_kind');
+		END IF; 
+	END IF; 
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_income_kind' and lower(column_name)='record_id';
+	IF v_count=0 THEN
+		dbms_output.put_line('add column record_id to table ref_book_income_kind');
+		EXECUTE IMMEDIATE 'alter table ref_book_income_kind add record_id number(18) null';
+		
+		select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_income_kind' and lower(column_name)='record_id';
+		IF v_count>0 THEN
+			dbms_output.put_line('Column record_id was added to table ref_book_income_kind');
+		END IF; 
+	END IF; 
+	
+	execute immediate 'update REF_BOOK_INCOME_KIND set record_id = id';
+	commit;
+	
+	select count(1) into v_count from user_tab_columns where table_name='REF_BOOK_INCOME_KIND' and column_name='RECORD_ID' and data_type='NUMBER'and nullable='Y';
+	if v_count>0 then
+		dbms_output.put_line('alter table REF_BOOK_INCOME_KIND');
+		execute	immediate 'alter table REF_BOOK_INCOME_KIND modify record_id number(18) not null';
+		select count(1) into v_count from user_tab_columns where table_name='REF_BOOK_INCOME_KIND' and column_name='RECORD_ID' and data_type='NUMBER' and data_precision=18 and nullable='N';
+		if v_count>0 then
+			dbms_output.put_line('Table REF_BOOK_INCOME_KIND altered');
+		end if;
+	end if;
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='report_period_type' and lower(column_name)='version';
+	IF v_count=0 THEN
+		dbms_output.put_line('add column version to table report_period_type');
+		EXECUTE IMMEDIATE 'alter table report_period_type add version date default to_date(''01.01.0001'',''DD.MM.YYYY'') not null';
+		
+		select count(1) into v_count from user_tab_columns where lower(table_name)='report_period_type' and lower(column_name)='version';
+		IF v_count>0 THEN
+			dbms_output.put_line('Column version was added to table report_period_type');
+		END IF; 
+	END IF; 
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='report_period_type' and lower(column_name)='status';
+	IF v_count=0 THEN
+		dbms_output.put_line('add column status to table report_period_type');
+		EXECUTE IMMEDIATE 'alter table report_period_type add status number(1) default 0 not null';
+		
+		select count(1) into v_count from user_tab_columns where lower(table_name)='report_period_type' and lower(column_name)='status';
+		IF v_count>0 THEN
+			dbms_output.put_line('Column status was added to table report_period_type');
+		END IF; 
+	END IF; 
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='report_period_type' and lower(column_name)='record_id';
+	IF v_count=0 THEN
+		dbms_output.put_line('add column record_id to table report_period_type');
+		EXECUTE IMMEDIATE 'alter table report_period_type add record_id number(18) null';
+		
+		select count(1) into v_count from user_tab_columns where lower(table_name)='report_period_type' and lower(column_name)='record_id';
+		IF v_count>0 THEN
+			dbms_output.put_line('Column record_id was added to table report_period_type');
+		END IF; 
+	END IF; 
+	
+	execute immediate 'update REPORT_PERIOD_TYPE set record_id = id';
+	commit;
+	
+	select count(1) into v_count from user_tab_columns where table_name='REPORT_PERIOD_TYPE' and column_name='RECORD_ID' and data_type='NUMBER'and nullable='Y';
+	if v_count>0 then
+		dbms_output.put_line('alter table REPORT_PERIOD_TYPE');
+		execute	immediate 'alter table REPORT_PERIOD_TYPE modify record_id number(18) not null';
+		select count(1) into v_count from user_tab_columns where table_name='REPORT_PERIOD_TYPE' and column_name='RECORD_ID' and data_type='NUMBER' and data_precision=18 and nullable='N';
+		if v_count>0 then
+			dbms_output.put_line('Table REPORT_PERIOD_TYPE altered');
+		end if;
+	end if;
 END;
 /

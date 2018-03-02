@@ -378,5 +378,6 @@ BEGIN
 	
 	--https://jira.aplana.com/browse/SBRFNDFL-3765 Увеличить размеры полей: "Район", "Город", "Населенный пункт", "Улица" в справочнике ФЛ
 	update ref_book_attribute set max_length=100 where ref_book_id=901 and alias in ('DISTRICT','CITY','LOCALITY','STREET');
+
 END;
 /
