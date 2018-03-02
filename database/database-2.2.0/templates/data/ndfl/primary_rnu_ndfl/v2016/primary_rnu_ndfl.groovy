@@ -2038,6 +2038,8 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
             })
             // Для каждого физлица формируем  количество строк равное максимальному количеству строк из каждого вида операций
             for(int i = 0; i < maxOperationSize; i++) {
+                StringBuilder cell0Value = new StringBuilder(np.id.toString())
+                cell0Value.append("_")
                 Row row = sheet.createRow(pointer)
                 // Заполненние данными из раздела "Реквизиты"
                 Cell cell_0 = row.createCell(0)
@@ -2159,6 +2161,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_44.setCellStyle(centeredStyle)
                 if (i < np.incomes.size()) {
                     NdflPersonIncome npi = np.incomes.get(i)
+                    cell0Value.append(npi.id.toString())
                     cell_23.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
                     cell_24.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
                     cell_25.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
@@ -2214,6 +2217,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                         cell_44.setCellValue(npi.taxSumm.intValue());
                     }
                 }
+                cell0Value.append("_")
                 // Заполнение данными из раздела "Сведения о вычетах"
                 Cell cell_45 = row.createCell(45);
                 cell_45.setCellStyle(centeredStyle)
@@ -2245,6 +2249,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_58.setCellStyle(centeredStyle)
                 if (i < np.deductions.size()) {
                     NdflPersonDeduction npd = np.deductions.get(i)
+                    cell0Value.append(npd.id.toString())
                     cell_45.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "");
                     cell_46.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "");
                     if (npd.notifDate != null) {
@@ -2276,6 +2281,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                         cell_58.setCellValue(npd.periodCurrSumm.doubleValue());
                     }
                 }
+                cell0Value.append("_")
                 // Заполнение данными из раздела "Сведения об авансах"
                 Cell cell_59 = row.createCell(59);
                 cell_59.setCellStyle(centeredStyle)
@@ -2289,6 +2295,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_63.setCellStyle(centeredStyle)
                 if (i < np.prepayments.size()) {
                     NdflPersonPrepayment npp = np.prepayments.get(i)
+                    cell0Value.append(npp.id.toString())
                     cell_59.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "");
                     if (npp.summ != null) {
                         cell_60.setCellValue(npp.summ.doubleValue());
@@ -2299,6 +2306,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     }
                     cell_63.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "");
                 }
+                cell_0.setCellValue(cell0Value.toString())
                 pointer++
             }
         }
