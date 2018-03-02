@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о вычетах"
      */
         .controller('deductionCtrl', [
-            '$scope', '$stateParams', 'NdflPersonResource', '$filter', 'APP_CONSTANTS',
-            function ($scope, $stateParams, NdflPersonResource, $filter, APP_CONSTANTS) {
+            '$scope', '$stateParams', 'NdflPersonResource', '$filter', 'APP_CONSTANTS', '$rootScope',
+            function ($scope, $stateParams, NdflPersonResource, $filter, APP_CONSTANTS, $rootScope) {
 
                 var tab = $scope.deductionsTab;
 
@@ -23,10 +23,21 @@
 
                 // Обработчик на активацию таба
                 $scope.$watch("deductionsTab.active", function (newValue, oldValue) {
+                    $rootScope.$emit("selectedRowCountChanged", 0);
                     if (newValue && !oldValue) {
                         $scope.submitSearch();
                     }
                 });
+
+                // Получение номера раздела, который отображается на вкладке
+                tab.getSection = function () {
+                    return 3
+                };
+
+                // Получение строк выбранных в таблице внутри вкладки
+                tab.getRows = function () {
+                    return $scope.deductionGrid.value
+                };
 
                 $scope.deductionGrid = {
                     ctrl: {},
@@ -109,7 +120,13 @@
                         sortorder: "asc",
                         hidegrid: false,
                         multiselect: true,
-                        disableAutoLoad: true
+                        disableAutoLoad: true,
+                        onSelectRow: function (rowId, status) {
+                            if (status) {
+                                $rootScope.$emit("selectedRowCountChanged", $scope.deductionGrid.value.length + 1)
+                            } else $rootScope.$emit("selectedRowCountChanged", $scope.deductionGrid.value.length - 1)
+
+                        }
                     }
                 };
             }]);

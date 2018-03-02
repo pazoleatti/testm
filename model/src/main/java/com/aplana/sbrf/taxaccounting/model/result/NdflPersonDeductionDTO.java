@@ -1,9 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
 public class NdflPersonDeductionDTO {
+
+    /**
+     * Ссылка на физлицо
+     */
+    private Long ndflPersonId;
 
     /**
      * Идентификатор операции
@@ -24,6 +32,7 @@ public class NdflPersonDeductionDTO {
     private String notifType;
 
     // Документ о праве на налоговый вычет.Дата (Графа 5)
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date notifDate;
 
     // Документ о праве на налоговый вычет.Номер (Графа 6)
@@ -36,6 +45,7 @@ public class NdflPersonDeductionDTO {
     private BigDecimal notifSumm;
 
     // Начисленный доход.Дата (Графа 10)
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date incomeAccrued;
 
     // Начисленный доход.Код дохода (Графа 11)
@@ -45,12 +55,14 @@ public class NdflPersonDeductionDTO {
     private BigDecimal incomeSumm;
 
     // Применение вычета.Предыдущий период.Дата (Графа 13)
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date periodPrevDate;
 
     // Применение вычета.Предыдущий период.Сумма (Графа 14)
     private BigDecimal periodPrevSumm;
 
     // Применение вычета.Текущий период.Дата (Графа 15)
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date periodCurrDate;
 
     // Применение вычета.Текущий период.Сумма (Графа 16)
@@ -61,6 +73,7 @@ public class NdflPersonDeductionDTO {
     private Long id;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
@@ -247,5 +260,13 @@ public class NdflPersonDeductionDTO {
 
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public Long getNdflPersonId() {
+        return ndflPersonId;
+    }
+
+    public void setNdflPersonId(Long ndflPersonId) {
+        this.ndflPersonId = ndflPersonId;
     }
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -449,6 +450,30 @@ public interface NdflPersonDao {
      * @return  число ФЛ
      */
     int get6NdflPersonCount(Long declarationDataId);
+
+    /**
+     * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
+     *
+     * @param personIncome данные строки раздела 2
+     * @param taUserInfo пользователь, выполняющий изменения
+     */
+    void updateOneNdflIncome(NdflPersonIncomeDTO personIncome, TAUserInfo taUserInfo);
+
+    /**
+     * Обновляет данные строки для раздела 3 (Сведения о вычетах)
+     *
+     * @param personDeduction данные строки раздела 3
+     * @param taUserInfo пользователь, выполняющий изменения
+     */
+    void updateOneNdflDeduction(NdflPersonDeductionDTO personDeduction, TAUserInfo taUserInfo);
+
+    /**
+     * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
+     *
+     * @param personPrepayment данные строки раздела 4
+     * @param taUserInfo пользователь, выполняющий изменения
+     */
+    void updateOneNdflPrepayment(NdflPersonPrepaymentDTO personPrepayment, TAUserInfo taUserInfo);
 
     /**
      * Найти идентификаторы операций в указанном диапазоне в алфавитном порядке

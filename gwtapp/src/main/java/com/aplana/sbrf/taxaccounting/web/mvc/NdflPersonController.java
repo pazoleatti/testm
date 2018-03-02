@@ -3,25 +3,23 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.*;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -213,5 +211,27 @@ public class NdflPersonController {
             }
         }
         return resultPerson;
+    }
+
+    /**
+     * Найти данные ФЛ по идентификатору
+     *
+     * @param id   идентификатор ФЛ
+     * @return объект типа {@link NdflPerson}
+     */
+    @GetMapping(value = "/rest/ndflPerson/{id}")
+    public NdflPerson fetchPersonData(@PathVariable Long id) {
+        return ndflPersonService.findOne(id);
+    }
+
+    /**
+     * Возвращает наименование ДУЛ для ФЛ
+     *
+     * @param idDocType   Документ удостоверяющий личность.Код (Графа 10)
+     * @return объект типа {@link NdflPerson}
+     */
+    @GetMapping(value = "/rest/getPersonDocTypeName/{idDocType}")
+    public String getPersonDocTypeName(@PathVariable Long idDocType) {
+        return ndflPersonService.getPersonDocTypeName(idDocType);
     }
 }

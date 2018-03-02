@@ -2,16 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAttachFileTypeService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
+import com.aplana.sbrf.taxaccounting.service.refbook.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
@@ -21,6 +15,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,11 +35,13 @@ public class RefBookValuesController {
 
     final private SecurityService securityService;
 
+    final private RefBookOktmoService oktmoService;
+
     final private DepartmentService departmentService;
 
     public RefBookValuesController(RefBookAttachFileTypeService refBookAttachFileTypeService, RefBookAsnuService refBookAsnuService,
                                    RefBookDeclarationTypeService refBookDeclarationTypeService, RefBookDepartmentDataService refBookDepartmentDataService,
-                                   PeriodService periodService, SecurityService securityService, DepartmentService departmentService) {
+                                   PeriodService periodService, SecurityService securityService, DepartmentService departmentService, RefBookOktmoService oktmoService) {
         this.refBookAttachFileTypeService = refBookAttachFileTypeService;
         this.refBookAsnuService = refBookAsnuService;
         this.refBookDeclarationTypeService = refBookDeclarationTypeService;
@@ -52,6 +49,7 @@ public class RefBookValuesController {
         this.periodService = periodService;
         this.securityService = securityService;
         this.departmentService = departmentService;
+        this.oktmoService = oktmoService;
     }
 
     /**
@@ -166,6 +164,30 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/934")
     public List<RefBookAttachFileType> fetchAllAttachFileTypes() {
         return refBookAttachFileTypeService.fetchAllAttachFileTypes();
+    }
+
+    /**
+     * Получение всех значений справочника ОКТМО
+     *
+     * @param name              Параметр фильтрации названию и коду
+     * @param pagingParams      Параметры пейджинга
+     * @return Значения справочника
+     */
+    @GetMapping(value = "/rest/refBookValues/96")
+    public JqgridPagedList<RefBookOktmo> fetchAllOktmo(@RequestParam String name, @RequestParam PagingParams pagingParams) {
+        PagingResult<RefBookOktmo> result = oktmoService.fetchAll(name, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение одной записи из справочника ОКТМО по ее коду
+     *
+     * @param code              код записи
+     * @return Значения справочника
+     */
+    @GetMapping(value = "/rest/refBookValues/oktmoByCode")
+    public RefBookOktmo fetchOktmoByCode(@RequestParam String code) {
+        return oktmoService.fetchByCode(code, new Date());
     }
 
     /**

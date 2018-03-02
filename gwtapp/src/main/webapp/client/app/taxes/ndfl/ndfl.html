@@ -219,6 +219,12 @@
                     <!--Панель кнопок -->
                     <div class="button_panel" style="padding: 10px 12px 0;">
                         <div class="btn-toolbar" role="toolbar">
+                            <!--Редактировать строку -->
+                            <span>
+                                <button type="button" class="btn btn-default" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.EDIT) || !canEditRow" data-ng-click="showEditRowModal()">
+                                    <span data-translate-once="button.edit.row"></span>
+                                </button>
+                            </span>
                             <!--Идентифицировать ФЛ -->
                             <span>
                                 <button type="button" class="btn btn-default"

@@ -1,9 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
 public class NdflPersonPrepaymentDTO {
+
+    /**
+     * Ссылка на физлицо
+     */
+    private Long ndflPersonId;
 
     /**
      * Идентификатор операции
@@ -24,6 +32,7 @@ public class NdflPersonPrepaymentDTO {
     private String notifNum;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Дата выдачи уведомления
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date notifDate;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)
@@ -34,6 +43,7 @@ public class NdflPersonPrepaymentDTO {
     private Long id;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
@@ -139,5 +149,13 @@ public class NdflPersonPrepaymentDTO {
 
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public Long getNdflPersonId() {
+        return ndflPersonId;
+    }
+
+    public void setNdflPersonId(Long ndflPersonId) {
+        this.ndflPersonId = ndflPersonId;
     }
 }

@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о доходах и НДФЛ"
      */
         .controller('incomesAndTaxCtrl', [
-            '$scope', '$stateParams', 'NdflPersonResource', '$filter', 'APP_CONSTANTS',
-            function ($scope, $stateParams, NdflPersonResource, $filter, APP_CONSTANTS) {
+            '$scope', '$stateParams', 'NdflPersonResource', '$filter', 'APP_CONSTANTS', '$rootScope',
+            function ($scope, $stateParams, NdflPersonResource, $filter, APP_CONSTANTS, $rootScope) {
 
                 var tab = $scope.incomesAndTaxTab;
 
@@ -23,10 +23,21 @@
 
                 // Обработчик на активацию таба
                 $scope.$watch("incomesAndTaxTab.active", function (newValue, oldValue) {
+                    $rootScope.$emit("selectedRowCountChanged", 0);
                     if (newValue && !oldValue) {
                         $scope.submitSearch();
                     }
                 });
+
+                // Получение номера раздела, который отображается на вкладке
+                tab.getSection = function () {
+                    return 2
+                };
+
+                // Получение строк выбранных в таблице внутри вкладки
+                tab.getRows = function () {
+                    return $scope.incomesAndTaxGrid.value
+                };
 
                 $scope.incomesAndTaxGrid = {
                     ctrl: {},
@@ -125,7 +136,13 @@
                         sortorder: "asc",
                         hidegrid: false,
                         multiselect: true,
-                        disableAutoLoad: true
+                        disableAutoLoad: true,
+                        onSelectRow: function (rowId, status) {
+                            if (status) {
+                                $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length + 1)
+                            } else $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length - 1)
+
+                        }
                     }
                 };
             }]);

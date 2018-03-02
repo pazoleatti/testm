@@ -7,6 +7,9 @@
 
     angular.module('app.ndfl',
         ['ui.router',
+            'app.editNdflIncomesAndTax',
+            'app.editNdflDeduction',
+            'app.editNdflPrepayment',
             'app.ndflFL',
             'app.incomesAndTax',
             'app.deduction',
@@ -599,6 +602,71 @@
                         }
                     }
                 }
+
+                /**
+                 * Флаг, означающий, может ли текущий пользоватеть выполнить редактирование строки в таблице
+                 * Зависит от выделенных строк на вкладках, поэтому реализовано через события
+                 */
+                $scope.canEditRow = false;
+                $rootScope.$on("selectedRowCountChanged", function(event, count){
+                    $scope.canEditRow = count === 1
+                });
+
+                /**
+                 * Событие, которое возникает по нажатию на кнопку "Редактировать строку"
+                 */
+                $scope.showEditRowModal = function () {
+                    var row = $scope.ndflTabsCtrl.getActiveTab().getRows()[0];
+
+                    //Раздел 2 (Сведения о доходах и НДФЛ)
+                    var title = "incomesAndTax.edit.title";
+                    var templateUrl = "client/app/taxes/ndfl/editNdflIncomesAndTax.html?v=${buildUuid}";
+                    var controller = "editNdflIncomesAndTaxFormCtrl";
+
+                    if ($scope.ndflTabsCtrl.getActiveTab().getSection() === 3) {
+                        //Раздел 3 (Сведения о вычетах)
+                        title = "ndflDeduction.edit.title";
+                        templateUrl = "client/app/taxes/ndfl/editNdflDeduction.html?v=${buildUuid}";
+                        controller = "editNdflDeductionFormCtrl";
+                    } else if ($scope.ndflTabsCtrl.getActiveTab().getSection() === 4) {
+                        //Раздел 4 (Сведения о доходах в виде авансовых платежей)
+                        title = "ndlfPrepayment.edit.title";
+                        templateUrl = "client/app/taxes/ndfl/editNdflPrepayment.html?v=${buildUuid}";
+                        controller = "editNdflPrepaymentFormCtrl";
+                    }
+
+                    $aplanaModal.open({
+                        title: $filter('translate')(title, {
+                            rowNum: row.rowNum,
+                            operationId: row.operationId
+                        }),
+                        templateUrl: templateUrl,
+                        controller: controller,
+                        windowClass: 'modal1000',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    row: $.extend(true, {}, row),
+                                    declarationId: $stateParams.declarationDataId,
+                                    department: $scope.declarationData.department
+                                };
+                            }
+                        },
+                        closeCallback: function(scope) {
+                            scope.close();
+                        }
+                    }).result.then(
+                        function (result) {
+                            $http({
+                                method: "POST",
+                                url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlock"
+                            });
+                            if (result) {
+                                $scope.canEditRow = false;
+                                $scope.refreshGrid(1)
+                            }
+                        });
+                };
 
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Идентифицировать ФЛ"

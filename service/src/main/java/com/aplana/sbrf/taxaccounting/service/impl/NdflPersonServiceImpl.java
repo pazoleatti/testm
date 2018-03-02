@@ -3,19 +3,25 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -26,6 +32,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Autowired
     private NdflPersonDao ndflPersonDao;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Override
     public NdflPerson findOne(long id) {
@@ -55,5 +63,16 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonPrepaymentByParameters(ndflFilter, pagingParams);
+    }
+
+    @Override
+    public String getPersonDocTypeName(long idDocType) {
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.DOCUMENT_CODES.getId());
+        PagingResult<Map<String, RefBookValue>> docCodes = provider.getRecords(new Date(), null,
+                String.format("CODE = '%s'", idDocType), null);
+        if (docCodes.size() > 1) {
+            throw new ServiceException("Найдено несколько ДУЛ удовлетворяющих условиям!");
+        }
+        return docCodes.get(0).get("NAME").getStringValue();
     }
 }

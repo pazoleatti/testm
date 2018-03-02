@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
@@ -151,6 +148,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         NdflPersonIncomeDTO personIncome = new NdflPersonIncomeDTO();
 
                         personIncome.setRowNum(rs.getBigDecimal("rn"));
+                        personIncome.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
                         personIncome.setOperationId(rs.getString("operation_id"));
                         personIncome.setOktmo(rs.getString("oktmo"));
@@ -259,6 +257,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
                         personDeduction.setRowNum(rs.getBigDecimal("row_num"));
                         personDeduction.setOperationId(rs.getString("operation_id"));
+                        personDeduction.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
                         personDeduction.setTypeCode(rs.getString("type_code"));
 
@@ -357,6 +356,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         NdflPersonPrepaymentDTO personPrepayment = new NdflPersonPrepaymentDTO();
                         personPrepayment.setRowNum(rs.getBigDecimal("row_num"));
                         personPrepayment.setOperationId(rs.getString("operation_id"));
+                        personPrepayment.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
                         personPrepayment.setSumm(rs.getBigDecimal("summ"));
                         personPrepayment.setNotifNum(rs.getString("notif_num"));
@@ -1904,5 +1904,82 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("p_declaration", declarationDataId);
         Integer personCnt = (Integer) call.execute(params).get("personCnt");
         return personCnt != null ? personCnt : 0;
+    }
+
+    @Override
+    public void updateOneNdflIncome(NdflPersonIncomeDTO personIncome, TAUserInfo taUserInfo) {
+        String sql = "update ndfl_person_income set KPP = :kpp, OKTMO = :oktmo, INCOME_CODE = :incomeCode, INCOME_ACCRUED_DATE = :incomeAccruedDate, " +
+                "INCOME_ACCRUED_SUMM = :incomeAccruedSumm, INCOME_TYPE = :incomeType, INCOME_PAYOUT_DATE = :incomePayoutDate, INCOME_PAYOUT_SUMM = :incomePayoutSumm, " +
+                "TAX_BASE = :taxBase, TOTAL_DEDUCTIONS_SUMM = :totalDeductionsSumm, TAX_RATE = :taxRate, CALCULATED_TAX = :calculatedTax, WITHHOLDING_TAX = :withholdingTax, " +
+                "TAX_DATE = :taxDate, NOT_HOLDING_TAX = :notHoldingTax, OVERHOLDING_TAX = :overholdingTax, REFOUND_TAX = :refoundTax, TAX_TRANSFER_DATE = :taxTransferDate," +
+                "TAX_SUMM = :taxSumm, PAYMENT_DATE = :paymentDate, PAYMENT_NUMBER = :paymentNumber, MODIFIED_DATE = sysdate, MODIFIED_BY = :user where id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("kpp", personIncome.getKpp());
+        params.addValue("oktmo", personIncome.getOktmo());
+        params.addValue("incomeCode", personIncome.getIncomeCode());
+        params.addValue("incomeAccruedDate", personIncome.getIncomeAccruedDate());
+        params.addValue("incomeAccruedSumm", personIncome.getIncomeAccruedSumm());
+        params.addValue("incomeType", personIncome.getIncomeType());
+        params.addValue("incomePayoutDate", personIncome.getIncomePayoutDate());
+        params.addValue("incomePayoutSumm", personIncome.getIncomePayoutSumm());
+        params.addValue("taxBase", personIncome.getTaxBase());
+        params.addValue("totalDeductionsSumm", personIncome.getTotalDeductionsSumm());
+        params.addValue("taxRate", personIncome.getTaxRate());
+        params.addValue("calculatedTax", personIncome.getCalculatedTax());
+        params.addValue("withholdingTax", personIncome.getWithholdingTax());
+        params.addValue("taxDate", personIncome.getTaxDate());
+        params.addValue("notHoldingTax", personIncome.getNotHoldingTax());
+        params.addValue("overholdingTax", personIncome.getOverholdingTax());
+        params.addValue("refoundTax", personIncome.getRefoundTax());
+        params.addValue("taxTransferDate", personIncome.getTaxTransferDate());
+        params.addValue("taxSumm", personIncome.getTaxSumm());
+        params.addValue("paymentDate", personIncome.getPaymentDate());
+        params.addValue("paymentNumber", personIncome.getPaymentNumber());
+        params.addValue("user", taUserInfo.getUser().getName() + " (" + taUserInfo.getUser().getLogin() + ")");
+        params.addValue("id", personIncome.getId());
+
+        getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    @Override
+    public void updateOneNdflDeduction(NdflPersonDeductionDTO personDeduction, TAUserInfo taUserInfo) {
+        String sql = "update ndfl_person_deduction set TYPE_CODE = :typeCode, NOTIF_TYPE = :notifType, NOTIF_NUM = :notifNum, NOTIF_SUMM = :notifSumm, " +
+                "NOTIF_SOURCE = :notifSource, NOTIF_DATE = :notifDate, INCOME_CODE = :incomeCode, INCOME_SUMM = :incomeSumm, INCOME_ACCRUED = :incomeAccrued, " +
+                "PERIOD_PREV_DATE = :periodPrevDate, PERIOD_PREV_SUMM = :periodPrevSumm, PERIOD_CURR_DATE = :periodCurrDate, PERIOD_CURR_SUMM = :periodCurrSumm, " +
+                "MODIFIED_DATE = sysdate, MODIFIED_BY = :user where id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("typeCode", personDeduction.getTypeCode());
+        params.addValue("notifType", personDeduction.getNotifType());
+        params.addValue("notifNum", personDeduction.getNotifNum());
+        params.addValue("notifSumm", personDeduction.getNotifSumm());
+        params.addValue("notifSource", personDeduction.getNotifSource());
+        params.addValue("notifDate", personDeduction.getNotifDate());
+        params.addValue("incomeCode", personDeduction.getIncomeCode());
+        params.addValue("incomeSumm", personDeduction.getIncomeSumm());
+        params.addValue("incomeAccrued", personDeduction.getIncomeAccrued());
+        params.addValue("periodPrevDate", personDeduction.getPeriodPrevDate());
+        params.addValue("periodPrevSumm", personDeduction.getPeriodPrevSumm());
+        params.addValue("periodCurrDate", personDeduction.getPeriodCurrDate());
+        params.addValue("periodCurrSumm", personDeduction.getPeriodCurrSumm());
+        params.addValue("user", taUserInfo.getUser().getName() + " (" + taUserInfo.getUser().getLogin() + ")");
+        params.addValue("id", personDeduction.getId());
+
+        getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    @Override
+    public void updateOneNdflPrepayment(NdflPersonPrepaymentDTO personPrepayment, TAUserInfo taUserInfo) {
+        String sql = "update ndfl_person_prepayment set SUMM = :summ, NOTIF_NUM = :notifNum, NOTIF_SOURCE = :notifSource, " +
+                "NOTIF_DATE = :notifDate, MODIFIED_DATE = sysdate, MODIFIED_BY = :user where id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("summ", personPrepayment.getSumm());
+        params.addValue("notifNum", personPrepayment.getNotifNum());
+        params.addValue("notifSource", personPrepayment.getNotifSource());
+        params.addValue("notifDate", personPrepayment.getNotifDate());
+        params.addValue("user", taUserInfo.getUser().getName() + " (" + taUserInfo.getUser().getLogin() + ")");
+        params.addValue("id", personPrepayment.getId());
+
+        getNamedParameterJdbcTemplate().update(sql, params);
+
     }
 }

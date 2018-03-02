@@ -719,4 +719,37 @@ public class DeclarationDataController {
         PrepareSubreportResult result = declarationService.prepareSubreport(securityService.currentUserInfo(), action);
         return result;
     }
+
+    /**
+     * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
+     *
+     * @param declarationDataId идентификатор формы, строка которой редактируется
+     * @param personIncome измененные данные строки
+     */
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflIncomesAndTax", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void editNdflIncomesAndTax(@PathVariable Long declarationDataId, @RequestBody NdflPersonIncomeDTO personIncome) {
+        declarationService.updateNdflIncomesAndTax(declarationDataId, securityService.currentUserInfo(), personIncome);
+    }
+
+    /**
+     * Обновляет данные строки для раздела 3 (Сведения о вычетах)
+     *
+     * @param declarationDataId идентификатор формы, строка которой редактируется
+     * @param personDeduction измененные данные строки
+     */
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflDeduction", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void editNdflDeduction(@PathVariable Long declarationDataId, @RequestBody NdflPersonDeductionDTO personDeduction) {
+        declarationService.updateNdflDeduction(declarationDataId, securityService.currentUserInfo(), personDeduction);
+    }
+
+    /**
+     * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
+     *
+     * @param declarationDataId идентификатор формы, строка которой редактируется
+     * @param personPrepayment измененные данные строки
+     */
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflPrepayment", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void editNdflPrepayment(@PathVariable Long declarationDataId, @RequestBody NdflPersonPrepaymentDTO personPrepayment) {
+        declarationService.updateNdflPrepayment(declarationDataId, securityService.currentUserInfo(), personPrepayment);
+    }
 }

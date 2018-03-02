@@ -246,7 +246,7 @@
         }])
 
         /**
-         * @description ПРоверить НФ
+         * @description Поверить НФ
          */
         .factory('checkDeclarationData', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId/check', {declarationDataId: '@declarationDataId'}, {
@@ -269,6 +269,33 @@
         .factory('prepareSpecificReport', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/prepareSpecificReport', {}, {
                 doOperation: {method: 'POST'}
+            });
+        }])
+
+        /**
+         * @description обновить данные строки раздела 2 КНФ
+         */
+        .factory('ndflIncomesAndTax', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/editNdflIncomesAndTax', {declarationDataId: '@declarationDataId'}, {
+                update: {method: 'POST'}
+            });
+        }])
+
+        /**
+         * @description обновить данные строки раздела 3 КНФ
+         */
+        .factory('ndflDeduction', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/editNdflDeduction', {declarationDataId: '@declarationDataId'}, {
+                update: {method: 'POST'}
+            });
+        }])
+
+        /**
+         * @description обновить данные строки раздела 4 КНФ
+         */
+        .factory('ndflPrepayment', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/editNdflPrepayment', {declarationDataId: '@declarationDataId'}, {
+                update: {method: 'POST'}
             });
         }])
 
