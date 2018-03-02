@@ -1514,23 +1514,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
-    <!--https://jira.aplana.com/browse/SBRFNDFL-3818-->
-    <changeSet id="2.2-dloshkarev-9" author="dloshkarev">
-        <sql>
-            alter table REF_BOOK_INCOME_KIND add version date default '01.01.0001' not null;
-            alter table REF_BOOK_INCOME_KIND add status number(1) default 0 not null;
-            alter table REF_BOOK_INCOME_KIND add record_id number(18) null;
-            update REF_BOOK_INCOME_KIND set record_id = id;
-            alter table REF_BOOK_INCOME_KIND modify record_id number(18) not null;
-        </sql>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3812 -->
+    <changeSet id="2.2-ytrofimov-69" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
     </changeSet>
-    <changeSet id="2.2-dloshkarev-10" author="dloshkarev">
-        <sql>
-            alter table REPORT_PERIOD_TYPE add version date default '01.01.0001' not null;
-            alter table REPORT_PERIOD_TYPE add status number(1) default 0 not null;
-            alter table REPORT_PERIOD_TYPE add record_id number(18) null;
-            update REPORT_PERIOD_TYPE set record_id = id;
-            alter table REPORT_PERIOD_TYPE modify record_id number(18) not null;
-        </sql>
-    </changeSet>
+
 </databaseChangeLog>
