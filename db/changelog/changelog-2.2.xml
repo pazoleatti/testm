@@ -1533,4 +1533,14 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             alter table REPORT_PERIOD_TYPE modify record_id number(18) not null;
         </sql>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3812 -->
+    <changeSet id="2.2-ytrofimov-69" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

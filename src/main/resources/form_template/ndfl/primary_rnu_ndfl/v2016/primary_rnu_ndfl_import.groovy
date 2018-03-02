@@ -828,7 +828,6 @@ class Import extends AbstractScriptClass {
             for (NdflPersonOperation operation : operations) {
                 operation.operationId = uuid
             }
-            operationsGrouped.put(uuid, operations)
         }
     }
 
