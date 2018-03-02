@@ -132,16 +132,18 @@ class Person extends AbstractScriptClass {
             NaturalPerson person = null
 
             boolean inInfoPart = false
+            String idFL
             while (reader.hasNext()) {
                 if (reader.startElement) {
                     String tag = reader.name.localPart
                     if ('ИнфЧасть' == tag) {
                         checkInterrupted()
                         inInfoPart = true
+                        idFL = getAttrValue(reader, "ИдФЛ")
                         person = new NaturalPerson()
                     } else if (inInfoPart) {
                         if ('АнкетДаннФЛ' == tag) {
-                            parsePersonInfo(reader, person)
+                            parsePersonInfo(reader, idFL, person)
                         } else if ('УдЛичнФЛ' == tag) {
                             person.personDocumentList.add(parseDocumentInfo(reader, person))
                         } else if ('СисИсточ' == tag) {
@@ -164,7 +166,7 @@ class Person extends AbstractScriptClass {
         }
     }
 
-    void parsePersonInfo(XMLStreamReader reader, NaturalPerson person) {
+    void parsePersonInfo(XMLStreamReader reader, String idFL, NaturalPerson person) {
         person.lastName = getAttrValue(reader, "ФамФЛ")
         person.firstName = getAttrValue(reader, "ИмяФЛ")
         person.middleName = getAttrValue(reader, "ОтчФЛ")
@@ -173,17 +175,17 @@ class Person extends AbstractScriptClass {
         person.inn = getAttrValue(reader, "ИННФЛ")
         person.innForeign = getAttrValue(reader, "ИННИно")
         person.taxPayerStatus = getTaxpayerStatusByCode(getAttrValue(reader, "СтатусФЛ"))
-        person.address = parseAddress(reader)
+        person.address = parseAddress(reader, idFL, person)
     }
 
-    Address parseAddress(XMLStreamReader reader) {
+    Address parseAddress(XMLStreamReader reader, String idFL, NaturalPerson person) {
         Address address = new Address()
         address.regionCode = getAttrValue(reader, "КодРегион")
         address.postalCode = getAttrValue(reader, "Индекс")
-        address.district = getAttrValue(reader, "Район")
-        address.city = getAttrValue(reader, "Город")
-        address.locality = getAttrValue(reader, "НаселПункт")
-        address.street = getAttrValue(reader, "Улица")
+        address.district = truncateIfNeeded(getAttrValue(reader, "Район"), person, idFL, 100, "Район")
+        address.city = truncateIfNeeded(getAttrValue(reader, "Город"), person, idFL, 100, "Город")
+        address.locality = truncateIfNeeded(getAttrValue(reader, "НаселПункт"), person, idFL, 100, "НаселПункт")
+        address.street = truncateIfNeeded(getAttrValue(reader, "Улица"), person, idFL, 100, "Улица")
         address.house = getAttrValue(reader, "Дом")
         address.build = getAttrValue(reader, "Корпус")
         address.appartment = getAttrValue(reader, "Кварт")
@@ -369,10 +371,10 @@ class Person extends AbstractScriptClass {
         putValue(values, "ADDRESS_TYPE", NUMBER, address.getAddressType() ?: 0)
         putValue(values, "COUNTRY_ID", REFERENCE, address.getCountry()?.getId())
         putValue(values, "REGION_CODE", STRING, address.getRegionCode())
-        putValue(values, "DISTRICT", STRING, truncateIfNeeded(address.getDistrict(), 50, "Район"))
-        putValue(values, "CITY", STRING, truncateIfNeeded(address.getCity(), 50, "Город"))
-        putValue(values, "LOCALITY", STRING, truncateIfNeeded(address.getLocality(), 50, "НаселПункт"))
-        putValue(values, "STREET", STRING, truncateIfNeeded(address.getStreet(), 50, "Улица"))
+        putValue(values, "DISTRICT", STRING, address.getDistrict())
+        putValue(values, "CITY", STRING, address.getCity())
+        putValue(values, "LOCALITY", STRING, address.getLocality())
+        putValue(values, "STREET", STRING, address.getStreet())
         putValue(values, "HOUSE", STRING, address.getHouse())
         putValue(values, "BUILD", STRING, address.getBuild())
         putValue(values, "APPARTMENT", STRING, address.getAppartment())
@@ -421,9 +423,10 @@ class Person extends AbstractScriptClass {
         values.put(attrName, new RefBookValue(type, value))
     }
 
-    String truncateIfNeeded(String stringToTruncate, int maxLength, String fieldName) {
+    String truncateIfNeeded(String stringToTruncate, NaturalPerson personRecord, String idFL, int maxLength, String fieldName) {
         if (stringToTruncate && stringToTruncate.length() > maxLength) {
-            logger.warn("Обрезано значение графы \"${fieldName}\" (\"${stringToTruncate}\") до ${maxLength} символов.")
+            logger.warn("\"${fieldName}\" превышает допустимые размеры поля. Значение обрезано. Запись ${idFL}, ${personRecord.lastName} " +
+                    "${personRecord.firstName} ${personRecord.middleName}, ${personRecord.birthDate.format("dd.MM.yyyy")}. Причина: \"Превышено допустимое значение в поле\"")
             return stringToTruncate.substring(0, maxLength)
         }
         return stringToTruncate

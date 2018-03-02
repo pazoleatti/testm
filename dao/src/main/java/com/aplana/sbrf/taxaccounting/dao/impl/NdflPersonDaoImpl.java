@@ -715,11 +715,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             params.addValue("middleName", ndflPersonFilter.getMiddleName().toLowerCase());
         }
         if (ndflPersonFilter.getDateFrom() != null) {
-            queryBuilder.append("and (np.birth_day is null or np.birth_day >= trunc(:birthDayFrom)) ");
+            queryBuilder.append("and np.birth_day >= trunc(:birthDayFrom) ");
             params.addValue("birthDayFrom", ndflPersonFilter.getDateFrom());
         }
         if (ndflPersonFilter.getDateTo() != null) {
-            queryBuilder.append("and (np.birth_day is null or np.birth_day <= trunc(:birthDayTo)) ");
+            queryBuilder.append("and np.birth_day <= trunc(:birthDayTo) ");
             params.addValue("birthDayTo", ndflPersonFilter.getDateTo());
         }
         return queryBuilder.toString();
@@ -756,27 +756,27 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             params.addValue("paymentNumber", ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase());
         }
         if (ndflPersonIncomeFilter.getTransferDateFrom() != null) {
-            queryBuilder.append("and (npi.tax_transfer_date is null or npi.tax_transfer_date >= trunc(:taxTransferDateFrom)) ");
+            queryBuilder.append("and npi.tax_transfer_date >= trunc(:taxTransferDateFrom) ");
             params.addValue("taxTransferDateFrom", ndflPersonIncomeFilter.getTransferDateFrom());
         }
         if (ndflPersonIncomeFilter.getTransferDateTo() != null) {
-            queryBuilder.append("and (npi.tax_transfer_date is null or npi.tax_transfer_date <= trunc(:taxTransferDateTo)) ");
+            queryBuilder.append("and npi.tax_transfer_date <= trunc(:taxTransferDateTo) ");
             params.addValue("taxTransferDateTo", ndflPersonIncomeFilter.getTransferDateTo());
         }
         if (ndflPersonIncomeFilter.getCalculationDateFrom() != null) {
-            queryBuilder.append("and (npi.tax_date is null or npi.tax_date >= trunc(:taxDateFrom)) ");
+            queryBuilder.append("and npi.tax_date >= trunc(:taxDateFrom) ");
             params.addValue("taxDateFrom", ndflPersonIncomeFilter.getCalculationDateFrom());
         }
         if (ndflPersonIncomeFilter.getCalculationDateTo() != null) {
-            queryBuilder.append("and (npi.tax_date is null or npi.tax_date <= trunc(:taxDateTo)) ");
+            queryBuilder.append("and npi.tax_date <= trunc(:taxDateTo) ");
             params.addValue("taxDateTo", ndflPersonIncomeFilter.getCalculationDateTo());
         }
         if (ndflPersonIncomeFilter.getPaymentDateFrom() != null) {
-            queryBuilder.append("and (npi.payment_date is null or npi.payment_date >= trunc(:paymentDateFrom)) ");
+            queryBuilder.append("and npi.payment_date >= trunc(:paymentDateFrom) ");
             params.addValue("paymentDateFrom", ndflPersonIncomeFilter.getPaymentDateFrom());
         }
         if (ndflPersonIncomeFilter.getPaymentDateTo() != null) {
-            queryBuilder.append("and (npi.payment_date is null or npi.payment_date <= trunc(:paymentDateTo)) ");
+            queryBuilder.append("and npi.payment_date <= trunc(:paymentDateTo) ");
             params.addValue("paymentDateTo", ndflPersonIncomeFilter.getPaymentDateTo());
         }
         return queryBuilder.toString();
@@ -798,20 +798,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             params.addValue("incomeCode", ndflPersonDeductionFilter.getDeductionIncomeCode().toLowerCase());
         }
         if (ndflPersonDeductionFilter.getIncomeAccruedDateFrom() != null) {
-            queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued >= trunc(:incomeAccruedDateFrom)) ");
+            queryBuilder.append("and npd.income_accrued >= trunc(:incomeAccruedDateFrom) ");
             params.addValue("incomeAccruedDateFrom", ndflPersonDeductionFilter.getIncomeAccruedDateFrom());
         }
         if (ndflPersonDeductionFilter.getIncomeAccruedDateTo() != null) {
-            queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued <= trunc(:incomeAccruedDateTo)) ");
+            queryBuilder.append("and npd.income_accrued <= trunc(:incomeAccruedDateTo) ");
             params.addValue("incomeAccruedDateTo", ndflPersonDeductionFilter.getIncomeAccruedDateTo());
         }
         if (ndflPersonDeductionFilter.getDeductionDateFrom() != null) {
-            queryBuilder.append("and (npd.period_curr_date is null or npd.period_curr_date >= trunc(:deductionDateFrom)) ");
+            queryBuilder.append("and npd.period_curr_date >= trunc(:deductionDateFrom) ");
             params.addValue("deductionDateFrom", ndflPersonDeductionFilter.getDeductionDateFrom());
         }
 
         if (ndflPersonDeductionFilter.getDeductionDateTo() != null) {
-            queryBuilder.append("and (npd.period_curr_date is null or npd.period_curr_date <= trunc(:deductionDateTo)) ");
+            queryBuilder.append("and npd.period_curr_date <= trunc(:deductionDateTo) ");
             params.addValue("deductionDateTo", ndflPersonDeductionFilter.getDeductionDateTo());
         }
         return queryBuilder.toString();
@@ -833,11 +833,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             params.addValue("notifSource", ndflPersonPrepaymentFilter.getNotifSource().toLowerCase());
         }
         if (ndflPersonPrepaymentFilter.getNotifDateFrom() != null) {
-            queryBuilder.append("and (npp.notif_date is null or npp.notif_date >= trunc(:notifDateFrom)) ");
+            queryBuilder.append("and npp.notif_date >= trunc(:notifDateFrom) ");
             params.addValue("notifDateFrom", ndflPersonPrepaymentFilter.getNotifDateFrom());
         }
         if (ndflPersonPrepaymentFilter.getNotifDateTo() != null) {
-            queryBuilder.append("and (npp.notif_date is null or npp.notif_date <= trunc(:notifDateTo)) ");
+            queryBuilder.append("and npp.notif_date <= trunc(:notifDateTo) ");
             params.addValue("notifDateTo", ndflPersonPrepaymentFilter.getNotifDateTo());
         }
         return queryBuilder.toString();
