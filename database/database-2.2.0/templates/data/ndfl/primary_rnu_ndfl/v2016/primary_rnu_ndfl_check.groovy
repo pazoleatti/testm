@@ -1338,7 +1338,13 @@ class Check extends AbstractScriptClass {
                 if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
                     dateConditionDataList.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
-                            if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
+                            boolean check;
+                            if (dateConditionData.checker instanceof Column6EqualsColumn7){
+                                check = new Column6EqualsColumn7().check(ndflPersonIncomeCurrentByPersonIdAndOperationIdList)
+                            }else {
+                                check = dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)
+                            }
+                            if (!check) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format(dateConditionData.conditionMessage,
                                         C_INCOME_ACCRUED_DATE, ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : ""
@@ -1670,6 +1676,7 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
+
                 // "Сумма Граф 16"
                 BigDecimal calculatedTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
@@ -1704,6 +1711,7 @@ class Check extends AbstractScriptClass {
                         refoundTaxSum += ndflPersonIncomeCurrent.refoundTax
                     }
                 }
+
                 // "Сумма Граф 24"
                 Long taxSum = 0L
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
@@ -1865,13 +1873,7 @@ class Check extends AbstractScriptClass {
                     dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             // Все подпункты, кроме 11-го
-                            boolean check;
-                            if (dateConditionData.checker instanceof Column6EqualsColumn7){
-                                check = new Column6EqualsColumn7().check(ndflPersonIncomeCurrentByPersonIdAndOperationIdList)
-                            }else {
-                                check = dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)
-                            }
-                            if (!check) {
+                            if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format(dateConditionData.conditionMessage,
                                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : "",
