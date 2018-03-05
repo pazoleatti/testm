@@ -721,21 +721,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Проверяет существование формы в системе
-     *
-     * @param declarationDataId идентификатор формы
-     * @return Возвращает {@link DeclarationData}, если существует или null, если нет.
-     */
-    @PostMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=checkExist")
-    public DeclarationData checkExistDeclarationData(@PathVariable Long declarationDataId){
-        try {
-            return declarationService.get(declarationDataId, securityService.currentUserInfo());
-        }catch (DaoException e){
-            return null;
-        }
-    }
-
-    /**
      * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется

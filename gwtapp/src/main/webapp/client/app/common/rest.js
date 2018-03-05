@@ -325,15 +325,5 @@
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
-
-        /**
-         * @description Проверить существование налоговой формы
-         */
-        .factory('CheckExistDeclarationDataResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/declarationData/:declarationDataId?projection=checkExist', {declarationDataId: '@declarationDataId'}, {
-                query: {method: 'POST', isArray: false, cache: false}
-            });
-        }])
-
     ;
 }());

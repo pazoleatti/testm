@@ -19,9 +19,9 @@
          */
         .controller('ndflJournalCtrl', [
             '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS',
-            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage', '$timeout', 'CheckExistDeclarationDataResource',
+            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage', '$timeout',
             function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS,
-                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage, $timeout, CheckExistDeclarationDataResource) {
+                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage, $timeout) {
                 $rootScope.declarationPrimaryCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY);
                 $rootScope.declarationConsolidatedCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
                 $rootScope.declarationCreateAllowed = $rootScope.declarationPrimaryCreateAllowed || $rootScope.declarationConsolidatedCreateAllowed;
@@ -342,10 +342,11 @@
                 $(document).undelegate('#ndflJournalTable .tfDownloadLink', 'click');
                 $(document).delegate('#ndflJournalTable .tfDownloadLink', 'click', function () {
                     var declarationDataId = $(this).attr('declarationDataId');
-                    CheckExistDeclarationDataResource.query({
-                        declarationDataId: declarationDataId
+                    DeclarationDataResource.query({
+                        declarationDataId: declarationDataId,
+                        projection: "existenceAndKind"
                     }, function (response) {
-                        if (response.id) {
+                        if (response.exists) {
                             window.open('controller/rest/declarationData/' + declarationDataId + '/xml', '_self');
                         } else {
                             $dialogs.errorDialog({
