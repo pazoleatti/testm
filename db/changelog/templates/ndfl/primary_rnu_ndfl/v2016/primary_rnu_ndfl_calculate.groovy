@@ -888,7 +888,7 @@ class Calculate extends AbstractScriptClass {
         for (Map<String, RefBookValue> refBookValues : updatePersonList) {
             ScriptUtils.checkInterrupted();
             Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
+            getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, uniqueId, refBookValues.get("VERSION").getDateValue()  as Date ?: getRefBookPersonVersionFrom(), null, refBookValues);
         }
 
         for (Map<String, RefBookValue> refBookValues : refBookDocumentList) {
