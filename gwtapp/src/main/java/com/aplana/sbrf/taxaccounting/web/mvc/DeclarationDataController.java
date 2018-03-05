@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -716,8 +717,22 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData/prepareSpecificReport", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PrepareSubreportResult prepareSubreport(@RequestBody PrepareSubreportAction action) {
-        PrepareSubreportResult result = declarationService.prepareSubreport(securityService.currentUserInfo(), action);
-        return result;
+        return declarationService.prepareSubreport(securityService.currentUserInfo(), action);
+    }
+
+    /**
+     * Проверяет существование формы в системе
+     *
+     * @param declarationDataId идентификатор формы
+     * @return Возвращает {@link DeclarationData}, если существует или null, если нет.
+     */
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=checkExist")
+    public DeclarationData checkExistDeclarationData(@PathVariable Long declarationDataId){
+        try {
+            return declarationService.get(declarationDataId, securityService.currentUserInfo());
+        }catch (DaoException e){
+            return null;
+        }
     }
 
     /**

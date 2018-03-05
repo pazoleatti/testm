@@ -19,9 +19,9 @@
          */
         .controller('ndflJournalCtrl', [
             '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS',
-            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage', '$timeout',
+            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage', '$timeout', 'CheckExistDeclarationDataResource',
             function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS,
-                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage, $timeout) {
+                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage, $timeout, CheckExistDeclarationDataResource) {
                 $rootScope.declarationPrimaryCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY);
                 $rootScope.declarationConsolidatedCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
                 $rootScope.declarationCreateAllowed = $rootScope.declarationPrimaryCreateAllowed || $rootScope.declarationConsolidatedCreateAllowed;
@@ -132,7 +132,12 @@
                             {name: 'asnuName', index: 'asnuName', width: 176},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 110},
                             {name: 'state', index: 'state', width: 100},
-                            {name: 'fileName', index: 'fileName', width: 400, formatter: $filter('linkFileFormatter')},
+                            {
+                                name: 'fileName',
+                                index: 'fileName',
+                                width: 400,
+                                formatter: $filter('linkFileNdflFormatter')
+                            },
                             {
                                 name: 'creationDate',
                                 index: 'creationDate',
@@ -333,6 +338,25 @@
                         }
                     });
                 };
+
+                $(document).undelegate('#ndflJournalTable .tfDownloadLink', 'click');
+                $(document).delegate('#ndflJournalTable .tfDownloadLink', 'click', function () {
+                    var declarationDataId = $(this).attr('declarationDataId');
+                    CheckExistDeclarationDataResource.query({
+                        declarationDataId: declarationDataId
+                    }, function (response) {
+                        if (response.id) {
+                            window.open('controller/rest/declarationData/' + declarationDataId + '/xml', '_self');
+                        } else {
+                            $dialogs.errorDialog({
+                                content: $filter('translate')('ndflJournal.downloadTf.error.notExist.text', {declarationDataId: declarationDataId}),
+                                closeBtnClick: function () {
+                                    $state.go("/");
+                                }
+                            });
+                        }
+                    });
+                });
             }])
 
         /**
@@ -351,12 +375,12 @@
          * @param cellValue Значение ячейки
          * @param options Данные таблицы
          */
-        .filter('linkFileFormatter', function () {
+        .filter('linkFileNdflFormatter', function () {
             return function (cellValue, options) {
                 if (!cellValue) {
                     cellValue = '';
                 }
-                return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
+                return '<a class="tfDownloadLink" declarationDataId="' + options.rowId + '">' + cellValue + '</a>';
             };
         })
     ;

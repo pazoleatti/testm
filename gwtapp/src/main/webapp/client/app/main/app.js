@@ -465,6 +465,7 @@
         "ndflJournal.grid.columnName.creationDateTime": "Дата и время создания формы",
         "ndflJournal.grid.columnName.creator": "Создал",
         "ndflJournal.table.titleYear": "Календарный год ",
+        "ndflJournal.downloadTf.error.notExist.text" : "Налоговая форма с номером = {{declarationDataId}} не существует либо была удалена. Вы будете перенаправлены на главную страницу",
 
         "reportPeriod.title": "Ведение периодов",
         "reportPeriod.deadline.title": "Срок сдачи отчетности для периода: ",
