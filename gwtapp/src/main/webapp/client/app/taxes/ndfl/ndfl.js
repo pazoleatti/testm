@@ -362,10 +362,10 @@
                             value: $scope.searchFilter.params.incomeCode
                         });
                     }
-                    if ($scope.searchFilter.params.incomeType) {
+                    if ($scope.searchFilter.params.incomeAttr) {
                         $scope.searchFilter.ajaxFilter.push({
                             property: "incomeType",
-                            value: $scope.searchFilter.params.incomeType
+                            value: $scope.searchFilter.params.incomeAttr
                         });
                     }
                     if ($scope.searchFilter.params.taxRate) {
