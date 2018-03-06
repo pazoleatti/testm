@@ -301,12 +301,12 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (income.incomeAccruedDate != persistedIncome.incomeAccruedDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_DATE, persistedIncome.incomeAccruedDate.format(DATE_FORMAT), income.incomeAccruedDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_DATE, persistedIncome.incomeAccruedDate?.format(DATE_FORMAT), income.incomeAccruedDate?.format(DATE_FORMAT))
                                     persistedIncome.incomeAccruedDate = income.incomeAccruedDate
                                     updated = true
                                 }
                                 if (income.incomePayoutDate != persistedIncome.incomePayoutDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_DATE, persistedIncome.incomePayoutDate.format(DATE_FORMAT), income.incomePayoutDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_DATE, persistedIncome.incomePayoutDate?.format(DATE_FORMAT), income.incomePayoutDate?.format(DATE_FORMAT))
                                     persistedIncome.incomePayoutDate = income.incomePayoutDate
                                     updated = true
                                 }
@@ -321,67 +321,67 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (income.incomeAccruedSumm != persistedIncome.incomeAccruedSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_SUMM, persistedIncome.incomeAccruedSumm.toString(), income.incomeAccruedSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_SUMM, persistedIncome.incomeAccruedSumm?.toString(), income.incomeAccruedSumm?.toString())
                                     persistedIncome.incomeAccruedSumm = income.incomeAccruedSumm
                                     updated = true
                                 }
                                 if (income.incomePayoutSumm != persistedIncome.incomePayoutSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_SUMM, persistedIncome.incomePayoutSumm.toString(), income.incomePayoutSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_SUMM, persistedIncome.incomePayoutSumm?.toString(), income.incomePayoutSumm?.toString())
                                     persistedIncome.incomePayoutSumm = income.incomePayoutSumm
                                     updated = true
                                 }
                                 if (income.totalDeductionsSumm != persistedIncome.totalDeductionsSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TOTAL_DEDUCTIONS_SUMM, persistedIncome.totalDeductionsSumm.toString(), income.totalDeductionsSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TOTAL_DEDUCTIONS_SUMM, persistedIncome.totalDeductionsSumm?.toString(), income.totalDeductionsSumm?.toString())
                                     persistedIncome.totalDeductionsSumm = income.totalDeductionsSumm
                                     updated = true
                                 }
                                 if (income.taxBase != persistedIncome.taxBase) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_BASE, persistedIncome.taxBase.toString(), income.taxBase.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_BASE, persistedIncome.taxBase?.toString(), income.taxBase?.toString())
                                     persistedIncome.taxBase = income.taxBase
                                     updated = true
                                 }
                                 if (income.taxRate != persistedIncome.taxRate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_RATE, persistedIncome.taxRate.toString(), income.taxRate.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_RATE, persistedIncome.taxRate?.toString(), income.taxRate?.toString())
                                     persistedIncome.taxRate = income.taxRate
                                     updated = true
                                 }
                                 if (income.taxDate != persistedIncome.taxDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_DATE, persistedIncome.taxDate.format(DATE_FORMAT), income.taxDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_DATE, persistedIncome.taxDate?.format(DATE_FORMAT), income.taxDate?.format(DATE_FORMAT))
                                     persistedIncome.taxDate = income.taxDate
                                     updated = true
                                 }
                                 if (income.calculatedTax != persistedIncome.calculatedTax) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, CALCULATED_TAX, persistedIncome.calculatedTax.toString(), income.calculatedTax.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, CALCULATED_TAX, persistedIncome.calculatedTax?.toString(), income.calculatedTax?.toString())
                                     persistedIncome.calculatedTax = income.calculatedTax
                                     updated = true
                                 }
                                 if (income.withholdingTax != persistedIncome.withholdingTax) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, WITHHOLDING_TAX, persistedIncome.withholdingTax.toString(), income.withholdingTax.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, WITHHOLDING_TAX, persistedIncome.withholdingTax?.toString(), income.withholdingTax?.toString())
                                     persistedIncome.withholdingTax = income.withholdingTax
                                     updated = true
                                 }
                                 if (income.notHoldingTax != persistedIncome.notHoldingTax) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, NOT_HOLDING_TAX, persistedIncome.notHoldingTax.toString(), income.notHoldingTax.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, NOT_HOLDING_TAX, persistedIncome.notHoldingTax?.toString(), income.notHoldingTax?.toString())
                                     persistedIncome.notHoldingTax = income.notHoldingTax
                                     updated = true
                                 }
                                 if (income.overholdingTax != persistedIncome.overholdingTax) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, OVERHOLDING_TAX, persistedIncome.overholdingTax.toString(), income.overholdingTax.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, OVERHOLDING_TAX, persistedIncome.overholdingTax?.toString(), income.overholdingTax?.toString())
                                     persistedIncome.overholdingTax = income.overholdingTax
                                     updated = true
                                 }
                                 if (income.refoundTax != persistedIncome.refoundTax) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, REFOUND_TAX, persistedIncome.refoundTax.toString(), income.refoundTax.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, REFOUND_TAX, persistedIncome.refoundTax?.toString(), income.refoundTax?.toString())
                                     persistedIncome.refoundTax = income.refoundTax
                                     updated = true
                                 }
                                 if (income.taxTransferDate != persistedIncome.taxTransferDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE, persistedIncome.taxTransferDate.format(DATE_FORMAT), income.taxTransferDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE, persistedIncome.taxTransferDate?.format(DATE_FORMAT), income.taxTransferDate?.format(DATE_FORMAT))
                                     persistedIncome.taxTransferDate = income.taxTransferDate
                                     updated = true
                                 }
                                 if (income.paymentDate != persistedIncome.paymentDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, PAYMENT_DATE, persistedIncome.paymentDate.format(DATE_FORMAT), income.paymentDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, PAYMENT_DATE, persistedIncome.paymentDate?.format(DATE_FORMAT), income.paymentDate?.format(DATE_FORMAT))
                                     persistedIncome.paymentDate = income.paymentDate
                                     updated = true
                                 }
@@ -391,7 +391,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (income.taxSumm != persistedIncome.taxSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_SUMM, persistedIncome.taxSumm.toString(), income.taxSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_SUMM, persistedIncome.taxSumm?.toString(), income.taxSumm?.toString())
                                     persistedIncome.taxSumm = income.taxSumm
                                     updated = true
                                 }
@@ -428,7 +428,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.notifDate != persistedDeduction.notifDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_DATE, persistedDeduction.notifDate.format(DATE_FORMAT), deduction.notifDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_DATE, persistedDeduction.notifDate?.format(DATE_FORMAT), deduction.notifDate?.format(DATE_FORMAT))
                                     persistedDeduction.notifDate = deduction.notifDate
                                     updated = true
                                 }
@@ -443,7 +443,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.notifSumm != persistedDeduction.notifSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_SUM, persistedDeduction.notifSumm.toString(), deduction.notifSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_SUM, persistedDeduction.notifSumm?.toString(), deduction.notifSumm?.toString())
                                     persistedDeduction.notifSumm = deduction.notifSumm
                                     updated = true
                                 }
@@ -453,7 +453,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.incomeAccrued != persistedDeduction.incomeAccrued) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_ACCRUED, persistedDeduction.incomeAccrued.format(DATE_FORMAT), deduction.incomeAccrued.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_ACCRUED, persistedDeduction.incomeAccrued?.format(DATE_FORMAT), deduction.incomeAccrued?.format(DATE_FORMAT))
                                     persistedDeduction.incomeAccrued = deduction.incomeAccrued
                                     updated = true
                                 }
@@ -463,27 +463,27 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.incomeSumm != persistedDeduction.incomeSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_SUMM, persistedDeduction.incomeSumm.toString(), deduction.incomeSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_SUMM, persistedDeduction.incomeSumm?.toString(), deduction.incomeSumm?.toString())
                                     persistedDeduction.incomeSumm = deduction.incomeSumm
                                     updated = true
                                 }
                                 if (deduction.periodPrevDate != persistedDeduction.periodPrevDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_DATE, persistedDeduction.periodPrevDate.format(DATE_FORMAT), deduction.periodPrevDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_DATE, persistedDeduction.periodPrevDate?.format(DATE_FORMAT), deduction.periodPrevDate?.format(DATE_FORMAT))
                                     persistedDeduction.periodPrevDate = deduction.periodPrevDate
                                     updated = true
                                 }
                                 if (deduction.periodPrevSumm != persistedDeduction.periodPrevSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_SUMM, persistedDeduction.periodPrevSumm.toString(), deduction.periodPrevSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_SUMM, persistedDeduction.periodPrevSumm?.toString(), deduction.periodPrevSumm?.toString())
                                     persistedDeduction.periodPrevSumm = deduction.periodPrevSumm
                                     updated = true
                                 }
                                 if (deduction.periodCurrDate != persistedDeduction.periodCurrDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_DATE, persistedDeduction.periodCurrDate.format(DATE_FORMAT), deduction.periodCurrDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_DATE, persistedDeduction.periodCurrDate?.format(DATE_FORMAT), deduction.periodCurrDate?.format(DATE_FORMAT))
                                     persistedDeduction.periodCurrDate = deduction.periodCurrDate
                                     updated = true
                                 }
                                 if (deduction.periodCurrSumm != persistedDeduction.periodCurrSumm) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_SUMM, persistedDeduction.periodCurrSumm.toString(), deduction.periodCurrSumm.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_SUMM, persistedDeduction.periodCurrSumm?.toString(), deduction.periodCurrSumm?.toString())
                                     persistedDeduction.periodCurrSumm = deduction.periodCurrSumm
                                     updated = true
                                 }
@@ -515,7 +515,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (prepayment.summ != persistedPrepayment.summ) {
-                                    messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_SUMM, persistedPrepayment.summ.toString(), prepayment.summ.toString())
+                                    messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_SUMM, persistedPrepayment.summ?.toString(), prepayment.summ?.toString())
                                     persistedPrepayment.summ = prepayment.summ
                                     updated = true
                                 }
@@ -525,7 +525,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (prepayment.notifDate != persistedPrepayment.notifDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_DATE, persistedPrepayment.notifDate.format(DATE_FORMAT), prepayment.notifDate.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_DATE, persistedPrepayment.notifDate?.format(DATE_FORMAT), prepayment.notifDate?.format(DATE_FORMAT))
                                     persistedPrepayment.notifDate = prepayment.notifDate
                                     updated = true
                                 }
@@ -1103,7 +1103,7 @@ class Import extends AbstractScriptClass {
      */
 
     LogEntry createUpdateOperationMessage(NdflPerson ndflPerson, String sectionName, Long id, String attrName, String oldValue, String newValue) {
-        return new LogEntry(LogLevel.INFO, String.format("Изменены данные у ФЛ: (%s %s %s, ИНП: %s, ДУЛ: %s, %s). Раздел %s. Идентификатор строки: %d. Обновлена гр. \"%s\". Старое значение: \"%s\". Новое значение: \"%s",
+        return new LogEntry(LogLevel.INFO, String.format("Изменены данные у ФЛ: (%s %s %s, ИНП: %s, ДУЛ: %s, %s). Раздел %s. Идентификатор строки: %d. Обновлена гр. \"%s\". Старое значение: \"%s\". Новое значение: \"%s\"",
                 ndflPerson.lastName ?: "",
                 ndflPerson.firstName ?: "",
                 ndflPerson.middleName ?: "",
@@ -1113,8 +1113,8 @@ class Import extends AbstractScriptClass {
                 sectionName,
                 id,
                 attrName,
-                oldValue,
-                newValue
+                oldValue ?: "",
+                newValue ?: ""
         ))
     }
 
