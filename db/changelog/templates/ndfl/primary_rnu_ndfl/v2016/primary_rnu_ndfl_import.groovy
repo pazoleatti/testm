@@ -124,6 +124,7 @@ class Import extends AbstractScriptClass {
     List<Long> prepaymentImportIdList = []
 
     final String DATE_FORMAT = "dd.MM.yyyy"
+    final String DATE_ZERO_VALUE = "00.00.0000"
 
     Import(scriptClass) {
         //noinspection GroovyAssignabilityCheck
@@ -698,7 +699,11 @@ class Import extends AbstractScriptClass {
         personIncome.notHoldingTax = row.cell(39).toBigDecimal(20)
         personIncome.overholdingTax = row.cell(40).toBigDecimal(20)
         personIncome.refoundTax = row.cell(41).toLong(15)
-        personIncome.taxTransferDate = row.cell(42).toDate()
+        if (row.cell(42).toString(11) == DATE_ZERO_VALUE) {
+            personIncome.taxTransferDate = Date.parse(DATE_FORMAT, "01.01.1901")
+        } else {
+            personIncome.taxTransferDate = row.cell(42).toDate()
+        }
         personIncome.paymentDate = row.cell(43).toDate()
         personIncome.paymentNumber = row.cell(44).toString(20)
         personIncome.taxSumm = row.cell(45).toLong(20)

@@ -128,6 +128,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
+    final String DATE_ZERO_VALUE = "00.00.0000"
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
      */
@@ -1092,7 +1093,8 @@ public class SheetFillerContext {
  * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
  */
 interface SheetFiller {
-
+    final String DATE_FORMAT = "dd.MM.yyyy"
+    final String DATE_ZERO_VALUE = "00.00.0000"
     void fillSheet(Workbook wb, SheetFillerContext context);
 }
 
@@ -1327,9 +1329,14 @@ class IncomesSheetFiller implements SheetFiller {
                 cell20.setCellValue(npi.refoundTax.doubleValue());
             }
             Cell cell21 = row.createCell(21);
-            cell21.setCellStyle(centeredStyleDate)
             if (npi.taxTransferDate != null) {
-                cell21.setCellValue(npi.taxTransferDate);
+                if (npi.taxTransferDate.format(DATE_FORMAT) == "01.01.1901") {
+                    cell21.setCellStyle(centeredStyle)
+                    cell21.setCellValue(DATE_ZERO_VALUE)
+                } else {
+                    cell21.setCellStyle(centeredStyleDate)
+                    cell21.setCellValue(npi.taxTransferDate)
+                }
             }
             Cell cell22 = row.createCell(22);
             cell22.setCellStyle(centeredStyleDate)

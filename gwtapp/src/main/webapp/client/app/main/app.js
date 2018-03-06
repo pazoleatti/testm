@@ -316,6 +316,8 @@
         "title.overholdingTax": "НДФЛ излишне удержанный",
         "title.refoundTax": "НДФЛ возвращенный НП",
         "title.taxTransferDate": "Срок перечисления в бюджет",
+        "title.taxTransferDateZeroDate": "1901-01-01",
+        "title.taxTransferDateZeroString": "00.00.0000",
         "title.paymentDate": "Дата платежного поручения",
         "title.paymentNumber": "Номер платежного поручения",
         "title.taxSumm": "Сумма платежного поручения",

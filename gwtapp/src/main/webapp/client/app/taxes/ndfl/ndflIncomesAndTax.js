@@ -115,7 +115,7 @@
                                 name: 'taxTransferDate',
                                 index: 'taxTransferDate',
                                 width: 145,
-                                formatter: $filter('dateFormatter')
+                                formatter: $filter('dateZeroFormatter')
                             },
                             {
                                 name: 'paymentDate',

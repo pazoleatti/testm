@@ -16,6 +16,7 @@
 
                 $scope.row = {};
                 $scope.temp = {};
+                $scope.disableTaxTransferDate = false;
 
                 // Установка блокировки на форму
                 $http({
@@ -30,6 +31,9 @@
                         }).success(function (person) {
                             $scope.row = $shareData.row;
                             $scope.temp.person = person;
+                            if ($scope.row.taxTransferDate === $filter('translate')('title.taxTransferDateZeroDate')) {
+                                $scope.disableTaxTransferDate = true;
+                            }
                             $http({
                                 method: "GET",
                                 url: "controller//rest/getPersonDocTypeName/" + person.idDocType
@@ -80,10 +84,20 @@
                  */
                 $scope.save = function () {
                     $scope.row.oktmo = $scope.temp.oktmo.code;
+                    if ($scope.disableTaxTransferDate) {
+                        $scope.row.taxTransferDate = $filter('translate')('title.taxTransferDateZeroDate');
+                    }
                     ndflIncomesAndTax.update({declarationDataId: $shareData.declarationId}, $scope.row,
                         function (response) {
                             $modalInstance.close(true);
                         });
+                };
+
+                /**
+                 * Определяет состояние ввода даты перечсисления в бюджет
+                 */
+                $scope.zeroDateClick = function() {
+                    $scope.disableTaxTransferDate = !$scope.disableTaxTransferDate;
                 };
 
                 /**

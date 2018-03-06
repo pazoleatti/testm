@@ -274,5 +274,27 @@
                 return oktmo ? oktmo.code + ": " + oktmo.name : "";
             };
         })
+    /**
+    * @description Фильтр даты. Если значение даты будет равно '1901-01-01', то отображаться будет '00.00.0000'
+    *
+    * @param value значение, которое необходимо отформатировать
+    * @return Дата в формате 'dd.MM.yyyy'
+    */
+        .filter('dateZeroFormatter', ['$filter', function($filter) {
+            return function (value) {
+                if (!value) {
+                    return '';
+                }
+                if (value === $filter('translate')('title.taxTransferDateZeroDate')) {
+                    return $filter('translate')('title.taxTransferDateZeroString');
+                }
+                if (!value.millis) {
+                    return $filter('date')(value, 'dd.MM.yyyy');
+                }
+                else {
+                    return $filter('date')(value.millis, 'dd.MM.yyyy');
+                }
+            };
+        }])
     ;
 }());

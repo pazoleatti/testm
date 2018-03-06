@@ -268,8 +268,20 @@
                         </div>
                         <div data-aplana-field>
                             <div data-aplana-datepicker
+                                 data-ng-show="!disableTaxTransferDate"
                                  data-ng-model="row.taxTransferDate"></div>
+                            <input type="text" placeholder="{{::'title.taxTransferDateZeroString' | translate}}"
+                                   data-ng-show="disableTaxTransferDate"
+                                   data-ng-disabled="disableTaxTransferDate"/>
+                            <br/>
+                            <label>
+                                <input type="checkbox" data-ng-click="zeroDateClick()" />
+                                {{::'title.taxTransferDateZeroString' | translate}}
+                            </label>
                         </div>
+                    </div>
+                    <div class="row-fluid form-group">
+
                     </div>
                     <div class="row-fluid form-group">
                         <div class="span4">

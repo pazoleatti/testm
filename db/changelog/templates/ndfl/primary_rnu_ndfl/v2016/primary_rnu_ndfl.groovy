@@ -152,7 +152,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
     final String DATE_FORMAT = "dd.MM.yyyy"
-
+    final String DATE_ZERO_VALUE = "00.00.0000"
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
      */
@@ -1203,7 +1203,12 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.notHoldingTax = toBigDecimal((GPathResult) node.getProperty('@ДолгНП'))
         personIncome.overholdingTax = toBigDecimal((GPathResult) node.getProperty('@ДолгНА'))
         personIncome.refoundTax = toLong((GPathResult) node.getProperty('@ВозврНал'))
-        personIncome.taxTransferDate = toDate((GPathResult) node.getProperty('@СрокПрчслНал'))
+        GPathResult taxTransferDateRawValue = (GPathResult) node.getProperty('@СрокПрчслНал')
+        if (toString(taxTransferDateRawValue) == DATE_ZERO_VALUE) {
+            personIncome.taxTransferDate = Date.parse(DATE_FORMAT, "01.01.1901")
+        } else {
+            personIncome.taxTransferDate = toDate(taxTransferDateRawValue)
+        }
         personIncome.paymentDate = toDate((GPathResult) node.getProperty('@ПлПоручДат'))
         personIncome.paymentNumber = toString((GPathResult) node.getProperty('@ПлатПоручНом'))
         personIncome.taxSumm = toLong((GPathResult) node.getProperty('@НалПерСумм'))
@@ -1587,7 +1592,8 @@ public class SheetFillerContext {
  * Интерфейс отвечающий за заполнение листа Excel файла
  */
 interface SheetFiller {
-
+    final String DATE_FORMAT = "dd.MM.yyyy"
+    final String DATE_ZERO_VALUE = "00.00.0000"
     void fillSheet(Workbook wb, SheetFillerContext context);
 }
 
@@ -1824,9 +1830,14 @@ class IncomesSheetFiller implements SheetFiller {
                 cell20.setCellValue(npi.refoundTax.doubleValue());
             }
             Cell cell21 = row.createCell(21);
-            cell21.setCellStyle(centeredStyleDate)
             if (npi.taxTransferDate != null) {
-                cell21.setCellValue(npi.taxTransferDate);
+                if (npi.taxTransferDate.format(DATE_FORMAT) == "01.01.1901") {
+                    cell21.setCellStyle(centeredStyle)
+                    cell21.setCellValue(DATE_ZERO_VALUE)
+                } else {
+                    cell21.setCellStyle(centeredStyleDate)
+                    cell21.setCellValue(npi.taxTransferDate)
+                }
             }
             Cell cell22 = row.createCell(22);
             cell22.setCellStyle(centeredStyleDate)
@@ -2152,7 +2163,6 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_40 = row.createCell(40);
                 cell_40.setCellStyle(centeredStyle)
                 Cell cell_41 = row.createCell(41);
-                cell_41.setCellStyle(centeredStyleDate)
                 Cell cell_42 = row.createCell(42);
                 cell_42.setCellStyle(centeredStyleDate)
                 Cell cell_43 = row.createCell(43);
@@ -2207,7 +2217,13 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                         cell_40.setCellValue(npi.refoundTax.doubleValue());
                     }
                     if (npi.taxTransferDate != null) {
-                        cell_41.setCellValue(npi.taxTransferDate);
+                        if (npi.taxTransferDate?.format(DATE_FORMAT) == "01.01.1901") {
+                            cell_41.setCellStyle(centeredStyle)
+                            cell_41.setCellValue(DATE_ZERO_VALUE)
+                        } else {
+                            cell_41.setCellStyle(centeredStyleDate)
+                            cell_41.setCellValue(npi.taxTransferDate);
+                        }
                     }
                     if (npi.paymentDate != null) {
                         cell_42.setCellValue(npi.paymentDate);
