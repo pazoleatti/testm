@@ -81,7 +81,7 @@
                         isLoadingPage = false;
                     } else {
                         if (!isLoadingPage) {
-                            $webStorage.remove(APP_CONSTANTS.APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true);
+                            $webStorage.remove(APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true);
                         }
                     }
                 });
