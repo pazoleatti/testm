@@ -193,7 +193,6 @@
                 $scope.searchFilter = {
                     ajaxFilter: [],
                     params: {},
-                    isClear: false,
                     filterName: 'ndflFilter'
                 };
 
@@ -204,7 +203,6 @@
                     $scope.searchFilter.ajaxFilter = [];
                     $scope.searchFilter.fillFilterParams();
                     $scope.refreshGrid(1);
-                    $scope.searchFilter.isClear = !_.isEmpty($scope.searchFilter.ajaxFilter);
                 };
 
                 /**
@@ -213,9 +211,6 @@
                 $scope.resetFilter = function () {
                     /* очистка всех инпутов на форме */
                     $scope.searchFilter.params = {};
-
-                    /* убираем надпись "Сброс" */
-                    $scope.isClear = false;
 
                     $scope.submitSearch();
                 };
@@ -362,10 +357,10 @@
                             value: $scope.searchFilter.params.incomeCode
                         });
                     }
-                    if ($scope.searchFilter.params.incomeType) {
+                    if ($scope.searchFilter.params.incomeAttr) {
                         $scope.searchFilter.ajaxFilter.push({
                             property: "incomeType",
-                            value: $scope.searchFilter.params.incomeType
+                            value: $scope.searchFilter.params.incomeAttr
                         });
                     }
                     if ($scope.searchFilter.params.taxRate) {
