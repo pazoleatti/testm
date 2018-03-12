@@ -18,9 +18,9 @@
                 url: '/taxes/configParam/',
                 templateUrl: 'client/app/administration/configParams/configParam.html',
                 controller: 'configParamController',
-                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource',
-                    function ($state, PermissionChecker, APP_CONSTANTS) {
-                        if (!PermissionChecker.check(null, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
                             $state.go("/");
                         }
                     }]

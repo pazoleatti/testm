@@ -17,13 +17,12 @@
                 url: '/taxes/reportPeriod',
                 templateUrl: 'client/app/taxes/ndfl/periods/reportPeriod.html',
                 controller: 'reportPeriodCtrl',
-                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource',
-                    function ($state, PermissionChecker, APP_CONSTANTS) {
-                        if (!PermissionChecker.check(null, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
                             $state.go("/");
                         }
-                    }
-                ]
+                    }]
             });
         }])
 
