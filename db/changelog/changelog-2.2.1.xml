@@ -51,4 +51,28 @@
             <where>id=14</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3711 -->
+    <changeSet id="2.2.1-ytrofimov-6" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-7" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-8" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

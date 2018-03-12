@@ -187,6 +187,10 @@
             },
             ASYNC_HANDLER_CLASS_NAME: {
                 UPLOAD_REFBOOK_ASYNC_TASK: "UploadRefBookAsyncTask"
+            },
+            DATE_ZERO: {
+                AS_DATE: "1901-01-01",
+                AS_STRING: "00.00.0000"
             }
         });
 }());

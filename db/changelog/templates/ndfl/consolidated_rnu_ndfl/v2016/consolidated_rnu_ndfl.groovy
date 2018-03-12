@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
@@ -128,7 +129,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
-    final String DATE_ZERO_VALUE = "00.00.0000"
+
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
      */
@@ -1093,8 +1094,6 @@ public class SheetFillerContext {
  * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
  */
 interface SheetFiller {
-    final String DATE_FORMAT = "dd.MM.yyyy"
-    final String DATE_ZERO_VALUE = "00.00.0000"
     void fillSheet(Workbook wb, SheetFillerContext context);
 }
 
@@ -1330,9 +1329,9 @@ class IncomesSheetFiller implements SheetFiller {
             }
             Cell cell21 = row.createCell(21);
             if (npi.taxTransferDate != null) {
-                if (npi.taxTransferDate.format(DATE_FORMAT) == "01.01.1901") {
+                if (npi.taxTransferDate.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
                     cell21.setCellStyle(centeredStyle)
-                    cell21.setCellValue(DATE_ZERO_VALUE)
+                    cell21.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
                 } else {
                     cell21.setCellStyle(centeredStyleDate)
                     cell21.setCellValue(npi.taxTransferDate)

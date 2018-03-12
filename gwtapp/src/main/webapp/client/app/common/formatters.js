@@ -205,10 +205,9 @@
                     return $filter('translate')('title.period.value', {
                         year: declarationData.reportPeriodYear,
                         periodName: declarationData.reportPeriod,
-                        correctionString:
-                            declarationData.correctionDate ?
-                                $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yyyy')}) :
-                                ''
+                        correctionString: declarationData.correctionDate ?
+                            $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yy')}) :
+                            ''
                     });
                 }
                 return '';
@@ -230,10 +229,10 @@
                         return _.deep(obj, path || 'name');
                     });
 
-                    if(checkDistinction) {
+                    if (checkDistinction) {
                         var distinctValues = [];
                         angular.forEach(nameArray, function (value) {
-                            if(distinctValues.indexOf(value) === -1) {
+                            if (distinctValues.indexOf(value) === -1) {
                                 distinctValues.push(value);
                             }
                         });
@@ -274,26 +273,18 @@
                 return oktmo ? oktmo.code + ": " + oktmo.name : "";
             };
         })
-    /**
-    * @description Фильтр даты. Если значение даты будет равно '1901-01-01', то отображаться будет '00.00.0000'
-    *
-    * @param value значение, которое необходимо отформатировать
-    * @return Дата в формате 'dd.MM.yyyy'
-    */
-        .filter('dateZeroFormatter', ['$filter', function($filter) {
+        /**
+         * @description Фильтр даты. Если значение даты будет равно '1901-01-01', то отображаться будет '00.00.0000'
+         *
+         * @param value значение, которое необходимо отформатировать
+         * @return Дата в формате 'dd.MM.yyyy'
+         */
+        .filter('dateZeroFormatter', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
             return function (value) {
-                if (!value) {
-                    return '';
+                if (value === APP_CONSTANTS.DATE_ZERO.AS_DATE) {
+                    return APP_CONSTANTS.DATE_ZERO.AS_STRING;
                 }
-                if (value === $filter('translate')('title.taxTransferDateZeroDate')) {
-                    return $filter('translate')('title.taxTransferDateZeroString');
-                }
-                if (!value.millis) {
-                    return $filter('date')(value, 'dd.MM.yyyy');
-                }
-                else {
-                    return $filter('date')(value.millis, 'dd.MM.yyyy');
-                }
+                return $filter('dateFormatter')(value);
             };
         }])
     ;

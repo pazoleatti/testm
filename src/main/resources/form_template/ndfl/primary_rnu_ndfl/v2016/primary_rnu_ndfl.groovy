@@ -24,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
@@ -151,8 +152,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
 
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
-    final String DATE_FORMAT = "dd.MM.yyyy"
-    final String DATE_ZERO_VALUE = "00.00.0000"
+
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
      */
@@ -556,7 +556,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             subReportViewParams.put('Фамилия', (String) row.lastName)
             subReportViewParams.put('Имя', (String) row.firstName)
             subReportViewParams.put('Отчество', (String) row.middleName)
-            subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(DATE_FORMAT) : "")
+            subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(SharedConstants.DATE_FORMAT) : "")
             subReportViewParams.put('№ ДУЛ', (String) row.idDocNumber)
 
         } else {
@@ -815,7 +815,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 declarationData.getId(),
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 reportPeriod.getReportPeriod().getName(),
-                departmentReportPeriodService.formatPeriodName(reportPeriod, DATE_FORMAT),
+                departmentReportPeriodService.formatPeriodName(reportPeriod, SharedConstants.DATE_FORMAT),
                 department.getCode(),
                 asnuName);
     }
@@ -870,7 +870,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     void importData() {
 
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat sdf = new SimpleDateFormat(SharedConstants.DATE_FORMAT);
         logForDebug("Начало загрузки данных первичной налоговой формы " + declarationData.id + ". Дата начала отчетного периода: " + sdf.format(getReportPeriodStartDate()) + ", дата окончания: " + sdf.format(getReportPeriodEndDate()));
 
         //валидация по схеме
@@ -895,7 +895,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             throw new ServiceException("Отсутствует значение параметра dataFile!")
         }
 
-        def reportPeriodEndDate = getReportPeriodEndDate().format(DATE_FORMAT)
+        def reportPeriodEndDate = getReportPeriodEndDate().format(SharedConstants.DATE_FORMAT)
 
         def Файл = new XmlSlurper().parse(dFile)
         String reportDate = Файл.СлЧасть.'@ДатаОтч'
@@ -1076,7 +1076,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def incomePayoutRowNum = null;
         def allRowNums = new ArrayList<String>();
 
-        SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT)
+        SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
         ndflPersonOperationsNode.childNodes().each { node ->
             def rowNum = node.attributes['НомСтр']
             allRowNums.add(rowNum)
@@ -1204,8 +1204,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.overholdingTax = toBigDecimal((GPathResult) node.getProperty('@ДолгНА'))
         personIncome.refoundTax = toLong((GPathResult) node.getProperty('@ВозврНал'))
         GPathResult taxTransferDateRawValue = (GPathResult) node.getProperty('@СрокПрчслНал')
-        if (toString(taxTransferDateRawValue) == DATE_ZERO_VALUE) {
-            personIncome.taxTransferDate = Date.parse(DATE_FORMAT, "01.01.1901")
+        if (toString(taxTransferDateRawValue) == SharedConstants.DATE_ZERO_AS_STRING) {
+            personIncome.taxTransferDate = Date.parse(SharedConstants.DATE_FORMAT, SharedConstants.DATE_ZERO_AS_DATE)
         } else {
             personIncome.taxTransferDate = toDate(taxTransferDateRawValue)
         }
@@ -1315,7 +1315,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     Date toDate(GPathResult xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
-            SimpleDateFormat format = new java.text.SimpleDateFormat(DATE_FORMAT)
+            SimpleDateFormat format = new java.text.SimpleDateFormat(SharedConstants.DATE_FORMAT)
             if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
                 Date date = format.parse(xmlNode.text())
                 if (format.format(date) != xmlNode.text()) {
@@ -1339,7 +1339,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     String formatDate(date) {
-        return ScriptUtils.formatDate((Date) date, DATE_FORMAT)
+        return ScriptUtils.formatDate((Date) date, SharedConstants.DATE_FORMAT)
     }
 
     //>------------------< REF BOOK >----------------------<
@@ -1592,8 +1592,6 @@ public class SheetFillerContext {
  * Интерфейс отвечающий за заполнение листа Excel файла
  */
 interface SheetFiller {
-    final String DATE_FORMAT = "dd.MM.yyyy"
-    final String DATE_ZERO_VALUE = "00.00.0000"
     void fillSheet(Workbook wb, SheetFillerContext context);
 }
 
@@ -1831,9 +1829,9 @@ class IncomesSheetFiller implements SheetFiller {
             }
             Cell cell21 = row.createCell(21);
             if (npi.taxTransferDate != null) {
-                if (npi.taxTransferDate.format(DATE_FORMAT) == "01.01.1901") {
+                if (npi.taxTransferDate.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
                     cell21.setCellStyle(centeredStyle)
-                    cell21.setCellValue(DATE_ZERO_VALUE)
+                    cell21.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
                 } else {
                     cell21.setCellStyle(centeredStyleDate)
                     cell21.setCellValue(npi.taxTransferDate)
@@ -2217,9 +2215,9 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                         cell_40.setCellValue(npi.refoundTax.doubleValue());
                     }
                     if (npi.taxTransferDate != null) {
-                        if (npi.taxTransferDate?.format(DATE_FORMAT) == "01.01.1901") {
+                        if (npi.taxTransferDate?.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
                             cell_41.setCellStyle(centeredStyle)
-                            cell_41.setCellValue(DATE_ZERO_VALUE)
+                            cell_41.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
                         } else {
                             cell_41.setCellStyle(centeredStyleDate)
                             cell_41.setCellValue(npi.taxTransferDate);

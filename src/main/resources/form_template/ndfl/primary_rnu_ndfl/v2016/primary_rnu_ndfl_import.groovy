@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
 
 import java.text.SimpleDateFormat
@@ -122,9 +123,6 @@ class Import extends AbstractScriptClass {
 
     // Список идентификаторов импортируемых авансов
     List<Long> prepaymentImportIdList = []
-
-    final String DATE_FORMAT = "dd.MM.yyyy"
-    final String DATE_ZERO_VALUE = "00.00.0000"
 
     Import(scriptClass) {
         //noinspection GroovyAssignabilityCheck
@@ -301,12 +299,12 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (income.incomeAccruedDate != persistedIncome.incomeAccruedDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_DATE, persistedIncome.incomeAccruedDate?.format(DATE_FORMAT), income.incomeAccruedDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_DATE, persistedIncome.incomeAccruedDate?.format(SharedConstants.DATE_FORMAT), income.incomeAccruedDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedIncome.incomeAccruedDate = income.incomeAccruedDate
                                     updated = true
                                 }
                                 if (income.incomePayoutDate != persistedIncome.incomePayoutDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_DATE, persistedIncome.incomePayoutDate?.format(DATE_FORMAT), income.incomePayoutDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_DATE, persistedIncome.incomePayoutDate?.format(SharedConstants.DATE_FORMAT), income.incomePayoutDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedIncome.incomePayoutDate = income.incomePayoutDate
                                     updated = true
                                 }
@@ -346,7 +344,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (income.taxDate != persistedIncome.taxDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_DATE, persistedIncome.taxDate?.format(DATE_FORMAT), income.taxDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_DATE, persistedIncome.taxDate?.format(SharedConstants.DATE_FORMAT), income.taxDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedIncome.taxDate = income.taxDate
                                     updated = true
                                 }
@@ -376,12 +374,12 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (income.taxTransferDate != persistedIncome.taxTransferDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE, persistedIncome.taxTransferDate?.format(DATE_FORMAT), income.taxTransferDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE, persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT), income.taxTransferDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedIncome.taxTransferDate = income.taxTransferDate
                                     updated = true
                                 }
                                 if (income.paymentDate != persistedIncome.paymentDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, PAYMENT_DATE, persistedIncome.paymentDate?.format(DATE_FORMAT), income.paymentDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, PAYMENT_DATE, persistedIncome.paymentDate?.format(SharedConstants.DATE_FORMAT), income.paymentDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedIncome.paymentDate = income.paymentDate
                                     updated = true
                                 }
@@ -428,7 +426,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.notifDate != persistedDeduction.notifDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_DATE, persistedDeduction.notifDate?.format(DATE_FORMAT), deduction.notifDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_DATE, persistedDeduction.notifDate?.format(SharedConstants.DATE_FORMAT), deduction.notifDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedDeduction.notifDate = deduction.notifDate
                                     updated = true
                                 }
@@ -453,7 +451,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.incomeAccrued != persistedDeduction.incomeAccrued) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_ACCRUED, persistedDeduction.incomeAccrued?.format(DATE_FORMAT), deduction.incomeAccrued?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_ACCRUED, persistedDeduction.incomeAccrued?.format(SharedConstants.DATE_FORMAT), deduction.incomeAccrued?.format(SharedConstants.DATE_FORMAT))
                                     persistedDeduction.incomeAccrued = deduction.incomeAccrued
                                     updated = true
                                 }
@@ -468,7 +466,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.periodPrevDate != persistedDeduction.periodPrevDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_DATE, persistedDeduction.periodPrevDate?.format(DATE_FORMAT), deduction.periodPrevDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_DATE, persistedDeduction.periodPrevDate?.format(SharedConstants.DATE_FORMAT), deduction.periodPrevDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedDeduction.periodPrevDate = deduction.periodPrevDate
                                     updated = true
                                 }
@@ -478,7 +476,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (deduction.periodCurrDate != persistedDeduction.periodCurrDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_DATE, persistedDeduction.periodCurrDate?.format(DATE_FORMAT), deduction.periodCurrDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_DATE, persistedDeduction.periodCurrDate?.format(SharedConstants.DATE_FORMAT), deduction.periodCurrDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedDeduction.periodCurrDate = deduction.periodCurrDate
                                     updated = true
                                 }
@@ -525,7 +523,7 @@ class Import extends AbstractScriptClass {
                                     updated = true
                                 }
                                 if (prepayment.notifDate != persistedPrepayment.notifDate) {
-                                    messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_DATE, persistedPrepayment.notifDate?.format(DATE_FORMAT), prepayment.notifDate?.format(DATE_FORMAT))
+                                    messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_DATE, persistedPrepayment.notifDate?.format(SharedConstants.DATE_FORMAT), prepayment.notifDate?.format(SharedConstants.DATE_FORMAT))
                                     persistedPrepayment.notifDate = prepayment.notifDate
                                     updated = true
                                 }
@@ -699,8 +697,8 @@ class Import extends AbstractScriptClass {
         personIncome.notHoldingTax = row.cell(39).toBigDecimal(20)
         personIncome.overholdingTax = row.cell(40).toBigDecimal(20)
         personIncome.refoundTax = row.cell(41).toLong(15)
-        if (row.cell(42).toString(11) == DATE_ZERO_VALUE) {
-            personIncome.taxTransferDate = Date.parse(DATE_FORMAT, "01.01.1901")
+        if (row.cell(42).toString(11) == SharedConstants.DATE_ZERO_AS_STRING) {
+            personIncome.taxTransferDate = Date.parse(SharedConstants.DATE_FORMAT, SharedConstants.DATE_ZERO_AS_DATE)
         } else {
             personIncome.taxTransferDate = row.cell(42).toDate()
         }
@@ -916,7 +914,7 @@ class Import extends AbstractScriptClass {
     }
 
     void logIncomeDatesError(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
-        logger.error("Дата: \"${date?.format(DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
+        logger.error("Дата: \"${date?.format(SharedConstants.DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
                 " для строки ${rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
                 " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
                 "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
@@ -1195,7 +1193,7 @@ class Import extends AbstractScriptClass {
         Date toDate() {
             if (value != null && !value.isEmpty()) {
                 try {
-                    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT)
+                    SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
                     return formatter.parse(value)
                 } catch (Exception ignored) {
                     logIncorrectTypeError("Дата")

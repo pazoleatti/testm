@@ -31,7 +31,7 @@
                         }).success(function (person) {
                             $scope.row = $shareData.row;
                             $scope.temp.person = person;
-                            if ($scope.row.taxTransferDate === $filter('translate')('title.taxTransferDateZeroDate')) {
+                            if ($scope.row.taxTransferDate === APP_CONSTANTS.DATE_ZERO.AS_DATE) {
                                 $scope.disableTaxTransferDate = true;
                             }
                             $http({
