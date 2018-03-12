@@ -18,25 +18,10 @@
                 templateUrl: 'client/app/taxes/ndfl/periods/reportPeriod.html',
                 controller: 'reportPeriodCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource',
-                    function ($state, PermissionChecker, APP_CONSTANTS, UserDataResource) {
-                        UserDataResource.query({
-                            projection: "user"
-                        }, function (data) {
-                            var user = {
-                                name: data.taUserInfo.user.name,
-                                login: data.taUserInfo.user.login,
-                                department: data.department,
-                                permissions: data.taUserInfo.user.permissions,
-                                roles: data.taUserInfo.user.roles
-                            };
-                            if (!PermissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
-                                $stateProvider.state('main', {
-                                    url: '/',
-                                    templateUrl: 'client/app/main/app.html'
-                                });
-                                $state.go('main');
-                            }
-                        });
+                    function ($state, PermissionChecker, APP_CONSTANTS) {
+                        if (!PermissionChecker.check(null, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
+                            $state.go("/");
+                        }
                     }
                 ]
             });
