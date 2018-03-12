@@ -464,7 +464,7 @@ class Person extends AbstractScriptClass {
             }
             if (!newRefDulList.isEmpty()) {
                 List<Long> docIds = getProvider(REF_BOOK_ID_DOC_ID).createRecordVersionWithoutLock(logger, validDateFrom, null, newRefDulList)
-                logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size())
+                logger.info("В справочнике 'Документ, удостоверяющий личность' создано записей: " + docIds.size())
             }
 
             // Перенесем ИНП из старой версии в новую
@@ -477,7 +477,7 @@ class Person extends AbstractScriptClass {
             }
             if (!newRefInpList.isEmpty()) {
                 List<Long> docIds = getProvider(REF_BOOK_ID_TAX_PAYER_ID).createRecordVersionWithoutLock(logger, validDateFrom, null, newRefInpList)
-                logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size())
+                logger.info("В справочнике 'Идентификаторы налогоплательщика' создано записей: " + docIds.size())
             }
         }
     }
