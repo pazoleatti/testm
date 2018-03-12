@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -588,6 +589,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
     public ActionResult createTaskToImportXml(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
         final ActionResult result = new ActionResult();
         long refBookId = RefBook.Id.PERSON.getId();
@@ -656,6 +658,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
     public ActionResult createTaskToImportZip(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
         final ActionResult result = new ActionResult();
         if (fileName == null) {
