@@ -54,6 +54,8 @@ public class TransportDataController {
 
         if (fileName.startsWith("FL") && "xml".equals(FilenameUtils.getExtension(fileName))) {
             return loadRefBookDataService.createTaskToImportXml(userInfo, fileName, inputStream, logger);
+        } else if (fileName.startsWith("FL") && "zip".equals(FilenameUtils.getExtension(fileName))) {
+            return loadRefBookDataService.createTaskToImportZip(userInfo, fileName, inputStream, logger);
         } else {
             return uploadTransportDataService.upload(userInfo, fileName, inputStream, logger);
         }

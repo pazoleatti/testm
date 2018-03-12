@@ -215,7 +215,7 @@
 
         "title.period": "Период",
         "title.period.value": "{{year}}, {{periodName}}{{correctionString}}",
-        "title.period.value.correctionString": ", кор. ({{correctionDate}})",
+        "title.period.value.correctionString": ", корр. ({{correctionDate}})",
         "title.department": "Подразделение",
         "title.formNumber": "Номер формы",
         "title.formType": "Тип налоговой формы",

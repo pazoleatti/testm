@@ -66,4 +66,14 @@ public interface LoadRefBookDataService {
      */
     void importXml(long refBookId, BlobData blobData, TAUserInfo userInfo, Logger logger);
 
+    /**
+     * Запускает новую задачу на загрузку данных из zip-архива в справочник ФЛ
+     *
+     * @param userInfo    пользователь, запустивший задачу
+     * @param fileName    имя файла
+     * @param inputStream данные файла
+     * @param logger      логгер
+     * @return результат запуска задачи
+     */
+    ActionResult createTaskToImportZip(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger);
 }
