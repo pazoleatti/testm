@@ -50,7 +50,7 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
         if (action.isCreate()) {
             departments = departmentService.getOpenPeriodDepartments(userInfo.getUser(), action.getTaxType(), action.getReportPeriodId());
         } else {
-            departments = departmentService.getNDFLDeclarationDepartments(userInfo.getUser());
+            departments = departmentService.getTaxFormDepartments(userInfo.getUser());
         }
         if (departments.isEmpty()){
             result.setDepartments(new ArrayList<Department>());

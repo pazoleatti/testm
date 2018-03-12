@@ -380,19 +380,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public int getHierarchyLevel(int departmentId) {
-        try {
-            return getJdbcTemplate().queryForObject("SELECT level " +
-                    "FROM department " +
-                    "WHERE id = " + departmentId + " " +
-                    "START WITH parent_id is null " +
-                    "CONNECT BY PRIOR id = parent_id", Integer.class);
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
-        }
-    }
-
-    @Override
     public List<Integer> getAllPerformers(int userDepId, int declarationTypeId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("userDepId", userDepId);
@@ -525,20 +512,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         return getNamedParameterJdbcTemplate().query(
                 "select * from department " + where,
                 new DepartmentJdbcMapper()
-        );
-    }
-
-    @Override
-    public List<Pair<Integer, Integer>> fetchNdflDeclarationDepartmentForEachDeclarationType(List<Integer> performersIds) {
-        return getJdbcTemplate().query("select declaration_type_id, department_id from DEPARTMENT_DECLARATION_TYPE ddt\n" +
-                        "inner join DEPARTMENT_DECL_TYPE_PERFORMER ddtp on ddt.id = ddtp.department_decl_type_id\n" +
-                        "where " + SqlUtils.transformToSqlInStatement("performer_dep_id", performersIds),
-                new RowMapper<Pair<Integer, Integer>>() {
-                    @Override
-                    public Pair<Integer, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<>(SqlUtils.getInteger(rs, "declaration_type_id"), SqlUtils.getInteger(rs, "department_id"));
-                    }
-                }
         );
     }
 }

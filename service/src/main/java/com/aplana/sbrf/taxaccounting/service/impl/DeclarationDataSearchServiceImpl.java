@@ -46,8 +46,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
         if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER,
                 TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_OPER)) {
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-            result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    taxType, null, null)));
+            result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser())));
         } else {
             throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
         }

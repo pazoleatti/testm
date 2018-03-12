@@ -110,13 +110,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "консолидация).";
     private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
     private static final String DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s";
+    private static final String ACCESS_ERR_MSG_FMT = "Нет прав на доступ к налоговой форме. Проверьте назначение формы РНУ НДФЛ (первичная) для подразделения «%s» в «Назначении налоговых форм»%s.";
 
     private final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(DeclarationDataReportType.ACCEPT_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.XML_DEC, DeclarationDataReportType.IMPORT_TF_DEC, DeclarationDataReportType.DELETE_DEC));
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
-    @Autowired
-    private DeclarationDataAccessService declarationDataAccessService;
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
     @Autowired
@@ -303,8 +302,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceLoggerException(msg, null);
                 }*/
 
-                declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod, asunId,
-                        FormDataEvent.CREATE, logger);
+                canCreate(userInfo, declarationTemplateId, departmentReportPeriod, asunId, logger);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
@@ -379,6 +377,118 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    /**
+     * Проверка возможности создания пользователем формы из макета
+     * TODO: вынести в пермишены
+     * @param userInfo
+     * @param declarationTemplateId
+     * @param departmentReportPeriod
+     * @param asnuId
+     * @param logger
+     */
+    private void canCreate(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuId, Logger logger) {
+        // Для начала проверяем, что в данном подразделении вообще можно
+        // работать с декларациями данного вида
+        if (!departmentReportPeriod.isActive()) {
+            error("Выбранный период закрыт", logger);
+        }
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+        int declarationTypeId = declarationTemplate.getType().getId();
+
+        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
+        List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
+                TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        boolean found = false;
+        for (DepartmentDeclarationType ddt : ddts) {
+            if (ddt.getDeclarationTypeId() == declarationTypeId) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            error("Выбранный вид налоговой формы не назначен подразделению", logger);
+        }
+        // Создавать декларацию могут только контролёры УНП и контролёры
+        // текущего уровня обособленного подразделения
+
+        //Подразделение формы
+        Department declDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+
+        TaxType taxType = TaxType.NDFL;
+
+        // Выборка для доступа к экземплярам деклараций
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+        // Не используется логика из com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission.VIEW, т.к тут нет экземпляра декларации
+
+        // Контролёр УНП может просматривать все декларации
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP)) {
+            return;
+        }
+
+        // Контролёр НС
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
+            List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser());
+            if (departments.contains(declDepartment.getId())) {
+                return;
+            }
+        }
+
+        // Оператор (НДФЛ или Сборы)
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER)) {
+            if (asnuId != null && !checkUserAsnu(userInfo, asnuId)) {
+                throw new AccessDeniedException("Нет прав на доступ к форме");
+            }
+
+            List<Integer> executors = departmentService.getTaxFormDepartments(userInfo.getUser());
+            if (executors.contains(declDepartment.getId())) {
+                if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
+                    return;
+                }
+            }
+        }
+
+        // Прочие
+        String asnuMsgPart = "";
+        if (asnuId != null) {
+            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+            String asnuName = asnuProvider.getRecordData(asnuId).get("NAME").getStringValue();
+            asnuMsgPart = String.format(" и наличие доступа к АСНУ «%s»", asnuName);
+        }
+        error(String.format(
+                ACCESS_ERR_MSG_FMT,
+                declDepartment.getName(),
+                asnuMsgPart
+        ), logger);
+    }
+
+    /**
+     * Выбросить исключение или записать в лог.
+     *
+     * @param msg    текст ошибки
+     * @param logger логгер
+     */
+    private void error(String msg, Logger logger) {
+        if (logger == null) {
+            throw new AccessDeniedException(msg);
+        } else {
+            logger.error(msg);
+        }
+    }
+
+    /**
+     * Проверяет есть у пользователя права на АСНУ декларации.
+     *
+     * @param userInfo пользователь
+     * @param asnuId   АСНУ НФ, для ПНФ значение должно быть задано, для остальных форм null
+     */
+    private boolean checkUserAsnu(TAUserInfo userInfo, Long asnuId) {
+        if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER_ALL)) {
+            return true;
+        }
+
+        return userInfo.getUser().getAsnuIds().contains(asnuId);
+    }
+
     @Override
     @Transactional
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
@@ -438,7 +548,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CHECK)")
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         LOG.info(String.format("Проверка данных налоговой формы %s", id));
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CHECK);
         DeclarationData dd = declarationDataDao.get(id);
         Logger scriptLogger = new Logger();
         try {
@@ -817,6 +926,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment) {
         long declarationDataId = dataFileComment.getDeclarationDataId();
 
@@ -829,7 +939,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LockData lockData = lock(declarationDataId, userInfo);
         if (lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
             try {
-                declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
             } catch (AccessDeniedException e) {
                 //удаляем блокировку, если пользователю недоступно редактирование
                 unlock(declarationDataId, userInfo);
@@ -890,18 +999,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 filter.setAsnuIds(asnuIds);
             }
 
-            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
-                filter.setDeclarationTypeDepartmentMap(refBookDepartmentDataService.fetchAllAvailableDepartmentsForEachDeclarationType(currentUser));
-            } else if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
-                Set<Integer> receiverDepartmentIds = new HashSet<>();
-                for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
-                    receiverDepartmentIds.add(department.getId());
-                }
-                for (Integer filterDepartmentId : filter.getDepartmentIds()) {
-                    if (!receiverDepartmentIds.contains(filterDepartmentId))
-                    filter.getDepartmentIds().remove(filterDepartmentId);
-                }
-            }
+            // Отбираем подразделения (и соответственно их формы), доступные пользователю в соотстветствии с его ролями
+            filter.setDepartmentIds(departmentService.getTaxFormDepartments(currentUser));
 
             if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
                 List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
@@ -1185,8 +1284,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public DeclarationData get(long id, TAUserInfo userInfo) {
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         return declarationDataDao.get(id);
     }
 
@@ -1215,7 +1314,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
         LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
         if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
-            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             final String lockKey = generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC);
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataId", id);
@@ -1261,7 +1359,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         if (lockData == null && lockDataAccept == null && lockDataCheck == null && lockDataDelete == null) {
             try {
-                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
                 DeclarationData declarationData = declarationDataDao.get(id);
 
                 Logger logger = new Logger();
@@ -1341,8 +1438,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).ACCEPTED)")
     public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED);
-
         DeclarationData declarationData = declarationDataDao.get(id);
 
         Logger scriptLogger = new Logger();
@@ -1527,8 +1622,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#declarationId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
-        declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
         String xmlUuid = reportService.getDec(declarationId, DeclarationDataReportType.XML_DEC);
         if (xmlUuid == null) {
             return null;
@@ -1609,8 +1704,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#declarationId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo) {
-        declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL0);
         String pdfUuid = reportService.getDec(declarationId, DeclarationDataReportType.PDF_DEC);
         if (pdfUuid == null) {
             return null;
@@ -2568,10 +2663,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream,
                                       String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
                                       AttachFileType fileType, Date createDateFile) {
-        declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
         try {
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
@@ -2661,6 +2756,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).PermissionEvaluatorVIEW)")
     public void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files) {
         declarationDataDao.updateNote(declarationDataId, note);
         declarationDataFileDao.createOrUpdateList(declarationDataId, files);
@@ -2789,7 +2885,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId) {
-        declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CHANGE_STATUS_ED);
         DeclarationData declarationData = get(declarationDataId, userInfo);
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         additionalParameters.put("docStateId", docStateId);

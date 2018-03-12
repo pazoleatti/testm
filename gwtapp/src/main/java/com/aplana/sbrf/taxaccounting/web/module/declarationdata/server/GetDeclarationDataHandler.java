@@ -36,8 +36,8 @@ public class GetDeclarationDataHandler
     private DeclarationDataService declarationDataService;
     @Autowired
     private DepartmentService departmentService;
-    @Autowired
-    private DeclarationDataAccessService declarationAccessService;
+    //@Autowired
+    //private DeclarationDataAccessService declarationAccessService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
@@ -73,19 +73,19 @@ public class GetDeclarationDataHandler
         if (!declarationDataService.existDeclarationData(action.getId())) {
             throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, action.getId()), null);
         }
-        Set<FormDataEvent> permittedEvents = declarationAccessService.getPermittedEvents(userInfo, action.getId());
+        //Set<FormDataEvent> permittedEvents = declarationAccessService.getPermittedEvents(userInfo, action.getId());
 
         DeclarationData declaration = declarationDataService.get(action.getId(), userInfo);
         Date docDate = declarationDataService.getXmlDataDocDate(action.getId(), userInfo);
         result.setDeclarationData(declaration);
         result.setDocDate(docDate != null ? docDate : new Date());
 
-        result.setCanCheck(permittedEvents.contains(FormDataEvent.CHECK));
+        /*result.setCanCheck(permittedEvents.contains(FormDataEvent.CHECK));
         result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED));
         result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
         result.setCanRecalculate(permittedEvents.contains(FormDataEvent.CALCULATE));
-        result.setCanChangeStatusED(permittedEvents.contains(FormDataEvent.CHANGE_STATUS_ED));
+        result.setCanChangeStatusED(permittedEvents.contains(FormDataEvent.CHANGE_STATUS_ED));*/
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {

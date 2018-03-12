@@ -151,9 +151,6 @@ public class DeclarationDataServiceImplTest {
 
     @Test
     public void getXmlSAXParserTest() {
-        DeclarationDataAccessService declarationDataAccessService = mock(DeclarationDataAccessService.class);
-        ReflectionTestUtils.setField(declarationDataService, "declarationDataAccessService", declarationDataAccessService);
-
         String uuid1 = UUID.randomUUID().toString().toLowerCase();
         String uuid2 = UUID.randomUUID().toString().toLowerCase();
 

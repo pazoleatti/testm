@@ -66,7 +66,7 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
                 }
             } else {
                 // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-                avSet.addAll(departmentService.getTaxFormDepartments(currUser, action.getTaxType(), null, null));
+                avSet.addAll(departmentService.getTaxFormDepartments(currUser));
 
                 // Необходимые для дерева подразделения
                 result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));

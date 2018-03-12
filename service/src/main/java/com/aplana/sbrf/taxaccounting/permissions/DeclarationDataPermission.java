@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
@@ -16,12 +16,15 @@ import java.util.List;
 
 /**
  * Реализация прав для декларации.
+ * Описано в аналитике - https://conf.aplana.com/pages/viewpage.action?pageId=27177937
  */
 @Configurable
 public abstract class DeclarationDataPermission extends AbstractPermission<DeclarationData> {
 
     @Autowired
     protected DeclarationTemplateDao declarationTemplateDao;
+    @Autowired
+    protected DeclarationTypeDao declarationTypeDao;
     @Autowired
     protected DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
@@ -228,9 +231,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             super(mask);
         }
 
-        /**
-         * Дубликат в {@link com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataAccessServiceImpl#checkRolesForReading}
-         */
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             // Выборка для доступа к экземплярам деклараций
@@ -242,44 +242,32 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             }
 
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
-            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-            Long asnuId = targetDomainObject.getAsnuId();
-
-            //Подразделение формы
-            Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
 
             // Контролёр НС
             if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
-                //ТБ формы
-                int declarationTB = departmentService.getParentTB(declarationDepartment.getId()).getId();
-                //Подразделение и ТБ пользователя
-                int userTB = departmentService.getParentTB(taUser.getDepartmentId()).getId();
-
-                //Подразделение формы и подразделение пользователя должны относиться к одному ТБ или
-                if (userTB == declarationTB) {
-                    return true;
-                }
-
-                //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
-                List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
-
-                //Подразделение формы относится к одному из ТБ подразделений, для которых подразделение пользователя является исполнителем
-                if (tbDepartments.contains(declarationTB)) {
+                // Подразделение формы = (ТБ подразделения пользователя + все дочерние + иерархия подразделений от подразделения, для которого являемся исполнителем, вверх до ТБ и всех дочерних вниз)
+                List<Integer> departments = departmentService.getTaxFormDepartments(taUser);
+                if (departments.contains(targetDomainObject.getDepartmentId())) {
                     return true;
                 }
             }
 
+            Long asnuId = targetDomainObject.getAsnuId();
+            DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+
             // Оператор
             if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER)) {
-                if (asnuId != null && !checkUserAsnu(taUser, asnuId)) {
-                    return false;
-                }
-
-                List<Integer> executors = departmentService.getTaxDeclarationDepartments(taUser, declarationTemplate.getType());
-                if (executors.contains(declarationDepartment.getId())) {
-                    if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
-                        return true;
+                // Тип формы = Первичная и Вид формы = РНУ-НДФЛ
+                if (declarationKind == DeclarationFormKind.PRIMARY && declarationType.getId() == DeclarationType.NDFL_PRIMARY) {
+                    // Проверка АСНУ
+                    if (hasUserAsnuAccess(currentUser, taUser, asnuId)) {
+                        //TODO: надо проверить правильность после https://jira.aplana.com/browse/SBRFNDFL-3835
+                        // Подразделение формы = подразделению пользователя (либо дочернему) или подразделению (либо дочернему) для которого исполнителем назначено подразделение пользователя
+                        List<Integer> departments = departmentService.getTaxFormDepartments(taUser);
+                        if (departments.contains(targetDomainObject.getDepartmentId())) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -289,17 +277,18 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         /**
          * Проверяет есть у пользователя права на АСНУ декларации.
+         * Если у формы не указана асну - есть права на нее
          * Если табличка SEC_USER_ASNU пустая, то права есть на все записи.
+         * Если у пользователя есть роль N_ROLE_OPER_ALL, то права есть на все записи.
+         * Если у пользователя есть только роль N_ROLE_OPER, то прав нет ни на какие АСНУ
          *
          * @param user   пользователь
          * @param asnuId АСНУ НФ, для ПНФ значение должно быть задано, для остальных форм null
          */
-        private boolean checkUserAsnu(TAUser user, Long asnuId) {
-            if (user.getAsnuIds() == null || user.getAsnuIds().isEmpty()) {
-                return true;
-            }
+        private boolean hasUserAsnuAccess(User user, TAUser taUser, Long asnuId) {
+            return asnuId == null || (!taUser.hasSingleRole(TARole.N_ROLE_OPER) && (taUser.getAsnuIds().contains(asnuId) ||
+                    PermissionUtils.hasRole(user, TARole.N_ROLE_OPER_ALL)));
 
-            return user.getAsnuIds().contains(asnuId);
         }
     }
 
@@ -319,8 +308,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
                         if (departmentReportPeriod.isActive()) {
-                            DeclarationFormKind kind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
-                            if (kind == DeclarationFormKind.PRIMARY &&
+                            DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+                            if (declarationKind == DeclarationFormKind.PRIMARY &&
                                     targetDomainObject.getManuallyCreated() &&
                                     targetDomainObject.getLastDataModifiedDate() == null) {
                                 return false;
@@ -413,21 +402,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
                             return true;
                         } else if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
-                            //Подразделение декларации
-                            Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-                            //ТБ декларации
-                            Department parent = departmentService.getParentTB(declarationDepartment.getId());
-                            int declarationTB = parent != null ? parent.getId() : declarationDepartment.getId();
-
-                            //Подразделение и ТБ пользователя
+                            //Форма назначена подразделению пользователя или его дочернему подразделению
                             TAUser taUser = taUserService.getUser(currentUser.getUsername());
-                            Department userDepartmentTB = departmentService.getParentTB(taUser.getDepartmentId());
-                            int userTB = userDepartmentTB != null ? userDepartmentTB.getId() : taUser.getDepartmentId();
-                            //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
-                            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-                            List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
-
-                            if (userTB == declarationTB || tbDepartments.contains(declarationTB)) {
+                            List<Integer> childrenWithParent = departmentService.getAllChildrenIds(taUser.getDepartmentId());
+                            if (childrenWithParent.contains(targetDomainObject.getDepartmentId())) {
                                 return true;
                             }
                         }
@@ -517,11 +495,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
-            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-            DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+            DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
-            if (!declarationFormKind.equals(DeclarationFormKind.PRIMARY)) {
-                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationFormKind, logger);
+            if (!declarationKind.equals(DeclarationFormKind.PRIMARY)) {
+                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationKind, logger);
                 return false;
             }
             if (!departmentReportPeriod.isActive()) {
@@ -561,11 +538,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
-            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-            DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+            DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
-            if (!declarationFormKind.equals(DeclarationFormKind.CONSOLIDATED)) {
-                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationFormKind, logger);
+            if (!declarationKind.equals(DeclarationFormKind.CONSOLIDATED)) {
+                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationKind, logger);
                 return false;
             }
             if (!departmentReportPeriod.isActive()) {
@@ -611,10 +587,9 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
 
             if (targetDomainObject.getState() == State.CREATED && canView && hasRoles) {
-                DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-                DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+                DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
 
-                if (declarationFormKind != DeclarationFormKind.CONSOLIDATED || !departmentReportPeriod.isActive()) {
+                if (declarationKind != DeclarationFormKind.CONSOLIDATED || !departmentReportPeriod.isActive()) {
                     logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
                     return false;
                 }

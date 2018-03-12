@@ -97,6 +97,12 @@
                                     $scope.refreshGrid(1);
                                 }
                             }
+                        },
+                        function (e) {
+
+                            $dialogs.errorDialog({
+                                content: $filter('translate')('ndfl.not.access')
+                            });
                         }
                     );
                 }
