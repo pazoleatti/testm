@@ -81,7 +81,7 @@
                             $filter('translate')('incomesAndTax.title.modifiedDate'),
                             $filter('translate')('incomesAndTax.title.modifiedBy')],
                         colModel: [
-                            {name: 'rowNum', index: 'rowNum', width: 60, key: true},
+                            {name: 'rowNum', index: 'rowNum', width: 60},
                             {name: 'inp', index: 'inp', width: 170},
                             {name: 'operationId', index: 'operationId', width: 200},
                             {name: 'incomeCode', index: 'incomeCode', width: 175},
@@ -125,7 +125,7 @@
                             },
                             {name: 'paymentNumber', index: 'paymentNumber', width: 205},
                             {name: 'taxSumm', index: 'taxSumm', width: 205},
-                            {name: 'id', index: 'id', width: 200},
+                            {name: 'id', index: 'id', width: 200, key: true},
                             {name: 'modifiedDate', index: 'modifiedDate', width: 230, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 170}
                         ],

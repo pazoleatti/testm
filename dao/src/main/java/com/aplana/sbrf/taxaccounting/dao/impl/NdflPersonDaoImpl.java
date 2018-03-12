@@ -147,7 +147,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     public NdflPersonIncomeDTO mapRow(ResultSet rs, int i) throws SQLException {
                         NdflPersonIncomeDTO personIncome = new NdflPersonIncomeDTO();
 
-                        personIncome.setRowNum(rs.getBigDecimal("rn"));
+                        personIncome.setRowNum(rs.getBigDecimal("row_num"));
                         personIncome.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
                         personIncome.setOperationId(rs.getString("operation_id"));
