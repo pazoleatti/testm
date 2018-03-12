@@ -16,11 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.validator.XsdValidator;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -29,6 +25,8 @@ import net.sf.sevenzipjbinding.IInArchive;
 import net.sf.sevenzipjbinding.SevenZip;
 import net.sf.sevenzipjbinding.SevenZipNativeInitializationException;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,15 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -94,6 +84,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     // Сообщения, которые не учтены в постановка
     private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов %s. %s";
+
+    private static final String NO_FILE_NAME_ERROR = "Невозможно определить имя файла!";
+    private static final String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
 
 
     static {
@@ -611,7 +604,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 logger.error("Загрузка файла \"%s\" не может быть выполнена.", fileName);
             } else {
                 String uuid = blobDataService.create(inputStream, fileName);
-                String asyncLockKey = LockData.LockObjects.IMPORT_REF_BOOK_XML.name() + "_" + refBookId;
+                String asyncLockKey = LockData.LockObjects.IMPORT_REF_BOOK_XML.name() + "_" + refBookId + "_" + fileName;
                 LockData asyncLock = lockService.lock(asyncLockKey, user.getId(), String.format(DescriptionTemplate.IMPORT_TRANSPORT_DATA_PERSON_XML.getText(), fileName));
                 if (asyncLock != null) {
                     logger.error("Не удалось запустить задачу. Возможно загрузка в справочник ФЛ уже выполняется");
@@ -660,6 +653,64 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 }
             }
         }
+    }
+
+    @Override
+    public ActionResult createTaskToImportZip(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
+        final ActionResult result = new ActionResult();
+        if (fileName == null) {
+            logger.error(NO_FILE_NAME_ERROR);
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
+
+        if (inputStream == null) {
+            logger.error(EMPTY_INPUT_STREAM_ERROR);
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
+
+        try {
+            if (fileName.toLowerCase().endsWith(".zip")) {
+                File dataFile = null;
+                OutputStream dataFileOutputStream = null;
+                try {
+                    dataFile = File.createTempFile("zipfile", ".original");
+                    dataFileOutputStream = new FileOutputStream(dataFile);
+                    IOUtils.copy(inputStream, dataFileOutputStream);
+                } catch (IOException e) {
+                    logger.error(LogData.L33.getText(), fileName, e.getMessage());
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    IOUtils.closeQuietly(dataFileOutputStream);
+                }
+                ZipFile zf = new ZipFile(dataFile);
+                Enumeration<ZipArchiveEntry> entries = zf.getEntries();
+                try {
+                    while (entries.hasMoreElements()) {
+                        ZipArchiveEntry entry = entries.nextElement();
+                        try {
+                            InputStream is = zf.getInputStream(entry);
+                            createTaskToImportXml(userInfo, entry.getName(), is, logger);
+                        } catch (ServiceException se) {
+                            logger.error(LogData.L33.getText(), entry.getName(), se.getMessage());
+                            LOG.error(se.getMessage(), se);
+                        }
+                    }
+                } catch (IOException | ServiceException e) {
+                    // Ошибка копирования из архива
+                    logger.error(LogData.L33.getText(), fileName, e.getMessage());
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        } catch (IOException e) {
+            logger.error(LogData.L33.getText(), fileName, e.getMessage());
+            LOG.error(e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     private List<String> validate(File xmlFile) {
