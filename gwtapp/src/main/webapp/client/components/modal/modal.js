@@ -165,17 +165,6 @@ angular.module('aplana.modal', ['aplana.utils'])
                             return maxModalBodyHeight;
                         });
                     }
-                    if (isExceededThreshold) {
-                        // нулевое смещение от верха
-                        modalDomElement.css("top", "0");
-                        modalDomElement.css("margin-top", "0");
-                    } else {
-                        modalDomElement.css("top", "52%"); // устанавливаем начало координат в центр
-                        // задаем смещение относительно центра
-                        modalDomElement.css("margin-top", function () {
-                            return -visibleHeight / 2 + verticalModalOffest   ;
-                        });
-                    }
                 }
 
                 $http.get(AplanaUtils.templatePath + 'modal/window.html', {cache: $templateCache}).then(function (result) {
