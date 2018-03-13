@@ -3475,7 +3475,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome) {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
-        reportService.deleteDec(declarationDataId, DeclarationDataReportType.SPECIFIC_REPORT_DEC);
+        reportService.deleteDec(Collections.singletonList(declarationDataId),
+                Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
     }
 
     @Override
@@ -3483,7 +3484,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction) {
         ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
-        reportService.deleteDec(declarationDataId, DeclarationDataReportType.SPECIFIC_REPORT_DEC);
+        reportService.deleteDec(Collections.singletonList(declarationDataId),
+                Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
     }
 
     @Override
@@ -3491,7 +3493,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment) {
         ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
-        reportService.deleteDec(declarationDataId, DeclarationDataReportType.SPECIFIC_REPORT_DEC);
+        reportService.deleteDec(Collections.singletonList(declarationDataId),
+                Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
     }
 
     private String getDeclarationDescription(long declarationDataId) {
