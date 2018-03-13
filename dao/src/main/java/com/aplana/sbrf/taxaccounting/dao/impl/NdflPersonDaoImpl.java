@@ -179,7 +179,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personIncome.setInp(rs.getString("inp"));
 
                         personIncome.setId(SqlUtils.getLong(rs, "id"));
-                        personIncome.setModifiedDate(rs.getDate("modified_date"));
+                        personIncome.setModifiedDate(rs.getTimestamp("modified_date"));
                         personIncome.setModifiedBy(rs.getString("modified_by"));
                         return personIncome;
                     }
@@ -279,7 +279,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personDeduction.setInp(rs.getString("inp"));
 
                         personDeduction.setId(SqlUtils.getLong(rs, "id"));
-                        personDeduction.setModifiedDate(rs.getDate("modified_date"));
+                        personDeduction.setModifiedDate(rs.getTimestamp("modified_date"));
                         personDeduction.setModifiedBy(rs.getString("modified_by"));
                         return personDeduction;
                     }
@@ -367,7 +367,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personPrepayment.setInp(rs.getString("inp"));
 
                         personPrepayment.setId(SqlUtils.getLong(rs, "id"));
-                        personPrepayment.setModifiedDate(rs.getDate("modified_date"));
+                        personPrepayment.setModifiedDate(rs.getTimestamp("modified_date"));
                         personPrepayment.setModifiedBy(rs.getString("modified_by"));
                         return personPrepayment;
                     }
@@ -1772,7 +1772,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             person.setAddress(rs.getString("address"));
             person.setAdditionalData(rs.getString("additional_data"));
 
-            person.setModifiedDate(rs.getDate("modified_date"));
+            person.setModifiedDate(rs.getTimestamp("modified_date"));
             person.setModifiedBy(rs.getString("modified_by"));
             return person;
         }
@@ -1816,7 +1816,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxSumm(SqlUtils.getLong(rs, "tax_summ"));
             personIncome.setSourceId(SqlUtils.getLong(rs, "source_id"));
 
-            personIncome.setModifiedDate(rs.getDate("modified_date"));
+            personIncome.setModifiedDate(rs.getTimestamp("modified_date"));
             personIncome.setModifiedBy(rs.getString("modified_by"));
             return personIncome;
         }
@@ -1851,7 +1851,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setPeriodCurrSumm(rs.getBigDecimal("period_curr_summ"));
             personDeduction.setSourceId(SqlUtils.getLong(rs, "source_id"));
 
-            personDeduction.setModifiedDate(rs.getDate("modified_date"));
+            personDeduction.setModifiedDate(rs.getTimestamp("modified_date"));
             personDeduction.setModifiedBy(rs.getString("modified_by"));
             return personDeduction;
         }
@@ -1874,7 +1874,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setNotifSource(rs.getString("notif_source"));
             personPrepayment.setSourceId(SqlUtils.getLong(rs, "source_id"));
 
-            personPrepayment.setModifiedDate(rs.getDate("modified_date"));
+            personPrepayment.setModifiedDate(rs.getTimestamp("modified_date"));
             personPrepayment.setModifiedBy(rs.getString("modified_by"));
             return personPrepayment;
         }
