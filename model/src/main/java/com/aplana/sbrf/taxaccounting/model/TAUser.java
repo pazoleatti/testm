@@ -112,6 +112,14 @@ public class TAUser implements SecuredEntity, Serializable {
         return false;
     }
 
+	/**
+	 * Проверяет есть ли у пользователя единственная роль
+	 * @param role роль пользователя
+	 * @return true - если у пользователя есть только такая роль, false - в противном случае
+	 */
+	public boolean hasSingleRole(String role) {
+		return roles != null && roles.size() == 1 && roles.get(0).getAlias().equals(role);
+	}
 
     public boolean hasRoles(TaxType taxType, String... roleAlias) {
         boolean hashRole = false;
@@ -133,12 +141,22 @@ public class TAUser implements SecuredEntity, Serializable {
         return hashRole;
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-    @Override
+		TAUser taUser = (TAUser) o;
+
+		return id == taUser.id;
+	}
+
+	@Override
+	public int hashCode() {
+		return id;
+	}
+
+	@Override
     public String toString() {
         return "TAUser{" +
                 "id: " + id +

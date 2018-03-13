@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -50,7 +50,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user) {
-        List<Integer> declarationDepartments = departmentService.getNDFLDeclarationDepartments(user);
+        List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user);
         return refBookDepartmentDataDao.fetchDepartments(declarationDepartments);
     }
 
@@ -67,7 +67,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams) {
-        List<Integer> declarationDepartments = departmentService.getNDFLDeclarationDepartments(user);
+        List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user);
         return refBookDepartmentDataDao.fetchDepartments(declarationDepartments, name, pagingParams);
     }
 
@@ -136,10 +136,5 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     public List<RefBookDepartment> fetchActiveAvailableTB(TAUser user) {
         List<Integer> tbDepartmentIds = departmentService.getTBDepartmentIds(user, TaxType.NDFL, false);
         return refBookDepartmentDataDao.fetchDepartments(tbDepartmentIds);
-    }
-
-    @Override
-    public Map<Integer, Set<Integer>> fetchAllAvailableDepartmentsForEachDeclarationType(TAUser currentUser) {
-        return departmentService.fetchNdflDeclarationDepartmentForEachDeclarationType(currentUser);
     }
 }

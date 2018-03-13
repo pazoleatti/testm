@@ -41,7 +41,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         NotificationsFilterData filter = action.getFilter();
         filter.setUserId(user.getId());
 		Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
-		receiverDepartmentIds.addAll(departmentService.getNDFLDeclarationDepartments(user));
+		receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user));
         filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         filter.setUserRoleIds(userRoles);
 

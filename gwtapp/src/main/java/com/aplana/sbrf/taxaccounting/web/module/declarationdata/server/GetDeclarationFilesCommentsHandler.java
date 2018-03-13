@@ -24,8 +24,8 @@ public class GetDeclarationFilesCommentsHandler extends AbstractActionHandler<Ge
     @Autowired
     private DeclarationDataService declarationDataService;
 
-    @Autowired
-    private DeclarationDataAccessService accessService;
+    //@Autowired
+    //private DeclarationDataAccessService accessService;
 
     @Autowired
     private LockDataService lockService;
@@ -56,7 +56,7 @@ public class GetDeclarationFilesCommentsHandler extends AbstractActionHandler<Ge
         Logger logger = new Logger();
         boolean canEdit = true;
         try {
-            accessService.checkEvents(userInfo, action.getDeclarationData().getId(), FormDataEvent.CALCULATE);
+            //accessService.checkEvents(userInfo, action.getDeclarationData().getId(), FormDataEvent.CALCULATE);
         } catch (AccessDeniedException e) {
             canEdit = false;
         }

@@ -12,9 +12,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">

@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Сервис содержит действия и проверки связанные с департаментом
@@ -43,7 +48,7 @@ public interface DepartmentService {
     List<Department> getChildren(int parentDepartmentId);
 
     /**
-     * 70 - Получить все дочерние подразделения
+     * 70 - Получить все дочерние подразделения, включая указанное
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11381799">Аналитика</a>
      *
      * @param parentDepartmentId
@@ -111,24 +116,6 @@ public interface DepartmentService {
     List<Department> getTBDepartments(TAUser tAUser, TaxType taxType);
 
     /**
-     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
-     *
-     * @param departmentId
-     * @param type
-     * @return
-     */
-    Department getParentDepartmentByType(int departmentId, DepartmentType type);
-
-    /**
-     * 25 - Получение ТБ пользователя. Может быть не более одного подразделения
-     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380666">Аналитика</a>
-     *
-     * @param tAUser пользователь
-     * @return список подразделений
-     */
-    List<Department> getTBUserDepartments(TAUser tAUser);
-
-    /**
      * 20 - Получение идентификаторов ТБ
      * Для роли "Контролер УНП" может быть несколько подразделений
      * Для роли "Контролер НС" только одно подразделение
@@ -150,55 +137,13 @@ public interface DepartmentService {
 
     /**
      * 40 - Выборка id подразделений для доступа к экземплярам НФ/деклараций
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380670">Аналитика</a>
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380670">Старая аналитика</a>
+     * <a href = "https://conf.aplana.com/pages/viewpage.action?pageId=27177937">Новая аналитика</a>
      *
      * @param tAUser      пользователь
-     * @param taxType     Тип налога
-     * @param periodStart начало периода, в котором действуют назначения
-     * @param periodEnd   окончание периода, в котором действуют назначения
      * @return
      */
-    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, Date periodStart, Date periodEnd);
-
-    /**
-     * Получить id подразделений для доступа к налоговым формам, тип налога НДФЛ
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380670">Аналитика</a>
-     *
-     * @param user Пользователь
-     * @return Список идентификаторов подразделений, к формам которых пользователь имеет доступ
-     */
-    List<Integer> getNDFLDeclarationDepartments(TAUser user);
-
-    /**
-     * Выборка id подразделений для доступа к экземплярам деклараций
-     *
-     * @param tAUser          пользователь
-     * @param declarationType Тип декларации(макета)
-     * @return
-     */
-    List<Integer> getTaxDeclarationDepartments(TAUser tAUser, DeclarationType declarationType);
-
-    /**
-     * 45 - Подразделения, доступные через назначение источников-приёмников
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14816445">Аналитика</a>
-     *
-     * @param tAUser      пользователь
-     * @param periodStart дата начала периода
-     * @param periodEnd   дата окончания периода
-     * @return
-     */
-    List<Department> getSourcesDepartments(TAUser tAUser, Date periodStart, Date periodEnd);
-
-    /**
-     * 45 - Идентификаторы подразделений, доступные через назначение источников-приёмников
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14816445">Аналитика</a>
-     *
-     * @param tAUser      пользователь
-     * @param periodStart дата начала периода
-     * @param periodEnd   дата окончания периода
-     * @return
-     */
-    Collection<Integer> getSourcesDepartmentIds(TAUser tAUser, Date periodStart, Date periodEnd);
+    List<Integer> getTaxFormDepartments(TAUser tAUser);
 
     /**
      * 50 - Выборка id подразделений для назначения подразделений-исполнителей
@@ -215,15 +160,6 @@ public interface DepartmentService {
      * @return Список id подразделений для назначения исполнителей
      */
     List<Integer> getDestinationDepartmentIds(TAUser tAUser);
-
-    /**
-     * 55 - Подразделения, доступные через назначение исполнителя
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14814963">Аналитика</a>
-     *
-     * @param tAUser пользователь
-     * @return
-     */
-    Collection<Integer> getAppointmentDepartments(TAUser tAUser);
 
     /**
      * 80 - Выборка id подразделений по открытым периодам
@@ -243,13 +179,6 @@ public interface DepartmentService {
      * @return набор сочетаний идентификатор-подразделение
      */
     Map<Integer, Department> getDepartments(List<Integer> departmentId);
-
-    /**
-     * Список подразделений передаваемых в СУДИР
-     *
-     * @return подразделения с типом {@link com.aplana.sbrf.taxaccounting.model.DepartmentType#MANAGEMENT}
-     */
-    List<Department> getDepartmentForSudir();
 
     /**
      * Возвращает путь в иерархии до указанного подразделения
@@ -277,39 +206,13 @@ public interface DepartmentService {
     Department getParentTB(int departmentId);
 
     /**
-     * Переключание флага использования подразделения модулем Гарантий
-     *
-     * @param depId ид подразделения
-     * @param used  true - используется, false - не используется
-     */
-    void setUsedByGarant(int depId, boolean used);
-
-    /**
-     * Используемое наименование подразделения для печати
-     *
-     * @param departmentId id подразделения
-     * @return строка наименования
-     */
-    String getReportDepartmentName(int departmentId);
-
-    int getHierarchyLevel(int departmentId);
-
-    /**
-     * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
-     *
-     * @param performerDepartmentId ID подразделения, которое является исполнителем
-     * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
-     */
-    List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
-
-    /**
      * Получить списиок ТБ подразделений, для которых подразделение из ТБ пользователя является исполнителем макетов
      *
      * @param userTBDepId     подразделения-исполнителя
      * @param declarationType макет
      * @return
      */
-    List<Integer> getAllTBPerformers(int userTBDepId, DeclarationType declarationType);
+    //List<Integer> getAllTBPerformers(int userTBDepId, DeclarationType declarationType);
 
     /**
      * Получение списка подразделений по идентификаторам
@@ -318,14 +221,5 @@ public interface DepartmentService {
      * @return список {@link Department} или пустой список
      */
     List<Department> fetchAllDepartmentByIds(List<Integer> ids);
-
-    /**
-     * Получение мапы, в которой ключ - идентификатор типа налоговой формы, значение - список идентификаторов подразделений,
-     * для которых подразделение пользователя назначено исполнителем налоговой формы, содержащейся в ключе
-     *
-     * @param currentUser Информация о пользовател
-     * @return мапа {@link DeclarationType#getId()} -> {@link Set<Integer>} или пустая мапа
-     */
-    Map<Integer, Set<Integer>> fetchNdflDeclarationDepartmentForEachDeclarationType(TAUser currentUser);
 
 }

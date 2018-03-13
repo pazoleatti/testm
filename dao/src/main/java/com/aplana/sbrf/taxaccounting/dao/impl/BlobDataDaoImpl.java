@@ -160,9 +160,6 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     "union select xsd from declaration_template " +
                     "union select jrxml from declaration_template " +
                     "union select blob_data_id from declaration_report " +
-                    "union select blob_data_id from form_data_report " +
-                    "union select blob_data_id from ifrs_data " +
-                    "union select blob_data_id from form_data_file " +
                     "union select blob_data_id from declaration_data_file " +
                     "union select blob_data_id from declaration_template_file " +
                     "union select blob_data_id from declaration_subreport) where id is not null) " +

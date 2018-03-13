@@ -24,8 +24,8 @@ public class SaveDeclarationFilesCommentsHandler extends AbstractActionHandler<S
     @Autowired
     private DeclarationDataService declarationDataService;
 
-    @Autowired
-    private DeclarationDataAccessService accessService;
+    //@Autowired
+    //private DeclarationDataAccessService accessService;
 
     @Autowired
     private LockDataService lockService;
@@ -55,7 +55,7 @@ public class SaveDeclarationFilesCommentsHandler extends AbstractActionHandler<S
         LockData lockData = lockService.getLock(key);
         if (lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
             try {
-                accessService.checkEvents(userInfo, action.getDeclarationData().getId(), FormDataEvent.CALCULATE);
+                //accessService.checkEvents(userInfo, action.getDeclarationData().getId(), FormDataEvent.CALCULATE);
             } catch (AccessDeniedException e) {
                 //удаляем блокировку, если пользователю недоступно редактирование
                 lockService.unlock(key, userInfo.getUser().getId());

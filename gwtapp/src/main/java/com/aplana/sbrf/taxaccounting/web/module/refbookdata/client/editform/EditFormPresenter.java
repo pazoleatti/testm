@@ -94,6 +94,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         action.setRefBookId(currentRefBookId);
         if (isVersionMode) {
             action.setRecordId(recordId);
+            action.setSourceUniqueRecordId(uniqueRecordId);
         } else {
             action.setRecordId(null);
         }
@@ -103,7 +104,6 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         action.setRecord(map);
         action.setVersionFrom(getView().getVersionFrom());
         action.setVersionTo(getView().getVersionTo());
-        action.setSourceUniqueRecordId(uniqueRecordId);
 
         final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
         recordChanges.setCreate(true);

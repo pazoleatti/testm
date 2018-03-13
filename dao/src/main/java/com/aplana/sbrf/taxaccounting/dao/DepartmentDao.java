@@ -88,6 +88,12 @@ public interface DepartmentDao extends PermissionDao {
      */
     String getParentsHierarchyShortNames(Integer departmentId);
 
+    /**
+     * Получение id родительского территориального банка
+     *
+     * @param departmentId идентификатор подразделения
+     * @return id родительского ТБ
+     */
     Integer getParentTBId(int departmentId);
 
     /**
@@ -201,8 +207,6 @@ public interface DepartmentDao extends PermissionDao {
      */
     void setUsedByGarant(int depId, boolean used);
 
-    int getHierarchyLevel(int departmentId);
-
     /**
      * Получить списиок подразделений, для которых подразделение пользователя(или его дочернее подразделение) является исполнителем макетов
      *
@@ -254,12 +258,4 @@ public interface DepartmentDao extends PermissionDao {
      * @return список {@link Department} или пустой список
      */
     List<Department> fetchAllDepartmentByIds(List<Integer> ids);
-
-    /**
-     * Получение списка пар (идентификатор типа налоговой формы, идентификатор подразделения, для которого подразделения пользователя назначено исполнителем)
-     *
-     * @param currentUser Пользователь
-     * @return список {@link Pair} или пустой список
-     */
-    List<Pair<Integer,Integer>> fetchNdflDeclarationDepartmentForEachDeclarationType(List<Integer> currentUser);
 }

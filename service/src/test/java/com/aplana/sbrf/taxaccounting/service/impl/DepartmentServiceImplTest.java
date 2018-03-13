@@ -411,26 +411,6 @@ public class DepartmentServiceImplTest {
     }
 
     @Test
-    public void getTaxFormDepartmentsTest() {
-        TAUser taUser = new TAUser();
-        taUser.setRoles(taRoles);
-
-        List<Integer> result = departmentService.getNDFLDeclarationDepartments(taUser);
-        Assert.assertEquals(5, result.size());
-        Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
-                && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())
-                && result.contains(departmentOSB311.getId()));
-
-        // TODO
-        taUser.getRoles().remove(0);
-        //test for ROLE_CONTROL_NS
-        taUser.getRoles().remove(0);
-        // test for ROLE_CONTROL
-        taUser.getRoles().remove(0);
-        // test for ROLE_OPER
-    }
-
-    @Test
     public void getDestinationDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
@@ -479,25 +459,5 @@ public class DepartmentServiceImplTest {
         // test for ROLE_CONTROL
         taUser.getRoles().remove(0);
         // test for ROLE_OPER
-    }
-
-    //@Test
-    public void getSourcesDepartmentsTest() {
-        TAUser taUser = new TAUser();
-        taUser.setRoles(taRoles);
-        // test for ROLE_CONTROL_UNP
-        Assert.assertEquals(5, departmentService.getSourcesDepartments(taUser, null, null).size());
-        // test for ROLE_CONTROL_NS
-        taUser.getRoles().remove(0);
-        Assert.assertEquals(0, departmentService.getSourcesDepartments(taUser, null, null).size());
-        taUser.setDepartmentId(2);
-        Assert.assertEquals(1, departmentService.getSourcesDepartments(taUser, null, null).size());
-        // test for ROLE_CONTROL
-        taUser.getRoles().remove(0);
-        taUser.setDepartmentId(311);
-        Assert.assertEquals(1, departmentService.getSourcesDepartments(taUser, null, null).size());
-        // test for other
-        taUser.getRoles().remove(0);
-        Assert.assertEquals(0, departmentService.getSourcesDepartments(taUser, null, null).size());
     }
 }

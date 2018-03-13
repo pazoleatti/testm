@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
@@ -11,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +32,13 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     private DeclarationDataService declarationDataService;
     private DepartmentReportPeriodService departmentReportPeriodService;
     private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+    private CacheManagerDecorator cacheManagerDecorator;
+    private TAUserService userService;
 
     public DeclarationTypeAssignmentServiceImpl(DepartmentService departmentService, SourceService sourceService, LogEntryService logEntryService,
                                                 DeclarationTypeService declarationTypeService, DeclarationDataService declarationDataService,
-                                                DepartmentReportPeriodService departmentReportPeriodService, DepartmentDeclarationTypeDao departmentDeclarationTypeDao) {
+                                                DepartmentReportPeriodService departmentReportPeriodService, DepartmentDeclarationTypeDao departmentDeclarationTypeDao,
+                                                CacheManagerDecorator cacheManagerDecorator, TAUserService userService) {
         this.departmentService = departmentService;
         this.sourceService = sourceService;
         this.logEntryService = logEntryService;
@@ -41,6 +46,8 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         this.declarationDataService = declarationDataService;
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.departmentDeclarationTypeDao = departmentDeclarationTypeDao;
+        this.cacheManagerDecorator = cacheManagerDecorator;
+        this.userService = userService;
     }
 
     /**
@@ -110,6 +117,12 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
                         addAllReportPeriodsToDepartment(childrenDepartmentId);
                     }
                     sourceService.saveDDT((long) depId, dt.intValue(), action.getPerformerIds());
+
+                    // Сброс кэша для получения доступных подразделений пользователя (учитываются исполнители)
+                    // Перебираем пользователей, т.к в этом же кэше хранятся и сами подразделения, которые не изменились
+                    for (TAUser user : userService.listAllUsers()) {
+                        cacheManagerDecorator.evict(CacheConstants.DEPARTMENT, "user_departments_" + user.getId());
+                    }
                 }
             }
         }
@@ -130,8 +143,16 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
     public void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action) {
-        for (Integer assignmentId : action.getAssignmentIds()) {
-            sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
+        if (!CollectionUtils.isEmpty(action.getAssignmentIds())) {
+            for (Integer assignmentId : action.getAssignmentIds()) {
+                sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
+            }
+
+            // Сброс кэша для получения доступных подразделений пользователя (учитываются исполнители)
+            // Перебираем пользователей, т.к в этом же кэше хранятся и сами подразделения, которые не изменились
+            for (TAUser user : userService.listAllUsers()) {
+                cacheManagerDecorator.evict(CacheConstants.DEPARTMENT, "user_departments_" + user.getId());
+            }
         }
     }
 
@@ -149,10 +170,18 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         Logger logger = new Logger();
         boolean declarationsExist = false;
 
-        for (DeclarationTypeAssignmentIdModel assignment : assignments) {
-            declarationsExist |= declarationDataService.existDeclaration(assignment.getDeclarationTypeId(), assignment.getDepartmentId(), logger.getEntries());
-            if (!declarationsExist) {
-                sourceService.deleteDDT(Arrays.asList(assignment.getId()));
+        if (!CollectionUtils.isEmpty(assignments)) {
+            for (DeclarationTypeAssignmentIdModel assignment : assignments) {
+                declarationsExist |= declarationDataService.existDeclaration(assignment.getDeclarationTypeId(), assignment.getDepartmentId(), logger.getEntries());
+                if (!declarationsExist) {
+                    sourceService.deleteDDT(Collections.singletonList(assignment.getId()));
+                }
+            }
+
+            // Сброс кэша для получения доступных подразделений пользователя (учитываются исполнители)
+            // Перебираем пользователей, т.к в этом же кэше хранятся и сами подразделения, которые не изменились
+            for (TAUser user : userService.listAllUsers()) {
+                cacheManagerDecorator.evict(CacheConstants.DEPARTMENT, "user_departments_" + user.getId());
             }
         }
 

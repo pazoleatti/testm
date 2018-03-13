@@ -92,8 +92,8 @@ class Import extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
 
-    String fileName
-    InputStream inputStream
+    String fileName // имя загружаемого файла
+    File file // временный файл с данными
 
     // Дата окончания отчетного периода
     ReportPeriod reportPeriod
@@ -129,7 +129,7 @@ class Import extends AbstractScriptClass {
         super(scriptClass)
         this.logger = (Logger) scriptClass.getProperty("logger")
         this.fileName = (String) scriptClass.getProperty("fileName")
-        this.inputStream = (InputStream) scriptClass.getProperty("inputStream")
+        this.file = (File) scriptClass.getProperty("file")
         this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
         this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
@@ -172,7 +172,7 @@ class Import extends AbstractScriptClass {
         List<List<String>> headerValues = []
         Map<String, Object> paramsMap = ['rowOffset': 0, 'colOffset': 0]  // отступы сверху и слева для таблицы
 
-        readSheetsRange(inputStream, allValues, headerValues, null, null, 2, paramsMap, 1, null)
+        readSheetsRange(file, allValues, headerValues, null, null, 2, paramsMap, 1, null)
         checkHeaders(headerValues)
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")

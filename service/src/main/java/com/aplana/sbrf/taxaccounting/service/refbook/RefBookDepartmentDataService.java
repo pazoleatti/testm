@@ -83,13 +83,4 @@ public interface RefBookDepartmentDataService {
      * @return Список значений справочника
      */
     List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
-
-    /**
-     * Получение мапы, в которой ключ - идентификатор типа налоговой формы, значение - список идентификаторов подразделений,
-     * для которых подразделение пользователя назначено исполнителем налоговой формы, содержащейся в ключе
-     *
-     * @param currentUser Информация о пользовател
-     * @return мапа {@link DeclarationType#getId()} -> {@link Set<Integer>} или пустая мапа
-     */
-    Map<Integer, Set<Integer>> fetchAllAvailableDepartmentsForEachDeclarationType(TAUser currentUser);
 }

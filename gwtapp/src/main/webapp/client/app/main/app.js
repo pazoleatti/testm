@@ -443,6 +443,7 @@
         "ndfl.rnuNdflPersonFace.manyRecords": "Найдено записей: {{count}}. Отображено записей: 10. Уточните критерии поиска",
         "ndfl.rnuNdflPersonFace.countRecords": "Найдено записей: {{count}}.",
         "ndfl.rnuNdflPersonFace.emptySearchFilter": "Для выбора физического лица необходимо задать один из критериев.",
+        "ndfl.not.access": 'Нет прав на доступ к налоговой форме. Проверьте назначение формы подразделению в разделе «Назначении налоговых форм», а также доступ к АСНУ',
 
         "ndflJournal.filter.periodType": "Тип периода",
         "ndflJournal.filter.period": "Период",
