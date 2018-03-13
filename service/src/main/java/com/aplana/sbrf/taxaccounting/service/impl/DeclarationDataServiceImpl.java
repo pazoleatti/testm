@@ -1000,7 +1000,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
             // Отбираем подразделения (и соответственно их формы), доступные пользователю в соотстветствии с его ролями
-            filter.setDepartmentIds(departmentService.getTaxFormDepartments(currentUser));
+            if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
+                filter.setDepartmentIds(departmentService.getTaxFormDepartments(currentUser));
+            }
 
             if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
                 List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
