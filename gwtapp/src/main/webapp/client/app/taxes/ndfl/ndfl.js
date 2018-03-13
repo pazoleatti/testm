@@ -99,10 +99,11 @@
                             }
                         },
                         function (e) {
-
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('ndfl.not.access')
-                            });
+                            if (e.status === 403) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('ndfl.not.access')
+                                });
+                            }
                         }
                     );
                 }
