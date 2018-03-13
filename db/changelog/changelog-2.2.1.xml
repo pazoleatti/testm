@@ -75,4 +75,12 @@
             <where>id=101</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2-ytrofimov-9" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

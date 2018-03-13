@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1869"/>
+	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -34,7 +34,10 @@
 		<field name="ФактДоход" class="java.lang.String">
 			<fieldDescription><![CDATA[@ФактДоход]]></fieldDescription>
 		</field>
-		<sortField name="ДатаУдержНал"/>
+		<sortField name="valueForSorting" type="Variable"/>
+		<variable name="valueForSorting" class="java.util.Date">
+			<variableExpression><![CDATA[java.util.Date.parse("dd.MM.yyyy", $F{ДатаУдержНал})]]></variableExpression>
+		</variable>
 		<variable name="ФактДоход" class="java.lang.String">
 			<variableExpression><![CDATA[(
     (
