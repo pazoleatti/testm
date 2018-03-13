@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -52,6 +53,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1732,16 +1734,14 @@ public final class ScriptUtils {
      * @throws OpenXML4JException
      * @throws SAXException
      */
-    public static void readSheetsRange(InputStream inputStream, List<List<String>> allValues, List<List<String>>headerValues,
-                           String tableStartValue, String tableEndValue, int headerRowCount,
-                           Map<String, Object> paramsMap, Integer startSheetIndex, Integer endSheetIndex) throws IOException, OpenXML4JException, SAXException {
+    public static void readSheetsRange(File file, List<List<String>> allValues, List<List<String>>headerValues,
+                                       String tableStartValue, String tableEndValue, int headerRowCount,
+                                       Map<String, Object> paramsMap, Integer startSheetIndex, Integer endSheetIndex) throws IOException, OpenXML4JException, SAXException {
         if (startSheetIndex == null) {
             throw new IllegalArgumentException("Начальный индекс не должен быть равен null");
         }
-        InputStream sheet = null;
-        InputSource sheetSource = null;
 
-        OPCPackage pkg = OPCPackage.open(inputStream);
+        OPCPackage pkg = OPCPackage.open(file.getAbsolutePath(), PackageAccess.READ);
         XSSFReader r = new XSSFReader(pkg);
         SharedStringsTable sst = r.getSharedStringsTable();
         XMLReader parser = XMLReaderFactory.createXMLReader();
@@ -1753,8 +1753,8 @@ public final class ScriptUtils {
         while(sheets.hasNext()) {
             if (i >= startSheetIndex) {
                 if (endSheetIndex == null || endSheetIndex <= i) {
-                    sheet = sheets.next();
-                    sheetSource = new InputSource(sheet);
+                    InputStream sheet = sheets.next();
+                    InputSource sheetSource = new InputSource(sheet);
                     parser.parse(sheetSource);
                 }
             } else {

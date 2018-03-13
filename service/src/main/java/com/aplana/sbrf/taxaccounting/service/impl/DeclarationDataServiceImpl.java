@@ -3395,6 +3395,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
     public void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger) {
         TAUser user = userInfo.getUser();
+        File tempFile = null;
         try {
             LockData existentlockData = doLock(declarationDataId, userInfo);
             if (existentlockData != null && existentlockData.getUserId() != userInfo.getUser().getId() ||
@@ -3404,13 +3405,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } else {
                 LOG.info(String.format("Загрузка данных из Excel-файла в налоговую форму %s", declarationDataId));
                 DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-                int ndflPersonCount = ndflPersonDao.getNdflPersonCount(declarationDataId);
+
                 reportService.deleteDec(declarationDataId);
+
+                tempFile = createTempFile("tmp_dec_", ".xlsx", blobData.getInputStream());
                 Map<String, Object> params = new HashMap<>();
                 params.put("fileName", blobData.getName());
-                params.put("inputStream", blobData.getInputStream());
-                FormDataEvent formDataEvent = FormDataEvent.IMPORT;
-                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, formDataEvent, logger, params)) {
+                params.put("file", tempFile);
+                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.IMPORT, logger, params)) {
                     throw new ServiceException();
                 }
 
@@ -3434,10 +3436,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
 
                 String note = "Загрузка данных из файла \"" + blobData.getName() + "\" в налоговую форму";
-                logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
+                int ndflPersonCount = ndflPersonDao.getNdflPersonCount(declarationDataId);
                 if (ndflPersonCount == 0) {
-                    auditService.add(formDataEvent, userInfo, declarationData, note, null);
-                    logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
+                    auditService.add(FormDataEvent.IMPORT, userInfo, declarationData, note, null);
+                    logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.IMPORT, note);
                 } else {
                     auditService.add(FormDataEvent.DATA_MODIFYING, userInfo, declarationData, note, null);
                     logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.DATA_MODIFYING, note);
@@ -3446,7 +3448,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         } finally {
             unlock(declarationDataId, userInfo);
+            if (tempFile != null) {
+                if (!tempFile.delete()) {
+                    LOG.warn(String.format(FILE_NOT_DELETE, tempFile.getAbsolutePath()));
+                }
+            }
         }
+    }
+
+    private File createTempFile(String prefix, String suffix, InputStream inputStream) {
+        File file;
+        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(
+                file = File.createTempFile(prefix, suffix)
+        ))) {
+            IOUtils.copy(inputStream, out);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return file;
     }
 
     @Override
