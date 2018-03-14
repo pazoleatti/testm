@@ -1641,7 +1641,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public void updateIncomes(List<NdflPersonIncome> incomes) {
         String sql = "update " + NdflPersonIncome.TABLE_NAME + " set " +
-                "operation_id = :operationId, oktmo = :oktmo, kpp = :kpp, income_code = :incomeCode, income_type = :incomeType, " +
+                "row_num = :rowNum, operation_id = :operationId, oktmo = :oktmo, kpp = :kpp, income_code = :incomeCode, income_type = :incomeType, " +
                 "income_accrued_date = :incomeAccruedDate, income_payout_date = :incomePayoutDate, income_accrued_summ = :incomeAccruedSumm, income_payout_summ = :incomePayoutSumm, total_deductions_summ = :totalDeductionsSumm, " +
                 "tax_base = :taxBase, tax_rate = :taxRate, tax_date = :taxDate, calculated_tax = :calculatedTax, withholding_tax = :withholdingTax, not_holding_tax = :notHoldingTax, overholding_tax = :overholdingTax, " +
                 "refound_tax = :refoundTax, tax_transfer_date = :taxTransferDate, payment_date = :paymentDate, payment_number = :paymentNumber, tax_summ = :taxSumm, modified_date = :modifiedDate, modified_by = :modifiedBy " +
@@ -1654,10 +1654,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public void updateDeductions(List<NdflPersonDeduction> deductions) {
         String sql = "update " + NdflPersonDeduction.TABLE_NAME + " set " +
-                "type_code = :typeCode, notif_type = :notifType, notif_date = :notifDate, notif_num = :notifNum, notif_source = :notifSource, " +
+                "row_num = :rowNum, type_code = :typeCode, notif_type = :notifType, notif_date = :notifDate, notif_num = :notifNum, notif_source = :notifSource, " +
                 "notif_summ = :notifSumm, operation_id = :operationId, income_accrued = :incomeAccrued, income_code = :incomeCode, income_summ = :incomeSumm, " +
                 "period_prev_date = :periodPrevDate, period_prev_summ = :periodPrevSumm, period_curr_date = :periodCurrDate, " +
-                "period_curr_summ = :periodCurrSumm, modified_date = :modifiedDate, modified_by = :modifiedBy";
+                "period_curr_summ = :periodCurrSumm, modified_date = :modifiedDate, modified_by = :modifiedBy " +
+                "where id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(deductions.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1666,7 +1667,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public void updatePrepayments(List<NdflPersonPrepayment> prepayments) {
         String sql = "update " + NdflPersonPrepayment.TABLE_NAME + " set " +
-                "operation_id = :operationId, summ = :summ, notif_num = :notifNum, notif_date = :notifDate, notif_source = :notifSource, modified_date = :modifiedDate, modified_by = :modifiedBy";
+                "row_num = :rowNum, operation_id = :operationId, summ = :summ, notif_num = :notifNum, notif_date = :notifDate, notif_source = :notifSource, modified_date = :modifiedDate, modified_by = :modifiedBy " +
+                "where id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(prepayments.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
