@@ -105,7 +105,7 @@ public class LockDataServiceImpl implements LockDataService {
                             if (!force && lock.getUserId() != userId) {
                                 TAUser blocker = userDao.getUser(lock.getUserId());
                                 throw new ServiceException(String.format("Невозможно удалить блокировку, так как она установлена " +
-                                        "пользователем \"%s\"(%s).", blocker.getLogin(), blocker.getId()));
+                                        "пользователем \"%s\"", blocker.getLogin()));
                             }
                             dao.unlock(key);
                         } else if (!force) {
