@@ -231,6 +231,17 @@ class Import extends AbstractScriptClass {
                     cached << ndflPersonPersistedCache
                 }
             }
+            long personRowNum = 0
+            long incomeRowNum = 0
+            long deductionRowNum = 0
+            long prepaymentRowNum = 0
+            List<NdflPerson> updateRowNumPersonList = []
+            List<NdflPersonIncome> updateRowNumIncomeList = []
+            List<NdflPersonDeduction> updateRowNumDeductionList = []
+            List<NdflPersonPrepayment> updateRowNumPrepaymentList = []
+
+            List<NdflPerson> ndflPersonsForCreate = []
+
             // Операции для добавления
             List<NdflPersonIncome> incomesForCreate = []
             List<NdflPersonDeduction> deductionsForCreate = []
@@ -241,6 +252,7 @@ class Import extends AbstractScriptClass {
             List<NdflPersonPrepayment> prepaymentsForUpdate = []
             // Ведем поиск полностью совпадающих ФЛ из ТФ и БД, сначала по хеш-коду полей, затем по equals
             for (NdflPerson ndflPerson : ndflPersons) {
+                ndflPerson.rowNum = ++personRowNum
                 if (ndflPerson.snils?.isEmpty()) ndflPerson.snils = null
                 if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
                 if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
@@ -260,6 +272,8 @@ class Import extends AbstractScriptClass {
                 for (NdflPerson persistedPerson : ndflPersonPersistedCache.get(hash)) {
                     if (personsEquals(persistedPerson, ndflPerson)) {
                         ndflPerson.id = persistedPerson.id
+                    } else {
+                        ndflPerson.id = null
                     }
                 }
                 // Флаг показывающий нужно ли ФЛ обновлять или создавать
@@ -270,6 +284,7 @@ class Import extends AbstractScriptClass {
                         // Определяем списки операций которые будут создаваться либо обновляться у ФЛ
                         int incomesCreateCount = 0
                         for (NdflPersonIncome income : ndflPerson.incomes) {
+                            income.rowNum = ++incomeRowNum
                             NdflPersonIncome persistedIncome = null
                             if (income.id != null) {
                                 persistedIncome = ndflPersonService.getIncome(income.id)
@@ -279,6 +294,7 @@ class Import extends AbstractScriptClass {
                                 incomesForCreate << income
                                 incomesCreateCount++
                             } else {
+                                updateRowNumIncomeList << income
                                 if (income.incomeCode?.isEmpty()) income.incomeCode = null
                                 if (income.incomeType?.isEmpty()) income.incomeType = null
                                 if (income.paymentNumber?.isEmpty()) income.paymentNumber = null
@@ -405,6 +421,7 @@ class Import extends AbstractScriptClass {
                         }
                         int deductionsCreateCount = 0
                         for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                            deduction.rowNum = ++deductionRowNum
                             NdflPersonDeduction persistedDeduction = null
                             if (deduction.id != null) {
                                 persistedDeduction = ndflPersonService.getDeduction(deduction.id)
@@ -414,6 +431,7 @@ class Import extends AbstractScriptClass {
                                 deductionsForCreate << deduction
                                 deductionsCreateCount++
                             } else {
+                                updateRowNumDeductionList << deduction
                                 boolean updated = false
                                 if (deduction.typeCode != persistedDeduction.typeCode) {
                                     messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, TYPE_CODE, persistedDeduction.typeCode, deduction.typeCode)
@@ -497,6 +515,7 @@ class Import extends AbstractScriptClass {
                         }
                         int prepaymentsCreateCount = 0
                         for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                            prepayment.rowNum = ++prepaymentRowNum
                             NdflPersonPrepayment persistedPrepayment = null
                             if (prepayment.id != null) {
                                 persistedPrepayment = ndflPersonService.getPrepayment(prepayment.id)
@@ -506,6 +525,7 @@ class Import extends AbstractScriptClass {
                                 prepaymentsForCreate << prepayment
                                 prepaymentsCreateCount++
                             } else {
+                                updateRowNumPrepaymentList << prepayment
                                 boolean updated = false
                                 if (prepayment.operationId != persistedPrepayment.operationId) {
                                     messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_OPERATION_ID, persistedPrepayment.operationId, prepayment.operationId)
@@ -543,17 +563,23 @@ class Import extends AbstractScriptClass {
                             messages << createNewOperationMessage(ndflPerson, "Сведения о доходах в виде авансовых платежей", prepaymentsCreateCount)
                         }
                     }
+                    updateRowNumPersonList << ndflPerson
                 } else {
                     // создаем новых физлиц
                     if (!needPersonUpdate) {
                         transformOperationId()
-                        if (!logger.containsLevel(LogLevel.ERROR)) {
-                            checkInterrupted()
-
-                            ndflPersonService.save(ndflPersons)
-                        } else {
-                            logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
+                        for (NdflPersonIncome income : ndflPerson.incomes) {
+                            income.rowNum = ++incomeRowNum
                         }
+                        for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                            deduction.rowNum = ++deductionRowNum
+                        }
+                        for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                            prepayment.rowNum = ++prepaymentRowNum
+                        }
+                        ndflPersonsForCreate << ndflPerson
+                    } else {
+                        updateRowNumPersonList << ndflPerson
                     }
                 }
             }
@@ -563,11 +589,17 @@ class Import extends AbstractScriptClass {
             ndflPersonService.updateIncomes(incomesForUpdate)
             ndflPersonService.updateDeductions(deductionsForUpdate)
             ndflPersonService.updatePrepayments(prepaymentsForUpdate)
+            ndflPersonService.save(ndflPersonsForCreate)
             logger.getEntries().addAll(messages)
+            checkPersons(ndflPersons)
+            ndflPersonService.updateNdflPersonsRowNum(updateRowNumPersonList)
+            ndflPersonService.updateIncomesRowNum(updateRowNumIncomeList)
+            ndflPersonService.updateDeductionsRowNum(updateRowNumDeductionList)
+            ndflPersonService.updatePrepaymentsRowNum(updateRowNumPrepaymentList)
         }
-
-        updatePersonsRowNum(ndflPersons)
-        checkPersons(ndflPersons)
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
+        }
     }
 
     /**
@@ -818,18 +850,20 @@ class Import extends AbstractScriptClass {
      * Ищет идентификаторы операций которые отсутствуют в налоговой форме и изменяет их
      */
     void transformOperationId() {
-        List<List<String>> operationsForSeek = operationsGrouped.keySet().collate(1000)
-        List<String> persistedOperationIdList = []
-        for (List<String> operationsPart : operationsForSeek) {
-            persistedOperationIdList.addAll(ndflPersonService.findIncomeOperationId(operationsPart))
-        }
-        Set<String> operationsForTransform = operationsGrouped.keySet()
-        operationsForTransform.removeAll(persistedOperationIdList)
-        for (String operationId : operationsForTransform) {
-            List<NdflPersonOperation> operations = operationsGrouped.get(operationId)
-            String uuid = UUID.randomUUID().toString()
-            for (NdflPersonOperation operation : operations) {
-                operation.operationId = uuid
+        if (!operationsGrouped.keySet().isEmpty()) {
+            List<List<String>> operationsForSeek = operationsGrouped.keySet().collate(1000)
+            List<String> persistedOperationIdList = []
+            for (List<String> operationsPart : operationsForSeek) {
+                persistedOperationIdList.addAll(ndflPersonService.findIncomeOperationId(operationsPart))
+            }
+            Set<String> operationsForTransform = operationsGrouped.keySet()
+            operationsForTransform.removeAll(persistedOperationIdList)
+            for (String operationId : operationsForTransform) {
+                List<NdflPersonOperation> operations = operationsGrouped.get(operationId)
+                String uuid = UUID.randomUUID().toString()
+                for (NdflPersonOperation operation : operations) {
+                    operation.operationId = uuid
+                }
             }
         }
     }
@@ -866,7 +900,7 @@ class Import extends AbstractScriptClass {
                     incomes.add(income)
                 }
             }
-            for (List<NdflPersonIncome> incomesGroup: incomesGroupedByOperationId.values()) {
+            for (List<NdflPersonIncome> incomesGroup : incomesGroupedByOperationId.values()) {
                 boolean checkPassed = isIncomeDatesInPeriod(incomesGroup)
                 allRecordsFailed &= !checkPassed
                 atLeastOneRecordFailed |= !checkPassed
@@ -1051,9 +1085,9 @@ class Import extends AbstractScriptClass {
 
     /**
      * Создает сообщение о удалении даннух у ФЛ
-     * @param ndflPerson    объект физлица
-     * @param sectionName   название раздела
-     * @param removedCount  количество удаленных записей
+     * @param ndflPerson объект физлица
+     * @param sectionName название раздела
+     * @param removedCount количество удаленных записей
      * @return запись для логгера с сообщением
      */
     LogEntry createRemoveMessage(NdflPerson ndflPerson, String sectionName, int removedCount) {
@@ -1071,8 +1105,8 @@ class Import extends AbstractScriptClass {
 
     /**
      * Создает сообщение о добавлении даннных
-     * @param ndflPerson        объект физлица
-     * @param sectionName       название раздела
+     * @param ndflPerson объект физлица
+     * @param sectionName название раздела
      * @param newOperationCount количество новых записей
      * @return запись для логгера с сообщением
      */
@@ -1091,12 +1125,12 @@ class Import extends AbstractScriptClass {
 
     /**
      * Создает сообщение об изменениии данных у физлица
-     * @param ndflPerson    объект физлица
-     * @param sectionName   название раздела
-     * @param id            иденитфикатор строки
-     * @param attrName      название изменяемой графы
-     * @param oldValue      старое значение
-     * @param newValue      новое значение
+     * @param ndflPerson объект физлица
+     * @param sectionName название раздела
+     * @param id иденитфикатор строки
+     * @param attrName название изменяемой графы
+     * @param oldValue старое значение
+     * @param newValue новое значение
      * @return запись для логгера с сообщением
      */
 

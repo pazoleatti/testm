@@ -985,22 +985,34 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testUpdateDeductions() {
-        List<NdflPersonDeduction> NdflPersonDeductionList = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(101L);
-        NdflPersonDeductionList.get(0).setModifiedBy("me");
-        NdflPersonDeductionList.get(1).setModifiedBy("me");
-        ndflPersonDao.updateDeductions(NdflPersonDeductionList);
+        List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(101L);
+        ndflPersonDeductionList.get(0).setModifiedBy("me");
+        ndflPersonDeductionList.get(1).setModifiedBy("me");
+        ndflPersonDao.updateDeductions(ndflPersonDeductionList);
         List<NdflPersonDeduction> ndflPersonDeductionListResult = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(101L);
         Assert.assertEquals(ndflPersonDeductionListResult.get(0).getModifiedBy(), "me");
     }
 
     @Test
     public void testUpdatePrepayments() {
-        List<NdflPersonPrepayment> NdflPersonPrepaymentList = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(101L);
-        NdflPersonPrepaymentList.get(0).setModifiedBy("me");
-        NdflPersonPrepaymentList.get(1).setModifiedBy("me");
-        ndflPersonDao.updatePrepayments(NdflPersonPrepaymentList);
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(101L);
+        ndflPersonPrepaymentList.get(0).setModifiedBy("me");
+        ndflPersonPrepaymentList.get(1).setModifiedBy("me");
+        ndflPersonDao.updatePrepayments(ndflPersonPrepaymentList);
         List<NdflPersonPrepayment> ndflPersonPrepaymentListResult = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(101L);
         Assert.assertEquals(ndflPersonPrepaymentListResult.get(0).getModifiedBy(), "me");
+    }
+
+    @Test
+    public void testUpdateNdflPersonsRowNum() {
+        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L));
+        for (long i = 0; i < ndflPersonList.size(); i++) {
+            ndflPersonList.get((int) i).setRowNum(i);
+        }
+        ndflPersonDao.updateNdflPersonsRowNum(ndflPersonList);
+        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L));
+        Assert.assertEquals(new Long(0), ndflPersonListResult.get(0).getRowNum());
+        Assert.assertEquals(new Long(1), ndflPersonListResult.get(1).getRowNum());
     }
 
     public static Date toDate(String dateStr) {

@@ -489,5 +489,29 @@ public interface NdflPersonService {
      * @param prepayments список объектов авансов
      */
     void updatePrepayments(List<NdflPersonPrepayment> prepayments);
+
+    /**
+     * Оюновляет номер строки у физлиц
+     * @param persons список физлиц
+     */
+    void updateNdflPersonsRowNum(List<NdflPerson> persons);
+
+    /**
+     * Обновляет номер строки у доходов
+     * @param incomes список объектов доходов
+     */
+    void updateIncomesRowNum(List<NdflPersonIncome> incomes);
+
+    /**
+     * Обновляет номер строки у вычетов
+     * @param deductions список объектов вычетов
+     */
+    void updateDeductionsRowNum(List<NdflPersonDeduction> deductions);
+
+    /**
+     * Обновляет номер строки у авансов
+     * @param prepayments список объектов авансов
+     */
+    void updatePrepaymentsRowNum (List<NdflPersonPrepayment> prepayments);
 }
 

@@ -328,4 +328,24 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public void updatePrepayments(List<NdflPersonPrepayment> prepayments) {
         ndflPersonDao.updatePrepayments(prepayments);
     }
+
+    @Override
+    public void updateNdflPersonsRowNum(List<NdflPerson> persons) {
+        ndflPersonDao.updateNdflPersonsRowNum(persons);
+    }
+
+    @Override
+    public void updateIncomesRowNum(List<NdflPersonIncome> incomes) {
+        ndflPersonDao.updateIncomesRowNum(incomes);
+    }
+
+    @Override
+    public void updateDeductionsRowNum(List<NdflPersonDeduction> deductions) {
+        ndflPersonDao.updateDeductionsRowNum(deductions);
+    }
+
+    @Override
+    public void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments) {
+        ndflPersonDao.updatePrepaymentsRowNum(prepayments);
+    }
 }

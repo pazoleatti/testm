@@ -1674,6 +1674,45 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
     }
 
+    @Override
+    public void updateNdflPersonsRowNum(List<NdflPerson> persons) {
+        String sql = "update " + NdflPerson.TABLE_NAME + " set " +
+                "row_num = :rowNum " +
+                "where id = :id";
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(persons.toArray());
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
+    }
+
+    @Override
+    public void updateIncomesRowNum(List<NdflPersonIncome> incomes) {
+        String sql = "update " + NdflPersonIncome.TABLE_NAME + " set " +
+                "row_num = :rowNum " +
+                "where id = :id";
+
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(incomes.toArray());
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
+    }
+
+    @Override
+    public void updateDeductionsRowNum(List<NdflPersonDeduction> deductions) {
+        String sql = "update " + NdflPersonDeduction.TABLE_NAME + " set " +
+                "row_num = :rowNum " +
+                "where id = :id";
+
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(deductions.toArray());
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
+    }
+
+    @Override
+    public void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments) {
+        String sql = "update " + NdflPersonPrepayment.TABLE_NAME + " set " +
+                "row_num = :rowNum, operation_id = :operationId, summ = :summ, notif_num = :notifNum, notif_date = :notifDate, notif_source = :notifSource, modified_date = :modifiedDate, modified_by = :modifiedBy " +
+                "where id = :id";
+
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(prepayments.toArray());
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
+    }
+
     private static String createColumns(String[] columns, String alias) {
         List<String> list = new ArrayList<String>();
         for (String col : columns) {
