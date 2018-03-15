@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -643,12 +642,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public String updateCommonParam(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         checkConfig(commonParam, logger);
-        configurationDao.update(commonParam);
-        String message = ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + commonParam.getDescription() + "\": " + commonParam.getValue();
-        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
-        logger.info(message);
-
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            configurationDao.update(commonParam);
+            String message = ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + commonParam.getDescription() + "\": " + commonParam.getValue();
+            auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+            logger.info(message);
+        }
         return logEntryService.save(logger.getEntries());
     }
 
@@ -709,12 +709,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param logger логгер
      */
     private void check01Value(String value, Logger logger) {
-        try {
-            Double doubleValue = new Double(value);
-            if (!Objects.equals(doubleValue, 1d) && !Objects.equals(doubleValue, 0d)) {
-                logger.error(ONLY_0_1_AVAILABLE_ERROR);
-            }
-        } catch (NumberFormatException e) {
+        if (!"0".equals(value) && !"1".equals(value)) {
             logger.error(ONLY_0_1_AVAILABLE_ERROR);
         }
     }
@@ -725,6 +720,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param value  значение параметра
      * @param logger логгер
      */
+
     private void checkLimitIdent(String value, Logger logger) {
         try {
             BigDecimal decimal = new BigDecimal(value);

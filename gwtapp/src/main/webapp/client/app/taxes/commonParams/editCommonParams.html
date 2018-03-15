@@ -1,26 +1,33 @@
-<div class="modal-body">
-    <form class="form-horizontal" role="form">
-        <div class="row-fluid form-group" style="padding: 20px; display: flex; align-items: center;">
+<form data-aplana-submit-valid="save()">
+    <div class="modal-body">
+        <div class="row-fluid" style="padding: 20px; display: flex; align-items: center;">
             <div class="span4">
                 <label class="control-label">{{parameter.description}}:</label>
             </div>
             <div class="span8">
-                <input class="form-control"
-                       data-ng-model="parameter.value"
-                       value={{parameter.value}}
-                       type="text"
-                       title="value"/>
+                <div data-aplana-field>
+                    <input
+                           data-ng-model="parameter.value"
+                           value={{parameter.value}}
+                           type="text"
+                           title="value"
+                           data-required
+                           style="width: 100%"/>
+                    <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                        translate}}
+                    </div>
+                </div>
             </div>
         </div>
-    </form>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-default iconed-btn" id="saveButton" data-ng-click="save()">
-        <span data-translate-once="button.save"></span>
-        <span class="btn-icon-ok"></span>
-    </button>
-    <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
-        <span data-translate-once="button.cancel"></span>
-        <span class="btn-icon-noneBg-close"></span>
-    </button>
-</div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton">
+            <span data-translate-once="button.save"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

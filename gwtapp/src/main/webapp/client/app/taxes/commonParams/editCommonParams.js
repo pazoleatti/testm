@@ -10,8 +10,8 @@
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$dialogs', '$logPanel',
-            function ($scope, $filter, $http, $modalInstance, parameter, $dialogs,  $logPanel) {
+        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$dialogs', '$logPanel', 'LogEntryResource', '$rootScope',
+            function ($scope, $filter, $http, $modalInstance, parameter, $dialogs,  $logPanel, LogEntryResource, $rootScope) {
 
                 /**
                  * @description Редактирование параметра
@@ -26,9 +26,17 @@
                         }
                     }).then(function (response) {
                         if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
+                            LogEntryResource.query({
+                                uuid: response.data,
+                                projection: 'count'
+                            }, function (data) {
+                                $logPanel.open('log-panel-container', response.data);
+                                if (data.ERROR + data.WARNING < 1) {
+                                    $rootScope.$broadcast("UPDATE_CONFIG_GRID_DATA");
+                                    $modalInstance.close(true);
+                                }
+                            });
                         }
-                        $modalInstance.close();
                     });
                 };
 
