@@ -59,12 +59,6 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
         }
         result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
 
-        Set<Integer> userDepIds = new HashSet<Integer>();
-        /*for (Department department : departmentService.getDepartmentForSudir()) {
-            userDepIds.add(department.getId());
-        }*/
-        result.setUserDepIds(userDepIds);
-        result.setUserDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(userDepIds).values()));
         return result;
     }
 

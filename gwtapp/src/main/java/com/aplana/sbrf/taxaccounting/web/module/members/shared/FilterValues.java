@@ -12,8 +12,6 @@ public class FilterValues implements Result {
     private List<TARole> roles;
     private List<Department> departments;
     private String roleFilter;
-    private Set<Integer> userDepIds;
-    private List<Department> userDepartments;
     private boolean canEdit = false;
 
     public List<TARole> getRoles() {
@@ -38,22 +36,6 @@ public class FilterValues implements Result {
 
     public void setRoleFilter(String roleFilter) {
         this.roleFilter = roleFilter;
-    }
-
-    public List<Department> getUserDepartments() {
-        return userDepartments;
-    }
-
-    public void setUserDepartments(List<Department> userDepartments) {
-        this.userDepartments = userDepartments;
-    }
-
-    public Set<Integer> getUserDepIds() {
-        return userDepIds;
-    }
-
-    public void setUserDepIds(Set<Integer> userDepIds) {
-        this.userDepIds = userDepIds;
     }
 
     public boolean isCanEdit() {
