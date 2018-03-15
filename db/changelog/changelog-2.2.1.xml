@@ -91,7 +91,6 @@
         </update>
     </changeSet>
 
-
     <changeSet id="2.2.1-ytrofimov-9" author="ytrofimov">
         <update tableName="BLOB_DATA">
             <column name="data"
@@ -107,4 +106,12 @@
             <where>id=14</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2.1-dnovikov-3" author="dnovikov">
+        <update tableName="ref_book">
+            <column name="is_versioned">0</column>>
+            <where>id = 951</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

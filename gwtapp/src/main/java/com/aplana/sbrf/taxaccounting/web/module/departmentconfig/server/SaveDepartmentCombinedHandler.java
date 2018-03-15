@@ -206,11 +206,12 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             RefBookRecordVersion recordVersion;
-            Date versionTo = provider.getEndVersion(record.getRecordId(), period.getCalendarStartDate());
             if (!needEdit) {
+                Date versionTo = provider.getEndVersion(record.getRecordId(), period.getCalendarStartDate());
                 List<Long> newRecordIds = provider.createRecordVersion(logger, period.getCalendarStartDate(), versionTo, Arrays.asList(record));
                 recordVersion = provider.getRecordVersionInfo(newRecordIds.get(0));
             } else {
+                Date versionTo = provider.getRecordVersionInfo(depCombined.getRecordId()).getVersionEnd();
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), versionTo, paramsMap);
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }

@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * @author vpetrov
-*/
+ */
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<DeleteDepartmentCombinedAction,
@@ -94,11 +94,11 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
             if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {
                 provider.deleteRecordVersions(logger, deleteList, false);
             } else {
-                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteList);
+                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(), -1), deleteList);
             }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                if (recordVersion.getVersionEnd()==null)
+                if (recordVersion.getVersionEnd() == null)
                     logger.info(String.format(SUCCESS_INFO_SHORT, sdf.get().format(period.getCalendarStartDate())));
                 else
                     logger.info(String.format(SUCCESS_INFO, sdf.get().format(period.getCalendarStartDate()), sdf.get().format(recordVersion.getVersionEnd())));
