@@ -615,9 +615,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             long lastindex = pagingParams.getStartIndex() + pagingParams.getCount();
             totalQuery = "select * from \n (" +
                     "select rating.*, rownum rnum from \n (" +
-                    query + ") rating where rownum < " +
+                    query + ") rating where rownum <= " +
                     lastindex +
-                    ") where rnum >= " +
+                    ") where rnum > " +
                     pagingParams.getStartIndex();
         }
         List<NdflPerson> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());

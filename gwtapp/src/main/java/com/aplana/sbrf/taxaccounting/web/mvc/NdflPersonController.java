@@ -190,7 +190,7 @@ public class NdflPersonController {
             filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, ndflPersonFilter.getDateTo());
         }
 
-        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(declarationDataId, filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount() + 1));
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(declarationDataId, filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount()));
         JqgridPagedList<NdflPerson> resultPerson = JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersons,
                 ndflPersons.getTotalCount(),
