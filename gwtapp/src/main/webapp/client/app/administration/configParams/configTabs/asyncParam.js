@@ -73,7 +73,6 @@
                                 };
                             }
                         }
-
                     }).result.then(function (resolve) {
                         if (resolve) {
                             $scope.asyncParamGrid.ctrl.refreshGrid(1);

@@ -28,7 +28,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-//TODO Необходимо организовать проверку прав доступа в ConfigurationServiceImpl, через com.aplana.sbrf.taxaccounting.permissions.Permission. https://jira.aplana.com/browse/SBRFNDFL-3173
 @Service("configurationService")
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
@@ -438,6 +437,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param model    модель с конфигурационными параметрами
      * @param userInfo информация о пользователе
      */
+    @Deprecated
     void saveAndLog(ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, TAUserInfo userInfo) {
         ConfigurationParamModel oldModel = configurationDao.fetchAllAsModel();
         Map<String, Map<String, String>> oldEmailConfigMap = new HashMap<String, Map<String, String>>();
@@ -570,11 +570,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public void setCommonParamsDefault(TAUserInfo userInfo) {
         configurationDao.update(defaultCommonParams());
-    }
-
-    @Override
-    public Configuration fetchByEnum(ConfigurationParam param) {
-        return configurationDao.fetchByEnum(param);
     }
 
     @Override

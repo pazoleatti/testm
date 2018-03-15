@@ -49,7 +49,7 @@
                 $scope.save = function () {
                     $scope.checkAccess().then(function (accept) {
                         if (accept) {
-                            if ($scope.commonParamTabActive){
+                            if ($scope.commonParamTabActive) {
                                 // активна вкладка "Общие параметры"
                                 $http({
                                     method: "POST",
@@ -62,7 +62,7 @@
                                         })
                                     }
                                 }).then(function (logger) {
-                                    if(logger.data) {
+                                    if (logger.data) {
                                         LogEntryResource.query({
                                             uuid: logger.data,
                                             projection: 'count'
@@ -75,20 +75,20 @@
                                         });
                                     }
                                 });
-                            }else if ($scope.asyncParamTabActive){
+                            } else if ($scope.asyncParamTabActive) {
                                 // активна вкладка "Параметры асинхронных задач"
                                 $http({
                                     method: "POST",
                                     url: "controller/action/configuration/asyncParam/update",
                                     params: {
-                                            asyncParam: JSON.stringify({
+                                        asyncParam: JSON.stringify({
                                             id: $scope.asyncParam.param.id,
                                             taskLimit: $scope.asyncParam.taskLimit,
                                             shortQueueLimit: $scope.asyncParam.shortQueueLimit
                                         })
                                     }
                                 }).then(function (logger) {
-                                    if(logger.data) {
+                                    if (logger.data) {
                                         LogEntryResource.query({
                                             uuid: logger.data,
                                             projection: 'count'
@@ -122,6 +122,14 @@
                 };
 
                 /**
+                 * Переопределенный метод модуля {aplana.modal}, чтобы по нажатию на крестик
+                 * выполнялась логика кнопки "Закрыть"
+                 */
+                $scope.modalCloseCallback = function () {
+                    $scope.close();
+                };
+
+                /**
                  * @description проверка доступности создания или редактирования записи
                  *
                  * @return {Promise} признак проверки (true - разрешено сохранение, false - запрещено сохранение)
@@ -141,8 +149,17 @@
                             }
                         }).then(function (logger) {
                             if (logger.data) {
-                                $logPanel.open('log-panel-container', logger.data);
-                                checkAccessQDefer.resolve(false);
+                                LogEntryResource.query({
+                                    uuid: logger.data,
+                                    projection: 'count'
+                                }, function (data) {
+                                    if ((data.ERROR + data.WARNING) > 0) {
+                                        $logPanel.open('log-panel-container', logger.data);
+                                        checkAccessQDefer.resolve(false);
+                                    } else {
+                                        checkAccessQDefer.resolve(true);
+                                    }
+                                });
                             } else {
                                 checkAccessQDefer.resolve(true);
                             }
@@ -161,7 +178,7 @@
                             return checkAccessQDefer.promise;
                         }
                         // проверка на числовое значение "Ограничение на выполнение задания в очереди быстрых заданий", отличное от 0
-                        if ($scope.asyncParam.shortQueueLimit !== "" && (isNaN(Number($scope.asyncParam.shortQueueLimit)) ||  Number($scope.asyncParam.shortQueueLimit) === 0)) {
+                        if ($scope.asyncParam.shortQueueLimit !== "" && (isNaN(Number($scope.asyncParam.shortQueueLimit)) || Number($scope.asyncParam.shortQueueLimit) === 0)) {
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.checkNumber', {
                                     taskTitle: $scope.asyncParam.param.name,
@@ -173,7 +190,7 @@
                             return checkAccessQDefer.promise;
                         }
                         // проверка, что значения параметра "Загрузка данных из файла в справочник" меньше, чем 1500000
-                        if($scope.asyncParam.param.handlerClassName === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)){
+                        if ($scope.asyncParam.param.handlerClassName === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)) {
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.tooMuch', {
                                     taskTitle: $scope.asyncParam.param.name,

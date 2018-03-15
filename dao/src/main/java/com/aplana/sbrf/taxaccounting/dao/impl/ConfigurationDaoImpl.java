@@ -27,7 +27,6 @@ import java.util.Map;
  */
 @Repository
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
-    private static final Log LOG = LogFactory.getLog(ConfigurationDaoImpl.class);
 
     class ConfigurationRowCallbackHandler implements RowCallbackHandler {
         final ConfigurationParamModel model;
@@ -89,23 +88,10 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public List<Configuration> fetchAll() {
-        return getJdbcTemplate().query("SELECT code, department_id, value FROM configuration", configurationRowMapper);
-    }
-
-    @Override
     public ConfigurationParamModel fetchAllAsModel() {
         final ConfigurationParamModel model = new ConfigurationParamModel();
         getJdbcTemplate().query("SELECT code, value, department_id FROM configuration", new ConfigurationRowCallbackHandler(model));
         return model;
-    }
-
-    @Override
-    public List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group) {
-        return getJdbcTemplate().query(
-                "select code, department_id, value from configuration where " +
-                        SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(group)),
-                configurationRowMapper);
     }
 
     @Override

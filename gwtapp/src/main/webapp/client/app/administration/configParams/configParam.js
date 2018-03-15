@@ -11,14 +11,13 @@
             'app.rest',
             'app.asyncParam',
             'app.commonParam',
-            'app.createRecordModal'
-        ])
+            'app.createRecordModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('configParam', {
                 url: '/taxes/configParam/',
                 templateUrl: 'client/app/administration/configParams/configParam.html',
                 controller: 'configParamController',
-                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource', '$rootScope',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
                         if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
                             $state.go("/");

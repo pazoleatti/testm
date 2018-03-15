@@ -23,24 +23,11 @@ public interface ConfigurationDao {
     Configuration fetchByEnum(ConfigurationParam param);
 
     /**
-     * Возвращяет список всех конфигурационных параметров
-     *
-     * @return список {@link Configuration} или пустой список
-     */
-    List<Configuration> fetchAll();
-
-    /**
      * Возвращяет все параметры в виде {@link ConfigurationParamModel}
-     */
-    ConfigurationParamModel fetchAllAsModel();
-
-    /**
-     * Возвращает список конфигурационных параметров определенных групп
      *
-     * @param group группа параметров {@link ConfigurationParamGroup}
-     * @return список параметров определенной группы или пустой список
      */
-    List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group);
+    @Deprecated
+    ConfigurationParamModel fetchAllAsModel();
 
     /**
      * Возвращяет страницу конфигурационных параметров
@@ -72,6 +59,7 @@ public interface ConfigurationDao {
      *
      * @param model модель-хранилище мапы конфигурационных параметров
      */
+    @Deprecated
     void save(ConfigurationParamModel model);
 
     /**
@@ -80,6 +68,7 @@ public interface ConfigurationDao {
      * @param configurationParamMap мапа обновляемых парметров (параметр - значение)
      * @param departmentId          идентификатор подразделения
      */
+    @Deprecated
     void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId);
 
     /**
@@ -95,7 +84,6 @@ public interface ConfigurationDao {
      * @param configurations список обновляемых параметров
      */
     void update(List<Configuration> configurations);
-
 
     /**
      * Создание нового значения для конфигураций параметров "Общие параметры"
