@@ -752,7 +752,11 @@ class Calculate extends AbstractScriptClass {
               */
                 if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
                     Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
-                    downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                    refBookPerson.setVersion(getReportPeriodStartDate())
+                    fillSystemAliases(downgradePerson, refBookPerson);
+                    updatePersonReferenceList.add(primaryPerson);
+                    updatePersonList.add(downgradePerson);
+                    continue
                 }
 
                 //person
