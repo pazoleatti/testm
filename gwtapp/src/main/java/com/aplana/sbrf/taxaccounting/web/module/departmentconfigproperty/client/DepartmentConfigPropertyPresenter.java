@@ -294,6 +294,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                     });
         } else {
             getView().setEditMode(false);
+            getView().updateVisibleEditButton();
         }
     }
 

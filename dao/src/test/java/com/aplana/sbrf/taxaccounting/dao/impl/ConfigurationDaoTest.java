@@ -43,12 +43,6 @@ public class ConfigurationDaoTest {
     }
 
     @Test
-    public void fetchAll() {
-        List<Configuration> configurations = dao.fetchAll();
-        assertTrue(configurations.size() > 0);
-    }
-
-    @Test
     public void fetchAllAsModel() {
         ConfigurationParamModel model = dao.fetchAllAsModel();
         assertEquals(9, model.size());
@@ -62,12 +56,6 @@ public class ConfigurationDaoTest {
         assertTrue(model.containsKey(ConfigurationParam.NO_CODE));
         assertTrue(model.containsKey(ConfigurationParam.SBERBANK_INN));
         assertEquals("test6", model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1).get(0));
-    }
-
-    @Test
-    public void fetchAllByGroup() {
-        List<Configuration> configurations = dao.fetchAllByGroup(ConfigurationParamGroup.COMMON);
-        assertTrue(configurations.size() > 0);
     }
 
     @Test

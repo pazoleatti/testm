@@ -38,6 +38,8 @@ import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Collections.singletonList;
+
 /**
  * Универсальный провайдер данных
  *
@@ -260,8 +262,6 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBook refBook = refBookDao.get(refBookId);
             List<RefBookAttribute> attributes = refBook.getAttributes();
             List<Long> excludedVersionEndRecords = new ArrayList<Long>();
-            //Признак того, что для проверок дата окончания была изменена (была использована дата начала следующей версии)
-            boolean dateToChangedForChecks = false;
 
             if (!refBook.isVersioned()) {
                 //Устанавливаем минимальную дату
@@ -279,31 +279,32 @@ public class RefBookUniversal implements RefBookDataProvider {
             //Проверка корректности
             checkCorrectness(logger, refBook, null, versionFrom, attributes, records);
 
-            if (!refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId())) {
-
-                if (refBook.isVersioned()) {
-                    for (RefBookRecord record : records) {
-                        //Проверка пересечения версий
-                        if (record.getRecordId() != null) {
-                            boolean needToCreateFakeVersion = crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, record.getVersionTo(), null),
+            if (refBook.isVersioned()) {
+                for (RefBookRecord record : records) {
+                    if (record.getRecordId() != null) {
+                        List<CheckCrossVersionsResult> checkCrossVersionsResults =
+                                refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, record.getVersionTo(), null);
+                        if (!refBookId.equals(RefBook.WithTable.NDFL.getRefBookId()) &&
+                                !refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId())) {
+                            //Проверка пересечения версий
+                            boolean needToCreateFakeVersion = crossVersionsProcessing(checkCrossVersionsResults,
                                     refBook, versionFrom, record.getVersionTo(), logger);
                             if (!needToCreateFakeVersion) {
                                 //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
                                 excludedVersionEndRecords.add(record.getRecordId());
+                            }
+                        } else {
+                            // для настроек подразделений только удаляем ненужные фиктивные версии (как это делается в crossVersionsProcessing)
+                            for (CheckCrossVersionsResult checkCrossVersionsResult : checkCrossVersionsResults) {
+                                if (checkCrossVersionsResult.getResult() == CrossResult.NEED_DELETE) {
+                                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, singletonList(checkCrossVersionsResult.getRecordId()), false);
+                                }
                             }
                         }
                     }
                 }
             }
 
-            //Создание настоящей и фиктивной версии
-            for (RefBookRecord record : records) {
-                if (dateToChangedForChecks) {
-                    //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
-                    record.setVersionTo(null);
-                    versionTo = null;
-                }
-            }
             return createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
         } catch (DataAccessException e) {
             throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);

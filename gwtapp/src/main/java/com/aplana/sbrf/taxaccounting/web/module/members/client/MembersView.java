@@ -422,7 +422,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
             departmentIds.add(d.getId());
         }
         departmentPicker.setAvalibleValues(values.getDepartments(), departmentIds);
-        userDepartmentPicker.setAvalibleValues(values.getUserDepartments(), values.getUserDepIds());
+        userDepartmentPicker.setAvalibleValues(values.getDepartments(), departmentIds);
         if (values.getRoleFilter() != null) {
             role.setFilter(values.getRoleFilter());
             userRole.setFilter(values.getRoleFilter());

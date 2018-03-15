@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import java.util.List;
 import java.util.Map;
@@ -96,14 +95,6 @@ public interface ConfigurationService {
     void setCommonParamsDefault(TAUserInfo userInfo);
 
     /**
-     * Возвращяет {@link Configuration} по перечислению {@link ConfigurationParam}
-     *
-     * @param param перечисление {@link ConfigurationParam}
-     * @return параметр {@link Configuration} или null, если не найден
-     */
-    Configuration fetchByEnum(ConfigurationParam param);
-
-    /**
      * Получение списка типов асинхронных задач
      *
      * @param pagingParams параметры пагинации
@@ -115,7 +106,7 @@ public interface ConfigurationService {
      * Возвращяет страницу общих конфигурационных параметров
      *
      * @param pagingParams            параметры пагинации
-     * @param configurationParamGroup
+     * @param configurationParamGroup группа параметров приложения, которые необходимо выгрузить
      * @return страница {@link Configuration}
      */
     PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup);
@@ -150,7 +141,7 @@ public interface ConfigurationService {
      * Обновление записей конфигурационных параметров
      *
      * @param commonParam конфигурационные параметры "Общие параметры"
-     * @param userInfo
+     * @param userInfo    информация о пользователе
      * @return uuid идентификатор логгера
      */
     String updateCommonParam(Configuration commonParam, TAUserInfo userInfo);
@@ -159,7 +150,7 @@ public interface ConfigurationService {
      * Обновление записей конфигурационных параметров
      *
      * @param asyncParam конфигурационные параметры "Параметры асинхронных задач"
-     * @param userInfo
+     * @param userInfo   информация о пользователе
      * @return uuid идентификатор логгера
      */
     String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo);

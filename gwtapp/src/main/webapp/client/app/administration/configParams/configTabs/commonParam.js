@@ -52,7 +52,7 @@
                  */
                 $scope.createRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('configParam.modal.createParam.title'),
+                        title: $filter('translate')('configParam.modal.createParam.title'),
                         templateUrl: 'client/app/administration/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal600',
@@ -96,7 +96,7 @@
                  */
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('configParam.modal.editParam.title'),
+                        title: $filter('translate')('configParam.modal.editParam.title'),
                         templateUrl: 'client/app/administration/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal600',
@@ -127,7 +127,7 @@
                         case APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT:
                             return PermissionChecker.check($scope.commonParamGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT) && $scope.commonParamGrid.value.length === 1;
                         case APP_CONSTANTS.CONFIGURATION_PERMISSION.REMOVE:
-                            return PermissionChecker.check($scope.commonParamGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.REMOVE) && PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG);
+                            return PermissionChecker.check($scope.commonParamGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.REMOVE);
                     }
                 };
 

@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Collections.singletonList;
+
 /**
  * User: avanteev
  */
@@ -452,11 +454,12 @@ public class RefBookHelperImpl implements RefBookHelper {
         mainConfig.put(departmentAlias, new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
 
         RefBookRecordVersion recordVersion;
-        Date versionTo = provider.getEndVersion(record.getRecordId(), rp.getCalendarStartDate());
         if (!needEdit) {
+            Date versionTo = provider.getEndVersion(record.getRecordId(), rp.getCalendarStartDate());
             record.setValues(mainConfig);
-            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), versionTo, Arrays.asList(record)).get(0);
+            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), versionTo, singletonList(record)).get(0);
         } else {
+            Date versionTo = provider.getRecordVersionInfo(uniqueRecordId).getVersionEnd();
             provider.updateRecordVersion(logger, uniqueRecordId, rp.getCalendarStartDate(), versionTo, mainConfig);
         }
         recordVersion = provider.getRecordVersionInfo(uniqueRecordId);
@@ -549,15 +552,15 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!recordsToAdd.isEmpty()) {
-                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), recordsToAdd);
+                providerSlave.createRecordVersion(logger, null, null, recordsToAdd);
             }
 
             if (!toUpdate.isEmpty()) {
-                providerSlave.updateRecordVersions(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), toUpdate);
+                providerSlave.updateRecordVersions(logger, null, null, toUpdate);
             }
 
             if (!deleteIds.isEmpty()) {
-                providerSlave.deleteRecordVersions(logger, deleteIds);
+                providerSlave.deleteAllRecords(logger, deleteIds);
             }
         }
         return recordVersion;

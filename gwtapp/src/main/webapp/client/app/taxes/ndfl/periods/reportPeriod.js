@@ -198,7 +198,7 @@
                  */
                 $scope.openPeriod = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('reportPeriod.pils.openPeriod'),
+                        title: $filter('translate')('reportPeriod.pils.openPeriod'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html?v=${buildUuid}',
                         controller: 'reportPeriodCtrlModal',
                         windowClass: 'modal600',
@@ -222,7 +222,7 @@
                  */
                 $scope.editPeriod = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('reportPeriod.pils.editPeriod'),
+                        title: $filter('translate')('reportPeriod.pils.editPeriod'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html?v=${buildUuid}',
                         controller: 'reportPeriodCtrlModal',
                         windowClass: 'modal600',

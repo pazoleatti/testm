@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Collections.singletonList;
+
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteConfigPropertyAction, DeleteConfigPropertyResult> {
@@ -68,9 +70,6 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
             logger.setTaUserInfo(securityService.currentUserInfo());
 
             RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(action.getRecordId());
-            List<Long> deleteList = new ArrayList<Long>();
-            List<Long> deleteSlaveList = new ArrayList<Long>();
-            deleteList.add(recordVersion.getRecordId());
 
             RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
             String filterSlave = "LINK  = " + recordVersion.getRecordId();
@@ -78,20 +77,23 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
                 filterSlave = "REF_BOOK_NDFL_ID = " + recordVersion.getRecordId();
             }
 
-            PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate(), null, filterSlave, null);
+            PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(null, null, filterSlave, null);
 
+            List<Long> deleteList = new ArrayList<Long>(singletonList(recordVersion.getRecordId()));
+            List<Long> deleteSlaveList = new ArrayList<Long>();
             for (Map<String, RefBookValue> r : paramsSlave) {
                 deleteSlaveList.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             }
 
             if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {
+                // если настройки действуют на текущий период, то удалем настройку и связанные записи
                 if (!deleteSlaveList.isEmpty()) {
-                    providerSlave.deleteRecordVersions(logger, deleteSlaveList, false);
+                    providerSlave.deleteAllRecords(logger, deleteSlaveList);
                 }
                 provider.deleteRecordVersions(logger, deleteList, false);
             } else {
-                providerSlave.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteSlaveList);
-                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteList);
+                // если настройки действуют с предыдущего периода, то просто закрываем версию
+                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-1), deleteList);
             }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
