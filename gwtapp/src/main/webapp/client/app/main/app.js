@@ -527,7 +527,7 @@
         "reportPeriod.error.deletePeriod.text": "Удаление периода невозможно!",
 
 
-        "ndflFL.title.numberpp": "№п/п\n Гр. 1",
+        "ndflFL.title.numberpp": "№ п/п\n Гр. 1",
         "ndflFL.title.inp": "ИНП\n Гр. 2",
         "ndflFL.title.lastName": "Фамилия\n Гр. 3",
         "ndflFL.title.firstName": "Имя\n Гр. 4",
@@ -535,7 +535,7 @@
         "ndflFL.title.dateOfBirth": "Дата рождения\n Гр. 6",
         "ndflFL.title.citizenship": "Гражданство (код страны) \n Гр. 7",
         "ndflFL.title.innNp": "ИНН РФ\n Гр. 8",
-        "ndflFL.title.innForeign": "ИНН Ино\n Гр. 9",
+        "ndflFL.title.innForeign": "ИНН ИНО\n Гр. 9",
         "ndflFL.title.codeDul": "ДУЛ Код\n Гр. 10",
         "ndflFL.title.numberDul": "ДУЛ Номер\n Гр. 11",
         "ndflFL.title.statusCode": "Статус (код)\n Гр. 12",
@@ -553,7 +553,7 @@
         "ndflFL.title.modifiedDate": "Дата и время редактирования\n Гр. 24",
         "ndflFL.title.modifiedBy": "Обновил\n Гр. 25",
 
-        "incomesAndTax.title.numberpp": "№п/п\n Гр. 1",
+        "incomesAndTax.title.numberpp": "№ п/п\n Гр. 1",
         "incomesAndTax.title.inp": "ИНП\nГр. 2",
         "incomesAndTax.title.idOperation": "ID операции\n Гр. 3",
         "incomesAndTax.title.incomeCode": "Код дохода\n Гр. 4",
@@ -615,7 +615,7 @@
         "ndlfPrepayment.edit.summ": "Сумма",
         "ndlfPrepayment.edit.validation.notifNum": "Номер уведомления должен состоять максимум из 20 символов",
 
-        "ndflDeduction.title.numberpp": "№п/п\n Гр. 1",
+        "ndflDeduction.title.numberpp": "№ п/п\n Гр. 1",
         "ndflDeduction.title.inp": "ИНП\n Гр. 2",
         "ndflDeduction.title.deductionCode": "Код вычета\n Гр. 3",
         "ndflDeduction.title.notifType": "Подтверждающий документ. Тип\n Гр. 4",
@@ -635,7 +635,7 @@
         "ndflDeduction.title.modifiedDate": "Дата и время редактирования\n Гр. 18",
         "ndflDeduction.title.modifiedBy": "Обновил\n Гр. 19",
 
-        "ndlfPrepayment.title.numberpp": "№п/п\n Гр. 1",
+        "ndlfPrepayment.title.numberpp": "№ п/п\n Гр. 1",
         "ndlfPrepayment.title.inp": "ИНП\n Гр. 2",
         "ndlfPrepayment.title.idOperation": "ID операции\n Гр. 3",
         "ndlfPrepayment.title.summ": "Сумма фиксированного авансового платежа\n Гр. 4",
