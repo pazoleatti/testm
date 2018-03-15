@@ -690,9 +690,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param logger логгер
      */
     private void checkConfig(Configuration config, Logger logger) {
-        if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.getCaption())) {
+        if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.name())) {
             checkSberbankInn(config.getValue(), logger);
-        } else if (config.getCode().equals(ConfigurationParam.NO_CODE.getCaption())) {
+        } else if (config.getCode().equals(ConfigurationParam.NO_CODE.name())) {
             checkNoCode(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.LIMIT_IDENT.name())) {
             checkLimitIdent(config.getValue(), logger);
