@@ -78,6 +78,18 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		}
 	}
 
+	private class DeclarationTemplateRowMapperLight implements RowMapper<DeclarationTemplate> {
+        @Override
+        public DeclarationTemplate mapRow(ResultSet rs, int index) throws SQLException {
+            DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+            declarationTemplate.setId(SqlUtils.getInteger(rs,"id"));
+            declarationTemplate.setName(rs.getString("name"));
+            declarationTemplate.setVersion(rs.getDate("version"));
+            declarationTemplate.setVersionEnd(rs.getDate("version_end"));
+            return declarationTemplate;
+        }
+    }
+
 	@Override
 	public List<DeclarationTemplate> listAll() {
 		try {
@@ -305,6 +317,21 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 "select DECLARATION_TEMPLATE.id from DECLARATION_TEMPLATE where status in (0,1)",
                 Integer.class
         );
+    }
+
+    @Override
+    public List<DeclarationTemplate> fetchAllByType(int declarationTypeId) {
+	    MapSqlParameterSource params = new MapSqlParameterSource();
+	    params.addValue("declarationTypeId", declarationTypeId);
+	    return getNamedParameterJdbcTemplate().query(
+	            "select id, name, version, version_end from (" +
+                        "  SELECT dt.*, " +
+                        "    lead(version) over(partition BY declaration_type_id order by version) - interval '1' DAY version_end " +
+                        "  FROM declaration_template dt " +
+                        "  where status != -1 " +
+                        ") WHERE declaration_type_id = :declarationTypeId and status = 0",
+                params,
+                new DeclarationTemplateRowMapperLight());
     }
 
     @Override

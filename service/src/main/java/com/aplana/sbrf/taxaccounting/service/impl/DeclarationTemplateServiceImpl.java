@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -239,6 +240,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             templates.add(declarationTemplateDao.get(id));
         }
         return templates;
+    }
+
+    @Override
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    public List<DeclarationTemplate> fetchAllByType(int declarationTypeId) {
+        return declarationTemplateDao.fetchAllByType(declarationTypeId);
     }
 
     @Override

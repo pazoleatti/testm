@@ -98,6 +98,14 @@ public interface DeclarationTemplateDao {
     List<Integer> listAllId();
 
     /**
+     * Возвращяет список актуальных макетов по типу макета
+     *
+     * @param declarationTypeId ид типа макета
+     * @return список DeclarationTemplate
+     */
+    List<DeclarationTemplate> fetchAllByType(int declarationTypeId);
+
+    /**
      * Получает список id версий макета по типу шаблона и статусу версии.
      *
      * @param decTypeId     вид шаблона

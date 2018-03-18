@@ -28,11 +28,11 @@
                         },
                         colNames: [
                             '',
-                            $filter('translate')('declarationTypeJournalGrid.grid.name'),
-                            $filter('translate')('declarationTypeJournalGrid.grid.versionCount')],
+                            $filter('translate')('declarationTypeJournal.grid.name'),
+                            $filter('translate')('declarationTypeJournal.grid.versionCount')],
                         colModel: [
                             {name: 'id', index: 'id', key: true, hidden: true},
-                            {name: 'name', index: 'name', width: 1000, formatter: $filter('templateLinkFormatter')},
+                            {name: 'name', index: 'name', width: 1000, formatter: $filter('templatesByTypeLinkFormatter')},
                             {name: 'versionsCount', index: 'versionsCount'}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
@@ -49,7 +49,7 @@
         /**
          * @description Формирует ссылку на версии макетов
          */
-        .filter('templateLinkFormatter', function () {
+        .filter('templatesByTypeLinkFormatter', function () {
             return function (cellValue, options) {
                 return "<a href='index.html#/administration/declarationTemplateJournal/" + options.rowId + "'>" + cellValue + "</a>";
             };

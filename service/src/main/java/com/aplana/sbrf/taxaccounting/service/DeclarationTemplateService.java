@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
- * Сервис для работы с шаблонами деклараций 
+ * Сервис для работы с шаблонами деклараций
  * @author dsultanbekov
   */
 public interface DeclarationTemplateService {
@@ -113,13 +113,23 @@ public interface DeclarationTemplateService {
 	 */
 	List<DeclarationTemplate> getByFilter(TemplateFilter filter);
 
+    /**
+     * Возвращяет список актуальных макетов по типу макета
+     *
+     * @param declarationTypeId ид типа макета
+     * @return список DeclarationTemplate
+     */
+    List<DeclarationTemplate> fetchAllByType(int declarationTypeId);
+
 	/**
 	 * Получить версии макетов деклараций с определеннным статусом
 	 *
 	 * @param formTypeId тип налоговой формы
 	 * @param status     статус версии макета НФ
 	 * @return список версий налоговых форм
+	 * @deprecated только для gwt
 	 */
+	@Deprecated
 	List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
 	/**

@@ -1,1 +1,16 @@
-todo
+<div class="flex-column">
+    <div>
+        <h1><a href="index.html#/administration/declarationTypeJournal">{{::'move_back' |
+            translate}}</a> - {{declarationType.name}}</h1>
+    </div>
+    <div id="declarationTemplateJournalGridContainer" class="container-grid box-shadow-block flex-fill">
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector="#declarationTemplateJournalGridContainer"
+             data-grid-fill-space-container-selector-top="none"
+             data-grid-options="declarationTemplateJournalGrid.options"
+             data-grid-ctrl="declarationTemplateJournalGrid.ctrl"
+             data-ng-model="declarationTemplateJournalGrid.value"
+             id="declarationTemplateJournalGrid"></div>
+    </div>
+</div>

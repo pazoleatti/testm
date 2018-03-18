@@ -338,8 +338,8 @@
         /**
          * @description Получить данные о макетах налоговых форм
          */
-        .factory('DeclarationTemplateByTypeResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/declarationTemplateByType/:declarationTypeId?projection=:projection', {}, {
+        .factory('DeclarationTemplateResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationTemplate/:id?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

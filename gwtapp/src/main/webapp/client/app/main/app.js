@@ -699,11 +699,14 @@
         "async.title.state": "Состояние",
         "async.title.stateDate": "Дата изменения состояния",
 
-        "declarationTypeJournalGrid.title": "Список макетов налоговых форм",
-        "declarationTypeJournalGrid.grid.name": "Наименование",
-        "declarationTypeJournalGrid.grid.versionCount": "Версий",
+        "declarationTypeJournal.title": "Список макетов налоговых форм",
+        "declarationTypeJournal.grid.name": "Наименование",
+        "declarationTypeJournal.grid.versionCount": "Версий",
 
-        "declarationTemplateVersionList.title": "TODO",
+        "declarationTemplateJournal.title": "Список макетов налоговых форм",
+        "declarationTemplateJournal.grid.name": "Наименование",
+        "declarationTemplateJournal.grid.versionFrom": "Начало периода актуальности",
+        "declarationTemplateJournal.grid.versionEnd": "Окончание периода актуальности",
 
         "declarationTemplate.title": "TODO",
 
@@ -793,7 +796,8 @@
             'app.configParam',
             'app.declarationTypeAssignment',
             'app.declarationTypeJournal',
-            'app.declarationTemplateJournal'
+            'app.declarationTemplateJournal',
+            'app.declarationTemplate'
         ])
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".

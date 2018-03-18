@@ -8,18 +8,46 @@ import java.util.List;
 
 /**
  * Шаблон декларации
+ *
  * @author dsultanbekov
  */
 public class DeclarationTemplate extends IdentityObject<Integer> {
-	private static final long serialVersionUID = 1L;
-
-	private DeclarationType type;
-	private Date version;
+    private static final long serialVersionUID = 1L;
+    /**
+     * Вид декларации
+     */
+    private DeclarationType type;
+    /**
+     * Дата начала актуальности макета
+     */
+    private Date version;
+    /**
+     * Дата окончания актуальности макета
+     */
+    private Date versionEnd;
+    /**
+     * Uuid на данные {@link BlobData} xsd
+     */
     private String xsdId;
+    /**
+     * Uuid на данные {@link BlobData} jrxml
+     */
     private String jrxmlBlobId;
+    /**
+     * Наименование макета
+     */
     private String name;
+    /**
+     * Скрипт макета
+     */
     private String createScript;
+    /**
+     * Статус макета
+     */
     private VersionedObjectStatus status;
+    /**
+     * Спец отчеты
+     */
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
     /**
      * Типы налоговых форм(declaration)
@@ -29,12 +57,13 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      * Вид наловой формы(declaration)
      */
     private Long declarationFormTypeId;
-
     /**
      * Файлы макета
      */
     private List<DeclarationTemplateFile> declarationTemplateFiles = new ArrayList<DeclarationTemplateFile>();
-
+    /**
+     * Список скриптов по отдельному событию
+     */
     private List<DeclarationTemplateEventScript> eventScripts = new ArrayList<DeclarationTemplateEventScript>();
 
     public String getName() {
@@ -53,57 +82,62 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
         this.status = status;
     }
 
+    public DeclarationType getType() {
+        return type;
+    }
+
+    public void setType(DeclarationType type) {
+        this.type = type;
+    }
+
     /**
-	 * Получить вид декларации
-	 * @return вид декларации
-	 */
-	public DeclarationType getType() {
-		return type;
-	}
+     * Получить название версии шаблона
+     *
+     * @return версия шаблона
+     */
+    public Date getVersion() {
+        return version;
+    }
 
-	/**
-	 * Задать вид декларации
-	 * @param type вид декларации
-	 */	
-	public void setType(DeclarationType type) {
-		this.type = type;
-	}
+    /**
+     * Задать версию шаблона
+     *
+     * @param version версия шаблона
+     */
+    public void setVersion(Date version) {
+        this.version = version;
+    }
 
-	/**
-	 * Получить название версии шаблона
-	 * @return версия шаблона
-	 */
-	public Date getVersion() {
-		return version;
-	}
+    public Date getVersionEnd() {
+        return versionEnd;
+    }
 
-	/**
-	 * Задать версию шаблона
-	 * @param version версия шаблона
-	 */
-	public void setVersion(Date version) {
-		this.version = version;
-	}
+    public void setVersionEnd(Date versionEnd) {
+        this.versionEnd = versionEnd;
+    }
 
-	/**
-	 * Получить скрипт (groovy), использующийся для формирования декларации
+    /**
+     * Получить скрипт (groovy), использующийся для формирования декларации
      * Нужно пользоваться отдельным методом дао для получения тела скрипта, иначе вернет null если не был получен
-	 * @return тело скрипта на groovy
-	 */
-	public String getCreateScript() {
-		return createScript;
-	}
+     *
+     * @return тело скрипта на groovy
+     */
+    public String getCreateScript() {
+        return createScript;
+    }
 
-	/**
-	 * Задать скрипт, использующийся для формирования декларации
-	 * @param createScript тело скрипта на groovy
-	 */
-	public void setCreateScript(String createScript) {
-		this.createScript = createScript;
-	}
+    /**
+     * Задать скрипт, использующийся для формирования декларации
+     *
+     * @param createScript тело скрипта на groovy
+     */
+    public void setCreateScript(String createScript) {
+        this.createScript = createScript;
+    }
 
     /**
      * Получить идентификатор записи с содержимым XSD файла для проверки декларации
+     *
      * @return идентификатор записи
      */
     public String getXsdId() {
@@ -119,6 +153,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
     /**
      * Получить идентификатор записи с содержимым jrxml шаблона из связанной таблицы
+     *
      * @return идентификатор записи
      */
     public String getJrxmlBlobId() {
@@ -132,34 +167,18 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
         this.jrxmlBlobId = jrxmlBlobId;
     }
 
-    /**
-     * Получить список спец отчетов
-     * @return
-     */
     public List<DeclarationSubreport> getSubreports() {
         return subreports;
     }
 
-    /**
-     * Установка набора спец отчетов
-     * @param subreports
-     */
     public void setSubreports(List<DeclarationSubreport> subreports) {
         this.subreports = subreports;
     }
 
-    /**
-     * Добавляет спец отчет
-     * @param subreport добавляемый отчет
-     */
     public void addSubreport(DeclarationSubreport subreport) {
         subreports.add(subreport);
     }
 
-    /**
-     * Удаляет спец отчет
-     * @param subreport удаляемый отчет
-     */
     public void removeSubreport(DeclarationSubreport subreport) {
         subreports.remove(subreport);
     }
