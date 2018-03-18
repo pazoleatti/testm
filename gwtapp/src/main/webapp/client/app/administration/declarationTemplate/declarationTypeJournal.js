@@ -1,0 +1,58 @@
+(function () {
+    'use strict';
+
+    /**
+     * @description Модуль для страницы "Макеты налоговых форм"
+     */
+    angular.module('app.declarationTypeJournal', ['app.rest'])
+        .config(['$stateProvider', function ($stateProvider) {
+            $stateProvider.state('declarationTypeJournal', {
+                url: '/administration/declarationTypeJournal',
+                templateUrl: 'client/app/administration/declarationTemplate/declarationTypeJournal.html?v=${buildUuid}',
+                controller: 'DeclarationTypeJournalCtrl'
+            });
+        }])
+
+        .controller('DeclarationTypeJournalCtrl', ['$scope', '$filter', 'DeclarationTypeResource', '$http', 'APP_CONSTANTS',
+            function ($scope, $filter, DeclarationTypeResource, $http, APP_CONSTANTS) {
+                $scope.declarationTypeJournalGrid = {
+                    ctrl: {},
+                    value: [],
+                    options: {
+                        datatype: "angularResource",
+                        angularResource: DeclarationTypeResource,
+                        requestParameters: function () {
+                            return {
+                                projection: 'declarationTypeJournal'
+                            };
+                        },
+                        colNames: [
+                            '',
+                            $filter('translate')('declarationTypeJournalGrid.grid.name'),
+                            $filter('translate')('declarationTypeJournalGrid.grid.versionCount')],
+                        colModel: [
+                            {name: 'id', index: 'id', key: true, hidden: true},
+                            {name: 'name', index: 'name', width: 1000, formatter: $filter('templateLinkFormatter')},
+                            {name: 'versionsCount', index: 'versionsCount'}
+                        ],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                        sortname: 'name',
+                        viewrecords: true,
+                        sortorder: "asc",
+                        hidegrid: false
+                    }
+                };
+            }
+        ])
+
+        /**
+         * @description Формирует ссылку на версии макетов
+         */
+        .filter('templateLinkFormatter', function () {
+            return function (cellValue, options) {
+                return "<a href='index.html#/administration/declarationTemplateJournal/" + options.rowId + "'>" + cellValue + "</a>";
+            };
+        })
+
+}());

@@ -25,6 +25,7 @@ public class DeclarationType implements Serializable {
 	private int id;
 	private String name;
     private VersionedObjectStatus status;
+    private Integer versionsCount;
 
     public VersionedObjectStatus getStatus() {
         return status;
@@ -66,7 +67,15 @@ public class DeclarationType implements Serializable {
         this.name = StringUtils.cleanString(name);
 	}
 
-    @Override
+	public Integer getVersionsCount() {
+		return versionsCount;
+	}
+
+	public void setVersionsCount(Integer versionsCount) {
+		this.versionsCount = versionsCount;
+	}
+
+	@Override
     public String toString() {
         return "DeclarationType{" +
                 "name='" + name + '\'' +

@@ -325,5 +325,23 @@
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
+
+        /**
+         * @description Получить данные о типах макетов налоговых форм
+         */
+        .factory('DeclarationTypeResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationType?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Получить данные о макетах налоговых форм
+         */
+        .factory('DeclarationTemplateByTypeResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationTemplateByType/:declarationTypeId?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

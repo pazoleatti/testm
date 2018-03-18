@@ -28,7 +28,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 
 	private static final Log LOG = LogFactory.getLog(DeclarationTypeDaoImpl.class);
 	
-	private static final class DeclarationTypeRowMapper implements RowMapper<DeclarationType> {
+	private static class DeclarationTypeRowMapper implements RowMapper<DeclarationType> {
 		@Override
 		public DeclarationType mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationType res = new DeclarationType();
@@ -38,6 +38,15 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 			return res;
 		}
 	}
+
+    private static class DeclarationTypeWithVersionsCountRowMapper extends DeclarationTypeRowMapper {
+        @Override
+        public DeclarationType mapRow(ResultSet rs, int index) throws SQLException {
+            DeclarationType res = super.mapRow(rs, index);
+            res.setVersionsCount(SqlUtils.getInteger(rs, "versions_count"));
+            return res;
+        }
+    }
 	
 	@Override
 	@Cacheable(CacheConstants.DECLARATION_TYPE)
@@ -71,8 +80,12 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
     }
 
 	@Override
-	public List<DeclarationType> listAll(){
-		return getJdbcTemplate().query("SELECT * FROM declaration_type where status = 0", new DeclarationTypeRowMapper());
+	public List<DeclarationType> fetchAll(){
+		return getJdbcTemplate().query(
+		        "SELECT dt.*," +
+                        "(select count(*) from declaration_template where declaration_type_id = dt.id and status in (0,1)) AS versions_count " +
+                        " FROM declaration_type dt where status = 0",
+                new DeclarationTypeWithVersionsCountRowMapper());
 	}
 
 	@Override

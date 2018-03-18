@@ -140,7 +140,7 @@
                                 name: $filter('translate')('menu.administration.settings'),
                                 subtree: [{
                                     name: $filter('translate')('menu.administration.settings.mockOfTaxForms'),
-                                    href: "Main.jsp" + $scope.gwtMode + "#!declarationTemplateList"
+                                    href: $state.href('declarationTypeJournal')
                                 }, {
                                     name: $filter('translate')('menu.administration.settings.refbooks'),
                                     href: "Main.jsp" + $scope.gwtMode + "#!refbooklistadmin"

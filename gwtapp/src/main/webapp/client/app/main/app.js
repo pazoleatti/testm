@@ -699,6 +699,13 @@
         "async.title.state": "Состояние",
         "async.title.stateDate": "Дата изменения состояния",
 
+        "declarationTypeJournalGrid.title": "Список макетов налоговых форм",
+        "declarationTypeJournalGrid.grid.name": "Наименование",
+        "declarationTypeJournalGrid.grid.versionCount": "Версий",
+
+        "declarationTemplateVersionList.title": "TODO",
+
+        "declarationTemplate.title": "TODO",
 
         "configParam.title": "Администрирование - Конфигурационные параметры",
         "configParam.confirm.rejectCreatingConfig.title": "Отмена операции создания параметра",
@@ -784,7 +791,9 @@
             'app.formatters',
             'app.reportPeriod',
             'app.configParam',
-            'app.declarationTypeAssignment'
+            'app.declarationTypeAssignment',
+            'app.declarationTypeJournal',
+            'app.declarationTemplateJournal'
         ])
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".

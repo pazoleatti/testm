@@ -12,10 +12,16 @@ import java.util.List;
  */
 public interface DeclarationTypeService {
     int save(DeclarationType type);
+
     void updateDT(DeclarationType type);
+
     DeclarationType get(int typeId);
+
     void delete(int typeId);
-    List<DeclarationType> listAll();
+
+    List<DeclarationType> fetchAll();
+
     List<DeclarationType> getByFilter(TemplateFilter filter);
-	List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds);
+
+    List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds);
 }

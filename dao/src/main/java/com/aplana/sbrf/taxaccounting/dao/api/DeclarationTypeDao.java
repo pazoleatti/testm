@@ -30,7 +30,7 @@ public interface DeclarationTypeDao {
 	 * @return список видов деклараций
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если в БД нет такой записи
 	 */
-	List<DeclarationType> listAll();
+	List<DeclarationType> fetchAll();
 
 	/**
 	 * Получить список всех видов деклараций по типу налога

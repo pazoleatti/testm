@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,8 +60,9 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     }
 
     @Override
-    public List<DeclarationType> listAll() {
-        return declarationTypeDao.listAll();
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    public List<DeclarationType> fetchAll() {
+        return declarationTypeDao.fetchAll();
     }
 
     @Override
