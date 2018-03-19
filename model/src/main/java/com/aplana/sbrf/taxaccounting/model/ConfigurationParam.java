@@ -86,6 +86,12 @@ public enum ConfigurationParam {
         return nameParamsForUser;
     }
 
+    /**
+     * Получение списка кофигурационных параметров по их принадлежносте к группе из {@link ConfigurationParamGroup}
+     *
+     * @param group группа параметров {@link ConfigurationParamGroup}
+     * @return список {@link ConfigurationParam} или пустой список
+     */
     public static List<ConfigurationParam> getParamsByGroup(ConfigurationParamGroup group){
         List<ConfigurationParam> params = new ArrayList<ConfigurationParam>();
         for (ConfigurationParam configurationParam : ConfigurationParam.values()){
