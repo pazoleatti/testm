@@ -61,11 +61,10 @@ public interface ConfigurationService {
     /**
      * Проверка доступности путей для чтения или записи в указанном параметре
      *
-     * @param userInfo информация о пользователе
-     * @param param    конфигурационный параметр
+     * @param param конфигурационный параметр
      * @return uuid идентификатор логгера
      */
-    String checkReadWriteAccess(TAUserInfo userInfo, Configuration param);
+    String checkReadWriteAccess(Configuration param);
 
     /**
      * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
@@ -154,4 +153,12 @@ public interface ConfigurationService {
      * @return uuid идентификатор логгера
      */
     String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo);
+
+    /**
+     * Проверка конфигурационного параметра на наличие ошибок
+     *
+     * @param param проверяемый параметр
+     * @return uuid идентификатор логгера
+     */
+    String checkConfigParam(Configuration param);
 }

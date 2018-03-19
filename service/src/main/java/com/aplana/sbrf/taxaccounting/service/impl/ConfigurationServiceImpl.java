@@ -265,55 +265,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public String checkReadWriteAccess(TAUserInfo userInfo, Configuration param) {
-        Logger logger = new Logger();
-        if (param == null) {
-            return null;
-        }
 
-        ConfigurationParam configParam = ConfigurationParam.getValueByCaption(param.getDescription());
-        if (configParam == null) {
-            logger.error(NO_ENUM_CONSTANT);
+    @Override
+    public String checkConfigParam(Configuration param) {
+        Logger logger = checkConfigurationParam(param);
+        if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING)) {
+            return logEntryService.save(logger.getEntries());
+        } else {
+            logger.clear();
+            logger.info("Проверка выполнена, ошибок не найдено");
             return logEntryService.save(logger.getEntries());
         }
-        Boolean isFolder = configParam.isFolder();
-        // у папок smb в конце должен быть слеш (иначе возникенет ошибка при configurationParam.isFolder() == true и configurationParam.hasReadCheck() == true)
-        if (isFolder == null) {
-            FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(param.getValue(), false);
-            if (keyResourceFolder.isFile()) {
-                isFolder = false;
-            } else if (keyResourceFolder.isDirectory()) {
-                isFolder = true;
-                param.setValue(param.getValue() + "/");
-            } else {
-                isFolder = false;
-            }
-        } else if (isFolder) {
-            param.setValue(param.getValue() + "/");
-        }
-        // Проверка значения параметра "Проверять ЭП"
-        if (configParam.equals(ConfigurationParam.SIGN_CHECK)) {
-            signCheck(param.getValue(), logger);
-        }
-        if (configParam.hasReadCheck() && (isFolder
-                && !FileWrapper.canReadFolder(param.getValue()) || !isFolder
-                && !FileWrapper.canReadFile(param.getValue()))) {
-            // Доступ на чтение
-            logger.error(READ_ERROR, param.getValue());
-        } else if (configParam.hasWriteCheck() && (isFolder
-                && !FileWrapper.canWriteFolder(param.getValue()) || !isFolder
-                && !FileWrapper.canWriteFile(param.getValue()))) {
-            // Доступ на запись
-            logger.error(WRITE_ERROR, param.getValue());
-        } else {
-            if (configParam.hasReadCheck()) {
-                logger.info(READ_INFO, param.getValue());
-            } else if (configParam.hasWriteCheck()) {
-                logger.info(WRITE_INFO, param.getValue());
-            }
-        }
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public String checkReadWriteAccess(Configuration param) {
+        Logger logger = checkConfigurationParam(param);
         return logEntryService.save(logger.getEntries());
     }
 
@@ -755,5 +723,61 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
             logger.error(INN_JUR_ERROR, inn);
         }
+    }
+
+    /**
+     * Проверяет конфигурационный параметр на наличие ошибок в значении или доступе к папке
+     *
+     * @param param конфигурационный параметр
+     * @return объект {@link Logger}
+     */
+    private Logger checkConfigurationParam(Configuration param) {
+        Logger logger = new Logger();
+        if (param == null) {
+            return logger;
+        }
+
+        ConfigurationParam configParam = ConfigurationParam.getValueByCaption(param.getDescription());
+        if (configParam == null) {
+            logger.error(NO_ENUM_CONSTANT);
+            return logger;
+        }
+        Boolean isFolder = configParam.isFolder();
+        // у папок smb в конце должен быть слеш (иначе возникенет ошибка при configurationParam.isFolder() == true и configurationParam.hasReadCheck() == true)
+        if (isFolder == null) {
+            FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(param.getValue(), false);
+            if (keyResourceFolder.isFile()) {
+                isFolder = false;
+            } else if (keyResourceFolder.isDirectory()) {
+                isFolder = true;
+                param.setValue(param.getValue() + "/");
+            } else {
+                isFolder = false;
+            }
+        } else if (isFolder) {
+            param.setValue(param.getValue() + "/");
+        }
+        // Проверка значения параметра "Проверять ЭП"
+        if (configParam.equals(ConfigurationParam.SIGN_CHECK)) {
+            signCheck(param.getValue(), logger);
+        }
+        if (configParam.hasReadCheck() && (isFolder
+                && !FileWrapper.canReadFolder(param.getValue()) || !isFolder
+                && !FileWrapper.canReadFile(param.getValue()))) {
+            // Доступ на чтение
+            logger.error(READ_ERROR, param.getValue());
+        } else if (configParam.hasWriteCheck() && (isFolder
+                && !FileWrapper.canWriteFolder(param.getValue()) || !isFolder
+                && !FileWrapper.canWriteFile(param.getValue()))) {
+            // Доступ на запись
+            logger.error(WRITE_ERROR, param.getValue());
+        } else {
+            if (configParam.hasReadCheck()) {
+                logger.info(READ_INFO, param.getValue());
+            } else if (configParam.hasWriteCheck()) {
+                logger.info(WRITE_INFO, param.getValue());
+            }
+        }
+        return logger;
     }
 }

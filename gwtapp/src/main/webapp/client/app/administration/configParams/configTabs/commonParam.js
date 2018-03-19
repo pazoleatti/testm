@@ -116,6 +116,23 @@
                     });
                 };
 
+                $scope.checkRecord = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/action/configuration/commonParam/check",
+                        params: {
+                            param: JSON.stringify({
+                                description: $scope.commonParamGrid.value[0].description,
+                                value: $scope.commonParamGrid.value[0].value
+                            })
+                        }
+                    }).then(function (logger) {
+                        if (logger.data) {
+                            $logPanel.open('log-panel-container', logger.data);
+                        }
+                    });
+                };
+
                 /**
                  * @description проверка прав для записи грида
                  * @param permission действие

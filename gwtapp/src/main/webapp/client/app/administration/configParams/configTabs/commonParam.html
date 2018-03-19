@@ -28,6 +28,14 @@
                         <span data-translate-once="configParam.button.removeRecord"></span>
                     </button>
                 </span>
+            <!-- Проверить запись -->
+            <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT)"
+                            data-ng-click="checkRecord()">
+                        <span data-translate-once="button.check"></span>
+                    </button>
+                </span>
         </div>
     </div>
 

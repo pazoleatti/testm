@@ -82,7 +82,7 @@ public class ConfigurationController {
      *
      * @return список {@link Configuration}
      */
-    @GetMapping(value = "rest/configuration/commonParam" , params = "projection=taxesCommonParam")
+    @GetMapping(value = "rest/configuration/commonParam", params = "projection=taxesCommonParam")
     public JqgridPagedList<Configuration> fetchCommonParams(@RequestParam PagingParams pagingParams) {
         PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams, ConfigurationParamGroup.COMMON_PARAM);
         setCommonConfigParamPermission(data);
@@ -112,7 +112,18 @@ public class ConfigurationController {
      */
     @PostMapping(value = "action/configuration/commonParam", params = "projection=checkReadWriteAccess")
     public String checkReadWriteAccess(@RequestParam Configuration param) {
-        return configurationService.checkReadWriteAccess(securityService.currentUserInfo(), param);
+        return configurationService.checkReadWriteAccess(param);
+    }
+
+    /**
+     * Проверка конфигурационного параметра на наличие ошибок
+     *
+     * @param param проверяемый параметр
+     * @return uuid идентификатор логгера
+     */
+    @PostMapping(value = "action/configuration/commonParam/check")
+    public String checkConfigParam(@RequestParam Configuration param) {
+        return configurationService.checkConfigParam(param);
     }
 
     /**

@@ -18,8 +18,9 @@
         /**
          * @description Контроллер для общих параметров
          */
-        .controller('commonParamsCtrl', ['$scope', 'CommonParamResource', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS', '$dialogs',
-            function ($scope, CommonParamResource, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs) {
+        .controller('commonParamsCtrl', ['$scope', 'CommonParamResource', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS',
+            '$dialogs', 'LogEntryResource', '$logPanel',
+            function ($scope, CommonParamResource, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs, LogEntryResource, $logPanel) {
 
                 /**
                  * @description Создание и заполнение грида
@@ -30,9 +31,9 @@
                     options: {
                         datatype: "angularResource",
                         angularResource: CommonParamResource,
-                        requestParameters : function () {
+                        requestParameters: function () {
                             return {
-                                 projection: 'taxesCommonParam'
+                                projection: 'taxesCommonParam'
                             };
                         },
                         height: 280,
