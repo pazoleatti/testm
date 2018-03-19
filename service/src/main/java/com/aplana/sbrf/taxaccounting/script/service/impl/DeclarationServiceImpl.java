@@ -128,9 +128,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public String getXmlData(long declarationDataId) {
+    public String getXmlData(long declarationDataId, TAUserInfo userInfo) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId, userInfo);
         if (zipXmlIn != null) {
             try {
                 zipXmlIn.getNextEntry();
@@ -145,8 +145,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public ZipInputStream getXmlStream(long declarationDataId) {
-        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+    public ZipInputStream getXmlStream(long declarationDataId, TAUserInfo userInfo) {
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId, userInfo);
         if (zipXmlIn != null) {
             try {
                 zipXmlIn.getNextEntry();
@@ -159,8 +159,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public XMLStreamReader getXmlStreamReader(long declarationDataId) {
-        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+    public XMLStreamReader getXmlStreamReader(long declarationDataId, TAUserInfo userInfo) {
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId, userInfo);
         if (zipXmlIn != null) {
             try {
                 zipXmlIn.getNextEntry();
@@ -174,8 +174,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         return null;
     }
 
-    private ZipInputStream getZipInputStream(long declarationDataId) {
-        InputStream zipXml = declarationDataService.getXmlDataAsStream(declarationDataId, taUserService.getSystemUserInfo());
+    private ZipInputStream getZipInputStream(long declarationDataId, TAUserInfo userInfo) {
+        InputStream zipXml = declarationDataService.getXmlDataAsStream(declarationDataId, userInfo);
         if (zipXml != null) {
             return new ZipInputStream(zipXml);
         }
@@ -222,8 +222,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }*/
 
     @Override
-    public String getXmlDataFileName(long declarationDataId) {
-        String fileName = declarationDataService.getXmlDataFileName(declarationDataId, taUserService.getSystemUserInfo());
+    public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
+        String fileName = declarationDataService.getXmlDataFileName(declarationDataId, userInfo);
         if (fileName != null) {
             return fileName.replace(".zip", ".xml");
         }

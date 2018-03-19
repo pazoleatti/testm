@@ -267,7 +267,7 @@ public class DeclarationTemplateController {
                     declarationTemplate.setXsdId(xsdBlobId);
                     declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
                     resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
-                    declarationTemplateService.save(declarationTemplate);
+                    declarationTemplateService.save(declarationTemplate, userInfo);
 
                     checkErrors(customLog);
                     resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));

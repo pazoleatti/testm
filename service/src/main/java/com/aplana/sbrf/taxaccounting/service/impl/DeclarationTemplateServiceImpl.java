@@ -107,13 +107,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
 	@Override
-	public int save(DeclarationTemplate declarationTemplate) {
+	public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
         if (declarationTemplate.getId() == null){
             int declarationTemplateId = declarationTemplateDao.create(declarationTemplate);
             saveDeclarationTemplateFile((long)declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
             return declarationTemplateId;
         }
-        checkScript(declarationTemplate, new Logger());
+        checkScript(declarationTemplate, new Logger(), userInfo);
         DeclarationTemplate declarationTemplateBase = declarationTemplateDao.get(declarationTemplate.getId());
         int savedId = declarationTemplateDao.save(declarationTemplate);
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().equals(declarationTemplateBase.getXsdId()))
@@ -144,7 +144,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         declarationTemplateDao.createTemplateFile(declarationTemplateId, createBlobIds);
     }
 
-    private void checkScript(DeclarationTemplate declarationTemplate, Logger logger) {
+    private void checkScript(DeclarationTemplate declarationTemplate, Logger logger, TAUserInfo userInfo) {
         if (declarationTemplate.getCreateScript() == null || declarationTemplate.getCreateScript().isEmpty())
             return;
         Logger tempLogger = new Logger();
@@ -156,7 +156,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             declaration.setDepartmentId(1);
             declaration.setState(State.CREATED);
 
-            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userService.getSystemUserInfo(), declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
+            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userInfo, declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
             if (tempLogger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceException("Обнаружены фатальные ошибки!");
             }
@@ -485,7 +485,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public void updateScript(DeclarationTemplate declarationTemplate, Logger log, TAUserInfo userInfo) {
         try {
-            checkScript(declarationTemplate, log);
+            checkScript(declarationTemplate, log, userInfo);
         } catch (ServiceLoggerException e) {
             LOG.error(e.getLocalizedMessage(), e);
             return;

@@ -80,23 +80,26 @@ public interface DeclarationService {
      * Получить данные декларации в формате законодателя (XML)
      *
      * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе
      */
     @SuppressWarnings("unused")
-    String getXmlData(long declarationDataId);
+    String getXmlData(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML) в виде потока
      *
      * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе
      */
-    ZipInputStream getXmlStream(long declarationDataId);
+    ZipInputStream getXmlStream(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML) в виде потока для чтения StAX
      *
      * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе
      */
-    XMLStreamReader getXmlStreamReader(long declarationDataId);
+    XMLStreamReader getXmlStreamReader(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Проверить существование декларации в отчетном периоде (без учета подразделения).
@@ -117,10 +120,11 @@ public interface DeclarationService {
      * Получить имя файла в формате законодателя
      *
      * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе
      * @return имя файла взятого из xml данных
      * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
      */
-    String getXmlDataFileName(long declarationDataId);
+    String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)

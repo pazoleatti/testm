@@ -79,7 +79,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     }
 
     @Override
-    public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+    public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger, TAUserInfo userInfo) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
 
         List<VersionSegment> segmentIntersections =
@@ -120,7 +120,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                                     Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
                                     cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
                                     DeclarationTemplate declarationTemplate =  createFakeTemplate(date, typeId);
-                                    declarationTemplateService.save(declarationTemplate);
+                                    declarationTemplateService.save(declarationTemplate, userInfo);
                                 }
                             }
                         }
@@ -131,7 +131,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                         if (compareResult == -2 || compareResult == -7 || compareResult == -16){
                             DeclarationTemplate formTemplate = declarationTemplateService.get(intersection.getTemplateId());
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime()));
-                            declarationTemplateService.save(formTemplate);
+                            declarationTemplateService.save(formTemplate, userInfo);
                         }
                         //Варианты 16,18a,19,20
                         else if (compareResult == 11 || compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
@@ -147,7 +147,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
             cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
             DeclarationTemplate declarationTemplate =  createFakeTemplate(date, typeId);
-            declarationTemplateService.save(declarationTemplate);
+            declarationTemplateService.save(declarationTemplate, userInfo);
         }
     }
 

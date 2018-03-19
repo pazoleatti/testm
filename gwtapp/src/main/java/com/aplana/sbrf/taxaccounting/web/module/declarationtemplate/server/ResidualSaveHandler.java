@@ -57,7 +57,7 @@ public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveActio
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getDtId());
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript((action.getDtId())));
             declarationTemplate.setJrxmlBlobId(action.getUploadUuid());
-            declarationTemplateService.save(declarationTemplate);
+            declarationTemplateService.save(declarationTemplate, securityService.currentUserInfo());
             result.setUploadUuid(declarationTemplate.getJrxmlBlobId());
         }
 

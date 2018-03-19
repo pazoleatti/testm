@@ -123,7 +123,7 @@ class Check extends AbstractScriptClass {
     def check() {
 
         ScriptUtils.checkInterrupted()
-        ZipInputStream xmlStream = declarationService.getXmlStream(declarationData.id)
+        ZipInputStream xmlStream = declarationService.getXmlStream(declarationData.id, userInfo)
 
         // Парсим xml и компонуем содержимое в группу объектов со структурой дерева из узлов и листьев
         GPathResult fileNode = new XmlSlurper().parse(xmlStream)
@@ -355,7 +355,7 @@ class Check extends AbstractScriptClass {
         def kolFl6 = 0
         def kolFl2 = 0
 
-        def ndfl6Stream = declarationService.getXmlStream(ndfl6declarationData.id)
+        def ndfl6Stream = declarationService.getXmlStream(ndfl6declarationData.id, userInfo)
         if (ndfl6Stream == null) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
             Department department = departmentService.get(departmentReportPeriod.departmentId)
@@ -395,7 +395,7 @@ class Check extends AbstractScriptClass {
         // Суммы значений всех 2-НДФЛ сравниваются с одним 6-НДФЛ
         ndfl2declarationDataList.id.each { ndfl2DeclarationDataId ->
             ScriptUtils.checkInterrupted()
-            def ndfl2Stream = declarationService.getXmlStream(ndfl2DeclarationDataId)
+            def ndfl2Stream = declarationService.getXmlStream(ndfl2DeclarationDataId, userInfo)
             def fileNode2Ndfl = new XmlSlurper().parse(ndfl2Stream);
 
             // МежДок8

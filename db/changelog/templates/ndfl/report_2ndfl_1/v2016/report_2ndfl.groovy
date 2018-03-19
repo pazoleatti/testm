@@ -2488,7 +2488,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
 
     @TypeChecked(TypeCheckingMode.SKIP)
     List searchData(def params, pageSize, PrepareSpecificReportResult prepareSpecificReportResult) {
-        def xmlStr = declarationService.getXmlData(declarationData.id)
+        def xmlStr = declarationService.getXmlData(declarationData.id, userInfo)
         def Файл = new XmlSlurper().parseText(xmlStr)
         def docs = []
         Файл.Документ.each { doc ->
@@ -2561,7 +2561,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         subReportViewParams.put('Дата рождения', row.birthDay ? row.birthDay.toString() : "")
         subReportViewParams.put('№ ДУЛ', row.idDocNumber.toString())
 
-        def xmlStr = declarationService.getXmlData(declarationData.id)
+        def xmlStr = declarationService.getXmlData(declarationData.id, userInfo)
         def Файл = new XmlSlurper().parseText(xmlStr)
         long xmlPartNumber = 1 + (long) ((new Long(Файл.Документ.find { doc -> true }.@НомСпр.text())) / NUMBER_OF_PERSONS)
 
@@ -2585,7 +2585,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         def params = new HashMap<String, Object>()
         params.put("declarationId", declarationData.getId());
 
-        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id));
+        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id, userInfo));
 
         StringBuilder fileName = new StringBuilder("Реестр_справок_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
         exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
@@ -2617,7 +2617,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
  */
     @TypeChecked(TypeCheckingMode.SKIP)
     def filterData(params) {
-        def xml = declarationService.getXmlData(declarationData.id)
+        def xml = declarationService.getXmlData(declarationData.id, userInfo)
         def Файл = new XmlParser().parseText(xml)
         Файл.Документ.each { doc ->
             if (doc.@НомСпр != params.pNumSpravka) {

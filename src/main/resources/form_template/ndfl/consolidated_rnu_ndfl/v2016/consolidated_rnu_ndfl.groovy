@@ -664,7 +664,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         def params = new HashMap<String, Object>()
         params.put("declarationId", declarationData.getId());
 
-        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id));
+        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id, userInfo));
 
         StringBuilder fileName = new StringBuilder("Реестр_загруженных_данных_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
         exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());

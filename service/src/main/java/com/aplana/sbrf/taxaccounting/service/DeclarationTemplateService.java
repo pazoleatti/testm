@@ -31,11 +31,12 @@ public interface DeclarationTemplateService {
 	 * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
 	 * Производится очистка blob_data, в случае если значение идентификаторов было измененно по сравнению с базой.
 	 *
-	 * @param declarationTemplate объект шаблона декларации
+	 * @param declarationTemplate 	объект шаблона декларации
+	 * @param userInfo				информация о пользователе
 	 * @return идентификатор сохранённой записи в БД
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав на изменение шаблона декларации
 	 */
-	int save(DeclarationTemplate declarationTemplate);
+	int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo);
 
 	/**
 	 * Изменение информации о версиях шаблонов

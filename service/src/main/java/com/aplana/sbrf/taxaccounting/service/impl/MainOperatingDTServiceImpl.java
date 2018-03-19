@@ -75,7 +75,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 || (dbVersionEndDate == null && templateActualEndDate != null)
                 || (dbVersionEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) != 0) ){
             versionOperatingService.isIntersectionVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
-                    declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+                    declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger, user);
             checkError(logger, SAVE_MESSAGE);
             //Выполенение шага 5.А.1.1
             Pair<Date, Date> beginRange = null;
@@ -115,10 +115,10 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
         for (long declarationId : ddIds) {
             // Отменяем задачи формирования спец отчетов/удаляем спец отчеты
-            declarationDataService.interruptAsyncTask(declarationId, userService.getSystemUserInfo(), AsyncTaskType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
+            declarationDataService.interruptAsyncTask(declarationId, user, AsyncTaskType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
         }
 
-        declarationTemplateService.save(declarationTemplate);
+        declarationTemplateService.save(declarationTemplate, user);
         logger.info("Изменения сохранены");
         int id = declarationTemplate.getId();
 
@@ -147,10 +147,10 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         type.setName(declarationTemplate.getName() != null && !declarationTemplate.getName().isEmpty()?declarationTemplate.getName():"");
         int formTypeId = declarationTypeService.save(type);
         declarationTemplate.getType().setId(formTypeId);
-        versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger);
+        versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger, user);
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        int id = declarationTemplateService.save(declarationTemplate);
+        int id = declarationTemplateService.save(declarationTemplate, user);
         declarationTemplateService.createChecks(checks, id);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
@@ -167,9 +167,9 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),
-                declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+                declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger, user);
         checkError(logger, SAVE_MESSAGE);
-        int id = declarationTemplateService.save(declarationTemplate);
+        int id = declarationTemplateService.save(declarationTemplate, user);
         declarationTemplateService.createChecks(checks, id);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),

@@ -132,4 +132,41 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.1-ytrofimov-13" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-14" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-15" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id in (102, 104)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-16" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
+            <where>id in (8, 12)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-17" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
+            <where>id=10</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

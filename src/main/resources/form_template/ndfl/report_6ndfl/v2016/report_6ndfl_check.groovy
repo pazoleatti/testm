@@ -88,7 +88,7 @@ class Check extends AbstractScriptClass {
         def msgError = "В форме \"%s\" КПП: \"%s\" ОКТМО: \"%s\" "
         msgError = sprintf(msgError, FORM_NAME_NDFL6, declarationData.kpp, declarationData.oktmo)
 
-        def ndfl6Stream = declarationService.getXmlStream(declarationData.id)
+        def ndfl6Stream = declarationService.getXmlStream(declarationData.id, userInfo)
         def fileNode = new XmlSlurper().parse(ndfl6Stream);
 
         // ВнДок2 Расчет погрешности
@@ -201,7 +201,7 @@ class Check extends AbstractScriptClass {
         def kolFl6 = 0
         def kolFl2 = 0
 
-        def ndfl6Stream = declarationService.getXmlStream(declarationData.id)
+        def ndfl6Stream = declarationService.getXmlStream(declarationData.id, userInfo)
         def fileNode6Ndfl = new XmlSlurper().parse(ndfl6Stream);
         def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
         sumStavkaNodes6.each { sumStavkaNode6 ->
@@ -235,7 +235,7 @@ class Check extends AbstractScriptClass {
         // Суммы значений всех 2-НДФЛ сравниваются с одним 6-НДФЛ
         for (def ndfl2DeclarationDataId : ndfl2DeclarationDataIds) {
             ScriptUtils.checkInterrupted()
-            def ndfl2Stream = declarationService.getXmlStream(ndfl2DeclarationDataId)
+            def ndfl2Stream = declarationService.getXmlStream(ndfl2DeclarationDataId, userInfo)
             if (ndfl2Stream == null) {
                 DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
                 Department department = departmentService.get(departmentReportPeriod.departmentId)
