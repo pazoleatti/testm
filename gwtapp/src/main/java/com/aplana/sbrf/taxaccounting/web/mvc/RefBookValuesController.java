@@ -23,25 +23,28 @@ import java.util.List;
  */
 @RestController
 public class RefBookValuesController {
-    final private RefBookAttachFileTypeService refBookAttachFileTypeService;
+    private final RefBookAttachFileTypeService refBookAttachFileTypeService;
 
-    final private RefBookAsnuService refBookAsnuService;
+    private final RefBookAsnuService refBookAsnuService;
 
-    final private RefBookDeclarationTypeService refBookDeclarationTypeService;
+    private final RefBookDeclarationTypeService refBookDeclarationTypeService;
 
-    final private RefBookDepartmentDataService refBookDepartmentDataService;
+    private final RefBookDepartmentDataService refBookDepartmentDataService;
 
-    final private PeriodService periodService;
+    private final PeriodService periodService;
 
-    final private SecurityService securityService;
+    private final SecurityService securityService;
 
-    final private RefBookOktmoService oktmoService;
+    private final RefBookOktmoService oktmoService;
 
-    final private DepartmentService departmentService;
+    private final DepartmentService departmentService;
+    
+    private final RefBookFormTypeService refBookFormTypeService;
 
     public RefBookValuesController(RefBookAttachFileTypeService refBookAttachFileTypeService, RefBookAsnuService refBookAsnuService,
                                    RefBookDeclarationTypeService refBookDeclarationTypeService, RefBookDepartmentDataService refBookDepartmentDataService,
-                                   PeriodService periodService, SecurityService securityService, DepartmentService departmentService, RefBookOktmoService oktmoService) {
+                                   PeriodService periodService, SecurityService securityService, DepartmentService departmentService, RefBookOktmoService oktmoService,
+                                   RefBookFormTypeService refBookFormTypeService) {
         this.refBookAttachFileTypeService = refBookAttachFileTypeService;
         this.refBookAsnuService = refBookAsnuService;
         this.refBookDeclarationTypeService = refBookDeclarationTypeService;
@@ -50,6 +53,7 @@ public class RefBookValuesController {
         this.securityService = securityService;
         this.departmentService = departmentService;
         this.oktmoService = oktmoService;
+        this.refBookFormTypeService = refBookFormTypeService;
     }
 
     /**
@@ -169,8 +173,8 @@ public class RefBookValuesController {
     /**
      * Получение всех значений справочника ОКТМО
      *
-     * @param name              Параметр фильтрации названию и коду
-     * @param pagingParams      Параметры пейджинга
+     * @param name         Параметр фильтрации названию и коду
+     * @param pagingParams Параметры пейджинга
      * @return Значения справочника
      */
     @GetMapping(value = "/rest/refBookValues/96")
@@ -182,7 +186,7 @@ public class RefBookValuesController {
     /**
      * Получение одной записи из справочника ОКТМО по ее коду
      *
-     * @param code              код записи
+     * @param code код записи
      * @return Значения справочника
      */
     @GetMapping(value = "/rest/refBookValues/oktmoByCode")
@@ -214,10 +218,19 @@ public class RefBookValuesController {
 
     /**
      * Получения подразделения с типом {@link DepartmentType}.ROOT_BANK
+     *
      * @return Объект ПАО "Сбербанк России"
      */
     @GetMapping(value = "rest/getBankDepartment")
-    public Department getBankDepartment(){
+    public Department getBankDepartment() {
         return departmentService.getBankDepartment();
+    }
+
+    /**
+     * Получение всех значений справочника Виды налоговых форм (931)
+     */
+    @GetMapping(value = "/rest/refBookValues/931")
+    public List<RefBookFormType> fetchAllFormType() {
+        return refBookFormTypeService.fetchAll();
     }
 }

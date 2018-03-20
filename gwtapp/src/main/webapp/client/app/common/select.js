@@ -524,5 +524,21 @@
                     }, "oktmoFormatter");
                 };
             }
+        ])
+
+        /**
+         * Контроллер для выбора типов налоговых форм
+         */
+        .controller('SelectFormTypeCtrl', ['$scope', 'GetSelectOption', 'RefBookValuesResource', 'APP_CONSTANTS',
+            function ($scope, GetSelectOption, RefBookValuesResource, APP_CONSTANTS) {
+                $scope.formTypeSelect = {};
+
+                $scope.initSelectWithAllFormTypes = function () {
+                    $scope.formTypeSelect = GetSelectOption.getBasicSingleSelectOptions();
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_DATA_TYPE_REF_BOOK}, function (data) {
+                        $scope.formTypeSelect.options.data.results = data;
+                    });
+                };
+            }
         ]);
 }());

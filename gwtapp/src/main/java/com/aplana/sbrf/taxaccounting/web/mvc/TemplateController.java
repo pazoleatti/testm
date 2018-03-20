@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateCheck;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
@@ -75,5 +76,14 @@ public class TemplateController {
     @GetMapping(value = "/rest/declarationTemplate/{id}", params = "projection=fetchOne")
     public DeclarationTemplate fetchDeclarationTemplate(@PathVariable int id) {
         return declarationTemplateService.get(id);
+    }
+
+    /**
+     * Возвращяет данные о фатальности проверок по макету
+     */
+    @GetMapping(value = "/rest/declarationTemplate", params = "projection=fetchChecks")
+    public List<DeclarationTemplateCheck> fetchChecksByTemplateId(@RequestParam int declarationTypeId,
+                                                                  @RequestParam(required = false) Integer declarationTemplateId) {
+        return declarationTemplateService.getChecks(declarationTypeId, declarationTemplateId);
     }
 }
