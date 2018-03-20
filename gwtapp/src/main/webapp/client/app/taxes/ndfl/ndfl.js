@@ -206,7 +206,7 @@
                 $scope.searchFilter = {
                     ajaxFilter: [],
                     params: {},
-                    filterName: 'ndflFilter'
+                    filterName: 'ndflFilterForDec' + $stateParams.declarationDataId
                 };
 
                 /**
