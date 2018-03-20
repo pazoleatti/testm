@@ -320,6 +320,8 @@
         "title.paymentNumber": "Номер платежного поручения",
         "title.taxSumm": "Сумма платежного поручения",
         "title.confirm": "Подтверждение",
+        "title.taxTransferDateZeroDate": "1901-01-01",
+        "title.taxTransferDateZeroString": "00.00.0000",
         "title.deleteDeclaration": "Вы уверены, что хотите удалить форму?",
         "title.deleteDeclarations": "Вы уверены, что хотите удалить формы?",
         "title.importDeclaration.confirm": "Запуск операции приведет к изменению текущих данных формы. Продолжить?",
