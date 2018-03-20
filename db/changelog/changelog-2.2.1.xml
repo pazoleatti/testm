@@ -169,4 +169,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.1-ytrofimov-18" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/NO_NDFL6_1_152_00_05_02_02.xsd"/>
+            <column name="name" value="NO_NDFL6_1_152_00_05_02_02.xsd"/>
+            <where>id in (select dt.xsd from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

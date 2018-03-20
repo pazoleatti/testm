@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<!-- edited with XMLSpy v2006 rel. 3 U (http://www.altova.com) by 1 (GNIVC FNS RF) -->
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by VI (GNIVC FNS RF) -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:sch="http://purl.oclc.org/dsdl/schematron" xmlns:usch="http://www.unisoftware.ru/schematron-extensions" xmlns:sql="urn:schemas-microsoft-com:mapping-schema" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:element name="Файл">
 		<xs:annotation>
@@ -7,7 +7,7 @@
 			<xs:appinfo>
 				<sch:pattern name="Проверка имени файла на соответствие значению атрибута @ИдФайл">
 					<sch:rule context="Файл">
-						<!--  Табл.4.1. Проверка имени файла на соответствие ИдФайл  -->
+						<!--  1. Проверка имени файла на соответствие ИдФайл  -->
 						<sch:assert test="usch:getFileName() = @ИдФайл">
 							<usch:error code="0400400007" path="@ИдФайл" value-of-select="@ИдФайл" doc-id-path="usch:getFileName()" doc-id-caption="Файл">Имя файла обмена "<usch:value-of select="usch:getFileName()"/>" не совпадает со значением элемента ИдФайл "<usch:value-of select="@ИдФайл"/>"</usch:error>
 						</sch:assert>
@@ -25,7 +25,7 @@
 						<xs:appinfo>
 							<sch:pattern name="Присутствие ФИО (руководителя организации / представителя)  в  зависимости  от  значения  ПрПодп и наличия НПЮЛ">
 								<sch:rule context="Документ">
-									<!-- Табл.4.7. Контроль  обязательности  присутствия  ФИО (руководителя организации / представителя)  в  зависимости  от  значения  ПрПодп и наличия НПЮЛ -->
+									<!-- 2. Контроль  обязательности  присутствия  ФИО (руководителя организации / представителя)  в  зависимости  от  значения  ПрПодп и наличия НПЮЛ -->
 									<sch:assert test=" (Подписант/ФИО and Подписант/@ПрПодп=2) or (Подписант/ФИО and Подписант/@ПрПодп=1 and СвНП/НПЮЛ) or 		( ( (Подписант/ФИО) or  not(Подписант/ФИО) )  and Подписант/@ПрПодп=1 and СвНП/НПФЛ) ">
 										<usch:error code="0400300003" path="Подписант/ФИО" value-of-select="Подписант/@ПрПодп"> Не выполнено условие присутствия (отсутствия) элемента Файл/Документ/Подписант/ФИО при значении элемента ПрПодп, равном "<usch:value-of select="Подписант/@ПрПодп"/>". </usch:error>
 									</sch:assert>
@@ -48,6 +48,63 @@
 												<xs:documentation>Налоговый агент - организация</xs:documentation>
 											</xs:annotation>
 											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="СвРеоргЮЛ" minOccurs="0">
+														<xs:annotation>
+															<!---*********************************************************************************************************************************-->
+															<xs:appinfo>
+																<sch:pattern name="Присутствие атрибутов ИННЮЛ и КПП">
+																	<sch:rule context="СвРеоргЮЛ">
+																		<!-- 7. Контроль  обязательности  присутствия  атрибутов  ИННЮЛ  и  КПП  в  зависимости  от  значения  атрибута  ФормРеорг       -->
+																		<sch:assert test=" (count(@ИННЮЛ)!=0 and @ФормРеорг!=0) or (count(@ИННЮЛ)=0 and @ФормРеорг=0)  ">
+																			<usch:error code="0400300003" path="@ИННЮЛ" value-of-select="@ФормРеорг">Не выполнено условие присутствия элемента Файл/Документ/СвНП/НПЮЛ/СвРеоргЮЛ/ИННЮЛ при значении элемента ФормРеорг, равном "<usch:value-of select="@ФормРеорг"/>".</usch:error>
+																		</sch:assert>
+																		<sch:assert test=" (count(@КПП)!=0 and @ФормРеорг!=0) or (count(@КПП)=0 and @ФормРеорг=0)  ">
+																			<usch:error code="0400300003" path="@КПП" value-of-select="@ФормРеорг">Не выполнено условие присутствия элемента Файл/Документ/СвНП/НПЮЛ/СвРеоргЮЛ/@КПП при значении элемента ФормРеорг, равном "<usch:value-of select="@ФормРеорг"/>".</usch:error>
+																		</sch:assert>
+																	</sch:rule>
+																</sch:pattern>
+															</xs:appinfo>
+															<!---*********************************************************************************************************************************-->
+															<xs:documentation>Сведения о реорганизованной организации</xs:documentation>
+														</xs:annotation>
+														<xs:complexType>
+															<xs:attribute name="ФормРеорг" use="required">
+																<xs:annotation>
+																	<xs:documentation>Код формы реорганизации</xs:documentation>
+																	<xs:documentation>Принимает значение:
+0 – ликвидация   | 
+1 – преобразование   | 
+2 – слияние   | 
+3 – разделение   | 
+5 – присоединение   | 
+6 – разделение с одновременным присоединением</xs:documentation>
+																</xs:annotation>
+																<xs:simpleType>
+																	<xs:restriction base="xs:string">
+																		<xs:length value="1"/>
+																		<xs:enumeration value="1"/>
+																		<xs:enumeration value="2"/>
+																		<xs:enumeration value="3"/>
+																		<xs:enumeration value="5"/>
+																		<xs:enumeration value="6"/>
+																		<xs:enumeration value="0"/>
+																	</xs:restriction>
+																</xs:simpleType>
+															</xs:attribute>
+															<xs:attribute name="ИННЮЛ" type="ИННЮЛТип" use="optional">
+																<xs:annotation>
+																	<xs:documentation>ИНН реорганизованной организации</xs:documentation>
+																</xs:annotation>
+															</xs:attribute>
+															<xs:attribute name="КПП" type="КППТип" use="optional">
+																<xs:annotation>
+																	<xs:documentation>КПП реорганизованной организации</xs:documentation>
+																</xs:annotation>
+															</xs:attribute>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
 												<xs:attribute name="НаимОрг" use="required">
 													<xs:annotation>
 														<xs:documentation>Наименование организации</xs:documentation>
@@ -115,7 +172,7 @@
 									<xs:appinfo>
 										<sch:pattern name="Присутствие сведений о представителе">
 											<sch:rule context="Подписант">
-												<!-- Контроль  обязательности  присутствия  Сведений  о  представителе  налогоплательщика  в  зависимости  от  значения  ПрПодп  -->
+												<!-- 3. Контроль  обязательности  присутствия  Сведений  о  представителе  налогоплательщика  в  зависимости  от  значения  ПрПодп  -->
 												<sch:assert test="usch:iif(@ПрПодп=2, count(СвПред)!=0, (count(СвПред)!=0 or count(СвПред)=0))">
 													<usch:error code="0400300003" path="@ПрПодп" value-of-select="@ПрПодп">Не выполнено условие присутствия (отсутствия) элемента Файл/Документ/Подписант/СвПред при значении элемента ПрПодп, равном "<usch:value-of select="@ПрПодп"/>".</usch:error>
 												</sch:assert>
@@ -140,7 +197,7 @@
 											<xs:complexType>
 												<xs:attribute name="НаимДок" use="required">
 													<xs:annotation>
-														<xs:documentation>Наименование документа, подтверждающего полномочия представителя</xs:documentation>
+														<xs:documentation>Наименование и реквизиты документа, подтверждающего полномочия представителя налогового агента</xs:documentation>
 													</xs:annotation>
 													<xs:simpleType>
 														<xs:restriction base="xs:string">
@@ -323,6 +380,18 @@
 												<xs:sequence>
 													<xs:element name="СумДата" maxOccurs="unbounded">
 														<xs:annotation>
+															<!---*********************************************************************************************************************************************************-->
+															<xs:appinfo>
+																<sch:pattern name="Контроль значения СрокПрчслНал в зависимости от значения ДатаУдержНал">
+																	<sch:rule context="СумДата">
+																		<!-- 4. Контроль значения СрокПрчслНал в зависимости от значения ДатаУдержНал  -->
+																		<sch:assert test="usch:iif(@ДатаУдержНал='00.00.0000', @СрокПрчслНал='00.00.0000',  @СрокПрчслНал!='00.00.0000'  )">
+																			<usch:error code="0400400007" path="@СрокПрчслНал" value-of-select="@СрокПрчслНал">Не выполнено условие присутствия (отсутствия) элемента Файл/Документ/НДФЛ6/ДохНал/СумДата/СрокПрчслНал при значении элемента ДатаУдержНал, равном "<usch:value-of select="@ДатаУдержНал"/>".</usch:error>
+																		</sch:assert>
+																	</sch:rule>
+																</sch:pattern>
+															</xs:appinfo>
+															<!---*********************************************************************************************************************************************************-->
 															<xs:documentation>Сведения по суммам в зависимости от дат</xs:documentation>
 														</xs:annotation>
 														<xs:complexType>
@@ -352,7 +421,7 @@
 															</xs:attribute>
 															<xs:attribute name="СрокПрчслНал" use="required">
 																<xs:annotation>
-																	<xs:documentation>СрокПрчслНал</xs:documentation>
+																	<xs:documentation>Срок перечисления налога</xs:documentation>
 																</xs:annotation>
 																<xs:simpleType>
 																	<xs:restriction base="xs:string">
@@ -457,10 +526,13 @@
 								<xs:restriction base="xs:string">
 									<xs:length value="3"/>
 									<xs:enumeration value="120"/>
+									<xs:enumeration value="124"/>
 									<xs:enumeration value="125"/>
 									<xs:enumeration value="126"/>
-									<xs:enumeration value="212"/>
 									<xs:enumeration value="213"/>
+									<xs:enumeration value="214"/>
+									<xs:enumeration value="215"/>
+									<xs:enumeration value="216"/>
 									<xs:enumeration value="220"/>
 									<xs:enumeration value="320"/>
 									<xs:enumeration value="335"/>
@@ -565,11 +637,11 @@
 	</xs:simpleType>
 	<xs:simpleType name="КППТип">
 		<xs:annotation>
-			<xs:documentation>Код причины постановки на учет (КПП) - 5 и 6 знаки от 0-9 и A-Z</xs:documentation>
+			<xs:documentation>Код причины постановки на учет (КПП) - 5 и 6 знаки кроме 50</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:length value="9"/>
-			<xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})"/>
+			<xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-4A-Z]{1}[0-9A-Z]{1}|5[1-9A-Z]{1}|[6-9A-Z]{1}[0-9A-Z]{1})([0-9]{3})"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="КНДТип">
