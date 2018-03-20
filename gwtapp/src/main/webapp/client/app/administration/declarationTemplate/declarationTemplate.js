@@ -13,8 +13,8 @@
             });
         }])
 
-        .controller('DeclarationTemplateCtrl', ['$scope', '$filter', '$stateParams', 'DeclarationTemplateResource', '$window',
-            function ($scope, $filter, $stateParams, DeclarationTemplateResource, $window) {
+        .controller('DeclarationTemplateCtrl', ['$scope', '$filter', '$stateParams', 'DeclarationTemplateResource',
+            function ($scope, $filter, $stateParams, DeclarationTemplateResource) {
                 $scope.declarationTemplate = {formType: {}};
 
                 // Загружаем данные по макету

@@ -4,7 +4,7 @@
      * @description Модуль для работы со вкладкой "Основная информация" на форме макета
      */
     angular.module('app.templateInfoTab', [])
-        .controller('TemplateInfoTabCtrl', ['$scope', function ($scope) {
+        .controller('TemplateInfoTabCtrl', ['$scope', '$window', function ($scope, $window) {
             $scope.tab = $scope.checksTab;
 
             $scope.downloadXsdClick = function () {
