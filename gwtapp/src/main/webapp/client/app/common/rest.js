@@ -340,7 +340,8 @@
          */
         .factory('DeclarationTemplateResource', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationTemplate/:id?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
     ;

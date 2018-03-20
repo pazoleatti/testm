@@ -466,7 +466,7 @@
         "ndflJournal.grid.columnName.creationDateTime": "Дата и время создания формы",
         "ndflJournal.grid.columnName.creator": "Создал",
         "ndflJournal.table.titleYear": "Календарный год ",
-        "ndflJournal.downloadTf.error.notExist.text" : "Налоговая форма с номером = {{declarationDataId}} не существует либо была удалена. Вы будете перенаправлены на главную страницу",
+        "ndflJournal.downloadTf.error.notExist.text": "Налоговая форма с номером = {{declarationDataId}} не существует либо была удалена. Вы будете перенаправлены на главную страницу",
 
         "reportPeriod.title": "Ведение периодов",
         "reportPeriod.deadline.title": "Срок сдачи отчетности для периода: ",
@@ -708,7 +708,25 @@
         "declarationTemplateJournal.grid.versionFrom": "Начало периода актуальности",
         "declarationTemplateJournal.grid.versionEnd": "Окончание периода актуальности",
 
-        "declarationTemplate.title": "TODO",
+        "declarationTemplate.title.backLink": "Версии макета",
+        "declarationTemplate.tabs.info": "Основная информация",
+        "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
+        "declarationTemplate.tabs.info.name": "Наименование налоговой формы",
+        "declarationTemplate.tabs.info.type": "Тип налоговой формы",
+        "declarationTemplate.tabs.info.kind": "Вид налоговой формы",
+        "declarationTemplate.tabs.info.uploadXsd": "Загрузить xsd",
+        "declarationTemplate.tabs.info.downloadXsd": "Скачать xsd",
+        "declarationTemplate.tabs.info.deleteXsd": "Удалить xsd",
+        "declarationTemplate.tabs.info.uploadJrxml": "Загрузить jrxml",
+        "declarationTemplate.tabs.info.downloadJrxml": "Скачать jrxml",
+        "declarationTemplate.tabs.info.deleteJrxml": "Удалить jrxml",
+
+        "declarationTemplate.tabs.checks": "Проверки",
+        "declarationTemplate.tabs.checks.fatality": "Фатальность",
+        "declarationTemplate.tabs.checks.code": "Код",
+        "declarationTemplate.tabs.checks.type": "Тип",
+        "declarationTemplate.tabs.checks.description": "Описание",
+
 
         "configParam.title": "Администрирование - Конфигурационные параметры",
         "configParam.confirm.rejectCreatingConfig.title": "Отмена операции создания параметра",

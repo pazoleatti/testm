@@ -1,1 +1,12 @@
-todo
+<div class="flex-column">
+    <div style="margin-left: 30px; height: 40px;">
+        <a href="index.html#/administration/declarationTemplateJournal/{{declarationTemplate.type.id}}"
+           style="font-size: 14px; text-decoration: underline;">{{::'declarationTemplate.title.backLink' | translate}}</a>
+        <h3 style="display: inline-block; line-height: 20px;"> — {{declarationTemplate.name}}</h3>
+    </div>
+    <div id="template_tabs" class="flex-fill"
+         style="position: relative; background-color: white;"
+         data-aplana-tabs="templateTabsCtrl"
+         data-tab-model="templateTabs">
+    </div>
+</div>

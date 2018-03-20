@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * Типы налоговых форм(declaration)
  */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DeclarationFormKind {
     /**
      * Выходная форма

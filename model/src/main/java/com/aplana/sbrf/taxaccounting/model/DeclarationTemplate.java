@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     /**
      * Вид наловой формы(declaration)
      */
-    private Long declarationFormTypeId;
+    private RefBookFormType formType;
     /**
      * Файлы макета
      */
@@ -191,12 +192,31 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
         this.declarationFormKind = declarationFormKind;
     }
 
-    public Long getDeclarationFormTypeId() {
-        return declarationFormTypeId;
+    public RefBookFormType getFormType() {
+        return formType;
     }
 
+    public void setFormType(RefBookFormType formType) {
+        this.formType = formType;
+    }
+
+    /**
+     * @deprecated см {@link #formType}
+     */
+    @Deprecated
+    public Long getDeclarationFormTypeId() {
+        return formType != null ? formType.getId() : null;
+    }
+
+    /**
+     * @deprecated см {@link #formType}
+     */
+    @Deprecated
     public void setDeclarationFormTypeId(Long declarationFormTypeId) {
-        this.declarationFormTypeId = declarationFormTypeId;
+        if (formType == null) {
+            formType = new RefBookFormType();
+        }
+        formType.setId(declarationFormTypeId);
     }
 
     public List<DeclarationTemplateFile> getDeclarationTemplateFiles() {
