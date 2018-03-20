@@ -209,8 +209,8 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     public void updateAsyncParam(AsyncTaskTypeData asyncParam) {
         getJdbcTemplate().update("UPDATE ASYNC_TASK_TYPE SET TASK_LIMIT=?, SHORT_QUEUE_LIMIT=? WHERE ID=?",
                 new Object[]{
-                        (asyncParam.getTaskLimit() == 0 ? null : asyncParam.getTaskLimit()),
-                        (asyncParam.getShortQueueLimit() == 0 ? null : asyncParam.getShortQueueLimit()),
+                        (asyncParam.getTaskLimit()),
+                        (asyncParam.getShortQueueLimit()),
                         asyncParam.getId()
                 },
                 new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
