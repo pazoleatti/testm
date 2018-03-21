@@ -21,11 +21,11 @@ public class AsyncTaskTypeData {
     /**
      * Ограничение на выполнение задачи в очереди быстрых задач
      */
-    private long shortQueueLimit;
+    private Long shortQueueLimit;
     /**
      * Ограничение на выполнение задачи
      */
-    private long taskLimit;
+    private Long taskLimit;
 
     /**
      * Наименование вида ограничения
@@ -56,19 +56,19 @@ public class AsyncTaskTypeData {
         this.handlerClassName = handlerClassName;
     }
 
-    public long getShortQueueLimit() {
+    public Long getShortQueueLimit() {
         return shortQueueLimit;
     }
 
-    public void setShortQueueLimit(long shortQueueLimit) {
+    public void setShortQueueLimit(Long shortQueueLimit) {
         this.shortQueueLimit = shortQueueLimit;
     }
 
-    public long getTaskLimit() {
+    public Long getTaskLimit() {
         return taskLimit;
     }
 
-    public void setTaskLimit(long taskLimit) {
+    public void setTaskLimit(Long taskLimit) {
         this.taskLimit = taskLimit;
     }
 

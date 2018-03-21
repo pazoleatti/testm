@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookFormTypeDaoImpl;
 import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -69,10 +70,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             if (formKind != null) {
                 d.setDeclarationFormKind(DeclarationFormKind.fromId(formKind));
             }
-            Integer formType = SqlUtils.getInteger(rs, "form_type");
-            if (formType != null) {
-                d.setDeclarationFormTypeId(SqlUtils.getLong(rs, "form_type"));
-            }
+
+            d.setFormType(new RefBookFormTypeDaoImpl.RefBookFormTypeRowMapper("form_type_").mapRow(rs, index));
+
             d.setDeclarationTemplateFiles(getFiles(d.getId()));
             return d;
 		}
@@ -94,7 +94,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public List<DeclarationTemplate> listAll() {
 		try {
 			return getJdbcTemplate().query(
-					"select * from declaration_template",
+					"select dt.*, " +
+                            " ft.id form_type_id, ft.code form_type_code, ft.name form_type_name " +
+                            " from declaration_template dt " +
+                            " left outer join ref_book_form_type ft on ft.id = dt.form_type ",
 					new DeclarationTemplateRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
@@ -107,7 +110,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select id, name, version, declaration_type_id, xsd, jrxml, status, form_kind, form_type from declaration_template where id = ?",
+					"select dt.id, dt.name, dt.version, dt.declaration_type_id, dt.xsd, dt.jrxml, dt.status, dt.form_kind, " +
+                            "  ft.id form_type_id, ft.code form_type_code, ft.name form_type_name " +
+                            " from declaration_template dt " +
+                            " left outer join ref_book_form_type ft on ft.id = dt.form_type " +
+                            " where dt.id = ?",
 					new Object[] { declarationTemplateId },
 					new DeclarationTemplateRowMapper()
 			);

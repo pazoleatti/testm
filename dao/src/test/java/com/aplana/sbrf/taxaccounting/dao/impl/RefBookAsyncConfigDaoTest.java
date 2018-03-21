@@ -73,12 +73,12 @@ public class RefBookAsyncConfigDaoTest {
 
         assertEquals(1, asyncTaskTypeData1.getId());
         assertEquals("task1", asyncTaskTypeData1.getName());
-        assertEquals(100, asyncTaskTypeData1.getShortQueueLimit());
-        assertEquals(1000, asyncTaskTypeData1.getTaskLimit());
+        assertEquals(new Long(100), asyncTaskTypeData1.getShortQueueLimit());
+        assertEquals(new Long(1000), asyncTaskTypeData1.getTaskLimit());
 
         assertEquals(2, asyncTaskTypeData2.getId());
         assertEquals("task2", asyncTaskTypeData2.getName());
-        assertEquals(200, asyncTaskTypeData2.getShortQueueLimit());
-        assertEquals(2000, asyncTaskTypeData2.getTaskLimit());
+        assertEquals(new Long(200), asyncTaskTypeData2.getShortQueueLimit());
+        assertEquals(new Long(2000), asyncTaskTypeData2.getTaskLimit());
     }
 }

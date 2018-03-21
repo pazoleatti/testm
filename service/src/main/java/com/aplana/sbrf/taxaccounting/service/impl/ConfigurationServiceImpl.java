@@ -56,6 +56,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String SHORT_QUEUE_LIMIT = "Ограничение на выполнение задачи в очереди быстрых задач";
     private static final String LIMIT_IDENT_ERROR = "Значение параметра должно быть от \"0\" до \"1\" и иметь не более 2-х знаков после запятой";
     private static final String ONLY_0_1_AVAILABLE_ERROR = "Допустимые значения параметра \"0\" и \"1\"";
+    private static final String ASYNC_PARAM_NOT_NUMBER_ERROR = "%s: Значение параметра \"%s\" (%d) должно быть числовым (больше нуля)!";
+    private static final String ASYNC_PARAM_TOO_MUCH_VALUE_ERROR = "%s: Значение параметра \"%s\" (%d) должно быть числовым меньше или равно 1 500 000!";
+    public static final String  ASYNC_PARAM_INTERVAL_ERROR = "%s: Значение параметра \"Ограничение на выполнение задания\" (%d) " +
+            "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" (%d)";
+    private static final String UPLOAD_REFBOOK_ASYNC_TASK = "UploadRefBookAsyncTask";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -625,12 +630,24 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         AsyncTaskTypeData oldAsyncParam = asyncTaskDao.getTaskTypeData(asyncParam.getId());
+        // необходимо при проверке изменения значения, так как, если в БД значение пустое,
+        // оно выгружается как "0"
+        if (oldAsyncParam.getTaskLimit() == 0){
+            oldAsyncParam.setTaskLimit(null);
+        }
+        if (oldAsyncParam.getShortQueueLimit() == 0){
+            oldAsyncParam.setShortQueueLimit(null);
+        }
+        checkAsyncParam(asyncParam, logger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return logEntryService.save(logger.getEntries());
+        }
         configurationDao.updateAsyncParam(asyncParam);
 
         String message = ConfigurationParamGroup.ASYNC.getCaption() +
                 ". Изменён параметр \"" + ((!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
-                "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
-                (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "")));
+                "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? (asyncParam.getTaskLimit() != null ? asyncParam.getTaskLimit() : "") :
+                (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : "")));
 
         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                 userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
@@ -640,7 +657,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             message = ConfigurationParamGroup.ASYNC.getCaption() +
                     ". Изменён параметр \"" + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "") +
-                    "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "");
+                    "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : "");
 
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
@@ -649,6 +666,27 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         return logEntryService.save(logger.getEntries());
+    }
+
+    private void checkAsyncParam(AsyncTaskTypeData asyncParam, Logger logger) {
+        if (asyncParam.getTaskLimit() != null && asyncParam.getTaskLimit() < 1) {
+            logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), "Ограничение на выполнение задания", asyncParam.getTaskLimit());
+            return;
+        }
+        if (asyncParam.getShortQueueLimit()!= null && asyncParam.getShortQueueLimit() < 1) {
+            logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), "Ограничение на выполнение задания в очереди быстрых заданий", asyncParam.getShortQueueLimit());
+            return;
+        }
+        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit()!= null && asyncParam.getHandlerClassName().equals(UPLOAD_REFBOOK_ASYNC_TASK) && (asyncParam.getTaskLimit() > 1500000 || asyncParam.getShortQueueLimit() > 1500000)) {
+            logger.error(ASYNC_PARAM_TOO_MUCH_VALUE_ERROR, asyncParam.getName(),
+                    asyncParam.getTaskLimit() > 1500000 ? "Ограничение на выполнение задания" : "Ограничение на выполнение задания в очереди быстрых заданий",
+                    asyncParam.getTaskLimit() > 1500000 ? asyncParam.getTaskLimit() : asyncParam.getShortQueueLimit());
+            return;
+        }
+        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getShortQueueLimit() >= asyncParam.getTaskLimit()){
+            logger.error(ASYNC_PARAM_INTERVAL_ERROR, asyncParam.getName(), asyncParam.getTaskLimit(), asyncParam.getShortQueueLimit());
+        }
+
     }
 
     /**

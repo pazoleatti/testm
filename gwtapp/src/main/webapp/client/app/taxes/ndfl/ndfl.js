@@ -26,6 +26,12 @@
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
                 templateUrl: 'client/app/taxes/ndfl/ndfl.html?v=${buildUuid}',
                 controller: 'ndflCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                            $state.go("/");
+                        }
+                    }],
                 resolve: {
                     checkExistenceAndKind: ['$q', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
                         function ($q, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
@@ -200,7 +206,7 @@
                 $scope.searchFilter = {
                     ajaxFilter: [],
                     params: {},
-                    filterName: 'ndflFilter'
+                    filterName: 'ndflFilterForDec' + $stateParams.declarationDataId
                 };
 
                 /**
