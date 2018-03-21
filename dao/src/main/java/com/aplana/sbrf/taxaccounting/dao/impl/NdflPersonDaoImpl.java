@@ -1279,19 +1279,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> fetchNdflPeronPrepaymentByOperationList(List<String> operationId) {
-        String sql = "select distinct " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", null inp " +
-                " from NDFL_PERSON_PREPAYMENT npp join NDFL_PERSON_INCOME npi ON npi.ndfl_person_id = npp.ndfl_person_id where npi.id in (:operationId)";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("operationId", operationId);
-        try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
-        } catch (EmptyResultDataAccessException ex) {
-            return new ArrayList<NdflPersonPrepayment>();
-        }
-    }
-
-    @Override
     public NdflPersonIncome fetchOneNdflPersonIncome(long id) {
         try {
             String sql = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", null inp from NDFL_PERSON_INCOME npi " +
@@ -2022,5 +2009,35 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         getNamedParameterJdbcTemplate().update(sql, params);
 
+    }
+
+    @Override
+    public int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
+        String query = "select inp " +
+                "from ndfl_person np join ndfl_person_income npi " +
+                "on np.id = npi.ndfl_person_id " +
+                "where np.id in (:ndflPersonIdList) " +
+                "and npi.income_accrued_date between :periodStartDate and :periodEndDate " +
+                "group by np.inp";
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("ndflPersonIdList", ndflPersonIdList);
+        params.put("periodStartDate", periodStartDate);
+        params.put("periodEndDate", periodEndDate);
+        return getCount(query, params);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate) {
+        String sql = "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " from ndfl_person_prepayment npp join ndfl_person np on npp.ndfl_person_id = np.id " +
+                "where np.inp in (select np.inp from ndfl_person np join ndfl_person_income npi on np.id = npi.ndfl_person_id where npi.id in (:ndflPersonIncomeIdList) and npi.income_accrued_date between :periodStartDate and :periodEndDate) " +
+                "and npp.operation_id in (select npi.operation_id from ndfl_person_income npi where npi.id in (:ndflPersonIncomeIdList) and npi.income_accrued_date between :periodStartDate and :periodEndDate) ";
+        MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIncomeIdList", ndflPersonIncomeIdList);
+        params.addValue("periodStartDate", periodStartDate)
+                .addValue("periodEndDate", periodEndDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
     }
 }

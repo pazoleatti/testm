@@ -141,11 +141,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId) {
-        return ndflPersonDao.fetchNdflPeronPrepaymentByOperationList(operationId);
-    }
-
-    @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters) {
         return ndflPersonDao.fetchNdflPersonByParameters(declarationDataId, subreportParameters, new PagingParams());
     }
@@ -347,5 +342,15 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments) {
         ndflPersonDao.updatePrepaymentsRowNum(prepayments);
+    }
+
+    @Override
+    public int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
+        return ndflPersonDao.findInpCountForPersonsAndIncomeAccruedDatePeriod(ndflPersonIdList, periodStartDate, periodEndDate);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate) {
+        return ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(ndflPersonIncomeIdList, periodStartDate, periodEndDate);
     }
 }

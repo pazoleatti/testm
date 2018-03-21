@@ -1015,6 +1015,26 @@ public class NdflPersonDaoTest {
         Assert.assertEquals(new Long(1), ndflPersonListResult.get(1).getRowNum());
     }
 
+    @Test
+    public void testFindInpCountForPersonsAndIncomeAccruedDatePeriod() {
+        Calendar startDate = Calendar.getInstance();
+        startDate.set(2005, 0, 1);
+        Calendar endDate = Calendar.getInstance();
+        endDate.set(2005, 11, 31);
+        int result = ndflPersonDao.findInpCountForPersonsAndIncomeAccruedDatePeriod(Arrays.asList(101L, 102L), startDate.getTime(), endDate.getTime());
+        Assert.assertEquals(2, result);
+    }
+
+    @Test
+    public void testFetchPrepaymentByIncomesIdAndAccruedDate() {
+        Calendar startDate = Calendar.getInstance();
+        startDate.set(2005, 0, 1);
+        Calendar endDate = Calendar.getInstance();
+        endDate.set(2005, 11, 31);
+        List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(Arrays.asList(1036L, 1037L, 1038L), startDate.getTime(), endDate.getTime());
+        Assert.assertEquals(2, result.size());
+    }
+
     public static Date toDate(String dateStr) {
         try {
             return new SimpleDateFormat("dd.MM.yyyy").parse(dateStr);

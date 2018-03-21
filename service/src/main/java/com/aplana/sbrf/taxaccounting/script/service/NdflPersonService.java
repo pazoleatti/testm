@@ -92,14 +92,6 @@ public interface NdflPersonService {
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
 
     /**
-     * Найти авансы для определенной операции
-     *
-     * @param operationId ключ операции в БД, а не поле ид операции
-     * @return
-     */
-    List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId);
-
-    /**
      * Найти сведения о доходах
      * @param ndflPersonId
      * @return
@@ -513,5 +505,24 @@ public interface NdflPersonService {
      * @param prepayments список объектов авансов
      */
     void updatePrepaymentsRowNum (List<NdflPersonPrepayment> prepayments);
+
+    /**
+     * Найти количество ИНП по физлицам операции которых попадают в период
+     * @param ndflPersonIdList  список идентификаторов физлиц
+     * @param periodStartDate   дата начала периода
+     * @param periodEndDate     дата конца периода
+     * @return  количество найденных ИНП
+     */
+    int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate);
+
+    /**
+     * Находит авансы имеющие ИНП, ИдОперации такие же как и доходы передаваемые в {@code ndflPersonIncomeIdList} и
+     * если дата начисления дохода входит в период ограниченный параметрами {@code periodStartDate} и {@code periodEndDate}
+     * @param ndflPersonIncomeIdList    список идентификаторов доходов на основании которых будет производится выборка авансов
+     * @param periodStartDate           дата начала периода
+     * @param periodEndDate             дата окончания периода
+     * @return список объектов авансов
+     */
+    List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate);
 }
 
