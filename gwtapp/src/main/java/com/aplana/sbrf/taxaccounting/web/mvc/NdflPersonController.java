@@ -17,11 +17,13 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -183,11 +185,11 @@ public class NdflPersonController {
             filterParams.put(SubreportAliasConstants.MIDDLE_NAME, ndflPersonFilter.getMiddleName());
         }
         if (ndflPersonFilter.getDateFrom() != null) {
-            filterParams.put(SubreportAliasConstants.FROM_BIRTHDAY, ndflPersonFilter.getDateFrom());
+            filterParams.put(SubreportAliasConstants.FROM_BIRTHDAY, DateUtils.truncate(ndflPersonFilter.getDateFrom(), Calendar.DATE));
         }
 
         if (ndflPersonFilter.getDateTo() != null) {
-            filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, ndflPersonFilter.getDateTo());
+            filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, DateUtils.truncate(ndflPersonFilter.getDateTo(), Calendar.DATE));
         }
 
         PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(declarationDataId, filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount()));

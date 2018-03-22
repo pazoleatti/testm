@@ -213,7 +213,8 @@ public class DepartmentServiceImpl implements DepartmentService {
             // ТБ подразделения пользователя + все дочерние
             departments.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
             // ТБ + дочерние подразделения, для которых подразделение пользователя назначено исполнителем. Т.е сначала вверх до ТБ, а потом все дочерние
-            for (int tbId : departmentDao.getTBDepartmentIdsByDeclarationPerformer(tAUser.getDepartmentId())) {
+            List<Integer> forPerform = departmentDao.getTBDepartmentIdsByDeclarationPerformer(tAUser.getDepartmentId());
+            for (Integer tbId : forPerform) {
                 departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
             }
             retList.addAll(departments);

@@ -404,18 +404,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("performerDepartmentId", performerDepartmentId);
+        String sql = "SELECT id\n" +
+                "FROM department\n" +
+                "WHERE parent_id = 0 AND type = 2\n" +
+                "CONNECT BY id = prior parent_id START WITH id IN (\n" +
+                "  SELECT DISTINCT ddt.department_id\n" +
+                "  FROM department_declaration_type ddt\n" +
+                "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
+                "  WHERE ddtp.performer_dep_id in (\n" +
+                "    select dep_ddtp.id from department dep_ddtp connect by prior dep_ddtp.id = dep_ddtp.parent_id start with dep_ddtp.id = :performerDepartmentId\n" +
+                "  )" +
+                ")";
         try {
-            return getNamedParameterJdbcTemplate().queryForList("SELECT id\n" +
-                    "FROM department\n" +
-                    "WHERE parent_id = 0 AND type = 2\n" +
-                    "CONNECT BY id = prior parent_id START WITH id IN (\n" +
-                    "  SELECT DISTINCT ddt.department_id\n" +
-                    "  FROM department_declaration_type ddt\n" +
-                    "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
-                    "  WHERE ddtp.performer_dep_id in (\n" +
-                    "    select dep_ddtp.id from department dep_ddtp connect by prior dep_ddtp.id = dep_ddtp.parent_id start with dep_ddtp.id = :performerDepartmentId\n" +
-                    "  )" +
-                    ")", params, Integer.class);
+            return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>();
         }
