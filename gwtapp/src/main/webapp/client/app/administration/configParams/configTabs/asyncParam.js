@@ -60,10 +60,10 @@
                  */
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('configParam.modal.editParam.title'),
+                        title: $filter('translate')('configParam.modal.editParam.title'),
                         templateUrl: 'client/app/administration/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
-                        windowClass: 'modal1000',
+                        windowClass: 'modal600',
                         resolve: {
                             $shareData: function () {
                                 return {

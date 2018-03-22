@@ -62,7 +62,7 @@
                         translate}}:</label>
                 </td>
                 <td data-ng-if="asyncParam.param.name">
-                    <span data-ng-bind="asyncParam.param.name"></span>
+                    <span data-ng-bind="asyncParam.param.name" style="white-space: pre-line"></span>
                 </td>
 
             </tr>
@@ -90,7 +90,7 @@
                                type="text"
                                id="asyncParamTaskLimit"
                                class="form-control"
-                               style="width: 450px"
+                               style="width: 300px"
                         />
                     </div>
                 </td>
@@ -99,7 +99,7 @@
             <!-- "Значение параметра "Ограничение на выполнение задания в очереди быстрых заданий"" для "Параметры асинхронных заданий" -->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
-                    <label class="control-label" for="asyncParamShortQueueLimit">{{::'asyncParam.modal.field.shortQueueLimit'
+                    <label class="control-label" style="width: 250px; white-space: pre-line" for="asyncParamShortQueueLimit">{{::'asyncParam.modal.field.shortQueueLimit'
                         |
                         translate}}:</label>
                 </td>
@@ -109,7 +109,7 @@
                                type="text"
                                id="asyncParamShortQueueLimit"
                                class="form-control"
-                               style="width: 450px"
+                               style="width: 300px"
                         />
                     </div>
                 </td>
@@ -120,11 +120,8 @@
 
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-default" id="openButton" data-ng-if="isCreate">
+        <button type="submit" class="btn btn-default" id="openButton">
             <span data-translate-once="button.save"></span>
-        </button>
-        <button type="submit" class="btn btn-default" id="editButton" data-ng-if="!isCreate">
-            <span data-translate-once="button.edit"></span>
         </button>
         <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
             <span data-translate-once="button.cancel"></span>

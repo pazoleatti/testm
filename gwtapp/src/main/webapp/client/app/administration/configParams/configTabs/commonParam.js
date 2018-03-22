@@ -10,8 +10,10 @@
     /**
      * @description контроллер вкладки "Общие параметры"
      */
-        .controller('commonParamController', ['$scope', '$filter', 'CommonParamResource', 'APP_CONSTANTS', '$http', '$logPanel', 'LogEntryResource', '$rootScope', '$aplanaModal', 'PermissionChecker',
-            function ($scope, $filter, CommonParamResource, APP_CONSTANTS, $http, $logPanel, LogEntryResource, $rootScope, $aplanaModal, PermissionChecker) {
+        .controller('commonParamController', ['$scope', '$filter', 'CommonParamResource', 'APP_CONSTANTS', '$http', '$logPanel',
+            'LogEntryResource', '$rootScope', '$aplanaModal', 'PermissionChecker', '$dialogs',
+            function ($scope, $filter, CommonParamResource, APP_CONSTANTS, $http, $logPanel, LogEntryResource, $rootScope, $aplanaModal,
+                      PermissionChecker, $dialogs) {
 
                 $scope.user = $rootScope.user;
 
@@ -74,21 +76,30 @@
                  */
                 $scope.removeRecords = function () {
                     var selectedItems = $scope.commonParamGrid.value;
-                    $http({
-                        method: "POST",
-                        url: "controller/action/configuration/remove",
-                        data: $filter('idExtractor')(selectedItems, 'description')
-                    }).then(function (logger) {
-                        LogEntryResource.query({
-                            uuid: logger.data,
-                            projection: 'count'
-                        }, function (data) {
-                            $logPanel.open('log-panel-container', logger.data);
-                            if (data.ERROR + data.WARNING < 1) {
-                                $scope.commonParamGrid.ctrl.refreshGrid(1);
-                            }
-                        });
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('configParam.confirm.deleteConfig.title'),
+                        content: $filter('translate')('configParam.confirm.deleteConfig.text'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/configuration/remove",
+                                data: $filter('idExtractor')(selectedItems, 'description')
+                            }).then(function (logger) {
+                                LogEntryResource.query({
+                                    uuid: logger.data,
+                                    projection: 'count'
+                                }, function (data) {
+                                    $logPanel.open('log-panel-container', logger.data);
+                                    if (data.ERROR + data.WARNING < 1) {
+                                        $scope.commonParamGrid.ctrl.refreshGrid(1);
+                                    }
+                                });
+                            });
+                        }
                     });
+
                 };
 
                 /**
@@ -119,7 +130,7 @@
                 $scope.checkRecord = function () {
                     $http({
                         method: "POST",
-                        url: "controller/action/configuration/commonParam/check",
+                        url: "controller/actions/configuration/commonParam/checkConfigParam",
                         params: {
                             param: JSON.stringify({
                                 description: $scope.commonParamGrid.value[0].description,

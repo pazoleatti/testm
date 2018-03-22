@@ -34,6 +34,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final int COMMON_PARAM_DEPARTMENT_ID = 0;
     private static final int MAX_LENGTH = 500;
     private static final int EMAIL_MAX_LENGTH = 200;
+    private static final int UPLOAD_REFBOOK_ASYNC_TASK_LIMIT = 1500000;
     private static final String SBERBANK_INN_DEFAULT = "7707083893";
     private static final String NO_CODE_DEFAULT = "9979";
     private static final String SHOW_TIMING_DEFAULT = "0";
@@ -58,9 +59,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String ONLY_0_1_AVAILABLE_ERROR = "Допустимые значения параметра \"0\" и \"1\"";
     private static final String ASYNC_PARAM_NOT_NUMBER_ERROR = "%s: Значение параметра \"%s\" (%d) должно быть числовым (больше нуля)!";
     private static final String ASYNC_PARAM_TOO_MUCH_VALUE_ERROR = "%s: Значение параметра \"%s\" (%d) должно быть числовым меньше или равно 1 500 000!";
-    public static final String  ASYNC_PARAM_INTERVAL_ERROR = "%s: Значение параметра \"Ограничение на выполнение задания\" (%d) " +
+    private static final String ASYNC_PARAM_INTERVAL_ERROR = "%s: Значение параметра \"Ограничение на выполнение задания\" (%d) " +
             "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" (%d)";
     private static final String UPLOAD_REFBOOK_ASYNC_TASK = "UploadRefBookAsyncTask";
+    private static final String ASYNC_PARAM_TASK_LIMIT = "Ограничение на выполнение задания";
+    private static final String ASYNC_PARAM_SHORT_QUEUE_LIMIT = "Ограничение на выполнение задания в очереди быстрых заданий";
+    private static final String SEARCH_WITOUT_ERROR_MESSAGE = "Проверка выполнена, ошибок не найдено";
+    private static final String EDIT_ASYNC_PARAM_MESSAGE = "%s. Изменён параметр \"%s\" для задания \"%s\": %s.";
+
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -87,13 +93,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
     public ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo) {
         return configurationDao.fetchAllAsModel();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public ConfigurationParamModel getCommonConfig(TAUserInfo userInfo) {
         return getCommonConfigUnsafe();
     }
@@ -106,8 +111,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public List<Map<String, String>> getEmailConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
-        PagingParams pagingParams = null;
-        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), pagingParams, null, null);
+        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
             Map<String, String> record = new HashMap<String, String>();
@@ -122,8 +126,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public List<Map<String, String>> getAsyncConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
-        PagingParams pagingParams = null;
-        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), pagingParams, null, null);
+        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
             Map<String, String> record = new HashMap<String, String>();
@@ -144,13 +147,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
+            "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo) {
         return configurationDao.fetchAllByDepartment(departmentId);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
         if (model == null) {
             return;
@@ -272,26 +275,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 
     @Override
-    public String checkConfigParam(Configuration param) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
+    public String checkConfigParam(Configuration param, TAUserInfo userInfo) {
         Logger logger = checkConfigurationParam(param);
         if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING)) {
             return logEntryService.save(logger.getEntries());
         } else {
             logger.clear();
-            logger.info("Проверка выполнена, ошибок не найдено");
+            logger.info(SEARCH_WITOUT_ERROR_MESSAGE);
             return logEntryService.save(logger.getEntries());
         }
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public String checkReadWriteAccess(Configuration param) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
+    public String checkReadWriteAccess(Configuration param, TAUserInfo userInfo) {
         Logger logger = checkConfigurationParam(param);
         return logEntryService.save(logger.getEntries());
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
         if (model == null) {
             return;
@@ -398,7 +401,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
     public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo) {
         configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
     }
@@ -495,76 +497,35 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    private String checkConfig(Map<String, String> config, Map<String, String> oldConfig, String key) {
-        String value = config.get(key);
-        String oldValue = oldConfig.get(key);
-        if (value == null) value = "";
-        if (oldValue == null) oldValue = "";
-        if (!value.equals(oldValue)) {
-            return "\"" + oldValue + "\" -> \"" + value + "\"";
-        }
-        return null;
-    }
-
-    // Проверка значения параметра "Проверять ЭП"
-    private void signCheck(String value, Logger logger) {
-        if (!"0".equals(value) && !"1".equals(value)) {
-            logger.error(SIGN_CHECK_ERROR, value);
-        }
-    }
-
-    /**
-     * Изменился ли путь настроики
-     *
-     * @param oldModel модель со старыми данными
-     * @param newModel модель с новыми данными
-     * @return если изменился параметр, то возвращает и старый и новый значениея
-     */
-    private String checkParams(ConfigurationParamModel oldModel, ConfigurationParamModel newModel, ConfigurationParam param, Integer departmentId) {
-        String oldModelFullStringValue = oldModel.getFullStringValue(param, departmentId);
-        String newModelFullStringValue = newModel.getFullStringValue(param, departmentId);
-        if (oldModelFullStringValue != null && newModelFullStringValue != null) {
-            if (!oldModelFullStringValue.equals(newModelFullStringValue)) {
-                return "\"" + oldModelFullStringValue + "\" -> \"" + newModelFullStringValue + "\"";
-            } else {
-                return null;
-            }
-        } else if (oldModelFullStringValue == null && newModelFullStringValue == null) {
-            return null;
-        } else if (oldModelFullStringValue != null) {
-            return "\"" + oldModelFullStringValue + "\" -> \"\"";
-        } else {
-            return "\"\" -> \"" + newModelFullStringValue + "\"";
-        }
-    }
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
-    public void setCommonParamsDefault(TAUserInfo userInfo) {
+    public void resetCommonParams(TAUserInfo userInfo) {
         configurationDao.update(defaultCommonParams());
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) ")
+    public PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams, TAUserInfo userInfo) {
         return asyncTaskDao.fetchAllAsyncTaskTypeData(pagingParams);
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
-    public PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
+            "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_GENERAL)")
+    public PagingResult<Configuration> fetchCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo) {
         return configurationDao.fetchAllByGroupAndPaging(configurationParamGroup, pagingParams);
     }
 
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String create(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         if (commonParam != null) {
             ConfigurationParam param = ConfigurationParam.getValueByCaption(commonParam.getDescription());
             if (param != null) {
-                configurationDao.createCommonParam(param, commonParam.getValue());
+                configurationDao.createCommonParam(commonParam);
                 String message = ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\": " + commonParam.getValue();
                 auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo, userInfo.getUser().getDepartmentId(), null, null,
                         null, null, message, null);
@@ -576,8 +537,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public PagingResult<Configuration> fetchAllNonChangedCommonParam(PagingParams pagingParams) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG)")
+    public PagingResult<Configuration> fetchNonChangedCommonParam(PagingParams pagingParams, TAUserInfo userInfo) {
         List<Configuration> result = new ArrayList<>();
         for (ConfigurationParam param : ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON)) {
             result.add(new Configuration(param.name(), param.getCaption()));
@@ -592,7 +553,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String remove(List<String> names, TAUserInfo userInfo) {
         Logger logger = new Logger();
         List<ConfigurationParam> params = new ArrayList<>();
@@ -611,7 +572,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG) || " +
+            "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public String updateCommonParam(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         checkConfig(commonParam, logger);
@@ -626,16 +588,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         AsyncTaskTypeData oldAsyncParam = asyncTaskDao.getTaskTypeData(asyncParam.getId());
         // необходимо при проверке изменения значения, так как, если в БД значение пустое,
         // оно выгружается как "0"
-        if (oldAsyncParam.getTaskLimit() == 0){
+        if (oldAsyncParam.getTaskLimit() == 0) {
             oldAsyncParam.setTaskLimit(null);
         }
-        if (oldAsyncParam.getShortQueueLimit() == 0){
+        if (oldAsyncParam.getShortQueueLimit() == 0) {
             oldAsyncParam.setShortQueueLimit(null);
         }
         checkAsyncParam(asyncParam, logger);
@@ -644,10 +606,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         configurationDao.updateAsyncParam(asyncParam);
 
-        String message = ConfigurationParamGroup.ASYNC.getCaption() +
-                ". Изменён параметр \"" + ((!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
-                "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? (asyncParam.getTaskLimit() != null ? asyncParam.getTaskLimit() : "") :
-                (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : "")));
+        String message = String.format(EDIT_ASYNC_PARAM_MESSAGE,
+                ConfigurationParamGroup.ASYNC.getCaption(),
+                (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")),
+                oldAsyncParam.getName(),
+                (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? (asyncParam.getTaskLimit() != null ? asyncParam.getTaskLimit() : "") :
+                        (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : "")));
 
         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                 userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
@@ -655,9 +619,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) && !Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit())) {
 
-            message = ConfigurationParamGroup.ASYNC.getCaption() +
-                    ". Изменён параметр \"" + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "") +
-                    "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : "");
+            message = String.format(EDIT_ASYNC_PARAM_MESSAGE,
+                    ConfigurationParamGroup.ASYNC.getCaption(),
+                    (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : ""),
+                    oldAsyncParam.getName(),
+                    (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : ""));
 
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
@@ -668,22 +634,29 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return logEntryService.save(logger.getEntries());
     }
 
+    /**
+     * Проверка параметров асинхронных задач на валидность. Если одна из проверок не пройдена, ошибка записывается в logger
+     *
+     * @param asyncParam параметр
+     * @param logger логгер
+     */
     private void checkAsyncParam(AsyncTaskTypeData asyncParam, Logger logger) {
         if (asyncParam.getTaskLimit() != null && asyncParam.getTaskLimit() < 1) {
-            logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), "Ограничение на выполнение задания", asyncParam.getTaskLimit());
+            logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), ASYNC_PARAM_TASK_LIMIT, asyncParam.getTaskLimit());
             return;
         }
-        if (asyncParam.getShortQueueLimit()!= null && asyncParam.getShortQueueLimit() < 1) {
-            logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), "Ограничение на выполнение задания в очереди быстрых заданий", asyncParam.getShortQueueLimit());
+        if (asyncParam.getShortQueueLimit() != null && asyncParam.getShortQueueLimit() < 1) {
+            logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), ASYNC_PARAM_SHORT_QUEUE_LIMIT, asyncParam.getShortQueueLimit());
             return;
         }
-        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit()!= null && asyncParam.getHandlerClassName().equals(UPLOAD_REFBOOK_ASYNC_TASK) && (asyncParam.getTaskLimit() > 1500000 || asyncParam.getShortQueueLimit() > 1500000)) {
+        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getHandlerClassName().equals(UPLOAD_REFBOOK_ASYNC_TASK) &&
+                (asyncParam.getTaskLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT || asyncParam.getShortQueueLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT)) {
             logger.error(ASYNC_PARAM_TOO_MUCH_VALUE_ERROR, asyncParam.getName(),
-                    asyncParam.getTaskLimit() > 1500000 ? "Ограничение на выполнение задания" : "Ограничение на выполнение задания в очереди быстрых заданий",
-                    asyncParam.getTaskLimit() > 1500000 ? asyncParam.getTaskLimit() : asyncParam.getShortQueueLimit());
+                    asyncParam.getTaskLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT ? ASYNC_PARAM_TASK_LIMIT : ASYNC_PARAM_SHORT_QUEUE_LIMIT,
+                    asyncParam.getTaskLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT ? asyncParam.getTaskLimit() : asyncParam.getShortQueueLimit());
             return;
         }
-        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getShortQueueLimit() >= asyncParam.getTaskLimit()){
+        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getShortQueueLimit() >= asyncParam.getTaskLimit()) {
             logger.error(ASYNC_PARAM_INTERVAL_ERROR, asyncParam.getName(), asyncParam.getTaskLimit(), asyncParam.getShortQueueLimit());
         }
 
@@ -704,7 +677,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkLimitIdent(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.SHOW_TIMING.name()) ||
                 config.getCode().equals(ConfigurationParam.ENABLE_IMPORT_PERSON.name())) {
-            check01Value(config.getValue(), logger);
+            checkDiscreteValue(config.getValue(), logger);
         }
     }
 
@@ -714,7 +687,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param value  значение параметра
      * @param logger логгер
      */
-    private void check01Value(String value, Logger logger) {
+    private void checkDiscreteValue(String value, Logger logger) {
         if (!"0".equals(value) && !"1".equals(value)) {
             logger.error(ONLY_0_1_AVAILABLE_ERROR);
         }
@@ -797,7 +770,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         // Проверка значения параметра "Проверять ЭП"
         if (configParam.equals(ConfigurationParam.SIGN_CHECK)) {
-            signCheck(param.getValue(), logger);
+            checkDiscreteValue(param.getValue(), logger);
         }
         if (configParam.hasReadCheck() && (isFolder
                 && !FileWrapper.canReadFolder(param.getValue()) || !isFolder
@@ -817,5 +790,61 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
         return logger;
+    }
+
+    /**
+     * Формирует строку изменения конфигурационного параматра для сообщения в формате <старое значение> -> <новое значение>
+     *
+     * @param config    новые параметры конфигурации
+     * @param oldConfig старые параметры конфигурации
+     * @param key       название параметра конфигурации, для которого осуществляется проверка на изменение
+     * @return строка, если параметр изменен, null в противном случае
+     */
+    private String checkConfig(Map<String, String> config, Map<String, String> oldConfig, String key) {
+        String value = config.get(key);
+        String oldValue = oldConfig.get(key);
+        if (value == null) value = "";
+        if (oldValue == null) oldValue = "";
+        if (!value.equals(oldValue)) {
+            return "\"" + oldValue + "\" -> \"" + value + "\"";
+        }
+        return null;
+    }
+
+    /**
+     * Проверка значения параметра "Проверять ЭП"
+     *
+     * @param value  значение параметра
+     * @param logger логгер
+     */
+    private void signCheck(String value, Logger logger) {
+        if (!"0".equals(value) && !"1".equals(value)) {
+            logger.error(SIGN_CHECK_ERROR, value);
+        }
+    }
+
+    /**
+     * Изменился ли путь настроики
+     *
+     * @param oldModel модель со старыми данными
+     * @param newModel модель с новыми данными
+     * @return если изменился параметр, то возвращает и старый и новый значения
+     */
+    private String checkParams(ConfigurationParamModel oldModel, ConfigurationParamModel newModel, ConfigurationParam param, Integer departmentId) {
+        String oldModelFullStringValue = oldModel.getFullStringValue(param, departmentId);
+        String newModelFullStringValue = newModel.getFullStringValue(param, departmentId);
+        if (oldModelFullStringValue != null && newModelFullStringValue != null) {
+            if (!oldModelFullStringValue.equals(newModelFullStringValue)) {
+                return "\"" + oldModelFullStringValue + "\" -> \"" + newModelFullStringValue + "\"";
+            } else {
+                return null;
+            }
+        } else if (oldModelFullStringValue == null && newModelFullStringValue == null) {
+            return null;
+        } else if (oldModelFullStringValue != null) {
+            return "\"" + oldModelFullStringValue + "\" -> \"\"";
+        } else {
+            return "\"\" -> \"" + newModelFullStringValue + "\"";
+        }
     }
 }

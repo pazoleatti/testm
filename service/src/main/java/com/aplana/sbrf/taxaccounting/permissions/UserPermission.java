@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.sun.org.apache.bcel.internal.generic.PUTFIELD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
@@ -124,6 +125,13 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * Право "Ведение периодов > Открыть период"
      */
     public static final Permission<TAUser> OPEN_DEPARTMENT_REPORT_PERIOD = new OpenDepartmentReportPeriodPermission(1 << 23);
+
+    /**
+     * Право доступа к редактированию пунктов меню:
+     * "Администрирование->Конфигурационные параметр"
+     * "Администрирование->Планировщик задач"
+     */
+    public static final Permission<TAUser> EDIT_ADMINISTRATION_CONFIG = new EditAdministrationConfigPermission(1 << 24);
 
     public UserPermission(long mask) {
         super(mask);
@@ -494,6 +502,22 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+        }
+    }
+
+    /**
+     * Право доступа к редактированию пунктов меню:
+     * "Администрирование->Конфигурационные параметр"
+     * "Администрирование->Планировщик задач"
+     */
+    public static final class EditAdministrationConfigPermission extends UserPermission{
+        public EditAdministrationConfigPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN);
         }
     }
 }

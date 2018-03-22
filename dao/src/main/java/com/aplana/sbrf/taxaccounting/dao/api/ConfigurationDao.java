@@ -88,10 +88,9 @@ public interface ConfigurationDao {
     /**
      * Создание нового значения для конфигураций параметров "Общие параметры"
      *
-     * @param param создаваемый параметр
-     * @param value значение создаваемого параметра
+     * @param configuration создаваемая конфигурация
      */
-    void createCommonParam(ConfigurationParam param, String value);
+    void createCommonParam(Configuration configuration);
 
     /**
      * Удаление значенией параметров конфигураций

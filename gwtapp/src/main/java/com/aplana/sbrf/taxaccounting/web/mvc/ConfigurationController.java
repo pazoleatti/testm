@@ -50,9 +50,9 @@ public class ConfigurationController {
      * @param pagingParams параметры пагинации
      * @return страница {@link JqgridPagedList} с данными {@link AsyncTaskTypeData}
      */
-    @GetMapping(value = "rest/configuration/asyncParam")
-    public JqgridPagedList<AsyncTaskTypeData> fetchAllAsyncParam(@RequestParam PagingParams pagingParams) {
-        PagingResult<AsyncTaskTypeData> data = configurationService.fetchAllAsyncParam(pagingParams);
+    @GetMapping(value = "/rest/configuration/asyncParam")
+    public JqgridPagedList<AsyncTaskTypeData> fetchAsyncParam(@RequestParam PagingParams pagingParams) {
+        PagingResult<AsyncTaskTypeData> data = configurationService.fetchAllAsyncParam(pagingParams, securityService.currentUserInfo());
         return JqgridPagedResourceAssembler.buildPagedList(
                 data,
                 data.getTotalCount(),
@@ -66,9 +66,9 @@ public class ConfigurationController {
      * @param pagingParams параметры пагинации
      * @return страница {@link JqgridPagedList} с данными {@link Configuration}
      */
-    @GetMapping(value = "rest/configuration/commonParam", params = "projection=adminCommonParam")
-    public JqgridPagedList<Configuration> fetchAllCommonParam(@RequestParam PagingParams pagingParams) {
-        PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams, ConfigurationParamGroup.COMMON);
+    @GetMapping(value = "/rest/configuration/commonParam", params = "projection=adminCommonParam")
+    public JqgridPagedList<Configuration> fetchAdminCommonParam(@RequestParam PagingParams pagingParams) {
+        PagingResult<Configuration> data = configurationService.fetchCommonParam(pagingParams, ConfigurationParamGroup.COMMON, securityService.currentUserInfo());
         setCommonConfigParamPermission(data);
         return JqgridPagedResourceAssembler.buildPagedList(
                 data,
@@ -82,9 +82,9 @@ public class ConfigurationController {
      *
      * @return список {@link Configuration}
      */
-    @GetMapping(value = "rest/configuration/commonParam", params = "projection=taxesCommonParam")
-    public JqgridPagedList<Configuration> fetchCommonParams(@RequestParam PagingParams pagingParams) {
-        PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams, ConfigurationParamGroup.COMMON_PARAM);
+    @GetMapping(value = "/rest/configuration/commonParam", params = "projection=taxesCommonParam")
+    public JqgridPagedList<Configuration> fetchTaxesCommonParam(@RequestParam PagingParams pagingParams) {
+        PagingResult<Configuration> data = configurationService.fetchCommonParam(pagingParams, ConfigurationParamGroup.COMMON_PARAM, securityService.currentUserInfo());
         setCommonConfigParamPermission(data);
         return JqgridPagedResourceAssembler.buildPagedList(
                 data,
@@ -98,9 +98,9 @@ public class ConfigurationController {
      *
      * @return страница {@link JqgridPagedList} с данными {@link Configuration}
      */
-    @GetMapping(value = "rest/configuration/commonParam", params = "projection=selectNonChanged")
-    public JqgridPagedList<Configuration> fetchAllNonChangedCommonParam(@RequestParam PagingParams pagingParams) {
-        PagingResult<Configuration> result = configurationService.fetchAllNonChangedCommonParam(pagingParams);
+    @GetMapping(value = "/rest/configuration/commonParam", params = "projection=fetchNonChanged")
+    public JqgridPagedList<Configuration> fetchNonChangedCommonParam(@RequestParam PagingParams pagingParams) {
+        PagingResult<Configuration> result = configurationService.fetchNonChangedCommonParam(pagingParams, securityService.currentUserInfo());
         return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
     }
 
@@ -110,9 +110,9 @@ public class ConfigurationController {
      * @param param конфигурационный параметр
      * @return uuid идентификатор логгера
      */
-    @PostMapping(value = "action/configuration/commonParam", params = "projection=checkReadWriteAccess")
+    @PostMapping(value = "/actions/configuration/commonParam", params = "projection=checkReadWriteAccess")
     public String checkReadWriteAccess(@RequestParam Configuration param) {
-        return configurationService.checkReadWriteAccess(param);
+        return configurationService.checkReadWriteAccess(param, securityService.currentUserInfo());
     }
 
     /**
@@ -121,9 +121,9 @@ public class ConfigurationController {
      * @param param проверяемый параметр
      * @return uuid идентификатор логгера
      */
-    @PostMapping(value = "action/configuration/commonParam/check")
+    @PostMapping(value = "/actions/configuration/commonParam/checkConfigParam")
     public String checkConfigParam(@RequestParam Configuration param) {
-        return configurationService.checkConfigParam(param);
+        return configurationService.checkConfigParam(param, securityService.currentUserInfo());
     }
 
     /**
@@ -132,7 +132,7 @@ public class ConfigurationController {
      * @param commonParam общий параметр
      * @return uuid идентификатор логгера
      */
-    @PostMapping(value = "action/configuration/commonParam/create")
+    @PostMapping(value = "/actions/configuration/commonParam/create")
     public String create(@RequestParam Configuration commonParam) {
         return configurationService.create(commonParam, securityService.currentUserInfo());
     }
@@ -143,7 +143,7 @@ public class ConfigurationController {
      * @param names список наименований удаляемых конфигурационных параметров
      * @return uuid идентификатор логгера
      */
-    @PostMapping(value = "action/configuration/remove")
+    @PostMapping(value = "/actions/configuration/remove")
     public String remove(@RequestBody List<String> names) {
         return configurationService.remove(names, securityService.currentUserInfo()
         );
@@ -155,7 +155,7 @@ public class ConfigurationController {
      * @param commonParam конфигурационные параметры "Общие параметры"
      * @return uuid идентификатор логгера
      */
-    @PostMapping(value = "action/configuration/commonParam/update")
+    @PostMapping(value = "/actions/configuration/commonParam/update")
     public String updateCommonParam(@RequestParam Configuration commonParam) {
         return configurationService.updateCommonParam(commonParam, securityService.currentUserInfo());
     }
@@ -166,7 +166,7 @@ public class ConfigurationController {
      * @param asyncParam конфигурационные параметры "Параметры асинхронных задач"
      * @return uuid идентификатор логгера
      */
-    @PostMapping(value = "action/configuration/asyncParam/update")
+    @PostMapping(value = "/actions/configuration/asyncParam/update")
     public String updateAsyncParam(@RequestParam AsyncTaskTypeData asyncParam) {
         return configurationService.updateAsyncParam(asyncParam, securityService.currentUserInfo());
     }
@@ -174,10 +174,10 @@ public class ConfigurationController {
     /**
      * Установка значений общих параметров по умолчанию
      */
-    @PostMapping(value = "/actions/configuration/commonParams/changeToDefaultCommonParams")
-    public void setCommonParamsDefault() {
+    @PostMapping(value = "/actions/configuration/commonParam/resetCommonParams")
+    public void resetCommonParams() {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        configurationService.setCommonParamsDefault(userInfo);
+        configurationService.resetCommonParams(userInfo);
     }
 
     /**

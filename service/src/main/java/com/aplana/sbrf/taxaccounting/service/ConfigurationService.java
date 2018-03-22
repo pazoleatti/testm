@@ -61,10 +61,11 @@ public interface ConfigurationService {
     /**
      * Проверка доступности путей для чтения или записи в указанном параметре
      *
-     * @param param конфигурационный параметр
+     * @param param    конфигурационный параметр
+     * @param userInfo информация о пользователе
      * @return uuid идентификатор логгера
      */
-    String checkReadWriteAccess(Configuration param);
+    String checkReadWriteAccess(Configuration param, TAUserInfo userInfo);
 
     /**
      * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
@@ -91,24 +92,26 @@ public interface ConfigurationService {
      *
      * @param userInfo информация о пользователе
      */
-    void setCommonParamsDefault(TAUserInfo userInfo);
+    void resetCommonParams(TAUserInfo userInfo);
 
     /**
      * Получение списка типов асинхронных задач
      *
      * @param pagingParams параметры пагинации
+     * @param userInfo     информация о пользователе
      * @return страница {@link PagingResult} с данными {@link AsyncTaskTypeData}
      */
-    PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams);
+    PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams, TAUserInfo userInfo);
 
     /**
      * Возвращяет страницу общих конфигурационных параметров
      *
      * @param pagingParams            параметры пагинации
      * @param configurationParamGroup группа параметров приложения, которые необходимо выгрузить
+     * @param userInfo                информация о пользователе
      * @return страница {@link Configuration}
      */
-    PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup);
+    PagingResult<Configuration> fetchCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo);
 
     /**
      * Создание нового значения конфигурацинного параметра
@@ -123,9 +126,10 @@ public interface ConfigurationService {
      * Полученние зачений параметров "Общие параметры", которых нет в БД
      *
      * @param pagingParams параметры пагинации
+     * @param userInfo     информация о пользователе
      * @return страница {@link PagingResult} с данными {@link Configuration}
      */
-    PagingResult<Configuration> fetchAllNonChangedCommonParam(PagingParams pagingParams);
+    PagingResult<Configuration> fetchNonChangedCommonParam(PagingParams pagingParams, TAUserInfo userInfo);
 
     /**
      * Удаление записей конфигураций "Общие параметры"
@@ -157,8 +161,9 @@ public interface ConfigurationService {
     /**
      * Проверка конфигурационного параметра на наличие ошибок
      *
-     * @param param проверяемый параметр
+     * @param param    проверяемый параметр
+     * @param userInfo информация о пользователе
      * @return uuid идентификатор логгера
      */
-    String checkConfigParam(Configuration param);
+    String checkConfigParam(Configuration param, TAUserInfo userInfo);
 }

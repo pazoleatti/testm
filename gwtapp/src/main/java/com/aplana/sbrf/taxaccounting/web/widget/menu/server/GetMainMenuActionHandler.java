@@ -134,8 +134,7 @@ public class GetMainMenuActionHandler extends
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
-                adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
-                        + ConfigurationPresenter.TOKEN));
+                adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", "index.html#/taxes/configParam/"));
                 adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", "index.html#/administration/schedulerTaskList"));
             }
 

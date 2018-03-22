@@ -37,6 +37,7 @@
                             $scope.asyncParam.param = $shareData.asyncParam;
                             $scope.asyncParam.taskLimit = $shareData.asyncParam.taskLimit === 0 ? "" : $shareData.asyncParam.taskLimit;
                             $scope.asyncParam.shortQueueLimit = $shareData.asyncParam.shortQueueLimit === 0 ? "" : $shareData.asyncParam.shortQueueLimit;
+                            $scope.asyncParam.handlerClassName = $shareData.asyncParam.handlerClassName ? $shareData.asyncParam.handlerClassName : "";
                         }
                         break;
                     default:
@@ -53,7 +54,7 @@
                                 // активна вкладка "Общие параметры"
                                 $http({
                                     method: "POST",
-                                    url: "controller/action/configuration/commonParam/" + ($scope.isCreate ? "create" : "update"),
+                                    url: "controller/actions/configuration/commonParam/" + ($scope.isCreate ? "create" : "update"),
                                     params: {
                                         commonParam: JSON.stringify({
                                             code: $scope.commonParam.param.code,
@@ -79,12 +80,13 @@
                                 // активна вкладка "Параметры асинхронных задач"
                                 $http({
                                     method: "POST",
-                                    url: "controller/action/configuration/asyncParam/update",
+                                    url: "controller/actions/configuration/asyncParam/update",
                                     params: {
                                         asyncParam: JSON.stringify({
                                             id: $scope.asyncParam.param.id,
                                             taskLimit: $scope.asyncParam.taskLimit,
-                                            shortQueueLimit: $scope.asyncParam.shortQueueLimit
+                                            shortQueueLimit: $scope.asyncParam.shortQueueLimit,
+                                            handlerClassName: $scope.asyncParam.handlerClassName
                                         })
                                     }
                                 }).then(function (logger) {
@@ -140,7 +142,7 @@
                         // проверка доступности введенного пути
                         $http({
                             method: "POST",
-                            url: "controller/action/configuration/commonParam?projection=checkReadWriteAccess",
+                            url: "controller/actions/configuration/commonParam?projection=checkReadWriteAccess",
                             params: {
                                 param: JSON.stringify({
                                     description: $scope.commonParam.param.description,
