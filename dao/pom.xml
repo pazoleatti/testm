@@ -26,6 +26,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
+            <version>${ttddyy.version}</version>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <artifactId>commons-logging</artifactId>
