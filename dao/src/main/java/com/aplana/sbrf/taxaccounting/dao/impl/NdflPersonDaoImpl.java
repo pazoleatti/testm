@@ -1693,7 +1693,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments) {
         String sql = "update " + NdflPersonPrepayment.TABLE_NAME + " set " +
-                "row_num = :rowNum, operation_id = :operationId, summ = :summ, notif_num = :notifNum, notif_date = :notifDate, notif_source = :notifSource, modified_date = :modifiedDate, modified_by = :modifiedBy " +
+                "row_num = :rowNum " +
                 "where id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(prepayments.toArray());
