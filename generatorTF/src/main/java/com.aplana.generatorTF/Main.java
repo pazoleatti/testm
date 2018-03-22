@@ -42,9 +42,7 @@ public class Main {
                                 Integer.toString(i + 1).length() == 1 ?
                                         RandomStringUtils.randomAlphanumeric(30) + "-" + Integer.toString(i + 1)
                                         : RandomStringUtils.randomAlphanumeric(29) + "-" + Integer.toString(i + 1));
-                        destFile = new File(tmpPath);
-                        FileUtils.copyFile(sourceFile, destFile);
-                        new GeneratorXml().changeXmlFile(destFile, tmpPath.substring(tmpPath.lastIndexOf("/") + 1, tmpPath.length() - 4), Integer.parseInt(args[2]));
+                        new GeneratorXml().generateXML(sourceFile, tmpPath, Integer.parseInt(args[2]));
                     }
                 } else {
                     printStream.println("Тип формируемого файла не указан (xml или xlsx)");
