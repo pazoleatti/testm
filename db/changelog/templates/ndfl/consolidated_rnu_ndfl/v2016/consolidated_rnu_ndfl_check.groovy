@@ -562,7 +562,7 @@ class Check extends AbstractScriptClass {
                             }
                         }
 
-                        if (dulRecordValues == null) {
+                        if (dulRecordValues.isEmpty()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код\" (\"${ndflPerson.idDocType ?: ""}\"), \"ДУЛ Номер", ndflPerson.idDocNumber ?: "", R_PERSON))

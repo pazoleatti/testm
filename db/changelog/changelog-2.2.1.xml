@@ -184,4 +184,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.1-ytrofimov-20" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
