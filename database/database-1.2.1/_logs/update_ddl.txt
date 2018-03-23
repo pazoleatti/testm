@@ -1,0 +1,41 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:12:27 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+create DropAndCreateFiasViews
+
+Procedure created.
+
+drop index
+
+PL/SQL procedure successfully completed.
+
+drop constraints
+
+PL/SQL procedure successfully completed.
+
+create job
+job created
+
+PL/SQL procedure successfully completed.
+
+compile fias_pkg
+
+Package created.
+
+No errors.
+
+Package body created.
+
+No errors.
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options

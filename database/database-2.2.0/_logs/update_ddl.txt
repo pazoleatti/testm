@@ -1,0 +1,80 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:14:56 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+alter tables
+alter table ASYNC_TASK
+Table ASYNC_TASK altered
+add column MODIFIED_DATE to table NDFL_PERSON
+Column MODIFIED_DATE was added to table NDFL_PERSON
+add column MODIFIED_BY to table NDFL_PERSON
+Column MODIFIED_BY was added to table NDFL_PERSON
+add column MODIFIED_DATE to table NDFL_PERSON_INCOME
+Column MODIFIED_DATE was added to table NDFL_PERSON_INCOME
+add column MODIFIED_BY to table NDFL_PERSON_INCOME
+Column MODIFIED_BY was added to table NDFL_PERSON_INCOME
+add column MODIFIED_DATE to table NDFL_PERSON_DEDUCTION
+Column MODIFIED_DATE was added to table NDFL_PERSON_DEDUCTION
+add column MODIFIED_BY to table NDFL_PERSON_DEDUCTION
+Column MODIFIED_BY was added to table NDFL_PERSON_DEDUCTION
+add column MODIFIED_DATE to table NDFL_PERSON_PREPAYMENT
+Column MODIFIED_DATE was added to table NDFL_PERSON_PREPAYMENT
+add column MODIFIED_BY to table NDFL_PERSON_PREPAYMENT
+Column MODIFIED_BY was added to table NDFL_PERSON_PREPAYMENT
+drop column IS_IFRS from table DECLARATION_TYPE
+Column IS_IFRS was dropped from table DECLARATION_TYPE
+drop column IFRS_NAME from table DECLARATION_TYPE
+Column IFRS_NAME was dropped from table DECLARATION_TYPE
+modify column REF_BOOK_ADDRESS.DISTRICT
+Column REF_BOOK_ADDRESS.DISTRICT modified
+modify column REF_BOOK_ADDRESS.CITY
+Column REF_BOOK_ADDRESS.CITY modified
+modify column REF_BOOK_ADDRESS.LOCALITY
+Column REF_BOOK_ADDRESS.LOCALITY modified
+modify column REF_BOOK_ADDRESS.STREET
+Column REF_BOOK_ADDRESS.STREET modified
+
+PL/SQL procedure successfully completed.
+
+drop tables
+Dropping table REF_BOOK_TARIFF_PAYER
+Table REF_BOOK_TARIFF_PAYER was dropped
+
+PL/SQL procedure successfully completed.
+
+alter materialized views
+Re-create materialized view MV_FIAS_LOCALITY_ACT
+Materialized view MV_FIAS_LOCALITY_ACT was dropped
+Materialized view MV_FIAS_LOCALITY_ACT was created
+Re-create materialized view MV_FIAS_STREET_ACT
+Materialized view MV_FIAS_STREET_ACT was dropped
+Materialized view MV_FIAS_STREET_ACT was created
+
+PL/SQL procedure successfully completed.
+
+compile person_pkg
+
+Package created.
+
+No errors.
+
+Package body created.
+
+No errors.
+compile fias_pkg
+
+Package created.
+
+No errors.
+
+Package body created.
+
+No errors.
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options

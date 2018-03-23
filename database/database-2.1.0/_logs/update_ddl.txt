@@ -1,0 +1,101 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:13:35 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+alter table notification.id
+
+Table altered.
+
+create synonyms
+old   6:     EXECUTE IMMEDIATE 'CREATE SYNONYM SUBSYSTEM_ROLE FOR &1..SUBSYSTEM_ROLE';
+new   6:     EXECUTE IMMEDIATE 'CREATE SYNONYM SUBSYSTEM_ROLE FOR TAX_NEXT.SUBSYSTEM_ROLE';
+old  11:     EXECUTE IMMEDIATE 'CREATE SYNONYM vw_log_table_change FOR &1..vw_log_table_change';
+new  11:     EXECUTE IMMEDIATE 'CREATE SYNONYM vw_log_table_change FOR TAX_NEXT.vw_log_table_change';
+
+PL/SQL procedure successfully completed.
+
+create tables
+
+PL/SQL procedure successfully completed.
+
+create views
+
+View created.
+
+
+View created.
+
+
+View created.
+
+
+View created.
+
+alter tables
+
+PL/SQL procedure successfully completed.
+
+create constraints
+
+PL/SQL procedure successfully completed.
+
+drop tables
+
+PL/SQL procedure successfully completed.
+
+create sequences
+
+PL/SQL procedure successfully completed.
+
+create indexes
+
+PL/SQL procedure successfully completed.
+
+alter jobs
+
+PL/SQL procedure successfully completed.
+
+alter materialized views
+
+PL/SQL procedure successfully completed.
+
+compile DEP_REP_PER_BEFORE_DELETE
+
+Trigger created.
+
+No errors.
+compile DEP_REP_PER_BEFORE_INS_UPD
+
+Trigger created.
+
+No errors.
+compile person_pkg
+
+Package created.
+
+No errors.
+
+Package body created.
+
+No errors.
+compile fias_pkg
+
+Package created.
+
+No errors.
+
+Package body created.
+
+No errors.
+async_task
+
+PL/SQL procedure successfully completed.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options

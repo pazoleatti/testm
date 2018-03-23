@@ -1,0 +1,77 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:11:50 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+mig sec_user_asnu
+
+PL/SQL procedure successfully completed.
+
+ref_book_attributes
+
+2 rows deleted.
+
+
+1 row deleted.
+
+
+2 rows merged.
+
+
+1 row deleted.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+synonym department
+old  50:     EXECUTE IMMEDIATE 'CREATE SYNONYM DEPARTMENT FOR &1..DEPARTMENT';
+new  50:     EXECUTE IMMEDIATE 'CREATE SYNONYM DEPARTMENT FOR TAX_NEXT.DEPARTMENT';
+
+PL/SQL procedure successfully completed.
+
+synonym user role
+old  67:     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_ROLE FOR &1..SEC_ROLE';
+new  67:     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_ROLE FOR TAX_NEXT.SEC_ROLE';
+old  73:     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_USER FOR &1..SEC_USER';
+new  73:     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_USER FOR TAX_NEXT.SEC_USER';
+old  79:     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_USER_ROLE FOR &1..SEC_USER_ROLE';
+new  79:     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_USER_ROLE FOR TAX_NEXT.SEC_USER_ROLE';
+
+PL/SQL procedure successfully completed.
+
+synonym add_log_system_ndfl
+old   8:     EXECUTE IMMEDIATE 'CREATE SYNONYM ADD_LOG_SYSTEM_NDFL FOR &1..ADD_LOG_SYSTEM_NDFL';
+new   8:     EXECUTE IMMEDIATE 'CREATE SYNONYM ADD_LOG_SYSTEM_NDFL FOR TAX_NEXT.ADD_LOG_SYSTEM_NDFL';
+
+PL/SQL procedure successfully completed.
+
+ref_book_income_kind
+
+PL/SQL procedure successfully completed.
+
+async_task
+
+1 row updated.
+
+
+4 rows deleted.
+
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options

@@ -1,0 +1,39 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:15:00 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+fill ref_book
+
+PL/SQL procedure successfully completed.
+
+update declaration_type
+
+PL/SQL procedure successfully completed.
+
+update report_period_type
+
+PL/SQL procedure successfully completed.
+
+update declaration_template
+
+PL/SQL procedure successfully completed.
+
+fill async_task_type
+
+PL/SQL procedure successfully completed.
+
+fill configuration
+
+PL/SQL procedure successfully completed.
+
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
