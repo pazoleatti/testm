@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -76,7 +77,9 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
-        declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(DECLARATION_FORM_TYPE_ID);
+        declarationTemplate.setFormType(formType);
         declarationTemplate.setType(declarationType);
 
 
@@ -226,7 +229,9 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
-        declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(DECLARATION_FORM_TYPE_ID);
+        declarationTemplate.setFormType(formType);
         declarationTemplate.setType(declarationType);
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL2_9979_9979_7707083893997950001_20160602_344B2B8C-3DC6-7097-E054-00144F6713DE.XML"), anyLong()))
@@ -297,7 +302,9 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
-        declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(DECLARATION_FORM_TYPE_ID);
+        declarationTemplate.setFormType(formType);
         DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
         xsdFile.setFileName("IV_NONDFL6.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
@@ -379,7 +386,9 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
-        declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(DECLARATION_FORM_TYPE_ID);
+        declarationTemplate.setFormType(formType);
         DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
         xsdFile.setFileName("KV_OTCH_1_095_00_05_04_01.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));

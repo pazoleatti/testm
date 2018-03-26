@@ -121,6 +121,15 @@
         })
 
         /**
+         * @description Форматтер для enum DeclarationCheckCode
+         */
+        .filter('declarationCheckCodeEnumFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (enumName) {
+                return APP_CONSTANTS.DECLARATION_CHECK_CODE[enumName];
+            };
+        }])
+
+        /**
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
          * @param reportPeriod Отчетный период
          */

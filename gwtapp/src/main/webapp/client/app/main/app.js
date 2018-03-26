@@ -711,6 +711,17 @@
         "declarationTemplateJournal.grid.versionEnd": "Окончание периода актуальности",
 
         "declarationTemplate.title.backLink": "Версии макета",
+        "declarationTemplate.button.activate": "Ввести в действие",
+        "declarationTemplate.button.deactivate": "Вывести из действия",
+
+        "declarationTemplate.message.fileUploaded": "Файл загружен!",
+        "declarationTemplate.warning.formsExist.save": "Найдены экземпляры налоговых форм, использующие версию макета. Продолжить сохранение?",
+        "declarationTemplate.warning.formsExist.updateStatus": "Найдены экземпляры налоговых форм, использующие версию макета. Изменить статус версии?",
+
+        "declarationTemplate.error.yearFromUndefined": "Не задан год начала действия макета.",
+        "declarationTemplate.error.badYears": "Дата окончания не может быть меньше даты начала актуализации.",
+        "declarationTemplate.error.nameUndefined": "Дата окончания не может быть меньше даты начала актуализации.",
+
         "declarationTemplate.tabs.info": "Основная информация",
         "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
         "declarationTemplate.tabs.info.name": "Наименование налоговой формы",

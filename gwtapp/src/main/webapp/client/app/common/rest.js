@@ -344,5 +344,12 @@
                 querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
+
+        /**
+         * @description Ресурс на файлы (BlobData)
+         */
+        .factory('BlobDataResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/blobData/:uuid?projection=:projection', {}, {});
+        }])
     ;
 }());

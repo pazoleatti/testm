@@ -2,6 +2,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateAction;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
@@ -105,6 +109,15 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             throw new ServiceException("Ошибка получения шаблона налоговой формы.", e);
         }
 	}
+
+    @Override
+    public DeclarationTemplate fetchWithScripts(int declarationTemplateId) {
+        DeclarationTemplate declarationTemplate = get(declarationTemplateId);
+        List<DeclarationTemplateEventScript> eventScriptList = declarationTemplateEventScriptDao.fetch(declarationTemplateId);
+        declarationTemplate.setEventScripts(eventScriptList);
+        declarationTemplate.setCreateScript(getDeclarationTemplateScript(declarationTemplateId));
+        return declarationTemplate;
+    }
 
 	@Override
 	public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
@@ -447,10 +460,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
+	public LockData lock(int declarationTemplateId, TAUserInfo userInfo){
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         Date endVersion = getDTEndDate(declarationTemplateId);
-        LockData objectLock = lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
+        return lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
                 String.format(
                         DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
                         declarationTemplate.getName(),
@@ -458,7 +471,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         sdf.get().format(declarationTemplate.getVersion()),
                         endVersion != null ? sdf.get().format(endVersion) : "-"
                 ));
-        return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
     }
 
 	@Override
@@ -566,5 +578,48 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (CollectionUtils.isNotEmpty(checks)) {
             declarationTemplateDao.updateChecks(checks, declarationTemplateId);
         }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    public UpdateTemplateResult update(UpdateTemplateAction action, TAUserInfo userInfo) {
+        UpdateTemplateResult result = new UpdateTemplateResult();
+        Logger logger = new Logger();
+        DeclarationTemplate template = action.getDeclarationTemplate();
+
+        LockData lockData = lock(template.getId(), userInfo);
+        if (lockData != null && lockData.getUserId() != userInfo.getUser().getId()) {
+            throw new ServiceException("Макет формы заблокирован другим пользователем");
+        } else {
+            try {
+                if (mainOperatingService.edit(template, action.getChecks(),
+                        template.getVersionEnd(), logger, userInfo, action.isFormsExistWarningConfirmed())) {
+                    result.setSuccess(true);
+                    if (!logger.getEntries().isEmpty()) {
+                        result.setUuid(logEntryService.save(logger.getEntries()));
+                    }
+                } else {
+                    result.setConfirmNeeded(true);
+                }
+            } finally {
+                unlock(template.getId(), userInfo);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    public UpdateTemplateStatusResult updateStatus(UpdateTemplateStatusAction action, TAUserInfo userInfo) {
+        UpdateTemplateStatusResult result = new UpdateTemplateStatusResult();
+        Logger logger = new Logger();
+
+        result.setSuccess(mainOperatingService.setStatusTemplate(action.getTemplateId(), logger, userInfo, action.isFormsExistWarningConfirmed()));
+
+        result.setStatus(get(action.getTemplateId()).getStatus());
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+        return result;
     }
 }

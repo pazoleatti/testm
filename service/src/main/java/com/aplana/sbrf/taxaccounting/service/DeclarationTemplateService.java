@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateAction;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -19,12 +23,20 @@ public interface DeclarationTemplateService {
 	List<DeclarationTemplate> listAll();
 
 	/**
-	 * Получить шаблон декларации
+	 * Возвращяет макет декларации без скриптов
 	 *
 	 * @param declarationTemplateId идентификатор шаблона декларации
-	 * @return объект шаблона декларации
+	 * @return макет декларации без скриптов
 	 */
 	DeclarationTemplate get(int declarationTemplateId);
+
+	/**
+	 * Возвращяет макет декларации со скриптами
+	 *
+	 * @param declarationTemplateId идентификатор макета декларации
+	 * @return макет декларации вместе со скриптами
+	 */
+	DeclarationTemplate fetchWithScripts(int declarationTemplateId);
 
 	/**
 	 * Сохранить шаблон декларации.
@@ -80,7 +92,7 @@ public interface DeclarationTemplateService {
 	 * @param userInfo              - информация о пользователе
 	 * @return информацию о блокировке объекта
 	 */
-	boolean lock(int declarationTemplateId, TAUserInfo userInfo);
+	LockData lock(int declarationTemplateId, TAUserInfo userInfo);
 
 	/**
 	 * Проверяет, не заблокирован ли шаблон декларации другим пользователем
@@ -308,4 +320,23 @@ public interface DeclarationTemplateService {
 	 * @param declarationTemplateId идентификатор макета
      */
 	void updateChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId);
+
+	/**
+	 * Изменяет макет
+	 * если у макета скрипты = null, то их не трогает
+	 *
+	 * @param action   параметры операции
+	 * @param userInfo пользователь
+	 * @return результат выполнения операции
+	 */
+	UpdateTemplateResult update(UpdateTemplateAction action, TAUserInfo userInfo);
+
+	/**
+	 * Изменяет статус макета (Вводит/Выводит из действия)
+	 *
+	 * @param action   параметры операции
+	 * @param userInfo пользователь
+	 * @return результат выполнения операции
+	 */
+	UpdateTemplateStatusResult updateStatus(UpdateTemplateStatusAction action, TAUserInfo userInfo);
 }

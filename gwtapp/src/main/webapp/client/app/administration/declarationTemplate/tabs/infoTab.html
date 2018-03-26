@@ -32,6 +32,20 @@
                 </div>
                 <div class="span7"
                      style="margin-bottom: 10px;"
+                     data-ng-controller="SelectDeclarationKindCtrl"
+                     data-ui-select2="declarationKindSelect.options"
+                     data-ng-init="initSingleSelectAllKinds()"
+                     data-ng-model="declarationTemplate.declarationFormKind"
+                     data-required>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">
+                    <label class="control-label">{{::'declarationTemplate.tabs.info.kind' |
+                        translate}}:</label>
+                </div>
+                <div class="span7"
+                     style="margin-bottom: 10px;"
                      data-ng-controller="SelectFormTypeCtrl"
                      data-ui-select2="formTypeSelect.options"
                      data-ng-init="initSelectWithAllFormTypes()"
@@ -39,20 +53,15 @@
                      data-required>
                 </div>
             </div>
-            <div class="row-fluid">
-                <div class="span5">
-                    <label class="control-label" for="templateKind">{{::'declarationTemplate.tabs.info.kind' |
-                        translate}}:</label>
-                </div>
-                <div class="span7">
-                    <input id="templateKind" type="text" style="width: 100%;" data-ng-model="declarationTemplate.name">
-                </div>
-            </div>
         </div>
     </div>
     <div style="margin-top: 30px;">
-        <button type="button" class="btn btn-default" data-ng-click="downloadXsdClick()">
+        <button type="button" class="btn btn-default" data-ng-click="downloadXsdClick()"
+                data-ng-disabled="!declarationTemplate.xsdId">
             <span data-translate-once="declarationTemplate.tabs.info.downloadXsd"></span>
+        </button>
+        <button type="file" class="btn btn-default" ngf-select="uploadXsdClick($file)">
+            <span data-translate-once="declarationTemplate.tabs.info.uploadXsd"></span>
         </button>
     </div>
 </div>

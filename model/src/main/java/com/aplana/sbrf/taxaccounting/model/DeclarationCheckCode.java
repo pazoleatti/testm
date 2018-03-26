@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 /**
  * Список кодов для проверок форм. Используется для проверки настроек фатальности проверок
  * @author dloshkarev
  */
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DeclarationCheckCode {
     RNU_VALUE_CONDITION("000-0007-00001"),
     RNU_CITIZENSHIP("001-0001-00002"),

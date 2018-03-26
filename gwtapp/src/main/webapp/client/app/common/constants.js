@@ -192,6 +192,23 @@
             DATE_ZERO: {
                 AS_DATE: "1901-01-01",
                 AS_STRING: "00.00.0000"
+            },
+            VERSIONED_OBJECT_STATUS: {
+                NORMAL: "NORMAL",
+                DELETED: "DELETED",
+                DRAFT: "DRAFT",
+                FAKE: "FAKE"
+            },
+            DECLARATION_CHECK_CODE: {
+                RNU_VALUE_CONDITION: "000-0007-00001",
+                RNU_CITIZENSHIP: "001-0001-00002",
+                RNU_SECTION_3_10: "003-0001-00002",
+                RNU_SECTION_3_10_2: "003-0001-00003",
+                RNU_SECTION_3_16: "003-0001-00006",
+                RNU_SECTION_2_15: "004-0001-00004",
+                RNU_SECTION_2_16: "004-0001-00005",
+                RNU_SECTION_2_17: "004-0001-00006",
+                RNU_SECTION_2_21: "004-0001-00010"
             }
         });
 }());

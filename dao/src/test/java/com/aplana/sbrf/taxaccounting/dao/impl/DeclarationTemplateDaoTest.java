@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +85,9 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
-        declarationTemplate.setDeclarationFormTypeId(2L);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(2L);
+        declarationTemplate.setFormType(formType);
         int id = declarationTemplateDao.create(declarationTemplate);
 
         DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
@@ -105,7 +108,9 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
-        declarationTemplate.setDeclarationFormTypeId(2L);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(2L);
+        declarationTemplate.setFormType(formType);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.REPORTS);
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
         DeclarationType declarationType = declarationTypeDao.get(1);
@@ -190,7 +195,9 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
-        declarationTemplate.setDeclarationFormTypeId(2L);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(2L);
+        declarationTemplate.setFormType(formType);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 

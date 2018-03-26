@@ -27,7 +27,21 @@
                     }
                 });
 
-                $scope.templateChecksGrid = {
+                // Инициализация грида
+                var init = function (ctrl) {
+                    ctrl.beforeSelectRow = function (rowid, e) {
+                        var iCol = $.jgrid.getCellIndex($(e.target).closest("td")[0]);
+                        if ($scope.templateChecksGrid.options.colModel[iCol].name === "fatal") {
+                            // Устанавливаем значение фатальности из checkBox'a
+                            $scope.templateChecksGrid.ctrl.grid.getLocalRow(rowid).fatal = $(e.target).is(":checked");
+                        }
+                        return true; // allow selection
+                    };
+                };
+
+                // extend, т.к. определен в parentScope
+                angular.extend($scope.templateChecksGrid, {
+                    init: init,
                     ctrl: {},
                     value: [],
                     options: {
@@ -47,16 +61,15 @@
                                 width: 150,
                                 editable: true,
                                 edittype: 'checkbox',
-                                editoptions: {value: "True:False"},
                                 formatter: "checkbox",
                                 align: "center",
                                 formatoptions: {disabled: false}
                             },
-                            {name: 'code.code', index: 'code.code', width: 200},
+                            {name: 'code', index: 'code', width: 200, formatter: $filter('declarationCheckCodeEnumFormatter')},
                             {name: 'checkType', index: 'checkType', width: 500},
                             {name: 'description', index: 'description', width: 500}],
-                        rowNum: 5,
-                        rowList: [3, 5, 7],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         cellEdit: true,
                         cellsubmit: 'clientArray',
                         sortname: 'id',
@@ -64,6 +77,6 @@
                         sortorder: "asc",
                         hidegrid: false
                     }
-                };
+                });
             }]);
 }());
