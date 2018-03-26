@@ -20,7 +20,7 @@
 
                     $http({
                         method: "POST",
-                        url: "controller/actions/configuration/commonParam/update",
+                        url: "controller/rest/commonParam/update",
                         params: {
                             commonParam: $scope.parameter
                         }

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -344,7 +343,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("badPath"));
 
-        service.checkReadWriteAccess(getUser(), model, logger);
+        service.checkFileSystemAccess(getUser(), model, logger);
 
         file.delete();
         commonFolder.delete();
@@ -396,7 +395,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + errorFolder.getRoot().getPath() + "/testFile"));
 
-        service.checkReadWriteAccess(getUser(), model, logger);
+        service.checkFileSystemAccess(getUser(), model, logger);
 
         file.delete();
         commonFolder.delete();

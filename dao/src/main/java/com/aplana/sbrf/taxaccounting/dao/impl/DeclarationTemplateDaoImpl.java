@@ -336,7 +336,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                         "    lead(version) over(partition BY declaration_type_id order by version) - interval '1' DAY version_end " +
                         "  FROM declaration_template dt " +
                         "  where status != -1 " +
-                        ") WHERE declaration_type_id = :declarationTypeId and status = 0",
+                        ") WHERE declaration_type_id = :declarationTypeId and status != 2 ",
                 params,
                 new DeclarationTemplateRowMapperLight());
     }

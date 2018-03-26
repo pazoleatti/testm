@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -235,6 +236,8 @@ public class DeclarationTemplateInfoPresenter
 
     @Override
     public void setFormType(Long formTypeId) {
-        declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().setDeclarationFormTypeId(formTypeId);
+        RefBookFormType formType = new RefBookFormType();
+        formType.setId(formTypeId);
+        declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().setFormType(formType);
     }
 }

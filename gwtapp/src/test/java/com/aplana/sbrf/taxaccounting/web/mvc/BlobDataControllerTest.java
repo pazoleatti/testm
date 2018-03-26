@@ -23,12 +23,14 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,6 +58,7 @@ public class BlobDataControllerTest {
         user.setRoles(Arrays.asList(role));
         userInfo.setUser(user);
         Mockito.when(securityService.currentUserInfo()).thenReturn(userInfo);
+        when(blobDataService.create(any(InputStream.class), any(String.class))).thenReturn("createdUuid");
         // Setup Spring test in standalone mode
         this.mockMvc = standaloneSetup(blobDataController).build();
     }
@@ -99,7 +102,7 @@ public class BlobDataControllerTest {
                     .param("title", "title")
             )
                     .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andExpect(MockMvcResultMatchers.content().string("{uuid : \"null\"}"));
+                    .andExpect(MockMvcResultMatchers.content().string("createdUuid"));
         } finally {
             if (!cf.delete())
                 System.out.println("Can't delete");

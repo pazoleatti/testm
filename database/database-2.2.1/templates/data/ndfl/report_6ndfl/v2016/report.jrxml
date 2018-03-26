@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="1869"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -13854,7 +13854,7 @@
 			<printWhenExpression><![CDATA[!($F{ДатаФактДох}==null && $F{ДатаУдержНал}==null && $F{СрокПрчслНал}==null)]]></printWhenExpression>
 			<break>
 				<reportElement uuid="b9a602e3-4018-4746-a54c-a87278b4b71b" x="0" y="0" width="100" height="1">
-					<printWhenExpression><![CDATA[(3==3)]]></printWhenExpression>
+					<printWhenExpression><![CDATA[(0==3)]]></printWhenExpression>
 				</reportElement>
 			</break>
 			<staticText>
@@ -15682,7 +15682,7 @@
 			</staticText>
 			<break>
 				<reportElement uuid="60b59f2b-2bcd-4058-a9a2-16adf9353cda" x="0" y="0" width="100" height="1">
-					<printWhenExpression><![CDATA[(3==3)]]></printWhenExpression>
+					<printWhenExpression><![CDATA[(0==3)]]></printWhenExpression>
 				</reportElement>
 			</break>
 		</band>

@@ -6,12 +6,14 @@
     angular.module('app.logPanel', ['aplana.splitter', 'ui.router'])
         .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource', 'APP_CONSTANTS', '$transitions', '$document',
             function ($compile, $rootScope, $filter, LogEntryResource, APP_CONSTANTS, $transitions, $document) {
-                var logPanel = {};
+                var logPanel = {
+                    height: 300
+                };
 
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: 300px; min-height: 329px;'>" +
+                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: " + logPanel.height + "px; min-height: 329px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -176,6 +178,8 @@
                                     height: startHeight - my,
                                     maxHeight: container.height() - 3
                                 });
+
+                                logPanel.height = startHeight - my;
                             }
 
                             function unbindEvents() {

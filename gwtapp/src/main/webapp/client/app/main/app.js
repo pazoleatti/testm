@@ -711,6 +711,17 @@
         "declarationTemplateJournal.grid.versionEnd": "Окончание периода актуальности",
 
         "declarationTemplate.title.backLink": "Версии макета",
+        "declarationTemplate.button.activate": "Ввести в действие",
+        "declarationTemplate.button.deactivate": "Вывести из действия",
+
+        "declarationTemplate.message.fileUploaded": "Файл загружен!",
+        "declarationTemplate.warning.formsExist.save": "Найдены экземпляры налоговых форм, использующие версию макета. Продолжить сохранение?",
+        "declarationTemplate.warning.formsExist.updateStatus": "Найдены экземпляры налоговых форм, использующие версию макета. Изменить статус версии?",
+
+        "declarationTemplate.error.yearFromUndefined": "Не задан год начала действия макета.",
+        "declarationTemplate.error.badYears": "Дата окончания не может быть меньше даты начала актуализации.",
+        "declarationTemplate.error.nameUndefined": "Дата окончания не может быть меньше даты начала актуализации.",
+
         "declarationTemplate.tabs.info": "Основная информация",
         "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
         "declarationTemplate.tabs.info.name": "Наименование налоговой формы",
@@ -757,6 +768,7 @@
         "asyncParam.validate.checkLimit": "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
         "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
         "asyncParam.validate.checkNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым (больше нуля)!",
+        "asyncParam.validate.tooLargeNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) слишком велико! Введите число, содержащее не больше {{precision}} знаков до разделителя.",
         "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000",
 
         "taxes.commonParams.confirm.cancel.title": "Отмена операции",
@@ -930,6 +942,11 @@
                 $rootScope.permissionChecker = angular.injector(['app.permissionUtils']).get('PermissionChecker');
                 $rootScope.validationUtils = angular.injector(['app.validationUtils']).get('ValidationUtils');
                 $rootScope.APP_CONSTANTS = angular.injector(['app.constants']).get('APP_CONSTANTS');
+                // Паттерны для проверки полей ввода
+                $rootScope.patterns = {
+                    number:         /^[+-]?([0-9]*)?([.][0-9]{1,2})?$/,     // Целые числа и числа с 2мя знаками после запятой
+                    fourDigits:     /^\d{4}$/                               // 4 цифры
+                }
             });
         });
 

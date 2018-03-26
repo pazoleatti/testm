@@ -153,13 +153,21 @@
         .controller('SelectDeclarationKindCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption) {
                 var declarationKinds = [];
-                if ($rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS) || $rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP)) {
-                    declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY, APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED];
-                } else if ($rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_OPER)) {
-                    declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY];
-                }
 
-                $scope.declarationKindSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, declarationKinds);
+                $scope.initSingleSelectAllKinds = function () {
+                    declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY, APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED, APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS];
+                    $scope.declarationKindSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, declarationKinds);
+                };
+
+                $scope.initMultiSelectForNdflFilter = function () {
+                    if ($rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS) || $rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP)) {
+                        declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY, APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED];
+                    } else if ($rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_OPER)) {
+                        declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY];
+                    }
+
+                    $scope.declarationKindSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, declarationKinds);
+                }
             }])
 
         /**
@@ -488,7 +496,7 @@
                 $scope.initCommonParam = function () {
                     $scope.commonParamSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "configParamFormatter");
                     CommonParamResource.query({
-                        projection: 'fetchNonChanged',
+                        projection: 'notCreated',
                         pagingParams: {
                             page: 1,
                             count: 10000
@@ -534,7 +542,7 @@
                 $scope.formTypeSelect = {};
 
                 $scope.initSelectWithAllFormTypes = function () {
-                    $scope.formTypeSelect = GetSelectOption.getBasicSingleSelectOptions();
+                    $scope.formTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
                     RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_DATA_TYPE_REF_BOOK}, function (data) {
                         $scope.formTypeSelect.options.data.results = data;
                     });

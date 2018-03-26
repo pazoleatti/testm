@@ -96,6 +96,14 @@ public class BlobDataController {
     }
 
     /**
+     * Удаляет BlobData
+     */
+    @DeleteMapping(value = "/rest/blobData/{uuid}")
+    public void deleteBlob(@PathVariable String uuid) {
+        blobDataService.delete(uuid);
+    }
+
+    /**
      * Загрузка файла
      *
      * @param file файл
@@ -104,8 +112,7 @@ public class BlobDataController {
      */
     @PostMapping(value = "/actions/blobData/uploadFile", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
     public String uploadFile(@RequestParam("uploader") MultipartFile file) throws IOException {
-        String uuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
-        return "{uuid : \"" + uuid + "\"}";
+        return blobDataService.create(file.getInputStream(), file.getOriginalFilename());
     }
 
     /**

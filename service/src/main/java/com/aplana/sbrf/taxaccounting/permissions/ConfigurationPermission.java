@@ -56,7 +56,7 @@ public abstract class ConfigurationPermission extends AbstractPermission<Configu
         @Override
         protected boolean isGrantedInternal(User user, Configuration targetDomainObject, Logger logger) {
             if (targetDomainObject != null) {
-                ConfigurationParam param = ConfigurationParam.getValueByCaption(targetDomainObject.getCode());
+                ConfigurationParam param = ConfigurationParam.valueOf(targetDomainObject.getCode());
                 if (param != null) {
                     switch (param.getGroup()) {
                         case COMMON: {

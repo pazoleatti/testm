@@ -15,7 +15,7 @@ import java.util.Map;
 public interface ConfigurationDao {
 
     /**
-     * Возвращяет {@link Configuration} по перечислению {@link ConfigurationParam}
+     * Возвращает общий параметр конфигурации по перечислению {@link ConfigurationParam}
      *
      * @param param перечисление {@link ConfigurationParam}
      * @return параметр {@link Configuration} или null, если не найден
@@ -23,22 +23,22 @@ public interface ConfigurationDao {
     Configuration fetchByEnum(ConfigurationParam param);
 
     /**
-     * Возвращяет все параметры в виде {@link ConfigurationParamModel}
-     *
+     * Возвращает все параметры в виде модели {@link ConfigurationParamModel}
      */
     @Deprecated
     ConfigurationParamModel fetchAllAsModel();
 
     /**
-     * Возвращяет страницу конфигурационных параметров
+     * Возвращает страницу конфигурационных параметров по группе из перечисления {@link ConfigurationParamGroup}
      *
+     * @param group        группа параметров
      * @param pagingParams параметры пагинации
-     * @return страница {@link Configuration} или пустой список
+     * @return страница {@link Configuration} или пустая страница
      */
     PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams);
 
     /**
-     * Возвращяет все параметры определенной группы в виде {@link ConfigurationParamModel}
+     * Возвращает все параметры определенной группы в виде {@link ConfigurationParamModel}
      *
      * @param group группа параметров {@link ConfigurationParamGroup}
      * @return все параметры определенной группы в виде {@link ConfigurationParamModel}
@@ -46,7 +46,7 @@ public interface ConfigurationDao {
     ConfigurationParamModel fetchAllAsModelByGroup(ConfigurationParamGroup group);
 
     /**
-     * Возвращяет все параметры по подразделению в виде {@link ConfigurationParamModel}
+     * Возвращает все параметры по подразделению в виде {@link ConfigurationParamModel}
      *
      * @param departmentId идентификатор подразделения
      * @return все параметры по подразделению в виде {@link ConfigurationParamModel}
@@ -86,21 +86,21 @@ public interface ConfigurationDao {
     void update(List<Configuration> configurations);
 
     /**
-     * Создание нового значения для конфигураций параметров "Общие параметры"
+     * Создание общего параметра конфигурации
      *
      * @param configuration создаваемая конфигурация
      */
     void createCommonParam(Configuration configuration);
 
     /**
-     * Удаление значенией параметров конфигураций
+     * Удаление общих параметров конфигураций
      *
      * @param params список удаляемых параметров
      */
     void removeCommonParam(List<ConfigurationParam> params);
 
     /**
-     * Обновление записи конфигурационного параметра "Параметры асинхронных задач"
+     * Обновление записи конфигурационного параметра типов асинхронных задач
      *
      * @param asyncParam обновляемый параметр
      */

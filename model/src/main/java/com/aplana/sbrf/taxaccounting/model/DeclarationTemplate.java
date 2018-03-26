@@ -208,17 +208,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
         return formType != null ? formType.getId() : null;
     }
 
-    /**
-     * @deprecated см {@link #formType}
-     */
-    @Deprecated
-    public void setDeclarationFormTypeId(Long declarationFormTypeId) {
-        if (formType == null) {
-            formType = new RefBookFormType();
-        }
-        formType.setId(declarationFormTypeId);
-    }
-
     public List<DeclarationTemplateFile> getDeclarationTemplateFiles() {
         return declarationTemplateFiles;
     }
