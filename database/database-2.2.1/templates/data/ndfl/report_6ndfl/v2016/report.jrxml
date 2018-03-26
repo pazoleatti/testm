@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="408"/>
+	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -1677,12 +1677,12 @@
 				<textFieldExpression><![CDATA[$V{КодНО}.charAt(3)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="c9e77fa5-5339-46b3-b620-b20e64bac687" mode="Transparent" x="308" y="125" width="210" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="c9e77fa5-5339-46b3-b620-b20e64bac687" mode="Transparent" x="310" y="125" width="208" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
-				<text><![CDATA[По месту нахождения (учета) (код)]]></text>
+				<text><![CDATA[по месту нахождения (учета) (код)]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="9392929b-72f5-4182-8e25-d3719e8a5803" x="532" y="125" width="14" height="19" isPrintWhenDetailOverflows="true"/>

@@ -208,5 +208,15 @@
             <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4000 2.2 Печатное представление 6НДФЛ: отсутствует наименование поля (7) "по месту нахождения учета (код)"
+	https://jira.aplana.com/browse/SBRFNDFL-4001 2.2 PDF-отчет 6-НДФЛ: наименование поля "по месту нахождения учета (код)" начинается с большой буквы-->
+	<changeSet id="2.2.1-rnurgaleev-1" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>
