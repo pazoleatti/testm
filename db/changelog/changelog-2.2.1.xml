@@ -241,4 +241,20 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.1-ytrofimov-24" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+            <where>id = '4b84692c-7f70-4d11-844d-e61e81655336'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.1-ytrofimov-25" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+            <where>id = '64536272-05bc-42e8-82c5-347faf22da20'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
