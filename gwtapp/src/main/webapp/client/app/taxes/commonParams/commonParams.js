@@ -20,7 +20,7 @@
          */
         .controller('commonParamsCtrl', ['$scope', 'CommonParamResource', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS',
             '$dialogs', 'LogEntryResource', '$logPanel',
-            function ($scope, CommonParamResource, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs, LogEntryResource, $logPanel) {
+            function ($scope, CommonParamResource, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs) {
 
                 /**
                  * @description Создание и заполнение грида
@@ -33,7 +33,7 @@
                         angularResource: CommonParamResource,
                         requestParameters: function () {
                             return {
-                                projection: 'taxesCommonParam'
+                                projection: 'taxes'
                             };
                         },
                         height: 280,
@@ -69,7 +69,7 @@
                         okBtnClick: function () {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/configuration/commonParam/resetCommonParams"
+                                url: "controller/actions/resetCommonParams"
                             }).then(function () {
                                 $scope.commonParamsGrid.ctrl.refreshGrid();
                             });

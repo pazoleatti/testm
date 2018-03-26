@@ -52,7 +52,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
     private static final String NO_CODE_ERROR = "Код НО (пром.) (\"%s\") не найден в справочнике \"Налоговые инспекции\"";
     private static final String INN_JUR_ERROR = "Введен некорректный номер ИНН «%s»";
-    private static final String NO_ENUM_CONSTANT = "Введен неверное название конфигурационного параметра";
     private static final String TASK_LIMIT_FIELD = "Ограничение на выполнение задачи";
     private static final String SHORT_QUEUE_LIMIT = "Ограничение на выполнение задачи в очереди быстрых задач";
     private static final String LIMIT_IDENT_ERROR = "Значение параметра должно быть от \"0\" до \"1\" и иметь не более 2-х знаков после запятой";
@@ -289,13 +288,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
-    public String checkReadWriteAccess(Configuration param, TAUserInfo userInfo) {
+    public String checkFileSystemAccess(Configuration param, TAUserInfo userInfo) {
         Logger logger = checkConfigurationParam(param);
         return logEntryService.save(logger.getEntries());
     }
 
     @Override
-    public void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
+    public void checkFileSystemAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
         if (model == null) {
             return;
         }
@@ -506,14 +505,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) ")
-    public PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams, TAUserInfo userInfo) {
+    public PagingResult<AsyncTaskTypeData> fetchAsyncParams(PagingParams pagingParams, TAUserInfo userInfo) {
         return asyncTaskDao.fetchAllAsyncTaskTypeData(pagingParams);
     }
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
             "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_GENERAL)")
-    public PagingResult<Configuration> fetchCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo) {
+    public PagingResult<Configuration> fetchCommonParams(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo) {
         return configurationDao.fetchAllByGroupAndPaging(configurationParamGroup, pagingParams);
     }
 
@@ -523,7 +522,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public String create(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         if (commonParam != null) {
-            ConfigurationParam param = ConfigurationParam.getValueByCaption(commonParam.getDescription());
+            ConfigurationParam param = ConfigurationParam.valueOf(commonParam.getCode());
             if (param != null) {
                 configurationDao.createCommonParam(commonParam);
                 String message = ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\": " + commonParam.getValue();
@@ -538,7 +537,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG)")
-    public PagingResult<Configuration> fetchNonChangedCommonParam(PagingParams pagingParams, TAUserInfo userInfo) {
+    public PagingResult<Configuration> fetchNonCreatedCommonParams(PagingParams pagingParams, TAUserInfo userInfo) {
         List<Configuration> result = new ArrayList<>();
         for (ConfigurationParam param : ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON)) {
             result.add(new Configuration(param.name(), param.getCaption()));
@@ -554,18 +553,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
-    public String remove(List<String> names, TAUserInfo userInfo) {
+    public String remove(List<String> codes, TAUserInfo userInfo) {
         Logger logger = new Logger();
         List<ConfigurationParam> params = new ArrayList<>();
-        for (String name : names) {
-            ConfigurationParam param = ConfigurationParam.getValueByCaption(name);
-            if (param != null) {
-                params.add(param);
-                String message = ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption();
-                auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                        userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
-                logger.info(message);
-            }
+        for (String code : codes) {
+            ConfigurationParam param = ConfigurationParam.valueOf(code);
+            params.add(param);
+            String message = ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption();
+            auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+            logger.info(message);
         }
         configurationDao.removeCommonParam(params);
         return logEntryService.save(logger.getEntries());
@@ -638,7 +635,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * Проверка параметров асинхронных задач на валидность. Если одна из проверок не пройдена, ошибка записывается в logger
      *
      * @param asyncParam параметр
-     * @param logger логгер
+     * @param logger     логгер
      */
     private void checkAsyncParam(AsyncTaskTypeData asyncParam, Logger logger) {
         if (asyncParam.getTaskLimit() != null && asyncParam.getTaskLimit() < 1) {
@@ -748,11 +745,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             return logger;
         }
 
-        ConfigurationParam configParam = ConfigurationParam.getValueByCaption(param.getDescription());
-        if (configParam == null) {
-            logger.error(NO_ENUM_CONSTANT);
-            return logger;
-        }
+        ConfigurationParam configParam = ConfigurationParam.valueOf(param.getCode());
         Boolean isFolder = configParam.isFolder();
         // у папок smb в конце должен быть слеш (иначе возникенет ошибка при configurationParam.isFolder() == true и configurationParam.hasReadCheck() == true)
         if (isFolder == null) {

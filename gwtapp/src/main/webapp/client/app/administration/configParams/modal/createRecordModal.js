@@ -25,6 +25,7 @@
                         if ($shareData.isCreate) {
                             $scope.commonParam = {};
                         } else {
+                            $scope.commonParam.code = $shareData.commonParam.code;
                             $scope.commonParam.param = $shareData.commonParam;
                             $scope.commonParam.value = $shareData.commonParam.value;
                         }
@@ -54,7 +55,7 @@
                                 // активна вкладка "Общие параметры"
                                 $http({
                                     method: "POST",
-                                    url: "controller/actions/configuration/commonParam/" + ($scope.isCreate ? "create" : "update"),
+                                    url: "controller/rest/commonParam/" + ($scope.isCreate ? "create" : "update"),
                                     params: {
                                         commonParam: JSON.stringify({
                                             code: $scope.commonParam.param.code,
@@ -80,12 +81,13 @@
                                 // активна вкладка "Параметры асинхронных задач"
                                 $http({
                                     method: "POST",
-                                    url: "controller/actions/configuration/asyncParam/update",
+                                    url: "controller/rest/asyncParam/update",
                                     params: {
                                         asyncParam: JSON.stringify({
                                             id: $scope.asyncParam.param.id,
-                                            taskLimit: $scope.asyncParam.taskLimit,
-                                            shortQueueLimit: $scope.asyncParam.shortQueueLimit,
+                                            name: $scope.asyncParam.param.name,
+                                            taskLimit: $scope.asyncParam.taskLimit ? Math.floor($scope.asyncParam.taskLimit) : null,
+                                            shortQueueLimit: $scope.asyncParam.shortQueueLimit ? Math.floor($scope.asyncParam.shortQueueLimit) : null,
                                             handlerClassName: $scope.asyncParam.handlerClassName
                                         })
                                     }
@@ -142,9 +144,10 @@
                         // проверка доступности введенного пути
                         $http({
                             method: "POST",
-                            url: "controller/actions/configuration/commonParam?projection=checkReadWriteAccess",
+                            url: "controller/actions/commonParam/checkFileSystemAccess",
                             params: {
                                 param: JSON.stringify({
+                                    code: $scope.commonParam.param.code,
                                     description: $scope.commonParam.param.description,
                                     value: $scope.commonParam.value
                                 })
@@ -179,6 +182,19 @@
                             checkAccessQDefer.resolve(false);
                             return checkAccessQDefer.promise;
                         }
+                        // проверка введеного значения на количество цифр до разделителя
+                        if (truncate($scope.asyncParam.taskLimit, 18) !== Number($scope.asyncParam.taskLimit)){
+                            $dialogs.errorDialog({
+                                content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
+                                    taskTitle: $scope.asyncParam.param.name,
+                                    limitName: $filter('translate')('asyncParam.grid.columnName.taskLimit'),
+                                    limitValue: $scope.asyncParam.taskLimit,
+                                    precision: 18
+                                })
+                            });
+                            checkAccessQDefer.resolve(false);
+                            return checkAccessQDefer.promise;
+                        }
                         // проверка на числовое значение "Ограничение на выполнение задания в очереди быстрых заданий", отличное от 0
                         if ($scope.asyncParam.shortQueueLimit !== "" && (isNaN(Number($scope.asyncParam.shortQueueLimit)) || Number($scope.asyncParam.shortQueueLimit) === 0)) {
                             $dialogs.errorDialog({
@@ -186,6 +202,19 @@
                                     taskTitle: $scope.asyncParam.param.name,
                                     limitName: $filter('translate')('asyncParam.grid.columnName.shortQueueLimit'),
                                     limitValue: $scope.asyncParam.shortQueueLimit
+                                })
+                            });
+                            checkAccessQDefer.resolve(false);
+                            return checkAccessQDefer.promise;
+                        }
+                        // проверка введеного значения на количество цифр до разделителя
+                        if (truncate($scope.asyncParam.shortQueueLimit, 18) !== Number($scope.asyncParam.shortQueueLimit)){
+                            $dialogs.errorDialog({
+                                content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
+                                    taskTitle: $scope.asyncParam.param.name,
+                                    limitName: $filter('translate')('asyncParam.grid.columnName.shortQueueLimit'),
+                                    limitValue: $scope.asyncParam.shortQueueLimit,
+                                    precision: 18
                                 })
                             });
                             checkAccessQDefer.resolve(false);
@@ -220,6 +249,19 @@
                     }
                     return checkAccessQDefer.promise;
                 };
+
+                /**
+                 * @description Получение первых precision цифр числа до запятой. Если чисел меньше, возвращает всю целую часть
+                 *
+                 * @param number исходное число
+                 * @param precision максимальное количество цифр числа
+                 * @return {number} число заданной точности
+                 */
+                function truncate(number, precision) {
+                    var splittingNumber = number.toString().split('.');
+                    return Number(splittingNumber[0].substr(0, precision));
+
+                }
             }
         ]);
 

@@ -92,10 +92,10 @@ public enum ConfigurationParam {
      * @param group группа параметров {@link ConfigurationParamGroup}
      * @return список {@link ConfigurationParam} или пустой список
      */
-    public static List<ConfigurationParam> getParamsByGroup(ConfigurationParamGroup group){
+    public static List<ConfigurationParam> getParamsByGroup(ConfigurationParamGroup group) {
         List<ConfigurationParam> params = new ArrayList<ConfigurationParam>();
-        for (ConfigurationParam configurationParam : ConfigurationParam.values()){
-            if (configurationParam.group.equals(group)){
+        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
+            if (configurationParam.group.equals(group)) {
                 params.add(configurationParam);
             }
         }
@@ -144,9 +144,9 @@ public enum ConfigurationParam {
         return folder;
     }
 
-    public static ConfigurationParam getValueByCaption(String caption) {
-        for (ConfigurationParam configurationParam: ConfigurationParam.values()){
-            if (configurationParam.getCaption().equals(caption)){
+    public static ConfigurationParam getValueByCode(String code) {
+        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
+            if (configurationParam.name().equals(code)) {
                 return configurationParam;
             }
         }

@@ -31,7 +31,7 @@ public class CheckReadWriteAccessHandler extends AbstractActionHandler<CheckRead
     @Override
     public CheckReadWriteAccessResult execute(CheckReadWriteAccessAction action, ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
-        configurationService.checkReadWriteAccess(securityService.currentUserInfo(), action.getModel(), logger);
+        configurationService.checkFileSystemAccess(securityService.currentUserInfo(), action.getModel(), logger);
         CheckReadWriteAccessResult result = new CheckReadWriteAccessResult();
         if (logger.getEntries() != null) {
             result.setUuid(logEntryService.save(logger.getEntries()));

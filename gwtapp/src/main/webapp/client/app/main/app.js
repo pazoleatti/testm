@@ -768,6 +768,7 @@
         "asyncParam.validate.checkLimit": "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
         "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
         "asyncParam.validate.checkNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым (больше нуля)!",
+        "asyncParam.validate.tooLargeNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) слишком велико! Введите число, содержащее не больше {{precision}} знаков до разделителя.",
         "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000",
 
         "taxes.commonParams.confirm.cancel.title": "Отмена операции",

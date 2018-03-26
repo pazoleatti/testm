@@ -16,7 +16,7 @@ public interface ConfigurationService {
     ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo);
 
     /**
-     * Получение конфигурационных параметров (табл. CONFIGURATION)
+     * Получение модели конфигурационных параметров, на просмотр которых пользователь имеет права
      *
      * @param userInfo информация о текущем пользователе
      * @return модель {@link ConfigurationParamModel} содержащаяя информацию о всех конфигурационных параметрах
@@ -24,7 +24,9 @@ public interface ConfigurationService {
     ConfigurationParamModel getCommonConfig(TAUserInfo userInfo);
 
     /**
-     * То же что {@link #getCommonConfig(TAUserInfo)}, но без проверки прав
+     * Получение модели конфигурационных параметров без проверки прав
+     *
+     * @return модель {@link ConfigurationParamModel} содержащаяя информацию о всех конфигурационных параметрах
      */
     ConfigurationParamModel getCommonConfigUnsafe();
 
@@ -45,10 +47,10 @@ public interface ConfigurationService {
     List<Map<String, String>> getAsyncConfig();
 
     /**
-     * Получение конф.параметров по подразделению
+     * Получение конфигурациооных параметров по подразделению
      *
      * @param departmentId идентификатор подразделения
-     * @return модель
+     * @return модель {@link ConfigurationParamModel} содержащаяя информацию о конфигурационных параметрах
      */
     ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo);
 
@@ -59,19 +61,20 @@ public interface ConfigurationService {
     void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger);
 
     /**
-     * Проверка доступности путей для чтения или записи в указанном параметре
+     * Проверка конфигурационного параметра, представляющего из себя путь в файловой системе,
+     * на наличие доступа на чтение/запись в зависимости от сути параметра
      *
      * @param param    конфигурационный параметр
      * @param userInfo информация о пользователе
-     * @return uuid идентификатор логгера
+     * @return uuid идентификатор логгера с результатом проверки
      */
-    String checkReadWriteAccess(Configuration param, TAUserInfo userInfo);
+    String checkFileSystemAccess(Configuration param, TAUserInfo userInfo);
 
     /**
      * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
      */
     @Deprecated
-    void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
+    void checkFileSystemAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
 
     /**
      * Проверка общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
@@ -88,33 +91,33 @@ public interface ConfigurationService {
     void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
 
     /**
-     * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
+     * Установка значений общих конфигурационных параметров по умолчанию
      *
      * @param userInfo информация о пользователе
      */
     void resetCommonParams(TAUserInfo userInfo);
 
     /**
-     * Получение списка типов асинхронных задач
+     * Получение страницы типов асинхронных задач
      *
      * @param pagingParams параметры пагинации
      * @param userInfo     информация о пользователе
      * @return страница {@link PagingResult} с данными {@link AsyncTaskTypeData}
      */
-    PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams, TAUserInfo userInfo);
+    PagingResult<AsyncTaskTypeData> fetchAsyncParams(PagingParams pagingParams, TAUserInfo userInfo);
 
     /**
-     * Возвращяет страницу общих конфигурационных параметров
+     * Получение страницы общих конфигурационных параметров
      *
      * @param pagingParams            параметры пагинации
      * @param configurationParamGroup группа параметров приложения, которые необходимо выгрузить
      * @param userInfo                информация о пользователе
      * @return страница {@link Configuration}
      */
-    PagingResult<Configuration> fetchCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo);
+    PagingResult<Configuration> fetchCommonParams(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo);
 
     /**
-     * Создание нового значения конфигурацинного параметра
+     * Создание конфигурацинного параметра
      *
      * @param commonParam конфигурационный параметр типа "Общие параметры"
      * @param userInfo    информация текущего польователя
@@ -123,43 +126,44 @@ public interface ConfigurationService {
     String create(Configuration commonParam, TAUserInfo userInfo);
 
     /**
-     * Полученние зачений параметров "Общие параметры", которых нет в БД
+     * Полученние не созданых общих конфигурационных параметров
      *
      * @param pagingParams параметры пагинации
      * @param userInfo     информация о пользователе
      * @return страница {@link PagingResult} с данными {@link Configuration}
      */
-    PagingResult<Configuration> fetchNonChangedCommonParam(PagingParams pagingParams, TAUserInfo userInfo);
+    PagingResult<Configuration> fetchNonCreatedCommonParams(PagingParams pagingParams, TAUserInfo userInfo);
 
     /**
-     * Удаление записей конфигураций "Общие параметры"
+     * Удаление записей общих параметров конфигураций администрирования по коду
      *
-     * @param names    названия удаляемых параметров
+     * @param codes    названия удаляемых параметров
      * @param userInfo информация о текущем пользователе
      * @return uuid идентификатор логгера
      */
-    String remove(List<String> names, TAUserInfo userInfo);
+    String remove(List<String> codes, TAUserInfo userInfo);
 
     /**
-     * Обновление записей конфигурационных параметров
+     * Сохранение общих конфигурационных параметров
      *
-     * @param commonParam конфигурационные параметры "Общие параметры"
+     * @param commonParam конфигурационный параметр
      * @param userInfo    информация о пользователе
      * @return uuid идентификатор логгера
      */
     String updateCommonParam(Configuration commonParam, TAUserInfo userInfo);
 
     /**
-     * Обновление записей конфигурационных параметров
+     * Сохранение конфигурационных параметров асинхронных задач
      *
-     * @param asyncParam конфигурационные параметры "Параметры асинхронных задач"
+     * @param asyncParam конфигурационный параметр
      * @param userInfo   информация о пользователе
      * @return uuid идентификатор логгера
      */
     String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo);
 
     /**
-     * Проверка конфигурационного параметра на наличие ошибок
+     * Проверка конфигурационного параметра на валидность введенных значений и доступа к чтению/записи пути фаловой системы,
+     * указанного в параметре
      *
      * @param param    проверяемый параметр
      * @param userInfo информация о пользователе

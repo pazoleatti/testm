@@ -25,7 +25,7 @@
                         angularResource: CommonParamResource,
                         requestParameters: function () {
                             return {
-                                projection: 'adminCommonParam'
+                                projection: 'admin'
                             };
                         },
                         value: [],
@@ -84,8 +84,8 @@
                         okBtnClick: function () {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/configuration/remove",
-                                data: $filter('idExtractor')(selectedItems, 'description')
+                                url: "controller/actions/commonParam/remove",
+                                data: $filter('idExtractor')(selectedItems, 'code')
                             }).then(function (logger) {
                                 LogEntryResource.query({
                                     uuid: logger.data,
@@ -130,9 +130,10 @@
                 $scope.checkRecord = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/configuration/commonParam/checkConfigParam",
+                        url: "controller/actions/commonParam/checkValidate",
                         params: {
                             param: JSON.stringify({
+                                code: $scope.commonParamGrid.value[0].code,
                                 description: $scope.commonParamGrid.value[0].description,
                                 value: $scope.commonParamGrid.value[0].value
                             })

@@ -496,7 +496,7 @@
                 $scope.initCommonParam = function () {
                     $scope.commonParamSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "configParamFormatter");
                     CommonParamResource.query({
-                        projection: 'fetchNonChanged',
+                        projection: 'notCreated',
                         pagingParams: {
                             page: 1,
                             count: 10000
