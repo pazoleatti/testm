@@ -192,4 +192,11 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.1-ytrofimov-21" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>id=103</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
