@@ -550,12 +550,20 @@ class Report6Ndfl extends AbstractScriptClass {
 
                     /* Объекты {@code Section2DataHolder} сравниваются через equals по полям ДатаФактическогоПолученияДохода,
                     ДатаУдержанияНалога, СрокПеречисленияНалога. Если есть одинаковые объекты, то суммируем их значения по гр11(ФактДоход) и гр17(УдержНал)
-                    {@code TreeMap} поскольку делаем сортировку по ДатаУдержНал
+                    {@code TreeMap} поскольку делаем сортировку по датам
                      */
                     Map<Section2DataHolder, BigDecimal> virtuallyIncomeSum = new TreeMap<>(new Comparator<Section2DataHolder>() {
                         @Override
                         int compare(Section2DataHolder o1, Section2DataHolder o2) {
-                            return o1.witholdingDate.compareTo(o2.witholdingDate)
+                            int withholdingDateComp = o1.witholdingDate.compareTo(o2.witholdingDate)
+                            if (withholdingDateComp != 0) {
+                                return withholdingDateComp
+                            }
+                            int taxTransferDateComp = o1.taxTransferDate.compareTo(o2.taxTransferDate)
+                            if (taxTransferDateComp != 0) {
+                                return taxTransferDateComp
+                            }
+                            return o1.virtuallyReceivedIncomeDate.compareTo(o2.virtuallyReceivedIncomeDate)
                         }
                     })
                     Map<Section2DataHolder, BigDecimal> withholdingTaxSum = [:]
@@ -578,7 +586,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         ДохНал() {
                             for (Section2DataHolder section2DataItem : virtuallyIncomeSum.keySet()) {
                                 СумДата(
-                                        ДатаФактДох: section2DataItem.virtuallyReceivedIncomeDate ? formatDate(section2DataItem.virtuallyReceivedIncomeDate): SharedConstants.DATE_ZERO_AS_STRING,
+                                        ДатаФактДох: section2DataItem.virtuallyReceivedIncomeDate ? formatDate(section2DataItem.virtuallyReceivedIncomeDate) : SharedConstants.DATE_ZERO_AS_STRING,
                                         ДатаУдержНал: formatDate(section2DataItem.witholdingDate),
                                         СрокПрчслНал: formatDate(section2DataItem.taxTransferDate).equals(SharedConstants.DATE_ZERO_AS_DATE) ? SharedConstants.DATE_ZERO_AS_STRING : formatDate(section2DataItem.taxTransferDate),
                                         ФактДоход: virtuallyIncomeSum.get(section2DataItem),
