@@ -142,6 +142,16 @@ public class DeclarationTemplateEventScriptDaoImpl extends AbstractDao implement
     @Override
     public void updateScriptList(DeclarationTemplate declarationTemplate) {
         List<DeclarationTemplateEventScript> eventScriptsForRemove = fetch(declarationTemplate.getId());
+        for (DeclarationTemplateEventScript eventScript : eventScriptsForRemove){
+            if (declarationTemplate.getEventScripts().contains(eventScript)){
+                for (DeclarationTemplateEventScript declarationTemplateEventScript: declarationTemplate.getEventScripts()){
+                    if (declarationTemplateEventScript.getDeclarationTemplateId().equals(eventScript.getDeclarationTemplateId()) &&
+                           declarationTemplateEventScript.getEventId().equals(eventScript.getEventId())){
+                        declarationTemplateEventScript.setId(eventScript.getId());
+                    }
+                }
+            }
+        }
         eventScriptsForRemove.removeAll(declarationTemplate.getEventScripts());
         for (DeclarationTemplateEventScript declarationTemplateEventScript: eventScriptsForRemove) {
             if (declarationTemplateEventScript.getId() != null) {
