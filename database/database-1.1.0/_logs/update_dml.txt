@@ -1,0 +1,206 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:10:34 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+update attributes ref_book_ndfl_detaill
+
+1 row updated.
+
+
+1 row updated.
+
+rename subreports 2-НДФЛ 1,2-НДФЛ 2
+
+2 rows updated.
+
+update event
+
+1 row updated.
+
+merge configuration
+
+2 rows merged.
+
+update ref_book_income_kind
+
+1 row updated.
+
+delete async_task_type
+
+2 rows deleted.
+
+update async_task_type
+
+5 rows updated.
+
+
+1 row updated.
+
+
+5 rows updated.
+
+update ref_book_tariff_payer
+
+0 rows updated.
+
+insert new asnu
+
+1 row created.
+
+update and alter ref_books
+
+9 rows updated.
+
+
+1 row updated.
+
+
+0 rows updated.
+
+
+3 rows updated.
+
+
+8 rows deleted.
+
+
+Commit complete.
+
+
+Table altered.
+
+
+1 row updated.
+
+
+1 row deleted.
+
+
+Commit complete.
+
+
+Table altered.
+
+
+0 rows updated.
+
+
+22 rows deleted.
+
+
+43 rows deleted.
+
+
+Commit complete.
+
+
+Table altered.
+
+
+2 rows deleted.
+
+
+0 rows deleted.
+
+
+106 rows deleted.
+
+
+4 rows deleted.
+
+
+Commit complete.
+
+
+Table altered.
+
+
+5 rows deleted.
+
+
+4 rows deleted.
+
+
+0 rows deleted.
+
+
+1 row deleted.
+
+
+1 row deleted.
+
+
+Commit complete.
+
+
+Table altered.
+
+
+Table altered.
+
+
+Table altered.
+
+
+0 rows deleted.
+
+
+4 rows deleted.
+
+
+Commit complete.
+
+
+7 rows deleted.
+
+
+6 rows deleted.
+
+
+1 row updated.
+
+UPDATE declaration_subreport_params
+
+1 row created.
+
+
+1 row created.
+
+
+1 row deleted.
+
+
+1 row deleted.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+2 rows updated.
+
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options

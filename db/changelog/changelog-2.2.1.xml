@@ -192,6 +192,33 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3025 -->
+    <changeSet id="2.2.1-dloshkarev-1" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4003 2.2 Печатное представление 6-НДФЛ: некорректные названия полей на титульном листе-->
+	<changeSet id="2.2.1-rnurgaleev-0" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4000 2.2 Печатное представление 6НДФЛ: отсутствует наименование поля (7) "по месту нахождения учета (код)"
+	https://jira.aplana.com/browse/SBRFNDFL-4001 2.2 PDF-отчет 6-НДФЛ: наименование поля "по месту нахождения учета (код)" начинается с большой буквы-->
+	<changeSet id="2.2.1-rnurgaleev-1" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
+
     <changeSet id="2.2.1-ytrofimov-21" author="ytrofimov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>

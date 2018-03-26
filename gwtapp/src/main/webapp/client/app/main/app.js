@@ -735,6 +735,8 @@
         "configParam.confirm.rejectEditingConfig.title": "Отмена операции редактирования параметра",
         "configParam.confirm.rejectCreatingConfig.text": "Отменить операцию создания параметра?",
         "configParam.confirm.rejectEditingConfig.text": "Отменить операцию редактирования параметра?",
+        "configParam.confirm.deleteConfig.title": "Удаление конфигурационного параметра",
+        "configParam.confirm.deleteConfig.text" : "Вы уверены, что хотите удалить параметр?",
         "configParam.modal.createParam.title": "Создание конфигурационного параметра",
         "configParam.modal.editParam.title": "Редактирование конфигурационного параметра",
         "tab.configParam.commonParam": "Общие параметры",

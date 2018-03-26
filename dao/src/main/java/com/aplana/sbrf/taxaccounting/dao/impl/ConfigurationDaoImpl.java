@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -193,9 +191,9 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public void createCommonParam(ConfigurationParam param, String value) {
+    public void createCommonParam(Configuration configuration) {
         getJdbcTemplate().update("INSERT INTO CONFIGURATION VALUES (?, 0, ?) ",
-                new Object[]{param.name(), value},
+                new Object[]{configuration.getCode(), configuration.getValue()},
                 new int[]{Types.VARCHAR, Types.VARCHAR});
     }
 

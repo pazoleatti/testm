@@ -1,0 +1,103 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:13:48 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+delete ref_book
+
+PL/SQL procedure successfully completed.
+
+delete tax_type
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+1 row deleted.
+
+async_task_type
+
+16 rows deleted.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+0 rows updated.
+
+
+0 rows updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+4 rows merged.
+
+configuration_scheduler
+
+5 rows merged.
+
+
+1 row merged.
+
+fill ref_book_calendar
+
+PL/SQL procedure successfully completed.
+
+delete event
+
+21 rows deleted.
+
+fill decl_template_checks
+
+PL/SQL procedure successfully completed.
+
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options

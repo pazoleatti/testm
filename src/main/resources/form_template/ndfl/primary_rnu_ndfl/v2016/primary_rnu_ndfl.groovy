@@ -1074,6 +1074,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def incomeAccruedRowNum = null;
         Date incomePayoutDate = null
         def incomePayoutRowNum = null;
+        Date taxDate = null
+        def taxRowNum = null;
         def allRowNums = new ArrayList<String>();
 
         SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
@@ -1088,16 +1090,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
                 incomePayoutRowNum = rowNum
             }
+            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаНалог') && node.attributes['ДатаНалог'] != null) {
+                taxDate = formatter.parse(node.attributes['ДатаНалог']);
+                taxRowNum = rowNum
+            }
         }
 
         // Доход.Дата.Начисление
         boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
         // Доход.Дата.Выплата
         boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
-        if (incomeAccruedDateOk || incomePayoutDateOk) {
+        // НДФЛ.Расчет.Дата
+        boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
+        if (incomeAccruedDateOk || incomePayoutDateOk || taxDateOk) {
             return true
         } else {
-            def rowNums = new ArrayList<String>();
+            def rowNums = new HashSet<String>();
             if (!incomeAccruedDateOk && incomeAccruedRowNum != null) {
                 // Дата.Начисление не попала в период
                 rowNums.add(incomeAccruedRowNum)
@@ -1106,26 +1114,36 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 // Дата.Выплата не попала в период
                 rowNums.add(incomePayoutRowNum)
             }
-            if (incomeAccruedRowNum == null && incomePayoutRowNum == null) {
+            if (!taxDateOk && taxRowNum != null) {
+                // НДФЛ.Расчет.Дата не попала в период
+                rowNums.add(taxRowNum)
+            }
+            if (incomeAccruedRowNum == null && incomePayoutRowNum == null && taxRowNum == null) {
                 // Обе даты пустые - выводим сообщение по каждой строке операции (т.к не знаем где должна была быть каждая дата)
                 rowNums = allRowNums
             }
             for (String rowNum : rowNums) {
+                DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, rowNum)
-                logPeriodError(pathError, incomeAccruedDate, incomePayoutDate, inp, fio, operationId)
+                if (!incomeAccruedDateOk) {
+                    logPeriodError(departmentReportPeriod, pathError, C_INCOME_ACCRUED_DATE, incomeAccruedDate, inp, fio, operationId)
+                }
+                if (!incomePayoutDateOk) {
+                    logPeriodError(departmentReportPeriod, pathError, C_INCOME_PAYOUT_DATE, incomePayoutDate, inp, fio, operationId)
+                }
+                if (!taxDateOk) {
+                    logPeriodError(departmentReportPeriod, pathError, C_TAX_DATE, taxDate, inp, fio, operationId)
+                }
             }
             return false
         }
     }
 
-    void logPeriodError(String pathError, Date incomeAccruedDate, Date incomePayoutDate, String inp, String fio, String operationId) {
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
-
-        String errMsg = String.format("Значения гр. %s (\"%s\") и гр. %s (\"%s\") не входят в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
-                C_INCOME_ACCRUED_DATE,
-                incomeAccruedDate != null ? ScriptUtils.formatDate(incomeAccruedDate) : "Не определено",
-                C_INCOME_PAYOUT_DATE,
-                incomePayoutDate != null ? ScriptUtils.formatDate(incomePayoutDate) : "Не определено",
+    void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String pathError, String group, Date date, String inp, String fio, String operationId) {
+        String baseMessage = "Значения гр. %s (\"%s\") не входит в отчетный период налоговой формы (Форма.Период), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s."
+        String errMsg = String.format(baseMessage,
+                group,
+                date != null ? ScriptUtils.formatDate(date) : "Не определено",
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
                 operationId,
                 fio, inp

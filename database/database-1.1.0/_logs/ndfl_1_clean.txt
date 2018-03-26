@@ -1,0 +1,30 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Mar 1 11:10:37 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+
+8 rows deleted.
+
+
+23 rows deleted.
+
+
+4 rows deleted.
+
+
+10 rows deleted.
+
+
+5 rows deleted.
+
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
