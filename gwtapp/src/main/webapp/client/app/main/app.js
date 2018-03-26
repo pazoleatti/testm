@@ -930,6 +930,11 @@
                 $rootScope.permissionChecker = angular.injector(['app.permissionUtils']).get('PermissionChecker');
                 $rootScope.validationUtils = angular.injector(['app.validationUtils']).get('ValidationUtils');
                 $rootScope.APP_CONSTANTS = angular.injector(['app.constants']).get('APP_CONSTANTS');
+                // Паттерны для проверки полей ввода
+                $rootScope.patterns = {
+                    number:         /^[+-]?([0-9]*)?([.][0-9]{1,2})?$/,     // Целые числа и числа с 2мя знаками после запятой
+                    fourDigits:     /^\d{4}$/                               // 4 цифры
+                }
             });
         });
 

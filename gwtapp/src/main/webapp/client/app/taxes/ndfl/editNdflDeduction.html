@@ -88,7 +88,7 @@
                             <input data-ng-model="row.notifSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^[+-]?([0-9]*[.])?[0-9]+$/"
+                                   data-ng-pattern="patterns.number"
                                    title="{{title.documentAmount}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
                                 translate}}
@@ -105,7 +105,7 @@
                             <input data-ng-model="row.notifSource"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^\d{4}$/"
+                                   data-ng-pattern="patterns.fourDigits"
                                    data-required
                                    title="{{title.sourceCode}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
@@ -146,7 +146,7 @@
                             <input data-ng-model="row.incomeCode"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^\d{4}$/"
+                                   data-ng-pattern="patterns.fourDigits"
                                    data-required
                                    title="{{title.incomeCode}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
@@ -165,7 +165,7 @@
                             <input data-ng-model="row.incomeSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^[+-]?([0-9]*[.])?[0-9]+$/"
+                                   data-ng-pattern="patterns.number"
                                    data-required
                                    title="{{title.incomeAmount}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
@@ -208,7 +208,7 @@
                             <input data-ng-model="row.periodPrevSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^[+-]?([0-9]*[.])?[0-9]+$/"
+                                   data-ng-pattern="patterns.number"
                                    title="{{ndflDeduction.edit.periodPrevSumm}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
                                 translate}}
@@ -223,7 +223,7 @@
                             <input data-ng-model="row.periodCurrSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^[+-]?([0-9]*[.])?[0-9]+$/"
+                                   data-ng-pattern="patterns.number"
                                    data-required
                                    title="{{ndflDeduction.edit.periodCurrSumm}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |

@@ -22,7 +22,7 @@
                             <input data-ng-model="row.summ"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^[+-]?([0-9]*[.])?[0-9]+$/"
+                                   data-ng-pattern="patterns.number"
                                    data-required
                                    title="{{ndlfPrepayment.edit.summ}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
@@ -81,7 +81,7 @@
                             <input data-ng-model="row.notifSource"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
-                                   data-ng-pattern="/^\d{4}$/"
+                                   data-ng-pattern="patterns.fourDigits"
                                    data-required
                                    title="{{title.codeNO}}"/>
                             <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |

@@ -89,8 +89,12 @@
                         <div data-aplana-field>
                             <input data-ng-model="row.incomeAccruedSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
+                                   data-ng-pattern="patterns.number"
                                    type="text"
                                    title="{{row.amountCalcIncome}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -130,8 +134,12 @@
                         <div data-aplana-field>
                             <input data-ng-model="row.incomePayoutSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
+                                   data-ng-pattern="patterns.number"
                                    type="text"
                                    title="{{row.amountPaymentIncome}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -151,7 +159,11 @@
                             <input data-ng-model="row.taxBase"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.taxBase}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -164,7 +176,11 @@
                             <input data-ng-model="row.totalDeductionsSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.amountDeduction}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -195,7 +211,11 @@
                             <input data-ng-model="row.calculatedTax"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.calculatedTax}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
@@ -206,7 +226,11 @@
                             <input data-ng-model="row.withholdingTax"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.withholdingTax}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,7 +252,11 @@
                             <input data-ng-model="row.notHoldingTax"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.notHoldingTax}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
@@ -239,7 +267,11 @@
                             <input data-ng-model="row.overholdingTax"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.overholdingTax}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
@@ -250,7 +282,11 @@
                             <input data-ng-model="row.refoundTax"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
+                                   data-ng-pattern="patterns.number"
                                    title="{{row.refoundTax}}"/>
+                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
