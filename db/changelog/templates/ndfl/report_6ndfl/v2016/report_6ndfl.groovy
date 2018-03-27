@@ -536,8 +536,7 @@ class Report6Ndfl extends AbstractScriptClass {
                     // Определяем строки для заполнения раздела 2
                     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
                         if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
-                                && ndflPersonIncome.taxTransferDate != null
-                                && (getReportPeriodStartDate() <= ndflPersonIncome.taxTransferDate && getReportPeriodEndDate() >= ndflPersonIncome.taxTransferDate)) {
+                                && (getReportPeriodCalendarStartDate() <= ndflPersonIncome.taxTransferDate && getReportPeriodEndDate() >= ndflPersonIncome.taxTransferDate)) {
                             List<Date> incomeAccruedDateList = []
                             for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
                                 if (incomeGrouped.incomeAccruedDate != null) {
