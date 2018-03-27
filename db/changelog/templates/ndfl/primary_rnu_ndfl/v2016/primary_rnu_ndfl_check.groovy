@@ -1,10 +1,18 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
@@ -133,7 +141,7 @@ class Check extends AbstractScriptClass {
     final String LOG_TYPE_2_18 = "\"НДФЛ не удержанный\" рассчитан некорректно"
     final String LOG_TYPE_2_19 = "\"НДФЛ излишне удержанный\" рассчитан некорректно"
     final String LOG_TYPE_2_20 = "\"НДФЛ возвращеный НП\" рассчитан некорректно"
-    final String LOG_TYPE_2_21 = "\"Срок перечисления в бюджет\" рассчитан некорректно"
+    final String LOG_TYPE_2_21 = "\"Срок перечисления в бюджет\" указан некорректно"
     final String LOG_TYPE_NOT_ZERO = "Значение не может быть \"0\""
     final String LOG_TYPE_3_7 = "\"Код источника подтверждающего документа\" указан некорректно"
     final String LOG_TYPE_3_10 = "\"Дата начисленного дохода\" указана некорректно"
@@ -141,9 +149,13 @@ class Check extends AbstractScriptClass {
     final String LOG_TYPE_3_11 = "\"Код начисленного дохода\" указан некорректно"
     final String LOG_TYPE_3_12 = "\"Сумма начисленного дохода\" указана некорректно"
     final String LOG_TYPE_3_16 = "\"Сумма применения вычета\" указана некорректно"
+    final String LOG_TYPE_SECTION4 = "Раздел 4 заполнен некорректно"
 
     // Сведения о доходах в виде авансовых платежей
-    final String P_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление"
+    final String P_SUMM = "Сумма фиксированного авансового платежа" // графа 4 раздела 4
+    final String P_NOTIF_NUM = "Номер уведомления" // графа 5 раздела 4
+    final String P_NOTIF_DATE = "Дата выдачи уведомления" // графа 6 раздела 4
+    final String P_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление" // графа 7 раздела 4
 
     // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
     Map<Long, NdflPersonFL> ndflPersonFLMap = [:]
@@ -268,6 +280,11 @@ class Check extends AbstractScriptClass {
 
                 // Проверки Сведения о вычетах
                 checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, personMap)
+
+                ScriptUtils.checkInterrupted();
+
+                // Проверки Сведения о доходах в виде авансовых платежей
+                checkDataPrepayment(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList, personMap)
 
                 logForDebug("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
         }
@@ -899,7 +916,7 @@ class Check extends AbstractScriptClass {
                             C_TAX_SUMM
                     )
             )
-            //1 Раздел 2. Графа 5 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
+            //2 Раздел 2. Графа 5 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column5Fill(),
@@ -911,7 +928,7 @@ class Check extends AbstractScriptClass {
                             C_TAX_SUMM
                     )
             )
-            //2 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
+            //3 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column10Fill(),
                     new Column6Fill(),
@@ -921,7 +938,7 @@ class Check extends AbstractScriptClass {
                             C_INCOME_ACCRUED_SUMM
                     )
             )
-            //3 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
+            //4 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column11Fill(),
                     new Column7Fill(),
@@ -931,7 +948,7 @@ class Check extends AbstractScriptClass {
                             C_INCOME_PAYOUT_SUMM
                     )
             )
-            //3 Раздел 2. Графа 8 Должна быть всегда заполнена
+            //5 Раздел 2. Графа 8 Должна быть всегда заполнена
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column8Fill(),
@@ -940,7 +957,7 @@ class Check extends AbstractScriptClass {
                             C_OKTMO
                     )
             )
-            //3 Раздел 2. Графа 9 Должна быть всегда заполнена
+            //6 Раздел 2. Графа 9 Должна быть всегда заполнена
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column8Fill(),
@@ -949,7 +966,7 @@ class Check extends AbstractScriptClass {
                             C_KPP
                     )
             )
-            //4 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
+            //7 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column6Fill(),
                     new Column10Fill(),
@@ -959,7 +976,7 @@ class Check extends AbstractScriptClass {
                             C_INCOME_ACCRUED_DATE
                     )
             )
-            //5 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
+            //8 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7Fill(),
                     new Column11Fill(),
@@ -969,55 +986,36 @@ class Check extends AbstractScriptClass {
                             C_INCOME_PAYOUT_DATE
                     )
             )
-            //6 Раздел 2. Графа 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22, 23, 24
+            //9 Раздел 2. Графы 14 Должна быть заполнена, если заполнена Раздел 2. Графа 10 ИЛИ Раздел 2. Графа 11.
             columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column22And23And24Fill(),
-                    new Column12NotFill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: "",
-                            C_PAYMENT_DATE,
-                            C_PAYMENT_NUMBER,
-                            C_TAX_SUMM
-                    )
-            )
-            //7 Раздел 2. Графы 13 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column22And23And24NotFill(),
-                    new Column13Fill(applyTemporalySolution),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            C_TAX_BASE,
-                            C_PAYMENT_DATE,
-                            C_PAYMENT_NUMBER,
-                            C_TAX_SUMM
-                    )
-            )
-            //7 Раздел 2. Графы 14 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column22And23And24NotFill(),
+                    new Column10Or11Fill(),
                     new Column14Fill(applyTemporalySolution),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            C_TAX_RATE,
-                            C_PAYMENT_DATE,
-                            C_PAYMENT_NUMBER,
-                            C_TAX_SUMM
+                    String.format("Не заполнена гр. \"%s\".",
+                            C_TAX_RATE
                     )
             )
-            //7 Раздел 2. Графы 15 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
+            //10 Раздел 2. Графа 13 Должна быть заполнена, если заполнена Раздел 2. Графа 10.
             columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column22And23And24NotFill(),
+                    new Column10Fill(),
+                    new Column13Fill(applyTemporalySolution),
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                            C_TAX_BASE,
+                            C_INCOME_ACCRUED_SUMM
+                    )
+            )
+            //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена Раздел 2. Графа 10.
+            columnFillConditionDataList << new ColumnFillConditionData(
+                    new Column10Fill(),
                     new Column15Fill(applyTemporalySolution),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
                             C_TAX_DATE,
-                            C_PAYMENT_DATE,
-                            C_PAYMENT_NUMBER,
-                            C_TAX_SUMM
+                            C_INCOME_ACCRUED_SUMM
                     )
             )
-            //8 Раздел 2. Графы 6 должны быть заполнены, если заполнена Раздел 2. Графа 16
+            //12.1 Раздел 2. Графы 6 должны быть заполнены, если заполнена Раздел 2. Графа 16
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column16Fill(),
                     new Column6Fill(),
@@ -1027,7 +1025,7 @@ class Check extends AbstractScriptClass {
                             C_CALCULATED_TAX
                     )
             )
-            //8 Раздел 2. Графы 10 должны быть заполнены, если заполнена Раздел 2. Графа 16
+            //12.2 Раздел 2. Графы 10 должны быть заполнены, если заполнена Раздел 2. Графа 16
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column16Fill(),
                     new Column10Fill(),
@@ -1037,45 +1035,8 @@ class Check extends AbstractScriptClass {
                             C_CALCULATED_TAX
                     )
             )
-            //9 Раздел 2. Графа 6 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column18Fill(),
-                    new Column6Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
-                            C_NOT_HOLDING_TAX
-                    )
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column19Fill(),
-                    new Column6Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
-                            C_OVERHOLDING_TAX
-                    )
-            )
-            //9 Раздел 2. Графа 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column18Fill(),
-                    new Column10Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_SUMM,
-                            C_NOT_HOLDING_TAX
-                    )
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column19Fill(),
-                    new Column10Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_SUMM,
-                            C_OVERHOLDING_TAX
-                    )
-            )
-            //10 Раздел 2. Графы 7 должны быть заполнены, если заполнена Раздел 2. Графа 17
+            //13???
+            //14.1 Раздел 2. Графы 7 должны быть заполнены, если заполнена Раздел 2. Графа 17
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7Fill(),
@@ -1086,7 +1047,7 @@ class Check extends AbstractScriptClass {
                     )
 
             )
-            //10 Раздел 2. Графы 11 должны быть заполнены, если заполнена Раздел 2. Графа 17
+            //14.2 Раздел 2. Графы 11 должны быть заполнены, если заполнена Раздел 2. Графа 17
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column11Fill(),
@@ -1096,28 +1057,7 @@ class Check extends AbstractScriptClass {
                             C_WITHHOLDING_TAX
                     )
             )
-            //11 Раздел 2. Графы 7 должны быть заполнены, если заполнена Раздел 2. Графа 20
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column20Fill(),
-                    new Column7Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_PAYOUT_DATE,
-                            C_REFOUND_TAX
-                    )
-
-            )
-            //11 Раздел 2. Графы 11 должны быть заполнены, если заполнена Раздел 2. Графа 20
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column20Fill(),
-                    new Column11Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_PAYOUT_SUMM,
-                            C_REFOUND_TAX
-                    )
-            )
-            //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7, 11
+            //15.1 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7, 11
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7And11Fill(),
                     new Column21Fill(),
@@ -1129,7 +1069,7 @@ class Check extends AbstractScriptClass {
                     )
 
             )
-            //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 23, 23, 24
+            //15.2 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 23, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24Fill(),
                     new Column21Fill(),
@@ -1142,7 +1082,7 @@ class Check extends AbstractScriptClass {
                     )
 
             )
-            //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7, 11 и 22, 23, 24
+            //15.3 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7, 11 и 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7And11And22And23And24NotFill(),
                     new Column21NotFill(),
@@ -1156,7 +1096,7 @@ class Check extends AbstractScriptClass {
                             C_TAX_SUMM
                     )
             )
-            //13 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
+            //16 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column22And23And24FillOrColumn22And23And24NotFill(),
@@ -1720,6 +1660,7 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
+                /* todo Убрал проверку Заполнения Раздела 2 Графы 17, в SBRFNDFL-3997 её доработают
                 // СведДох7 НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
                 if (ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
                     // СведДох7.1
@@ -1820,7 +1761,7 @@ class Check extends AbstractScriptClass {
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
-                }
+                }*/
 
                 // "Сумма Граф 24"
                 // Отменил изменения https://jira.aplana.com/browse/SBRFNDFL-1307, поскольку они привели к https://jira.aplana.com/browse/SBRFNDFL-1483
@@ -2141,6 +2082,43 @@ class Check extends AbstractScriptClass {
         logForDebug("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
+    /**
+     * Проверки для Раздел 4. Сведения о доходах в виде авансовых платежей
+     */
+    def checkDataPrepayment(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
+                            List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+        long time = System.currentTimeMillis()
+
+        Map<Long, NdflPerson> personByIdMap = ndflPersonList.collectEntries{[it.id, it]}
+
+        for (def prepayment : ndflPersonPrepaymentList) {
+            def operationId = prepayment.operationId
+            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(prepayment.ndflPersonId)
+            String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
+
+            def person = personByIdMap[prepayment.ndflPersonId]
+
+            if (person.status != "6") {
+                def logErrorIfFieldFilled = { fieldValue, fieldName ->
+                    if (fieldValue) {
+                        String errMsg = String.format("Значение гр. \"%s\" (%s) не должно быть заполнено для  \"Статуса НП\" (\"%s\") ",
+                                fieldName, fieldValue instanceof Date ? fieldValue.format("dd.MM.yyyy") : fieldValue, person.status
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
+                        logger.logCheck("%s. %s.",
+                                true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)
+                    }
+                }
+                logErrorIfFieldFilled(prepayment.summ, P_SUMM)
+                logErrorIfFieldFilled(prepayment.notifNum, P_NOTIF_NUM)
+                logErrorIfFieldFilled(prepayment.notifDate, P_NOTIF_DATE)
+                logErrorIfFieldFilled(prepayment.notifSource, P_NOTIF_SOURCE)
+            }
+        }
+
+        logForDebug("Проверки сведений о доходах в виде авансовых платежей (" + (System.currentTimeMillis() - time) + " мс)")
+    }
+
     class NdflPersonFL {
         String fio
         String inp
@@ -2241,6 +2219,15 @@ class Check extends AbstractScriptClass {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             return ndflPersonIncome.incomePayoutSumm != null
+        }
+    }
+    /**
+     * Проверка: "Раздел 2. Графа 10 или 11 заполнена"
+     */
+    class Column10Or11Fill implements ColumnFillConditionChecker {
+        @Override
+        boolean check(NdflPersonIncome ndflPersonIncome) {
+            return ndflPersonIncome.incomeAccruedSumm != null || ndflPersonIncome.incomePayoutSumm != null
         }
     }
     /**
