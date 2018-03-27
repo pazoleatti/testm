@@ -405,13 +405,18 @@ class Report6Ndfl extends AbstractScriptClass {
                                 && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())) {
                             incomeWithholdingTotal = incomeWithholdingTotal.add(item.withholdingTax)
                         }
-                        if (item.notHoldingTax != null) {
+                        if (item.notHoldingTax != null
+                                && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
+                                || (item.incomePayoutDate != null && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())))) {
                             incomeNotHoldingTaxSum = incomeNotHoldingTaxSum.add(item.notHoldingTax)
                         }
-                        if (item.overholdingTax != null) {
+                        if (item.overholdingTax != null
+                                && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
+                                || (item.incomePayoutDate != null && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())))) {
                             incomeOverholdingTaxSum = incomeOverholdingTaxSum.add(item.overholdingTax)
                         }
-                        if (item.refoundTax != null && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
+                        if (item.refoundTax != null
+                                && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
                                 || (item.incomePayoutDate != null && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())))) {
                             refoundTotal += item.refoundTax
                         }
