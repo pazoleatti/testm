@@ -97,9 +97,9 @@ class Check extends AbstractScriptClass {
     final String C_INCOME_CODE = "Код дохода" //"Доход.Вид.Код"
     final String C_TYPE_CODE = "Код вычета" //" Код вычета"
     final String C_NOTIF_SOURCE = "Подтверждающий документ. Код источника"
-    final String C_PAYMENT_DATE = "Дата платежного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
-    final String C_PAYMENT_NUMBER = "Номер платежного поручения"//"НДФЛ.Перечисление в бюджет.Платежное поручение.Номер"
-    final String C_TAX_SUMM = "Сумма платежного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+    final String C_PAYMENT_DATE = "Дата платёжного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
+    final String C_PAYMENT_NUMBER = "Номер платёжного поручения"//"НДФЛ.Перечисление в бюджет.Платежное поручение.Номер"
+    final String C_TAX_SUMM = "Сумма платёжного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
     final String C_INCOME_ACCRUED_DATE = "Дата начисления дохода" //"Доход.Дата.Начисление"
     final String C_INCOME_ACCRUED_SUMM = "Сумма начисленного дохода" //"Доход.Сумма.Начисление"
     final String C_INCOME_PAYOUT_DATE = "Дата выплаты дохода" //"Доход.Дата.Выплата"
@@ -114,7 +114,7 @@ class Check extends AbstractScriptClass {
     final String C_NOT_HOLDING_TAX = "НДФЛ не удержанный" //"НДФЛ.Расчет.Сумма.Не удержанный"
     final String C_OVERHOLDING_TAX = "НДФЛ излишне удержанный" //"НДФЛ.Расчет.Сумма.Излишне удержанный"
     final String C_WITHHOLDING_TAX = "НДФЛ удержанный" //"НДФЛ.Расчет.Сумма.Удержанный"
-    final String C_REFOUND_TAX = "НДФЛ возвращенный НП" //C_REFOUND_TAX
+    final String C_REFOUND_TAX = "НДФЛ возвращённый НП" //C_REFOUND_TAX
     final String C_TAX_TRANSFER_DATE = "Срок перечисления в бюджет" //"НДФЛ.Перечисление в бюджет.Срок"
     final String C_PERIOD_CURR_SUMM = "Вычет. Текущий период. Сумма" //" Применение вычета.Текущий период.Сумма"
     final String C_INCOME_ACCRUED = "Доход. Дата" //" Начисленный доход.Дата"
