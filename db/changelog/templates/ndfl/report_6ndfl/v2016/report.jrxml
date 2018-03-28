@@ -15673,7 +15673,7 @@
 				<text><![CDATA[Раздел 2. Даты и суммы фактически полученных доходов и удержанного налога на доходы физических лиц]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="7739b265-9f48-4bb2-a17d-99cebc5925b2" x="240" y="33" width="250" height="25" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="7739b265-9f48-4bb2-a17d-99cebc5925b2" x="240" y="32" width="250" height="25" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="9" isItalic="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
