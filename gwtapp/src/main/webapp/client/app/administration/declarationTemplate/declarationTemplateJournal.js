@@ -22,18 +22,23 @@
                     $scope.declarationType = declarationType;
                 });
 
+                DeclarationTemplateResource.querySource({
+                        id: $stateParams.declarationTypeId,
+                        projection: 'allByTypeId'
+                    },
+                    function (data) {
+                        if (data) {
+                            $scope.declarationTemplateJournalGrid.ctrl.refreshGridData(data);
+                        }
+                    }
+                );
+
                 $scope.declarationTemplateJournalGrid = {
                     ctrl: {},
                     value: [],
                     options: {
-                        datatype: "angularResource",
-                        angularResource: DeclarationTemplateResource,
-                        requestParameters: function () {
-                            return {
-                                projection: 'allByTypeId',
-                                id: $stateParams.declarationTypeId
-                            };
-                        },
+                        datatype: "local",
+                        data: [],
                         colNames: [
                             '',
                             $filter('translate')('declarationTemplateJournal.grid.name'),

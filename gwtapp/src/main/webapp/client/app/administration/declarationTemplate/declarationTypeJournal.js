@@ -15,17 +15,23 @@
 
         .controller('DeclarationTypeJournalCtrl', ['$scope', '$filter', 'DeclarationTypeResource', '$http', 'APP_CONSTANTS',
             function ($scope, $filter, DeclarationTypeResource, $http, APP_CONSTANTS) {
+
+                DeclarationTypeResource.querySource({
+                        projection: "declarationTypeJournal"
+                    },
+                    function (data) {
+                        if (data) {
+                            $scope.declarationTypeJournalGrid.ctrl.refreshGridData(data);
+                        }
+                    }
+                );
+
                 $scope.declarationTypeJournalGrid = {
                     ctrl: {},
                     value: [],
                     options: {
-                        datatype: "angularResource",
-                        angularResource: DeclarationTypeResource,
-                        requestParameters: function () {
-                            return {
-                                projection: 'declarationTypeJournal'
-                            };
-                        },
+                        datatype: "local",
+                        data: [],
                         colNames: [
                             '',
                             $filter('translate')('declarationTypeJournal.grid.name'),

@@ -331,7 +331,8 @@
          */
         .factory('DeclarationTypeResource', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationType?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
 

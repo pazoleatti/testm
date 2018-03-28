@@ -27,7 +27,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService"/>
     </bean>
 
-    <bean id="formTemplateController" class="com.aplana.sbrf.taxaccounting.web.mvc.DeclarationTemplateController">
+    <bean id="formTemplateController" class="com.aplana.sbrf.taxaccounting.web.mvc.DeclarationTemplateControllerGWT">
         <constructor-arg index="0" ref="securityService"/>
         <constructor-arg index="1" ref="declarationTemplateService"/>
         <constructor-arg index="2" ref="declarationTemplateImpexService"/>

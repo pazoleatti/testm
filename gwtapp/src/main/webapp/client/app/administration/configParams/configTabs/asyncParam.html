@@ -2,25 +2,23 @@
      data-ng-controller="asyncParamController" style="position: absolute; height: 100%; width: 100%;">
 
     <!--Панель кнопок -->
-    <div class="button_panel" style="padding: 10px 12px 0;">
-        <div class="btn-toolbar" role="toolbar">
-
+    <div id="asyncParamGridTop">
+        <div role="toolbar" style="padding: 12px;">
             <!--Редактировать запись -->
             <span>
-                    <button type="button" class="btn btn-default"
-                            data-ng-disabled="!checkPermissionForGridValue()"
-                            data-ng-click="updateRecord()">
-                        <span data-translate-once="configParam.button.editRecord"></span>
-                    </button>
-                </span>
-
+                <button type="button" class="btn btn-default"
+                        data-ng-disabled="!checkPermissionForGridValue()"
+                        data-ng-click="updateRecord()">
+                    <span data-translate-once="configParam.button.editRecord"></span>
+                </button>
+            </span>
         </div>
     </div>
 
     <div data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector="#asyncParamGridContainer"
-         data-grid-fill-space-container-selector-top="none"
+         data-grid-fill-space-container-selector-top="#asyncParamGridTop"
          data-grid-options="asyncParamGrid.options"
          data-grid-ctrl="asyncParamGrid.ctrl"
          data-ng-model="asyncParamGrid.value"

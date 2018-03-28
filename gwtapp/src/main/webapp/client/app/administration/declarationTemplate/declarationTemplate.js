@@ -16,7 +16,6 @@
         .controller('DeclarationTemplateCtrl', ['$scope', '$filter', '$stateParams', 'DeclarationTemplateResource', '$logPanel', '$dialogs', 'APP_CONSTANTS', 'BlobDataResource',
             function ($scope, $filter, $stateParams, DeclarationTemplateResource, $logPanel, $dialogs, APP_CONSTANTS, BlobDataResource) {
                 $scope.declarationTemplate = {formType: {}};
-                $scope.templateChecksGrid = {};
 
                 // Загружаем данные по макету
                 function loadTemplate() {
@@ -28,6 +27,13 @@
                         $scope.declarationTemplate.yearFrom = new Date(declarationTemplate.version).getUTCFullYear();
                         if (declarationTemplate.versionEnd) {
                             $scope.declarationTemplate.yearTo = new Date(declarationTemplate.versionEnd).getUTCFullYear();
+                        }
+
+                        // При обновлении страницы есть проблема
+                        if ($scope.checksTab.loadChecks) {
+                            $scope.checksTab.loadChecks();
+                        } else {
+                            $scope.checksTab.needLoadChecks = true;
                         }
                     });
                 }
@@ -119,15 +125,15 @@
                 // Проверки перед сохранением
                 function checkBeforeSave() {
                     if (!$scope.declarationTemplate.version) {
-                        $dialogs.errorDialog({content: $filter("translate")("declarationTypeJournal.error.yearFromUndefined")});
+                        $dialogs.errorDialog({content: $filter("translate")("declarationTemplate.error.yearFromUndefined")});
                         return false;
                     }
-                    if ($scope.declarationTemplate.versionEnd && $scope.declarationTemplate.version < $scope.declarationTemplate.versionEnd) {
-                        $dialogs.errorDialog({content: $filter("translate")("declarationTypeJournal.error.badYears")});
+                    if ($scope.declarationTemplate.versionEnd && $scope.declarationTemplate.version > $scope.declarationTemplate.versionEnd) {
+                        $dialogs.errorDialog({content: $filter("translate")("declarationTemplate.error.badYears")});
                         return false;
                     }
                     if (!$scope.declarationTemplate.name) {
-                        $dialogs.errorDialog({content: $filter("translate")("declarationTypeJournal.error.nameUndefined")});
+                        $dialogs.errorDialog({content: $filter("translate")("declarationTemplate.error.nameUndefined")});
                         return false;
                     }
                     return true;
@@ -135,11 +141,11 @@
 
                 // Возвращяет данные из таблицы проверок с фатальностями
                 function getChecks() {
-                    $scope.templateChecksGrid.ctrl.grid.editCell(0, 0, false);
-                    var ids = $scope.templateChecksGrid.ctrl.grid.getDataIDs();
+                    $scope.checksTab.grid.ctrl.grid.editCell(0, 0, false);
+                    var ids = $scope.checksTab.grid.ctrl.grid.getDataIDs();
                     var checks = [];
                     _.each(ids, function (rowId) {
-                        checks.push($scope.templateChecksGrid.ctrl.grid.getLocalRow(rowId));
+                        checks.push($scope.checksTab.grid.ctrl.grid.getLocalRow(rowId));
                     });
                     return checks;
                 }

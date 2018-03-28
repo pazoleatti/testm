@@ -60,6 +60,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setId(SqlUtils.getInteger(rs,"id"));
             d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
+            d.setVersionEnd(rs.getDate("version_end"));
 			d.setType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
@@ -96,7 +97,15 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			return getJdbcTemplate().query(
 					"select dt.*, " +
                             " ft.id form_type_id, ft.code form_type_code, ft.name form_type_name " +
-                            " from declaration_template dt " +
+                            " from " +
+                            "(SELECT dt.*, " +
+                            (isSupportOver() ?
+                                    " lead(version) over(partition BY declaration_type_id order by version) - interval '1' DAY version_end " :
+                                    " null version_end"
+                            ) +
+                            "  FROM declaration_template dt " +
+                            "  where status != -1)" +
+                            " dt " +
                             " left outer join ref_book_form_type ft on ft.id = dt.form_type ",
 					new DeclarationTemplateRowMapper()
 			);
@@ -111,8 +120,16 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		try {
 			return getJdbcTemplate().queryForObject(
 					"select dt.id, dt.name, dt.version, dt.declaration_type_id, dt.xsd, dt.jrxml, dt.status, dt.form_kind, " +
-                            "  ft.id form_type_id, ft.code form_type_code, ft.name form_type_name " +
-                            " from declaration_template dt " +
+                            "  ft.id form_type_id, ft.code form_type_code, ft.name form_type_name, dt.version_end " +
+                            " from " +
+                            "(SELECT dt.*, " +
+                            (isSupportOver() ?
+                                " lead(version) over(partition BY declaration_type_id order by version) - interval '1' DAY version_end " :
+                                " null version_end"
+                            ) +
+                            "  FROM declaration_template dt " +
+                            "  where status != -1)" +
+                            " dt " +
                             " left outer join ref_book_form_type ft on ft.id = dt.form_type " +
                             " where dt.id = ?",
 					new Object[] { declarationTemplateId },
@@ -336,7 +353,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                         "    lead(version) over(partition BY declaration_type_id order by version) - interval '1' DAY version_end " +
                         "  FROM declaration_template dt " +
                         "  where status != -1 " +
-                        ") WHERE declaration_type_id = :declarationTypeId and status != 2 ",
+                        ") WHERE declaration_type_id = :declarationTypeId and status != 2 " +
+                        " order by version",
                 params,
                 new DeclarationTemplateRowMapperLight());
     }

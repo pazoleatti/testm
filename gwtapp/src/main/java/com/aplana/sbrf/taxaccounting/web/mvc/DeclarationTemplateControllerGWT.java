@@ -34,9 +34,9 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
  * TODO только для gwt!!! ошибки обрабатываются через свой @ExceptionHandler, поправится после перехода настройщика на angular
  */
 @RestController
-public class DeclarationTemplateController {
+public class DeclarationTemplateControllerGWT {
 
-    private static final Log LOG = LogFactory.getLog(DeclarationTemplateController.class);
+    private static final Log LOG = LogFactory.getLog(DeclarationTemplateControllerGWT.class);
 
     private SecurityService securityService;
     private DeclarationTemplateService declarationTemplateService;
@@ -46,9 +46,9 @@ public class DeclarationTemplateController {
     private LogEntryService logEntryService;
     private FormTemplateImpexService formTemplateImpexService;
 
-    public DeclarationTemplateController(SecurityService securityService, DeclarationTemplateService declarationTemplateService, DeclarationTemplateImpexService declarationTemplateImpexService,
-                                         @Qualifier("declarationTemplateMainOperatingService") MainOperatingService mainOperatingService, BlobDataService blobDataService,
-                                         LogEntryService logEntryService, FormTemplateImpexService formTemplateImpexService) {
+    public DeclarationTemplateControllerGWT(SecurityService securityService, DeclarationTemplateService declarationTemplateService, DeclarationTemplateImpexService declarationTemplateImpexService,
+                                            @Qualifier("declarationTemplateMainOperatingService") MainOperatingService mainOperatingService, BlobDataService blobDataService,
+                                            LogEntryService logEntryService, FormTemplateImpexService formTemplateImpexService) {
         this.securityService = securityService;
         this.declarationTemplateService = declarationTemplateService;
         this.declarationTemplateImpexService = declarationTemplateImpexService;

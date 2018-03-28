@@ -84,7 +84,8 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 		return getJdbcTemplate().query(
 		        "SELECT dt.*," +
                         "(select count(*) from declaration_template where declaration_type_id = dt.id and status in (0,1)) AS versions_count " +
-                        " FROM declaration_type dt where status = 0",
+                        " FROM declaration_type dt where status = 0 " +
+                        " order by dt.name",
                 new DeclarationTypeWithVersionsCountRowMapper());
 	}
 

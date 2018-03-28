@@ -49,14 +49,8 @@ public class TemplateController {
      * Возвращяет список типов налоговых форм
      */
     @GetMapping(value = "/rest/declarationType", params = "projection=declarationTypeJournal")
-    public JqgridPagedList<DeclarationType> fetchDeclarationTypes() {
-        List<DeclarationType> types = declarationTypeService.fetchAll();
-
-        return JqgridPagedResourceAssembler.buildPagedList(
-                types,
-                types.size(),
-                PagingParams.getInstance(1, types.size())
-        );
+    public List<DeclarationType> fetchDeclarationTypes() {
+        return declarationTypeService.fetchAll();
     }
 
     /**
@@ -70,15 +64,9 @@ public class TemplateController {
     /**
      * Возвращяет список макетов налоговых форм по типу макета
      */
-    @GetMapping(value = "/rest/declarationTemplate/{id}", params = "projection=allByTypeId")
-    public JqgridPagedList<DeclarationTemplate> fetchDeclarationTemplatesByTypeId(@PathVariable int id) {
-        List<DeclarationTemplate> types = declarationTemplateService.fetchAllByType(id);
-
-        return JqgridPagedResourceAssembler.buildPagedList(
-                types,
-                types.size(),
-                PagingParams.getInstance(1, types.size())
-        );
+    @GetMapping(value = "/rest/declarationTemplate/{typeId}", params = "projection=allByTypeId")
+    public List<DeclarationTemplate> fetchDeclarationTemplatesByTypeId(@PathVariable int typeId) {
+        return declarationTemplateService.fetchAllByType(typeId);
     }
 
     /**

@@ -10,22 +10,24 @@
 
                 $scope.tab = $scope.checksTab;
 
-                // При переключению на вкладку загружаем данные
-                $scope.$watch("checksTab.active", function (newValue, oldValue) {
-                    if (newValue && !oldValue) {
-                        DeclarationTemplateResource.querySource({
-                                declarationTypeId: $scope.declarationTemplate.type.id,
-                                declarationTemplateId: $scope.declarationTemplate.id,
-                                projection: "fetchChecks"
-                            },
-                            function (data) {
-                                if (data) {
-                                    $scope.templateChecksGrid.ctrl.refreshGridData(data);
-                                }
+                // Загружает данные о фатальности проверок
+                $scope.tab.loadChecks = function () {
+                    DeclarationTemplateResource.querySource({
+                            declarationTypeId: $scope.declarationTemplate.type.id,
+                            declarationTemplateId: $scope.declarationTemplate.id,
+                            projection: "fetchChecks"
+                        },
+                        function (data) {
+                            if (data) {
+                                $scope.templateChecksGrid.ctrl.refreshGridData(data);
                             }
-                        )
-                    }
-                });
+                        }
+                    );
+                };
+
+                if ($scope.tab.needLoadChecks) {
+                    $scope.tab.loadChecks();
+                }
 
                 // Инициализация грида
                 var init = function (ctrl) {
@@ -39,8 +41,8 @@
                     };
                 };
 
-                // extend, т.к. определен в parentScope
-                angular.extend($scope.templateChecksGrid, {
+                // Настройки грида
+                $scope.tab.grid = $scope.templateChecksGrid = {
                     init: init,
                     ctrl: {},
                     value: [],
@@ -65,7 +67,12 @@
                                 align: "center",
                                 formatoptions: {disabled: false}
                             },
-                            {name: 'code', index: 'code', width: 200, formatter: $filter('declarationCheckCodeEnumFormatter')},
+                            {
+                                name: 'code',
+                                index: 'code',
+                                width: 200,
+                                formatter: $filter('declarationCheckCodeEnumFormatter')
+                            },
                             {name: 'checkType', index: 'checkType', width: 500},
                             {name: 'description', index: 'description', width: 500}],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
@@ -77,6 +84,6 @@
                         sortorder: "asc",
                         hidegrid: false
                     }
-                });
+                };
             }]);
 }());

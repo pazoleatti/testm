@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -46,11 +45,11 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "DeclarationTemplateControllerTest.xml")
 @WebAppConfiguration
-public class DeclarationTemplateControllerTest {
+public class DeclarationTemplateControllerGWTTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private DeclarationTemplateController declarationTemplateController;
+    private DeclarationTemplateControllerGWT declarationTemplateController;
     @Autowired
     SecurityService securityService;
     @Autowired

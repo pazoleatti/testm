@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -586,6 +587,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         UpdateTemplateResult result = new UpdateTemplateResult();
         Logger logger = new Logger();
         DeclarationTemplate template = action.getDeclarationTemplate();
+        template.setVersion(DateUtils.truncate(template.getVersion(), Calendar.DATE));
+        if (template.getVersionEnd() != null) {
+            template.setVersionEnd(DateUtils.truncate(template.getVersionEnd(), Calendar.DATE));
+        }
 
         LockData lockData = lock(template.getId(), userInfo);
         if (lockData != null && lockData.getUserId() != userInfo.getUser().getId()) {
