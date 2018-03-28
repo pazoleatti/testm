@@ -38,6 +38,7 @@ import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 
 new Report6Ndfl(this).run();
 
@@ -224,7 +225,6 @@ class Report6Ndfl extends AbstractScriptClass {
     final int DECLARATION_TYPE_NDFL6_ID = 103
 
     final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
-    final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
     int pairKppOktmoSize = 0
     final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
@@ -246,8 +246,11 @@ class Report6Ndfl extends AbstractScriptClass {
 // Дата окончания отчетного периода
     Date reportPeriodEndDate = null
 
-    // Даты начала отчетного периода
+    // Дата начала отчетного периода
     Date reportPeriodStartDate
+
+    // Календарная дата начала отчетного периода
+    Date reportPeriodCalendarStartDate
 
 // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
@@ -333,7 +336,7 @@ class Report6Ndfl extends AbstractScriptClass {
         ) {
             Документ(
                     КНД: "1151099",
-                    ДатаДок: currDate.format(DATE_FORMAT_DOTTED),
+                    ДатаДок: currDate.format(SharedConstants.DATE_FORMAT),
                     Период: getPeriod(departmentParamIncomeRow, periodCode),
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
@@ -402,13 +405,18 @@ class Report6Ndfl extends AbstractScriptClass {
                                 && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())) {
                             incomeWithholdingTotal = incomeWithholdingTotal.add(item.withholdingTax)
                         }
-                        if (item.notHoldingTax != null) {
+                        if (item.notHoldingTax != null
+                                && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
+                                || (item.incomePayoutDate != null && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())))) {
                             incomeNotHoldingTaxSum = incomeNotHoldingTaxSum.add(item.notHoldingTax)
                         }
-                        if (item.overholdingTax != null) {
+                        if (item.overholdingTax != null
+                                && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
+                                || (item.incomePayoutDate != null && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())))) {
                             incomeOverholdingTaxSum = incomeOverholdingTaxSum.add(item.overholdingTax)
                         }
-                        if (item.refoundTax != null && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
+                        if (item.refoundTax != null
+                                && ((item.incomeAccruedDate != null && (item.incomeAccruedDate >= getReportPeriodStartDate() && item.incomeAccruedDate <= getReportPeriodEndDate()))
                                 || (item.incomePayoutDate != null && (item.incomePayoutDate >= getReportPeriodStartDate() && item.incomePayoutDate <= getReportPeriodEndDate())))) {
                             refoundTotal += item.refoundTax
                         }
@@ -514,10 +522,9 @@ class Report6Ndfl extends AbstractScriptClass {
                             }
                         }
                     }
-                    /* Мапа используется для заполнения раздела ДохНал. Ключом выступает ИдОперации,
-                    а значением спиок доходов которые соответствуют этой операции*/
+
+                    // Необходимо сгруппировать доходы по ИдОперации для поиска даты начисления
                     def pairOperationIdMap = [:]
-                    // Находим все возможные значения
                     ndflPersonIncomeList.each {
                         def operationId = it.operationId
                         def incomesGroup = pairOperationIdMap.get(operationId)
@@ -527,105 +534,67 @@ class Report6Ndfl extends AbstractScriptClass {
                             incomesGroup << it
                         }
                     }
-                    // В этом временном списке находятся пары NdflPersonId-OperationId, которые не следует включать в отчет
-                    def pairOperationsForRemove = []
 
-                    // заполняем pairOperationsForRemove
-                    pairOperationIdMap.each { k, v ->
-                        ScriptUtils.checkInterrupted()
-                        def absentAccruedDate = true
-                        def absentTaxDate = true
-                        def absentTransferDate = true
-                        for (def income : v) {
-                            if (income.incomeAccruedDate != null && income.incomeAccruedSumm != null && !income.incomeAccruedSumm.equals(new BigDecimal(0))) {
-                                absentAccruedDate = false
-                                break
-                            }
-                        }
-                        for (def income : v) {
-                            if (income.taxDate != null) {
-                                if (income.taxDate >= reportPeriod.calendarStartDate && income.taxDate <= reportPeriod.endDate) {
-                                    absentTaxDate = false
-                                    break
+                    // Список содержащий данные для формирования раздела 2
+                    List<Section2DataHolder> section2Data = []
+
+                    // Определяем строки для заполнения раздела 2
+                    for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+                        if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
+                                && (getReportPeriodCalendarStartDate() <= ndflPersonIncome.taxTransferDate && getReportPeriodEndDate() >= ndflPersonIncome.taxTransferDate)) {
+                            List<Date> incomeAccruedDateList = []
+                            for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
+                                if (incomeGrouped.incomeAccruedDate != null) {
+                                    incomeAccruedDateList << incomeGrouped.incomeAccruedDate
                                 }
                             }
+                            section2Data << new Section2DataHolder(ndflPersonIncome, incomeAccruedDateList.isEmpty() ? null : Collections.min(incomeAccruedDateList), ndflPersonIncome.taxDate, ndflPersonIncome.taxTransferDate)
                         }
-                        for (def income : v) {
-                            if (income.taxTransferDate != null) {
-                                if (income.taxTransferDate >= reportPeriod.calendarStartDate && income.taxTransferDate <= reportPeriod.endDate) {
-                                    absentTransferDate = false
-                                    break
-                                }
+                    }
+
+                    /* Объекты {@code Section2DataHolder} сравниваются через equals по полям ДатаФактическогоПолученияДохода,
+                    ДатаУдержанияНалога, СрокПеречисленияНалога. Если есть одинаковые объекты, то суммируем их значения по гр11(ФактДоход) и гр17(УдержНал)
+                    {@code TreeMap} поскольку делаем сортировку по датам
+                     */
+                    Map<Section2DataHolder, BigDecimal> virtuallyIncomeSum = new TreeMap<>(new Comparator<Section2DataHolder>() {
+                        @Override
+                        int compare(Section2DataHolder o1, Section2DataHolder o2) {
+                            int withholdingDateComp = o1.witholdingDate.compareTo(o2.witholdingDate)
+                            if (withholdingDateComp != 0) {
+                                return withholdingDateComp
                             }
+                            int taxTransferDateComp = o1.taxTransferDate.compareTo(o2.taxTransferDate)
+                            if (taxTransferDateComp != 0) {
+                                return taxTransferDateComp
+                            }
+                            return o1.virtuallyReceivedIncomeDate.compareTo(o2.virtuallyReceivedIncomeDate)
                         }
-                        if (absentAccruedDate || absentTaxDate || absentTransferDate) {
-                            pairOperationsForRemove << k
+                    })
+                    Map<Section2DataHolder, BigDecimal> withholdingTaxSum = [:]
+
+                    for (Section2DataHolder section2DataItem : section2Data) {
+                        BigDecimal virtuallyIncome = virtuallyIncomeSum.get(section2DataItem) ?: new BigDecimal(0)
+                        BigDecimal withholdingTax = withholdingTaxSum.get(section2DataItem) ?: new BigDecimal(0)
+                        if (section2DataItem.withholdingRow.incomePayoutSumm != null) {
+                            virtuallyIncome = virtuallyIncome.add(section2DataItem.withholdingRow.incomePayoutSumm)
+                            virtuallyIncomeSum.put(section2DataItem, virtuallyIncome)
+                        }
+                        if (section2DataItem.withholdingRow.withholdingTax != null) {
+                            withholdingTax = withholdingTax.add(section2DataItem.withholdingRow.withholdingTax)
+                            withholdingTaxSum.put(section2DataItem, withholdingTax)
                         }
                     }
-                    pairOperationsForRemove.each {
-                        pairOperationIdMap.remove(it)
-                    }
-                    if (pairOperationIdMap.size() != 0) {
+
+                    if (!section2Data.isEmpty()) {
 
                         ДохНал() {
-                            Set groups = []
-                            def payoutSumByGroup = [:]
-                            def withholdingTaxSumByGroup = [:]
-                            pairOperationIdMap.values().each { listIncomes ->
-                                ScriptUtils.checkInterrupted()
-                                def incomeAccruedDate
-                                def taxDate
-                                def transferDate
-                                def incomePayoutSumm = new BigDecimal(0)
-                                def withholdingTax = 0
-                                listIncomes.each {
-                                    if (it.incomeAccruedDate != null && it.incomeAccruedSumm != null && !it.incomeAccruedSumm.equals(new BigDecimal(0))) {
-                                        incomeAccruedDate = it.incomeAccruedDate
-                                    }
-                                    if (it.taxDate != null) {
-                                        boolean notEmpty = false
-                                        if (it.withholdingTax != null && it.withholdingTax != 0) {
-                                            notEmpty = true
-                                        } else if (it.incomeAccruedSumm.equals(it.incomeAccruedSumm) && it.taxBase.equals(new BigDecimal(0)) && it.calculatedTax == 0) {
-                                            notEmpty = true
-                                        }
-                                        if (notEmpty) {
-                                            taxDate = it.taxDate
-                                        }
-                                    }
-                                    if (it.taxTransferDate != null && it.taxSumm != null && it.taxSumm != 0) {
-                                        transferDate = it.taxTransferDate
-                                    }
-                                    if (it.incomePayoutSumm != null) {
-                                        incomePayoutSumm = incomePayoutSumm.add(it.incomePayoutSumm)
-                                    }
-                                    if (it.withholdingTax != null) {
-                                        withholdingTax += it.withholdingTax
-                                    }
-                                }
-                                def grouping = [
-                                        'incomeAccruedDate': incomeAccruedDate,
-                                        'taxDate'          : taxDate,
-                                        'transferDate'     : transferDate
-                                ]
-                                groups.add(grouping)
-                                def payoutfromMap = payoutSumByGroup.get(grouping, new BigDecimal(0))
-                                payoutfromMap = payoutfromMap.add(incomePayoutSumm)
-                                payoutSumByGroup.put(grouping, payoutfromMap)
-
-                                def withholdingTaxfromMap = withholdingTaxSumByGroup.get(grouping, 0)
-                                withholdingTaxfromMap += withholdingTax
-                                withholdingTaxSumByGroup.put(grouping, withholdingTaxfromMap)
-                            }
-                            groups.each { grouping ->
-                                def factIncome = ScriptUtils.round(payoutSumByGroup.get(grouping), 2)
-                                def holdTax = withholdingTaxSumByGroup.get(grouping)
+                            for (Section2DataHolder section2DataItem : virtuallyIncomeSum.keySet()) {
                                 СумДата(
-                                        ДатаФактДох: factIncome != 0 ? formatDate(grouping.incomeAccruedDate) : "00.00.0000",
-                                        ДатаУдержНал: holdTax != 0 ? formatDate(grouping.taxDate) : "00.00.0000",
-                                        СрокПрчслНал: holdTax != 0 ? formatDate(grouping.transferDate) : "00.00.0000",
-                                        ФактДоход: factIncome,
-                                        УдержНал: holdTax
+                                        ДатаФактДох: section2DataItem.virtuallyReceivedIncomeDate ? formatDate(section2DataItem.virtuallyReceivedIncomeDate) : SharedConstants.DATE_ZERO_AS_STRING,
+                                        ДатаУдержНал: formatDate(section2DataItem.witholdingDate),
+                                        СрокПрчслНал: formatDate(section2DataItem.taxTransferDate).equals(SharedConstants.DATE_ZERO_AS_DATE) ? SharedConstants.DATE_ZERO_AS_STRING : formatDate(section2DataItem.taxTransferDate),
+                                        ФактДоход: virtuallyIncomeSum.get(section2DataItem),
+                                        УдержНал: withholdingTaxSum.get(section2DataItem)
                                 ) {}
                             }
                         }
@@ -639,35 +608,6 @@ class Report6Ndfl extends AbstractScriptClass {
         //    println(writer)
     }
 
-
-    class PairPersonOperationId {
-        Long ndflPersonId
-        String operationId
-
-        PairPersonOperationId(Long ndflPersonId, String operationId) {
-            this.ndflPersonId = ndflPersonId
-            this.operationId = operationId
-        }
-
-        boolean equals(o) {
-            if (this.is(o)) return true
-            if (getClass() != o.class) return false
-
-            PairPersonOperationId that = (PairPersonOperationId) o
-
-            if (ndflPersonId != that.ndflPersonId) return false
-            if (operationId != that.operationId) return false
-
-            return true
-        }
-
-        int hashCode() {
-            int result
-            result = ndflPersonId.hashCode()
-            result = 31 * result + operationId.hashCode()
-            return result
-        }
-    }
 
     int findCorrectionNumber() {
         int toReturn = 0
@@ -1068,7 +1008,7 @@ class Report6Ndfl extends AbstractScriptClass {
         String periodCode = period?.CODE?.stringValue
         String periodName = period?.NAME?.stringValue
         Date calendarStartDate = reportPeriod?.calendarStartDate
-        String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format(DATE_FORMAT_DOTTED)},"
+        String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format(SharedConstants.DATE_FORMAT)},"
         if (!mapDepartmentNotExistRnu.isEmpty()) {
             def listDepartmentNotExistRnu = []
             mapDepartmentNotExistRnu.each {
@@ -1537,6 +1477,17 @@ class Report6Ndfl extends AbstractScriptClass {
         return reportPeriodStartDate
     }
 
+    /**
+     * Получить календарную дату начала отчетного периода
+     * @return
+     */
+    Date getReportPeriodCalendarStartDate() {
+        if (reportPeriodCalendarStartDate == null) {
+            reportPeriodCalendarStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
+        }
+        return reportPeriodCalendarStartDate
+    }
+
 /**
  * Получить "Коды мест предоставления документа"
  * @return
@@ -1696,13 +1647,13 @@ class Report6Ndfl extends AbstractScriptClass {
         // КПП
         String kpp = declarationData.kpp
         //	Дата сдачи корректировки
-        String dateDelivery = departmentReportPeriod.correctionDate?.format(DATE_FORMAT_DOTTED)
+        String dateDelivery = departmentReportPeriod.correctionDate?.format(SharedConstants.DATE_FORMAT)
         // ОКТМО
         String oktmo = declarationData.oktmo
         // Код НО (конечный)
         String taxOrganCode = declarationData.taxOrganCode
         // Дата формирования
-        String currentDate = new Date().format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
+        String currentDate = new Date().format(SharedConstants.DATE_FORMAT, TimeZone.getTimeZone('Europe/Moscow'))
 
         XSSFCell cell1 = sheet.getRow(2).createCell(1)
 
@@ -1901,6 +1852,50 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     String formatDate(Date date) {
-        return ScriptUtils.formatDate(date, DATE_FORMAT_DOTTED)
+        return ScriptUtils.formatDate(date, SharedConstants.DATE_FORMAT)
+    }
+
+    /**
+     * Класс содержащий данные неоходимые для формирования раздела 2 формы 6НДФЛ
+     */
+    class Section2DataHolder {
+        // Строка удержания налога
+        NdflPersonIncome withholdingRow
+        // Дата Фактического Получения Дохода
+        Date virtuallyReceivedIncomeDate
+        // Дата Удержания Налога
+        Date witholdingDate
+        // Срок Перечисления Налога
+        Date taxTransferDate
+
+        Section2DataHolder(NdflPersonIncome withholdingRow, Date virtuallyReceivedIncomeDate, Date witholdingDate, Date taxTransferDate) {
+            this.withholdingRow = withholdingRow
+            this.virtuallyReceivedIncomeDate = virtuallyReceivedIncomeDate
+            this.witholdingDate = witholdingDate
+            this.taxTransferDate = taxTransferDate
+
+
+        }
+
+        boolean equals(o) {
+            if (this.is(o)) return true
+            if (getClass() != o.class) return false
+
+            Section2DataHolder that = (Section2DataHolder) o
+
+            if (taxTransferDate != that.taxTransferDate) return false
+            if (virtuallyReceivedIncomeDate != that.virtuallyReceivedIncomeDate) return false
+            if (witholdingDate != that.witholdingDate) return false
+
+            return true
+        }
+
+        int hashCode() {
+            int result
+            result = (virtuallyReceivedIncomeDate != null ? virtuallyReceivedIncomeDate.hashCode() : 0)
+            result = 31 * result + (witholdingDate != null ? witholdingDate.hashCode() : 0)
+            result = 31 * result + (taxTransferDate != null ? taxTransferDate.hashCode() : 0)
+            return result
+        }
     }
 }
