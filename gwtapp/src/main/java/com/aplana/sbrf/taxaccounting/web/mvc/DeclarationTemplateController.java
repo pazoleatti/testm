@@ -29,7 +29,7 @@ import java.util.List;
 
 
 @RestController
-public class TemplateController {
+public class DeclarationTemplateController {
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
