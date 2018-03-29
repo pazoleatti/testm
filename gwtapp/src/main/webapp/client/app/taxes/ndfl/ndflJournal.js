@@ -339,6 +339,9 @@
                     });
                 };
 
+                /**
+                 * @description Проверяется существование налоговой формы перед выгрузкой ТФ
+                 */
                 $(document).undelegate('#ndflJournalTable .tfDownloadLink', 'click');
                 $(document).delegate('#ndflJournalTable .tfDownloadLink', 'click', function () {
                     var declarationDataId = $(this).attr('declarationDataId');
