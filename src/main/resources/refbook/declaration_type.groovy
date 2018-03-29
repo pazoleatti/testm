@@ -878,6 +878,20 @@ class DeclarationType extends AbstractScriptClass {
         declarationService.createPdfReport(logger, declarationData, userInfo)
     }
 
+    /**
+     * Валидирует xml-файл по xsd схеме макета
+     * @param declarationTemplate макет формы
+     */
+    def boolean validate(DeclarationTemplate declarationTemplate) {
+        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, declarationTemplate.xsdId)
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.error("Файл ответа \"%s\" не соответствует формату", UploadFileName)
+            return false
+        }
+        return true
+    }
+
 //Параметры имени ТФ
     final String KOD_DEPARTMENT = "КодПодр"
     final String KOD_ASNU = "КодАС"
@@ -1018,125 +1032,127 @@ class DeclarationType extends AbstractScriptClass {
             return
         }
 
-        //достать из XML файла атрибуты тега СлЧасть
-        SAXHandler handler = new SAXHandler('СлЧасть', 'Файл', true)
-        InputStream inputStream
-        try {
-            inputStream = new FileInputStream(dataFile)
-            SAXParserFactory factory = SAXParserFactory.newInstance()
-            SAXParser saxParser = factory.newSAXParser()
-            saxParser.parse(inputStream, handler)
-        } catch (SAXParseException e) {
-            LOG.error(getSAXParseExceptionMessage(e), e)
-            logger.error("Ошибка чтения файла «${UploadFileName}»")
-            return
-        } catch (Exception e) {
-            LOG.error("Ошибка чтения файла ${UploadFileName}", e)
-            logger.error("Ошибка чтения файла «${UploadFileName}»")
-            return
-        } finally {
-            IOUtils.closeQuietly(inputStream)
-        }
-        handler.getListValueAttributesTag();
-
-        //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
-        def xmlDepartmentCode = handler.getListValueAttributesTag()?.get(KOD_DEPARTMENT)?.replaceFirst("_*", "")?.trim()
-        if (!departmentCode.equals(xmlDepartmentCode)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»",
-                    departmentCode, xmlDepartmentCode)
-        }
-
-        def xmlAsnuCode = handler.getListValueAttributesTag()?.get(KOD_ASNU)
-        if (!asnuCode.equals(xmlAsnuCode)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»",
-                    asnuCode, xmlAsnuCode)
-        }
-
-        def xmlFileName = handler.getListValueAttributesTag()?.get(NAME_TF_NOT_EXTENSION)
-        if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(xmlFileName)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»",
-                    UploadFileName.trim()[0..-5], xmlFileName)
-        }
-
-        //достать из XML файла атрибуты тега СлЧасть
-        handler = new SAXHandler('Файл', 'ИнфЧасть', true)
-        try {
-            inputStream = new FileInputStream(dataFile)
-            SAXParserFactory factory = SAXParserFactory.newInstance()
-            SAXParser saxParser = factory.newSAXParser()
-            saxParser.parse(inputStream, handler)
-        } catch (SAXParseException e) {
-            LOG.error(getSAXParseExceptionMessage(e), e)
-            logger.error("Ошибка чтения файла «${UploadFileName}»")
-            return
-        } catch (Exception e) {
-            LOG.error("Ошибка чтения файла ${UploadFileName}", e)
-            logger.error("Ошибка чтения файла «${UploadFileName}»")
-            return
-        }
-
-        //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
-        def xmlReportPeriodCode = handler.getListValueAttributesTag()?.get(KOD_REPORT_PERIOD)
-        if (!reportPeriodCode.equals(xmlReportPeriodCode)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»",
-                    reportPeriodCode, xmlReportPeriodCode)
-        }
-
-        def xmlReportYear = handler.getListValueAttributesTag()?.get(REPORT_YEAR)
-        Integer reportYear = null
-        try {
-            reportYear = Integer.parseInt(xmlReportYear);
-        } catch (NumberFormatException nfe) {
-            nfe.printStackTrace()
-        }
-
-        if (!year.equals(reportYear)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»",
-                    year, xmlReportYear)
-        }
-
-        // Проверка не загружен ли уже такой файл в систему
-        if (UploadFileName != null && !UploadFileName.isEmpty()) {
-            DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
-
-            declarationFilter.setFileName(UploadFileName);
-            declarationFilter.setTaxType(TaxType.NDFL);
-            declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
-
-            List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
-            if (!declarationDataSearchResultItems.isEmpty()) {
-                logger.error("ТФ с именем «%s» уже загружен в систему.", UploadFileName)
+        if (validate(declarationTemplate)) {
+            //достать из XML файла атрибуты тега СлЧасть
+            SAXHandler handler = new SAXHandler('СлЧасть', 'Файл', true)
+            InputStream inputStream
+            try {
+                inputStream = new FileInputStream(dataFile)
+                SAXParserFactory factory = SAXParserFactory.newInstance()
+                SAXParser saxParser = factory.newSAXParser()
+                saxParser.parse(inputStream, handler)
+            } catch (SAXParseException e) {
+                LOG.error(getSAXParseExceptionMessage(e), e)
+                logger.error("Ошибка чтения файла «${UploadFileName}»")
+                return
+            } catch (Exception e) {
+                LOG.error("Ошибка чтения файла ${UploadFileName}", e)
+                logger.error("Ошибка чтения файла «${UploadFileName}»")
+                return
+            } finally {
+                IOUtils.closeQuietly(inputStream)
             }
-        }
+            handler.getListValueAttributesTag();
 
-        // Поиск экземпляра декларации
-        DeclarationData declarationData = declarationService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, null, asnuId, UploadFileName);
-        // Экземпляр уже есть
-        if (declarationData != null) {
-            logger.error("Экземпляр формы \"%s\" в \"%s\" уже существует! Загрузка файла «%s» не выполнена.", declarationType.getName(), formDepartment.getName(), UploadFileName);
-            return;
-        }
+            //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
+            def xmlDepartmentCode = handler.getListValueAttributesTag()?.get(KOD_DEPARTMENT)?.replaceFirst("_*", "")?.trim()
+            if (!departmentCode.equals(xmlDepartmentCode)) {
+                logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»",
+                        departmentCode, xmlDepartmentCode)
+            }
 
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            return
-        }
-        // Создание экземпляра декларации
-        declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
+            def xmlAsnuCode = handler.getListValueAttributesTag()?.get(KOD_ASNU)
+            if (!asnuCode.equals(xmlAsnuCode)) {
+                logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»",
+                        asnuCode, xmlAsnuCode)
+            }
 
-        inputStream = new FileInputStream(dataFile)
-        try {
-            // Запуск события скрипта для разбора полученного файла
-            declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, createDateFile)
-        } finally {
-            IOUtils.closeQuietly(inputStream);
+            def xmlFileName = handler.getListValueAttributesTag()?.get(NAME_TF_NOT_EXTENSION)
+            if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(xmlFileName)) {
+                logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»",
+                        UploadFileName.trim()[0..-5], xmlFileName)
+            }
+
+            //достать из XML файла атрибуты тега СлЧасть
+            handler = new SAXHandler('Файл', 'ИнфЧасть', true)
+            try {
+                inputStream = new FileInputStream(dataFile)
+                SAXParserFactory factory = SAXParserFactory.newInstance()
+                SAXParser saxParser = factory.newSAXParser()
+                saxParser.parse(inputStream, handler)
+            } catch (SAXParseException e) {
+                LOG.error(getSAXParseExceptionMessage(e), e)
+                logger.error("Ошибка чтения файла «${UploadFileName}»")
+                return
+            } catch (Exception e) {
+                LOG.error("Ошибка чтения файла ${UploadFileName}", e)
+                logger.error("Ошибка чтения файла «${UploadFileName}»")
+                return
+            }
+
+            //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
+            def xmlReportPeriodCode = handler.getListValueAttributesTag()?.get(KOD_REPORT_PERIOD)
+            if (!reportPeriodCode.equals(xmlReportPeriodCode)) {
+                logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»",
+                        reportPeriodCode, xmlReportPeriodCode)
+            }
+
+            def xmlReportYear = handler.getListValueAttributesTag()?.get(REPORT_YEAR)
+            Integer reportYear = null
+            try {
+                reportYear = Integer.parseInt(xmlReportYear);
+            } catch (NumberFormatException nfe) {
+                nfe.printStackTrace()
+            }
+
+            if (!year.equals(reportYear)) {
+                logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»",
+                        year, xmlReportYear)
+            }
+
+            // Проверка не загружен ли уже такой файл в систему
+            if (UploadFileName != null && !UploadFileName.isEmpty()) {
+                DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
+
+                declarationFilter.setFileName(UploadFileName);
+                declarationFilter.setTaxType(TaxType.NDFL);
+                declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+
+                List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
+                if (!declarationDataSearchResultItems.isEmpty()) {
+                    logger.error("ТФ с именем «%s» уже загружен в систему.", UploadFileName)
+                }
+            }
+
+            // Поиск экземпляра декларации
+            DeclarationData declarationData = declarationService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, null, asnuId, UploadFileName);
+            // Экземпляр уже есть
+            if (declarationData != null) {
+                logger.error("Экземпляр формы \"%s\" в \"%s\" уже существует! Загрузка файла «%s» не выполнена.", declarationType.getName(), formDepartment.getName(), UploadFileName);
+                return;
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                return
+            }
+            // Создание экземпляра декларации
+            declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
+
+            inputStream = new FileInputStream(dataFile)
+            try {
+                // Запуск события скрипта для разбора полученного файла
+                declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, createDateFile)
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+            msgBuilder.append("Выполнено создание налоговой формы: ")
+                    .append("№: \"").append(declarationDataId).append("\"")
+                    .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+                    .append(getCorrectionDateString(departmentReportPeriod))
+                    .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
+                    .append(", Вид: \"").append(declarationType.getName()).append("\"")
+                    .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
         }
-        msgBuilder.append("Выполнено создание налоговой формы: ")
-                .append("№: \"").append(declarationDataId).append("\"")
-                .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
-                .append(getCorrectionDateString(departmentReportPeriod))
-                .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
-                .append(", Вид: \"").append(declarationType.getName()).append("\"")
-                .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
     }
 
     String getSAXParseExceptionMessage(SAXParseException e) {
