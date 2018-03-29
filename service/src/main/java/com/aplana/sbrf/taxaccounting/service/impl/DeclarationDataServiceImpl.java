@@ -3408,8 +3408,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Загрузка данных из Excel-файла в налоговую форму %s", declarationDataId));
                 DeclarationData declarationData = declarationDataDao.get(declarationDataId);
 
-                reportService.deleteNotXmlDec(declarationDataId);
-
                 tempFile = createTempFile("tmp_dec_", ".xlsx", blobData.getInputStream());
                 Map<String, Object> params = new HashMap<>();
                 params.put("fileName", blobData.getName());
