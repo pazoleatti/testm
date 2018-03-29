@@ -1,9 +1,8 @@
 <div class="flex-column">
-    <div style="margin-left: 30px; height: 40px;">
-        <a href="index.html#/administration/declarationTemplateJournal/{{declarationTemplate.type.id}}"
-           style="font-size: 14px; text-decoration: underline;">{{::'declarationTemplate.title.backLink' |
-            translate}}</a>
-        <h3 style="display: inline-block; line-height: 20px;"> — {{declarationTemplate.type.name}}</h3>
+    <div class="content-header">
+        <a href="index.html#/administration/declarationTemplateJournal/{{declarationTemplate.type.id}}">
+            {{::'declarationTemplate.title.backLink' | translate}}</a>
+        <h1>— {{declarationTemplate.type.name}}</h1>
     </div>
     <div class="flex-fill flex-column" style="background-color: white;">
         <div class="button_panel" style="padding: 10px 12px 0;">

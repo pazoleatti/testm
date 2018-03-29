@@ -1,71 +1,71 @@
-<div id="ndfl" style="display: flex; flex-flow: column; height: 100%;">
-    <!--Заголовок-->
-    <div class="row">
-        <div class="header-col" style="margin: 14px 0 0 28px;">
-            <h1><a href="index.html#/taxes/ndflJournal">{{::'move_back' |
-                translate}}</a> - {{declarationData.declarationTypeName}}, №{{declarationDataId}}</h1>
+<div id="ndfl" class="flex-column">
+    <div>
+        <!--Заголовок-->
+        <div class="content-header pull-left">
+            <a href="index.html#/taxes/ndflJournal">{{::'move_back' |
+                translate}}</a>
+            <h1>— {{declarationData.declarationTypeName}}, №{{declarationDataId}}</h1>
         </div>
-        <div class="row" style="min-width: 1000px;">
-            <div class="header-col w200" style="float: right; margin-top: 14px; margin-right: 10px;">
-                <div class="btn-group" style="float: right;">
-                    <div id="single-button"
-                         data-aplana-dropdown
-                         data-placement="bottom-right"
-                         data-ng-disabled="!availableReports && !canCreateExcelTemplate()"
-                         class="btn btn-default">
-                        <span data-translate-once="link.ndfl.reporting"></span>
-                    </div>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
-                        <li role="menuitem"
-                            ng-show="!declarationData.manuallyCreated && availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
-                            <div class="row menuitem">
-                                <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem"
-                            ng-show="availableReports">
-                            <div class="row menuitem">
-                                <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
-                                <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download'
-                                    | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem"
-                            ng-show="availableReports">
-                            <div class="row menuitem">
-                                <a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem"
-                            ng-show="availableReports">
-                            <div class="row menuitem">
-                                <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' |
-                                    translate}}</a>
-                                <a ng-click="downloadSpecific()" ng-show="availableRnuNdflPersonAllDb">{{::'link.ndfl.reporting.download'
-                                    | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem"
-                            ng-show="availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
-                            <div class="row menuitem">
-                                <a ng-click="createPairKppOktmo(false)">{{::'link.ndfl.reporting.formForKppOktmo'
-                                    |
-                                    translate}}</a>
-                                <a ng-click="downloadPairKppOktmo()" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
-                                    | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem"
-                            ng-show="canCreateExcelTemplate()">
-                            <div class="row menuitem">
-                                <a ng-click="createExcelTemplate()">{{::'link.ndfl.reporting.formTemplateExcel' |
-                                    translate}}</a>
-                                <a ng-click="downloadExcelTemplate()" ng-show="availableExcelTemplate">{{::'link.ndfl.reporting.download'
-                                    | translate}}</a>
-                            </div>
-                        </li>
-                    </ul>
+        <!--Формирование отчетов-->
+        <div class="w200 pull-right" style="margin: 5px 10px 10px 0; min-width: 1000px;">
+            <div class="btn-group" style="float: right;">
+                <div id="single-button"
+                     data-aplana-dropdown
+                     data-placement="bottom-right"
+                     data-ng-disabled="!availableReports && !canCreateExcelTemplate()"
+                     class="btn btn-default">
+                    <span data-translate-once="link.ndfl.reporting"></span>
                 </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
+                    <li role="menuitem"
+                        ng-show="!declarationData.manuallyCreated && availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                        <div class="row menuitem">
+                            <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem"
+                        ng-show="availableReports">
+                        <div class="row menuitem">
+                            <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
+                            <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download'
+                                | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem"
+                        ng-show="availableReports">
+                        <div class="row menuitem">
+                            <a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem"
+                        ng-show="availableReports">
+                        <div class="row menuitem">
+                            <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' |
+                                translate}}</a>
+                            <a ng-click="downloadSpecific()" ng-show="availableRnuNdflPersonAllDb">{{::'link.ndfl.reporting.download'
+                                | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem"
+                        ng-show="availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                        <div class="row menuitem">
+                            <a ng-click="createPairKppOktmo(false)">{{::'link.ndfl.reporting.formForKppOktmo'
+                                |
+                                translate}}</a>
+                            <a ng-click="downloadPairKppOktmo()" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
+                                | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem"
+                        ng-show="canCreateExcelTemplate()">
+                        <div class="row menuitem">
+                            <a ng-click="createExcelTemplate()">{{::'link.ndfl.reporting.formTemplateExcel' |
+                                translate}}</a>
+                            <a ng-click="downloadExcelTemplate()" ng-show="availableExcelTemplate">{{::'link.ndfl.reporting.download'
+                                | translate}}</a>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -221,7 +221,9 @@
                         <div class="btn-toolbar" role="toolbar">
                             <!--Редактировать строку -->
                             <span>
-                                <button type="button" class="btn btn-default" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.EDIT) || !canEditRow" data-ng-click="showEditRowModal()">
+                                <button type="button" class="btn btn-default"
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.EDIT) || !canEditRow"
+                                        data-ng-click="showEditRowModal()">
                                     <span data-translate-once="button.edit.row"></span>
                                 </button>
                             </span>
