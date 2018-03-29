@@ -1140,7 +1140,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String pathError, String group, Date date, String inp, String fio, String operationId) {
-        String baseMessage = "Значения гр. %s (\"%s\") не входит в отчетный период налоговой формы (Форма.Период), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s."
+        String baseMessage = "Значения гр. %s (\"%s\") не входит в отчетный период налоговой формы %s, операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s."
         String errMsg = String.format(baseMessage,
                 group,
                 date != null ? ScriptUtils.formatDate(date) : "Не определено",
