@@ -1078,30 +1078,42 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def taxRowNum = null;
         def allRowNums = new ArrayList<String>();
 
+        // Доход.Дата.Начисление
+        boolean incomeAccruedDateOk = false
+        // Доход.Дата.Выплата
+        boolean incomePayoutDateOk = false
+        // НДФЛ.Расчет.Дата
+        boolean taxDateOk = false
+
         SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
         ndflPersonOperationsNode.childNodes().each { node ->
-            def rowNum = node.attributes['НомСтр']
-            allRowNums.add(rowNum)
-            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
-                incomeAccruedDate = formatter.parse(node.attributes['ДатаДохНач']);
-                incomeAccruedRowNum = rowNum
-            }
-            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
-                incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
-                incomePayoutRowNum = rowNum
-            }
-            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаНалог') && node.attributes['ДатаНалог'] != null) {
-                taxDate = formatter.parse(node.attributes['ДатаНалог']);
-                taxRowNum = rowNum
+            if (!incomeAccruedDateOk && !incomePayoutDateOk && !taxDateOk) {
+                def rowNum = node.attributes['НомСтр']
+                allRowNums.add(rowNum)
+                if (!incomeAccruedDateOk) {
+                    if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
+                        incomeAccruedDate = formatter.parse(node.attributes['ДатаДохНач']);
+                        incomeAccruedRowNum = rowNum
+                        incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+                    }
+                }
+                if (!incomePayoutDateOk) {
+                    if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
+                        incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
+                        incomePayoutRowNum = rowNum
+                        incomeAccruedDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+                    }
+                }
+                if (!taxDateOk) {
+                    if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаНалог') && node.attributes['ДатаНалог'] != null) {
+                        taxDate = formatter.parse(node.attributes['ДатаНалог']);
+                        taxRowNum = rowNum
+                        incomeAccruedDateOk = dateRelateToCurrentPeriod(taxDate)
+                    }
+                }
             }
         }
 
-        // Доход.Дата.Начисление
-        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
-        // Доход.Дата.Выплата
-        boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
-        // НДФЛ.Расчет.Дата
-        boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
         if (incomeAccruedDateOk || incomePayoutDateOk || taxDateOk) {
             return true
         } else {
