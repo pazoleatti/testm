@@ -1020,7 +1020,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             ndflPerson.rowNum = rowNum
             ndflPersonService.save(ndflPerson)
         } else {
-            logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
+            logger.warn("У ФЛ $fio, ИНП: ${ndflPerson.inp} отсутствуют операции, принадлежащие отчетному периоду. ФЛ не загружено в налоговую форму")
             return false
         }
         return true
