@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
@@ -155,6 +156,19 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     "where dr.declaration_data_id=dr1.declaration_data_id and type = 0)");
         } catch (DataAccessException e) {
             throw new DaoException(String.format("Ошибка при удалении ненужных записей таблицы DECLARATION_REPORT. %s.", e.getMessage()), e);
+        }
+    }
+
+    @Override
+    public void deleteNotXmlDec(long declarationDataId) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("declarationDataId", declarationDataId);
+            params.addValue("type", DeclarationDataReportType.XML_DEC.getReportType().getId());
+            getNamedParameterJdbcTemplate().update(
+                    "DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = :declarationDataId AND TYPE <> :type", params);
+        } catch (DataAccessException e) {
+            throw new DaoException("Не удалось удалить записи", e);
         }
     }
 }
