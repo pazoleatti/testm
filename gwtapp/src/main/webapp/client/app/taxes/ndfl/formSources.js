@@ -206,11 +206,11 @@
             };
         })
 
-        .filter('declarationDataIdFormatter', ['$state', function ($state) {
+        .filter('declarationDataIdFormatter', ['$state', 'APP_CONSTANTS', function ($state, APP_CONSTANTS) {
             return function (declarationDataId, row, declarationData) {
                 var url;
 
-                if(declarationData.declarationTemplate.declarationFormKind === 'REPORTS') {
+                if(declarationData.declarationTemplate.declarationFormKind.id === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id) {
                     url = $state.href('ndflReport', {declarationDataId: declarationDataId});
                 } else {
                     url = $state.href('ndfl', {declarationDataId: declarationDataId});
