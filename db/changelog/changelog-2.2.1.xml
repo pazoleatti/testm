@@ -344,6 +344,14 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3477 -->
+    <changeSet id="2.2.1-dloshkarev-3" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
     <!-- https://jira.aplana.com/browse/SBRFNDFL-4028 -->
     <changeSet id="2.2.1-apronin-1" author="apronin">
         <update tableName="DECLARATION_TEMPLATE">
