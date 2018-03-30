@@ -1020,7 +1020,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             ndflPerson.rowNum = rowNum
             ndflPersonService.save(ndflPerson)
         } else {
-            logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
+            logger.warn("У ФЛ $fio, ИНП: ${ndflPerson.inp} отсутствуют операции, принадлежащие отчетному периоду. ФЛ не загружено в налоговую форму")
             return false
         }
         return true
@@ -1070,77 +1070,74 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     boolean isDatesInPeriod(NodeChild ndflPersonOperationsNode, NdflPerson ndflPerson, String kpp, String oktmo, String inp, String fio) {
 
         def operationId = toString((GPathResult) ndflPersonOperationsNode.getProperty('@ИдОпер'))
-        Date incomeAccruedDate = null
-        def incomeAccruedRowNum = null;
-        Date incomePayoutDate = null
-        def incomePayoutRowNum = null;
-        Date taxDate = null
-        def taxRowNum = null;
-        def allRowNums = new ArrayList<String>();
+        def incomeAccruedRows = new ArrayList<Tuple2>();
+        def incomePayoutRows = new ArrayList<Tuple2>();
+        def taxRows = new ArrayList<Tuple2>();
+
+        // Доход.Дата.Начисление
+        boolean incomeAccruedDateOk = false
+        // Доход.Дата.Выплата
+        boolean incomePayoutDateOk = false
+        // НДФЛ.Расчет.Дата
+        boolean taxDateOk = false
 
         SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
         ndflPersonOperationsNode.childNodes().each { node ->
-            def rowNum = node.attributes['НомСтр']
-            allRowNums.add(rowNum)
-            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
-                incomeAccruedDate = formatter.parse(node.attributes['ДатаДохНач']);
-                incomeAccruedRowNum = rowNum
-            }
-            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
-                incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
-                incomePayoutRowNum = rowNum
-            }
-            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаНалог') && node.attributes['ДатаНалог'] != null) {
-                taxDate = formatter.parse(node.attributes['ДатаНалог']);
-                taxRowNum = rowNum
+            if (!incomeAccruedDateOk && !incomePayoutDateOk && !taxDateOk) {
+                def rowNum = node.attributes['НомСтр']
+                if (!incomeAccruedDateOk) {
+                    if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
+                        Date incomeAccruedDate = formatter.parse(node.attributes['ДатаДохНач']);
+                        incomeAccruedRows.add(new Tuple2(rowNum, incomeAccruedDate))
+                        incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+                    }
+                }
+                if (!incomePayoutDateOk) {
+                    if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
+                        Date incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
+                        incomePayoutRows.add(new Tuple2(rowNum, incomePayoutDate))
+                        incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+                    }
+                }
+                if (!taxDateOk) {
+                    if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаНалог') && node.attributes['ДатаНалог'] != null) {
+                        Date taxDate = formatter.parse(node.attributes['ДатаНалог']);
+                        taxRows.add(new Tuple2(rowNum, taxDate))
+                        taxDateOk = dateRelateToCurrentPeriod(taxDate)
+                    }
+                }
             }
         }
 
-        // Доход.Дата.Начисление
-        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
-        // Доход.Дата.Выплата
-        boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
-        // НДФЛ.Расчет.Дата
-        boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
         if (incomeAccruedDateOk || incomePayoutDateOk || taxDateOk) {
             return true
         } else {
-            def rowNums = new HashSet<String>();
-            if (!incomeAccruedDateOk && incomeAccruedRowNum != null) {
+            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+            if (!incomeAccruedDateOk && !incomeAccruedRows.empty) {
                 // Дата.Начисление не попала в период
-                rowNums.add(incomeAccruedRowNum)
+                for (Tuple2 row : incomeAccruedRows) {
+                    logPeriodError(departmentReportPeriod, row[0], C_INCOME_ACCRUED_DATE, row[1], inp, fio, operationId)
+                }
             }
-            if (!incomePayoutDateOk && incomePayoutRowNum != null) {
+            if (!incomePayoutDateOk && !incomePayoutRows.empty) {
                 // Дата.Выплата не попала в период
-                rowNums.add(incomePayoutRowNum)
+                for (Tuple2 row : incomePayoutRows) {
+                    logPeriodError(departmentReportPeriod, row[0], C_INCOME_PAYOUT_DATE, row[1], inp, fio, operationId)
+                }
             }
-            if (!taxDateOk && taxRowNum != null) {
+            if (!taxDateOk && !taxRows.empty) {
                 // НДФЛ.Расчет.Дата не попала в период
-                rowNums.add(taxRowNum)
-            }
-            if (incomeAccruedRowNum == null && incomePayoutRowNum == null && taxRowNum == null) {
-                // Обе даты пустые - выводим сообщение по каждой строке операции (т.к не знаем где должна была быть каждая дата)
-                rowNums = allRowNums
-            }
-            for (String rowNum : rowNums) {
-                DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
-                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, rowNum)
-                if (!incomeAccruedDateOk) {
-                    logPeriodError(departmentReportPeriod, pathError, C_INCOME_ACCRUED_DATE, incomeAccruedDate, inp, fio, operationId)
-                }
-                if (!incomePayoutDateOk) {
-                    logPeriodError(departmentReportPeriod, pathError, C_INCOME_PAYOUT_DATE, incomePayoutDate, inp, fio, operationId)
-                }
-                if (!taxDateOk) {
-                    logPeriodError(departmentReportPeriod, pathError, C_TAX_DATE, taxDate, inp, fio, operationId)
+                for (Tuple2 row : taxRows) {
+                    logPeriodError(departmentReportPeriod, row[0], C_TAX_DATE, row[1], inp, fio, operationId)
                 }
             }
             return false
         }
     }
 
-    void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String pathError, String group, Date date, String inp, String fio, String operationId) {
-        String baseMessage = "Значения гр. %s (\"%s\") не входит в отчетный период налоговой формы (Форма.Период), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s."
+    void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String rowNum, String group, Date date, String inp, String fio, String operationId) {
+        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, rowNum)
+        String baseMessage = "Значения гр. %s (\"%s\") не входит в отчетный период налоговой формы %s, операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s."
         String errMsg = String.format(baseMessage,
                 group,
                 date != null ? ScriptUtils.formatDate(date) : "Не определено",
