@@ -304,14 +304,14 @@
                         </div>
                         <div data-aplana-field>
                             <div data-aplana-datepicker
-                                 data-ng-show="!disableTaxTransferDate"
+                                 data-ng-show="!row.disableTaxTransferDate"
                                  data-ng-model="row.taxTransferDate"></div>
                             <input type="text" placeholder="{{APP_CONSTANTS.DATE_ZERO.AS_STRING}}"
-                                   data-ng-show="disableTaxTransferDate"
-                                   data-ng-disabled="disableTaxTransferDate"/>
+                                   data-ng-show="row.disableTaxTransferDate"
+                                   data-ng-disabled="row.disableTaxTransferDate"/>
                             <br/>
                             <label>
-                                <input type="checkbox" data-ng-click="zeroDateClick()" />
+                                <input type="checkbox" data-ng-model="row.disableTaxTransferDate"/>
                                 {{APP_CONSTANTS.DATE_ZERO.AS_STRING}}
                             </label>
                         </div>
