@@ -538,6 +538,7 @@ class Check extends AbstractScriptClass {
         final String INCOME_SUM_COMMON = "СумДохОбщ"
         final String NOT_HOLDING_TAX = "НалНеУдерж"
         final String TAX_ORGAN_CODE = "КодНО"
+        final String UVED_FIX_PLAT = "УведФиксПлат"
         final String UVED_SOTS_VICH = "УведСоцВыч"
         final String UVED_IMUSCH_VICH = "УведИмущВыч"
         final String IFNS_UVED = "ИФНСУвед"
@@ -628,12 +629,15 @@ class Check extends AbstractScriptClass {
                 }
                 List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
                 for (Ndfl2Node svedDohNode : svedDohNodeList) {
-                    String uvedFixPlatIfns = extractAttribute(IFNS_UVED, svedDohNode)?.getValue()
-                    if (uvedFixPlatIfns != null && uvedFixPlatIfns != "" && !taxInspectionList.contains(uvedFixPlatIfns)) {
-                        createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.СведДох.СумИтНалПер.УведФиксПлат.ИФНСУвед\" (\"$uvedFixPlatIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
-                    }
+                    def uvedFixPlatNodeList = extractNdfl2Nodes(UVED_FIX_PLAT, svedDohNode)
                     def uvedSotsVichNodeList = extractNdfl2Nodes(UVED_SOTS_VICH, svedDohNode)
                     def uvedImuschVichNodeList = extractNdfl2Nodes(UVED_IMUSCH_VICH, svedDohNode)
+                    for (Ndfl2Node uvedFixPlatNode : uvedFixPlatNodeList) {
+                        String uvedFixPlatIfns = extractAttribute(IFNS_UVED, uvedFixPlatNode)?.getValue()
+                        if (uvedFixPlatIfns != null && uvedFixPlatIfns != "" && !taxInspectionList.contains(uvedFixPlatIfns)) {
+                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.СведДох.СумИтНалПер.УведФиксПлат.ИФНСУвед\" (\"$uvedFixPlatIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                        }
+                    }
                     for (Ndfl2Node uvedSotsVichNode : uvedSotsVichNodeList) {
                         String uvedSotsVichIfns = extractAttribute(IFNS_UVED, uvedSotsVichNode)?.getValue()
                         if (uvedSotsVichIfns != null && uvedSotsVichIfns != "" && !taxInspectionList.contains(uvedSotsVichIfns)) {
