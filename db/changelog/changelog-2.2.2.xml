@@ -4,4 +4,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+	<!--Прежнее значение '01.01.0001' выдает ошибку при импорте схемы-->
+	<changeSet id="2.2.2-rnurgaleev-0" author="rnurgaleev">
+        <sql>
+            alter table REF_BOOK_INCOME_KIND modify version date default to_date('01.01.0001','DD.MM.YYYY');
+            alter table REPORT_PERIOD_TYPE modify version date default to_date('01.01.0001','DD.MM.YYYY');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
