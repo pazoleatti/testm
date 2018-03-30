@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -71,10 +72,26 @@ public class ReportDaoImplTest {
 
     @Test
     @Transactional(readOnly = false)
+    public void deleteDecExceptTest(){
+        assertEquals("uuid_1", reportDao.getDec(1, EXCEL_DEC));
+        assertEquals("uuid_2", reportDao.getDec(1, XML_DEC));
+        assertEquals("uuid_3", reportDao.getDec(1, PDF_DEC));
+        assertEquals("uuid_4", reportDao.getDec(1, JASPER_DEC));
+
+        reportDao.deleteNotXmlDec(1);
+
+        assertEquals(null, reportDao.getDec(1, EXCEL_DEC));
+        assertEquals("uuid_2", reportDao.getDec(1, XML_DEC));
+        assertEquals(null, reportDao.getDec(1, PDF_DEC));
+        assertEquals(null, reportDao.getDec(1, JASPER_DEC));
+    }
+
+    @Test
+    @Transactional(readOnly = false)
     public void deleteDecTest3(){
         DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
 
-        reportDao.deleteDec(Arrays.asList(1l, 2l), Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.XML_DEC));
+        reportDao.deleteDec(Arrays.asList(1l, 2l), Arrays.asList(EXCEL_DEC, XML_DEC));
 
         String id = reportDao.getDec(1, type);
         assertEquals(null, id);
@@ -87,7 +104,7 @@ public class ReportDaoImplTest {
     public void deleteDecTest4(){
         DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
 
-        reportDao.deleteDec(1l, DeclarationDataReportType.EXCEL_DEC);
+        reportDao.deleteDec(1l, EXCEL_DEC);
 
         String id = reportDao.getDec(1, type);
         assertEquals(null, id);
@@ -115,7 +132,7 @@ public class ReportDaoImplTest {
         blobData.setName("hello");
         blobData.setInputStream(new ByteArrayInputStream(new byte[]{'a'}));
         blobDataDao.createWithSysdate(blobData);
-        reportDao.createDec(3, uuid, DeclarationDataReportType.EXCEL_DEC);
+        reportDao.createDec(3, uuid, EXCEL_DEC);
     }
 
     @Test

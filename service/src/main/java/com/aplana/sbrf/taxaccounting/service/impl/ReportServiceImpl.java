@@ -55,4 +55,9 @@ public class ReportServiceImpl implements ReportService {
     public void deleteDec(String blobDataId) {
         reportDao.deleteDec(blobDataId);
     }
+
+    @Override
+    public void deleteNotXmlDec(long declarationDataId) {
+        reportDao.deleteNotXmlDec(declarationDataId);
+    }
 }

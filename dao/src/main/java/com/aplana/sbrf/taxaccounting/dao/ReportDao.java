@@ -70,4 +70,11 @@ public interface ReportDao {
      * @return Количество удаленных запсией
      */
     int clean();
+
+    /**
+     * Удаление отчетов деклараций по id, кроме {@link DeclarationDataReportType#XML_DEC}
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    void deleteNotXmlDec(long declarationDataId);
 }

@@ -157,4 +157,17 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             throw new DaoException(String.format("Ошибка при удалении ненужных записей таблицы DECLARATION_REPORT. %s.", e.getMessage()), e);
         }
     }
+
+    @Override
+    public void deleteNotXmlDec(long declarationDataId) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("declarationDataId", declarationDataId);
+            params.addValue("type", DeclarationDataReportType.XML_DEC.getReportType().getId());
+            getNamedParameterJdbcTemplate().update(
+                    "DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = :declarationDataId AND TYPE <> :type", params);
+        } catch (DataAccessException e) {
+            throw new DaoException("Не удалось удалить записи", e);
+        }
+    }
 }

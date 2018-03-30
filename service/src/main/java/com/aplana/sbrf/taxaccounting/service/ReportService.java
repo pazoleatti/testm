@@ -65,4 +65,11 @@ public interface ReportService {
      * @param uuid идентификатор блоба
      */
     void deleteDec(String uuid);
+
+    /**
+     * Удаление отчетов декларации по id, кроме {@link DeclarationDataReportType#XML_DEC}
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    void deleteNotXmlDec(long declarationDataId);
 }
