@@ -570,6 +570,12 @@ public interface NdflPersonDao {
     void savePrepayments(List<NdflPersonPrepayment> prepayments);
 
     /**
+     * Обновляет физлиц. Этот метод не обновляет доходы вычеты и авансы физлица
+     * @param persons список физлиц
+     */
+    void updateNdflPersons(List<NdflPerson> persons);
+
+    /**
      * Обновляет доходы
      * @param incomes список объектов доходов
      */

@@ -1626,6 +1626,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public void updateNdflPersons(List<NdflPerson> persons) {
+        String sql = "update " + NdflPerson.TABLE_NAME + " set " +
+                "row_num = :rowNum, inp = :inp, last_name = :lastName, first_name = :firstName, middle_name = :middleName, birth_day = :birthDay, " +
+                "citizenship = :citizenship, inn_np = :innNp, inn_foreign = :innForeign, id_doc_type = :idDocType, id_doc_number = :idDocNumber, " +
+                "status = :status, region_code = :regionCode, post_index = :postIndex, area = :area, city = :city, locality = :locality, street = :street, " +
+                "house = :house, building = :building, flat = :flat, snils = :snils, modified_date = :modifiedDate, modified_by = :modifiedBy " +
+                "where id = :id";
+
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(persons.toArray());
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
+    }
+
+    @Override
     public void updateIncomes(List<NdflPersonIncome> incomes) {
         String sql = "update " + NdflPersonIncome.TABLE_NAME + " set " +
                 "row_num = :rowNum, operation_id = :operationId, oktmo = :oktmo, kpp = :kpp, income_code = :incomeCode, income_type = :incomeType, " +

@@ -310,6 +310,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public void updateNdflPersons(List<NdflPerson> persons) {
+        ndflPersonDao.updateNdflPersons(persons);
+    }
+
+    @Override
     public void updateIncomes(List<NdflPersonIncome> incomes) {
         ndflPersonDao.updateIncomes(incomes);
     }

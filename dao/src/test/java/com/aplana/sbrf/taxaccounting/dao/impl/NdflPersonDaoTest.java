@@ -974,13 +974,30 @@ public class NdflPersonDaoTest {
     }
 
     @Test
+    public void testUpdateNdflPersons() {
+        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L));
+        ndflPersonList.get(0).setLastName("Петров");
+        ndflPersonList.get(0).setModifiedBy("me");
+        ndflPersonList.get(1).setLastName("Смит");
+        ndflPersonList.get(1).setModifiedBy("me");
+        ndflPersonDao.updateNdflPersons(ndflPersonList);
+        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L, 203L));
+        Assert.assertEquals("me", ndflPersonListResult.get(0).getModifiedBy());
+        Assert.assertEquals("Петров", ndflPersonListResult.get(0).getLastName());
+        Assert.assertEquals("me", ndflPersonListResult.get(1).getModifiedBy());
+        Assert.assertEquals("Смит", ndflPersonListResult.get(1).getLastName());
+        Assert.assertNull(ndflPersonListResult.get(2).getModifiedBy());
+        Assert.assertEquals("Иванов", ndflPersonListResult.get(2).getLastName());
+    }
+
+    @Test
     public void testUpdateIncomes() {
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(101L);
         ndflPersonIncomeList.get(0).setModifiedBy("me");
         ndflPersonIncomeList.get(1).setModifiedBy("me");
         ndflPersonDao.updateIncomes(ndflPersonIncomeList);
         List<NdflPersonIncome> ndflPersonIncomeListResult = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(101L);
-        Assert.assertEquals(ndflPersonIncomeListResult.get(0).getModifiedBy(), "me");
+        Assert.assertEquals("me", ndflPersonIncomeListResult.get(0).getModifiedBy());
     }
 
     @Test
@@ -990,7 +1007,7 @@ public class NdflPersonDaoTest {
         ndflPersonDeductionList.get(1).setModifiedBy("me");
         ndflPersonDao.updateDeductions(ndflPersonDeductionList);
         List<NdflPersonDeduction> ndflPersonDeductionListResult = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(101L);
-        Assert.assertEquals(ndflPersonDeductionListResult.get(0).getModifiedBy(), "me");
+        Assert.assertEquals("me", ndflPersonDeductionListResult.get(0).getModifiedBy());
     }
 
     @Test
@@ -1000,7 +1017,7 @@ public class NdflPersonDaoTest {
         ndflPersonPrepaymentList.get(1).setModifiedBy("me");
         ndflPersonDao.updatePrepayments(ndflPersonPrepaymentList);
         List<NdflPersonPrepayment> ndflPersonPrepaymentListResult = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(101L);
-        Assert.assertEquals(ndflPersonPrepaymentListResult.get(0).getModifiedBy(), "me");
+        Assert.assertEquals("me", ndflPersonPrepaymentListResult.get(0).getModifiedBy());
     }
 
     @Test
