@@ -548,7 +548,7 @@ class Report6Ndfl extends AbstractScriptClass {
                                     incomeAccruedDateList << incomeGrouped.incomeAccruedDate
                                 }
                             }
-                            section2Data << new Section2DataHolder(ndflPersonIncome, incomeAccruedDateList.isEmpty() ? null : Collections.min(incomeAccruedDateList), ndflPersonIncome.taxDate, ndflPersonIncome.taxTransferDate)
+                            section2Data << new Section2DataHolder(ndflPersonIncome, incomeAccruedDateList.isEmpty() ? Date.parse(SharedConstants.DATE_FORMAT, SharedConstants.DATE_ZERO_AS_DATE) : Collections.min(incomeAccruedDateList), ndflPersonIncome.taxDate, ndflPersonIncome.taxTransferDate)
                         }
                     }
 
@@ -590,7 +590,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         ДохНал() {
                             for (Section2DataHolder section2DataItem : virtuallyIncomeSum.keySet()) {
                                 СумДата(
-                                        ДатаФактДох: section2DataItem.virtuallyReceivedIncomeDate ? formatDate(section2DataItem.virtuallyReceivedIncomeDate) : SharedConstants.DATE_ZERO_AS_STRING,
+                                        ДатаФактДох: formatDate(section2DataItem.virtuallyReceivedIncomeDate).equals(SharedConstants.DATE_ZERO_AS_DATE) ? SharedConstants.DATE_ZERO_AS_STRING : formatDate(section2DataItem.virtuallyReceivedIncomeDate),
                                         ДатаУдержНал: formatDate(section2DataItem.witholdingDate),
                                         СрокПрчслНал: formatDate(section2DataItem.taxTransferDate).equals(SharedConstants.DATE_ZERO_AS_DATE) ? SharedConstants.DATE_ZERO_AS_STRING : formatDate(section2DataItem.taxTransferDate),
                                         ФактДоход: virtuallyIncomeSum.get(section2DataItem),
