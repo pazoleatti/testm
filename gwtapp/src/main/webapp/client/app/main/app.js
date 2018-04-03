@@ -186,6 +186,7 @@
         "ndflReportJournal.filter.kpp": "КПП",
         "ndflReportJournal.filter.oktmo": "ОКТМО",
         "ndflReportJournal.filter.codeNO": "Код НО",
+        "ndflreportJournal.validation.required": "Заполнены не все поля отчетности",
 
         "declarationTypeAssignment.grid.columnName.department": "Подразделение",
         "declarationTypeAssignment.grid.columnName.declarationType": "Макет",

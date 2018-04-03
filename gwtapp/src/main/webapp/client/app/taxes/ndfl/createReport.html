@@ -1,4 +1,4 @@
-<form class="form-horizontal" name="createReportForm">
+<form class="form-horizontal" name="createReportForm" data-aplana-submit-valid="save()">
     <div class="modal-body" style="min-height: 155px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
                style="height: 100px;">
@@ -8,13 +8,16 @@
                     <label class="control-label">{{::'createReport.period' | translate}}:</label>
                 </td>
                 <td>
-
+                    <div data-aplana-field>
                         <div style="width: 355px;" data-ng-controller="SelectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="reportData.period"
-                             required>
-
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
+                            translate}}
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -25,14 +28,17 @@
                 </td>
                 <td>
                     <div data-ng-if="reportData.period">
-
+                        <div data-aplana-field>
                             <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
                                  data-ng-init="initActiveAvailableTBSelect('reportData.period',userTBDepartment)"
                                  data-ng-model="reportData.department"
-                                 required>
+                                 data-required>
                             </div>
-
+                            <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
+                                translate}}
+                            </div>
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -44,13 +50,16 @@
                 </td>
                 <td>
                     <div data-ng-if="reportData.department && reportData.period">
+                        <div data-aplana-field>
                             <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
                                  data-ui-select2="declarationTypeSelect.options"
                                  data-ng-model="reportData.declarationType"
                                  data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                                 required>
+                                 data-required>
                             </div>
-
+                            <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </td>
@@ -62,7 +71,7 @@
             dateFormatter}}</label>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-default iconed-btn" ng-click="save()">
+        <button type="submit" class="btn btn-default iconed-btn">
             {{"DIALOGS_CREATE" | translate}}
             <span class="btn-icon-ok"></span>
         </button>
