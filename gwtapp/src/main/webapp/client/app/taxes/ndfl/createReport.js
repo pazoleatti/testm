@@ -54,6 +54,10 @@
                     }
                 });
 
+                /**
+                 * @description проверяет заполненость полей, обязательных для ввода
+                 * @return {boolean} результат проверки
+                 */
                 function validateRequiredFields() {
                     if (!$scope.reportData.period || !$scope.reportData.department || !$scope.reportData.declarationType){
                         $dialogs.errorDialog({
