@@ -760,8 +760,8 @@ class Import extends AbstractScriptClass {
         for (int i = 0; i < header.size(); i++) {
             if (i >= headersActual[0].size() || header[i] != headersActual[0][i]) {
                 logger.error("Ошибка при загрузке файла \"$fileName\". Заголовок таблицы не соответствует требуемой структуре.")
-                logger.error("Столбец заголовка таблицы \"${i >= headersActual[0].size() ? "Не задан или отсутствует" : headersActual[0][i]}\" № ${i + 1} " +
-                        "не соответствует ожидаемому \"${header[i]}\" № ${i + 1}")
+                logger.error("Столбец заголовка таблицы \"${i >= headersActual[0].size() ? "Не задан или отсутствует" : headersActual[0][i]}\" № ${i} " +
+                        "не соответствует ожидаемому \"${header[i]}\" № ${i}")
                 break
             }
         }
