@@ -29,18 +29,18 @@ public class PersonalData {
 
         PersonalData that = (PersonalData) o;
 
-        if (!firstName.equals(that.firstName)) return false;
-        if (!lastName.equals(that.lastName)) return false;
+        if (firstName != null ? !firstName.equals(that.firstName) : that.firstName != null) return false;
+        if (lastName != null ? !lastName.equals(that.lastName) : that.lastName != null) return false;
         if (middleName != null ? !middleName.equals(that.middleName) : that.middleName != null) return false;
-        return birthDate.equals(that.birthDate);
+        return birthDate != null ? birthDate.equals(that.birthDate) : that.birthDate == null;
     }
 
     @Override
     public int hashCode() {
-        int result = firstName.hashCode();
-        result = 31 * result + lastName.hashCode();
+        int result = firstName != null ? firstName.hashCode() : 0;
+        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
         result = 31 * result + (middleName != null ? middleName.hashCode() : 0);
-        result = 31 * result + birthDate.hashCode();
+        result = 31 * result + (birthDate != null ? birthDate.hashCode() : 0);
         return result;
     }
 
