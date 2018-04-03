@@ -9,13 +9,15 @@
             <span>{{::'sources.checkbox.destinations' | translate}}</span>
         </label>
     </div>
-    <div data-aplana-grid
-         data-grid-options="sourcesGrid.options"
-         data-grid-ctrl="sourcesGrid.ctrl"
-         data-ng-model="sourcesGrid.value"
-         data-grid-hide-legend="false"
-         id="sourcesTable"
-         style="float: left; width: 100%; "></div>
+    <div style="height: 400px;">
+        <div class="flex-grid" data-aplana-grid style="height: 100%;"
+             data-grid-options="sourcesGrid.options"
+             data-grid-ctrl="sourcesGrid.ctrl"
+             data-ng-model="sourcesGrid.value"
+             data-grid-hide-legend="false"
+             id="sourcesTable">
+        </div>
+    </div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">

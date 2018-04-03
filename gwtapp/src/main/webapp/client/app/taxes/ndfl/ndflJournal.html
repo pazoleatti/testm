@@ -10,7 +10,7 @@
             </button>
         </div>
     </div>
-    <div id="ndflJournalGridContainer" class="container-grid box-shadow-block flex-fill">
+    <div id="ndflJournalGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
         <!-- Фильтр -->
         <div id="ndflJournalGridTop">
             <span data-ng-include="'client/app/taxes/ndfl/ndflJournalFilter.html'"></span>
@@ -62,7 +62,8 @@
         </div>
 
         <!-- Таблица -->
-        <div data-aplana-grid
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#ndflJournalGridContainer"
              data-grid-fill-space-container-selector-top="#ndflJournalGridTop"

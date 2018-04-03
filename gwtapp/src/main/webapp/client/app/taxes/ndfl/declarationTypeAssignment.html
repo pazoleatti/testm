@@ -2,12 +2,11 @@
     <div class="content-header">
         <h1>{{::'header.declarationTypeAssignment' | translate}}</h1>
     </div>
-    <div id="declarationTypeAssignmentGridCotainer" class="container-grid box-shadow-block flex-fill">
-        <div id='declarationTypeAssignmentGridTop' style="min-height: 50px; margin-bottom: -17px">
-
+    <div id="declarationTypeAssignmentGridCotainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id='declarationTypeAssignmentGridTop'>
             <!-- Фильтр -->
             <div data-ng-controller="CommonFilterCtrl">
-                <div class="grid-filter" style="margin: -6px 0 0 -19px; padding: 0 0 0 21px;">
+                <div class="grid-filter">
                     <div data-aplana-collapse data-is-collapsed="false"
                          data-label="'filterPanelLabel' | translate">
                         <form class="form-horizontal info-wrapper" style="min-height: 70px;" role="form" novalidate>
@@ -15,9 +14,8 @@
                                 <div class="filter-col w650">
                                     <div class="row-fluid form-group">
                                         <div class="span3">
-                                            <label class="control-label">{{::'declarationTypeAssignment.filter.department'
-                                                |
-                                                translate}}:</label>
+                                            <label class="control-label">
+                                                {{::'declarationTypeAssignment.filter.department' | translate}}:</label>
                                         </div>
                                         <div data-ng-controller="SelectDepartmentCtrl"
                                              data-ui-select2="departmentsSelect.options"
@@ -49,44 +47,44 @@
             </div>
 
             <!--Панель кнопок -->
-            <div class="button_panel" style="min-height: 52px; margin: -5px 0 -17px 0;">
+            <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
                     <!-- Назначить -->
                     <span>
-                    <button type="button" class="btn btn-default" data-ng-click="showCreateAssignmentModal()"
-                            data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT)">
-                        <span data-translate-once="declarationTypeAssignment.button.createAssignment"></span>
-                    </button>
-                </span>
+                        <button type="button" class="btn btn-default" data-ng-click="showCreateAssignmentModal()"
+                                data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT)">
+                            <span data-translate-once="declarationTypeAssignment.button.createAssignment"></span>
+                        </button>
+                    </span>
 
                     <!-- Редактировать -->
                     <span>
-                    <button type="button" class="btn btn-default" data-ng-click="showEditAssignmentModal()"
-                            data-ng-disabled="!(assignmentsAreSelected() && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT))">
-                        <span data-translate-once="declarationTypeAssignment.button.editAssignment"></span>
-                    </button>
-                </span>
+                        <button type="button" class="btn btn-default" data-ng-click="showEditAssignmentModal()"
+                                data-ng-disabled="!(assignmentsAreSelected() && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT))">
+                            <span data-translate-once="declarationTypeAssignment.button.editAssignment"></span>
+                        </button>
+                    </span>
 
                     <!-- Отменить назначение -->
                     <span>
-                    <button type="button" class="btn btn-default" data-ng-click="deleteAssignments()"
-                            data-ng-disabled="!(assignmentsAreSelected() && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT))">
-                        <span data-translate-once="declarationTypeAssignment.button.deleteAssignment"></span>
-                    </button>
-                </span>
+                        <button type="button" class="btn btn-default" data-ng-click="deleteAssignments()"
+                                data-ng-disabled="!(assignmentsAreSelected() && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT))">
+                            <span data-translate-once="declarationTypeAssignment.button.deleteAssignment"></span>
+                        </button>
+                    </span>
                 </div>
             </div>
         </div>
 
         <!-- Таблица -->
-        <div data-aplana-grid
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#declarationTypeAssignmentGridCotainer"
              data-grid-fill-space-container-selector-top="#declarationTypeAssignmentGridTop"
              data-grid-options="declarationTypeAssignmentGrid.options"
              data-grid-ctrl="declarationTypeAssignmentGrid.ctrl"
              data-ng-model="declarationTypeAssignmentGrid.value"
-             id="declarationTypeAssignmentTable"
-             style="float: left; width: 100%;"></div>
+             id="declarationTypeAssignmentTable"></div>
     </div>
 </div>

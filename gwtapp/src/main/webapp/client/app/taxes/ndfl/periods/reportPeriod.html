@@ -2,7 +2,7 @@
     <div class="content-header">
         <h1>{{::'reportPeriod.title' | translate}}</h1>
     </div>
-    <div id="reportPeriodGridContainer" class="container-grid box-shadow-block flex-fill">
+    <div id="reportPeriodGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
         <div id="reportPeriodGridTop" style="min-height: 50px;">
             <div>
                 <span data-ng-include="'client/app/taxes/ndfl/periods/reportPeriodFilter.html'"></span>
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div data-aplana-grid
+        <div class="flex-grid flex-fill" data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#reportPeriodGridContainer"
              data-grid-fill-space-container-selector-top="#reportPeriodGridTop"
@@ -47,8 +47,8 @@
              data-ng-model="reportPeriodGrid.value"
              data-grid-data="periodGridData"
              data-init-grid="initGrid()"
-             id="reportPeriodGrid"
-             style="float: left; width: 100%;"></div>
+             id="reportPeriodGrid">
+        </div>
 
     </div>
 </div>

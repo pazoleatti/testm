@@ -13,28 +13,29 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: " + logPanel.height + "px; min-height: 329px;'>" +
+                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: " + logPanel.height + "px; " +
+                        "max-height: " + angular.element('.cbr-page-layout__view').height() + "px; min-height: 36px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
-                        "         data-splitter-thick='30'" +
+                        "         data-splitter-thick='16'" +
                         "         data-splitter-left-top='app-content'" +
                         "         data-splitter-right-bottom='log-entry-list'" +
                         "         data-splitter-max='994' data-splitter-min='12'" +
                         "         data-splitter-start='540'" +
                         "         data-splitter-resizing='true'" +
                         "         id='resize-button'></div>" +
-                        "    <div id='log-entry-list' class='flex-fill'>" +
-                        "        <div id='log-panel-header'>" +
-                        "            <div id='log-panel-header-message'></div>" +
-                        "            <div style='float: right; margin: -7px 6px 0 4px;'>" +
-                        "                <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
-                        "            </div>" +
-                        "            <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
-                        "                <img src='resources/img/unload-white-16.png'>" +
-                        "                <a href='controller/actions/logEntry/" + uuid + "' title=\"{{'logPanel.header.unload.title' | translate}}\">{{'logPanel.header.unload' | translate}}</a>" +
-                        "            </div>" +
+                        "    <div id='log-panel-header'>" +
+                        "        <div id='log-panel-header-message'></div>" +
+                        "        <div style='float: right; margin: -7px 6px 0 4px;'>" +
+                        "            <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
                         "        </div>" +
-                        "        <div data-aplana-grid" +
+                        "        <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
+                        "            <img src='resources/img/unload-white-16.png'>" +
+                        "            <a href='controller/actions/logEntry/" + uuid + "' title=\"{{'logPanel.header.unload.title' | translate}}\">{{'logPanel.header.unload' | translate}}</a>" +
+                        "        </div>" +
+                        "    </div>" +
+                        "    <div id='log-entry-list' class='flex-fill flex-column'>" +
+                        "        <div class='flex-grid flex-fill' data-aplana-grid" +
                         "             data-grid-fill-space='true' " +
                         "             data-grid-options='logEntryGrid.options' " +
                         "             data-grid-fill-space-container-selector='#log-entry-list' " +
@@ -157,6 +158,12 @@
                         var resizeButton = angular.element('#resize-button');
                         var bottomDiv = angular.element('#log-panel');
 
+                        $rootScope.$on('WINDOW_RESIZED_MSG', function () {
+                            bottomDiv.css({
+                                maxHeight: container.height()
+                            });
+                        });
+
                         resizeButton.on('mousedown', function (e) {
                             var startHeight = bottomDiv.height(),
                                 pY = e.pageY;
@@ -167,19 +174,14 @@
                             function mouseMove(me) {
                                 var my = (me.pageY - pY);
 
-                                // тут стоит делать $rootScope.$broadcast('UPDATE_GIRD_HEIGHT'), но он тормозит
-                                bottomDiv.find('.ui-jqgrid-bdiv').css({
-                                    height: startHeight - my - 136,
-                                    maxHeight: topDiv.height() - 138,
-                                    minHeight: 192
-                                });
+                                $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
+
+                                logPanel.height = Math.max(Math.min(startHeight - my, container.height()), 0);
 
                                 bottomDiv.css({
-                                    height: startHeight - my,
-                                    maxHeight: container.height() - 3
+                                    height: logPanel.height,
+                                    maxHeight: container.height()
                                 });
-
-                                logPanel.height = startHeight - my;
                             }
 
                             function unbindEvents() {

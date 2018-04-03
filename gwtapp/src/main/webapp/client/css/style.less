@@ -474,7 +474,8 @@ input[type="number"] {
 }
 
 .modal-body {
-  padding: 15px 13px 18px;
+  padding: 0;
+  margin: 15px 13px 18px;
   max-height: 600px;
   overflow: visible;
 }
@@ -1194,11 +1195,16 @@ div [ui-view] {
 
 .cbr-page-layout__view {
   position: relative;
-  height: 100%;
+  &:extend(.flex-column);
   box-sizing: border-box;
   overflow: hidden;
   min-width: 1100px;
 }
+
+#app-content {
+  &:extend(.flex-fill);
+}
+
 .ui-jqgrid {
   width: 100% !important;
 }
@@ -1227,21 +1233,26 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 }
 
 /*================панель уведомлений============*/
+#log-panel-container {
+  z-index: 1;
+}
+
+#log-panel #resize-button a {
+  z-index: 1;
+}
+
 #log-panel {
-  z-index: 2;
   width: 100%;
   margin: 0 auto;
   border: 1px solid #d8d8d8;
-  position: absolute;
-  bottom: 0;
 }
 
 #log-panel-header {
   position: relative;
-  top: -18px;
   height: 20px;
   text-align: center;
   color: #fff;
+  background-color: #515e5e;
 }
 
 #log-panel-header-message {
@@ -1359,6 +1370,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 /*-------------------tabs-style---------*/
 .tab-wrapper {
   background: @white;
+  position: relative;
 }
 
 .btn-link {
@@ -1623,6 +1635,12 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   bottom: 0;
 }
 
+.tab-pane-content {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
 .btn-group {
   .btn {
     font-size: 12px;
@@ -1708,6 +1726,7 @@ form .pull-control-label-right .control-label {
 
 .flex-fill {
   flex: 1;
+  overflow: hidden;
 }
 /*--------*/
 #searchButton, #clearButton{
@@ -1742,7 +1761,31 @@ form .pull-control-label-right .control-label {
 }
 
 .content-header h1 {
+  white-space: nowrap;
   line-height: 40px;
   font-size: 24px;
   margin: 0;
+}
+
+.field-content {
+  height: 100%;
+}
+
+/*Размеры таблицы вычисляются через flexbox, header и footer - фиксированы, content - занимает всю остальную область*/
+.flex-grid {
+  .ui-jqgrid {
+    &:extend(.flex-column);
+  }
+
+  .ui-jqgrid-view {
+    &:extend(.flex-fill);
+    &:extend(.flex-column);
+  }
+
+  .ui-jqgrid-bdiv {
+    &:extend(.flex-fill);
+    table {
+      overflow: visible;
+    }
+  }
 }

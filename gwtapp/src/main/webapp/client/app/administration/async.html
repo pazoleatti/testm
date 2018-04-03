@@ -2,9 +2,8 @@
     <div class="content-header">
         <h1>{{::'async.title' | translate}}</h1>
     </div>
-    <div id="asyncTasksGridContainer" class="container-grid box-shadow-block flex-fill">
-        <div id="asyncTasksGridTop" style="min-height: 50px; margin-bottom: -17px">
-
+    <div id="asyncTasksGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id="asyncTasksGridTop">
             <!--Панель кнопок -->
             <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
@@ -32,14 +31,14 @@
         </div>
 
         <!-- Таблица -->
-        <div data-aplana-grid
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#asyncTasksGridContainer"
              data-grid-fill-space-container-selector-top="#asyncTasksGridTop"
              data-grid-options="asyncGrid.options"
              data-grid-ctrl="asyncGrid.ctrl"
              data-ng-model="asyncGrid.value"
-             id="asyncTable"
-             style="float: left; width: 100%;"></div>
+             id="asyncTable"></div>
     </div>
 </div>

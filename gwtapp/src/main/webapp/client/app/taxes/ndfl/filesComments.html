@@ -29,9 +29,9 @@
                 </tbody>
             </table>
         </div>
-        <div>
-            <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
-            <div data-aplana-grid
+        <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
+        <div style="height: 250px;">
+            <div class="flex-grid" data-aplana-grid style="height: 100%;"
                  data-grid-fill-space="true"
                  data-grid-fill-space-container-selector=".modal-body"
                  data-grid-fill-space-container-selector-top=".top-block"
@@ -42,8 +42,6 @@
                  id="fileCommentGrid">
             </div>
         </div>
-
-
     </div>
 </div>
 <div class="modal-footer" style="margin: 0;position: relative; z-index: 1000;">

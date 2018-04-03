@@ -2,36 +2,33 @@
     <div class="content-header">
         <h1>{{::'header.CommonParams' | translate}}</h1>
     </div>
-    <div id="commonParamsGridContainer" class="container-grid box-shadow-block flex-fill">
-        <div id="commonParamsGridTop" style="min-height: 50px; margin-bottom: -17px">
+    <div id="commonParamsGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id="commonParamsGridTop">
             <!--Панель кнопок -->
             <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
                 <span>
-                     <button type="button" class="btn btn-default" data-ng-click="changeToDefault()"
-                             data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_GENERAL_PARAMS) && !permissionChecker.check(commonParamsGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.DEFAULT)">
+                    <button type="button" class="btn btn-default" data-ng-click="changeToDefault()"
+                            data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_GENERAL_PARAMS) && !permissionChecker.check(commonParamsGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.DEFAULT)">
                          {{::'commonParams.default' | translate}}
-                      </button>
-
-                      <button type="button" class="btn btn-default" data-ng-click="edit()"
-                              data-ng-disabled="!permissionChecker.check(commonParamsGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT) || commonParamsGrid.value.length == 0">
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="edit()"
+                            data-ng-disabled="!permissionChecker.check(commonParamsGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT) || commonParamsGrid.value.length == 0">
                           {{::'button.edit' | translate}}
-                      </button>
-
+                    </button>
                 </span>
                 </div>
             </div>
         </div>
 
-        <div data-aplana-grid
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#commonParamsGridContainer"
              data-grid-fill-space-container-selector-top="#commonParamsGridTop"
              data-grid-options="commonParamsGrid.options"
              data-grid-ctrl="commonParamsGrid.ctrl"
              data-ng-model="commonParamsGrid.value"
-             id="commonParamsGrid"
-             style="float: left; width: 100%;"></div>
-
+             id="commonParamsGrid"></div>
     </div>
 </div>

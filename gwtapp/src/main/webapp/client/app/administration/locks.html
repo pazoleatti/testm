@@ -2,9 +2,8 @@
     <div class="content-header">
         <h1>{{::'locks.title' | translate}}</h1>
     </div>
-    <div id="locksGridContainer" class="container-grid box-shadow-block flex-fill">
-        <div id="locksGridTop" style="min-height: 50px; margin-bottom: -17px">
-
+    <div id="locksGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id="locksGridTop">
             <!--Панель кнопок -->
             <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
@@ -32,7 +31,8 @@
         </div>
 
         <!-- Таблица -->
-        <div data-aplana-grid
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#locksGridContainer"
              data-grid-fill-space-container-selector-top="#locksGridTop"
