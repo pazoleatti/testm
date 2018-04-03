@@ -27,4 +27,19 @@
             <where>id=14</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2.2-apronin-1" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-2" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
