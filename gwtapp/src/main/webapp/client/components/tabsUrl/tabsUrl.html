@@ -39,13 +39,13 @@
         <div class="tab-pane" data-ng-class="{active:currentTab.active}">
             <div ng-switch="$getContent(currentTab)">
                 <div ng-switch-when="content">
-                    <div data-ng-bind="currentTab.content"></div>
+                    <div class="tab-pane-content" data-ng-bind="currentTab.content"></div>
                 </div>
                 <div ng-switch-when="htmlContent">
-                    <div data-ng-bind-html="currentTab.htmlContent"></div>
+                    <div class="tab-pane-content" data-ng-bind-html="currentTab.htmlContent"></div>
                 </div>
                 <div ng-switch-default>
-                    <div data-ng-include="currentTab.contentUrl"></div>
+                    <div class="tab-pane-content" data-ng-include="currentTab.contentUrl"></div>
                 </div>
             </div>
         </div>

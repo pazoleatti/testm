@@ -1,21 +1,13 @@
-
-<div class="modal-body" style="height: 600px">
-
-    <div class="form-horizontal"  style="height: 510px;">
-
-        <div class="horizontal-input-table " style="margin: 0; height: 0px; "/>
-
-            <div data-aplana-grid
-                 data-grid-fill-space="true"
-                 data-grid-fill-space-container-selector=".modal-body"
-                 data-grid-fill-space-container-selector-top=".horizontal-input-table"
-                 data-grid-options="logBusinesGrid.options"
-                 data-grid-ctrl="logBusinesGrid.ctrl"
-                 data-ng-model="logBusinesGrid.value"
-                 data-init-grid="initOurGrid(ctrl)"
-                 id="logBusinesGrid">
-            </div>
-        </div>
+<div class="modal-body" style="height: 500px">
+    <div class="flex-grid" data-aplana-grid style="height: 100%;"
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector=".modal-body"
+         data-grid-fill-space-container-selector-top=".horizontal-input-table"
+         data-grid-options="logBusinesGrid.options"
+         data-grid-ctrl="logBusinesGrid.ctrl"
+         data-ng-model="logBusinesGrid.value"
+         data-init-grid="initOurGrid(ctrl)"
+         id="logBusinesGrid">
     </div>
 </div>
 <div class="modal-footer" style="margin: 0 0 2px 0;position: relative; z-index: 1000;">

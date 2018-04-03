@@ -1,10 +1,10 @@
 <div class="flex-column">
-    <div>
-        <h1><a href="index.html#/administration/declarationTypeJournal">{{::'move_back' |
-            translate}}</a> - {{declarationType.name}}</h1>
+    <div class="content-header">
+        <a href="index.html#/administration/declarationTypeJournal">{{::'move_back' | translate}}</a>
+        <h1>— {{declarationType.name}}</h1>
     </div>
     <div id="declarationTemplateJournalGridContainer" class="container-grid box-shadow-block flex-fill">
-        <div data-aplana-grid
+        <div class="flex-grid" data-aplana-grid style="height: 100%"
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#declarationTemplateJournalGridContainer"
              data-grid-fill-space-container-selector-top="none"

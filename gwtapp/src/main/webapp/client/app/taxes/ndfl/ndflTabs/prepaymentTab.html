@@ -1,11 +1,11 @@
-<div id="prepaymentGridContainer" data-ng-controller="prepaymentCtrl" style="position: absolute; height: 100%; width: 100%; padding: 12px;">
-        <div data-aplana-grid
-             data-grid-fill-space="true"
-             data-grid-fill-space-container-selector="#prepaymentGridContainer"
-             data-grid-fill-space-container-selector-top="none"
-             data-grid-options="prepaymentGrid.options"
-             data-init-grid="prepaymentGrid.init(ctrl)"
-             data-grid-ctrl="prepaymentGrid.ctrl"
-             data-ng-model="prepaymentGrid.value"
-             id="prepaymentTable"></div>
+<div id="prepaymentGridContainer" data-ng-controller="prepaymentCtrl" style="height: 100%; padding: 12px;">
+    <div class="flex-grid" data-aplana-grid style="height: 100%;"
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector="#prepaymentGridContainer"
+         data-grid-fill-space-container-selector-top="none"
+         data-grid-options="prepaymentGrid.options"
+         data-init-grid="prepaymentGrid.init(ctrl)"
+         data-grid-ctrl="prepaymentGrid.ctrl"
+         data-ng-model="prepaymentGrid.value"
+         id="prepaymentTable"></div>
 </div>

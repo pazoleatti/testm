@@ -118,7 +118,7 @@
              data-ng-model="reportNdflGrid.value"
              data-grid-enable-adjust-width-by-columns="true"
              id="rnuNdflTable"
-             style="float: left; width: 100%;"
+             style="width: 100%;"
              data-grid-no-paging="true">
         </div>
     </div>
@@ -132,15 +132,12 @@
         <span data-translate-once="common.button.search"></span>
         <span class="btn-icon-ok"></span>
     </button>
-
     <!--Кнопка Сформировать-->
     <button type="button"
             class="btn btn-default"
             data-ng-show="reportNdflGrid.value.length"
             data-ng-click="createSubreport()">
         <span data-translate-once="common.button.formation"></span>
-
-
     </button>
     <!--Кнопка Выход-->
     <button type="button"

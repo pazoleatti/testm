@@ -57,13 +57,13 @@
         <div data-ng-repeat="tab in tabModel" class="tab-pane" data-ng-class="{active:tab.active}">
             <div data-ng-switch="$getContent(tab)">
                 <div data-ng-switch-when="content">
-                    <div data-ng-bind="tab.content"></div>
+                    <div class="tab-pane-content" data-ng-bind="tab.content"></div>
                 </div>
                 <div data-ng-switch-when="htmlContent">
-                    <div data-ng-bind-html="tab.htmlContent"></div>
+                    <div class="tab-pane-content" data-ng-bind-html="tab.htmlContent"></div>
                 </div>
                 <div data-ng-switch-when="contentUrl">
-                    <div data-ng-include="tab.contentUrl"></div>
+                    <div class="tab-pane-content" data-ng-include="tab.contentUrl"></div>
                 </div>
                 <div data-ng-switch-default>
                     <div></div>

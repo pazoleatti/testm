@@ -1,5 +1,5 @@
-<div id="commonParamGridContainer" class="container-grid box-shadow-block"
-     data-ng-controller="commonParamController" style="position: absolute; height: 100%; width: 100%;">
+<div id="commonParamGridContainer" class="container-grid box-shadow-block flex-column"
+     data-ng-controller="commonParamController">
 
     <!--Панель кнопок -->
     <div id="commonParamGridTop">
@@ -39,14 +39,14 @@
         </div>
     </div>
 
-    <div data-aplana-grid
+    <div class="flex-grid flex-fill"
+         data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector="#commonParamGridContainer"
          data-grid-fill-space-container-selector-top="#commonParamGridTop"
          data-grid-options="commonParamGrid.options"
          data-grid-ctrl="commonParamGrid.ctrl"
          data-ng-model="commonParamGrid.value"
-         id="commonParamGrid"
-         style="float: left; width: 100%;">
+         id="commonParamGrid">
     </div>
 </div>
