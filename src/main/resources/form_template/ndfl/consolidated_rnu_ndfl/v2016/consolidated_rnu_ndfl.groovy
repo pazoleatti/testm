@@ -1336,6 +1336,8 @@ class IncomesSheetFiller implements SheetFiller {
                     cell21.setCellStyle(centeredStyleDate)
                     cell21.setCellValue(npi.taxTransferDate)
                 }
+            } else {
+                cell21.setCellStyle(centeredStyle)
             }
             Cell cell22 = row.createCell(22);
             cell22.setCellStyle(centeredStyleDate)
