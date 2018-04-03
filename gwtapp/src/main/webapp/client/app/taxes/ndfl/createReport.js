@@ -54,10 +54,23 @@
                     }
                 });
 
+                function validateRequiredFields() {
+                    if (!$scope.reportData.period || !$scope.reportData.department || !$scope.reportData.declarationType){
+                        $dialogs.errorDialog({
+                            content: $filter("translate")("ndflReportJournal.message.emptyFilterFields")
+                        });
+                        return false;
+                    }
+                    return true;
+                }
+
                 /**
                  * Создание отчётности
                  */
                 $scope.save = function () {
+                    if (!validateRequiredFields()){
+                        return;
+                    }
                     // Запоминаем период выбранный пользователем
                     $webStorage.set(APP_CONSTANTS.USER_STORAGE.NAME,
                         APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
