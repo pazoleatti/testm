@@ -35,12 +35,14 @@
                                 $scope.row.disableTaxTransferDate = true;
                                 $scope.row.taxTransferDate = null;
                             }
-                            $http({
-                                method: "GET",
-                                url: "controller//rest/getPersonDocTypeName/" + person.idDocType
-                            }).success(function (docTypeName) {
-                                $scope.temp.docTypeName = docTypeName;
-                            });
+                            if(person.idDocType) {
+                                $http({
+                                    method: "GET",
+                                    url: "controller//rest/getPersonDocTypeName/" + person.idDocType
+                                }).success(function (docTypeName) {
+                                    $scope.temp.docTypeName = docTypeName;
+                                });
+                            }
                             // Получение данных ОКТМО для установки значения в выпадашку
                             $http({
                                 method: "GET",
