@@ -2086,7 +2086,7 @@ class Check extends AbstractScriptClass {
      * Проверки для Раздел 4. Сведения о доходах в виде авансовых платежей
      */
     def checkDataPrepayment(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
-                        List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+                            List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
         long time = System.currentTimeMillis()
 
         Map<Long, NdflPerson> personByIdMap = ndflPersonList.collectEntries{[it.id, it]}
