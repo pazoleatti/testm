@@ -54,16 +54,6 @@
                     }
                 });
 
-                function validateRequiredFields() {
-                    if (!$scope.reportData.period || !$scope.reportData.department || !$scope.reportData.declarationType){
-                        $dialogs.errorDialog({
-                            content: $filter("translate")("ndflReportJournal.message.emptyFilterFields")
-                        });
-                        return false;
-                    }
-                    return true;
-                }
-
                 /**
                  * Создание отчётности
                  */
