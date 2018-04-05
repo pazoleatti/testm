@@ -164,6 +164,8 @@
 
         "link.ndfl.reporting": "Формирование отчетов",
         "link.ndfl.reporting.uploadXml": "Выгрузить в XML",
+        "link.ndfl.reporting.createPdf": "Сформировать PDF",
+        "link.ndfl.reporting.downloadPdf": "Выгрузить в PDF",
         "link.ndfl.reporting.formXLSX": "Сформировать в XLSX",
         "link.ndfl.reporting.formTemplateExcel": "Сформировать \"Шаблон ТФ (Excel)\"",
         "link.ndfl.reporting.formForFL": "Сформировать \"РНУ НДФЛ по физическому лицу\"",

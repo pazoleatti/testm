@@ -22,9 +22,9 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
-                            <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download'
-                                | translate}}</a>
+                            <a ng-click="createPdf()" ng-show="!availablePdf">{{::'link.ndfl.reporting.createPdf' | translate}}</a>
+                            <a ng-click="downloadPdf()" ng-show="availablePdf">{{::'link.ndfl.reporting.downloadPdf' |
+                                translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem">
@@ -71,7 +71,8 @@
                         <div class="span3">
                             <div class="row-fluid">
                                 <div class="span4">
-                                    <label class="control-label margin-left-minus5">{{::'title.department' | translate}}:</label>
+                                    <label class="control-label margin-left-minus5">{{::'title.department' |
+                                        translate}}:</label>
                                 </div>
                                 <div class="span8">
                                     <label class="font-normal info-text">{{declarationData.department}}</label>
@@ -207,7 +208,7 @@
                     <!-- Показать -->
                     <span>
                             <button type="button" class="btn btn-default"
-                                    data-ng-click="show()"
+                                    data-ng-click="createPdf()"
                                     data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.SHOW) || availablePdf">
                                 <span data-translate-once="button.show"></span>
                             </button>
@@ -215,7 +216,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex-fill" style="display: flex;  align-items: flex-start;  align-content: flex-start;  flex-shrink: 0;  width: 100%;">
+        <div class="flex-fill"
+             style="display: flex;  align-items: flex-start;  align-content: flex-start;  flex-shrink: 0;  width: 100%;">
             <div ng-if="!availablePdf">
                 <div style="min-height: 600px; text-align: center" class="report-wrapper">
                     <h1>{{pdfMessage}}</h1>

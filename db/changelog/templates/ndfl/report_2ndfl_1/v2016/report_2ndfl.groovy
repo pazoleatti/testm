@@ -202,9 +202,6 @@ class Report2Ndfl extends AbstractScriptClass {
             case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
                 createSpecificReport()
                 break
-            case FormDataEvent.CREATE_EXCEL_REPORT: //создание xlsx отчета
-                createXlsxReport()
-                break
             case FormDataEvent.CREATE_FORMS: // создание экземпляра
                 checkDataConsolidated()
                 createForm()
@@ -2574,42 +2571,6 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         StringBuilder fileName = new StringBuilder(declarationTemplate.name).append("_").append(declarationData.id).append("_").append(row.lastName ?: "").append(" ").append(row.firstName ?: "").append(" ").append(row.middleName ?: "").append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
         declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
         scriptSpecificReportHolder.setFileName(fileName.toString())
-    }
-
-/**
- * Создать XLSX отчет
- * @return
- */
-    def createXlsxReport() {
-        ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) getProperty("scriptSpecificReportHolder")
-        def params = new HashMap<String, Object>()
-        params.put("declarationId", declarationData.getId());
-
-        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id, userInfo));
-
-        StringBuilder fileName = new StringBuilder("Реестр_справок_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
-        exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-        scriptSpecificReportHolder.setFileName(fileName.toString())
-    }
-
-    void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
-        try {
-            JRXlsxExporter exporter = new JRXlsxExporter();
-            exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
-                    jasperPrint);
-            exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
-            exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
-                    Boolean.TRUE);
-            exporter.setParameter(
-                    JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
-                    Boolean.FALSE);
-
-            exporter.exportReport();
-            exporter.reset();
-        } catch (Exception e) {
-            throw new ServiceException(
-                    "Невозможно экспортировать отчет в XLSX", e) as Throwable
-        }
     }
 
 /**

@@ -50,4 +50,12 @@
             <where>id=14</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-3" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
+            <where>id in (8, 12)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

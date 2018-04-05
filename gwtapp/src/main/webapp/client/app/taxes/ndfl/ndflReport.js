@@ -427,7 +427,7 @@
                  * @param force
                  * @param create
                  */
-                $scope.show = function (force, create) {
+                $scope.createPdf = function (force, create) {
                     {
                         force = typeof force !== 'undefined' ? force : false;
                         create = typeof create !== 'undefined' ? create : false;
@@ -465,8 +465,8 @@
                 $scope.downloadXml = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml";
                 };
-                $scope.downloadXlsx = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
+                $scope.downloadPdf = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf";
                 };
             }]);
 }());

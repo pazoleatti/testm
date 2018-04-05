@@ -837,4 +837,12 @@ public interface DeclarationDataService {
      * @param personPrepayment данные строки раздела 4
      */
     void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment);
+
+    /**
+     * Создать имя Pdf отчета
+     * @param declarationDataId   идентификатор налоговой формы
+     * @param userInfo            информация о пользователе
+     * @return имя Pdf отчета
+     */
+    String createPdfFileName(Long declarationDataId, TAUserInfo userInfo);
 }

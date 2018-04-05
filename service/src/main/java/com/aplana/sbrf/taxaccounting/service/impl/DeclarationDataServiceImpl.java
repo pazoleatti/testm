@@ -104,6 +104,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         }
     };
+    private static final ThreadLocal<SimpleDateFormat> SDF_YYYY_MM_DD_HH_MM_SS = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        }
+    };
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
     private static final String CALCULATION_NOT_TOPICAL = "Налоговая форма содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
@@ -1808,7 +1814,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                 LOG.info(String.format("Сохранение PDF-файла в базе данных для налоговой формы %s", declarationData.getId()));
                 stateLogger.updateState(AsyncTaskState.SAVING_PDF);
-                reportService.createDec(declarationData.getId(), blobDataService.create(pdfFile.getPath(), ""), DeclarationDataReportType.PDF_DEC);
+                String fileName = createPdfFileName(declarationData.getId(), userInfo);
+                reportService.createDec(declarationData.getId(), blobDataService.create(pdfFile.getPath(), fileName), DeclarationDataReportType.PDF_DEC);
 
                 // не сохраняем jasper-отчет, если есть XLSX-отчет
                 if (reportService.getDec(declarationData.getId(), DeclarationDataReportType.EXCEL_DEC) == null) {
@@ -3553,5 +3560,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         reportService.deleteDec(declarationDataId);
+    }
+
+    public String createPdfFileName(Long declarationDataId, TAUserInfo userInfo) {
+        DeclarationData declarationData = get(declarationDataId, userInfo);
+        DeclarationTemplate dt = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        switch (dt.getType().getId()) {
+            case DeclarationType.NDFL_2_1:
+            case DeclarationType.NDFL_2_2:
+                return new StringBuilder("Реестр_справок_").append(declarationData.getId()).append("_").append(SDF_DD_MM_YYYY_HH_MM_SS.get().format(new Date())).append(".pdf").toString();
+            case DeclarationType.NDFL_6:
+                return getXmlDataFileName(declarationData.getId(), userInfo).replace("zip", "pdf");
+            default:
+                return "";
+        }
     }
 }

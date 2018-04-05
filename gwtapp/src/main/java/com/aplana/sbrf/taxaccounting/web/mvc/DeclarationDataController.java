@@ -103,6 +103,28 @@ public class DeclarationDataController {
     }
 
     /**
+     * Формирование отчета для налоговой формы в формате pdf
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param response          ответ
+     * @throws IOException IOException
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/pdf", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public void downloadDeclarationPdf(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
+            throws IOException {
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.PDF_DEC);
+        BlobData blobData = null;
+        if (blobId != null) {
+            blobData = blobDataService.get(blobId);
+        }
+        if (blobData != null) {
+            TAUserInfo userInfo = securityService.currentUserInfo();
+            blobData.setName(declarationService.createPdfFileName(declarationDataId, userInfo));
+        }
+        createBlobResponse(blobData, req, response);
+    }
+
+    /**
      * Сохранить шаблон ТФ (Excel) для формы
      *
      * @param declarationDataId идентификатор декларации
@@ -121,7 +143,10 @@ public class DeclarationDataController {
         if (blobId != null) {
             blobData = blobDataService.get(blobId);
         }
+        createBlobResponse(blobData, req, response);
+    }
 
+    private void createBlobResponse(BlobData blobData, HttpServletRequest req, HttpServletResponse response) throws IOException {
         if (blobData != null) {
             ResponseUtils.createBlobResponse(req, response, blobData);
         } else {
