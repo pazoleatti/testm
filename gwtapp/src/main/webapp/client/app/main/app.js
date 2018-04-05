@@ -750,7 +750,7 @@
         "configParam.confirm.rejectCreatingConfig.text": "Отменить операцию создания параметра?",
         "configParam.confirm.rejectEditingConfig.text": "Отменить операцию редактирования параметра?",
         "configParam.confirm.deleteConfig.title": "Удаление конфигурационного параметра",
-        "configParam.confirm.deleteConfig.text" : "Вы уверены, что хотите удалить параметр?",
+        "configParam.confirm.deleteConfig.text": "Вы уверены, что хотите удалить параметр?",
         "configParam.modal.createParam.title": "Создание конфигурационного параметра",
         "configParam.modal.editParam.title": "Редактирование конфигурационного параметра",
         "tab.configParam.commonParam": "Общие параметры",
@@ -781,64 +781,65 @@
     /**
      * @description Основной модуль приложения
      */
-    angular
-        .module('app', [
-            // Стандартные/внешние модули, плагины, компоненты
-            'ui.router',
-            'ui.validate',
-            'ui.select2',
-            'ngMessages',
-            'angularFileUpload',
-            'pascalprecht.translate',
-            // Наши компоненты
-            'aplana.overlay',
-            'aplana.alert',
-            'aplana.utils',
-            'aplana.grid',
-            'mgcrea.ngStrap.dropdown',
-            'aplana.dropdown',
-            'aplana.dropdownMenu',
-            'aplana.tabs',
-            'aplana.tooltip',
-            'aplana.submitValid',
-            'aplana.collapse',
-            'aplana.field',
-            'aplana.datepicker',
-            'aplana.popover',
-            'aplana.outerWidth',
-            'aplana.select.universal',
-            'aplana.timepicker',
-            'aplana.datepickerTimepicker',
-            'aplana.dateFromToFilter',
-            'aplana.formLeaveConfirmer',
-            'aplana.link',
-            'aplana.modal',
-            'aplana.modal.dialogs',
-            // Модули приложения
-            'app.treeMenu',
-            'app.header',
-            'app.logPanel',
-            'app.validationUtils',
-            'app.ndfl',
-            'app.ndflJournal',
-            'app.ndflReport',
-            'app.ndflReportJournal',
-            'app.schedulerTaskList',
-            'app.lockDataList',
-            'app.asyncTaskList',
-            'app.filterUtils',
-            'app.rest',
-            'app.formatters',
-            'app.reportPeriod',
-            'app.configParam',
-            'app.declarationTypeAssignment',
-            'app.declarationTypeJournal',
-            'app.declarationTemplateJournal',
-            'app.declarationTemplate'
-        ])
-        /**
-         * @description Отображение модального окна с сообщением "Функционал находится в разработке".
-         */
+    var appModule = angular.module('app', [
+        // Стандартные/внешние модули, плагины, компоненты
+        'ui.router',
+        'ui.validate',
+        'ui.select2',
+        'ngMessages',
+        'angularFileUpload',
+        'pascalprecht.translate',
+        // Наши компоненты
+        'aplana.overlay',
+        'aplana.alert',
+        'aplana.utils',
+        'aplana.grid',
+        'mgcrea.ngStrap.dropdown',
+        'aplana.dropdown',
+        'aplana.dropdownMenu',
+        'aplana.tabs',
+        'aplana.tooltip',
+        'aplana.submitValid',
+        'aplana.collapse',
+        'aplana.field',
+        'aplana.datepicker',
+        'aplana.popover',
+        'aplana.outerWidth',
+        'aplana.select.universal',
+        'aplana.timepicker',
+        'aplana.datepickerTimepicker',
+        'aplana.dateFromToFilter',
+        'aplana.formLeaveConfirmer',
+        'aplana.link',
+        'aplana.modal',
+        'aplana.modal.dialogs',
+        // Модули приложения
+        'app.treeMenu',
+        'app.header',
+        'app.logPanel',
+        'app.validationUtils',
+        'app.ndfl',
+        'app.ndflJournal',
+        'app.ndflReport',
+        'app.ndflReportJournal',
+        'app.schedulerTaskList',
+        'app.lockDataList',
+        'app.asyncTaskList',
+        'app.filterUtils',
+        'app.rest',
+        'app.formatters',
+        'app.reportPeriod',
+        'app.configParam',
+        'app.declarationTypeAssignment',
+        'app.declarationTypeJournal',
+        'app.declarationTemplateJournal',
+        'app.declarationTemplate'
+    ]);
+
+    /**
+     * @description Отображение модального окна с сообщением "Функционал находится в разработке".
+     */
+    appModule
         .factory('ShowToDoDialog', ['$dialogs', '$filter', function ($dialogs, $filter) {
             return function () {
                 $dialogs.messageDialog({
@@ -921,7 +922,7 @@
         ]);
 
     var UserDataResource = angular.injector(['app.rest']).get('UserDataResource');
-    UserDataResource.query({
+    var userRequest = UserDataResource.query({
             projection: "user"
         },
         function (data) {
@@ -952,7 +953,16 @@
                     twoDigits:     /^\d{1,2}$/                               // 4 цифры
                 }
             });
-        });
+        }
+    );
+
+    appModule.run(['$transitions',
+        function ($transitions) {
+            $transitions.onStart({}, function () {
+                return userRequest.$promise;
+            });
+        }
+    ]);
 
     /**
      * @description Поиск по нажатию на enter
