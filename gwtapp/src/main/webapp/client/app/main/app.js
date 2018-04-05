@@ -188,6 +188,7 @@
         "ndflReportJournal.filter.kpp": "КПП",
         "ndflReportJournal.filter.oktmo": "ОКТМО",
         "ndflReportJournal.filter.codeNO": "Код НО",
+        "ndflreportJournal.validation.required": "Заполнены не все поля отчетности",
 
         "declarationTypeAssignment.grid.columnName.department": "Подразделение",
         "declarationTypeAssignment.grid.columnName.declarationType": "Макет",
@@ -947,7 +948,8 @@
                 // Паттерны для проверки полей ввода
                 $rootScope.patterns = {
                     number:         /^[+-]?([0-9]*)?([.][0-9]{1,2})?$/,     // Целые числа и числа с 2мя знаками после запятой
-                    fourDigits:     /^\d{4}$/                               // 4 цифры
+                    fourDigits:     /^\d{4}$/,                               // 4 цифры
+                    twoDigits:     /^\d{1,2}$/                               // 4 цифры
                 }
             });
         });

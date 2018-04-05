@@ -130,11 +130,11 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
                 "from department dep " +
                 "inner join department_fullpath df " +
                 "on dep.id = df.id " +
-                "where dep.id in (:ids) ";
+                "where %s ";
 
-        StringBuilder queryBuilder = new StringBuilder(sql);
+        StringBuilder queryBuilder = new StringBuilder(String.format(sql, SqlUtils.transformToSqlInStatement("dep.id", ids)));
 
-        MapSqlParameterSource params = new MapSqlParameterSource("ids", ids);
+        MapSqlParameterSource params = new MapSqlParameterSource();
 
         if (!StringUtils.isBlank(name)) {
             queryBuilder.append("and (lower(dep.name) like :name or lower(df.shortname) like :name) ");
