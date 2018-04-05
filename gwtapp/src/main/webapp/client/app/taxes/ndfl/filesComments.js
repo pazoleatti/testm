@@ -91,7 +91,7 @@
                  * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-                    return "<a target='_self' href='controller/rest/blobData/" + row.uuid + "/conf'>" + row.fileName + " </a>";
+                    return "<a target='_self' href='controller/rest/blobData/" + row.uuid + "/notif'>" + row.fileName + " </a>";
 
                 }
 
