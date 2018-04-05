@@ -1869,6 +1869,7 @@ class IncomesSheetFiller implements SheetFiller {
             }
             index++;
         }
+        sheet.autoSizeColumn(1);
     }
 }
 

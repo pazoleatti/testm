@@ -58,4 +58,12 @@
             <where>id in (8, 12)</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4120 -->
+    <changeSet id="2.2.2-apronin-2" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
