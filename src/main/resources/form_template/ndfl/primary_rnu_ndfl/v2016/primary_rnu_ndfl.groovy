@@ -873,12 +873,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         SimpleDateFormat sdf = new SimpleDateFormat(SharedConstants.DATE_FORMAT);
         logForDebug("Начало загрузки данных первичной налоговой формы " + declarationData.id + ". Дата начала отчетного периода: " + sdf.format(getReportPeriodStartDate()) + ", дата окончания: " + sdf.format(getReportPeriodEndDate()));
 
-        //валидация по схеме
-        declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
-        }
-
         InputStream xmlInputStream = ImportInputStream;
 
         if (xmlInputStream == null) {
