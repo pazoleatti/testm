@@ -958,6 +958,7 @@
 
     appModule.run(['$transitions',
         function ($transitions) {
+            // Страницы не будут вычислятся пока не будут получены данные пользователя
             $transitions.onStart({}, function () {
                 return userRequest.$promise;
             });
