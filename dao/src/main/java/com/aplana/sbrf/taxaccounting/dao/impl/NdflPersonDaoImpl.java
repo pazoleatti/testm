@@ -699,7 +699,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             params.addValue("snils", ndflPersonFilter.getSnils().toLowerCase());
         }
         if (ndflPersonFilter.getIdDocNumber() != null) {
-            queryBuilder.append("and lower(np.id_doc_number) like concat(concat('%', :idDocNumber), '%') ");
+            queryBuilder.append("and REGEXP_REPLACE(lower(np.id_doc_number), '[^0-9A-Za-zА-Яа-яЁё]', '') like concat(concat('%', REGEXP_REPLACE(lower(:idDocNumber), '[^0-9A-Za-zА-Яа-яЁё]', '')), '%') ");
             params.addValue("idDocNumber", ndflPersonFilter.getIdDocNumber().toLowerCase());
         }
         if (ndflPersonFilter.getLastName() != null) {

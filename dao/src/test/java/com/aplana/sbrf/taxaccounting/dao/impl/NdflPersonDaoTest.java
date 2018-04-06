@@ -681,17 +681,6 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFindNdflPersonByParametersIdDocNumber() {
-        NdflFilter filter = new NdflFilter();
-        filter.setDeclarationDataId(2);
-        filter.getPerson().setIdDocNumber("0000");
-
-        PagingParams pagingParams = pagingParams(1, 100, "asc", "idDocNumber");
-        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
-        assertEquals(10, result.size());
-    }
-
-    @Test
     public void testFindNdflPersonByParametersLastName() {
         NdflFilter filter = new NdflFilter();
         filter.setDeclarationDataId(2);
