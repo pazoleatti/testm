@@ -288,20 +288,6 @@
                     });
                 };
 
-                $scope.createReportXlsx = function (force) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
-                        params: {
-                            force: force ? force : false
-                        }
-                    }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createReportXlsx, "availableXlsxReport");
-                    });
-                };
-
-
-
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
