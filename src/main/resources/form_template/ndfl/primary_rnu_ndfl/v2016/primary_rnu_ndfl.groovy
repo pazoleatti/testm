@@ -1748,9 +1748,12 @@ class IncomesSheetFiller implements SheetFiller {
             ScriptUtils.checkInterrupted();
 
             Row row = sheet.createRow(index);
+            Cell cell0 = row.createCell(0);
+            cell0.setCellStyle(centeredStyle)
+            cell0.setCellValue(" ");
             Cell cell1 = row.createCell(1);
             cell1.setCellStyle(centeredStyle)
-            cell1.setCellValue(npi.getRowNum().intValue());
+            cell1.setCellValue(npi.getRowNum().toString());
             Cell cell2 = row.createCell(2);
             cell2.setCellStyle(centeredStyle)
             String inp = context.getIdNdflPersonMap().get(npi.getNdflPersonId()).getInp();
@@ -1863,7 +1866,6 @@ class IncomesSheetFiller implements SheetFiller {
             }
             index++;
         }
-        sheet.autoSizeColumn(1);
     }
 }
 
