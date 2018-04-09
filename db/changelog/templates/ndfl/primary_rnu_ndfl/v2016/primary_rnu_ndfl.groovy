@@ -1748,9 +1748,6 @@ class IncomesSheetFiller implements SheetFiller {
             ScriptUtils.checkInterrupted();
 
             Row row = sheet.createRow(index);
-            Cell cell0 = row.createCell(0);
-            cell0.setCellStyle(centeredStyle)
-            cell0.setCellValue(" ");
             Cell cell1 = row.createCell(1);
             cell1.setCellStyle(centeredStyle)
             cell1.setCellValue(npi.getRowNum().toString());
