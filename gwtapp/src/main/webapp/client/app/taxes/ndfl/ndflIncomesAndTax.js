@@ -100,11 +100,11 @@
                             },
                             {name: 'kpp', index: 'kpp', width: 190, sortable: false},
                             {name: 'oktmo', index: 'oktmo', width: 185},
-                            {name: 'incomeAccruedSumm', index: 'incomeAccruedSumm', width: 95},
+                            {name: 'incomeAccruedSumm', index: 'incomeAccruedSumm', width: 195},
                             {name: 'incomePayoutSumm', index: 'incomePayoutSumm', width: 195},
-                            {name: 'totalDeductionsSumm', index: 'totalDeductionsSumm', width: 85},
-                            {name: 'taxBase', index: 'taxBase', width: 95},
-                            {name: 'taxRate', index: 'taxRate', width: 100},
+                            {name: 'totalDeductionsSumm', index: 'totalDeductionsSumm', width: 105},
+                            {name: 'taxBase', index: 'taxBase', width: 110},
+                            {name: 'taxRate', index: 'taxRate', width: 150},
                             {name: 'taxDate', index: 'taxDate', width: 205, formatter: $filter('dateFormatter')},
                             {name: 'calculatedTax', index: 'calculatedTax', width: 170},
                             {name: 'withholdingTax', index: 'withholdingTax', width: 155},
@@ -114,13 +114,13 @@
                             {
                                 name: 'taxTransferDate',
                                 index: 'taxTransferDate',
-                                width: 145,
+                                width: 195,
                                 formatter: $filter('dateZeroFormatter')
                             },
                             {
                                 name: 'paymentDate',
                                 index: 'paymentDate',
-                                width: 170,
+                                width: 195,
                                 formatter: $filter('dateFormatter')
                             },
                             {name: 'paymentNumber', index: 'paymentNumber', width: 205},
