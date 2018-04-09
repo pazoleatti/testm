@@ -132,7 +132,12 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 		return result;
     }
 
-	boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
+    @Override
+    public boolean validate(TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream) {
+        return isValid(logger, isErrorFatal, xmlFileName, xmlFile, xsdFileName, xsdStream, VALIDATION_TIMEOUT);
+    }
+
+    boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
         if (xsdBlobDataId == null) {
             xsdBlobDataId = declarationTemplateService.get(data.getDeclarationTemplateId()).getXsdId();
         }
@@ -143,8 +148,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    boolean isValid(Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
-        String[] params = new String[StringUtils.isNotBlank(fileName)?4:3];
+    private boolean isValid(Logger logger, boolean isErrorFatal, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream, long timeout) {
+        String[] params = new String[StringUtils.isNotBlank(xmlFileName)?4:3];
 
         FileOutputStream outputStream;
         InputStream inputStream;
@@ -153,30 +158,28 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             vsax3File = File.createTempFile("VSAX3",".exe");
             outputStream = new FileOutputStream(vsax3File);
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-			try {
-            	LOG.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-			} finally {
-				inputStream.close();
-				outputStream.close();
-			}
+            try {
+                LOG.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+            } finally {
+                inputStream.close();
+                outputStream.close();
+            }
             params[0] = vsax3File.getAbsolutePath();
             //Получаем xml
             params[1] = xmlFile.getAbsolutePath();
             //Получаем xsd файл
             xsdFile = File.createTempFile("validation_file",".xsd");
             outputStream = new FileOutputStream(xsdFile);
-            BlobData blobData = blobDataService.get(xsdBlobDataId);
-            inputStream = blobData.getInputStream();
-			try {
-            	LOG.info("Xsd copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-			} finally {
-				inputStream.close();
-				outputStream.close();
-			}
+            try {
+                LOG.info("Xsd copy, total number of bytes " + IOUtils.copy(xsdStream, outputStream));
+            } finally {
+                xsdStream.close();
+                outputStream.close();
+            }
             params[2] = xsdFile.getAbsolutePath();
 
-            if (StringUtils.isNotBlank(fileName)) {
-                params[3] = fileName;
+            if (StringUtils.isNotBlank(xmlFileName)) {
+                params[3] = xmlFileName;
             }
 
             ProcessRunner runner = new ProcessRunner(params, logger, isErrorFatal);
@@ -210,7 +213,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                         throw new TAInterruptedException();
                     }
                 }
-                logger.info("Проверка выполнена по файлу xsd %s", blobData.getName());
+                logger.info("Проверка выполнена по файлу xsd %s", xsdFileName);
                 fileInfo(logger, vsax3File);
             }
         } catch (IOException e) {
@@ -226,6 +229,11 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 LOG.warn(String.format(NOT_DELETE_WARN, vsax3File.getName()));
             }
         }
+    }
+
+    boolean isValid(Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
+        BlobData xsd = blobDataService.get(xsdBlobDataId);
+        return isValid(logger, isErrorFatal, fileName, xmlFile, xsd.getName(), xsd.getInputStream(), timeout);
     }
 
     private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String fileName, String xsdBlobDataId, long timeout) {

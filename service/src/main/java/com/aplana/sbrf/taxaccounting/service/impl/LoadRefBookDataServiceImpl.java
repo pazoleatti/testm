@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -17,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.impl.validator.XsdValidator;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import net.sf.sevenzipjbinding.ArchiveFormat;
@@ -70,6 +70,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private BlobDataService blobDataService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private ValidateXMLService validateXMLService;
 
     /**
      * Максимальное количество попыток создания временной директории
@@ -635,18 +637,19 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         File xmlFile = createTempFile(blobData.getInputStream());
         String fileName = blobData.getName();
         try {
-            List<String> errors = validate(xmlFile);
-            if (errors.isEmpty()) {
-                lockAndImportXml(refBookId, xmlFile, fileName, userInfo, logger);
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceException("Загрузка файла \"%s\" не может быть выполнена.", fileName);
-                }
-            } else {
-                logger.error("Загрузка файла \"%s\" не может быть выполнена. Файл не соответствует xsd-схеме.", fileName);
-                for (String error : errors) {
-                    logger.error(error);
-                }
-                throw new ServiceException();
+            validate(logger, userInfo, xmlFile);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Загрузка файла \"%s\" не может быть выполнена. Файл не соответствует xsd-схеме.",
+                        logEntryService.save(logger.getEntries()),
+                        xmlFile.getName());
+            }
+            lockAndImportXml(refBookId, xmlFile, fileName, userInfo, logger);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Загрузка файла \"%s\" не может быть выполнена.",
+                        logEntryService.save(logger.getEntries()),
+                        xmlFile.getName());
             }
         } finally {
             if (xmlFile != null) {
@@ -716,16 +719,18 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         return result;
     }
 
-    private List<String> validate(File xmlFile) {
-        try (InputStream xsd = this.getClass().getResourceAsStream("/xsd/personData.xsd");
-             InputStream xml = new BufferedInputStream(new FileInputStream(xmlFile))
-        ) {
-            return new XsdValidator()
-                    .validate(xml, xsd)
-                    .getErrors();
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage(), e);
-        }
+    /**
+     * Валидирует указанный xml-файл по xsd схеме с использованием схематрона
+     * @param logger
+     * @param userInfo
+     * @param xmlFile
+     * @return
+     */
+    private boolean validate(Logger logger, TAUserInfo userInfo, File xmlFile) {
+        return validateXMLService.validate(userInfo, logger, true,
+                xmlFile.getName(), xmlFile,
+                "personData.xsd", this.getClass().getResourceAsStream("/xsd/personData.xsd")
+        );
     }
 
     private void lockAndImportXml(long refBookId, File xmlFile, String fileName, TAUserInfo userInfo, Logger logger) {
