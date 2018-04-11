@@ -352,5 +352,14 @@
         .factory('BlobDataResource', ['$resource', function ($resource) {
             return $resource('controller/rest/blobData/:uuid?projection=:projection', {}, {});
         }])
+
+        /**
+         * @description Обновление данных ФЛ КНФ
+         */
+        .factory('UpdatePersonsData', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/update', {declarationDataId: '@declarationDataId'}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

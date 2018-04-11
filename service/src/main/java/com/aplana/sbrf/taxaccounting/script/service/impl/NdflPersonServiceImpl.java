@@ -358,4 +358,9 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate) {
         return ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(ndflPersonIncomeIdList, periodStartDate, periodEndDate);
     }
+
+    @Override
+    public List<NdflPerson> fetchRefBookPersons(Long declarationDataId) {
+        return ndflPersonDao.fetchRefBookPersons(declarationDataId);
+    }
 }

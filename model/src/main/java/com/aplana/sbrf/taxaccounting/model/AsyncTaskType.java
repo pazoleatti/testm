@@ -27,6 +27,7 @@ public enum AsyncTaskType {
     TEST(-1, "TEST", "Тестовая задача %s", -1L),
     IDENTIFY_PERSON(1, "IDENTIFY_PERSON", "Расчет НФ. %s", 8L),
     CONSOLIDATE(1, "CONSOLIDATE", "Расчет НФ. %s", 9L),
+    UPDATE_PERSONS_DATA(34, "UPDATE_PERSONS_DATA", "Обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\"", 34L),
 
     //Типы отчетов
     JASPER_DEC(3, "JASPER", ""),

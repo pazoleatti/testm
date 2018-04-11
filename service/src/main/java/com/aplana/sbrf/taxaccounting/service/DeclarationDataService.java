@@ -845,4 +845,20 @@ public interface DeclarationDataService {
      * @return имя Pdf отчета
      */
     String createPdfFileName(Long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Создает задачу на обновление данных ФЛ в КНФ
+     * @param declarationDataId идентификатор налоговой формы
+     * @param userInfo          информация о пользователе
+     * @return                  uuid уведомлений
+     */
+    String initUpdatePersonsData(Long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Запускает бизнес-логику по обновлению данных ФЛ в КНФ
+     * @param declarationDataId идентификатор налоговой формы
+     * @param logger            объект для логирования информации
+     * @param userInfo          информация о пользователе
+     */
+    void performUpdatePersonsData(Long declarationDataId, Logger logger, TAUserInfo userInfo);
 }

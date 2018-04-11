@@ -20,6 +20,7 @@ public class DeclarationDataReportType implements Serializable {
     public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(AsyncTaskType.CHECK_DEC, null);
     public static final DeclarationDataReportType EXCEL_TEMPLATE_DEC = new DeclarationDataReportType(AsyncTaskType.EXCEL_TEMPLATE_DEC, null);
     public static final DeclarationDataReportType DELETE_DEC = new DeclarationDataReportType(AsyncTaskType.DELETE_DEC, null);
+    public static final DeclarationDataReportType UPDATE_PERSONS_DATA = new DeclarationDataReportType(AsyncTaskType.UPDATE_PERSONS_DATA, null);
 
     //Какая то фигня, которая не связана с асинхронными задачами
     public static final DeclarationDataReportType JASPER_DEC = new DeclarationDataReportType(AsyncTaskType.JASPER_DEC, null);
@@ -133,6 +134,8 @@ public class DeclarationDataReportType implements Serializable {
             return IDENTIFY_PERSON;
         } else if (CONSOLIDATE.getReportType().equals(reportType)) {
             return CONSOLIDATE;
+        } else if (UPDATE_PERSONS_DATA.getReportType().equals(reportType)) {
+            return UPDATE_PERSONS_DATA;
         } else {
             throw new IllegalArgumentException("Некорректный тип отчета: " + reportType.getName());
         }

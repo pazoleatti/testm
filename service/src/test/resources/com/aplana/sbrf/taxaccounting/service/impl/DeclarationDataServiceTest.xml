@@ -81,5 +81,5 @@
         </property>
     </bean>
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl" />
-
+    <bean id="departmentReportPeriodFormatter" class="com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter" />
 </beans>

@@ -72,10 +72,11 @@
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
             '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
-            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload',
+            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload', 'UpdatePersonsData',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
-                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload) {
+                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload,
+                      UpdatePersonsData) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -891,6 +892,18 @@
                             }
                         });
                     }
+                };
+
+                /**
+                 * @description Событие которое возникает при нажатии на кнопку "Обновить данные ФЛ"
+                 */
+                $scope.updatePersonsData = function () {
+                    UpdatePersonsData.query({declarationDataId: $stateParams.declarationDataId}, {}, function (response) {
+                        if (response.uuid && response.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.uuid);
+                            initPage();
+                        }
+                    });
                 };
 
                 /**

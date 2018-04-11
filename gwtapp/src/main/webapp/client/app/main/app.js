@@ -86,6 +86,7 @@
         "button.show": "Показать",
         "button.next": ">",
         "button.prev": "<",
+        "button.updatePersonsData": "Обновить данные ФЛ",
         "messageDialog.toDo.title": "Информация",
         "messageDialog.toDo.message": "Функционал находится в разработке",
 

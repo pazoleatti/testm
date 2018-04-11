@@ -24,7 +24,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
@@ -37,6 +36,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -78,6 +78,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import static com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType.UPDATE_PERSONS_DATA;
 
 /**
  * Сервис для работы с декларациями
@@ -178,6 +180,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private MoveToCreateFacade moveToCreateFacade;
     @Autowired
     private BasePermissionEvaluator permissionEvaluator;
+    @Autowired
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -386,6 +390,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     /**
      * Проверка возможности создания пользователем формы из макета
      * TODO: вынести в пермишены
+     *
      * @param userInfo
      * @param declarationTemplateId
      * @param departmentReportPeriod
@@ -2516,6 +2521,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         departmentService.getDepartment(reportPeriod.getDepartmentId()).getName()
                 );
+            case UPDATE_PERSONS_DATA:
+                return String.format(ddReportType.getReportType().getDescription(),
+                        declarationId,
+                        departmentReportPeriodFormatter.formatPeriodName(reportPeriod, sdf.get().toPattern()),
+                        departmentService.getDepartment(reportPeriod.getDepartmentId()).getName());
             default:
                 return String.format(DescriptionTemplate.DECLARATION.getText(),
                         "Налоговая форма",
@@ -2566,6 +2576,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             case IDENTIFY_PERSON:
             case CONSOLIDATE:
+            case UPDATE_PERSONS_DATA:
             case XML_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
@@ -3340,7 +3351,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         fileName = FilenameUtils.getName(fileName);
         LockData decLockData = null;
         try {
-           decLockData = doLock(declarationDataId, userInfo);
+            decLockData = doLock(declarationDataId, userInfo);
         } catch (Throwable e) {
             LOG.error(e);
             logger.error("При блокировке Налоговой формы %s возникла ошибка: %s", getDeclarationDescription(declarationDataId), e);
@@ -3574,5 +3585,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             default:
                 return "";
         }
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).UPDATE_PERSONS_DATA)")
+    public String initUpdatePersonsData(Long declarationDataId, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+        if (ndflPersonService.getNdflPersonCount(declarationDataId) > 0) {
+            LockData lockData = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, UPDATE_PERSONS_DATA));
+            if (lockData == null) {
+                String keyTask = generateAsyncTaskKey(declarationDataId, UPDATE_PERSONS_DATA);
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("declarationDataId", declarationDataId);
+                asyncManager.executeTask(keyTask, UPDATE_PERSONS_DATA.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+                    }
+                });
+            } else {
+                DeclarationData declarationData =  declarationDataDao.get(declarationDataId);
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+                Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                logger.error("Невозможно обновить данные ФЛ формы: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\". Причина: \"Форма № %s из %s заблокирована. Попробуйте повторить операцию позднее",
+                        declarationDataId,
+                        departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, sdf.get().toPattern()),
+                        department.getName(),
+                        declarationDataId,
+                        department.getName());
+            }
+        }
+        return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).UPDATE_PERSONS_DATA)")
+    public void performUpdatePersonsData(Long declarationDataId, Logger logger, TAUserInfo userInfo) {
+        DeclarationData declarationData =  declarationDataDao.get(declarationDataId);
+        Logger scriptLogger = new Logger();
+        declarationDataScriptingService.executeScript(userInfo,  declarationData, FormDataEvent.UPDATE_PERSONS_DATA, scriptLogger, null);
+        logger.getEntries().addAll(scriptLogger.getEntries());
     }
 }

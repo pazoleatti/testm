@@ -43,6 +43,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> VIEW = new ViewPermission(1 << 1);
     /**
+     * Право на обнолвление данных ФЛ в КНФ
+     */
+    public static final Permission<DeclarationData> UPDATE_PERSONS_DATA = new UpdatePersonsDataPermission(1 << 2);
+    /**
      * Право на проверку декларации
      */
     public static final Permission<DeclarationData> CHECK = new CheckPermission(1 << 3);
@@ -599,6 +603,33 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
                 return false;
             }
+        }
+    }
+
+    public static final class UpdatePersonsDataPermission extends DeclarationDataPermission {
+
+        public final static String OPERATION_NAME = "Обновление данных ФЛ в КНФ";
+
+        public UpdatePersonsDataPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            TAUser taUser = taUserService.getUser(user.getUsername());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+
+            boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
+            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+
+            if ((targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.CREATED) && canView && hasRoles) {
+                DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+                if (declarationKind != DeclarationFormKind.CONSOLIDATED || !departmentReportPeriod.isActive()) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
     }
 }

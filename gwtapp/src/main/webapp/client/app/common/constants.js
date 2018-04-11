@@ -59,7 +59,7 @@
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
                 VIEW: 1 << 1,
-                CALCULATE: 1 << 2,
+                UPDATE_PERSONS_DATA: 1 << 2,
                 CHECK: 1 << 3,
                 ACCEPTED: 1 << 4,
                 DELETE: 1 << 5,

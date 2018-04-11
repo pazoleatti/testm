@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
@@ -20,6 +21,8 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -776,5 +779,20 @@ public class DeclarationDataController {
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflPrepayment", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editNdflPrepayment(@PathVariable Long declarationDataId, @RequestBody NdflPersonPrepaymentDTO personPrepayment) {
         declarationService.updateNdflPrepayment(declarationDataId, securityService.currentUserInfo(), personPrepayment);
+    }
+
+    /**
+     * Обновляет данные ФЛ КНФ
+     * @param declarationDataId иднтификатор формы данные которые обновляются
+     * @return строка с uuid уведомлений об обновлении данных ФЛ КНФ
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/update", produces = MediaType.TEXT_HTML_VALUE)
+    public String updatePersonData(@PathVariable long declarationDataId) throws JSONException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        String result = declarationService.initUpdatePersonsData(declarationDataId, userInfo);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(UuidEnum.UUID.toString(), result);
+        return jsonObject.toString();
+
     }
 }

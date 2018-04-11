@@ -635,4 +635,11 @@ public interface NdflPersonDao {
      * @return список объектов авансов
      */
     List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate);
+
+    /**
+     * Получить данные по физическим лицам из справочника.
+     * @param declarationDataId идентификатор налоговой формы
+     * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
+     */
+    List<NdflPerson> fetchRefBookPersons(Long declarationDataId);
 }

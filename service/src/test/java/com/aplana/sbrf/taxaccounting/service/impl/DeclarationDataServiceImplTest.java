@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +58,8 @@ public class DeclarationDataServiceImplTest {
     SourceService sourceService;
     @Autowired
     ReportService reportService;
+    @Autowired
+    DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 

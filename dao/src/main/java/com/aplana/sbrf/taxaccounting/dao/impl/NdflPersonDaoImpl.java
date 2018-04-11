@@ -2053,4 +2053,58 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             return new ArrayList<NdflPersonPrepayment>();
         }
     }
+
+    @Override
+    public List<NdflPerson> fetchRefBookPersons(Long declarationDataId) {
+        String sql = "select rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
+                "rbp.inn, rbp.inn_foreign, rbts.code as status, rbp.snils, rbdt.code as id_doc_type, rbid.doc_number, rba.region_code, " +
+                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
+                "rba.appartment, rbc2.code as country_code, rba.address " +
+                "from ref_book_person rbp " +
+                "left join ndfl_person np on rbp.id = np.person_id " +
+                "left join declaration_data dd on np.declaration_data_id = dd.id " +
+                "left join ref_book_country rbc on rbp.citizenship = rbc.id " +
+                "left join ref_book_taxpayer_state rbts on rbp.taxpayer_state = rbts.id " +
+                "left join ref_book_address rba on rbp.address = rba.id " +
+                "left join ref_book_id_tax_payer ritp on ritp.person_id = rbp.id " +
+                "left join ref_book_id_doc rbid on rbid.person_id = rbp.id and rbid.inc_rep = 1 " +
+                "left join ref_book_doc_type rbdt on rbid.doc_id = rbdt.id " +
+                "left join ref_book_country rbc2 on rba.country_id = rbc2.id " +
+                "where dd.id = ?";
+        return getJdbcTemplate().query(sql,
+                new Object[]{declarationDataId},
+                new RowMapper<NdflPerson>() {
+                    @Override
+                    public NdflPerson mapRow(ResultSet rs, int i) throws SQLException {
+                        NdflPerson person = new NdflPerson();
+
+                        person.setPersonId(SqlUtils.getLong(rs, "id"));
+                        person.setInp(String.valueOf(SqlUtils.getLong(rs, "inp")));
+                        person.setLastName(rs.getString("last_name"));
+                        person.setFirstName(rs.getString("first_name"));
+                        person.setMiddleName(rs.getString("middle_name"));
+                        person.setBirthDay(rs.getDate("birth_date"));
+                        person.setCitizenship(rs.getString("citizenship"));
+                        person.setInnNp(rs.getString("inn"));
+                        person.setInnForeign(rs.getString("inn_foreign"));
+                        person.setStatus(rs.getString("status"));
+                        person.setSnils(rs.getString("snils"));
+                        person.setIdDocType(rs.getString("id_doc_type"));
+                        person.setIdDocNumber(rs.getString("doc_number"));
+                        person.setRegionCode(rs.getString("region_code"));
+                        person.setPostIndex(rs.getString("postal_code"));
+                        person.setArea(rs.getString("district"));
+                        person.setCity(rs.getString("city"));
+                        person.setLocality(rs.getString("locality"));
+                        person.setStreet(rs.getString("street"));
+                        person.setHouse(rs.getString("house"));
+                        person.setBuilding(rs.getString("build"));
+                        person.setFlat(rs.getString("appartment"));
+                        person.setCountryCode(rs.getString("country_code"));
+                        person.setAddress(rs.getString("address"));
+
+                        return person;
+                    }
+                });
+    }
 }

@@ -74,4 +74,12 @@ public interface NdflPersonService {
      * @return название ДУЛ
      */
     String getPersonDocTypeName(long idDocType);
+
+    /**
+     * Получить число ФЛ в NDFL_PERSON
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @return число ФЛ
+     */
+    int getNdflPersonCount(Long declarationDataId);
 }

@@ -1041,6 +1041,13 @@ public class NdflPersonDaoTest {
         Assert.assertEquals(2, result.size());
     }
 
+    @Test
+    public void testFetchRefBookPersons() {
+        List<NdflPerson> result = ndflPersonDao.fetchRefBookPersons(1L);
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals("Федор", result.get(0).getFirstName());
+    }
+
     public static Date toDate(String dateStr) {
         try {
             return new SimpleDateFormat("dd.MM.yyyy").parse(dateStr);

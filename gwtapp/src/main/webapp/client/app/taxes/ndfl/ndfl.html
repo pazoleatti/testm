@@ -284,6 +284,14 @@
                                     <span data-translate-once="ndfl.button.importExcel"></span>
                                 </button>
                             </span>
+                            <!--Обновить данные ФЛ-->
+                            <span>
+                                <button type="button" class="btn btn-default"
+                                        data-ng-click="updatePersonsData()"
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_PERSONS_DATA)">
+                                    <span data-translate-once="button.updatePersonsData"></span>
+                                </button>
+                            </span>
                         </div>
                     </div>
                 </div>

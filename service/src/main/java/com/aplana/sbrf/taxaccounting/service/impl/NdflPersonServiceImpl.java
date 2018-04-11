@@ -75,4 +75,9 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         }
         return docCodes.get(0).get("NAME").getStringValue();
     }
+
+    @Override
+    public int getNdflPersonCount(Long declarationDataId) {
+        return ndflPersonDao.getNdflPersonCount(declarationDataId);
+    }
 }
