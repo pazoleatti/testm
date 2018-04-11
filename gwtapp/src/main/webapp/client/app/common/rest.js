@@ -352,5 +352,15 @@
         .factory('BlobDataResource', ['$resource', function ($resource) {
             return $resource('controller/rest/blobData/:uuid?projection=:projection', {}, {});
         }])
+
+        /**
+         * @description Список справочников
+         */
+        .factory('refBookListResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookList', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
     ;
 }());

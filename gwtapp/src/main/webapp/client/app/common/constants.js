@@ -209,6 +209,14 @@
                 RNU_SECTION_2_16: "004-0001-00005",
                 RNU_SECTION_2_17: "004-0001-00006",
                 RNU_SECTION_2_21: "004-0001-00010"
+            },
+            REFBOOK_TYPE: {
+                LINEAR: 0,
+                HIERARCHICAL: 1
+            },
+            REFBOOK_EDITING: {
+                IS_READ_ONLY: "Только для чтения",
+                NOT_IS_READ_ONLY: "Редактируемый"
             }
         });
 }());
