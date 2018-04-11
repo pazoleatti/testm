@@ -76,16 +76,16 @@
                             {name: 'rowNum', index: 'rowNum', width: 60, key: true},
                             {name: 'inp', index: 'inp', width: 170},
                             {name: 'typeCode', index: 'typeCode', width: 200},
-                            {name: 'notifType', index: 'notifType', width: 175},
+                            {name: 'notifType', index: 'notifType', width: 220},
                             {
                                 name: 'notifDate',
                                 index: 'notifDate',
-                                width: 200,
+                                width: 220,
                                 formatter: $filter('dateFormatter')
                             },
                             {name: 'notifNum', index: 'notifNum', width: 240},
-                            {name: 'notifSource', index: 'notifSource', width: 240},
-                            {name: 'notifSumm', index: 'notifSumm', width: 190},
+                            {name: 'notifSource', index: 'notifSource', width: 275},
+                            {name: 'notifSumm', index: 'notifSumm', width: 235},
                             {name: 'operationId', index: 'operationId', width: 185},
                             {
                                 name: 'incomeAccrued',
@@ -94,21 +94,21 @@
                                 formatter: $filter('dateFormatter')
                             },
                             {name: 'incomeCode', index: 'incomeCode', width: 195},
-                            {name: 'incomeSumm', index: 'incomeSumm', width: 85},
+                            {name: 'incomeSumm', index: 'incomeSumm', width: 105},
                             {
                                 name: 'periodPrevDate',
                                 index: 'periodPrevDate',
-                                width: 95,
+                                width: 175,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'periodPrevSumm', index: 'periodPrevSumm', width: 100},
+                            {name: 'periodPrevSumm', index: 'periodPrevSumm', width: 185},
                             {
                                 name: 'periodCurrDate',
                                 index: 'periodCurrDate',
                                 width: 205,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 170},
+                            {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 210},
                             {name: 'id', index: 'id', width: 200},
                             {name: 'modifiedDate', index: 'modifiedDate', width: 230, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 170}

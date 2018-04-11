@@ -354,6 +354,16 @@
         }])
 
         /**
+         * @description Список справочников
+         */
+        .factory('refBookListResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookList', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+
+        /**
          * @description Обновление данных ФЛ КНФ
          */
         .factory('UpdatePersonsData', ['$resource', function ($resource) {

@@ -776,8 +776,11 @@
         "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000",
 
         "taxes.commonParams.confirm.cancel.title": "Отмена операции",
-        "taxes.commonParams.confirm.cancel.text": "На форме общих параметров системы имеются несохраненные данные. Выйти без сохранения?"
+        "taxes.commonParams.confirm.cancel.text": "На форме общих параметров системы имеются несохраненные данные. Выйти без сохранения?",
 
+        "refBooks.refBooksList.title": "НСИ - Список справочников",
+        "refBrefBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
+        "refBrefBooks.refBooksList.columnHeader.refBookType": "Тип справочника"
     };
     /**
      * @description Основной модуль приложения
@@ -834,7 +837,10 @@
         'app.declarationTypeAssignment',
         'app.declarationTypeJournal',
         'app.declarationTemplateJournal',
-        'app.declarationTemplate'
+        'app.declarationTemplate',
+        'app.refBookList',
+        'app.linearRefBook',
+        'app.hierRefBook'
     ]);
 
     /**

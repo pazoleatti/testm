@@ -74,6 +74,23 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4120 -->
+    <changeSet id="2.2.2-apronin-3" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4137 Печатное представление 6-НДФЛ: в разделе 2 в графе 130 не отображается 00 при целочисленном значении графы-->
+	<changeSet id="2.2.2-rnurgaleev-1" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
+
     <changeSet id="2.2.2-ytrofimov-5" author="ytrofimov">
         <insert tableName="async_task_type">
             <column name="id" value="34"/>

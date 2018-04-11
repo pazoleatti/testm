@@ -1366,6 +1366,7 @@
                             scope.gridParams.gridItself = grid;
                             scope.gridParams.scrollOffset = scope.grid.jqGrid('getGridParam', 'scrollOffset');
                             scope.gridParams.bdiv = grid.find('.ui-jqgrid-bdiv');
+                            scope.gridParams.hdiv = grid.find('.ui-jqgrid-hdiv');
                             scope.gridParams.fullScreen = gridConfig.fullScreen;
                             scope.grid.jqGrid("setGridParam", {"fullScreen": scope.gridParams.fullScreen});
 
@@ -1520,55 +1521,74 @@
                          * Растягивает грид до заполнения контейнера
                          */
                         function fillHeight() {
-                            if (scope && scope.gridFillSpace && $(scope.gridFillSpaceContainerSelector).is(':visible') && !element.hasClass('flex-grid')) {
-                                var container = $(scope.gridFillSpaceContainerSelector);
-                                var containerTop = $(scope.gridFillSpaceContainerSelectorTop);
-                                var containerMinHeight = parseInt($(scope.gridFillSpaceContainerSelector).css('min-height'), 10);
-                                var view = $(scope.gridFillSpaceViewSelector);
-                                var table = scope.gridParams.bdiv.find("table");
+                            if (scope && scope.gridFillSpace && !element.hasClass('flex-grid')) {
+                                if ($(scope.gridFillSpaceContainerSelector).is(':visible') && !element.hasClass('full-height-grid')) {
+                                    var container = $(scope.gridFillSpaceContainerSelector);
+                                    var containerTop = $(scope.gridFillSpaceContainerSelectorTop);
+                                    var containerMinHeight = parseInt($(scope.gridFillSpaceContainerSelector).css('min-height'), 10);
+                                    var view = $(scope.gridFillSpaceViewSelector);
+                                    var table = scope.gridParams.bdiv.find("table");
 
-                                var containerHeight = container.height();
-                                var viewHeight = view.height();
-                                var tableHeight = table.height();
-                                var bdivHeight = scope.gridParams.bdiv.height();
-                                var containerTopHeight = containerTop.height();
+                                    var containerHeight = container.height();
+                                    var viewHeight = view.height();
+                                    var tableHeight = table.height();
+                                    var bdivHeight = scope.gridParams.bdiv.height();
+                                    var containerTopHeight = containerTop.height();
 
-                                if (!!containerMinHeight) {
-                                    containerHeight = containerHeight - (bdivHeight - tableHeight);
-                                    if (containerHeight < containerMinHeight) {
-                                        containerHeight = containerMinHeight;
+                                    if (!!containerMinHeight) {
+                                        containerHeight = containerHeight - (bdivHeight - tableHeight);
+                                        if (containerHeight < containerMinHeight) {
+                                            containerHeight = containerMinHeight;
+                                        }
                                     }
-                                }
-                                viewHeight = viewHeight - (bdivHeight - tableHeight);
+                                    viewHeight = viewHeight - (bdivHeight - tableHeight);
 
-                                if (!!containerMinHeight && (viewHeight > containerMinHeight)) {
-                                    scope.gridParams.bdiv.css({
-                                        height: 'auto'
-                                    });
-                                } else {
-                                    if (scope.gridFillSpaceContainerSelectorTop === undefined) {
+                                    if (!!containerMinHeight && (viewHeight > containerMinHeight)) {
                                         scope.gridParams.bdiv.css({
-                                            height: Math.max(tableHeight, containerHeight - viewHeight + tableHeight)
+                                            height: 'auto'
                                         });
+                                    } else {
+                                        if (scope.gridFillSpaceContainerSelectorTop === undefined) {
+                                            scope.gridParams.bdiv.css({
+                                                height: Math.max(tableHeight, containerHeight - viewHeight + tableHeight)
+                                            });
 
-                                    } else { // если указан gridFillSpaceContainerSelectorTop то высоту считает так:
-                                        //высота всего грида = (родительский контейнер).высота минус  (контейнер для фильтра).высота
-                                        var tempHeight = containerHeight - containerTopHeight;
-                                        // высота панели по "восстановить по умолчанию"
-                                        var heightRestore = scope.gridParams.gridItself.find('.ui-jqgrid-restore').height();
+                                        } else { // если указан gridFillSpaceContainerSelectorTop то высоту считает так:
+                                            //высота всего грида = (родительский контейнер).высота минус  (контейнер для фильтра).высота
+                                            var tempHeight = containerHeight - containerTopHeight;
+                                            // высота панели по "восстановить по умолчанию"
+                                            var heightRestore = scope.gridParams.gridItself.find('.ui-jqgrid-restore').height();
 
-                                        scope.gridParams.bdiv.parents('.ui-jqgrid').css({
-                                            height: tempHeight - heightRestore
-                                        });
+                                            scope.gridParams.bdiv.parents('.ui-jqgrid').css({
+                                                height: tempHeight - heightRestore
+                                            });
 
-                                        // вычитаем высоту заголовков таблицы. пагинацию и легенду
-                                        var tempOther = scope.gridParams.gridItself.find('.ui-jqgrid-htable').outerHeight() +
-                                            scope.gridParams.gridItself.find('.footer').outerHeight() +
-                                            scope.gridParams.gridItself.find('.viewrecords').outerHeight() +
-                                            scope.gridParams.gridItself.find('.legend').outerHeight();
-                                        // отдельно меняем высоту внутренней части грида, иначе скролл отображается не корректно
+                                            // вычитаем высоту заголовков таблицы. пагинацию и легенду
+                                            var tempOther = scope.gridParams.gridItself.find('.ui-jqgrid-htable').outerHeight() +
+                                                scope.gridParams.gridItself.find('.footer').outerHeight() +
+                                                scope.gridParams.gridItself.find('.viewrecords').outerHeight() +
+                                                scope.gridParams.gridItself.find('.legend').outerHeight();
+                                            // отдельно меняем высоту внутренней части грида, иначе скролл отображается не корректно
+                                            scope.gridParams.bdiv.css({
+                                                height: tempHeight - tempOther - heightRestore
+                                            });
+                                        }
+                                    }
+                                } else if (element.hasClass('full-height-grid')) {
+                                    var elementHeight = element.height();
+                                    var tableHeight = scope.gridParams.bdiv.find("table").height();
+                                    var hdivHeight = scope.gridParams.hdiv.height();
+                                    var pagerHeight = 30;
+                                    var hscrollHeight = 17;
+                                    if (elementHeight > hdivHeight + tableHeight + pagerHeight + hscrollHeight) {
+                                        // если таблица меньше, чем есть свободного места, то растягиваем её
                                         scope.gridParams.bdiv.css({
-                                            height: tempHeight - tempOther - heightRestore
+                                            height: elementHeight - hdivHeight - pagerHeight
+                                        });
+                                    } else {
+                                        // высота таблицы вычисляется по содержимому
+                                        scope.gridParams.bdiv.css({
+                                            height: 'auto'
                                         });
                                     }
                                 }
