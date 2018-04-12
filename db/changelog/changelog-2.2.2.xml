@@ -133,4 +133,13 @@
             <where>id=100</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4189 Для РНУ-НДФЛ установить "строгую" xsd-схему-->
+	<changeSet id="2.2.2-rnurgaleev-2" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd"/>
+            <column name="name" value="rnu_ndfl.xsd"/>
+            <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
