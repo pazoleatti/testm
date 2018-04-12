@@ -8,9 +8,13 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 
 import java.util.List;
 
+/**
+ * Сервис для работы с планировщиком задач
+ */
 public interface SchedulerTaskService {
+
     /**
-     * Возвращяет данные по id задачи
+     * Получени информации о задаче планировщика по объекту задачи
      *
      * @param task объект {@link SchedulerTask} задачи
      * @return объект {@link SchedulerTaskData} задачи
@@ -18,7 +22,7 @@ public interface SchedulerTaskService {
     SchedulerTaskData fetchOne(SchedulerTask task);
 
     /**
-     * Возвращяет данные по id задачи
+     * Получение информации о задаче по id задачи
      *
      * @param taskId id задачи
      * @return объект {@link SchedulerTaskData} задачи
@@ -27,14 +31,14 @@ public interface SchedulerTaskService {
 
 
     /**
-     * Возвращяет все задачи планировщика
+     * Получение списка всех задач планировщика
      *
      * @return список задач {@link SchedulerTaskData}
      */
     List<SchedulerTaskData> fetchAll();
 
     /**
-     * Возвращяет страницу параметров всех задач планировщика
+     * Получение страницы параметров задач планировщика
      *
      * @param pagingParams параметры пагиинации
      * @return Страница задач {@link SchedulerTaskData}
@@ -42,7 +46,7 @@ public interface SchedulerTaskService {
     PagingResult<TaskSearchResultItem> fetchAllByPaging(PagingParams pagingParams);
 
     /**
-     * Изменяет признак активности задач
+     * Обновление признака активности задач
      *
      * @param active признак активности
      * @param ids    идентификаторы задач
@@ -50,24 +54,25 @@ public interface SchedulerTaskService {
     void updateActiveByIds(boolean active, List<Long> ids);
 
     /**
-     * Изменяет дату последнего запуска задачи
+     * Обновление даты последнего запуска задачи
      *
      * @param task объект {@link SchedulerTask} задачи
      */
     void updateStartDate(SchedulerTask task);
 
     /**
-     * Изменяет параметры задачи планировщика
+     * Обновление параметров задачи планировщика
      *
      * @param taskData объект {@link SchedulerTaskData} задачи
+     * @return сообщение об ошибки или null, если обновление прошло успешно
      */
-    String update(SchedulerTaskData taskData);
+    void update(SchedulerTaskData taskData);
 
     /**
-     * Валидация расписания
+     * Валидация крон выражения на соответствие формату
      *
      * @param schedule строка расписания в формате cron
      * @return признак валидности
      */
-    boolean validateSchedule(String schedule);
+    boolean validateScheduleCronString(String schedule);
 }

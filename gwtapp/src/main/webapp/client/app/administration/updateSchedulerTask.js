@@ -40,21 +40,33 @@
                     $state.go('schedulerTaskList');
                 };
 
-                //Отправка редактируемого параметра
+                /**
+                 * @description обновление задачи планировщика
+                 */
                 $scope.actionsUpdateSchedulerfunction = function() {
+                    // проверка валидности введенного cron выражения
                     $http({
                         method: "POST",
-                        url: "controller/actions/updateSchedulerTask/",
+                        url: "controller/action/schedulerTaskData/validateCron",
                         params: {
-                             schedulerTaskModel: $scope.updateSchedulerTask
+                            cronString: $scope.updateSchedulerTask.schedule
                         }
                     }).then(function (response) {
-                        if (response.data !== null && response.data.length !== 0) {
+                        if (!response.data) {
                             $dialogs.errorDialog({
-                                content: response.data
+                                content: $filter('translate')('taskScheduler.validation.error')
                             });
                         } else {
-                            $state.go('schedulerTaskList');
+                            // сохранение параметра
+                            $http({
+                                method: "POST",
+                                url: "controller/rest/schedulerTaskData/update",
+                                params: {
+                                    schedulerTaskModel: $scope.updateSchedulerTask
+                                }
+                            }).then(function() {
+                                $state.go('schedulerTaskList');
+                            });
                         }
                     });
                 };

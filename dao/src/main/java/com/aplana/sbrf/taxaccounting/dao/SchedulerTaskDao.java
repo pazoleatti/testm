@@ -12,7 +12,7 @@ import java.util.List;
 public interface SchedulerTaskDao {
 
     /**
-     * Возвращяет данные по id задачи
+     * Получение данных о задаче по ее идентификатору
      *
      * @param taskId идентификатор задачи
      * @return объект {@link SchedulerTaskData} или null, если не найден
@@ -20,14 +20,14 @@ public interface SchedulerTaskDao {
     SchedulerTaskData fetchOne(Long taskId);
 
     /**
-     * Возвращяет все задачи планировщика
+     * Получение списка всех задач планировщика
      *
      * @return Список задач {@link SchedulerTaskData}
      */
     List<SchedulerTaskData> fetchAll();
 
     /**
-     * Возвращяет страницу параметров всех задач планировщика
+     * Получение страницы всех задач планировщика
      *
      * @param pagingParams параметры пагиинации
      * @return Страница задач {@link SchedulerTaskData}
@@ -35,21 +35,21 @@ public interface SchedulerTaskDao {
     PagingResult<SchedulerTaskData> fetchAllByPaging(PagingParams pagingParams);
 
     /**
-     * Изменяет параметры задачи планировщика
+     * Обновление информации задачи планировщика
      *
      * @param taskData объект {@link SchedulerTaskData} задачи
      */
     void update(SchedulerTaskData taskData);
 
     /**
-     * Изменяет дату последнего запуска задачи
+     * Обновление даты последнего запуска задачи
      *
      * @param taskId идентификатор задачи
      */
     void updateStartDate(long taskId);
 
     /**
-     * Изменяет признак активности задач
+     * Обновление признака активности задач
      *
      * @param active признак активности
      * @param ids    список идентификаторов задач

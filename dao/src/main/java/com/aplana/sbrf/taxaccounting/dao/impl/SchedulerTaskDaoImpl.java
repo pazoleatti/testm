@@ -25,6 +25,9 @@ import java.util.List;
 @Repository
 public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDao {
 
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link SchedulerTaskData}
+     */
     private static final class SchedulerTaskMapper implements RowMapper<SchedulerTaskData> {
         @Override
         public SchedulerTaskData mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -42,6 +45,9 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
         }
     }
 
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link SchedulerTaskParam}
+     */
     private static final class SchedulerTaskParamMapper implements RowMapper<SchedulerTaskParam> {
         @Override
         public SchedulerTaskParam mapRow(ResultSet rs, int rowNum) throws SQLException {

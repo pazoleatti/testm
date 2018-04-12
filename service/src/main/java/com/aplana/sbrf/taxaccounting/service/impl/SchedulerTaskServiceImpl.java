@@ -31,21 +31,25 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     private FastDateFormat dateFormatter = FastDateFormat.getInstance("dd-MM-yyyy, HH:mm:ss");
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public SchedulerTaskData fetchOne(SchedulerTask task) {
         return schedulerTaskDao.fetchOne(task.getSchedulerTaskId());
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public SchedulerTaskData fetchOne(Long taskId) {
         return schedulerTaskDao.fetchOne(taskId);
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public List<SchedulerTaskData> fetchAll() {
         return schedulerTaskDao.fetchAll();
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public PagingResult<TaskSearchResultItem> fetchAllByPaging(PagingParams pagingParams) {
         List<TaskSearchResultItem> records = new ArrayList<>();
 
@@ -73,24 +77,19 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void updateStartDate(SchedulerTask task) {
         schedulerTaskDao.updateStartDate(task.getSchedulerTaskId());
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public String update(SchedulerTaskData taskData) {
-        String result = null;
-        if (!validateSchedule(taskData.getSchedule())) {
-            result = " Значение атрибута «Расписание» не соответствует требованиям формата Cron!";
-        } else {
-            schedulerTaskDao.update(taskData);
-        }
-        return result;
+    public void update(SchedulerTaskData taskData) {
+        schedulerTaskDao.update(taskData);
     }
 
     @Override
-    public boolean validateSchedule(String schedule) {
+    public boolean validateScheduleCronString(String schedule) {
         try {
             new CronSequenceGenerator(schedule);
         } catch (IllegalArgumentException e) {

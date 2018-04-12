@@ -139,9 +139,6 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         }
     }
 
-    /**
-     * Добавляет выполнение методов помеченных {@link AplanaScheduled} в планировщик
-     */
     @Override
     public void updateAllTask() {
         Set<Method> methods = AnnotationUtil.findAllAnnotatedMethods(AplanaScheduled.class);

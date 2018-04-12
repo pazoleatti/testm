@@ -45,7 +45,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
         /**
          * Проверка расписания
          */
-        if (!schedulerTaskService.validateSchedule(action.getSchedule())){
+        if (!schedulerTaskService.validateScheduleCronString(action.getSchedule())){
             errors.add(" Значение атрибута «Расписание» не соответствует требованиям формата Cron!");
         }
 

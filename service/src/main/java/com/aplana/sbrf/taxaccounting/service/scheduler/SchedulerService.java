@@ -5,10 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
 import java.util.Date;
 
 /**
- * Created by lhaziev on 14.04.2017.
+ * Сервис для работы с планировщиком задач
  */
 public interface SchedulerService {
 
+    /**
+     * Завершение работы всех запущенных задач
+     */
     void shutdownAllTasks();
 
     /**
@@ -18,8 +21,9 @@ public interface SchedulerService {
 
     /**
      * Получить дату следующего вызова
-     * @param settingCode
-     * @return
+     *
+     * @param settingCode код конфигурационного параметра из таблицы CONFIGURATION
+     * @return время выполнения задачи, если задача заведена, в противном случае null
      */
     Date nextExecutionTime(String settingCode);
 }

@@ -166,10 +166,10 @@
         }])
 
         /**
-         *  @description Редактируемая задача планировщик
+         *  @description задача планировщик
          * */
         .factory('updateScheduleTask', ['$resource', function ($resource) {
-            return $resource('controller/rest/updateSchedulerTask?idTaskScheduler=:idTaskScheduler', {}, {
+            return $resource('controller/rest/schedulerTaskData/:idTaskScheduler', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

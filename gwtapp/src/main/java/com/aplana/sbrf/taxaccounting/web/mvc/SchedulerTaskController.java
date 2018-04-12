@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Контроллер для работы со списком задач по расписанию (Администрирование -> Планировщик задач)
+ * Контроллер для работы со списком задач по расписанию
  */
 
 @RestController
-// TODO Необходим рефакторинг бэкенда и фронтенда см. https://jira.aplana.com/browse/SBRFNDFL-3138
 public class SchedulerTaskController {
 
     private final SchedulerTaskService schedulerTaskService;
@@ -51,8 +50,10 @@ public class SchedulerTaskController {
     }
 
     /**
+     * Получение страницы задач
+     *
      * @param pagingParams параметры пагинации
-     * @return список {@link JqgridPagedList} задач {@link TaskSearchResultItem}
+     * @return страница {@link JqgridPagedList} задач {@link TaskSearchResultItem}
      */
     @GetMapping(value = "/rest/schedulerTask")
     public JqgridPagedList<TaskSearchResultItem> fetchSchedulerTasks(@RequestParam PagingParams pagingParams) {
@@ -89,22 +90,36 @@ public class SchedulerTaskController {
     }
 
     /**
-     * Отображение редактируемой задачи планировщика
+     * Получение задачи планировщика по идентификатору
      *
-     * @param idTaskScheduler идентификаторы задач
+     * @param idTaskScheduler идентификатор задачи
+     * @return объект {@link SchedulerTaskData} или null
      */
-    @GetMapping(value = "/rest/updateSchedulerTask")
-    public SchedulerTaskData fetchUpdateSchedulerTask(long idTaskScheduler) {
+    @GetMapping(value = "/rest/schedulerTaskData/{idTaskScheduler}")
+    public SchedulerTaskData fetchOne(@PathVariable long idTaskScheduler) {
         return schedulerTaskService.fetchOne(idTaskScheduler);
     }
 
     /**
-     * Редактирование задачи планировщика
+     * Обновление задачи планировщика
      *
      * @param schedulerTaskData измененная задача планировщика
      */
-    @PostMapping(value = "/actions/updateSchedulerTask")
-    public String updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskData schedulerTaskData) {
-        return schedulerTaskService.update(schedulerTaskData);
+    @PostMapping(value = "/rest/schedulerTaskData/update")
+    public void update(@RequestParam(value = "schedulerTaskModel") SchedulerTaskData schedulerTaskData) {
+        schedulerTaskService.update(schedulerTaskData);
     }
+
+    /**
+     * Валидация крон выражения на соответствие формату
+     *
+     * @param cronString строка расписания в формате cron
+     * @return признак валидности
+     */
+    @PostMapping(value = "/action/schedulerTaskData/validateCron")
+    public boolean validateCron(@RequestParam(value = "cronString") String cronString) {
+        return schedulerTaskService.validateScheduleCronString(cronString);
+    }
+
+
 }
