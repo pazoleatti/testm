@@ -1014,7 +1014,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             ndflPerson.rowNum = rowNum
             ndflPersonService.save(ndflPerson)
         } else {
-            logger.warn("У ФЛ $fio, ИНП: ${ndflPerson.inp} отсутствуют операции, принадлежащие отчетному периоду. ФЛ не загружено в налоговую форму")
+            logger.warn("У ФЛ ($fio, ИНП: ${ndflPerson.inp}) отсутствуют операции, принадлежащие отчетному периоду. ФЛ не загружено в налоговую форму")
             return false
         }
         return true
@@ -1131,7 +1131,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String rowNum, String group, Date date, String inp, String fio, String operationId) {
         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, rowNum)
-        String baseMessage = "Значения гр. %s (\"%s\") не входит в отчетный период налоговой формы %s, операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s."
+        String baseMessage = "Значения гр. \"%s\" (\"%s\") не входит в отчетный период налоговой формы: \"%s\". Операция (\"%s\") не загружена в налоговую форму. ФЛ: \"%s\", ИНП: \"%s\""
         String errMsg = String.format(baseMessage,
                 group,
                 date != null ? ScriptUtils.formatDate(date) : "Не определено",
