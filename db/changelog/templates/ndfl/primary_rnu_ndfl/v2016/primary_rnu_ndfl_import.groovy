@@ -311,7 +311,7 @@ class Import extends AbstractScriptClass {
                             updated = true
                         }
                         if (ndflPerson.birthDay != persistedPerson.birthDay) {
-                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BIRTH_DAY, persistedPerson.birthDay, ndflPerson.birthDay)
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BIRTH_DAY, persistedPerson.birthDay?.format(SharedConstants.DATE_FORMAT), ndflPerson.birthDay?.format(SharedConstants.DATE_FORMAT))
                             persistedPerson.birthDay = ndflPerson.birthDay
                             updated = true
                         }
@@ -1341,7 +1341,7 @@ class Import extends AbstractScriptClass {
  * @return запись для логгера с сообщением
  */
 
-    LogEntry createUpdateOperationMessage(NdflPerson ndflPerson, String sectionName, Long id, String attrName, String oldValue, String newValue) {
+    LogEntry createUpdateOperationMessage(NdflPerson ndflPerson, String sectionName, Long id, String attrName, Object oldValue, Object newValue) {
         return new LogEntry(LogLevel.INFO, String.format("Изменены данные у ФЛ: (%s %s %s, ИНП: %s, ДУЛ: %s, %s). Раздел %s. Идентификатор строки: %d. Обновлена гр. \"%s\". Старое значение: \"%s\". Новое значение: \"%s\"",
                 ndflPerson.lastName ?: "",
                 ndflPerson.firstName ?: "",
