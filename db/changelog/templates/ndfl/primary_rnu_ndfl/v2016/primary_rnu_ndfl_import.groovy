@@ -1041,42 +1041,40 @@ class Import extends AbstractScriptClass {
     }
 
     boolean isIncomeDatesInPeriod(List<NdflPersonIncome> incomeGroup) {
-        Date incomeAccruedDate = null
-        Date incomePayoutDate = null
-        Date taxDate = null
-        int incomeAccruedRowIndex = 0
-        int incomePayoutRowIndex = 0
-        int taxDateRowIndex = 0
+        Map<Integer, Date> incomeAccruedDateValues = [:]
+        Map<Integer, Date> incomePayoutDateValues = [:]
+        Map<Integer, Date> taxDateValues = [:]
         for (NdflPersonIncome income : incomeGroup) {
             if (income.incomeAccruedDate != null) {
-                incomeAccruedDate = income.incomeAccruedDate
-                incomeAccruedRowIndex = (income as NdflPersonIncomeExt).rowIndex
+                if (!checkIncomeDate(income.incomeAccruedDate)) {
+                    incomeAccruedDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.incomeAccruedDate)
+                } else {
+                    return true
+                }
             }
             if (income.incomePayoutDate != null) {
-                incomePayoutDate = income.incomePayoutDate
-                incomePayoutRowIndex = (income as NdflPersonIncomeExt).rowIndex
+                if (!checkIncomeDate(income.incomePayoutDate)) {
+                    incomePayoutDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.incomePayoutDate)
+                } else {
+                    return true
+                }
             }
             if (income.taxDate != null) {
-                taxDate = income.taxDate
-                taxDateRowIndex = (income as NdflPersonIncomeExt).rowIndex
+                if (!checkIncomeDate(income.taxDate)) {
+                    taxDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.taxDate)
+                } else {
+                    return true
+                }
             }
         }
-        boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
-        boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
-        boolean taxDateCorrect = checkIncomeDate(taxDate)
-        if (incomeAccruedDateCorrect || incomePayoutDateCorrect || taxDateCorrect) {
-            return true
-        } else {
-            if (!incomeAccruedDateCorrect) {
-                logIncomeDatesError(incomeAccruedDate, incomeGroup.get(0), incomeAccruedRowIndex, 26)
-            }
-            if (!incomePayoutDateCorrect) {
-                logIncomeDatesError(incomePayoutDate, incomeGroup.get(0), incomePayoutRowIndex, 27)
-            }
-            if (!taxDateCorrect) {
-                logIncomeDatesError(taxDate, incomeGroup.get(0), taxDateRowIndex, 35)
-            }
-            return false
+        for (Integer rowNumber : incomeAccruedDateValues.keySet()) {
+            logIncomeDatesError(incomeAccruedDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 26)
+        }
+        for (Integer rowNumber : incomePayoutDateValues.keySet()) {
+            logIncomeDatesError(incomePayoutDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 27)
+        }
+        for (Integer rowNumber : taxDateValues.keySet()) {
+            logIncomeDatesError(taxDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 35)
         }
     }
 
