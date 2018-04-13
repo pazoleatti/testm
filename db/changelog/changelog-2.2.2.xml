@@ -142,4 +142,13 @@
             <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-4190-->
+    <changeSet id="2.2.2-aokunev-2" author="aokunev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+            <where>id=5</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
