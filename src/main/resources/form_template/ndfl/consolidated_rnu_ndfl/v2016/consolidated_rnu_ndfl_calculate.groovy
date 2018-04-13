@@ -3,11 +3,7 @@ package form_template.ndfl.consolidated_rnu_ndfl.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.ndfl.*
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
@@ -110,11 +106,14 @@ class Calculate extends AbstractScriptClass {
         //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
         List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
 
-        List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
-
-        if (declarationDataIdList.isEmpty()) {
+        if (sourcesInfo.isEmpty()) {
             throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
         }
+
+        //сохранить только источники в состоянии "принята"
+        sourcesInfo = retainAcceptedSourceDeclarations(sourcesInfo);
+
+        List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
         logForDebug("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
@@ -266,6 +265,25 @@ class Calculate extends AbstractScriptClass {
         }
 
         return result.sort()
+    }
+
+    /**
+     * Получить список форм-источников в состоянии "Принята"
+     * @param sourcesInfo Список налоговых форм-источников
+     * @return Список форм-источников в состоянии "Принята"
+     */
+    List<Relation> retainAcceptedSourceDeclarations(List<Relation> sourcesInfo) {
+        List<Relation> result = new ArrayList<Relation>();
+        for (Relation relation : sourcesInfo) {
+            Long declarationDataId = relation.declarationDataId;
+            if (!relation.declarationState.equals(State.ACCEPTED)) {
+                logger.warn(String.format("Налоговая форма-источник существует, но не может быть использована в консолидации, так как еще не принята. Вид формы: \"%s\", Подразделение: \"%s\", Номер=\"%s\", Состояние=\"%s\"",
+                        relation.getDeclarationTypeName(), relation.getFullDepartmentName(), declarationDataId, relation.declarationState.title))
+                continue
+            }
+            result.add(relation);
+        }
+        return result;
     }
 
     /**
