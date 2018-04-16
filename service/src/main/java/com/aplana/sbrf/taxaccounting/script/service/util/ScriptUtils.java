@@ -1936,6 +1936,10 @@ public final class ScriptUtils {
         }
     }
 
+    public static BigDecimal round(BigDecimal value) {
+        return round(value, 0);
+    }
+
     public static BigDecimal round(BigDecimal value, int precision) {
         if (value == null) {
             return null;
