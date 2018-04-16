@@ -190,6 +190,7 @@
                             }
                         });
                     }
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                 };
 
                 /**
@@ -201,8 +202,12 @@
                     angular.element(document.querySelector('#app-content')).css('height', '100%');
                 };
 
+                /**
+                 * Отрабатывает при нажатии на кнопку закрытия панели
+                 */
                 $rootScope.closeLogPanel = function () {
                     logPanel.close();
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                 };
 
                 $transitions.onSuccess({}, function () {
