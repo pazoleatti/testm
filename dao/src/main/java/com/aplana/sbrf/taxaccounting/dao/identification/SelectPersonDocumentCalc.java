@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -25,7 +27,7 @@ public class SelectPersonDocumentCalc {
     /**
      * Код РФ по справочнику "ОК 025-2001 (Общероссийский классификатор стран мира)"
      */
-    private static final String RUS_CODE = "643";
+    static final String RUS_CODE = "643";
 
     /**
      * Статусы налогоплательщика 5 - Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации
@@ -35,7 +37,7 @@ public class SelectPersonDocumentCalc {
     /**
      *
      */
-    private static final String RUS_PASSPORT_21 = "21";
+    static final String RUS_PASSPORT_21 = "21";
     private static final String RUS_PASSPORT_TEMP_14 = "14";
 
     /**
@@ -106,16 +108,17 @@ public class SelectPersonDocumentCalc {
 
         if (rusPassports.size() == 1) {
             //а. Если есть один <ДУЛ>."Код ДУЛ" = 21, то у данной записи устанавливаем <ДУЛ>."Включается в отчетность" = 1
+
             return rusPassports.get(0);
         } else if (rusPassports.size() > 1) {
             //b. Если есть несколько <ДУЛ>."Код ДУЛ" = 21
-            if (isSeriesNumEquals(rusPassports)) {
-                //Если вторые две цифры у <ДУЛ> равны -> выбрать запись, у которой последние шесть цифр больше
-                return selectMaximumPassportDocumentNum(rusPassports);
-            } else {
+            List<PersonDocument> maximumPassportSeriesNum = selectMaximumPassportSeriesNum(rusPassports);
+            if (maximumPassportSeriesNum.size() == 1) {
                 //Если вторые две цифры у <ДУЛ> не равны -> выбрать запись, у которой вторые две цифры больше
-                return selectMaximumPassportSeriesNum(rusPassports);
+                return maximumPassportSeriesNum.get(0);
             }
+            //Если вторые две цифры у <ДУЛ> равны -> выбрать запись, у которой последние шесть цифр больше
+            return selectMaximumPassportDocumentNum(rusPassports);
         } else {
             //c. Иначе ( <ДУЛ>."Код ДУЛ ≠ 21)
             List<PersonDocument> rusPassportsTemp = findDocumentsByTypeCode(personDocumentList, RUS_PASSPORT_TEMP_14);
@@ -246,26 +249,39 @@ public class SelectPersonDocumentCalc {
 
 
     /**
-     * Выбрать запись, у которой вторые две цифры больше
+     * Выбрать записи, у которых вторые две цифры имеют наибольшее значение
      *
-     * @param personDocumentList
-     * @return
+     * @param personDocumentList список объектов ДУЛ для сравнения
+     * @return  список объектов ДУЛ у которых самые большие 2 цифры
      */
-    private static PersonDocument selectMaximumPassportSeriesNum(List<PersonDocument> personDocumentList) {
-        PersonDocument maxSeriesPersonDocument = null;
-        Integer maxSeriesNumber = null;
-        for (PersonDocument personDocument : personDocumentList) {
-            if (maxSeriesPersonDocument == null || maxSeriesNumber == null) {
-                maxSeriesPersonDocument = personDocument;
-                maxSeriesNumber = extractSeriesDigits(personDocument.getDocumentNumber());
+    private static List<PersonDocument> selectMaximumPassportSeriesNum(List<PersonDocument> personDocumentList) {
+        Collections.sort(personDocumentList, new Comparator<PersonDocument>() {
+            @Override
+            public int compare(PersonDocument o1, PersonDocument o2) {
+                Integer o2Series = extractSeriesDigits(o2.getDocumentNumber());
+                Integer o1Series = extractSeriesDigits(o1.getDocumentNumber());
+                if (o1Series == null && o2Series == null) {
+                    return 0;
+                } else if (o2Series == null) {
+                    return 1;
+                } else if (o1Series == null) {
+                    return -1;
+                }
+                return o2Series.compareTo(o1Series);
             }
+        });
+        Integer maxSeriesNumber = extractSeriesDigits(personDocumentList.get(0).getDocumentNumber());
+        List<PersonDocument> toReturn = new ArrayList<>();
+
+        for (PersonDocument personDocument : personDocumentList) {
             Integer docSeries = extractSeriesDigits(personDocument.getDocumentNumber());
-            if (docSeries != null && (docSeries > maxSeriesNumber)) {
-                maxSeriesNumber = docSeries;
-                maxSeriesPersonDocument = personDocument;
+            if (docSeries != null && (docSeries.equals(maxSeriesNumber))) {
+                toReturn.add(personDocument);
+            } else {
+                break;
             }
         }
-        return maxSeriesPersonDocument;
+        return toReturn;
     }
 
 

@@ -1,9 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
+import com.aplana.sbrf.taxaccounting.model.identification.Country;
+import com.aplana.sbrf.taxaccounting.model.identification.DocType;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Andrey Drunk
@@ -33,4 +40,23 @@ public class SelectPersonDocumentCalcTest {
 
     }
 
+    @Test
+    public void selectIncludeReportDocumentCode21Test() {
+        NaturalPerson person = new NaturalPerson();
+        person.setCitizenship(new Country(0L, SelectPersonDocumentCalc.RUS_CODE));
+        List<PersonDocument> personDocumentList = new ArrayList<>();
+        PersonDocument doc1 = new PersonDocument();
+        PersonDocument doc2 = new PersonDocument();
+        PersonDocument doc3 = new PersonDocument();
+        DocType docType = new DocType(0L, SelectPersonDocumentCalc.RUS_PASSPORT_21);
+        doc1.setDocType(docType);
+        doc1.setDocumentNumber("60 56 183620");
+        doc2.setDocType(docType);
+        doc2.setDocumentNumber("60 10 183620");
+        doc3.setDocType(docType);
+        doc3.setDocumentNumber("60 56 283620");
+        personDocumentList.addAll(Arrays.asList(doc1, doc2, doc3));
+        PersonDocument result = SelectPersonDocumentCalc.selectIncludeReportDocument(person, personDocumentList);
+        Assert.assertEquals("60 56 283620", result.getDocumentNumber());
+    }
 }
