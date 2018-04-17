@@ -10,6 +10,8 @@
                     height: 300
                 };
 
+                var scope = null;
+
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
@@ -46,7 +48,7 @@
                         "             id='log-entry-grid' ></div>" +
                         "    </div>" +
                         "</div>"
-                    )($rootScope);
+                    )(scope = $rootScope.$new());
                 }
 
                 function updateLogPanelHeaderMessage(total, errors) {
@@ -190,19 +192,28 @@
                             }
                         });
                     }
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                 };
 
                 /**
                  * Метод закрывает панель уведомлений
                  */
                 logPanel.close = function () {
-                    $rootScope.logEntryGrid = undefined;
-                    angular.element(document.querySelector('#log-panel')).remove();
-                    angular.element(document.querySelector('#app-content')).css('height', '100%');
+                    if (scope) {
+                        $rootScope.logEntryGrid = undefined;
+                        angular.element(document.querySelector('#log-panel')).remove();
+                        angular.element(document.querySelector('#app-content')).css('height', '100%');
+                        scope.$destroy();
+                        scope = null;
+                    }
                 };
 
+                /**
+                 * Отрабатывает при нажатии на кнопку закрытия панели
+                 */
                 $rootScope.closeLogPanel = function () {
                     logPanel.close();
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                 };
 
                 $transitions.onSuccess({}, function () {

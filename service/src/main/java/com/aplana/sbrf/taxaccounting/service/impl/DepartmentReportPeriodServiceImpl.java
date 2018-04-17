@@ -273,7 +273,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
         for (LockDataItem lockDataItem : lockDataItems) {
             DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
             DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            String msg = MessageGenerator.getFDMsg("Форма редактируется пользователем " + lockDataItem.getUser() + " ", template.getType().getName(), template.getDeclarationFormKind().getTitle(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
+            String msg = MessageGenerator.getFDMsg("Форма № " + dd.getId() + " редактируется пользователем " + lockDataItem.getUser() + " ", template.getType().getName(), template.getDeclarationFormKind().getTitle(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
                     null, dd.getManuallyCreated(), departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     departmentReportPeriod.getCorrectionDate(), null);
             logger.error(msg);
