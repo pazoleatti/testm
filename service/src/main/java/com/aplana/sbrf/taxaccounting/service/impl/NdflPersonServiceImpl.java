@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -46,21 +47,25 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#ndflFilter.declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchNdflPersonByParameters(ndflFilter, pagingParams);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#ndflFilter.declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public PagingResult<NdflPersonIncomeDTO> findPersonIncomeByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonIncomeByParameters(ndflFilter, pagingParams);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#ndflFilter.declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public PagingResult<NdflPersonDeductionDTO> findPersonDeductionsByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonDeductionByParameters(ndflFilter, pagingParams);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#ndflFilter.declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonPrepaymentByParameters(ndflFilter, pagingParams);
     }
