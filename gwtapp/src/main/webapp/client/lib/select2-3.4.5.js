@@ -2463,6 +2463,7 @@
                 "<ul class='select2-choices'>",
                 "  <li class='select2-search-field'>",
                 "    <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
+                "    <span class='select2-arrow'><b></b></span>",
                 "  </li>",
                 "</ul>",
                 "<div class='select2-drop select2-drop-multi select2-display-none'>",
@@ -2470,6 +2471,21 @@
                 "   </ul>",
                 "</div>"].join(""));
             return container;
+
+            /*
+             "<a href='javascript:void(0)' onclick='return false;' class='select2-choice' tabindex='-1'>",
+             "   <span class='select2-chosen'>&nbsp;</span><abbr class='select2-search-choice-close'></abbr>",
+             "   <span class='select2-arrow'><b></b></span>",
+             "</a>",
+             "<input class='select2-focusser select2-offscreen' type='text'/>",
+             "<div class='select2-drop select2-display-none'>",
+             "   <div class='select2-search'>",
+             "       <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'/>",
+             "   </div>",
+             "   <ul class='select2-results'>",
+             "   </ul>",
+             "</div>
+             */
         },
 
         // multi
