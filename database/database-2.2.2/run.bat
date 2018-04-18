@@ -17,6 +17,9 @@ MKDIR %BAD_DIR%
 DEL /s /q /f %LOG_DIR%\*.txt
 DEL /s /q /f %BAD_DIR%\*.*
 
+ECHO ## load ref_book_ndfl
+"%ORA_BIN%\sqlplus" %AUTH% @"load_ref_book_ndfl.sql" %LOG_DIR%/load_ref_book_ndfl.txt %ORA_BIN% %AUTH% %LOG_DIR% %BAD_DIR% %LOG_DIR%/null_values.csv %LOG_DIR%/not_unique_kpp_oktmo_tax.csv
+
 ECHO ## dml: templates
 "%ORA_BIN%\sqlplus" %AUTH% @"templates.sql" %LOG_DIR%/templates.txt %ORA_BIN% %AUTH% %LOG_DIR% %BAD_DIR%
 
