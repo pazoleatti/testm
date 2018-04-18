@@ -26,6 +26,11 @@ public interface RefBookFactory {
 	RefBook get(Long refBookId);
 
 	/**
+	 * Возвращяет все справочники
+	 */
+	List<RefBook> fetchAll();
+
+	/**
 	 * Загружает список всех справочников
 	 *
      * @param onlyVisible true - только видимые; false - весь список

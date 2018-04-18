@@ -250,13 +250,13 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             checkScript(refBook, script, log);
             if (refBook.getScriptId() == null) {
                 String uuid = blobDataService.create(inputStream, refBook.getName());
-                refBookDao.setScriptId(refBookId, uuid);
+                refBookDao.updateScriptId(refBookId, uuid);
             } else {
                 blobDataService.save(refBook.getScriptId(), inputStream);
             }
         } else {
             if (refBook.getScriptId() != null) {
-                refBookDao.setScriptId(refBookId, null);
+                refBookDao.updateScriptId(refBookId, null);
                 blobDataService.delete(refBook.getScriptId());
             }
         }

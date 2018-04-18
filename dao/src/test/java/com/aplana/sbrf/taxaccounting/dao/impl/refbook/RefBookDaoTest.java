@@ -616,11 +616,11 @@ public class RefBookDaoTest {
         RefBook refBook = refBookDao.get(3L);
         assertTrue(refBook.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
 
-        refBookDao.setScriptId(3L, null);
+        refBookDao.updateScriptId(3L, null);
         RefBook refBook1 = refBookDao.get(3L);
         assertTrue(refBook1.getScriptId() == null);
 
-        refBookDao.setScriptId(3L, "24af57ef-ec1c-455f-a4fa-f0fb29483066");
+        refBookDao.updateScriptId(3L, "24af57ef-ec1c-455f-a4fa-f0fb29483066");
         RefBook refBook2 = refBookDao.get(3L);
         assertTrue(refBook2.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
     }

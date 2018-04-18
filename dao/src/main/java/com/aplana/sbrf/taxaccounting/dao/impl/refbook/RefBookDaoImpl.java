@@ -88,12 +88,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name, xsd_id from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найден справочник с id = %d", refBookId));
         }
+    }
+
+    @Override
+    public List<RefBook> fetchAll() {
+        return getJdbcTemplate().query("select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name, xsd_id from ref_book",
+                new RefBookRowMapper());
     }
 
     @Override
@@ -159,6 +165,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			result.setReadOnly(rs.getBoolean("read_only"));
             result.setTableName(rs.getString("table_name"));
             result.setVersioned(rs.getBoolean("is_versioned"));
+            result.setXsdId(rs.getString("xsd_id"));
             BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
             if (regionAttributeId == null) {
                 result.setRegionAttribute(null);
@@ -1449,8 +1456,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public void setScriptId(Long refBookId, String scriptId) {
+    public void updateScriptId(Long refBookId, String scriptId) {
         getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
+    }
+
+    @Override
+    public void updateXsdId(Long refBookId, String xsdId) {
+        getJdbcTemplate().update("update ref_book set xsd_id = ? where id = ?", xsdId, refBookId);
     }
 
     @Override

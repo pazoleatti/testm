@@ -144,7 +144,7 @@
                                     href: "Main.jsp" + $scope.gwtMode + "#!declarationTemplateList"
                                 }, {
                                     name: $filter('translate')('menu.administration.settings.refbooks'),
-                                    href: "Main.jsp" + $scope.gwtMode + "#!refbooklistadmin"
+                                    href: $state.href('refBookConfList')
                                 }, {
                                     name: $filter('translate')('menu.administration.settings.resetCache'),
                                     href: "controller/actions/cache/clear-cache"

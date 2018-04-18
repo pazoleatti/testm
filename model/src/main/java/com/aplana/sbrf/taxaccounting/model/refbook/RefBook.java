@@ -201,6 +201,9 @@ public class RefBook implements Serializable {
     /** Название таблицы справочника, заполняется в случае если справочник не универсальный */
     private String tableName;
 
+	/** Ссылка на xsd файл */
+	private String xsdId;
+
     private RefBookAttribute regionAttribute;
 
 	public static RefBookAttribute getVersionFromAttribute() {
@@ -443,7 +446,15 @@ public class RefBook implements Serializable {
         this.regionAttribute = regionAttribute;
     }
 
-    @Override
+	public String getXsdId() {
+		return xsdId;
+	}
+
+	public void setXsdId(String xsdId) {
+		this.xsdId = xsdId;
+	}
+
+	@Override
     public String toString() {
         return "RefBook{" +
                 "id=" + id +
@@ -454,6 +465,7 @@ public class RefBook implements Serializable {
                 ", readOnly=" + readOnly +
                 ", versioned=" + versioned +
                 ", tableName='" + tableName + '\'' +
+				", xsdId='" + xsdId + '\'' +
                 '}';
     }
 

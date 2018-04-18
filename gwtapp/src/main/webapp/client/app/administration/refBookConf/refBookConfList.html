@@ -1,0 +1,19 @@
+<div class="flex-column">
+    <div>
+        <div class="content-header pull-left">
+            <h1>{{::'refBookConfList.title' | translate}}</h1>
+        </div>
+        <div class="pull-right-a">
+            <a ng-click="refBookExport()">{{::'refBookConfList.export' | translate}}</a>
+            <a ngf-select="refBookImport($file)">{{::'refBookConfList.import' | translate}}</a>
+        </div>
+    </div>
+    <div id="refBookConfListGridContainer" class="container-grid box-shadow-block flex-fill">
+        <div class="flex-grid" data-aplana-grid style="height: 100%"
+             data-grid-fill-space="true"
+             data-grid-options="refBookConfListGrid.options"
+             data-grid-ctrl="refBookConfListGrid.ctrl"
+             data-ng-model="refBookConfListGrid.value"
+             id="refBookConfListGrid"></div>
+    </div>
+</div>

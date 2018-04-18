@@ -157,6 +157,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
             return getJdbcTemplate().update("delete from blob_data bd where id not in " +
                     "(select distinct id from " +
                     "(select script_id id from ref_book " +
+                    "union select xsd_id from ref_book " +
                     "union select xsd from declaration_template " +
                     "union select jrxml from declaration_template " +
                     "union select blob_data_id from declaration_report " +

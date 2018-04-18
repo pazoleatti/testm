@@ -9,6 +9,13 @@ public class ActionResult {
      */
     private String uuid;
 
+    public ActionResult() {
+    }
+
+    public ActionResult(String uuid) {
+        this.uuid = uuid;
+    }
+
     public String getUuid() {
         return uuid;
     }
