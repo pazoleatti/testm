@@ -8,6 +8,18 @@ public class ActionResult {
      * UUID группы сообщений в журнале
      */
     private String uuid;
+    /**
+     * Признак того, что операция завершена успешно
+     */
+    private boolean success;
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
 
     public ActionResult() {
     }

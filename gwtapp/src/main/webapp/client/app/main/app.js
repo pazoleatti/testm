@@ -58,6 +58,8 @@
         "common.button.formation": "Сформировать",
         "common.button.clear": "Сбросить",
         "common.button.add": "Добавить",
+        "common.button.export": "Экспорт",
+        "common.button.import": "Импорт",
         "common.button.cancel": "Отменить",
         "common.button.f": "Сохранить",
         "common.button.no": "Нет",
@@ -744,6 +746,8 @@
         "declarationTemplate.tabs.checks.code": "Код",
         "declarationTemplate.tabs.checks.type": "Тип",
         "declarationTemplate.tabs.checks.description": "Описание",
+        "declarationTemplate.info.importSuccess": "Макет успешно обновлен",
+        "declarationTemplate.confirm.deleteReports": "Удалить ранее сформированные отчеты?",
 
         "refBook.type.LINEAR": "Линейный",
         "refBook.type.HIERARCHICAL": "Иерархический",

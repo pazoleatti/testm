@@ -4,10 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
 import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateAction;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
 import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
 
 import javax.validation.constraints.NotNull;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -339,4 +342,25 @@ public interface DeclarationTemplateService {
 	 * @return результат выполнения операции
 	 */
 	UpdateTemplateStatusResult updateStatus(UpdateTemplateStatusAction action, TAUserInfo userInfo);
+
+	/**
+	 * Экспорт скриптов, xsd и jrxml из макета в архив
+	 * @param declarationTemplateId идентификатор макета
+	 * @param os поток, в который надо записать результирующий файл
+	 */
+	void exportDeclarationTemplate(TAUserInfo userInfo, Integer declarationTemplateId, OutputStream os);
+
+	/**
+	 * Импорт архива со скриптами, xsd и т.д в макет
+	 * Включает бизнес-проверки перед выполнением импорта
+	 * @param declarationTemplateId идентификатор макета
+	 * @param fileData содержимое архива
+	 */
+	ActionResult importDeclarationTemplate(TAUserInfo userInfo, int declarationTemplateId, InputStream fileData);
+
+	/**
+	 * Удаляет отчеты (pdf и xlsx) для форм, которые связаны с изменяемым jrxml-шаблоном
+	 * @param declarationTemplateId идентификатор макета
+	 */
+	void deleteJrxmlReports(TAUserInfo userInfo, int declarationTemplateId);
 }

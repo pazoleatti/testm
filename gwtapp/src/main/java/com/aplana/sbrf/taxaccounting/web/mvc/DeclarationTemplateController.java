@@ -1,31 +1,28 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateCheck;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateAction;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
-import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+
+import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 
 @RestController
@@ -104,4 +101,52 @@ public class DeclarationTemplateController {
         return declarationTemplateService.updateStatus(action, userInfo);
     }
 
+    /**
+     * Выгрузка архива с содержимым макета декларации
+     *
+     * @param declarationTemplateId идентификатор макета декларации
+     * @param resp                  ответ
+     * @throws IOException IOException
+     */
+    @GetMapping(value = "/rest/declarationTemplate/export/{declarationTemplateId}")
+    public void download(@PathVariable int declarationTemplateId, HttpServletResponse resp)
+            throws IOException {
+        String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
+        resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        resp.setCharacterEncoding(UTF_8);
+        try {
+            declarationTemplateService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
+        } finally {
+            IOUtils.closeQuietly(resp.getOutputStream());
+        }
+    }
+
+    /**
+     * Загрузка архива в макет декларации
+     *
+     * @param file                  архив с содержимым макета
+     * @param declarationTemplateId идентификатор макета декларации
+     * @throws IOException IOException
+     */
+    @ResponseBody
+    @PostMapping(value = "/rest/declarationTemplate/import/{declarationTemplateId}")
+    public ActionResult importDeclarationTemplate(@RequestParam(value = "uploader") MultipartFile file,
+                                                  @PathVariable int declarationTemplateId) throws IOException {
+        if (declarationTemplateId == 0)
+            throw new ServiceException("Сначала сохраните шаблон.");
+        if (file.getSize() == 0)
+            throw new ServiceException("Архив пустой.");
+
+        return declarationTemplateService.importDeclarationTemplate(securityService.currentUserInfo(),
+                declarationTemplateId, file.getInputStream());
+    }
+
+    /**
+     * Удаляет отчеты форм, связанные с jrxml макета
+     */
+    @DeleteMapping(value = "/rest/declarationTemplate/{declarationTemplateId}", params = "projection=deleteJrxmlReports")
+    public void deleteJrxmlReports(@PathVariable int declarationTemplateId) {
+        declarationTemplateService.deleteJrxmlReports(securityService.currentUserInfo(), declarationTemplateId);
+    }
 }

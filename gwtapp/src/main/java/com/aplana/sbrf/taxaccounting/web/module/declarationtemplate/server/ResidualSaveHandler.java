@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.ResidualSaveAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.ResidualSaveResult;
@@ -15,8 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 /**
  * User: avanteev
  */
@@ -27,8 +26,6 @@ public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveActio
     @Autowired
     @Qualifier("declarationTemplateMainOperatingService")
     private MainOperatingService mainOperatingService;
-    @Autowired
-	private DeclarationTemplateImpexService declarationTemplateImpexService;
     @Autowired
 	private SecurityService securityService;
     @Autowired
@@ -46,7 +43,7 @@ public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveActio
     public ResidualSaveResult execute(ResidualSaveAction action, ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
         ResidualSaveResult result = new ResidualSaveResult();
-        if (action.isArchive()){
+        /*if (action.isArchive()){
             BlobData data = blobDataService.get(action.getUploadUuid());
             DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
                     (securityService.currentUserInfo(), action.getDtId(), data.getInputStream());
@@ -59,7 +56,7 @@ public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveActio
             declarationTemplate.setJrxmlBlobId(action.getUploadUuid());
             declarationTemplateService.save(declarationTemplate, securityService.currentUserInfo());
             result.setUploadUuid(declarationTemplate.getJrxmlBlobId());
-        }
+        }*/
 
         result.setSuccessUuid(logEntryService.save(logger.getEntries()));
         return result;
