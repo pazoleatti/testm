@@ -295,7 +295,7 @@ public class RefBookServiceImpl implements RefBookService {
 
     private void importRefBookConf(ByteArrayInputStream inputStream, String fileName, Logger logger) throws IOException {
         String dirName = new File(fileName).getParent();
-        if (dirName != null) {
+        if (dirName != null && new File(dirName).getParent() == null) {
             try {
                 Long refBookId = Long.valueOf(dirName);
                 RefBook refBook = refBookFactory.get(refBookId);
