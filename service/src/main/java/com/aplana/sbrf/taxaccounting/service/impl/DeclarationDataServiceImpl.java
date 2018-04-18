@@ -807,7 +807,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
             if (lockDataAccept == null) {
                 String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-                if (uuidXml != null || declarationDataDao.get(declarationDataId).getManuallyCreated()) {
+                if (uuidXml != null) {
                     String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                     Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
@@ -3008,7 +3008,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setDeclarationDataId(action.getDeclarationId());
         } else {
             String uuidXml = reportService.getDec(action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null && !declarationDataDao.get(action.getDeclarationId()).getManuallyCreated()) {
+            if (uuidXml == null) {
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             } else {
                 DeclarationData declarationData = get(action.getDeclarationId(), userInfo);
@@ -3436,6 +3436,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
 
+                // TODO workaround, создаём пустую xml (но не должна использоваться)
+                if (reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
+                    String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
+                    reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.XML_DEC);
+                }
                 declarationDataFileDao.deleteTransportFileExcel(declarationDataId);
 
                 DeclarationDataFile declarationDataFile = new DeclarationDataFile();
