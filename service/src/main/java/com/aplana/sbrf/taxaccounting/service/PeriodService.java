@@ -149,15 +149,6 @@ public interface PeriodService {
     String removeReportPeriod(Integer id, TAUserInfo userInfo);
 
     /**
-     * Редактирует период или выдает причину невозможности редактрования
-     *
-     * @param departmentReportPeriod обновленный отчетный период подразделения
-     * @param user                   пользователь, который обновляет запись
-     * @return uuid логера
-     */
-    String editPeriod(DepartmentReportPeriod departmentReportPeriod, TAUserInfo user);
-
-    /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
      *
      * @param id идентификатор

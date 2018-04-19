@@ -218,29 +218,6 @@
                 };
 
                 /**
-                 * @description Открытие модального окна редактирования периода
-                 */
-                $scope.editPeriod = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('reportPeriod.pils.editPeriod'),
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html?v=${buildUuid}',
-                        controller: 'reportPeriodCtrlModal',
-                        windowClass: 'modal600',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    isAdd: false,
-                                    period: $scope.reportPeriodGrid.value[0],
-                                    department: $scope.department
-                                };
-                            }
-                        }
-                    }).result.then(function () {
-                        $scope.refreshGrid();
-                    });
-                };
-
-                /**
                  * @description Закрыть период
                  */
                 $scope.closePeriod = function () {

@@ -90,12 +90,11 @@
                 EDIT: 1 << 0
             },
             DEPARTMENT_REPORT_PERIOD_PERMISSION: {
-                EDIT: 1 << 0,
-                OPEN: 1 << 1,
-                DELETE: 1 << 2,
-                CLOSE: 1 << 3,
-                OPEN_CORRECT: 1 << 4,
-                DEADLINE: 1 << 5
+                OPEN: 1 << 0,
+                DELETE: 1 << 1,
+                CLOSE: 1 << 2,
+                OPEN_CORRECT: 1 << 3,
+                DEADLINE: 1 << 4
             },
             DEPARTMENT_PERMISSION: {
                 EDIT: 1 << 0

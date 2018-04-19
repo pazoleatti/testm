@@ -123,17 +123,6 @@ public class DepartmentReportPeriodController {
     }
 
     /**
-     * Редактирование периода для подразделения
-     *
-     * @param departmentReportPeriod открываемый период
-     * @return идентификатор uuid для логов
-     */
-    @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
-    public String editPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
-        return periodService.editPeriod(departmentReportPeriod, securityService.currentUserInfo());
-    }
-
-    /**
      * Проверка преиода подразделения на наличие непринятых деклараций
      *
      * @param departmentReportPeriodId - идентификатор проверяемого периода подразделения
