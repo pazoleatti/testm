@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author dsultanbekov
  */
-public class DeclarationTemplate extends IdentityObject<Integer> {
+public class DeclarationTemplate extends IdentityObject<Integer> implements SecuredEntity {
     private static final long serialVersionUID = 1L;
     /**
      * Вид декларации
@@ -66,6 +66,12 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      * Список скриптов по отдельному событию
      */
     private List<DeclarationTemplateEventScript> eventScripts = new ArrayList<DeclarationTemplateEventScript>();
+
+    /**
+     * Права
+     */
+    private long permissions;
+
 
     public String getName() {
         return name;
@@ -222,5 +228,13 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
     public void setEventScripts(List<DeclarationTemplateEventScript> eventScripts) {
         this.eventScripts = eventScripts;
+    }
+
+    public long getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
     }
 }

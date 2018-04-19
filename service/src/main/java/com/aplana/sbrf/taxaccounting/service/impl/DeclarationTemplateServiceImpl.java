@@ -122,6 +122,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
     @Override
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
     public DeclarationTemplate fetchWithScripts(int declarationTemplateId) {
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         List<DeclarationTemplateEventScript> eventScriptList = declarationTemplateEventScriptDao.fetch(declarationTemplateId);
@@ -267,8 +268,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
-    public List<DeclarationTemplate> fetchAllByType(int declarationTypeId) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public List<DeclarationTemplate> fetchAllByType(int declarationTypeId, TAUserInfo userInfo) {
         return declarationTemplateDao.fetchAllByType(declarationTypeId);
     }
 
@@ -592,7 +593,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#action.declarationTemplate.id, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public UpdateTemplateResult update(UpdateTemplateAction action, TAUserInfo userInfo) {
         UpdateTemplateResult result = new UpdateTemplateResult();
         Logger logger = new Logger();
@@ -624,7 +625,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#action.templateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public UpdateTemplateStatusResult updateStatus(UpdateTemplateStatusAction action, TAUserInfo userInfo) {
         UpdateTemplateStatusResult result = new UpdateTemplateStatusResult();
         Logger logger = new Logger();
@@ -639,7 +640,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
+    public String uploadXsd(int declarationTemplateId, InputStream inputStream, String fileName) {
+        return blobDataService.create(inputStream, fileName);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
     public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
         try {
             ZipOutputStream zos = new ZipOutputStream(os);
@@ -729,7 +736,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public ActionResult importDeclarationTemplate(TAUserInfo userInfo, int declarationTemplateId, InputStream fileData) {
         try {
             // Проверки перед выполнением импорта + блокировка макета
@@ -769,7 +776,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public void deleteJrxmlReports(TAUserInfo userInfo, int declarationTemplateId) {
         declarationDataService.cleanBlobs(
                 getDataIdsThatUseJrxml(declarationTemplateId, userInfo),

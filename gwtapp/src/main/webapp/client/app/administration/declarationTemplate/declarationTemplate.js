@@ -17,7 +17,7 @@
             '$logPanel', '$dialogs', 'APP_CONSTANTS', 'BlobDataResource', 'Upload', '$window',
             function ($scope, $filter, $stateParams, DeclarationTemplateResource, $logPanel, $dialogs,
                       APP_CONSTANTS, BlobDataResource, Upload, $window) {
-                $scope.declarationTemplate = {formType: {}};
+                $scope.declarationTemplate = {id: $stateParams.declarationTemplateId, formType: {}};
 
                 // Загружаем данные по макету
                 function loadTemplate() {
@@ -131,7 +131,7 @@
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {
-                            if(response.data && response.data.uuid) {
+                            if (response.data && response.data.uuid) {
                                 $logPanel.open('log-panel-container', response.data.uuid);
                                 if (response.data.success) {
                                     $dialogs.messageDialog({

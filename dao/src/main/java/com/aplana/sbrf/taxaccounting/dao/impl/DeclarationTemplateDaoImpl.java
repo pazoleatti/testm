@@ -140,6 +140,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		}
 	}
 
+    @Override
+    public SecuredEntity getSecuredEntity(long id) {
+        return get((int) id);
+    }
+
     private String getActiveVersionSql(){
             return "with templatesByVersion as (Select ID, DECLARATION_TYPE_ID, STATUS, VERSION, row_number() " +
                 (isSupportOver() ? "over(partition by DECLARATION_TYPE_ID order by version)" : "over()") +

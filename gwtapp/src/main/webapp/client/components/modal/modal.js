@@ -118,6 +118,8 @@ angular.module('aplana.modal', ['aplana.utils'])
                     backdrop: modal.backdrop,
                     keyboard: modal.keyboard
                 });
+                modal.scope.index = openedWindows.length() - 1;
+                var openedWindow = openedWindows.top();
 
                 var body = $document.find('body').eq(0), currBackdropIndex = backdropIndex();
 
@@ -170,11 +172,10 @@ angular.module('aplana.modal', ['aplana.utils'])
                 $http.get(AplanaUtils.templatePath + 'modal/window.html', {cache: $templateCache}).then(function (result) {
                     var angularDomEl = angular.element(result.data);
                     angularDomEl.attr('window-class', modal.windowClass);
-                    modal.scope.index = openedWindows.length() - 1;
                     angularDomEl.append(modal.content);
 
                     var modalDomEl = $compile(angularDomEl)(modal.scope);
-                    openedWindows.top().value.modalDomEl = modalDomEl;
+                    openedWindow.value.modalDomEl = modalDomEl;
                     body.append(modalDomEl);
 
                     if (currBackdropIndex >= 0 && !backdropDomEl) {

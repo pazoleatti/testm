@@ -14,12 +14,14 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -47,7 +49,7 @@ public class DeclarationTemplateController {
      */
     @GetMapping(value = "/rest/declarationType", params = "projection=declarationTypeJournal")
     public List<DeclarationType> fetchDeclarationTypes() {
-        return declarationTypeService.fetchAll();
+        return declarationTypeService.fetchAll(securityService.currentUserInfo());
     }
 
     /**
@@ -63,7 +65,7 @@ public class DeclarationTemplateController {
      */
     @GetMapping(value = "/rest/declarationTemplate/{typeId}", params = "projection=allByTypeId")
     public List<DeclarationTemplate> fetchDeclarationTemplatesByTypeId(@PathVariable int typeId) {
-        return declarationTemplateService.fetchAllByType(typeId);
+        return declarationTemplateService.fetchAllByType(typeId, securityService.currentUserInfo());
     }
 
     /**
@@ -99,6 +101,16 @@ public class DeclarationTemplateController {
     public UpdateTemplateStatusResult updateStatus(@RequestBody UpdateTemplateStatusAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationTemplateService.updateStatus(action, userInfo);
+    }
+
+    /**
+     * Загрузка xsd макета
+     */
+    @PostMapping(value = "/actions/declarationTemplate/uploadXsd", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
+    public String uploadXsd(@RequestParam int declarationTemplateId, @RequestParam("uploader") MultipartFile file) throws IOException {
+        try (InputStream inputStream = file.getInputStream()) {
+            return declarationTemplateService.uploadXsd(declarationTemplateId, inputStream, file.getOriginalFilename());
+        }
     }
 
     /**

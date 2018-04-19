@@ -17,8 +17,8 @@
                 if (file) {
                     $scope.deleteNewXsd();
                     Upload.upload({
-                        url: 'controller/actions/blobData/uploadFile',
-                        data: {uploader: file}
+                        url: 'controller/actions/declarationTemplate/uploadXsd',
+                        data: {declarationTemplateId: $scope.declarationTemplate.id, uploader: file}
                     }).progress(function (e) {
                     }).then(function (response) {
                         var uuid = response.data;

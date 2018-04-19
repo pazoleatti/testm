@@ -727,7 +727,7 @@
 
         "declarationTemplate.error.yearFromUndefined": "Не задан год начала действия макета.",
         "declarationTemplate.error.badYears": "Дата окончания не может быть меньше даты начала актуализации.",
-        "declarationTemplate.error.nameUndefined": "Дата окончания не может быть меньше даты начала актуализации.",
+        "declarationTemplate.error.nameUndefined": "Введите имя налоговой формы.",
 
         "declarationTemplate.tabs.info": "Основная информация",
         "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
