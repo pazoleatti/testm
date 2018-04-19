@@ -174,4 +174,17 @@
             <where>id=6</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-10" author="ytrofimov">
+        <addColumn tableName="ASYNC_TASK">
+            <column name="TASK_GROUP" type="number(3)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-11" author="ytrofimov">
+        <sql>
+            COMMENT ON COLUMN ASYNC_TASK.TASK_GROUP IS 'Группа асинхронной задачи';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

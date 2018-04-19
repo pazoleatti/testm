@@ -126,7 +126,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public AsyncTaskData addTask(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode, Map<String, Object> params) {
+    public AsyncTaskData addTask(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode, AsyncTaskGroup taskGroup, Map<String, Object> params) {
         byte[] serializedParams;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -143,8 +143,8 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
 
         long id = dbUtils.getNextIds(DBUtils.Sequence.ASYNC_TASK, 1).get(0);
 
-        getJdbcTemplate().update("insert into async_task (id, type_id, user_id, description, queue, priority_node, serialized_params) values (?, ?, ?, ?, ?, ?, ?)",
-                id, taskTypeId, userId, substring(description, 0, 400), queue.getId(), priorityNode, serializedParams);
+        getJdbcTemplate().update("insert into async_task (id, type_id, user_id, description, queue, priority_node, task_group, serialized_params) values (?, ?, ?, ?, ?, ?, ?, ?)",
+                id, taskTypeId, userId, substring(description, 0, 400), queue.getId(), priorityNode, taskGroup != null ? taskGroup.getId() : null, serializedParams);
         return getTaskData(id);
     }
 
@@ -156,8 +156,9 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         params.addValue("maxTasksPerNode", maxTasksPerNode);
         params.addValue("queue", queue.getId());
         return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = (select id from (" +
-                        "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) order by create_date" +
-                        ") where rownum = 1)",
+                        "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) " +
+                        "and (task_group is null or (task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null))) order by create_date) " +
+                        "where rownum = 1)",
                 params);
     }
 

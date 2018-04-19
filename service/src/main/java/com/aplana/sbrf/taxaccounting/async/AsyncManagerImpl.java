@@ -110,7 +110,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 }
                 // Сохранение в очереди асинхронных задач - запись в БД
                 String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                AsyncTaskData taskData = asyncTaskDao.addTask(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, params);
+                AsyncTaskData taskData = asyncTaskDao.addTask(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
                 lockDataService.bindTask(lockKey, taskData.getId());
 
                 LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
@@ -387,6 +387,21 @@ public class AsyncManagerImpl implements AsyncManager {
             //Все параметры должны быть сериализуемы
             if (!Serializable.class.isAssignableFrom(param.getValue().getClass())) {
                 throw new AsyncTaskSerializationException("Attribute \"" + param.getKey() + "\" doesn't support serialization!");
+            }
+        }
+    }
+
+    /**
+     * Фабрика группы асинхронной задачи по типу асинхронной задачи
+     */
+    public static class AsyncTaskGroupFactory {
+        public static AsyncTaskGroup getTaskGroup(AsyncTaskType taskType) {
+            switch (taskType) {
+                case IDENTIFY_PERSON:
+                case IMPORT_REF_BOOK_XML:
+                    return AsyncTaskGroup.REF_BOOK_PERSON;
+                default:
+                    return null;
             }
         }
     }
