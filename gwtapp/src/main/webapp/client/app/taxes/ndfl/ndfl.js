@@ -72,11 +72,10 @@
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
             '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
-            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload', 'UpdatePersonsData',
+            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
-                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload,
-                      UpdatePersonsData) {
+                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -898,9 +897,12 @@
                  * @description Событие которое возникает при нажатии на кнопку "Обновить данные ФЛ"
                  */
                 $scope.updatePersonsData = function () {
-                    UpdatePersonsData.query({declarationDataId: $stateParams.declarationDataId}, {}, function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
+                    $http({
+                        method: "GET",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/updatePersonsData",
+                    }).then(function (response) {
+                        if (response.data && response.data !== null) {
+                            $logPanel.open('log-panel-container', response.data);
                             initPage();
                         }
                     });

@@ -3589,7 +3589,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).UPDATE_PERSONS_DATA)")
-    public String initUpdatePersonsData(Long declarationDataId, TAUserInfo userInfo) {
+    public String createUpdatePersonsDataTask(Long declarationDataId, TAUserInfo userInfo) {
         Logger logger = new Logger();
         if (ndflPersonService.getNdflPersonCount(declarationDataId) > 0) {
             LockData lockData = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, UPDATE_PERSONS_DATA));

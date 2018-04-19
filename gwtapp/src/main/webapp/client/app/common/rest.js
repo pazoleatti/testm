@@ -364,16 +364,6 @@
         }])
 
         /**
-         * @description Обновление данных ФЛ КНФ
-         */
-        .factory('UpdatePersonsData', ['$resource', function ($resource) {
-            return $resource('controller/rest/declarationData/:declarationDataId/update', {declarationDataId: '@declarationDataId'}, {
-                query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
-
-
-        /**
          * @description Ресурс на настройки справочников
          */
         .factory('RefBookConfResource', ['$resource', function ($resource) {

@@ -360,7 +360,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPerson> fetchRefBookPersons(Long declarationDataId) {
-        return ndflPersonDao.fetchRefBookPersons(declarationDataId);
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
+        return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(declarationDataId);
     }
 }

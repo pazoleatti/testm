@@ -2,12 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
@@ -22,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -786,13 +783,9 @@ public class DeclarationDataController {
      * @param declarationDataId иднтификатор формы данные которые обновляются
      * @return строка с uuid уведомлений об обновлении данных ФЛ КНФ
      */
-    @GetMapping(value = "/rest/declarationData/{declarationDataId}/update", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = "/actions/declarationData/{declarationDataId}/updatePersonsData", produces = MediaType.TEXT_HTML_VALUE)
     public String updatePersonData(@PathVariable long declarationDataId) throws JSONException {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        String result = declarationService.initUpdatePersonsData(declarationDataId, userInfo);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(UuidEnum.UUID.toString(), result);
-        return jsonObject.toString();
-
+        return declarationService.createUpdatePersonsDataTask(declarationDataId, userInfo);
     }
 }
