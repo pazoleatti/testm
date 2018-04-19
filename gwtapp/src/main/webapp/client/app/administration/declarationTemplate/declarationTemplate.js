@@ -87,15 +87,6 @@
                 // Отмена изменений
                 $scope.cancel = function () {
                     loadTemplate();
-                    // Если был загружен новый xsd, то при отмене удаляем его
-                    $scope.deleteNewXsd();
-                };
-
-                // Удаляет загруженный xsd файл, но ещё не привязанный к макету
-                $scope.deleteNewXsd = function () {
-                    if ($scope.declarationTemplate.xsdId && $scope.declarationTemplate.isXsdNew) {
-                        BlobDataResource.delete({uuid: $scope.declarationTemplate.xsdId});
-                    }
                 };
 
                 // Ввод/Вывод из действия

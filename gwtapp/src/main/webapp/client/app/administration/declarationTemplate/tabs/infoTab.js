@@ -15,7 +15,6 @@
 
             $scope.uploadXsdClick = function (file) {
                 if (file) {
-                    $scope.deleteNewXsd();
                     Upload.upload({
                         url: 'controller/actions/declarationTemplate/uploadXsd',
                         data: {declarationTemplateId: $scope.declarationTemplate.id, uploader: file}
@@ -23,7 +22,6 @@
                     }).then(function (response) {
                         var uuid = response.data;
                         if (uuid) {
-                            $scope.declarationTemplate.isXsdNew = true;
                             $scope.declarationTemplate.xsdId = uuid;
                             $dialogs.messageDialog({
                                 content: $filter('translate')('declarationTemplate.message.fileUploaded')
