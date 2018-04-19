@@ -20,3 +20,4 @@ begindata
  39327388-9684-4fd5-a522-c40a21680156|refbook_fias.groovy|templates/data/refbook/fias.groovy|01.01.2016|
  375ba56a-2509-11e7-93ae-92361f002671|refbook_department.groovy|templates/data/refbook/id_doc.groovy|01.01.2016|
  884b9f2e-1678-4d69-9652-b036bba2f728|refbook_department.groovy|templates/data/refbook/person.groovy|01.01.2016|
+ 290d3b24-ba60-408a-b4a7-ec5c0d166efa|person.xsd|templates/data/refbook/person.xsd|18.04.2018|

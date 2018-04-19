@@ -399,31 +399,6 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public String editPeriod(DepartmentReportPeriod departmentReportPeriod, TAUserInfo user) {
-
-        List<Integer> departmentIds = getAvailableDepartments(userService.getCurrentUser(), PeriodService.Operation.EDIT);
-        List<LogEntry> logs = new ArrayList<>();
-
-        DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDepartmentIds(departmentIds);
-        filter.setReportPeriodIds(Collections.singletonList(departmentReportPeriodService.fetchOne(departmentReportPeriod.getId()).getReportPeriod().getId()));
-        List<DeclarationData> declarations = declarationDataSearchService.getDeclarationData(filter, DeclarationDataSearchOrdering.ID, true);
-        for (DeclarationData dd : declarations) {
-            DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            logs.add(new LogEntry(LogLevel.ERROR, "\"" + dt.getType().getName() + "\" в подразделении \"" +
-                    departmentService.getDepartment(dd.getDepartmentId()).getName() + "\" находится в редактируемом периоде!"));
-        }
-
-        if (!declarations.isEmpty()) {
-            return logEntryService.save(logs);
-        } else {
-            return edit(departmentReportPeriod, user);
-        }
-
-
-    }
-
-    @Override
     public ReportPeriodType getPeriodTypeById(Long id) {
         return reportPeriodDao.getReportPeriodTypeById(id);
     }

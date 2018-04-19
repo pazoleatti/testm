@@ -481,7 +481,6 @@
         "reportPeriod.department": "Подразделение",
         "reportPeriod.pils.openPeriod": "Открыть период",
         "reportPeriod.pils.closePeriod": "Закрыть период",
-        "reportPeriod.pils.editPeriod": "Редактировать период",
         "reportPeriod.pils.correctPeriod": "Открыть корректирующий период",
         "reportPeriod.pils.deletePeriod": "Удалить период",
         "reportPeriod.pils.deadline": "Назначить срок сдачи отчетности",
@@ -508,11 +507,8 @@
         "reportPeriod.confirm.openPeriod.reopenPeriod.text": "Выбранный период закрыт. Выполнить переоткрытие?",
         "reportPeriod.confirm.openPeriod.text": "Отменить операцию открытия периода?",
         "reportPeriod.confirm.openPeriod.title": "Отмена операции открытия периода",
-        "reportPeriod.confirm.editPeriod.text": "Отменить операцию редактирования периода?",
-        "reportPeriod.confirm.editPeriod.title": "Отмена операции редактирования периода",
         "reportPeriod.confirm.deadline.title": "Отмена установки срока сдачи отчетности",
         "reportPeriod.confirm.deadline.text": "Вы уверены, что хотите отменить изменения?",
-        "reportPeriod.error.editPeriod.text": "Редактирование периода невозможно!",
         "reportPeriod.error.closePeriod.hasBlocked.text": "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!",
         "reportPeriod.error.deletePeriod.hasLaterCorPeriod.text": "Удаление периода невозможно, т.к. существует более поздний корректирующий период!",
         "reportPeriod.error.deletePeriod.hasCorPeriod.text": "Удаление периода невозможно, т.к. для него существует корректирующий период!",
@@ -526,12 +522,6 @@
         "reportPeriod.error.openCorrectionPeriod.last.text": "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более ранний корректирующий период!",
         "reportPeriod.error.openCorrectionPeriod.before.text": "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. существует более поздний корректирующий период!",
         "reportPeriod.error.openCorrectionPeriod.alreadyOpen.text": "Корректирующий с датой корректировки {{correctDate}} период уже открыт!",
-
-        "reportPeriod.error.editPeriod.alreadyClose.text": "Закрытый период не может быть отредактирован!",
-        "reportPeriod.error.editPeriod.noChange.title": "Редактирование параметров",
-        "reportPeriod.error.editPeriod.noChange.text": "Ни один параметр не был изменен!",
-        "reportPeriod.error.editPeriod.hasCorPeriod.text": "Перед изменением периода необходимо удалить все связанные корректирующие периоды!",
-        "reportPeriod.error.editPeriod.alreadyExist.text": "Указанный период уже заведён в Системе!",
         "reportPeriod.error.deletePeriod.text": "Удаление периода невозможно!",
 
 

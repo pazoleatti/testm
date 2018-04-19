@@ -95,16 +95,6 @@ public interface DepartmentReportPeriodService {
     DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId);
 
     /**
-     * Получение первого некорректирующего отчетного периода подразделения по идентификатору подразделения
-     * и идентификатору отчетного периода
-     *
-     * @param departmentId   идентификатор подразделения
-     * @param reportPeriodId идентификатор отчетного периода
-     * @return объект {@link DepartmentReportPeriod} или null
-     */
-    DepartmentReportPeriod fetchFirst(int departmentId, int reportPeriodId);
-
-    /**
      * Проверяет существует ли корректирующий период, атрибут "Период сдачи корректировки" которого содержит большее значение
      *
      * @param departmentId   идентификатор подразделения

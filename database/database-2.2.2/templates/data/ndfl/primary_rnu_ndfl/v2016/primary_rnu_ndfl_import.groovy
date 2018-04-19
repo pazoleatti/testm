@@ -311,7 +311,7 @@ class Import extends AbstractScriptClass {
                             updated = true
                         }
                         if (ndflPerson.birthDay != persistedPerson.birthDay) {
-                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BIRTH_DAY, persistedPerson.birthDay, ndflPerson.birthDay)
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BIRTH_DAY, persistedPerson.birthDay?.format(SharedConstants.DATE_FORMAT), ndflPerson.birthDay?.format(SharedConstants.DATE_FORMAT))
                             persistedPerson.birthDay = ndflPerson.birthDay
                             updated = true
                         }
@@ -1041,42 +1041,40 @@ class Import extends AbstractScriptClass {
     }
 
     boolean isIncomeDatesInPeriod(List<NdflPersonIncome> incomeGroup) {
-        Date incomeAccruedDate = null
-        Date incomePayoutDate = null
-        Date taxDate = null
-        int incomeAccruedRowIndex = 0
-        int incomePayoutRowIndex = 0
-        int taxDateRowIndex = 0
+        Map<Integer, Date> incomeAccruedDateValues = [:]
+        Map<Integer, Date> incomePayoutDateValues = [:]
+        Map<Integer, Date> taxDateValues = [:]
         for (NdflPersonIncome income : incomeGroup) {
             if (income.incomeAccruedDate != null) {
-                incomeAccruedDate = income.incomeAccruedDate
-                incomeAccruedRowIndex = (income as NdflPersonIncomeExt).rowIndex
+                if (!checkIncomeDate(income.incomeAccruedDate)) {
+                    incomeAccruedDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.incomeAccruedDate)
+                } else {
+                    return true
+                }
             }
             if (income.incomePayoutDate != null) {
-                incomePayoutDate = income.incomePayoutDate
-                incomePayoutRowIndex = (income as NdflPersonIncomeExt).rowIndex
+                if (!checkIncomeDate(income.incomePayoutDate)) {
+                    incomePayoutDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.incomePayoutDate)
+                } else {
+                    return true
+                }
             }
             if (income.taxDate != null) {
-                taxDate = income.taxDate
-                taxDateRowIndex = (income as NdflPersonIncomeExt).rowIndex
+                if (!checkIncomeDate(income.taxDate)) {
+                    taxDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.taxDate)
+                } else {
+                    return true
+                }
             }
         }
-        boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
-        boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
-        boolean taxDateCorrect = checkIncomeDate(taxDate)
-        if (incomeAccruedDateCorrect || incomePayoutDateCorrect || taxDateCorrect) {
-            return true
-        } else {
-            if (!incomeAccruedDateCorrect) {
-                logIncomeDatesError(incomeAccruedDate, incomeGroup.get(0), incomeAccruedRowIndex, 26)
-            }
-            if (!incomePayoutDateCorrect) {
-                logIncomeDatesError(incomePayoutDate, incomeGroup.get(0), incomePayoutRowIndex, 27)
-            }
-            if (!taxDateCorrect) {
-                logIncomeDatesError(taxDate, incomeGroup.get(0), taxDateRowIndex, 35)
-            }
-            return false
+        for (Integer rowNumber : incomeAccruedDateValues.keySet()) {
+            logIncomeDatesError(incomeAccruedDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 26)
+        }
+        for (Integer rowNumber : incomePayoutDateValues.keySet()) {
+            logIncomeDatesError(incomePayoutDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 27)
+        }
+        for (Integer rowNumber : taxDateValues.keySet()) {
+            logIncomeDatesError(taxDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 35)
         }
     }
 
@@ -1341,7 +1339,7 @@ class Import extends AbstractScriptClass {
  * @return запись для логгера с сообщением
  */
 
-    LogEntry createUpdateOperationMessage(NdflPerson ndflPerson, String sectionName, Long id, String attrName, String oldValue, String newValue) {
+    LogEntry createUpdateOperationMessage(NdflPerson ndflPerson, String sectionName, Long id, String attrName, Object oldValue, Object newValue) {
         return new LogEntry(LogLevel.INFO, String.format("Изменены данные у ФЛ: (%s %s %s, ИНП: %s, ДУЛ: %s, %s). Раздел %s. Идентификатор строки: %d. Обновлена гр. \"%s\". Старое значение: \"%s\". Новое значение: \"%s\"",
                 ndflPerson.lastName ?: "",
                 ndflPerson.firstName ?: "",
