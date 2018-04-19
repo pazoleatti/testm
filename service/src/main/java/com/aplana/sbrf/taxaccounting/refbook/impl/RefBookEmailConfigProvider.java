@@ -27,6 +27,11 @@ public class RefBookEmailConfigProvider implements RefBookDataProvider {
     RefBookEmailConfigDao dao;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         throw new UnsupportedOperationException();
     }

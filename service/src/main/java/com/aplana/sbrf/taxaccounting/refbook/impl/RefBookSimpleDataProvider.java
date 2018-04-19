@@ -56,6 +56,11 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     private RefBook refBook;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return dao.getRecordsWithVersionInfo(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute, boolean isSortAscending) {
         return dao.getRecords(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);

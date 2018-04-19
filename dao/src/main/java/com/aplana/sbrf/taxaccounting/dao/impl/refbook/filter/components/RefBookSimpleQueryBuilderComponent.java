@@ -186,6 +186,13 @@ public class RefBookSimpleQueryBuilderComponent {
                     "not exists (select 1 from %s r2 where r2.record_id=r.record_id and r2.status != -1 and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by record_id)\n";
 
+    private static final String WITH_VERSION_STATEMENT =
+            "with t as (select max(version) version, record_id from %s r where status = 0 and version <= ?  and\n" +
+                    "not exists (select 1 from %s r2 where r2.record_id=r.record_id and r2.status != -1 and r2.version between r.version + interval '1' day and ?)\n" +
+                    "group by record_id),\n" +
+                    "minNextVersion as (select r.record_id, min(r.version) version from %s r, t cv where r.version > cv.version and r.record_id= cv.record_id and r.status != -1 group by r.record_id),\n" +
+                    "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n";
+
     private String sqlRecordVersions() {
         return "with currentRecord as (select id, record_id, version from %s where id=?),\n" +
                 "recordsByVersion as (select r.ID, r.RECORD_ID, r.VERSION, r.STATUS, row_number() " +
@@ -221,31 +228,37 @@ public class RefBookSimpleQueryBuilderComponent {
      * @param pagingParams    параметры пагинации
      * @param isSortAscending порядок сортировки
      * @param onlyId          флаг указывающий на то что в выборке будет только record_id а не полный список полей
+     * @param withVersionInfo флаг указывающий на то, что в для каждой будет информация по дате начала и окончания действия версии
      * @return
      */
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, Long recordId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
-                                                   String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId) {
-		PreparedStatementData ps = new PreparedStatementData();
-		if (version != null) {
-			ps.appendQuery(String.format(WITH_STATEMENT, refBook.getTableName(), refBook.getTableName()));
-			ps.addParam(version);
-			ps.addParam(version);
-			return psGetRecordsQuery(refBook, ps, true, sortAttribute, filter, pagingParams, isSortAscending, onlyId);
-		} else {
-			if (uniqueRecordId != null) {
-				ps.appendQuery(String.format(sqlRecordVersions(), refBook.getTableName(), refBook.getTableName()));
-				ps.addParam(uniqueRecordId);
-				ps.addParam(VersionedObjectStatus.NORMAL.getId());
-			} else if (recordId != null) {
-				ps.appendQuery(String.format(sqlRecordVersionsByRecordId(), refBook.getTableName(), recordId));
-				ps.addParam(VersionedObjectStatus.NORMAL.getId());
-			} else {
-				ps.appendQuery(String.format(sqlRecordVersionsAll(), refBook.getTableName()));
-				ps.addParam(VersionedObjectStatus.NORMAL.getId());
-			}
-			return psGetRecordsQuery(refBook, ps, false, sortAttribute, filter, pagingParams, isSortAscending, onlyId);
-		}
-	}
+                                                   String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersionInfo) {
+        PreparedStatementData ps = new PreparedStatementData();
+        if (version != null) {
+            if (withVersionInfo) {
+                ps.appendQuery(String.format(WITH_VERSION_STATEMENT, refBook.getTableName(), refBook.getTableName(),
+                        refBook.getTableName(), refBook.getTableName()));
+            } else {
+                ps.appendQuery(String.format(WITH_STATEMENT, refBook.getTableName(), refBook.getTableName()));
+            }
+            ps.addParam(version);
+            ps.addParam(version);
+            return psGetRecordsQuery(refBook, ps, true, sortAttribute, filter, pagingParams, isSortAscending, onlyId, withVersionInfo);
+        } else {
+            if (uniqueRecordId != null) {
+                ps.appendQuery(String.format(sqlRecordVersions(), refBook.getTableName(), refBook.getTableName()));
+                ps.addParam(uniqueRecordId);
+                ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            } else if (recordId != null) {
+                ps.appendQuery(String.format(sqlRecordVersionsByRecordId(), refBook.getTableName(), recordId));
+                ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            } else {
+                ps.appendQuery(String.format(sqlRecordVersionsAll(), refBook.getTableName()));
+                ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            }
+            return psGetRecordsQuery(refBook, ps, false, sortAttribute, filter, pagingParams, isSortAscending, onlyId, withVersionInfo);
+        }
+    }
 
 	/*
      Пример запроса:
@@ -260,50 +273,42 @@ public class RefBookSimpleQueryBuilderComponent {
      WHERE end_version > TO_DATE('01.06.2016', 'dd.mm.yyyy')
 	 */
 
-	/**
-	 * Формирует запрос для выборки версии записей справочника за интервал времени
-	 * @param refBook справочник, для которого формируется запрос
-	 * @param versionFrom начала периода
-	 * @param versionTo конец периода
-	 * @param filter условия фильтрации (<strong>пока не реализовано</strong>)
-	 * @return
-	 */
-	public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
-		PreparedStatementData ps = new PreparedStatementData();
-		ps.appendQuery("SELECT * FROM (SELECT r.id ");
-		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-		ps.appendQuery(", r.record_id ");
-		ps.appendQuery(RefBook.BUSINESS_ID_ALIAS);
-		ps.appendQuery(", r.version ");
-		ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
-		ps.appendQuery(", COALESCE( ");
-		ps.appendQuery("(SELECT MIN(version) FROM ");
-		ps.appendQuery(refBook.getTableName());
-		ps.appendQuery(" w WHERE w.version > r.version AND w.record_id = r.record_id ");
-		ps.appendQuery("AND w.status IN (0, 2)), :maxDate) ");
-		ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
-		// добавляем атрибуты
-		for (RefBookAttribute attribute : refBook.getAttributes()) {
-			if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS) &&
-					!attribute.getAlias().equalsIgnoreCase(RefBook.BUSINESS_ID_ALIAS) &&
-					!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_VERSION_FROM_ALIAS) &&
-					!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_VERSION_TO_ALIAS)) {
-				ps.appendQuery(", r.");
-				ps.appendQuery(attribute.getAlias());
-			}
-		}
-		ps.appendQuery(" FROM ");
-		ps.appendQuery(refBook.getTableName());
-		ps.appendQuery(" r WHERE r.status = 0 AND r.version <= :versionTo) ");
-		ps.appendQuery("WHERE ");
-		ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
-		ps.appendQuery(" > :versionFrom");
+    /**
+     * Формирует запрос для выборки версии записей справочника за интервал времени
+     *
+     * @param refBook     справочник, для которого формируется запрос
+     * @param versionFrom начала периода
+     * @param versionTo   конец периода
+     * @param filter      условия фильтрации (<strong>пока не реализовано</strong>)
+     * @return
+     */
+    public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("SELECT * FROM (SELECT r.id ")
+                .appendQuery(RefBook.RECORD_ID_ALIAS).appendQuery(", r.record_id ")
+                .appendQuery(RefBook.BUSINESS_ID_ALIAS).appendQuery(", r.version ")
+                .appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS).appendQuery(", COALESCE( ")
+                .appendQuery("(SELECT MIN(version) FROM ").appendQuery(refBook.getTableName())
+                .appendQuery(" w WHERE w.version > r.version AND w.record_id = r.record_id ")
+                .appendQuery("AND w.status IN (0, 2)), :maxDate) ").appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+        // добавляем атрибуты
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS) &&
+                    !attribute.getAlias().equalsIgnoreCase(RefBook.BUSINESS_ID_ALIAS) &&
+                    !attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_VERSION_FROM_ALIAS) &&
+                    !attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_VERSION_TO_ALIAS)) {
+                ps.appendQuery(", r.");
+                ps.appendQuery(attribute.getAlias());
+            }
+        }
+        ps.appendQuery(" FROM ").appendQuery(refBook.getTableName()).appendQuery(" r WHERE r.status = 0 AND r.version <= :versionTo) ")
+                .appendQuery("WHERE ").appendQuery(RefBook.RECORD_VERSION_TO_ALIAS).appendQuery(" > :versionFrom");
 
-		ps.addNamedParam("versionFrom", versionFrom);
-		ps.addNamedParam("versionTo", versionTo);
-		Calendar maxDate = Calendar.getInstance();
-		maxDate.set(2099, 11, 31);
-		ps.addNamedParam("maxDate", maxDate.getTime());
+        ps.addNamedParam("versionFrom", versionFrom);
+        ps.addNamedParam("versionTo", versionTo);
+        Calendar maxDate = Calendar.getInstance();
+        maxDate.set(2099, 11, 31);
+        ps.addNamedParam("maxDate", maxDate.getTime());
 
 		/*PreparedStatementData filterPS = new PreparedStatementData();
 		SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -311,23 +316,21 @@ public class RefBookSimpleQueryBuilderComponent {
 		simpleFilterTreeListener.setPs(filterPS);
 
 		Filter.getFilterQuery(filter, simpleFilterTreeListener);*/
-		return ps;
-	}
+        return ps;
+    }
 
-	public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute,
-												   String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId) {
+    public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute,
+                                                   String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersion) {
         ps.appendQuery("SELECT * FROM (");
         if (onlyId) {
-            ps.appendQuery("SELECT ");
-            ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-            ps.appendQuery(" FROM ");
+            ps.appendQuery("SELECT ")
+                    .appendQuery(RefBook.RECORD_ID_ALIAS)
+                    .appendQuery(" FROM ");
         } else {
             ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
         }
 
-        ps.appendQuery("(SELECT frb.id AS ");
-        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-
+        ps.appendQuery("(SELECT frb.id AS ").appendQuery(RefBook.RECORD_ID_ALIAS);
         if (!checkVersion) {
             ps.appendQuery(",  t.version AS ");
             ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
@@ -335,6 +338,9 @@ public class RefBookSimpleQueryBuilderComponent {
 
             ps.appendQuery("  t.versionEnd AS ");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+        } else if (withVersion) {
+            ps.appendQuery(", t.version AS ").appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS)
+                    .appendQuery(", nve.version - interval '1' day AS ").appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -343,9 +349,12 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(attribute.getAlias());
             }
         }
-        ps.appendQuery(" FROM t, ");
-        ps.appendQuery(refBook.getTableName());
-        ps.appendQuery(" frb ");
+        ps.appendQuery(" FROM t, ")
+                .appendQuery(refBook.getTableName())
+                .appendQuery(" frb \n");
+        if (withVersion) {
+            ps.appendQuery("left join nextVersionEnd nve on nve.record_id = frb.record_id \n");
+        }
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -357,8 +366,8 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery(filterPS.getJoinPartsOfQuery());
         }
         if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE (");
-            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(" WHERE (")
+                    .appendQuery(filterPS.getQuery().toString());
             if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
@@ -373,9 +382,9 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
 
         if (sortAttribute != null) {
-            ps.appendQuery(" ORDER BY ");
-            ps.appendQuery("frb." + sortAttribute.getAlias());
-            ps.appendQuery(isSortAscending ? " ASC" : " DESC");
+            ps.appendQuery(" ORDER BY ")
+                    .appendQuery("frb." + sortAttribute.getAlias())
+                    .appendQuery(isSortAscending ? " ASC" : " DESC");
         } else {
             ps.appendQuery(" ORDER BY frb.id");
         }
@@ -407,7 +416,7 @@ public class RefBookSimpleQueryBuilderComponent {
     public PreparedStatementData psGetMatchedRecordsByUniqueAttributes(@NotNull RefBook refBook, Long uniqueRecordId, @NotNull RefBookRecord record,
                                                                        @NotNull Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues) {
         //TODO !!! неправильно, так как групп уникальности может быть несколько
-		List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
+        List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
 
         PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" AS id, ");
         appendNameColumn(sql, uniqueAttributesValues);
@@ -789,7 +798,7 @@ public class RefBookSimpleQueryBuilderComponent {
         StringBuilder builder = sql.getQuery();
         builder.delete(builder.lastIndexOf(",\n"), builder.length());
         sql.append("\nWHERE id = :id");
-		sql.addNamedParam("id", uniqueRecordId);
+        sql.addNamedParam("id", uniqueRecordId);
         return sql;
     }
 

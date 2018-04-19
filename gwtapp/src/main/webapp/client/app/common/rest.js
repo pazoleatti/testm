@@ -357,8 +357,26 @@
         /**
          * @description Список справочников
          */
-        .factory('refBookListResource', ['$resource', function ($resource) {
+        .factory('RefBookListResource', ['$resource', function ($resource) {
             return $resource('controller/rest/refBookList', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Данные справочника
+         */
+        .factory('RefBookResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/:id', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Список записей справочников
+         */
+        .factory('RefBookRecordResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookRecords/:refBookId', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

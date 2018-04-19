@@ -1,3 +1,43 @@
 <div class="flex-column">
-    <h2>TTTTT</h2>
+    <div class="content-header">
+        <h1><a href="index.html#/refbooks/refBookList">{{::'refBooks.title' | translate}}</a> - {{refBook.name}}</h1>
+    </div>
+    <div id="refBookGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id="refBookRecordsGridTop">
+            <!--Панель кнопок -->
+            <div class="button_panel">
+                <div class="btn-toolbar" role="toolbar">
+                    <span data-ng-show="refBook.versioned">
+                        <!-- Выбор даты актуальности -->
+                        <label style="float:left; margin: 5px;" class="control-label">{{::'refBook.version' | translate}}:</label>
+                        <div style="width: 150px;float:left;margin-right: 50px;">
+                            <span data-aplana-datepicker data-ng-model="data.recordVersion"
+                                  data-ng-change="onChangeVersion()"></span>
+                        </div>
+                    </span>
+                    <!-- Создать -->
+                    <button type="button" class="btn btn-default" data-ng-disabled="refBook.readOnly"
+                            data-ng-click="createRecord()">
+                        <span data-translate-once="button.create"></span>
+                    </button>
+                    <!-- Открыть -->
+                    <button type="button" class="btn btn-default" data-ng-disabled="refBookGrid.value.length != 1"
+                            data-ng-click="showRecord()">
+                        <span data-translate-once="button.open"></span>
+                    </button>
+                    <!-- Редактировать -->
+                    <button type="button" class="btn btn-default" data-ng-disabled="refBook.readOnly || refBookGrid.value.length != 1"
+                            data-ng-click="editRecord()">
+                        <span data-translate-once="button.edit"></span>
+                    </button>
+                    <!-- Удалить -->
+                    <button type="button" class="btn btn-default" data-ng-disabled="refBook.readOnly || refBookGrid.value.length == 0"
+                            data-ng-click="deleteRecords()">
+                        <span data-translate-once="button.delete"></span>
+                    </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

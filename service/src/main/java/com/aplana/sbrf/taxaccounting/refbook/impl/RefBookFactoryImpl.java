@@ -473,6 +473,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
+    public RefBookAttribute getAttributeByAlias(long refBookId, String attributeAlias) {
+        return refBookDao.getAttribute(refBookId, attributeAlias);
+    }
+
+    @Override
     public boolean getEventScriptStatus(long refBookId, FormDataEvent event) {
         String script = refBookScriptingService.getScript(refBookId);
         if (script != null && !script.isEmpty()) {

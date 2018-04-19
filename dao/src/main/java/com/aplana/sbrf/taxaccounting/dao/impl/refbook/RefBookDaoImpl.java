@@ -283,6 +283,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
+    public RefBookAttribute getAttribute(Long refBookId, String attributeAlias) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("refBookId", refBookId);
+            params.addValue("attributeAlias", attributeAlias);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
+                            "is_unique, sort_order, format, read_only, max_length " +
+                            "from ref_book_attribute where ref_book_id = :refBookId and alias = :attributeAlias",
+                    params, new RefBookAttributeRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найден атрибут с алиасом = %s для справочника с id = %s" , attributeAlias, refBookId));
+        }
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute, boolean isSortAscending, boolean calcHasChild, Long parentId) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, calcHasChild, parentId);

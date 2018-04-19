@@ -217,6 +217,10 @@
             REFBOOK_EDITING: {
                 IS_READ_ONLY: "Только для чтения",
                 NOT_IS_READ_ONLY: "Редактируемый"
+            },
+            REFBOOK_ALIAS: {
+                RECORD_VERSION_FROM_ALIAS: "record_version_from",
+                RECORD_VERSION_TO_ALIAS: "record_version_to"
             }
         });
 }());
