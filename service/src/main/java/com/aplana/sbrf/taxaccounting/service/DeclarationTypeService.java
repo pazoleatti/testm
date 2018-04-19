@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
@@ -19,7 +20,10 @@ public interface DeclarationTypeService {
 
     void delete(int typeId);
 
-    List<DeclarationType> fetchAll();
+    /**
+     * Возвращяет список типов макетов
+     */
+    List<DeclarationType> fetchAll(TAUserInfo userInfo);
 
     List<DeclarationType> getByFilter(TemplateFilter filter);
 

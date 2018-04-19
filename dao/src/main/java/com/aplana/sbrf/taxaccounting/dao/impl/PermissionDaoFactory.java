@@ -26,6 +26,8 @@ public class PermissionDaoFactory {
     private ReportPeriodDao reportPeriodDao;
     @Autowired
     private TAUserDao userDao;
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
 
     /**
      * Возвращает дао, которое занимается обработкой указанной защищенной сущности
@@ -50,6 +52,9 @@ public class PermissionDaoFactory {
         }
         if (permissionClass.isAssignableFrom(TAUser.class)) {
             return userDao;
+        }
+        if (permissionClass.isAssignableFrom(DeclarationTemplate.class)) {
+            return declarationTemplateDao;
         }
         throw new ServiceException("Не удалось получить дао, соответствующее защищенной сущности: " + permissionClass);
     }

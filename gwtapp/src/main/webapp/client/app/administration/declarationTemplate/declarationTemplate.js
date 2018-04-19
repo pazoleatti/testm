@@ -13,9 +13,11 @@
             });
         }])
 
-        .controller('DeclarationTemplateCtrl', ['$scope', '$filter', '$stateParams', 'DeclarationTemplateResource', '$logPanel', '$dialogs', 'APP_CONSTANTS', 'BlobDataResource',
-            function ($scope, $filter, $stateParams, DeclarationTemplateResource, $logPanel, $dialogs, APP_CONSTANTS, BlobDataResource) {
-                $scope.declarationTemplate = {formType: {}};
+        .controller('DeclarationTemplateCtrl', ['$scope', '$filter', '$stateParams', 'DeclarationTemplateResource',
+            '$logPanel', '$dialogs', 'APP_CONSTANTS', 'BlobDataResource', 'Upload', '$window',
+            function ($scope, $filter, $stateParams, DeclarationTemplateResource, $logPanel, $dialogs,
+                      APP_CONSTANTS, BlobDataResource, Upload, $window) {
+                $scope.declarationTemplate = {id: $stateParams.declarationTemplateId, formType: {}};
 
                 // Загружаем данные по макету
                 function loadTemplate() {
@@ -85,15 +87,6 @@
                 // Отмена изменений
                 $scope.cancel = function () {
                     loadTemplate();
-                    // Если был загружен новый xsd, то при отмене удаляем его
-                    $scope.deleteNewXsd();
-                };
-
-                // Удаляет загруженный xsd файл, но ещё не привязанный к макету
-                $scope.deleteNewXsd = function () {
-                    if ($scope.declarationTemplate.xsdId && $scope.declarationTemplate.isXsdNew) {
-                        BlobDataResource.delete({uuid: $scope.declarationTemplate.xsdId});
-                    }
                 };
 
                 // Ввод/Вывод из действия
@@ -114,6 +107,52 @@
                             }
                         }
                     );
+                };
+
+                // Экспорт содерижмого макета в архив
+                $scope.exportArchive = function () {
+                    $window.location = "controller/rest/declarationTemplate/export/" + $scope.declarationTemplate.id;
+                };
+
+                // Импорт архива в макет
+                $scope.importArchive = function (file) {
+                    if (file) {
+                        Upload.upload({
+                            url: 'controller/rest/declarationTemplate/import/' + $scope.declarationTemplate.id,
+                            data: {uploader: file}
+                        }).progress(function (e) {
+                        }).then(function (response) {
+                            if (response.data && response.data.uuid) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                                if (response.data.success) {
+                                    $dialogs.messageDialog({
+                                        content: $filter('translate')('declarationTemplate.info.importSuccess')
+                                    });
+                                } else {
+                                    $dialogs.confirmDialog({
+                                        content: $filter('translate')('declarationTemplate.confirm.deleteReports'),
+                                        okBtnCaption: $filter('translate')('common.button.yes'),
+                                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                                        okBtnClick: function () {
+                                            DeclarationTemplateResource.delete({
+                                                id: $scope.declarationTemplate.id,
+                                                projection: 'deleteJrxmlReports'
+                                            }, function (data) {
+                                                $dialogs.messageDialog({
+                                                    content: $filter('translate')('declarationTemplate.info.importSuccess')
+                                                });
+                                            });
+                                        },
+                                        cancelBtnClick: function () {
+                                            $dialogs.messageDialog({
+                                                content: $filter('translate')('declarationTemplate.info.importSuccess')
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
                 };
 
                 // Формирует наименование кнопки Ввод/Вывод из действия

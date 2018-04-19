@@ -8,9 +8,6 @@
     <bean id="securityService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService"/>
     </bean>
-    <bean id="declarationTemplateImpexService" class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService"/>
-    </bean>
     <bean id="logEntryService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
     </bean>
@@ -30,10 +27,9 @@
     <bean id="formTemplateController" class="com.aplana.sbrf.taxaccounting.web.mvc.DeclarationTemplateControllerGWT">
         <constructor-arg index="0" ref="securityService"/>
         <constructor-arg index="1" ref="declarationTemplateService"/>
-        <constructor-arg index="2" ref="declarationTemplateImpexService"/>
-        <constructor-arg index="3" ref="mainOperatingService"/>
-        <constructor-arg index="4" ref="blobDataService"/>
-        <constructor-arg index="5" ref="logEntryService"/>
-        <constructor-arg index="6" ref="formTemplateImpexService"/>
+        <constructor-arg index="2" ref="mainOperatingService"/>
+        <constructor-arg index="3" ref="blobDataService"/>
+        <constructor-arg index="4" ref="logEntryService"/>
+        <constructor-arg index="5" ref="formTemplateImpexService"/>
     </bean>
 </beans>

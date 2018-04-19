@@ -86,13 +86,13 @@
                             //jQuery возвращает число, а ангуляр - строку, !== не использовать
                             if (status === '413') {
                                 message = $filter('translate')("common.error.message.constraint.violation.exception");
-                            } else if (status === '403') {
-                                message = $filter('translate')(status);
-                            } else if (status !== '500') {
+                                // ignored?
+                            } else if (status !== '500' && status !== '403') {
                                 message = $filter('translate')(status);
                                 if (addMessage) {
                                     message += addMessage;
                                 }
+                                // ignored?
                             } else {
                                 //noinspection JSUnresolvedVariable
                                 messageType = addMessage.messageType;
@@ -102,7 +102,9 @@
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
                                     }]);
                                 } else {
-                                    if (addMessage.exceptionCause && addMessage.exceptionCause.length > 0) {
+                                    if (status === '403') {
+                                        message = $filter('translate')(status);
+                                    } else if (addMessage.exceptionCause && addMessage.exceptionCause.length > 0) {
                                         //Достаем корневое сообщение из стека исключений
                                         message = addMessage.exceptionCause[0].message;
                                     } else {

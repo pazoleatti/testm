@@ -96,14 +96,6 @@ public class BlobDataController {
     }
 
     /**
-     * Удаляет BlobData
-     */
-    @DeleteMapping(value = "/rest/blobData/{uuid}")
-    public void deleteBlob(@PathVariable String uuid) {
-        blobDataService.delete(uuid);
-    }
-
-    /**
      * Загрузка файла
      *
      * @param file файл

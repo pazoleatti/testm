@@ -11,19 +11,19 @@
 .reset-filter();
 }
 
-.select2-container .select2-choice .select2-arrow {
+.select2-container .select2-arrow {
     border-left: none;
     background: none;
 .reset-filter();
 }
 
-.select2-container .select2-choice .select2-arrow b {
+.select2-container .select2-arrow b {
     background: url(select-arrow-sprite.png) no-repeat 0 0;
     height: 5px;
     margin-top: 10px;
 }
 
-.select2-dropdown-open .select2-choice .select2-arrow b {
+.select2-dropdown-open .select2-arrow b {
     background-position: 0 -5px;
 }
 .select2-dropdown-open .select2-choice {

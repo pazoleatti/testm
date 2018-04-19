@@ -155,7 +155,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
         }
 
         PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(targetClass);
-        SecuredEntity targetDomainObject = permissionDao.getSecuredEntity((Long) targetId);
+        SecuredEntity targetDomainObject = permissionDao.getSecuredEntity(((Number) targetId).longValue());
 
         if (targetDomainObject == null) {
             throw new RuntimeException("Object of type '" + targetType +

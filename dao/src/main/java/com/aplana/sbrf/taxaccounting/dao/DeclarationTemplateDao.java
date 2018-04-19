@@ -9,7 +9,7 @@ import java.util.*;
  *
  * @author dsultanbekov
  */
-public interface DeclarationTemplateDao {
+public interface DeclarationTemplateDao extends PermissionDao {
 
     /**
      * Получить полный список всех деклараций

@@ -58,6 +58,8 @@
         "common.button.formation": "Сформировать",
         "common.button.clear": "Сбросить",
         "common.button.add": "Добавить",
+        "common.button.export": "Экспорт",
+        "common.button.import": "Импорт",
         "common.button.cancel": "Отменить",
         "common.button.f": "Сохранить",
         "common.button.no": "Нет",
@@ -725,7 +727,7 @@
 
         "declarationTemplate.error.yearFromUndefined": "Не задан год начала действия макета.",
         "declarationTemplate.error.badYears": "Дата окончания не может быть меньше даты начала актуализации.",
-        "declarationTemplate.error.nameUndefined": "Дата окончания не может быть меньше даты начала актуализации.",
+        "declarationTemplate.error.nameUndefined": "Введите имя налоговой формы.",
 
         "declarationTemplate.tabs.info": "Основная информация",
         "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
@@ -744,7 +746,19 @@
         "declarationTemplate.tabs.checks.code": "Код",
         "declarationTemplate.tabs.checks.type": "Тип",
         "declarationTemplate.tabs.checks.description": "Описание",
+        "declarationTemplate.info.importSuccess": "Макет успешно обновлен",
+        "declarationTemplate.confirm.deleteReports": "Удалить ранее сформированные отчеты?",
 
+        "refBook.type.LINEAR": "Линейный",
+        "refBook.type.HIERARCHICAL": "Иерархический",
+        "refBookConfList.title": "Список справочников",
+        "refBookConfList.grid.refBookName": "Наименование справочника",
+        "refBookConfList.grid.visible": "Видимость справочника",
+        "refBookConfList.grid.readOnly": "Тип справочника",
+        "refBookConfList.grid.regionality": "Региональность справочника",
+        "refBookConfList.grid.refBookType": "Вид справочника",
+        "refBookConfList.export": "Экспорт скриптов",
+        "refBookConfList.import": "Импорт скриптов",
 
         "configParam.title": "Администрирование - Конфигурационные параметры",
         "configParam.confirm.rejectCreatingConfig.title": "Отмена операции создания параметра",
@@ -841,7 +855,8 @@
         'app.declarationTemplate',
         'app.refBookList',
         'app.linearRefBook',
-        'app.hierRefBook'
+        'app.hierRefBook',
+        'app.refBookConfList'
     ]);
 
     /**

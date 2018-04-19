@@ -342,7 +342,8 @@
         .factory('DeclarationTemplateResource', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationTemplate/:id?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false},
-                querySource: {method: 'GET', isArray: true, cache: false}
+                querySource: {method: 'GET', isArray: true, cache: false},
+                delete: {method: 'DELETE'}
             });
         }])
 
@@ -362,13 +363,23 @@
             });
         }])
 
-
         /**
          * @description Обновление данных ФЛ КНФ
          */
         .factory('UpdatePersonsData', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId/update', {declarationDataId: '@declarationDataId'}, {
                 query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+
+        /**
+         * @description Ресурс на настройки справочников
+         */
+        .factory('RefBookConfResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookConf/:refBookId', {refBookId: '@refBookId'}, {
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
     ;

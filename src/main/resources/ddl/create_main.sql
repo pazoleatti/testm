@@ -125,7 +125,8 @@ create table ref_book (
   read_only           number(1) default 0 not null,
   region_attribute_id number(18, 0),
   table_name          varchar2(100),
-  is_versioned        number(1) default 1 not null
+  is_versioned        number(1) default 1 not null,
+  xsd_id              varchar2(36 byte)
 );
 
 comment on table ref_book is 'Справочник';
@@ -138,6 +139,7 @@ comment on column ref_book.read_only is 'Только для чтения (0 - �
 comment on column ref_book.region_attribute_id is 'При его наличии справочник считается региональным. Указывает на атрибут, по которому определяется принадлежность к региону';
 comment on column ref_book.table_name is 'Название таблицы БД, в которой хранятся данные';
 comment on column ref_book.is_versioned is 'Версионный справочник (0 - нет, 1 - да)';
+comment on column ref_book.xsd_id is 'Идентификатор связанного XSD файла';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id           number(18)           not null,

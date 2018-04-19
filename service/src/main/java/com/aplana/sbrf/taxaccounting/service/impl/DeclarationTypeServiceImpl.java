@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -60,8 +61,8 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
-    public List<DeclarationType> fetchAll() {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public List<DeclarationType> fetchAll(TAUserInfo userInfo) {
         return declarationTypeDao.fetchAll();
     }
 

@@ -135,15 +135,15 @@ public class FormTemplateImpexServiceImpl implements
 
                     List<String> eventScriptNameList = new LinkedList<>();
                     for (DeclarationTemplateEventScript eventScript : template.getEventScripts()) {
-                        tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + eventScript.getEventId() + DeclarationTemplateImpexServiceImpl.SCRIPT_FILE));
-                        eventScriptNameList.add(eventScript.getEventId() + DeclarationTemplateImpexServiceImpl.SCRIPT_FILE);
+                        tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + eventScript.getEventId() + DeclarationTemplateServiceImpl.SCRIPT_FILE));
+                        eventScriptNameList.add(eventScript.getEventId() + DeclarationTemplateServiceImpl.SCRIPT_FILE);
                         tempFile.write(eventScript.getScript().getBytes(ENCODING));
                         tempFile.close();
                     }
                     eventScriptPaths.put(folderTemplateName, eventScriptNameList);
 
                     //
-                    tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + DeclarationTemplateImpexServiceImpl.REPORT_FILE));
+                    tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + DeclarationTemplateServiceImpl.REPORT_FILE));
                     if (template.getJrxmlBlobId() != null) {
 
                         String dtJrxm = declarationTemplateService.getJrxml(template.getId());
@@ -163,9 +163,9 @@ public class FormTemplateImpexServiceImpl implements
             ZipArchiveEntry ze;
             for (String path : paths){
                 // Version
-                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.VERSION_FILE));
+                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateServiceImpl.VERSION_FILE));
                 zipOutputStream.putArchiveEntry(ze);
-                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.VERSION_FILE));
+                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateServiceImpl.VERSION_FILE));
 				try {
 					IOUtils.copy(in, zipOutputStream);
 					zipOutputStream.closeArchiveEntry();
@@ -174,9 +174,9 @@ public class FormTemplateImpexServiceImpl implements
 				}
 
                 // Script
-                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.SCRIPT_FILE));
+                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateServiceImpl.SCRIPT_FILE));
                 zipOutputStream.putArchiveEntry(ze);
-                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.SCRIPT_FILE));
+                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateServiceImpl.SCRIPT_FILE));
 				try {
 					IOUtils.copy(in, zipOutputStream);
 					zipOutputStream.closeArchiveEntry();
@@ -199,9 +199,9 @@ public class FormTemplateImpexServiceImpl implements
                 }
 
                 // JasperTemplate
-                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.REPORT_FILE));
+                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateServiceImpl.REPORT_FILE));
                 zipOutputStream.putArchiveEntry(ze);
-                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.REPORT_FILE));
+                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateServiceImpl.REPORT_FILE));
 				try {
 					IOUtils.copy(in, zipOutputStream);
 					zipOutputStream.closeArchiveEntry();

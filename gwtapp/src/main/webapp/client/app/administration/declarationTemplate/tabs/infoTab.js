@@ -14,21 +14,21 @@
             };
 
             $scope.uploadXsdClick = function (file) {
-                $scope.deleteNewXsd();
-                Upload.upload({
-                    url: 'controller/actions/blobData/uploadFile',
-                    data: {uploader: file}
-                }).progress(function (e) {
-                }).then(function (response) {
-                    var uuid = response.data;
-                    if (uuid) {
-                        $scope.declarationTemplate.isXsdNew = true;
-                        $scope.declarationTemplate.xsdId = uuid;
-                        $dialogs.messageDialog({
-                            content: $filter('translate')('declarationTemplate.message.fileUploaded')
-                        });
-                    }
-                });
+                if (file) {
+                    Upload.upload({
+                        url: 'controller/actions/declarationTemplate/uploadXsd',
+                        data: {declarationTemplateId: $scope.declarationTemplate.id, uploader: file}
+                    }).progress(function (e) {
+                    }).then(function (response) {
+                        var uuid = response.data;
+                        if (uuid) {
+                            $scope.declarationTemplate.xsdId = uuid;
+                            $dialogs.messageDialog({
+                                content: $filter('translate')('declarationTemplate.message.fileUploaded')
+                            });
+                        }
+                    });
+                }
             };
         }]);
 }());

@@ -637,7 +637,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         File xmlFile = createTempFile(blobData.getInputStream());
         String fileName = blobData.getName();
         try {
-            validate(logger, userInfo, xmlFile);
+            RefBook refBook = refBookFactory.get(refBookId);
+            validate(xmlFile, refBook, logger, userInfo);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
                         "Загрузка файла \"%s\" не может быть выполнена. Файл не соответствует xsd-схеме.",
@@ -720,17 +721,17 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     /**
-     * Валидирует указанный xml-файл по xsd схеме с использованием схематрона
-     * @param logger
-     * @param userInfo
-     * @param xmlFile
-     * @return
+     * Валидирует указанный xml-файл по xsd схеме справочника с использованием схематрона
      */
-    private boolean validate(Logger logger, TAUserInfo userInfo, File xmlFile) {
-        return validateXMLService.validate(userInfo, logger, true,
-                xmlFile.getName(), xmlFile,
-                "personData.xsd", this.getClass().getResourceAsStream("/xsd/personData.xsd")
-        );
+    private boolean validate(File xmlFile, RefBook refBook, Logger logger, TAUserInfo userInfo) {
+        if (refBook.getXsdId() != null) {
+            BlobData blobData = blobDataService.get(refBook.getXsdId());
+            return validateXMLService.validate(userInfo, logger, true,
+                    xmlFile.getName(), xmlFile,
+                    "personData.xsd", blobData.getInputStream()
+            );
+        }
+        return true;
     }
 
     private void lockAndImportXml(long refBookId, File xmlFile, String fileName, TAUserInfo userInfo, Logger logger) {

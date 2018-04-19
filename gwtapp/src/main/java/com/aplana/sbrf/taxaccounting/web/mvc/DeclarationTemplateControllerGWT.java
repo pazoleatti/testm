@@ -40,122 +40,20 @@ public class DeclarationTemplateControllerGWT {
 
     private SecurityService securityService;
     private DeclarationTemplateService declarationTemplateService;
-    private DeclarationTemplateImpexService declarationTemplateImpexService;
     private final MainOperatingService mainOperatingService;
     private BlobDataService blobDataService;
     private LogEntryService logEntryService;
     private FormTemplateImpexService formTemplateImpexService;
 
-    public DeclarationTemplateControllerGWT(SecurityService securityService, DeclarationTemplateService declarationTemplateService, DeclarationTemplateImpexService declarationTemplateImpexService,
+    public DeclarationTemplateControllerGWT(SecurityService securityService, DeclarationTemplateService declarationTemplateService,
                                             @Qualifier("declarationTemplateMainOperatingService") MainOperatingService mainOperatingService, BlobDataService blobDataService,
                                             LogEntryService logEntryService, FormTemplateImpexService formTemplateImpexService) {
         this.securityService = securityService;
         this.declarationTemplateService = declarationTemplateService;
-        this.declarationTemplateImpexService = declarationTemplateImpexService;
         this.mainOperatingService = mainOperatingService;
         this.blobDataService = blobDataService;
         this.logEntryService = logEntryService;
         this.formTemplateImpexService = formTemplateImpexService;
-    }
-
-    /**
-     * Выгрузка шаблона декларации
-     *
-     * @param declarationTemplateId идентификатор шаблона декларации
-     * @param req                   запрос
-     * @param resp                  ответ
-     * @throws IOException IOException
-     */
-    @GetMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/download")
-    public void download(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        if (checkRole(resp, securityService.currentUserInfo())) {
-            String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
-            resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
-            resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-            resp.setCharacterEncoding(UTF_8);
-            try {
-                declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
-            } finally {
-                IOUtils.closeQuietly(resp.getOutputStream());
-            }
-        }
-    }
-
-    /**
-     * Загрузка шаблона декларации
-     *
-     * @param file                  файл шаблона декларации
-     * @param declarationTemplateId идентификатор шаблона декларации
-     * @param req                   запрос
-     * @param resp                  ответ
-     * @throws IOException IOException
-     */
-    @PostMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/upload")
-    public void upload(@RequestParam(value = "uploader") MultipartFile file,
-                           @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        if (checkRole(resp, securityService.currentUserInfo())) {
-            if (declarationTemplateId == 0)
-                throw new ServiceException("Сначала сохраните шаблон.");
-
-            TAUserInfo userInfo = securityService.currentUserInfo();
-            declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
-            declarationTemplateService.lock(declarationTemplateId, userInfo);
-
-            try {
-                req.setCharacterEncoding(UTF_8);
-
-                if (file.getSize() == 0)
-                    throw new ServiceException("Архив пустой.");
-                DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
-                        (securityService.currentUserInfo(), declarationTemplateId, file.getInputStream());
-                //http://jira.aplana.com/browse/SBRFACCTAX-12066
-                Logger logger = new Logger();
-                logger.setTaUserInfo(securityService.currentUserInfo());
-
-
-                Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
-
-                if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
-                    mainOperatingService.isInUsed(
-                            declarationTemplateId,
-                            declarationTemplate.getType().getId(),
-                            declarationTemplate.getStatus(),
-                            declarationTemplate.getVersion(),
-                            endDate,
-                            logger);
-                    checkErrors(logger);
-                }
-
-                //Проверка на использоваение jrxml другими декларациями
-                //http://jira.aplana.com/browse/SBRFACCTAX-12066
-                if (
-                        declarationTemplate.getJrxmlBlobId() != null
-                                &&
-                                declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)) {
-                    JSONObject resultUuid = new JSONObject();
-                    String uploadUuid = blobDataService.create(file.getInputStream(), file.getName());
-                    resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
-                    resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
-
-                    resp.getWriter().printf(resultUuid.toString());
-                    return;
-                } else {
-                    mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
-                }
-
-                JSONObject resultUuid = new JSONObject();
-                resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
-                resp.getWriter().printf(resultUuid.toString());
-            } catch (JSONException e) {
-                LOG.error(e);
-                throw new ServiceException("", e);
-            } finally {
-                declarationTemplateService.unlock(declarationTemplateId, userInfo);
-                IOUtils.closeQuietly(file.getInputStream());
-            }
-        }
     }
 
     /**

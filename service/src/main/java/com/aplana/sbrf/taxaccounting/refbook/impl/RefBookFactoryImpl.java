@@ -84,6 +84,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
+    public List<RefBook> fetchAll() {
+        return refBookDao.fetchAll();
+    }
+
+    @Override
     public List<RefBook> getAll(boolean onlyVisible) {
         //TODO: избавиться от лишнего аргумента null (Marat Fayzullin 10.02.2014)
         return onlyVisible ? refBookDao.getAllVisible(null) : refBookDao.getAll(null);

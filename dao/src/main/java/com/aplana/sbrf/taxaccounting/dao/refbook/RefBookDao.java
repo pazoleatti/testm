@@ -40,6 +40,11 @@ public interface RefBookDao {
 	 */
 	RefBook get(@NotNull Long id);
 
+    /**
+     * Возвращяет все справочники
+     */
+    List<RefBook> fetchAll();
+
 	/**
 	 * Загружает список всех справочников
 	 * @return
@@ -508,10 +513,19 @@ public interface RefBookDao {
 
     /**
      * Устанавливает SCRIPT_ID для справочника
+     *
      * @param refBookId идентификатор справочника
-     * @param scriptId идентификатор скрипта
+     * @param scriptId  идентификатор скрипта
      */
-    void setScriptId(Long refBookId, String scriptId);
+    void updateScriptId(Long refBookId, String scriptId);
+
+    /**
+     * Изменяет ид xsd файла
+     *
+     * @param refBookId идентификатор справочника
+     * @param xsdId     идентификатор xsd файла
+     */
+    void updateXsdId(Long refBookId, String xsdId);
 
     /**
      * Возвращает значения атрибутов для указанных записей
@@ -539,7 +553,7 @@ public interface RefBookDao {
      */
     @Deprecated
     void createRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Map<String, RefBookValue>> records);
-    
+
     /**
      * Обновляет значения в справочнике
      * @param refBookId код справочника
@@ -559,7 +573,7 @@ public interface RefBookDao {
      *
      * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#deleteRecordVersions}
      */
-    @Deprecated    
+    @Deprecated
     void deleteRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Long> recordIds);
 
     /**

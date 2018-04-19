@@ -1,28 +1,24 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportDao;
-import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
-import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateAction;
-import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
-import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateAction;
+import com.aplana.sbrf.taxaccounting.model.action.UpdateTemplateStatusAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
+import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,11 +29,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 
@@ -62,6 +64,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s";
     private static final int SUBREPORT_NAME_MAX_VALUE = 1000;
     private static final int SUBREPORT_ALIAS_MAX_VALUE = 128;
+
+    public final static String VERSION_FILE = "version";
+    public final static String SCRIPT_FILE = "script.groovy";
+    public final static String REPORT_FILE = "report.jrxml";
+    public final static String CONTENT_FILE = "content.xml";
+    public final static String XSD = "main.xsd";
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
@@ -96,6 +104,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     MainOperatingService mainOperatingService;
     @Autowired
     private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
+    @Autowired
+    private AsyncManager asyncManager;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -112,6 +122,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
     @Override
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
     public DeclarationTemplate fetchWithScripts(int declarationTemplateId) {
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         List<DeclarationTemplateEventScript> eventScriptList = declarationTemplateEventScriptDao.fetch(declarationTemplateId);
@@ -257,8 +268,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
-    public List<DeclarationTemplate> fetchAllByType(int declarationTypeId) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public List<DeclarationTemplate> fetchAllByType(int declarationTypeId, TAUserInfo userInfo) {
         return declarationTemplateDao.fetchAllByType(declarationTypeId);
     }
 
@@ -582,7 +593,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#action.declarationTemplate.id, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public UpdateTemplateResult update(UpdateTemplateAction action, TAUserInfo userInfo) {
         UpdateTemplateResult result = new UpdateTemplateResult();
         Logger logger = new Logger();
@@ -614,7 +625,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    @PreAuthorize("hasPermission(#action.templateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public UpdateTemplateStatusResult updateStatus(UpdateTemplateStatusAction action, TAUserInfo userInfo) {
         UpdateTemplateStatusResult result = new UpdateTemplateStatusResult();
         Logger logger = new Logger();
@@ -626,5 +637,252 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
         return result;
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
+    public String uploadXsd(int declarationTemplateId, InputStream inputStream, String fileName) {
+        return blobDataService.create(inputStream, fileName);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
+    public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
+        try {
+            ZipOutputStream zos = new ZipOutputStream(os);
+            DeclarationTemplate dt = get(id);
+            dt.setCreateScript(getDeclarationTemplateScript(id));
+
+            // Version
+            ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
+            /*zos.putNextEntry(ze);
+			zos.write("1.0".getBytes());
+			zos.closeEntry();*/
+
+            // Структура формы
+            ze = new ZipEntry(CONTENT_FILE);
+            zos.putNextEntry(ze);
+            DeclarationTemplateContent dtc = new DeclarationTemplateContent();
+            dtc.fillDeclarationTemplateContent(dt);
+            for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
+                if (declarationSubreportContent.getBlobDataId() != null) {
+                    declarationSubreportContent.setFileName(blobDataService.get(declarationSubreportContent.getBlobDataId()).getName());
+                }
+            }
+            JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            jaxbMarshaller.marshal(dtc, zos);
+            zos.closeEntry();
+
+            // Основной скрипт
+            String dtScript = dt.getCreateScript();
+            if (dtScript != null) {
+                ze = new ZipEntry(SCRIPT_FILE);
+                zos.putNextEntry(ze);
+                zos.write(dtScript.getBytes(ENCODING));
+                zos.closeEntry();
+            }
+
+            // Скрипты событий
+            for (DeclarationTemplateEventScript eventScript : dt.getEventScripts()) {
+                ze = new ZipEntry(eventScript.getEventId() + "_" + SCRIPT_FILE);
+                zos.putNextEntry(ze);
+                zos.write(eventScript.getScript().getBytes(ENCODING));
+                zos.closeEntry();
+            }
+
+            // JRXML-файл
+            putBlobIntoZip(REPORT_FILE, dt.getJrxmlBlobId(), zos);
+
+            // JRXML-файлы спецотчетов
+            for (DeclarationSubreport subreport : dt.getSubreports()) {
+                putBlobIntoZip(subreport.getBlobDataId(), zos);
+            }
+
+            // XSD-файлы
+            putBlobIntoZip(XSD, dt.getXsdId(), zos);
+            for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
+                putBlobIntoZip(file.getBlobDataId(), zos);
+            }
+
+            zos.finish();
+        } catch (Exception e) {
+            throw new ServiceException("Не удалось экспортировать шаблон", e);
+        }
+    }
+
+    /**
+     * Добавляет содержимое блоба в архив
+     * @param fileName имя файла, которое будет ему присвоено в архиве. Если null - присваивается имя из блоба
+     * @param blobId идентификатор блоба из БД
+     * @param zos поток записи в архив
+     * @throws IOException
+     */
+    private void putBlobIntoZip(String fileName, String blobId, ZipOutputStream zos) throws IOException {
+        if (blobId != null) {
+            BlobData blob = blobDataService.get(blobId);
+            if (blob != null) {
+                ZipEntry ze = new ZipEntry(fileName != null ? fileName : blob.getName());
+                zos.putNextEntry(ze);
+                IOUtils.copy(blob.getInputStream(), zos);
+                zos.closeEntry();
+            }
+        }
+    }
+
+    private void putBlobIntoZip(String blobId, ZipOutputStream zos) throws IOException {
+        putBlobIntoZip(null, blobId, zos);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
+    public ActionResult importDeclarationTemplate(TAUserInfo userInfo, int declarationTemplateId, InputStream fileData) {
+        try {
+            // Проверки перед выполнением импорта + блокировка макета
+            checkLockedByAnotherUser(declarationTemplateId, userInfo);
+            lock(declarationTemplateId, userInfo);
+
+            Logger logger = new Logger();
+            DeclarationTemplate declarationTemplate = doImportDeclarationTemplate(declarationTemplateId, fileData);
+            Date endDate = getDTEndDate(declarationTemplateId);
+
+            if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
+                // Проверка использования макета в формах
+                mainOperatingService.isInUsed(
+                        declarationTemplateId,
+                        declarationTemplate.getType().getId(),
+                        declarationTemplate.getStatus(),
+                        declarationTemplate.getVersion(),
+                        endDate,
+                        logger);
+
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException("Не пройдена проверка использования макета", logEntryService.save(logger.getEntries()));
+                }
+            }
+
+            ActionResult result = new ActionResult();
+            // Если найдены созданные отчеты - требуется запрос подтверждения для их удаления
+            result.setSuccess(declarationTemplate.getJrxmlBlobId() == null || !checkExistingDataJrxml(declarationTemplateId, logger));
+            // Сохраняем изменения в любом случае
+            mainOperatingService.edit(declarationTemplate, endDate, logger, userInfo);
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        } finally {
+            unlock(declarationTemplateId, userInfo);
+            IOUtils.closeQuietly(fileData);
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
+    public void deleteJrxmlReports(TAUserInfo userInfo, int declarationTemplateId) {
+        declarationDataService.cleanBlobs(
+                getDataIdsThatUseJrxml(declarationTemplateId, userInfo),
+                Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
+        for (Long id : getLockDataIdsThatUseJrxml(declarationTemplateId)){
+            String keyPDF = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.PDF_DEC);
+            String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.EXCEL_DEC);
+            asyncManager.interruptTask(keyPDF, userInfo, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
+            asyncManager.interruptTask(keyEXCEL, userInfo, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
+        }
+        deleteJrxml(declarationTemplateId);
+    }
+
+    /**
+     * Выполняет непосредственно импорт файла в макет
+     * @param declarationTemplateId идентификатор макета
+     * @param data содержимое архива
+     * @return
+     */
+    private DeclarationTemplate doImportDeclarationTemplate(int declarationTemplateId, InputStream data) {
+        try {
+            ZipInputStream zis = new ZipInputStream(data);
+            ZipEntry entry;
+            DeclarationTemplate dt = SerializationUtils.clone(get(declarationTemplateId));
+            dt.setXsdId(null);
+            dt.setJrxmlBlobId(null);
+            dt.setCreateScript("");
+            dt.setSubreports(new ArrayList<DeclarationSubreport>());
+            dt.setEventScripts(new LinkedList<DeclarationTemplateEventScript>());
+            Map<String, byte[]> subreports = new HashMap<>();
+            DeclarationTemplateContent dtc = null;
+
+            while ((entry = zis.getNextEntry()) != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                if (entry.getSize() == 0) {
+                    throw new ServiceException("Файл " + entry.getName() + " не должен быть пуст");
+                }
+                if (entry.getName().endsWith(".groovy")) {
+                    if (entry.getName().equals(SCRIPT_FILE)) {
+                        // Основной скрипт
+                        IOUtils.copy(zis, baos);
+                        dt.setCreateScript(new String(baos.toByteArray(), 0, baos.toByteArray().length, Charset.forName("UTF-8")));
+                    } else {
+                        // Скрипт события
+                        int eventId = Integer.parseInt(entry.getName().split("_")[0]);
+                        DeclarationTemplateEventScript dtes = new DeclarationTemplateEventScript();
+                        dtes.setDeclarationTemplateId(declarationTemplateId);
+                        dtes.setEventId(eventId);
+                        IOUtils.copy(zis, baos);
+                        dtes.setScript(new String(baos.toByteArray(), 0, baos.toByteArray().length, Charset.forName("UTF-8")));
+                        dt.getEventScripts().add(dtes);
+                    }
+                } else if (entry.getName().endsWith(".jrxml")) {
+                    if (entry.getName().equals(REPORT_FILE)) {
+                        // Основной JRXML-файл
+                        IOUtils.copy(zis, baos);
+                        String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                        dt.setJrxmlBlobId(uuid);
+                    } else {
+                        // JRXML-файл спецотчета - сохраняем для дальнейшей обработки
+                        baos = new ByteArrayOutputStream();
+                        IOUtils.copy(zis, baos);
+                        subreports.put(entry.getName(), baos.toByteArray());
+                    }
+                } else if (entry.getName().endsWith(".xsd")) {
+                    if (entry.getName().equals(XSD)) {
+                        // Основной XSD-файл
+                        IOUtils.copy(zis, baos);
+                        String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                        dt.setXsdId(uuid);
+                    } else {
+                        // Другие прикрепленные XSD-файлы
+                        for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
+                            if (file.getFileName().equals(entry.getName())) {
+                                IOUtils.copy(zis, baos);
+                                String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                                file.setBlobDataId(uuid);
+                            }
+                        }
+                    }
+                } else if (entry.getName().equals(CONTENT_FILE)) {
+                    IOUtils.copy(zis, baos);
+                    JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+                    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                    dtc = (DeclarationTemplateContent) jaxbUnmarshaller.unmarshal(
+                            new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), ENCODING));
+                }
+            }
+            if (dtc != null) {
+                // Изменяем шаблоны спецотчетов
+                if (dtc.getSubreports() != null) {
+                    for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
+                        if (declarationSubreportContent.getFileName() != null && subreports.containsKey(declarationSubreportContent.getFileName())) {
+                            String uuid = blobDataService.create(
+                                    new ByteArrayInputStream(subreports.get(declarationSubreportContent.getFileName())), declarationSubreportContent.getFileName());
+                            declarationSubreportContent.setBlobDataId(uuid);
+                        }
+                    }
+                } else {
+                    dtc.setSubreports(new ArrayList<DeclarationSubreportContent>());
+                }
+                dtc.fillDeclarationTemplate(dt);
+            }
+            return dt;
+        } catch (Exception e) {
+            throw new ServiceException("Не удалось импортировать шаблон", e);
+        }
     }
 }

@@ -2463,6 +2463,7 @@
                 "<ul class='select2-choices'>",
                 "  <li class='select2-search-field'>",
                 "    <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
+                "    <span class='select2-arrow'><b></b></span>",
                 "  </li>",
                 "</ul>",
                 "<div class='select2-drop select2-drop-multi select2-display-none'>",
