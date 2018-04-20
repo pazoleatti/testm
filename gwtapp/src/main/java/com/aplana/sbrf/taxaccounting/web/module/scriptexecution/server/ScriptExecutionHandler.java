@@ -38,7 +38,7 @@ public class ScriptExecutionHandler extends AbstractActionHandler<ScriptExecutio
     public ScriptExecutionResult execute(ScriptExecutionAction action, ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
 
-        scriptExecutionService.executeScript(securityService.currentUserInfo(), action.getScript(), logger);
+        //scriptExecutionService.executeScript(securityService.currentUserInfo(), action.getScript(), logger);
 
         ScriptExecutionResult result = new ScriptExecutionResult();
         result.setUuid(logEntryService.save(logger.getEntries()));

@@ -10,6 +10,7 @@
         'ng.deviceDetector',
         'app.notifications',
         'app.uploadTransportData',
+        'app.scriptExecution',
         'app.commonParams',
         'app.formatters',
         'app.constants',

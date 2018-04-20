@@ -608,8 +608,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
     public static final class UpdatePersonsDataPermission extends DeclarationDataPermission {
 
-        public final static String OPERATION_NAME = "Обновление данных ФЛ в КНФ";
-
         public UpdatePersonsDataPermission(long mask) {
             super(mask);
         }

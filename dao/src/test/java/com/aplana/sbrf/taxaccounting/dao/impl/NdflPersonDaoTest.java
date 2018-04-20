@@ -29,7 +29,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.AssertTrue;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1043,7 +1042,7 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFetchRefBookPersons() {
-        List<NdflPerson> result = ndflPersonDao.fetchRefBookPersons(1L);
+        List<NdflPerson> result = ndflPersonDao.fetchRefBookPersonsAsNdflPerson(1L);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("Федор", result.get(0).getFirstName());
     }

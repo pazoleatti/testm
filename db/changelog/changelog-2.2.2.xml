@@ -430,4 +430,33 @@
             <where>id=904</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-10" author="ytrofimov">
+        <addColumn tableName="ASYNC_TASK">
+            <column name="TASK_GROUP" type="number(3)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-11" author="ytrofimov">
+        <sql>
+            COMMENT ON COLUMN ASYNC_TASK.TASK_GROUP IS 'Группа асинхронной задачи';
+        </sql>
+    </changeSet>
+
+	<changeSet id="2.2.2-ytrofimov-12" author="ytrofimov">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script"
+					valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+			<where>id=15</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2.2.2-ytrofimov-13" author="ytrofimov">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script"
+					valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+			<where>id=14</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>

@@ -856,9 +856,9 @@ class Import extends AbstractScriptClass {
         personIncome.paymentNumber = row.cell(44).toString(20)
         personIncome.taxSumm = row.cell(45).toLong(20)
         personIncome.id = importId
-        if (operationsGrouped.containsKey(personIncome.operationId)) {
+        if (personIncome.operationId != null && operationsGrouped.containsKey(personIncome.operationId)) {
             operationsGrouped.get(personIncome.operationId).add(personIncome)
-        } else {
+        } else if (personIncome.operationId != null) {
             operationsGrouped.put(personIncome.operationId, [personIncome])
         }
         return personIncome
@@ -881,9 +881,9 @@ class Import extends AbstractScriptClass {
         personDeduction.periodCurrDate = row.cell(58).toDate()
         personDeduction.periodCurrSumm = row.cell(59).toBigDecimal(20, 2)
         personDeduction.id = importId
-        if (operationsGrouped.containsKey(personDeduction.operationId)) {
+        if (personDeduction.operationId != null && operationsGrouped.containsKey(personDeduction.operationId)) {
             operationsGrouped.get(personDeduction.operationId).add(personDeduction)
-        } else {
+        } else if (personDeduction.operationId != null){
             operationsGrouped.put(personDeduction.operationId, [personDeduction])
         }
         return personDeduction
@@ -897,9 +897,9 @@ class Import extends AbstractScriptClass {
         personPrepayment.notifDate = row.cell(63).toDate()
         personPrepayment.notifSource = row.cell(64).toString(4)
         personPrepayment.id = importId
-        if (operationsGrouped.containsKey(personPrepayment.operationId)) {
+        if (personPrepayment.operationId != null && operationsGrouped.containsKey(personPrepayment.operationId)) {
             operationsGrouped.get(personPrepayment.operationId).add(personPrepayment)
-        } else {
+        } else if (personPrepayment.operationId != null) {
             operationsGrouped.put(personPrepayment.operationId, [personPrepayment])
         }
         return personPrepayment
@@ -1208,7 +1208,7 @@ class Import extends AbstractScriptClass {
 
     void logOperationIdError(String columnNumber, String columnName, String fio, String inp, String operationId, Integer fileRowNum) {
         logger.error("Ошибка при загрузке файла \"${fileName}\". В столбце ${columnNumber} \"${columnName}\" указано некорректное значение.")
-        logger.error("Для ФЛ (ФИО: \"${fio}\", ИНП: \"${inp}\") указан \"ID операции\": \"${operationId}\" в строке № ${fileRowNum} , который не указан в столбце №23 \"ID операции\" ни для одной строки файла по ФЛ")
+        logger.error("Для ФЛ (ФИО: \"${fio}\", ИНП: \"${inp}\") указан \"ID операции\": \"${operationId ?: ""}\" в строке № ${fileRowNum} , который не указан в столбце №23 \"ID операции\" ни для одной строки файла по ФЛ")
     }
 
     void updatePersonsRowNum(List<NdflPerson> persons) {

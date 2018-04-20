@@ -85,7 +85,7 @@ class UpdatePersonsData extends AbstractScriptClass {
 
     void doUpdate() {
         List<NdflPerson> declarationDataPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(declarationData.id)
+        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersons(declarationData.id)
         List<NdflPerson> toUpdatePersons = []
         List<LogEntry> logs = []
         Map<Long, NdflPerson> personIdAssociatedRefBookPersons = [:]
@@ -99,7 +99,7 @@ class UpdatePersonsData extends AbstractScriptClass {
                 continue
             }
             if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null && hasDul(refBookPerson.personId)) {
-                logger.info("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1",
+                logger.info("Система формирует уведомление: «Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1».",
                         (declarationDataPerson.lastName ?: "") + " " + (declarationDataPerson.firstName ?: "") + " " + (declarationDataPerson.middleName ?: ""),
                         declarationDataPerson.inp)
                 continue

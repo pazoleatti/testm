@@ -89,9 +89,7 @@ class GeneratorXml {
                 destFilePath = destFilePath.substring(destFilePath.lastIndexOf("\\") + 1, destFilePath.length() - 4);
             }
 
-            int existingInfoPartsCount = countInfoParts(sourceFile);
-            int generateTFCount = countTF != 0 && countTF > existingInfoPartsCount ? countTF - existingInfoPartsCount : 0;
-            printStream.println("Generated new objects count = " + generateTFCount);
+            printStream.println("Generated new objects count = " + countTF);
 
             XMLStreamReader reader = inputFactory.createXMLStreamReader(new FileInputStream(sourceFile), ENCODING);
             XMLStreamWriter writer = outputFactory.createXMLStreamWriter(new FileOutputStream(destFile), ENCODING);
@@ -120,70 +118,77 @@ class GeneratorXml {
                         if (EMPTY_TAGS.contains(elementName) || NOT_EMPTY_TAGS.contains(elementName)) {
                             emptyElements.push(EMPTY_TAGS.contains(elementName));
 
-                            if (elementName.equals(TAG_SERVICE_PART)) {
-                                attributes.put(ATTR_ID_FILE, destFilePath);
-                            } else if (elementName.equals(TAG_INFO_PART)) {
-                                if (!infoPartStructCreated) {
-                                    infoPart = new InfoPartTag(attributes);
-                                    infoPartStructCreated = true;
-                                }
-                            } else if (elementName.equals(TAG_INCOME)) {
-                                if (infoPartStructCreated) {
-                                    infoPart.setIncomeTagAttributes(attributes);
-                                } else {
-                                    throw new RuntimeException("Error while processing tag " + TAG_INCOME + ". Tag not found: " + TAG_INFO_PART);
-                                }
-                            } else if (elementName.equals(TAG_OPER_INFO)) {
-                                if (infoPartStructCreated) {
-                                    lastOperationInfoTag = new OperationInfoTag(attributes);
-                                    infoPart.addOperationInfoTag(lastOperationInfoTag);
-                                } else {
-                                    throw new RuntimeException("Error while processing tag " + TAG_OPER_INFO + ". Tag not found: " + TAG_INFO_PART);
-                                }
-                            } else if (elementName.equals(TAG_INCOME_TAX)) {
-                                if (infoPartStructCreated) {
-                                    if (lastOperationInfoTag != null) {
-                                        lastOperationInfoTag.addIncomeTaxInfoTagAttributes(attributes);
-                                    } else {
-                                        throw new RuntimeException("Error while processing tag " + TAG_INCOME_TAX + ". Tag not found: " + TAG_OPER_INFO);
+                            switch (elementName) {
+                                case TAG_SERVICE_PART:
+                                    attributes.put(ATTR_ID_FILE, destFilePath);
+                                    break;
+                                case TAG_INFO_PART:
+                                    if (!infoPartStructCreated) {
+                                        infoPart = new InfoPartTag(attributes);
+                                        infoPartStructCreated = true;
                                     }
-                                } else {
-                                    throw new RuntimeException("Error while processing tag " + TAG_INCOME_TAX + ". Tag not found: " + TAG_INFO_PART);
-                                }
-                            } else if (elementName.equals(TAG_DEDUCTION)) {
-                                if (infoPartStructCreated) {
-                                    if (lastOperationInfoTag != null) {
-                                        lastOperationInfoTag.addDeductionInfoTagAttributes(attributes);
+                                    break;
+                                case TAG_INCOME:
+                                    if (infoPartStructCreated) {
+                                        infoPart.setIncomeTagAttributes(attributes);
                                     } else {
-                                        throw new RuntimeException("Error while processing tag " + TAG_DEDUCTION + ". Tag not found: " + TAG_OPER_INFO);
+                                        throw new RuntimeException("Error while processing tag " + TAG_INCOME + ". Tag not found: " + TAG_INFO_PART);
                                     }
-                                } else {
-                                    throw new RuntimeException("Error while processing tag " + TAG_DEDUCTION + ". Tag not found: " + TAG_INFO_PART);
-                                }
-                            } else if (elementName.equals(TAG_PREPAYMENT)) {
-                                if (infoPartStructCreated) {
-                                    if (lastOperationInfoTag != null) {
-                                        lastOperationInfoTag.addPrepaymentInfoTagAttributes(attributes);
+                                    break;
+                                case TAG_OPER_INFO:
+                                    if (infoPartStructCreated) {
+                                        lastOperationInfoTag = new OperationInfoTag(attributes);
+                                        infoPart.addOperationInfoTag(lastOperationInfoTag);
                                     } else {
-                                        throw new RuntimeException("Error while processing tag " + TAG_PREPAYMENT + ". Tag not found: " + TAG_OPER_INFO);
+                                        throw new RuntimeException("Error while processing tag " + TAG_OPER_INFO + ". Tag not found: " + TAG_INFO_PART);
                                     }
-                                } else {
-                                    throw new RuntimeException("Error while processing tag " + TAG_PREPAYMENT + ". Tag not found: " + TAG_INFO_PART);
-                                }
+                                    break;
+                                case TAG_INCOME_TAX:
+                                    if (infoPartStructCreated) {
+                                        if (lastOperationInfoTag != null) {
+                                            lastOperationInfoTag.addIncomeTaxInfoTagAttributes(attributes);
+                                        } else {
+                                            throw new RuntimeException("Error while processing tag " + TAG_INCOME_TAX + ". Tag not found: " + TAG_OPER_INFO);
+                                        }
+                                    } else {
+                                        throw new RuntimeException("Error while processing tag " + TAG_INCOME_TAX + ". Tag not found: " + TAG_INFO_PART);
+                                    }
+                                    break;
+                                case TAG_DEDUCTION:
+                                    if (infoPartStructCreated) {
+                                        if (lastOperationInfoTag != null) {
+                                            lastOperationInfoTag.addDeductionInfoTagAttributes(attributes);
+                                        } else {
+                                            throw new RuntimeException("Error while processing tag " + TAG_DEDUCTION + ". Tag not found: " + TAG_OPER_INFO);
+                                        }
+                                    } else {
+                                        throw new RuntimeException("Error while processing tag " + TAG_DEDUCTION + ". Tag not found: " + TAG_INFO_PART);
+                                    }
+                                    break;
+                                case TAG_PREPAYMENT:
+                                    if (infoPartStructCreated) {
+                                        if (lastOperationInfoTag != null) {
+                                            lastOperationInfoTag.addPrepaymentInfoTagAttributes(attributes);
+                                        } else {
+                                            throw new RuntimeException("Error while processing tag " + TAG_PREPAYMENT + ". Tag not found: " + TAG_OPER_INFO);
+                                        }
+                                    } else {
+                                        throw new RuntimeException("Error while processing tag " + TAG_PREPAYMENT + ". Tag not found: " + TAG_INFO_PART);
+                                    }
+                                    break;
                             }
 
-                            writeElement(writer, elementName, emptyElements.size() - 1, emptyElements.peek(), attributes, namespaces);
+                            if(elementName.equals(TAG_FILE) || elementName.equals(TAG_SERVICE_PART)) {
+                                writeElement(writer, elementName, emptyElements.size() - 1, emptyElements.peek(), attributes, namespaces);
+                            }
                         }
 
                         break;
                     }
                     case XMLStreamConstants.END_ELEMENT: {
-                        if (!emptyElements.peek()) {
-                            writeEndElement(writer, emptyElements.size() - 1);
-                        }
                         emptyElements.pop();
                         if (reader.getLocalName().equals(TAG_INFO_PART) && !generationPerformed) {
-                            generateInfoPart(infoPart, writer, random, emptyElements.size(), generateTFCount);
+                            generateInfoPart(infoPart, writer, random, emptyElements.size(), countTF);
                             generationPerformed = true;
                         }
                         break;

@@ -1,7 +1,7 @@
 @ECHO OFF
 REM ����� ��������� ��� � ������ ��������� ����� � ����� ���� ������
 REM ������: user_name/password@host:port/service_name
-SET AUTH=ndfl_psi_test2/ndfl_psi_test2@sbrf_un
+SET AUTH=ndfl/ndfl@sbrf_un
 REM ����� ��������� ���� � ����� ORACLE_HOME\BIN
 SET ORA_BIN=D:\app\client\RNurgaleev\product\12.1.0\client_1\BIN
 SET LOG_DIR=_logs
@@ -19,6 +19,12 @@ DEL /s /q /f %BAD_DIR%\*.*
 
 ECHO ## load ref_book_ndfl
 "%ORA_BIN%\sqlplus" %AUTH% @"load_ref_book_ndfl.sql" %LOG_DIR%/load_ref_book_ndfl.txt %ORA_BIN% %AUTH% %LOG_DIR% %BAD_DIR% %LOG_DIR%/null_values.csv %LOG_DIR%/not_unique_kpp_oktmo_tax.csv
+
+ECHO ## ddl
+"%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt"
+
+ECHO ## dml
+"%ORA_BIN%\sqlplus" %AUTH% @"update_dml.sql" > "%LOG_DIR%/update_dml.txt"
 
 ECHO ## dml: templates
 "%ORA_BIN%\sqlplus" %AUTH% @"templates.sql" %LOG_DIR%/templates.txt %ORA_BIN% %AUTH% %LOG_DIR% %BAD_DIR%

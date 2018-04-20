@@ -9,35 +9,31 @@ import org.springframework.security.core.userdetails.User;
 
 @Configurable
 public abstract class DepartmentReportPeriodPermission extends AbstractPermission<DepartmentReportPeriod>{
-    /**
-     * Право на редактирование периодов
-     */
-    public static final Permission<DepartmentReportPeriod> EDIT = new EditPermission(1 << 0);
 
     /**
      * Право на открытие периодов
      */
-    public static final Permission<DepartmentReportPeriod> OPEN = new OpenPermission(1 << 1);
+    public static final Permission<DepartmentReportPeriod> OPEN = new OpenPermission(1 << 0);
 
     /**
      * Право на удаление периодов
      */
-    public static final Permission<DepartmentReportPeriod> DELETE = new DeletePermission(1 << 2);
+    public static final Permission<DepartmentReportPeriod> DELETE = new DeletePermission(1 << 1);
 
     /**
      * Право на закрытие периодов
      */
-    public static final Permission<DepartmentReportPeriod> CLOSE = new ClosePermission(1 << 3);
+    public static final Permission<DepartmentReportPeriod> CLOSE = new ClosePermission(1 << 2);
 
     /**
      * Право на окткрытие корректирующего периода
      */
-    public static final Permission<DepartmentReportPeriod> OPEN_CORRECT = new OpenCorrectPermission(1 << 4);
+    public static final Permission<DepartmentReportPeriod> OPEN_CORRECT = new OpenCorrectPermission(1 << 3);
 
     /**
      * Право на назначение срока сдачи периода
      */
-    public static final Permission<DepartmentReportPeriod> DEADLINE = new DeadlinePermission(1 << 5);
+    public static final Permission<DepartmentReportPeriod> DEADLINE = new DeadlinePermission(1 << 4);
 
     /**
      * Создает новое право по заданной битовой маске.
@@ -46,21 +42,6 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
      */
     public DepartmentReportPeriodPermission(long mask) {
         super(mask);
-    }
-
-    /**
-     * Право на редактирование периода
-     */
-    public static final class EditPermission extends DepartmentReportPeriodPermission {
-
-        public EditPermission(long mask) {
-            super(mask);
-        }
-
-        @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
-            return targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
-        }
     }
 
     /**

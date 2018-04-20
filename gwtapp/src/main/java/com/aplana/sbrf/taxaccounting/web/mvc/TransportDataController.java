@@ -33,7 +33,6 @@ public class TransportDataController {
         this.loadRefBookDataService = loadRefBookDataService;
     }
 
-
     /**
      * Загрузка ТФ
      *

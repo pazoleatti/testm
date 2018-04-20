@@ -852,7 +852,7 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе
      * @return                  uuid уведомлений
      */
-    String initUpdatePersonsData(Long declarationDataId, TAUserInfo userInfo);
+    String createUpdatePersonsDataTask(Long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Запускает бизнес-логику по обновлению данных ФЛ в КНФ
