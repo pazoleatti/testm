@@ -64,6 +64,7 @@
         "common.button.f": "Сохранить",
         "common.button.no": "Нет",
         "common.button.yes": "Да",
+        "common.button.upload": "Загрузить файл",
         "button.create": "Создать",
         "button.check": "Проверить",
         "button.edit.row": "Редактировать строку",
@@ -785,7 +786,11 @@
 
         "refBooks.refBooksList.title": "НСИ - Список справочников",
         "refBrefBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
-        "refBrefBooks.refBooksList.columnHeader.refBookType": "Тип справочника"
+        "refBrefBooks.refBooksList.columnHeader.refBookType": "Тип справочника",
+
+        "scriptExecution.title": "Выполнение скриптов",
+        "scriptExecution.button.execute": "Выполнить скрипт",
+        "scriptExecution.label.upload": "Выберите архив со скриптом для загрузки"
     };
     /**
      * @description Основной модуль приложения

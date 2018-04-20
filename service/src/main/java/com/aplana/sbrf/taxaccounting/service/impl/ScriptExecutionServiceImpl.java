@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -19,16 +20,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -63,31 +64,57 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     private RefBookFactory refBookFactory;
 
     @Override
-    public void executeScript(TAUserInfo userInfo, String script, Logger logger) {
-		if (!canExecuteScript(script, null)) {
-			logger.warn("Скрипт не может быть выполнен, так как он не содержит кода");
-			return;
-		}
-        // Биндим параметры для выполнения скрипта
-        Bindings b = getScriptEngine().createBindings();
-        Map<String, ?> scriptComponents =  getScriptExposedBeans();
-        for (Object component : scriptComponents.values()) {
-            ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-            scriptComponentContext.setUserInfo(userInfo);
-            if (component instanceof ScriptComponentContextHolder){
-                ((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    public ActionResult executeScript(TAUserInfo userInfo, String script) {
+        ActionResult result = new ActionResult();
+        Logger logger = new Logger();
+
+		if (canExecuteScript(script, null)) {
+            // Биндим параметры для выполнения скрипта
+            Bindings b = getScriptEngine().createBindings();
+            Map<String, ?> scriptComponents =  getScriptExposedBeans();
+            for (Object component : scriptComponents.values()) {
+                ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                scriptComponentContext.setUserInfo(userInfo);
+                if (component instanceof ScriptComponentContextHolder){
+                    ((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
+                }
             }
+            b.putAll(scriptComponents);
+            b.put("logger", logger);
+            b.put("user", userInfo.getUser());
+
+            executeScript(b, script, logger);
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Произошли ошибки при выполнении скрипта", logEntryService.save(logger.getEntries()));
+            } else {
+                logger.info("Скрипт успешно выполнен");
+            }
+            result.setSuccess(true);
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+		} else {
+            throw new ServiceException("Скрипт не может быть выполнен, так как он не содержит кода");
         }
-        b.putAll(scriptComponents);
-        b.put("logger", logger);
-        b.put("user", userInfo.getUser());
+    }
 
-        executeScript(b, script, logger);
-
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Найдены ошибки при выполнении расчета формы", logEntryService.save(logger.getEntries()));
-        } else {
-            logger.info("Скрипт успешно выполнен");
+    @Override
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
+    public String extractScript(InputStream scriptArchive) {
+        ZipInputStream zis = new ZipInputStream(scriptArchive);
+        ZipEntry entry;
+        try {
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().endsWith(".groovy")) {
+                    return IOUtils.toString(zis, "UTF-8");
+                }
+            }
+            throw new ServiceException("Архив не содержит .groovy файлов");
+        } catch (IOException e) {
+            throw new ServiceException("Не удалось извлечь скрипт из архива", e);
+        } finally {
+            IOUtils.closeQuietly(zis);
         }
     }
 

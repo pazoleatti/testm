@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="client/components/splitter/splitter.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2-bootstrap.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/codemirror.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/select2.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/app-select2.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/tooltip/ndflTooltip.css?v=${buildUuid}">
@@ -25,8 +26,7 @@
     <link rel="stylesheet" type="text/css" href="client/css/style.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/grid/ui.jqgrid.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/grid/app-ui.jqgrid.css?v=${buildUuid}">
-
-
+    <style>.CodeMirror {border-top: 1px solid #500; border-bottom: 1px solid #500;}</style>
 </head>
 <body>
 <div class="cbr-page">
@@ -71,6 +71,8 @@
 <script src="client/lib/angular-resource-1.4.7.js"></script>
 <script src="client/lib/date.format.js"></script>
 <script src="client/lib/date-parser.js"></script>
+<script src="client/lib/codemirror.js?v=${buildUuid}"></script>
+<script src="client/lib/groovy.js?v=${buildUuid}"></script>
 
 <script type="text/javascript">
     moment.locale('ru');
@@ -166,6 +168,7 @@
 <script src="client/app/administration/refBookConf/refBookConfList.js?v=${buildUuid}"></script>
 <script src="client/app/administration/declarationTemplate/tabs/checksTab.js?v=${buildUuid}"></script>
 <script src="client/app/administration/declarationTemplate/tabs/infoTab.js?v=${buildUuid}"></script>
+<script src="client/app/administration/scriptExecution.js?v=${buildUuid}"></script>
 
 <script src="client/app/common/directives/resizer/resizer.js?v=${buildUuid}"></script>
 <script src="client/app/common/directives/pager/pager.js?v=${buildUuid}"></script>
