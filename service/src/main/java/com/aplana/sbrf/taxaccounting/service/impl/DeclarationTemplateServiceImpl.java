@@ -630,8 +630,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         UpdateTemplateStatusResult result = new UpdateTemplateStatusResult();
         Logger logger = new Logger();
 
-        result.setConfirmNeeded(mainOperatingService.setStatusTemplate(action.getTemplateId(), logger, userInfo, action.isFormsExistWarningConfirmed()));
-        result.setSuccess(result.isConfirmNeeded());
+        result.setSuccess(mainOperatingService.setStatusTemplate(action.getTemplateId(), logger, userInfo, action.isFormsExistWarningConfirmed()));
+        result.setConfirmNeeded(!result.isSuccess());
 
         result.setStatus(get(action.getTemplateId()).getStatus());
         if (!logger.getEntries().isEmpty()) {
