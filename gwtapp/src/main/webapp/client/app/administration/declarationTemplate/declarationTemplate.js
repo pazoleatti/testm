@@ -111,14 +111,14 @@
 
                 // Экспорт содерижмого макета в архив
                 $scope.exportArchive = function () {
-                    $window.location = "controller/rest/declarationTemplate/export/" + $scope.declarationTemplate.id;
+                    $window.location = "controller/rest/declarationTemplate/" + $scope.declarationTemplate.id + "?projection=export";
                 };
 
                 // Импорт архива в макет
                 $scope.importArchive = function (file) {
                     if (file) {
                         Upload.upload({
-                            url: 'controller/rest/declarationTemplate/import/' + $scope.declarationTemplate.id,
+                            url: 'controller/rest/declarationTemplate/' + $scope.declarationTemplate.id + "?projection=import",
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {

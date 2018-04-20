@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -35,7 +36,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
@@ -157,8 +157,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private RefBookAsnuService refBookAsnuService;
     @Autowired
-    private RefBookDepartmentDataService refBookDepartmentDataService;
-    @Autowired
     private NdflPersonService ndflPersonService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
@@ -182,6 +180,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private BasePermissionEvaluator permissionEvaluator;
     @Autowired
     private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -3315,10 +3315,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) throws IOException {
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = File.createTempFile("report", ".dat");
-        try (InputStream inputStream = this.getClass().getResourceAsStream("/template/excel_template_dec.xlsx");
+        try (InputStream inputStream = declarationTemplateDao.getTemplateFileContent(declaration.getDeclarationTemplateId(), DeclarationTemplate.TF_TEMPLATE);
              OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile))) {
             if (inputStream == null) {
                 throw new ServiceException("Файл не найден");

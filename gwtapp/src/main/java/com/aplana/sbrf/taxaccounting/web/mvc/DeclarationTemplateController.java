@@ -120,8 +120,8 @@ public class DeclarationTemplateController {
      * @param resp                  ответ
      * @throws IOException IOException
      */
-    @GetMapping(value = "/rest/declarationTemplate/export/{declarationTemplateId}")
-    public void download(@PathVariable int declarationTemplateId, HttpServletResponse resp)
+    @GetMapping(value = "/rest/declarationTemplate/{declarationTemplateId}", params = "projection=export")
+    public void exportDeclarationTemplate(@PathVariable int declarationTemplateId, HttpServletResponse resp)
             throws IOException {
         String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
         resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
@@ -142,7 +142,7 @@ public class DeclarationTemplateController {
      * @throws IOException IOException
      */
     @ResponseBody
-    @PostMapping(value = "/rest/declarationTemplate/import/{declarationTemplateId}")
+    @PostMapping(value = "/rest/declarationTemplate/{declarationTemplateId}", params = "projection=import")
     public ActionResult importDeclarationTemplate(@RequestParam(value = "uploader") MultipartFile file,
                                                   @PathVariable int declarationTemplateId) throws IOException {
         if (declarationTemplateId == 0)
@@ -157,7 +157,7 @@ public class DeclarationTemplateController {
     /**
      * Удаляет отчеты форм, связанные с jrxml макета
      */
-    @DeleteMapping(value = "/rest/declarationTemplate/{declarationTemplateId}", params = "projection=deleteJrxmlReports")
+    @PostMapping(value = "/rest/declarationTemplate/{declarationTemplateId}", params = "projection=deleteJrxmlReports")
     public void deleteJrxmlReports(@PathVariable int declarationTemplateId) {
         declarationTemplateService.deleteJrxmlReports(securityService.currentUserInfo(), declarationTemplateId);
     }

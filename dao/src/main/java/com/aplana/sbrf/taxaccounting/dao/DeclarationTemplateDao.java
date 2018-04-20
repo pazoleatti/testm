@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -218,7 +219,7 @@ public interface DeclarationTemplateDao extends PermissionDao {
      * @param declarationTemplateId идентификатор макета
      * @param blobDataIds           идентификатор файла
      */
-    void deleteTemplateFile(Long declarationTemplateId, List<String> blobDataIds);
+    void deleteTemplateFile(int declarationTemplateId, List<String> blobDataIds);
 
     /**
      * Добавляет к макету файлы DECLARATION_TEMPLATE_FILE
@@ -226,7 +227,15 @@ public interface DeclarationTemplateDao extends PermissionDao {
      * @param declarationTemplateId идентификатор макета
      * @param blobDataIds           идентификатор файла
      */
-    void createTemplateFile(Long declarationTemplateId, List<String> blobDataIds);
+    void createTemplateFile(int declarationTemplateId, List<String> blobDataIds);
+
+    /**
+     * Получает файл из макета по его имени
+     * @param declarationTemplateId идентификатор макета
+     * @param fileName название файла, приложенного к макету
+     * @return содержимое файла
+     */
+    InputStream getTemplateFileContent(int declarationTemplateId, String fileName);
 
     /**
      * Возвращает признак фатальности проверки внутри формы по ее коду

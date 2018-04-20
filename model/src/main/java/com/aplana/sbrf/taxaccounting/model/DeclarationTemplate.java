@@ -14,6 +14,8 @@ import java.util.List;
  */
 public class DeclarationTemplate extends IdentityObject<Integer> implements SecuredEntity {
     private static final long serialVersionUID = 1L;
+    public static final String TF_TEMPLATE = "excel_template_dec.xlsx";
+
     /**
      * Вид декларации
      */

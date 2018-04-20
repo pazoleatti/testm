@@ -135,7 +135,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
         if (declarationTemplate.getId() == null){
             int declarationTemplateId = declarationTemplateDao.create(declarationTemplate);
-            saveDeclarationTemplateFile((long)declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
+            saveDeclarationTemplateFile(declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
             return declarationTemplateId;
         }
         checkScript(declarationTemplate, new Logger(), userInfo);
@@ -145,11 +145,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             blobDataService.delete(declarationTemplateBase.getXsdId());
         if (declarationTemplate.getJrxmlBlobId() != null && !declarationTemplate.getJrxmlBlobId().equals(declarationTemplateBase.getJrxmlBlobId()))
             blobDataService.delete(declarationTemplateBase.getJrxmlBlobId());
-        saveDeclarationTemplateFile((long) savedId, declarationTemplateBase.getDeclarationTemplateFiles(), declarationTemplate.getDeclarationTemplateFiles());
+        saveDeclarationTemplateFile(savedId, declarationTemplateBase.getDeclarationTemplateFiles(), declarationTemplate.getDeclarationTemplateFiles());
         return savedId;
 	}
 
-	private void saveDeclarationTemplateFile(Long declarationTemplateId, List<DeclarationTemplateFile> oldFiles, List<DeclarationTemplateFile> newFiles) {
+	private void saveDeclarationTemplateFile(int declarationTemplateId, List<DeclarationTemplateFile> oldFiles, List<DeclarationTemplateFile> newFiles) {
         List<String> deleteBlobIds = new ArrayList<String>();
         List<String> createBlobIds = new ArrayList<String>();
 
@@ -701,7 +701,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 putBlobIntoZip(subreport.getBlobDataId(), zos);
             }
 
-            // XSD-файлы
+            // XSD и XLSX файлы
             putBlobIntoZip(XSD, dt.getXsdId(), zos);
             for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
                 putBlobIntoZip(file.getBlobDataId(), zos);
@@ -740,6 +740,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public ActionResult importDeclarationTemplate(TAUserInfo userInfo, int declarationTemplateId, InputStream fileData) {
         try {
+            //TODO: Для макета 100 запрос выполняется слишком долго, прерывается а потом процесс начинается заново. Что за фигня?
             // Проверки перед выполнением импорта + блокировка макета
             checkLockedByAnotherUser(declarationTemplateId, userInfo);
             lock(declarationTemplateId, userInfo);
@@ -848,15 +849,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         IOUtils.copy(zis, baos);
                         String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                         dt.setXsdId(uuid);
-                    } else {
-                        // Другие прикрепленные XSD-файлы
-                        for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
-                            if (file.getFileName().equals(entry.getName())) {
-                                IOUtils.copy(zis, baos);
-                                String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
-                                file.setBlobDataId(uuid);
-                            }
-                        }
                     }
                 } else if (entry.getName().equals(CONTENT_FILE)) {
                     IOUtils.copy(zis, baos);
@@ -864,6 +856,15 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                     dtc = (DeclarationTemplateContent) jaxbUnmarshaller.unmarshal(
                             new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), ENCODING));
+                } else {
+                    // Другие прикрепленные файлы
+                    for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
+                        if (file.getFileName().equals(entry.getName())) {
+                            IOUtils.copy(zis, baos);
+                            String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                            file.setBlobDataId(uuid);
+                        }
+                    }
                 }
             }
             if (dtc != null) {
@@ -884,6 +885,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return dt;
         } catch (Exception e) {
             throw new ServiceException("Не удалось импортировать шаблон", e);
+        } finally {
+            IOUtils.closeQuietly(data);
         }
     }
 }

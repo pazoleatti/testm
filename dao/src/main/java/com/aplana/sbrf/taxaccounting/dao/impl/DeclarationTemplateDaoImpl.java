@@ -28,6 +28,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -628,7 +629,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public void deleteTemplateFile(final Long declarationTemplateId, final List<String> blobDataIds) {
+    public void deleteTemplateFile(final int declarationTemplateId, final List<String> blobDataIds) {
         getJdbcTemplate().batchUpdate("delete from DECLARATION_TEMPLATE_FILE where blob_data_id = ? and declaration_template_id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -646,7 +647,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public void createTemplateFile(final Long declarationTemplateId, final List<String> blobDataIds) {
+    public void createTemplateFile(final int declarationTemplateId, final List<String> blobDataIds) {
         getJdbcTemplate().batchUpdate("insert into DECLARATION_TEMPLATE_FILE(blob_data_id, declaration_template_id) values(?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -661,6 +662,21 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                     }
                 }
         );
+    }
+
+    @Override
+    public InputStream getTemplateFileContent(int declarationTemplateId, String fileName) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTemplateId", declarationTemplateId);
+        params.addValue("fileName", fileName);
+        return getNamedParameterJdbcTemplate().queryForObject("select b.data from declaration_template_file f\n" +
+                "join blob_data b on b.id = f.blob_data_id\n" +
+                "where f.declaration_template_id = :declarationTemplateId and b.name = :fileName", params, new RowMapper<InputStream>() {
+            @Override
+            public InputStream mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getBlob("data").getBinaryStream();
+            }
+        });
     }
 
     @Override

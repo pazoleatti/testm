@@ -310,7 +310,7 @@ public class DeclarationTemplateDaoTest {
 
     @Test
     public void testDeleteTemplateFile() {
-        declarationTemplateDao.createTemplateFile(1L, Arrays.asList("uuid_1", "uuid_2", "uuid_3"));
-        declarationTemplateDao.deleteTemplateFile(1L, Arrays.asList("uuid_1", "uuid_2", "uuid_3"));
+        declarationTemplateDao.createTemplateFile(1, Arrays.asList("uuid_1", "uuid_2", "uuid_3"));
+        declarationTemplateDao.deleteTemplateFile(1, Arrays.asList("uuid_1", "uuid_2", "uuid_3"));
     }
 }

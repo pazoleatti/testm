@@ -343,7 +343,7 @@
             return $resource('controller/rest/declarationTemplate/:id?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false},
                 querySource: {method: 'GET', isArray: true, cache: false},
-                delete: {method: 'DELETE'}
+                delete: {method: 'POST'}
             });
         }])
 

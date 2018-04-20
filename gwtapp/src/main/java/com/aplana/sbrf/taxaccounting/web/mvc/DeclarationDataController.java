@@ -292,7 +292,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/excelTemplate")
     public CreateDeclarationExcelTemplateResult createExcelTemplate(@PathVariable int declarationDataId,
-                                                                    @RequestParam boolean force) throws IOException {
+                                                                    @RequestParam boolean force) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo, force);
     }

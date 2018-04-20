@@ -459,4 +459,34 @@
 		</update>
 	</changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4256 -->
+	<changeSet id="2.2.2-dloshkarev-1" author="dloshkarev">
+		<insert tableName="blob_data">
+			<column name="id" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
+			<column name="name" value="excel_template_dec.xlsx"/>
+			<column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
+			<column name="creation_date" valueDate="2020-04-18"/>
+		</insert>
+	</changeSet>
+	<changeSet id="2.2.2-dloshkarev-2" author="dloshkarev">
+		<insert tableName="blob_data">
+			<column name="id" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
+			<column name="name" value="excel_template_dec.xlsx"/>
+			<column name="data" valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
+			<column name="creation_date" valueDate="2020-04-18"/>
+		</insert>
+	</changeSet>
+	<changeSet id="2.1-dloshkarev-3" author="dloshkarev">
+		<insert tableName="declaration_template_file">
+			<column name="DECLARATION_TEMPLATE_ID" value="100"/>
+			<column name="BLOB_DATA_ID" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
+		</insert>
+	</changeSet>
+	<changeSet id="2.1-dloshkarev-4" author="dloshkarev">
+		<insert tableName="declaration_template_file">
+			<column name="DECLARATION_TEMPLATE_ID" value="101"/>
+			<column name="BLOB_DATA_ID" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
