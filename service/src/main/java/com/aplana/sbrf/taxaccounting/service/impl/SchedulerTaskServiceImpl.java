@@ -36,6 +36,7 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public SchedulerTaskData fetchOne(Long taskId) {
         return schedulerTaskDao.fetchOne(taskId);
     }
@@ -46,6 +47,7 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public PagingResult<TaskSearchResultItem> fetchAllByPaging(PagingParams pagingParams) {
         List<TaskSearchResultItem> records = new ArrayList<>();
 
@@ -80,16 +82,26 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void update(SchedulerTaskData taskData) {
+        performValidateSchedule(taskData.getSchedule());
         schedulerTaskDao.update(taskData);
     }
 
     @Override
     public boolean validateScheduleCronString(String schedule) {
         try {
-            new CronSequenceGenerator(schedule);
+            performValidateSchedule(schedule);
         } catch (IllegalArgumentException e) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Проверяет валидность Cron паттерна посредством создания объекта {@code org.springframework.scheduling.support.CronSequenceGenerator}
+     * @param schedule паттерн Cron - строка из 6 разделенных пробелом элементов: секунда, минута, час, день, месяц, день недели
+     * @throws IllegalArgumentException в случае не валидного формата Cron паттерна
+     */
+    private void performValidateSchedule(String schedule) throws IllegalArgumentException {
+        new CronSequenceGenerator(schedule);
     }
 }
