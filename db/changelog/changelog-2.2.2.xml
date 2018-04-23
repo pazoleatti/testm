@@ -476,17 +476,25 @@
 			<column name="creation_date" valueDate="2020-04-18"/>
 		</insert>
 	</changeSet>
-	<changeSet id="2.1-dloshkarev-3" author="dloshkarev">
+	<changeSet id="2.2.2-dloshkarev-3" author="dloshkarev">
 		<insert tableName="declaration_template_file">
 			<column name="DECLARATION_TEMPLATE_ID" value="100"/>
 			<column name="BLOB_DATA_ID" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
 		</insert>
 	</changeSet>
-	<changeSet id="2.1-dloshkarev-4" author="dloshkarev">
+	<changeSet id="2.2.2-dloshkarev-4" author="dloshkarev">
 		<insert tableName="declaration_template_file">
 			<column name="DECLARATION_TEMPLATE_ID" value="101"/>
 			<column name="BLOB_DATA_ID" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
 		</insert>
+	</changeSet>
+	<changeSet id="2.2.2-dloshkarev-5" author="dloshkarev">
+		<sql>
+			alter table REF_BOOK_ADDRESS modify DISTRICT VARCHAR2(500 CHAR);
+			alter table REF_BOOK_ADDRESS modify CITY VARCHAR2(500 CHAR);
+			alter table REF_BOOK_ADDRESS modify LOCALITY VARCHAR2(500 CHAR);
+			alter table REF_BOOK_ADDRESS modify STREET VARCHAR2(500 CHAR);
+		</sql>
 	</changeSet>
 
 </databaseChangeLog>
