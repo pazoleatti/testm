@@ -163,7 +163,7 @@ public class DepartmentReportPeriodController {
      * @return страница {@link ReportPeriod} или пустой список
      */
     @GetMapping(value = "rest/departmentReportPeriod", params = "projection=closedWithoutCorrection")
-    public JqgridPagedList<ReportPeriod> fetchСlosedWithoutCorrection(@RequestParam Integer departmentId, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<ReportPeriod> fetchClosedWithoutCorrection(@RequestParam Integer departmentId, @RequestParam PagingParams pagingParams) {
         List<ReportPeriod> result = periodService.getCorrectPeriods(departmentId);
         pagingParams.setCount(result.size());
         return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
