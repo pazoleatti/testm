@@ -488,6 +488,8 @@
 			<column name="BLOB_DATA_ID" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
 		</insert>
 	</changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4347 -->
 	<changeSet id="2.2.2-dloshkarev-5" author="dloshkarev">
 		<sql>
 			alter table REF_BOOK_ADDRESS modify DISTRICT VARCHAR2(500 CHAR);
@@ -495,6 +497,12 @@
 			alter table REF_BOOK_ADDRESS modify LOCALITY VARCHAR2(500 CHAR);
 			alter table REF_BOOK_ADDRESS modify STREET VARCHAR2(500 CHAR);
 		</sql>
+	</changeSet>
+	<changeSet id="2.2.2-dloshkarev-6" author="dloshkarev">
+		<update tableName="REF_BOOK_ATTRIBUTE">
+			<column name="MAX_LENGTH" value="500"/>
+			<where>REF_BOOK_ID = 901 and ALIAS in ('DISTRICT', 'CITY', 'LOCALITY', 'STREET')</where>
+		</update>
 	</changeSet>
 
 </databaseChangeLog>
