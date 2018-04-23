@@ -722,6 +722,8 @@
 
         "declarationTemplate.tabs.info": "Основная информация",
         "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
+        "declarationTemplate.tabs.info.activityPeriod.valueFrom": "C 1 января {{yearFrom}} года " ,
+        "declarationTemplate.tabs.info.activityPeriod.valueTo": "по 31 декабря {{yearTo}} года",
         "declarationTemplate.tabs.info.name": "Наименование налоговой формы",
         "declarationTemplate.tabs.info.type": "Тип налоговой формы",
         "declarationTemplate.tabs.info.kind": "Вид налоговой формы",
@@ -731,6 +733,7 @@
         "declarationTemplate.tabs.info.uploadJrxml": "Загрузить jrxml",
         "declarationTemplate.tabs.info.downloadJrxml": "Скачать jrxml",
         "declarationTemplate.tabs.info.deleteJrxml": "Удалить jrxml",
+
 
         "declarationTemplate.tabs.checks": "Проверки",
         "declarationTemplate.tabs.checks.fatality": "Фатальность",
