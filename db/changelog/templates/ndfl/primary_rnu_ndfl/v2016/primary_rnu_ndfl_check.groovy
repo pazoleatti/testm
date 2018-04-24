@@ -1368,7 +1368,7 @@ class Check extends AbstractScriptClass {
                     }
                     CHECK_NDFL_PERSON_INCOMING_TAX_RATE_35:
                     {
-                        if ((presentIncomeCode && presentStatus && presentTaxRate) && (["2740", "3020", "2610"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2")) {
+                        if ((presentIncomeCode && presentStatus && presentTaxRate) && (["2740", "3020", "2610", "3023"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2")) {
                             if (ndflPersonIncome.taxRate == 35) {
                                 checkNdflPersonIncomingTaxRateTotal = true
                             } else {

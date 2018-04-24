@@ -4,8 +4,8 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-	<!--Прежнее значение '01.01.0001' выдает ошибку при импорте схемы-->
-	<changeSet id="2.2.2-rnurgaleev-0" author="rnurgaleev">
+    <!--Прежнее значение '01.01.0001' выдает ошибку при импорте схемы-->
+    <changeSet id="2.2.2-rnurgaleev-0" author="rnurgaleev">
         <sql>
             alter table REF_BOOK_INCOME_KIND modify version date default to_date('01.01.0001','DD.MM.YYYY');
             alter table REPORT_PERIOD_TYPE modify version date default to_date('01.01.0001','DD.MM.YYYY');
@@ -82,8 +82,8 @@
         </update>
     </changeSet>
 
-	<!--https://jira.aplana.com/browse/SBRFNDFL-4137 Печатное представление 6-НДФЛ: в разделе 2 в графе 130 не отображается 00 при целочисленном значении графы-->
-	<changeSet id="2.2.2-rnurgaleev-1" author="rnurgaleev">
+    <!--https://jira.aplana.com/browse/SBRFNDFL-4137 Печатное представление 6-НДФЛ: в разделе 2 в графе 130 не отображается 00 при целочисленном значении графы-->
+    <changeSet id="2.2.2-rnurgaleev-1" author="rnurgaleev">
         <update tableName="BLOB_DATA">
             <column name="data"
                     valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
@@ -133,9 +133,9 @@
             <where>id=100</where>
         </update>
     </changeSet>
-	
-	<!--https://jira.aplana.com/browse/SBRFNDFL-4189 Для РНУ-НДФЛ установить "строгую" xsd-схему-->
-	<changeSet id="2.2.2-rnurgaleev-2" author="rnurgaleev">
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-4189 Для РНУ-НДФЛ установить "строгую" xsd-схему-->
+    <changeSet id="2.2.2-rnurgaleev-2" author="rnurgaleev">
         <update tableName="BLOB_DATA">
             <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd"/>
             <column name="name" value="rnu_ndfl.xsd"/>
@@ -175,237 +175,270 @@
         </update>
     </changeSet>
 
-	<!--https://jira.aplana.com/browse/SBRFNDFL-4236 Реализовать обновление настроек подразделений по новым данным-->
-	<changeSet id="2.2.2-rnurgaleev-3" author="rnurgaleev">
-		<sql>
-			alter table ref_book_ndfl_detail modify row_ord number(9);
+    <!--https://jira.aplana.com/browse/SBRFNDFL-4236 Реализовать обновление настроек подразделений по новым данным-->
+    <changeSet id="2.2.2-rnurgaleev-3" author="rnurgaleev">
+        <sql>
+            alter table ref_book_ndfl_detail modify row_ord number(9);
             create table tmp_depart
-				(code varchar2(4 char),
-				name varchar2(100 char),
-				dep_id number
-				);
-			create table tmp_dep_params
-				(depcode varchar2(100 char) null,
-				inn varchar2(100 char) null,
-				tax_end varchar2(100 char) null,
-				kpp varchar2(100 char) null,
-				place varchar2(100 char) null,
-				titname varchar2(255 char) null,
-				oktmo varchar2(100 char) null,
-				phone varchar2(100 char) null,
-				sign varchar2(100 char) null,
-				surname varchar2(100 char) null,
-				name varchar2(100 char) null,
-				lastname varchar2(100 char) null,
-				docname varchar2(100 char) null,
-				orgname varchar2(100 char) null,
-				reorgcode varchar2(100 char) null,
-				row_num number null,
-				tax_organ_code_mid varchar2(100 char) null,
-				okved number(18) null,
-				region number(18) null,
-				obligation number(18) null,
-				reorg_inn varchar2(12 char) null,
-				reorg_kpp varchar2(9 char) null
-				);
+            (code varchar2(4 char),
+            name varchar2(100 char),
+            dep_id number
+            );
+            create table tmp_dep_params
+            (depcode varchar2(100 char) null,
+            inn varchar2(100 char) null,
+            tax_end varchar2(100 char) null,
+            kpp varchar2(100 char) null,
+            place varchar2(100 char) null,
+            titname varchar2(255 char) null,
+            oktmo varchar2(100 char) null,
+            phone varchar2(100 char) null,
+            sign varchar2(100 char) null,
+            surname varchar2(100 char) null,
+            name varchar2(100 char) null,
+            lastname varchar2(100 char) null,
+            docname varchar2(100 char) null,
+            orgname varchar2(100 char) null,
+            reorgcode varchar2(100 char) null,
+            row_num number null,
+            tax_organ_code_mid varchar2(100 char) null,
+            okved number(18) null,
+            region number(18) null,
+            obligation number(18) null,
+            reorg_inn varchar2(12 char) null,
+            reorg_kpp varchar2(9 char) null
+            );
         </sql>
-	</changeSet>
+    </changeSet>
 
-	<changeSet id="2.2.2-rnurgaleev-4" author="rnurgaleev">
+    <changeSet id="2.2.2-rnurgaleev-4" author="rnurgaleev">
         <sql splitStatements="false">
             begin
-				insert into TMP_DEPART (code, name) values ('ББ', 'Байкальский банк');
-				insert into TMP_DEPART (code, name) values ('ВВБ', 'Волго-Вятский банк');
-				insert into TMP_DEPART (code, name) values ('ДВБ', 'Дальневосточный банк');
-				insert into TMP_DEPART (code, name) values ('ЗСБ', 'Западно-Сибирский банк');
-				insert into TMP_DEPART (code, name) values ('ЗУБ', 'Западно-Уральский банк');
-				insert into TMP_DEPART (code, name) values ('МБ', 'Московский банк');
-				insert into TMP_DEPART (code, name) values ('ПБ', 'Поволжский банк');
-				insert into TMP_DEPART (code, name) values ('СЕВ', 'Северный банк');
-				insert into TMP_DEPART (code, name) values ('СЗБ', 'Северо-Западный банк');
-				insert into TMP_DEPART (code, name) values ('СИБ', 'Сибирский банк');
-				insert into TMP_DEPART (code, name) values ('СРБ', 'Среднерусский банк');
-				insert into TMP_DEPART (code, name) values ('УБ', 'Уральский банк');
-				insert into TMP_DEPART (code, name) values ('ЦА', 'Центральный аппарат ПАО Сбербанк');
-				insert into TMP_DEPART (code, name) values ('ЦЧБ', 'Центрально-Черноземный банк');
-				insert into TMP_DEPART (code, name) values ('ЮЗБ', 'Юго-Западный банк');
+            insert into TMP_DEPART (code, name) values ('ББ', 'Байкальский банк');
+            insert into TMP_DEPART (code, name) values ('ВВБ', 'Волго-Вятский банк');
+            insert into TMP_DEPART (code, name) values ('ДВБ', 'Дальневосточный банк');
+            insert into TMP_DEPART (code, name) values ('ЗСБ', 'Западно-Сибирский банк');
+            insert into TMP_DEPART (code, name) values ('ЗУБ', 'Западно-Уральский банк');
+            insert into TMP_DEPART (code, name) values ('МБ', 'Московский банк');
+            insert into TMP_DEPART (code, name) values ('ПБ', 'Поволжский банк');
+            insert into TMP_DEPART (code, name) values ('СЕВ', 'Северный банк');
+            insert into TMP_DEPART (code, name) values ('СЗБ', 'Северо-Западный банк');
+            insert into TMP_DEPART (code, name) values ('СИБ', 'Сибирский банк');
+            insert into TMP_DEPART (code, name) values ('СРБ', 'Среднерусский банк');
+            insert into TMP_DEPART (code, name) values ('УБ', 'Уральский банк');
+            insert into TMP_DEPART (code, name) values ('ЦА', 'Центральный аппарат ПАО Сбербанк');
+            insert into TMP_DEPART (code, name) values ('ЦЧБ', 'Центрально-Черноземный банк');
+            insert into TMP_DEPART (code, name) values ('ЮЗБ', 'Юго-Западный банк');
 
-				merge into tmp_depart t
-				using (
-				select t.code,t.name,d.id dep_id
-				from tmp_depart t left join department d on (upper(replace(d.name,'ё','е'))=upper(t.name) or
-                                               upper(d.shortname)=upper(t.code))
-				) v
-				on (t.code=v.code)
-				when matched then update set t.dep_id=v.dep_id;
-			end;
+            merge into tmp_depart t
+            using (
+            select t.code,t.name,d.id dep_id
+            from tmp_depart t left join department d on (upper(replace(d.name,'ё','е'))=upper(t.name) or
+            upper(d.shortname)=upper(t.code))
+            ) v
+            on (t.code=v.code)
+            when matched then update set t.dep_id=v.dep_id;
+            end;
         </sql>
     </changeSet>
 
-	<changeSet id="2.2.2-rnurgaleev-5" author="rnurgaleev">
-		<loadData encoding="UTF-8"
-				file="csv/ref_book_ndfl_detail.csv"
-				separator=";"
-				tableName="tmp_dep_params">
-			<column name="depcode" type="string"/>
-			<column name="titname" type="string"/>
-			<column name="kpp" type="string"/>
-			<column name="oktmo" type="string"/>
-			<column name="tax_end" type="string"/>
-			<column name="tax_organ_code_mid" type="string"/>
-			<column name="place" type="string"/>
-			<column name="okved" type="string"/>
-			<column name="region" type="string"/>
-			<column name="phone" type="string"/>
-			<column name="obligation" type="string"/>
-			<column name="reorgcode" type="string"/>
-			<column name="reorg_inn" type="string"/>
-			<column name="reorg_kpp" type="string"/>
-			<column name="sign" type="string"/>
-			<column name="surname" type="string"/>
-			<column name="name" type="string"/>
-			<column name="lastname" type="string"/>
-			<column name="docname" type="string"/>
-			<column name="orgname" type="string"/>
-			<column name="row_num" type="string"/>
-		</loadData>
-	</changeSet>
+    <changeSet id="2.2.2-rnurgaleev-5" author="rnurgaleev">
+        <loadData encoding="UTF-8"
+                  file="csv/ref_book_ndfl_detail.csv"
+                  separator=";"
+                  tableName="tmp_dep_params">
+            <column name="depcode" type="string"/>
+            <column name="titname" type="string"/>
+            <column name="kpp" type="string"/>
+            <column name="oktmo" type="string"/>
+            <column name="tax_end" type="string"/>
+            <column name="tax_organ_code_mid" type="string"/>
+            <column name="place" type="string"/>
+            <column name="okved" type="string"/>
+            <column name="region" type="string"/>
+            <column name="phone" type="string"/>
+            <column name="obligation" type="string"/>
+            <column name="reorgcode" type="string"/>
+            <column name="reorg_inn" type="string"/>
+            <column name="reorg_kpp" type="string"/>
+            <column name="sign" type="string"/>
+            <column name="surname" type="string"/>
+            <column name="name" type="string"/>
+            <column name="lastname" type="string"/>
+            <column name="docname" type="string"/>
+            <column name="orgname" type="string"/>
+            <column name="row_num" type="string"/>
+        </loadData>
+    </changeSet>
 
-	<changeSet id="2.2.2-rnurgaleev-6" author="rnurgaleev">
+    <changeSet id="2.2.2-rnurgaleev-6" author="rnurgaleev">
         <sql splitStatements="false">
-		BEGIN
+            BEGIN
 
-			merge into ref_book_oktmo a using
-			(select '27714000' as code, 'Населенные пункты, входящие в состав Неманского городского округа' as name, 2 as razd, to_date('01.03.2017','dd.mm.yyyy') as version from dual
-			union all
-			select '27703000' as code, 'Населенные пункты, входящие в состав Багратионовского городского округа' as name, 2 as razd, to_date('01.03.2017','dd.mm.yyyy') as version from dual
-			union all
-			select '27718000' as code, 'Населенные пункты, входящие в состав Полесского городского округа' as name, 2 as razd, to_date('01.03.2017','dd.mm.yyyy') as version from dual
-			union all
-			select '49625405' as code, 'Тёсово-Нетыльское' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46729000' as code, 'Зарайск' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46733000' as code, 'Истра' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46744000' as code, 'Красногорск' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46747000' as code, 'Луховицы' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46748000' as code, 'Люберцы' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46750000' as code, 'Наро-Фоминский' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46759000' as code, 'Павловский Посад' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46766000' as code, 'Рузский' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46776000' as code, 'Ступино' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46784000' as code, 'Чехов' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '46786000' as code, 'Шатура' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '28752000' as code, 'Населенные пункты, входящие в состав Осташковского городского округа' as name, 2 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			) b
-			on (a.code=b.code and a.status=0)
-			when not matched then
-				insert (id, record_id, version, status, code, name, razd)
-				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name, b.razd);
+            merge into ref_book_oktmo a using
+            (select '27714000' as code, 'Населенные пункты, входящие в состав Неманского городского округа' as name, 2
+            as razd, to_date('01.03.2017','dd.mm.yyyy') as version from dual
+            union all
+            select '27703000' as code, 'Населенные пункты, входящие в состав Багратионовского городского округа' as
+            name, 2 as razd, to_date('01.03.2017','dd.mm.yyyy') as version from dual
+            union all
+            select '27718000' as code, 'Населенные пункты, входящие в состав Полесского городского округа' as name, 2 as
+            razd, to_date('01.03.2017','dd.mm.yyyy') as version from dual
+            union all
+            select '49625405' as code, 'Тёсово-Нетыльское' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as
+            version from dual
+            union all
+            select '46729000' as code, 'Зарайск' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46733000' as code, 'Истра' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46744000' as code, 'Красногорск' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version
+            from dual
+            union all
+            select '46747000' as code, 'Луховицы' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46748000' as code, 'Люберцы' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46750000' as code, 'Наро-Фоминский' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as
+            version from dual
+            union all
+            select '46759000' as code, 'Павловский Посад' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as
+            version from dual
+            union all
+            select '46766000' as code, 'Рузский' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46776000' as code, 'Ступино' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46784000' as code, 'Чехов' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '46786000' as code, 'Шатура' as name, 1 as razd, to_date('01.03.2018','dd.mm.yyyy') as version from
+            dual
+            union all
+            select '28752000' as code, 'Населенные пункты, входящие в состав Осташковского городского округа' as name, 2
+            as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            ) b
+            on (a.code=b.code and a.status=0)
+            when not matched then
+            insert (id, record_id, version, status, code, name, razd)
+            values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name,
+            b.razd);
 
-			update ref_book_oktmo set name='Неманский (г Неман)', razd=1 where code='27714000' and status=0;
-			update ref_book_oktmo set name='Багратионовский', razd=1 where code='27703000' and status=0;
-			update ref_book_oktmo set name='Полесский (г Полесск)', razd=1 where code='27718000' and status=0;
+            update ref_book_oktmo set name='Неманский (г Неман)', razd=1 where code='27714000' and status=0;
+            update ref_book_oktmo set name='Багратионовский', razd=1 where code='27703000' and status=0;
+            update ref_book_oktmo set name='Полесский (г Полесск)', razd=1 where code='27718000' and status=0;
 
-			merge into ref_book_oktmo a using
-			(select '22739000' as code, 'Перевозский (г Перевоз)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '41648165' as code, 'Фёдоровское (гп Фёдоровское)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07705000' as code, 'Благодарненский (г Благодарный)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07713000' as code, 'Изобильненский (г Изобильный)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07714000' as code, 'Ипатовский (г Ипатово)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07716000' as code, 'Кировский (г Новопавловск)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07725000' as code, 'Нефтекумский (г Нефтекумск)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07731000' as code, 'Петровский (г Светлоград)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07735000' as code, 'Советский (г Зеленокумск)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '41630152' as code, 'Аннинское (гп Новоселье)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '07726000' as code, 'Новоалександровский (г Новоалександровск)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy') as version from dual
-			union all
-			select '26720000' as code, 'город Сунжа (г Сунжа)' as name, 1 as razd, to_date('01.01.2017','dd.mm.yyyy') as version from dual
-			) b
-			on (a.code=b.code and a.status=0)
-			when not matched then
-				insert (id, record_id, version, status, code, name, razd)
-				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name, b.razd);
+            merge into ref_book_oktmo a using
+            (select '22739000' as code, 'Перевозский (г Перевоз)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy')
+            as version from dual
+            union all
+            select '41648165' as code, 'Фёдоровское (гп Фёдоровское)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '07705000' as code, 'Благодарненский (г Благодарный)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '07713000' as code, 'Изобильненский (г Изобильный)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '07714000' as code, 'Ипатовский (г Ипатово)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy')
+            as version from dual
+            union all
+            select '07716000' as code, 'Кировский (г Новопавловск)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '07725000' as code, 'Нефтекумский (г Нефтекумск)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '07731000' as code, 'Петровский (г Светлоград)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '07735000' as code, 'Советский (г Зеленокумск)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '41630152' as code, 'Аннинское (гп Новоселье)' as name, 1 as razd, to_date('01.01.2018','dd.mm.yyyy')
+            as version from dual
+            union all
+            select '07726000' as code, 'Новоалександровский (г Новоалександровск)' as name, 1 as razd,
+            to_date('01.01.2018','dd.mm.yyyy') as version from dual
+            union all
+            select '26720000' as code, 'город Сунжа (г Сунжа)' as name, 1 as razd, to_date('01.01.2017','dd.mm.yyyy') as
+            version from dual
+            ) b
+            on (a.code=b.code and a.status=0)
+            when not matched then
+            insert (id, record_id, version, status, code, name, razd)
+            values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name,
+            b.razd);
 
-		END;
+            END;
         </sql>
     </changeSet>
 
-	<changeSet id="2.2.2-rnurgaleev-7" author="rnurgaleev">
+    <changeSet id="2.2.2-rnurgaleev-7" author="rnurgaleev">
         <sql splitStatements="false">
-			declare
-			  v_version date:=to_date('01.01.2016','dd.mm.yyyy');
-			begin
-				delete from ref_book_ndfl_detail;
-				delete from ref_book_ndfl;
+            declare
+            v_version date:=to_date('01.01.2016','dd.mm.yyyy');
+            begin
+            delete from ref_book_ndfl_detail;
+            delete from ref_book_ndfl;
 
-				for dep in (select depcode,count(*) cnt,max(row_num) last_num
-								from tmp_dep_params
-								group by depcode
-								minus
-								select td.code,count(*) cnt,max(row_ord) last_num
-								from ref_book_ndfl n join department d on (d.id=n.department_id)
-													 join ref_book_ndfl_detail p on (p.ref_book_ndfl_id=n.id)
-													 join tmp_depart td on (td.dep_id=d.id)
-								group by td.code
-								order by 1) loop
+            for dep in (select depcode,count(*) cnt,max(row_num) last_num
+            from tmp_dep_params
+            group by depcode
+            minus
+            select td.code,count(*) cnt,max(row_ord) last_num
+            from ref_book_ndfl n join department d on (d.id=n.department_id)
+            join ref_book_ndfl_detail p on (p.ref_book_ndfl_id=n.id)
+            join tmp_depart td on (td.dep_id=d.id)
+            group by td.code
+            order by 1) loop
 
-				insert into ref_book_ndfl(department_id, version, record_id, status, id)
-				select tab.*,seq_ref_book_record_row_id.nextval,0,seq_ref_book_record.nextval
-				  from (select d.dep_id,
-							   v_version
-						  from tmp_dep_params t join tmp_depart d on (d.code=t.depcode)
-						 where d.dep_id is not null
-						   and t.depcode=dep.depcode
-						group by d.dep_id,t.depcode,t.inn) tab;
-			  end loop;
+            insert into ref_book_ndfl(department_id, version, record_id, status, id)
+            select tab.*,seq_ref_book_record_row_id.nextval,0,seq_ref_book_record.nextval
+            from (select d.dep_id,
+            v_version
+            from tmp_dep_params t join tmp_depart d on (d.code=t.depcode)
+            where d.dep_id is not null
+            and t.depcode=dep.depcode
+            group by d.dep_id,t.depcode,t.inn) tab;
+            end loop;
 
-			  insert into ref_book_ndfl_detail(department_id, id, ref_book_ndfl_id,record_id, version, status, row_ord,
-						  tax_organ_code, kpp, present_place, name, oktmo, phone,
-						  signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, reorg_form_code,
-						  tax_organ_code_mid, okved, region, obligation, reorg_inn, reorg_kpp)
-				select d.dep_id, seq_ref_book_record.nextval,n.id ndfl_id,seq_ref_book_record_row_id.nextval,v_version,0,row_num,
-					   t.tax_end,t.kpp,pp.id place_id,t.titname,
-							  o.mid oktmo_id,t.phone,s.id sign_id,t.surname,t.name,t.lastname,t.docname,t.orgname,ro.id reorg_id,
-						t.tax_organ_code_mid, t.okved, t.region, t.obligation, t.reorg_inn, t.reorg_kpp
-						  from tmp_dep_params t join tmp_depart d on (d.code=t.depcode)
-														 left join ref_book_ndfl n on (n.department_id=d.dep_id and n.version=v_version)
-														 left join ref_book_present_place pp on (pp.code=t.place and pp.status=0)
-														 left join (select code,max(id) mid from ref_book_oktmo group by code) o on (o.code=t.oktmo)
-														 left join ref_book_signatory_mark s on (s.code=t.sign and v_version between s.version and v_version)
-														 left join ref_book_reorganization ro on (ro.code=t.reorgcode and v_version between ro.version and v_version);
+            insert into ref_book_ndfl_detail(department_id, id, ref_book_ndfl_id,record_id, version, status, row_ord,
+            tax_organ_code, kpp, present_place, name, oktmo, phone,
+            signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name,
+            approve_org_name, reorg_form_code,
+            tax_organ_code_mid, okved, region, obligation, reorg_inn, reorg_kpp)
+            select d.dep_id, seq_ref_book_record.nextval,n.id
+            ndfl_id,seq_ref_book_record_row_id.nextval,v_version,0,row_num,
+            t.tax_end,t.kpp,pp.id place_id,t.titname,
+            o.mid oktmo_id,t.phone,s.id sign_id,t.surname,t.name,t.lastname,t.docname,t.orgname,ro.id reorg_id,
+            t.tax_organ_code_mid, t.okved, t.region, t.obligation, t.reorg_inn, t.reorg_kpp
+            from tmp_dep_params t join tmp_depart d on (d.code=t.depcode)
+            left join ref_book_ndfl n on (n.department_id=d.dep_id and n.version=v_version)
+            left join ref_book_present_place pp on (pp.code=t.place and pp.status=0)
+            left join (select code,max(id) mid from ref_book_oktmo group by code) o on (o.code=t.oktmo)
+            left join ref_book_signatory_mark s on (s.code=t.sign and v_version between s.version and v_version)
+            left join ref_book_reorganization ro on (ro.code=t.reorgcode and v_version between ro.version and
+            v_version);
 
-			end;
+            end;
         </sql>
     </changeSet>
 
-	<changeSet id="2.2.2-rnurgaleev-8" author="rnurgaleev">
-		<sql>
-			alter table ref_book_ndfl_detail modify row_ord number(9);
+    <changeSet id="2.2.2-rnurgaleev-8" author="rnurgaleev">
+        <sql>
+            alter table ref_book_ndfl_detail modify row_ord number(9);
             drop table tmp_depart;
-			drop table tmp_dep_params;
+            drop table tmp_dep_params;
         </sql>
-	</changeSet>
+    </changeSet>
 
     <changeSet id="2.2.2-dnovikov-3" author="dnovikov">
         <addColumn tableName="ref_book">
@@ -443,103 +476,115 @@
         </sql>
     </changeSet>
 
-	<changeSet id="2.2.2-ytrofimov-12" author="ytrofimov">
-		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-			<column name="script"
-					valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
-			<where>id=15</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-ytrofimov-12" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+            <where>id=15</where>
+        </update>
+    </changeSet>
 
-	<changeSet id="2.2.2-ytrofimov-13" author="ytrofimov">
-		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-			<column name="script"
-					valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
-			<where>id=14</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-ytrofimov-13" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
 
-	<!-- https://jira.aplana.com/browse/SBRFNDFL-4256 -->
-	<changeSet id="2.2.2-dloshkarev-1" author="dloshkarev">
-		<insert tableName="blob_data">
-			<column name="id" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
-			<column name="name" value="excel_template_dec.xlsx"/>
-			<column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
-			<column name="creation_date" valueDate="2020-04-18"/>
-		</insert>
-	</changeSet>
-	<changeSet id="2.2.2-dloshkarev-2" author="dloshkarev">
-		<insert tableName="blob_data">
-			<column name="id" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
-			<column name="name" value="excel_template_dec.xlsx"/>
-			<column name="data" valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
-			<column name="creation_date" valueDate="2020-04-18"/>
-		</insert>
-	</changeSet>
-	<changeSet id="2.2.2-dloshkarev-3" author="dloshkarev">
-		<insert tableName="declaration_template_file">
-			<column name="DECLARATION_TEMPLATE_ID" value="100"/>
-			<column name="BLOB_DATA_ID" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
-		</insert>
-	</changeSet>
-	<changeSet id="2.2.2-dloshkarev-4" author="dloshkarev">
-		<insert tableName="declaration_template_file">
-			<column name="DECLARATION_TEMPLATE_ID" value="101"/>
-			<column name="BLOB_DATA_ID" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
-		</insert>
-	</changeSet>
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4256 -->
+    <changeSet id="2.2.2-dloshkarev-1" author="dloshkarev">
+        <insert tableName="blob_data">
+            <column name="id" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
+            <column name="name" value="excel_template_dec.xlsx"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
+            <column name="creation_date" valueDate="2020-04-18"/>
+        </insert>
+    </changeSet>
+    <changeSet id="2.2.2-dloshkarev-2" author="dloshkarev">
+        <insert tableName="blob_data">
+            <column name="id" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
+            <column name="name" value="excel_template_dec.xlsx"/>
+            <column name="data" valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
+            <column name="creation_date" valueDate="2020-04-18"/>
+        </insert>
+    </changeSet>
+    <changeSet id="2.2.2-dloshkarev-3" author="dloshkarev">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="100"/>
+            <column name="BLOB_DATA_ID" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
+        </insert>
+    </changeSet>
+    <changeSet id="2.2.2-dloshkarev-4" author="dloshkarev">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="101"/>
+            <column name="BLOB_DATA_ID" value="bfcccac4-7a42-4760-a462-98e2633b2392"/>
+        </insert>
+    </changeSet>
 
-	<!-- https://jira.aplana.com/browse/SBRFNDFL-4347 -->
-	<changeSet id="2.2.2-dloshkarev-5" author="dloshkarev">
-		<sql>
-			alter table REF_BOOK_ADDRESS modify DISTRICT VARCHAR2(500 CHAR);
-			alter table REF_BOOK_ADDRESS modify CITY VARCHAR2(500 CHAR);
-			alter table REF_BOOK_ADDRESS modify LOCALITY VARCHAR2(500 CHAR);
-			alter table REF_BOOK_ADDRESS modify STREET VARCHAR2(500 CHAR);
-		</sql>
-	</changeSet>
-	<changeSet id="2.2.2-dloshkarev-6" author="dloshkarev">
-		<update tableName="REF_BOOK_ATTRIBUTE">
-			<column name="MAX_LENGTH" value="500"/>
-			<where>REF_BOOK_ID = 901 and ALIAS in ('DISTRICT', 'CITY', 'LOCALITY', 'STREET')</where>
-		</update>
-	</changeSet>
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4347 -->
+    <changeSet id="2.2.2-dloshkarev-5" author="dloshkarev">
+        <sql>
+            alter table REF_BOOK_ADDRESS modify DISTRICT VARCHAR2(500 CHAR);
+            alter table REF_BOOK_ADDRESS modify CITY VARCHAR2(500 CHAR);
+            alter table REF_BOOK_ADDRESS modify LOCALITY VARCHAR2(500 CHAR);
+            alter table REF_BOOK_ADDRESS modify STREET VARCHAR2(500 CHAR);
+        </sql>
+    </changeSet>
+    <changeSet id="2.2.2-dloshkarev-6" author="dloshkarev">
+        <update tableName="REF_BOOK_ATTRIBUTE">
+            <column name="MAX_LENGTH" value="500"/>
+            <where>REF_BOOK_ID = 901 and ALIAS in ('DISTRICT', 'CITY', 'LOCALITY', 'STREET')</where>
+        </update>
+    </changeSet>
 
-	<changeSet id="2.2.2-dnovikov-6" author="dnovikov">
-		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
-			<where>id=2</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-dnovikov-6" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
 
-	<changeSet id="2.2.2-dnovikov-7" author="dnovikov">
-		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-			<column name="script"
-					valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
-			<where>id=6</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-dnovikov-7" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
 
-	<changeSet id="2.2.2-dnovikov-8" author="dnovikov">
-		<update tableName="DECLARATION_TEMPLATE">
-			<column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
-			<where>id=100</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-dnovikov-8" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
 
-	<changeSet id="2.2.2-dnovikov-9" author="dnovikov">
-		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
-			<where>id=2</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-dnovikov-9" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
 
-	<changeSet id="2.2.2-dnovikov-10" author="dnovikov">
-		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-			<column name="script"
-					valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
-			<where>id=6</where>
-		</update>
-	</changeSet>
+    <changeSet id="2.2.2-dnovikov-10" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-14" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>
