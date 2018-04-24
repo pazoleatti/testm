@@ -643,14 +643,14 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 throw new ServiceLoggerException(
                         "Загрузка файла \"%s\" не может быть выполнена. Файл не соответствует xsd-схеме.",
                         logEntryService.save(logger.getEntries()),
-                        xmlFile.getName());
+                        fileName);
             }
             lockAndImportXml(refBookId, xmlFile, fileName, userInfo, logger);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
                         "Загрузка файла \"%s\" не может быть выполнена.",
                         logEntryService.save(logger.getEntries()),
-                        xmlFile.getName());
+                        fileName);
             }
         } finally {
             if (xmlFile != null) {
