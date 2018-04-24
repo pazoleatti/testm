@@ -471,6 +471,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
      */
 
     @Test
+    @Ignore
     public void checkDataIncome2Test() {
         initRefBook();
 

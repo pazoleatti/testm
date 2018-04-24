@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
+import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -64,6 +65,14 @@ public interface RefBookDao {
      *               null - все
 	 */
 	List<RefBook> getAllVisible(Integer typeId);
+
+    /**
+     * Возвращяет страницу данных в таблицу справочников из настройщика
+     *
+     * @param pagingParams параметры для пагинации
+     * @return страницу справочников для настройщика
+     */
+    PagingResult<RefBookConfListItem> fetchRefBookConfPage(PagingParams pagingParams);
 
     /**
      * Ищет справочник по коду атрибута
