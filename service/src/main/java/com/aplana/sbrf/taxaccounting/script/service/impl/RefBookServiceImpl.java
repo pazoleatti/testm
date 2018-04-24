@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -17,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
@@ -221,21 +222,14 @@ public class RefBookServiceImpl implements RefBookService {
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
-    public List<RefBookConfListItem> getRefBookConfList() {
-        List<RefBookConfListItem> result = new ArrayList<>();
-
-        List<RefBook> list = refBookFactory.fetchAll();
-        for (RefBook refBook : list) {
-            result.add(new RefBookConfListItem(refBook.getId(), refBook.getName(), RefBookType.get(refBook.getType()),
-                    refBook.isReadOnly(), refBook.isVisible(), refBook.getRegionAttribute() == null ? "Общий" : "Региональный"));
-        }
-        return result;
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public PagingResult<RefBookConfListItem> fetchRefBookConfPage(PagingParams pagingParams, TAUserInfo userInfo) {
+        return refBookDao.fetchRefBookConfPage(pagingParams);
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
-    public String exportRefBookConfs() {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public String exportRefBookConfs(TAUserInfo userInfo) {
         String resultUUID;
         File file = null;
         try {
@@ -273,14 +267,16 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('N_ROLE_CONF')")
-    public String importRefBookConfs(InputStream inputStream, String fileName) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo) {
         Logger logger = new Logger();
 
+        boolean filesExists = false;
         try (ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(inputStream)) {
             ArchiveEntry zipEntry;
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 if (!zipEntry.isDirectory()) {
+                    filesExists = true;
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(zipInputStream));
                     importRefBookConf(byteArrayInputStream, zipEntry.getName(), logger);
                 }
@@ -289,7 +285,11 @@ public class RefBookServiceImpl implements RefBookService {
             throw new ServiceException(e.getMessage(), e);
         }
 
-        logger.logTopMessage(LogLevel.INFO,"Выполнен импорт скриптов и xsd справочников");
+        if (filesExists) {
+            logger.logTopMessage(LogLevel.INFO, "Выполнен импорт скриптов и xsd справочников");
+        } else {
+            logger.logTopMessage(LogLevel.INFO, "Выполнен импорт скриптов и xsd справочников. Загружаемых файлов в архиве не обнаружено.");
+        }
         return logEntryService.save(logger.getEntries());
     }
 
@@ -311,6 +311,7 @@ public class RefBookServiceImpl implements RefBookService {
                         refBookDao.updateScriptId(refBookId, newUuid);
                         logger.info("Добавлен скрипт для справочника \"%s\", взятый из файла \"%s\".", refBook.getName(), fileName);
                     } else if (!IOUtils.contentEquals(inputStream, blobDataService.get(oldUuid).getInputStream())) {
+                        inputStream.reset();
                         blobDataService.save(oldUuid, inputStream);
                         logger.info("Обновлен скрипт для справочника \"%s\", взятый из файла \"%s\".", refBook.getName(), fileName);
                     } else {
@@ -329,16 +330,23 @@ public class RefBookServiceImpl implements RefBookService {
                         refBookDao.updateXsdId(refBookId, newUuid);
                         logger.info("Добавлен xsd для справочника \"%s\", взятый из файла \"%s\".", refBook.getName(), fileName);
                     } else if (!IOUtils.contentEquals(inputStream, blobDataService.get(oldUuid).getInputStream())) {
+                        inputStream.reset();
                         blobDataService.save(oldUuid, inputStream);
                         logger.info("Обновлен xsd для справочника \"%s\", взятый из файла \"%s\".", refBook.getName(), fileName);
                     } else {
                         logger.info("Пропущен xsd для справочника \"%s\", взятый из файла \"%s\", т.к. содержимое файла не отличается от текущего.",
                                 refBook.getName(), fileName);
                     }
+                } else {
+                    logger.warn("Пропущен файл \"%s\". Файлы с расширением \"%s\" не обрабатывается текущей реализацией.",
+                            fileName, getExtension(fileName));
                 }
             } catch (NumberFormatException e) {
-                logger.warn("Не загружен файл \"%s\". Папка, содержащая файл, \"%s\" должна соответствовать ид справочника.", fileName, dirName);
+                logger.warn("Не загружен файл \"%s\". Папка, содержащая файл, \"%s\" должна соответствовать идентификатору справочника.", fileName, dirName);
             }
+        } else {
+            logger.warn("Пропущен файл \"%s\". Загружаемый файл должен лежать в папке с именем, соответствующим идентификатору справочника.",
+                    fileName);
         }
     }
 }

@@ -364,12 +364,11 @@
         }])
 
         /**
-         * @description Ресурс на настройки справочников
+         * @description Настройки справочников
          */
         .factory('RefBookConfResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBookConf/:refBookId', {refBookId: '@refBookId'}, {
-                query: {method: 'GET', isArray: false, cache: false},
-                querySource: {method: 'GET', isArray: true, cache: false}
+            return $resource('controller/rest/refBookConf', {refBookId: '@refBookId'}, {
+                query: {method: 'GET', isArray: false, cache: false}
             });
         }])
     ;

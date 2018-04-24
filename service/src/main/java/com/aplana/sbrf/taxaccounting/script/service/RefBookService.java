@@ -4,7 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
@@ -210,23 +212,29 @@ public interface RefBookService {
     PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
 
     /**
-     * Возвращяет данные на страницу списка справочников в настройщике
+     * Возвращяет страницу данных в таблицу справочников из настройщика
+     *
+     * @param pagingParams параметры для пагинации
+     * @param userInfo     пользователь запустивший операцию
+     * @return страницу справочников для настройщика
      */
-    List<RefBookConfListItem> getRefBookConfList();
+    PagingResult<RefBookConfListItem> fetchRefBookConfPage(PagingParams pagingParams, TAUserInfo userInfo);
 
     /**
      * Формирует архив со скриптами и др файлами, связанными со всеми справочниками
      *
+     * @param userInfo пользователь запустивший операцию
      * @return uuid ссылку на файл {@link com.aplana.sbrf.taxaccounting.model.BlobData}
      */
-    String exportRefBookConfs();
+    String exportRefBookConfs(TAUserInfo userInfo);
 
     /**
      * Выполняет импорт скриптов и др файлов, связанных со справочниками
      *
      * @param inputStream данные
      * @param fileName    имя архива
+     * @param userInfo    пользователь запустивший операцию
      * @return uuid ссылку на уведомления с результатом выполнения
      */
-    String importRefBookConfs(InputStream inputStream, String fileName);
+    String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo);
 }
