@@ -324,18 +324,23 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public AsyncTaskData reserveTask(String node, String priorityNode, int timeout, AsyncQueue balancingVariants, int maxTasksPerNode) {
-        int rowsUpdated = asyncTaskDao.lockTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
-        if (rowsUpdated != 0) {
-            LOG.debug(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
-        }
-        if (rowsUpdated > 1) {
-            throw new IllegalArgumentException("Incorrect tasks reserved per node!");
-        }
-        if (rowsUpdated == 1) {
-            return asyncTaskDao.getLockedTask(node, balancingVariants);
-        }
-        return null;
+    public AsyncTaskData reserveTask(final String node,final String priorityNode,final int timeout,final AsyncQueue balancingVariants,final int maxTasksPerNode) {
+        return tx.executeInNewTransaction(new TransactionLogic<AsyncTaskData>() {
+            @Override
+            public AsyncTaskData execute() {
+                int rowsUpdated = asyncTaskDao.lockTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
+                if (rowsUpdated != 0) {
+                    LOG.debug(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
+                }
+                if (rowsUpdated > 1) {
+                    throw new IllegalArgumentException("Incorrect tasks reserved per node!");
+                }
+                if (rowsUpdated == 1) {
+                    return asyncTaskDao.getLockedTask(node, balancingVariants);
+                }
+                return null;
+            }
+        });
     }
 
     @Override
