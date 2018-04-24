@@ -367,7 +367,7 @@
          * @description Настройки справочников
          */
         .factory('RefBookConfResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBookConf', {refBookId: '@refBookId'}, {
+            return $resource('controller/rest/refBookConf', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
