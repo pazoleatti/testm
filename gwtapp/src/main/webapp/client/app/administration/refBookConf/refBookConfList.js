@@ -16,22 +16,17 @@
         .controller('RefBookConfListCtrl', ['$scope', '$filter', '$window', 'RefBookConfResource', 'Upload', '$http', 'APP_CONSTANTS', '$logPanel',
             function ($scope, $filter, $window, RefBookConfResource, Upload, $http, APP_CONSTANTS, $logPanel) {
 
-                RefBookConfResource.querySource({
-                        projection: "refBookConfList"
-                    },
-                    function (data) {
-                        if (data) {
-                            $scope.refBookConfListGrid.ctrl.refreshGridData(data);
-                        }
-                    }
-                );
-
                 $scope.refBookConfListGrid = {
                     ctrl: {},
                     value: [],
                     options: {
-                        datatype: "local",
-                        data: [],
+                        datatype: "angularResource",
+                        angularResource: RefBookConfResource,
+                        requestParameters: function () {
+                            return {
+                                projection: 'refBookConfList'
+                            };
+                        },
                         colNames: [
                             '',
                             $filter('translate')('refBookConfList.grid.refBookName'),
@@ -87,11 +82,12 @@
 
                 /** Экспорт скриптов и xsd */
                 $scope.refBookExport = function () {
-                    RefBookConfResource.query({
-                        projection: 'exportRefBooks'
-                    }, function (data) {
-                        if (data.uuid) {
-                            $window.location = "controller/rest/blobData/" + data.uuid + "/conf";
+                    $http({
+                        method: "GET",
+                        url: "controller/actions/refBookConf/export"
+                    }).success(function (uuid) {
+                        if (uuid) {
+                            $window.location = "controller/rest/blobData/" + uuid + "/conf";
                         }
                     });
                 };
@@ -100,7 +96,7 @@
                 $scope.refBookImport = function (file) {
                     if (file) {
                         Upload.upload({
-                            url: 'controller/rest/refBookConf/import',
+                            url: 'controller/actions/refBookConf/import',
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {

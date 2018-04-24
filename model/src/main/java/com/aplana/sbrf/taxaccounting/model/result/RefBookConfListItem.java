@@ -14,6 +14,9 @@ public class RefBookConfListItem {
     private boolean visible;
     private String regionality;
 
+    public RefBookConfListItem() {
+    }
+
     public RefBookConfListItem(Long id, String name, RefBookType refBookType, boolean readOnly, boolean visible, String regionality) {
         this.id = id;
         this.name = name;

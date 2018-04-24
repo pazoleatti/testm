@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
@@ -128,6 +129,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
+    public PagingResult<RefBookConfListItem> fetchRefBookConfPage(PagingParams pagingParams) {
+        String sql = "select id, name, visible, type, read_only, region_attribute_id from ref_book";
+        String sqlOrdered = sql + " order by name";
+        String sqlNumbered = "select rownum rn, ordered.* from (" + sqlOrdered + ") ordered";
+        String sqlPaged = "select * from (" + sqlNumbered + ") where rn between :start and :end";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+
+        List<RefBookConfListItem> page = getNamedParameterJdbcTemplate().query(sqlPaged,
+                params,
+                new RefBookConfRowMapper());
+        int count = getJdbcTemplate().queryForObject("select count(*) from (" + sql + ")", Integer.class);
+
+        return new PagingResult<>(page, count);
+    }
+
+    @Override
     public RefBook getByAttribute(Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForObject(
@@ -172,6 +192,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             } else {
                 result.setRegionAttribute(getAttribute(regionAttributeId.longValue()));
             }
+            return result;
+        }
+    }
+
+    private class RefBookConfRowMapper implements RowMapper<RefBookConfListItem> {
+        @Override
+        public RefBookConfListItem mapRow(ResultSet rs, int index) throws SQLException {
+            RefBookConfListItem result = new RefBookConfListItem();
+            result.setId(SqlUtils.getLong(rs,"id"));
+            result.setName(rs.getString("name"));
+            result.setVisible(rs.getBoolean("visible"));
+            result.setReadOnly(rs.getBoolean("read_only"));
+            result.setRefBookType(RefBookType.get(SqlUtils.getInteger(rs,"type")));
+            result.setRegionality(rs.getObject("REGION_ATTRIBUTE_ID") == null ? "Общий" : "Региональный");
             return result;
         }
     }

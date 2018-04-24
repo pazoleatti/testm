@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -17,13 +20,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 @RestController
 public class RefBookConfController {
 
     @Autowired
     private RefBookService refBookService;
+    @Autowired
+    private SecurityService securityService;
 
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
@@ -34,8 +38,14 @@ public class RefBookConfController {
      * Возвращяет список справочников для настройщика
      */
     @GetMapping(value = "/rest/refBookConf", params = "projection=refBookConfList")
-    public List<RefBookConfListItem> fetchRefBookConfList() {
-        return refBookService.getRefBookConfList();
+    public JqgridPagedList<RefBookConfListItem> fetchRefBookConfList(@RequestParam PagingParams pagingParams) {
+        PagingResult<RefBookConfListItem> pagingResult = refBookService.fetchRefBookConfPage(pagingParams, securityService.currentUserInfo());
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                pagingResult,
+                pagingResult.getTotalCount(),
+                pagingParams
+        );
     }
 
     /**
@@ -43,9 +53,9 @@ public class RefBookConfController {
      *
      * @return uuid ссылку на уведомления с результатом выполнения
      */
-    @GetMapping(value = "/rest/refBookConf", params = "projection=exportRefBooks")
-    public ActionResult exportRefBooks() {
-        return new ActionResult(refBookService.exportRefBookConfs());
+    @GetMapping(value = "/actions/refBookConf/export")
+    public String exportRefBooks() {
+        return refBookService.exportRefBookConfs(securityService.currentUserInfo());
     }
 
     /**
@@ -53,10 +63,10 @@ public class RefBookConfController {
      *
      * @return uuid ссылку на уведомления с результатом выполнения
      */
-    @PostMapping(value = "/rest/refBookConf/import", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
+    @PostMapping(value = "/actions/refBookConf/import", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
     public String importRefBooks(@RequestParam("uploader") MultipartFile file) throws IOException {
         try (InputStream inputStream = file.getInputStream()) {
-            return refBookService.importRefBookConfs(inputStream, file.getOriginalFilename());
+            return refBookService.importRefBookConfs(inputStream, file.getOriginalFilename(), securityService.currentUserInfo());
         }
     }
 }
