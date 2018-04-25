@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -18,7 +19,9 @@ public enum RefBookAttributeType {
 	/** Дата-время */
 	DATE(Date.class),
 	/** Ссылка на элемент справочника */
-	REFERENCE(Long.class);
+	REFERENCE(Long.class),
+	/** Список */
+	COLLECTION(Collection.class);
 
 	private Class typeClass;
 

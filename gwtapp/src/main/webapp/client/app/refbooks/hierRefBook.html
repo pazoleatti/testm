@@ -1,2 +1,18 @@
 <div class="flex-column">
+    <div class="content-header">
+        <h1><a href="index.html#/refbooks/refBookList">{{::'refBooks.title' | translate}}</a> - {{refBook.name}}</h1>
+    </div>
+
+    <!--Панель кнопок -->
+    <div class="button_panel">
+        <div class="btn-toolbar" role="toolbar">
+            <!-- Открыть -->
+            <button type="button" class="btn btn-default" data-ng-disabled="!refBookTree.selectedNode"
+                    data-ng-click="showRecord()">
+                <span data-translate-once="button.open"></span>
+            </button>
+        </div>
+    </div>
+
+    <div id="refBookTreeContainer" style="overflow-y:auto"></div>
 </div>

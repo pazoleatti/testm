@@ -1,0 +1,26 @@
+.aplanaTreeviewContainer {
+    border: 1px solid transparent;
+}
+
+.control-group.error div.aplanaTreeviewContainer {
+    border-color: red;
+}
+
+.aplanaTreeview {
+    list-style-type: none;
+    margin: 3px 0 3px 10px;
+}
+
+ul.aplanaTreeview li {
+    cursor: pointer;
+}
+
+ul.aplanaTreeview li i{
+    margin-right: 3px;
+}
+
+div[data-tree-data] li .selected {
+    background-color: #aaddff;
+    font-weight: bold;
+    padding: 1px;
+}

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -56,6 +57,13 @@ public class RefBookValue implements Serializable {
 		return null;
 	}
 
+	public Collection getCollectionValue() {
+		if (value != null && attributeType == RefBookAttributeType.COLLECTION) {
+			return (Collection) value;
+		}
+		return null;
+	}
+
 	/**
 	 * Возвращает значение ссылки в виде кода записи справочника
 	 * @return
@@ -89,6 +97,7 @@ public class RefBookValue implements Serializable {
 				(attributeType == RefBookAttributeType.NUMBER && value instanceof Number) ||
 				(attributeType == RefBookAttributeType.STRING && value instanceof String) ||
 				(attributeType == RefBookAttributeType.DATE && value instanceof Date) ||
+				(attributeType == RefBookAttributeType.COLLECTION && value instanceof Collection) ||
 				(attributeType == RefBookAttributeType.REFERENCE && (value instanceof Long || value instanceof Map))) {
             if (attributeType == RefBookAttributeType.STRING && value != null) {
                 value = StringUtils.cleanString((String)value);
