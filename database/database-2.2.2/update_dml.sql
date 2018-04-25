@@ -1,5 +1,8 @@
 set serveroutput on;
 
+prompt add asnu
+@@add_asnu.sql;
+
 prompt fill ref_book
 @@ref_book.sql;
 
