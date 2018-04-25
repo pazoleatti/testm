@@ -69,11 +69,11 @@
                         title: $filter('translate')('refBooks.showRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal600',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    mode: "SHOW",
+                                    mode: "VIEW",
                                     refBook: $scope.refBook,
                                     record: $scope.refBookTree.selectedNode
                                 };

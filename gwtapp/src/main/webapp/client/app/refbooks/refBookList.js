@@ -45,7 +45,7 @@
                         {
                             name: 'refBookName',
                             index: 'refBookName',
-                            width: 250,
+                            width: 600,
                             formatter: linkFormatter
                         },
                         {

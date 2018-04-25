@@ -37,7 +37,7 @@
                     $scope.columnNames.push('');
                     $scope.columnModel.push(
                         {
-                            name: 'id',
+                            name: 'id.numberValue',
                             index: 'id',
                             width: 100,
                             key: true,
@@ -148,7 +148,10 @@
                             rowList: APP_CONSTANTS.COMMON.PAGINATION,
                             viewrecords: true,
                             hidegrid: false,
-                            multiselect: true
+                            multiselect: true,
+                            ondblClickRow: function (rowId) {
+                                $scope.showRecord($scope.refBookGrid.ctrl.getRawData(rowId))
+                            }
                         }
                     };
                 };
@@ -176,7 +179,7 @@
                         title: $filter('translate')('refBooks.createRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal600',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -193,18 +196,18 @@
                 /**
                  * Отображает диалог для просмотра записи справочника
                  */
-                $scope.showRecord = function () {
+                $scope.showRecord = function (record) {
                     $aplanaModal.open({
                         title: $filter('translate')('refBooks.showRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal600',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    mode: "SHOW",
+                                    mode: "VIEW",
                                     refBook: $scope.refBook,
-                                    record: $scope.refBookGrid.value[0]
+                                    record: record ? record : $scope.refBookGrid.value[0]
                                 };
                             }
                         }
@@ -219,7 +222,7 @@
                         title: $filter('translate')('refBooks.editRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal600',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -238,7 +241,6 @@
                  * Удаляет записи справочника, выбранные в таблице
                  */
                 $scope.deleteRecords = function () {
-
                 }
             }]);
 }());

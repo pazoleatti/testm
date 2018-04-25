@@ -56,27 +56,6 @@
                     }
 
                     /**
-                     * Возвращает дочерние элементы ноды
-                     * @param node нода дерева
-                     * @param field поле внутри ноды, в которой хранятся дочерние элементы. Может быть как названием поля, так и путем внутри полей типа "node.field.fieldName"
-                     */
-                    function getChildren(node, field) {
-                        if (field.indexOf('.') !== -1) {
-                            //Имя представляет собой путь внутри полей объекта
-                            var currentField = node;
-                            field.split('.').forEach(function (fieldName) {
-                                if (currentField) {
-                                    currentField = currentField[fieldName];
-                                }
-                            });
-                            return currentField;
-                        } else {
-                            //Просто имя поля
-                            return node[field];
-                        }
-                    }
-
-                    /**
                      * Вернет первый попавшийся элемент с пометкой Selected
                      * @return {*} отмеченный элемент
                      */
@@ -86,7 +65,7 @@
                                 return node;
                             }
 
-                            var children = getChildren(node, childrenParamName);
+                            var children = AplanaUtils.getObjectPropertyValueByPath(node, childrenParamName);
                             if (children) {
                                 for (var i = 0; i < children.length; i++) {
                                     var result = getSelection(children[i]);
@@ -154,7 +133,7 @@
                             var collapseNode = function (node, collapsed) {
                                 node.collapsed = collapsed;
 
-                                var children = getChildren(node, childrenParamName);
+                                var children = AplanaUtils.getObjectPropertyValueByPath(node, childrenParamName);
                                 if (children) {
                                     for (var i = 0; i < children.length; i++) {
                                         collapseNode(children[i], collapsed);
@@ -312,7 +291,7 @@
                                         return node;
                                     }
 
-                                    var children = getChildren(node, childrenParamName);
+                                    var children = AplanaUtils.getObjectPropertyValueByPath(node, childrenParamName);
                                     if (children) {
                                         for (var i = 0; i < children.length; i++) {
                                             var result = getSelection(children[i], value, property);
