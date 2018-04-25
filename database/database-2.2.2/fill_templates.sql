@@ -16,7 +16,7 @@ begin
 
 	for rec in (select bnt.blob_data_id, bdt.name, bdt.data, bdt.creation_date, bdt.id blob_data_id_old 
 	from BLOB_DATA_TMP bdt join BLOB_NAMES_TMP bnt on bdt.declaration_template_id=bnt.id
-	and bnt.blob_data_id in (select xsd from declaration_template))
+	and bnt.blob_data_id in (select xsd from declaration_template) and bdt.name like '%.xsd')
 	loop
 		update blob_data set name=rec.name, data=rec.data where id=rec.blob_data_id;
 		update blob_id_tmp set updated=1, blob_data_id_old=rec.blob_data_id_old where blob_data_id=rec.blob_data_id;

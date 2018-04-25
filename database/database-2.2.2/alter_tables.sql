@@ -26,6 +26,33 @@ BEGIN
 		END IF; 
 	END IF; 
 	
+	dbms_output.put_line('modify column REF_BOOK_ADDRESS.DISTRICT');
+	execute	immediate 'alter table ref_book_address modify (district VARCHAR2(500 CHAR))';
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_address' and lower(column_name)='district' and data_type='VARCHAR2' and char_length=500;
+	if v_count>0 then
+		dbms_output.put_line('Column REF_BOOK_ADDRESS.DISTRICT modified');
+	end if;
+	
+	dbms_output.put_line('modify column REF_BOOK_ADDRESS.CITY');
+	execute	immediate 'alter table ref_book_address modify (city VARCHAR2(500 CHAR))';
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_address' and lower(column_name)='city' and data_type='VARCHAR2' and char_length=500;
+	if v_count>0 then
+		dbms_output.put_line('Column REF_BOOK_ADDRESS.CITY modified');
+	end if;
+	
+	dbms_output.put_line('modify column REF_BOOK_ADDRESS.LOCALITY');
+	execute	immediate 'alter table ref_book_address modify (locality VARCHAR2(500 CHAR))';
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_address' and lower(column_name)='locality' and data_type='VARCHAR2' and char_length=500;
+	if v_count>0 then
+		dbms_output.put_line('Column REF_BOOK_ADDRESS.LOCALITY modified');
+	end if;
+	
+	dbms_output.put_line('modify column REF_BOOK_ADDRESS.STREET');
+	execute	immediate 'alter table ref_book_address modify (street VARCHAR2(500 CHAR))';
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_address' and lower(column_name)='street' and data_type='VARCHAR2' and char_length=500;
+	if v_count>0 then
+		dbms_output.put_line('Column REF_BOOK_ADDRESS.STREET modified');
+	end if;
 
 END;
 /

@@ -1146,7 +1146,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     // Проверка принадлежности даты к периоду формы
     boolean dateRelateToCurrentPeriod(Date date) {
         //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-        if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
+        if (date == null || (date >= getReportPeriodCalendarStartDate() && date <= getReportPeriodEndDate())) {
             return true
         }
         return false
@@ -1416,6 +1416,17 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Date getReportPeriodStartDate() {
         if (reportPeriodStartDate == null) {
             reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
+        }
+        return reportPeriodStartDate
+    }
+
+    /**
+     * Получить дату начала отчетного периода
+     * @return
+     */
+    Date getReportPeriodCalendarStartDate() {
+        if (reportPeriodStartDate == null) {
+            reportPeriodStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
         }
         return reportPeriodStartDate
     }

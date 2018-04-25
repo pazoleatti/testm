@@ -20,3 +20,5 @@ begindata
  4b84692c-7f70-4d11-844d-e61e81655336|rnu_ndfl_person_all_db.xlsx|templates/data/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx|04.12.2017|100|
  64536272-05bc-42e8-82c5-347faf22da20|rnu_ndfl_person_all_db.xlsx|templates/data/ndfl/consolidated_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx|05.12.2017|101|
  13765b29-f1b7-4ec0-a8a9-88196a6e45a1|NO_NDFL6_1_152_00_05_02_02.xsd|templates/data/ndfl/report_6ndfl/v2016/NO_NDFL6_1_152_00_05_02_02.xsd|01.01.2016|103|
+ 3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe|excel_template_dec.xlsx|templates/data/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx|18.04.2020|100|
+ bfcccac4-7a42-4760-a462-98e2633b2392|excel_template_dec.xlsx|templates/data/ndfl/consolidated_rnu_ndfl/v2016/excel_template_dec.xlsx|18.04.2020|101|

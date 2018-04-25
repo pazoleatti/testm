@@ -167,9 +167,10 @@ END;
 PROMPT Fill tables...
 @fill_templates.sql
 
+@declaration_template_file.sql
+
 PROMPT Fill complete
 PROMPT ======================
-
 
 set feedback off;
 set verify off;
