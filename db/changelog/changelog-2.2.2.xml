@@ -599,6 +599,13 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.2-dnovikov-11" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+            <where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
+
     <changeSet id="2.2.2-ytrofimov-16" author="ytrofimov">
         <sql>
             update ref_book_income_kind set ref_book_income_kind.VERSION=(select ref_book_income_type.version from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
