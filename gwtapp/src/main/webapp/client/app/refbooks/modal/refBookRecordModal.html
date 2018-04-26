@@ -1,5 +1,11 @@
 <form class="form-horizontal" data-aplana-submit-valid="save()">
     <div id="refBookRecordFieldsContainer" class="modal-body">
+        <div class="row-fluid" style="margin-bottom: 20px;" data-ng-show="refBook.versioned">
+            <label class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
+            <label class="inline-value">{{getAttributeValue(versionFromAttribute)}}</label>
+            <label class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
+            <label class="inline-value">{{getAttributeValue(versionToAttribute)}}</label>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-default" id="openButton" ng-show="isEditMode">

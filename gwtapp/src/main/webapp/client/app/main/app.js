@@ -804,6 +804,8 @@
         "refBook.version": "Дата актуальности",
         "refBook.versionFrom": "Дата начала актуальности",
         "refBook.versionTo": "Дата окончания актуальности",
+        "refBook.versionFromShort": "Действует с",
+        "refBook.versionToShort": "по",
 
         "refBook.confirm.cancelEdit": "Вы уверены, что хотите отменить редактирование записи?"
     };

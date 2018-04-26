@@ -15,30 +15,41 @@
                 $scope.refBook = $shareData.refBook;
                 $scope.record = $shareData.record;
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
+                $scope.refBook.attributes.forEach(function (attribute) {
+                    if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
+                        $scope.versionFromAttribute = attribute
+                    }
+                    if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS) {
+                        $scope.versionToAttribute = attribute
+                    }
+                });
 
                 /**
                  * Получает разыменованное значение атрибута
                  * @param attribute атрибут справочника
                  */
-                function getAttributeValue(attribute) {
-                    var value = "";
-                    switch (attribute.attributeType) {
-                        case 'STRING':
-                            value = $scope.record[attribute.alias].stringValue ? $scope.record[attribute.alias].stringValue : "";
-                            break;
-                        case 'NUMBER':
-                            value = $scope.record[attribute.alias].numberValue ? $scope.record[attribute.alias].numberValue : "";
-                            break;
-                        case 'DATE':
-                            //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
-                            value = $scope.record[attribute.alias].dateValue ? $filter('dateFormatter')($scope.record[attribute.alias].dateValue) : "";
-                            break;
-                        case 'REFERENCE':
-                            value = $scope.record[attribute.alias].referenceValue ? $scope.record[attribute.alias].referenceValue : "";
-                            break;
+                $scope.getAttributeValue = function(attribute) {
+                    if (attribute) {
+                        var value = "";
+                        var refBookValue = $scope.record[attribute.alias];
+                        switch (attribute.attributeType) {
+                            case 'STRING':
+                                value = refBookValue && refBookValue.stringValue ? refBookValue.stringValue : "";
+                                break;
+                            case 'NUMBER':
+                                value = refBookValue && refBookValue.numberValue ? refBookValue.numberValue : "";
+                                break;
+                            case 'DATE':
+                                //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
+                                value = refBookValue && refBookValue.dateValue ? $filter('dateFormatter')(refBookValue.dateValue) : "";
+                                break;
+                            case 'REFERENCE':
+                                value = refBookValue && refBookValue.referenceValue ? refBookValue.referenceValue : "";
+                                break;
+                        }
+                        return value;
                     }
-                    return value;
-                }
+                };
 
                 /**
                  * Динамически добавляет поля в диалог в зависимости от его режима работы и типа справочника
@@ -46,14 +57,16 @@
                 $scope.constructFields = function () {
                     var fieldsHtml = "";
                     $scope.refBook.attributes.forEach(function (attribute) {
-                        if (attribute.visible) {
+                        if (attribute.visible && (!$scope.refBook.versioned || (
+                                attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS &&
+                                attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS))) {
                             if ($shareData.mode === 'VIEW') {
                                 fieldsHtml += "<div class=\"row-fluid\">\n" +
                                     "    <div class=\"span4\">\n" +
                                     "        <label class=\"control-label\">" + attribute.name + ":</label>\n" +
                                     "    </div>\n" +
                                     "    <div class=\"span8\">\n" +
-                                    "        <label class=\"font-normal info-text\">" + getAttributeValue(attribute) + "</label>\n" +
+                                    "        <label class=\"font-normal info-text\">" + $scope.getAttributeValue(attribute) + "</label>\n" +
                                     "    </div>\n" +
                                     "</div>"
                             }

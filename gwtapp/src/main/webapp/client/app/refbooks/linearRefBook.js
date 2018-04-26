@@ -25,6 +25,25 @@
                     id: $stateParams.refBookId
                 }, function (data) {
                     $scope.refBook = data;
+                    if ($scope.refBook.versioned) {
+                        // Если справочник версионируемый - добавляем информацию о периоде действия записей
+                        $scope.refBook.attributes.push({
+                            name: $filter('translate')('refBook.versionFrom'),
+                            alias: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS,
+                            attributeType: 'DATE',
+                            required: true,
+                            visible: true,
+                            width: 5
+                        });
+                        $scope.refBook.attributes.push({
+                            name: $filter('translate')('refBook.versionTo'),
+                            alias: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS,
+                            attributeType: 'DATE',
+                            required: true,
+                            visible: true,
+                            width: 5
+                        });
+                    }
                     $scope.constructGridColumns();
                     $scope.constructGrid();
                 });
@@ -62,30 +81,6 @@
                             )
                         }
                     });
-
-                    // Если справочник версионируемый - добавляем информацию о периоде действия записей
-                    if ($scope.refBook.versioned) {
-                        $scope.columnNames.push($filter('translate')('refBook.versionFrom'));
-                        $scope.columnNames.push($filter('translate')('refBook.versionTo'));
-                        $scope.columnModel.push(
-                            {
-                                name: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS,
-                                index: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS,
-                                width: 150,
-                                type: "DATE",
-                                formatter: refBookValueFormatter
-                            }
-                        );
-                        $scope.columnModel.push(
-                            {
-                                name: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS,
-                                index: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS,
-                                width: 150,
-                                type: "DATE",
-                                formatter: refBookValueFormatter
-                            }
-                        );
-                    }
                 };
 
                 function refBookValueFormatter(cellValue, options, row) {
