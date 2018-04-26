@@ -599,4 +599,47 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.2-ytrofimov-16" author="ytrofimov">
+        <sql>
+            update ref_book_income_kind set ref_book_income_kind.VERSION=(select ref_book_income_type.version from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
+            where exists(select 1 from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
+        </sql>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-17" author="ytrofimov">
+        <sql splitStatements="false">
+            begin
+            insert into REF_BOOK_INCOME_KIND(id, income_type_id, mark, name, version, status, record_id)
+            values (seq_ref_book_record.nextval, (select id from ref_book_income_type where code = '1543' and status = 2), '01', 'Начисление дохода при выводе денежных средств с брокерского счёта', (select version from ref_book_income_type where code = '1543' and status = 2), 2, (select record_id from ref_book_income_kind where income_type_id = (select id from ref_book_income_type where code = '1543' and status = 0) and mark='01'));
+
+            insert into REF_BOOK_INCOME_KIND(id, income_type_id, mark, name, version, status, record_id)
+            values (seq_ref_book_record.nextval, (select id from ref_book_income_type where code = '1543' and status = 2), '02', 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо', (select version from ref_book_income_type where code = '1543' and status = 2), 2, (select record_id from ref_book_income_kind where income_type_id = (select id from ref_book_income_type where code = '1543' and status = 0) and mark='02'));
+
+            insert into REF_BOOK_INCOME_KIND(id, income_type_id, mark, name, version, status, record_id)
+            values (seq_ref_book_record.nextval, (select id from ref_book_income_type where code = '1543' and status = 2), '03', 'Начисление дохода при расторжении договора брокерского обслуживания', (select version from ref_book_income_type where code = '1543' and status = 2), 2, (select record_id from ref_book_income_kind where income_type_id = (select id from ref_book_income_type where code = '1543' and status = 0) and mark='03'));
+
+            insert into REF_BOOK_INCOME_KIND(id, income_type_id, mark, name, version, status, record_id)
+            values (seq_ref_book_record.nextval, (select id from ref_book_income_type where code = '1543' and status = 2), '04', 'Начисление дохода по окончанию налогового периода за который начислен доход', (select version from ref_book_income_type where code = '1543' and status = 2), 2, (select record_id from ref_book_income_kind where income_type_id = (select id from ref_book_income_type where code = '1543' and status = 0) and mark='04'));
+            end;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-18" author="ytrofimov">
+        <sql>
+            update ref_book set is_versioned = 1 where id = 933
+        </sql>
+    </changeSet>
+
+    <changeSet id="2.2.2-ytrofimov-19" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
