@@ -239,6 +239,6 @@
 
                 setInterval(function () {
                     $scope.updateNotificationCount();
-                }, 30000);
+                }, 10000);
             }]);
 }());

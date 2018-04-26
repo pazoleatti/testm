@@ -49,7 +49,6 @@
     margin: 0 0 0 -4px;
 }
 .ui-jqgrid .ui-jqgrid-htable th:nth-child(2) div.ui-jqgrid-sortable{
-    border-left: none;
     border-right: 2px dotted rgba(0, 0, 0, 0.2);
 }
 .ui-jqgrid .ui-jqgrid-htable th.ui-th-column .ui-jqgrid-sortable .s-ico {
@@ -328,8 +327,8 @@ background-position: -40px 0;*/
 .cbr-firstColCheckBox-grid .ui-jqgrid .ui-jqgrid-htable th.ui-th-column:first-child {
     text-align: center;
     vertical-align: middle;
-    padding: 3px;
-    border-right: 1px solid #ccc;
+    padding: 3px 0 3px 3px;
+    border-right: 2px dotted #a3a3a3;
 }
 
 .cbr-firstColCheckBox-grid .ui-jqgrid tr.jqgrow td:first-child {
