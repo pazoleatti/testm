@@ -2677,7 +2677,7 @@ public final class ScriptUtils {
     }
 
     public static String checkName(String value, String attrName) {
-        if (value != null) {
+        if (value != null && !value.isEmpty()) {
             if (Arrays.asList(" ","ь","ъ","-",".","'").contains(value.substring(0, 1).toLowerCase())) {
                 return "Значение гр. \"" + attrName + "\" (\"" + value +"\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме";
             }
