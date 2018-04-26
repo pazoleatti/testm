@@ -2060,7 +2060,8 @@ class Check extends AbstractScriptClass {
             }
 
             // Выч5 Начисленный доход.Сумма (Графы 12)
-            if (ndflPersonDeduction.incomeSumm != null) {
+            //TODO проверка закомментирована согласно https://jira.aplana.com/browse/SBRFNDFL-4390. Не удалять закомментированный кусок без соответствующей задачи.
+            /*if (ndflPersonDeduction.incomeSumm != null) {
                 BigDecimal deductionsIncomeSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.incomeSumm ?: 0 } ?: 0
                 BigDecimal incomesSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.incomeAccruedSumm ?: 0 } ?: 0
                 if (deductionsIncomeSum != incomesSum) {
@@ -2070,7 +2071,7 @@ class Check extends AbstractScriptClass {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_3_12, fioAndInpAndOperId, pathError, errMsg)
                 }
-            }
+            }*/
 
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.periodCurrSumm != null && ndflPersonDeduction.notifSumm != null) {
