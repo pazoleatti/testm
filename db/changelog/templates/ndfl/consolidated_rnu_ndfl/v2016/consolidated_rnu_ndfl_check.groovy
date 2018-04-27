@@ -349,8 +349,8 @@ class Check extends AbstractScriptClass {
         Map<Long, Map<String, RefBookValue>> incomeCodeMap = getRefIncomeCode()
         logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
-        // Виды доходов Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
-        Map<String, List<Long>> incomeTypeMap = getRefIncomeType()
+        // Виды доходов Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND>>
+        Map<String, List<Map<String, RefBookValue>>> incomeTypeMap = getRefIncomeType()
         logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
         // Коды видов вычетов
@@ -706,14 +706,14 @@ class Check extends AbstractScriptClass {
                 При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
 
                 Доход.Вид.Признак (Графа 5) - (Необязательное поле)
-                incomeTypeMap <REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
+                incomeTypeMap <REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND>>
 
                 Доход.Вид.Код (Графа 4) - (Необязательное поле)
                 incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
              */
             if (ndflPersonIncome.incomeType && ndflPersonIncome.incomeCode) {
-                List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
-                if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
+                List<Map<String, RefBookValue>> incomeTypeRowList = incomeTypeMap.get(ndflPersonIncome.incomeType)
+                if (incomeTypeRowList == null || incomeTypeRowList.isEmpty()) {
                     String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                             C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
                             R_INCOME_TYPE
@@ -723,14 +723,15 @@ class Check extends AbstractScriptClass {
                 } else {
                     if (ndflPersonIncome.incomeAccruedDate != null) {
                         List<Map<String, RefBookValue>> incomeCodeRefList = []
-                        incomeTypeIdList.each { incomeTypeId ->
-                            def incomeCodeRef = incomeCodeMap.get(incomeTypeId)
-                            incomeCodeRefList.add(incomeCodeRef)
+                        incomeTypeRowList.each { incomeTypeRow ->
+                            if (ndflPersonIncome.incomeAccruedDate >= incomeTypeRow.record_version_from?.dateValue &&
+                                    ndflPersonIncome.incomeAccruedDate <= incomeTypeRow.record_version_to?.dateValue) {
+                                def incomeCodeRef = incomeCodeMap.get(incomeTypeRow?.income_type_id?.numberValue)
+                                incomeCodeRefList.add(incomeCodeRef)
+                            }
                         }
                         Map<String, RefBookValue> incomeCodeRef = incomeCodeRefList.find { Map<String, RefBookValue> value ->
-                            value?.CODE?.stringValue == ndflPersonIncome.incomeCode &&
-                                    ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
-                                    ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
+                            value?.CODE?.stringValue == ndflPersonIncome.incomeCode
                         }
                         if (!incomeCodeRef) {
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\"",
@@ -1034,7 +1035,7 @@ class Check extends AbstractScriptClass {
                     new Column14Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_RATE, C_INCOME_ACCRUED_DATE
+                            C_TAX_RATE, C_INCOME_ACCRUED_SUMM
                     )
             )
             columnFillConditionDataList << new ColumnFillConditionData(
@@ -1042,7 +1043,7 @@ class Check extends AbstractScriptClass {
                     new Column14Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_RATE, C_INCOME_PAYOUT_DATE
+                            C_TAX_RATE, C_INCOME_PAYOUT_SUMM
                     )
             )
             //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
@@ -1059,7 +1060,7 @@ class Check extends AbstractScriptClass {
                     new Column15Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_DATE, C_INCOME_PAYOUT_DATE
+                            C_TAX_DATE, C_INCOME_PAYOUT_SUMM
                     )
             )
             //12 Раздел 2. Графа 16 Должна быть заполнена, если заполнена "Раздел 2. Графа 10"
@@ -1068,7 +1069,7 @@ class Check extends AbstractScriptClass {
                     new Column16Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM
+                            C_CALCULATED_TAX, C_INCOME_ACCRUED_SUMM
                     )
             )
             //13 Раздел 2. Графа 17 Должна быть заполнена, если заполнена "Раздел 2. Графа 11"
@@ -1077,7 +1078,7 @@ class Check extends AbstractScriptClass {
                     new Column17Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE, C_INCOME_PAYOUT_DATE
+                            C_WITHHOLDING_TAX, C_INCOME_PAYOUT_SUMM
                     )
             )
             //14 Раздел 2. Графа 21 Должна быть заполнена, если выполняется одно из условий:
@@ -2059,7 +2060,8 @@ class Check extends AbstractScriptClass {
             }
 
             // Выч5 Начисленный доход.Сумма (Графы 12)
-            if (ndflPersonDeduction.incomeSumm != null) {
+            //TODO проверка закомментирована согласно https://jira.aplana.com/browse/SBRFNDFL-4390. Не удалять закомментированный кусок без соответствующей задачи.
+            /*if (ndflPersonDeduction.incomeSumm != null) {
                 BigDecimal deductionsIncomeSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.incomeSumm ?: 0 } ?: 0
                 BigDecimal incomesSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.incomeAccruedSumm ?: 0 } ?: 0
                 if (deductionsIncomeSum != incomesSum) {
@@ -2069,7 +2071,7 @@ class Check extends AbstractScriptClass {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_3_12, fioAndInpAndOperId, pathError, errMsg)
                 }
-            }
+            }*/
 
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.periodCurrSumm != null && ndflPersonDeduction.notifSumm != null) {
@@ -2782,20 +2784,20 @@ class Check extends AbstractScriptClass {
 
     /**
      * Получить "Виды доходов"
-     * @return
+     * @return мапа , где ключ значение признака дохода, значение - список записей из справочника "Виды доходов" соответствующие данному признаку
      */
-    Map<String, List<Long>> getRefIncomeType() {
+    Map<String, List<Map<String, RefBookValue>>> getRefIncomeType() {
         // Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
-        Map<String, List<Long>> mapResult = [:]
+        Map<String, List<Map<String, RefBookValue>>> mapResult = [:]
         PagingResult<Map<String, RefBookValue>> refBookList = getRefBook(RefBook.Id.INCOME_KIND.id)
-        refBookList.each { refBook ->
-            String mark = refBook?.MARK?.stringValue
-            List<Long> incomeTypeIdList = mapResult.get(mark)
-            if (incomeTypeIdList == null) {
-                incomeTypeIdList = []
+        refBookList.each { Map<String, RefBookValue> refBookRow ->
+            String mark = refBookRow?.MARK?.stringValue
+            List<Map<String, RefBookValue>> refBookRowList = mapResult.get(mark)
+            if (refBookRowList == null) {
+                refBookRowList = []
             }
-            incomeTypeIdList.add(refBook?.INCOME_TYPE_ID?.referenceValue)
-            mapResult.put(mark, incomeTypeIdList)
+            refBookRowList.add(refBookRow)
+            mapResult.put(mark, refBookRowList)
         }
         return mapResult
     }
