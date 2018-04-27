@@ -661,4 +661,19 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2.2-dnovikov-12" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2.2-dnovikov-13" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

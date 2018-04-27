@@ -1035,7 +1035,7 @@ class Check extends AbstractScriptClass {
                     new Column14Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_RATE, C_INCOME_ACCRUED_DATE
+                            C_TAX_RATE, C_INCOME_ACCRUED_SUMM
                     )
             )
             columnFillConditionDataList << new ColumnFillConditionData(
@@ -1043,7 +1043,7 @@ class Check extends AbstractScriptClass {
                     new Column14Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_RATE, C_INCOME_PAYOUT_DATE
+                            C_TAX_RATE, C_INCOME_PAYOUT_SUMM
                     )
             )
             //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
@@ -1060,7 +1060,7 @@ class Check extends AbstractScriptClass {
                     new Column15Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_DATE, C_INCOME_PAYOUT_DATE
+                            C_TAX_DATE, C_INCOME_PAYOUT_SUMM
                     )
             )
             //12 Раздел 2. Графа 16 Должна быть заполнена, если заполнена "Раздел 2. Графа 10"
@@ -1069,7 +1069,7 @@ class Check extends AbstractScriptClass {
                     new Column16Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM
+                            C_CALCULATED_TAX, C_INCOME_ACCRUED_SUMM
                     )
             )
             //13 Раздел 2. Графа 17 Должна быть заполнена, если заполнена "Раздел 2. Графа 11"
@@ -1078,7 +1078,7 @@ class Check extends AbstractScriptClass {
                     new Column17Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE, C_INCOME_PAYOUT_DATE
+                            C_WITHHOLDING_TAX, C_INCOME_PAYOUT_SUMM
                     )
             )
             //14 Раздел 2. Графа 21 Должна быть заполнена, если выполняется одно из условий:
