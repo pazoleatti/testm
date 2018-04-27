@@ -23,6 +23,7 @@ import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.N
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.REFERENCE
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.STRING
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
+import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.formatDate
 
 /**
  * Cкрипт справочника "Физические лица" (id = 904).
@@ -100,8 +101,7 @@ class Person extends AbstractScriptClass {
     // ИНП
     final long REF_BOOK_ID_TAX_PAYER_ID = RefBook.Id.ID_TAX_PAYER.id
     // Дата новых версии при импорте
-    Date versionFrom = new GregorianCalendar(1990, Calendar.JANUARY, 1).time
-    String versionFromString = versionFrom.format("dd.MM.yyyy")
+    Date versionFrom = new GregorianCalendar(2017, Calendar.JANUARY, 1).time
     // Количество блоков ".Файл.ИнфЧасть" в xml при импорте
     int infPartCount = 0
 
@@ -109,16 +109,13 @@ class Person extends AbstractScriptClass {
         List<NaturalPerson> parsedPersons = []
 
         parseXml(parsedPersons)
-        def validPersons = validatePersons(parsedPersons)
-
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            save(validPersons)
-            for (def person : validPersons) {
-                logger.info("Создана новая запись в справочнике Физические лица: \"${person.id}\", " +
-                        "\"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\", \"${versionFromString}\"")
-            }
-            logger.info("Обработано записей из файла ${infPartCount}. Удалось загрузить ${validPersons.size()} записей")
+        def savedPersons = save(parsedPersons)
+        checkPersons(savedPersons)
+        for (def person : savedPersons) {
+            logger.info("Создана новая запись в справочнике Физические лица: " +
+                    "$person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}")
         }
+        logger.info("Обработано записей из файла ${infPartCount}. В справочнике ФЛ создано ${savedPersons.size()} записей")
     }
 
     void parseXml(List<NaturalPerson> persons) {
@@ -129,21 +126,19 @@ class Person extends AbstractScriptClass {
             xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
             reader = xmlFactory.createXMLStreamReader(inputStream)
 
-            NaturalPerson person = null
+            NaturalPersonExt person = null
 
             boolean inInfoPart = false
-            String idFL
             while (reader.hasNext()) {
                 if (reader.startElement) {
                     String tag = reader.name.localPart
                     if ('ИнфЧасть' == tag) {
                         checkInterrupted()
                         inInfoPart = true
-                        idFL = getAttrValue(reader, "ИдФЛ")
-                        person = new NaturalPerson()
+                        person = new NaturalPersonExt()
                     } else if (inInfoPart) {
                         if ('АнкетДаннФЛ' == tag) {
-                            parsePersonInfo(reader, idFL, person)
+                            parsePersonInfo(reader, person)
                         } else if ('УдЛичнФЛ' == tag) {
                             person.personDocumentList.add(parseDocumentInfo(reader, person))
                         } else if ('СисИсточ' == tag) {
@@ -166,63 +161,85 @@ class Person extends AbstractScriptClass {
         }
     }
 
-    void parsePersonInfo(XMLStreamReader reader, String idFL, NaturalPerson person) {
+    void parsePersonInfo(XMLStreamReader reader, NaturalPersonExt person) {
         person.lastName = getAttrValue(reader, "ФамФЛ")
         person.firstName = getAttrValue(reader, "ИмяФЛ")
         person.middleName = getAttrValue(reader, "ОтчФЛ")
-        person.birthDate = toDate(getAttrValue(reader, "ДатаРожд"))
-        person.citizenship = getCountryByCode(getAttrValue(reader, "Гражд"))
+        person.birthDateStr = getAttrValue(reader, "ДатаРожд")
+        person.birthDate = toDate(person.birthDateStr)
+        person.citizenshipCode = getAttrValue(reader, "Гражд")
+        person.citizenship = getCountryByCode(person.citizenshipCode)
         person.inn = getAttrValue(reader, "ИННФЛ")
         person.innForeign = getAttrValue(reader, "ИННИно")
-        person.taxPayerStatus = getTaxpayerStatusByCode(getAttrValue(reader, "СтатусФЛ"))
-        person.address = parseAddress(reader, idFL, person)
+        person.taxPayerStatusCode = getAttrValue(reader, "СтатусФЛ")
+        person.taxPayerStatus = getTaxpayerStatusByCode(person.taxPayerStatusCode)
+        person.address = parseAddress(reader)
     }
 
-    Address parseAddress(XMLStreamReader reader, String idFL, NaturalPerson person) {
+    Address parseAddress(XMLStreamReader reader) {
         Address address = new Address()
         address.regionCode = getAttrValue(reader, "КодРегион")
         address.postalCode = getAttrValue(reader, "Индекс")
-        address.district = truncateIfNeeded(getAttrValue(reader, "Район"), person, idFL, 100, "Район")
-        address.city = truncateIfNeeded(getAttrValue(reader, "Город"), person, idFL, 100, "Город")
-        address.locality = truncateIfNeeded(getAttrValue(reader, "НаселПункт"), person, idFL, 100, "НаселПункт")
-        address.street = truncateIfNeeded(getAttrValue(reader, "Улица"), person, idFL, 100, "Улица")
+        address.district = getAttrValue(reader, "Район")
+        address.city = getAttrValue(reader, "Город")
+        address.locality = getAttrValue(reader, "НаселПункт")
+        address.street = getAttrValue(reader, "Улица")
         address.house = getAttrValue(reader, "Дом")
         address.build = getAttrValue(reader, "Корпус")
         address.appartment = getAttrValue(reader, "Кварт")
-        address.country = getCountryByCode(getAttrValue(reader, "КодСтрИно"))
+        address.countryCode = getAttrValue(reader, "КодСтрИно")
+        address.country = getCountryByCode(address.countryCode)
         address.addressIno = getAttrValue(reader, "АдресИно")
-        return address
+        // Если присутствует хотя бы один из атрибутов
+        if (address.regionCode || address.postalCode || address.district || address.city || address.locality || address.street || address.house ||
+                address.build || address.appartment || address.countryCode || address.addressIno) {
+            return address
+        } else {
+            return null
+        }
     }
 
     PersonDocument parseDocumentInfo(XMLStreamReader reader, NaturalPerson person) {
-        PersonDocument document = new PersonDocument()
-        document.docType = getDocTypeByCode(getAttrValue(reader, "УдЛичнФЛВид"))
+        PersonDocument document = new PersonDocumentExt()
+        document.docTypeCode = getAttrValue(reader, "УдЛичнФЛВид")
+        document.docType = getDocTypeByCode(document.docTypeCode)
         document.documentNumber = getAttrValue(reader, "УдЛичнФЛНом")
-        document.incRep = toInteger(getAttrValue(reader, "УдЛичнФЛГл"))
+        document.incRepStr = getAttrValue(reader, "УдЛичнФЛГл")
+        document.incRep = toInteger(document.incRepStr)
         document.naturalPerson = person
         return document
     }
 
     PersonIdentifier parsePersonIdentifier(XMLStreamReader reader, NaturalPerson person) {
-        PersonIdentifier personIdentifier = new PersonIdentifier()
-        personIdentifier.asnu = getAsnuByName(getAttrValue(reader, "СисИсточНам"))
+        PersonIdentifier personIdentifier = new PersonIdentifierExt()
+        personIdentifier.asnuName = getAttrValue(reader, "СисИсточНам")
+        personIdentifier.asnu = getAsnuByName(personIdentifier.asnuName)
         personIdentifier.inp = getAttrValue(reader, "СисИсточИНП")
         personIdentifier.naturalPerson = person
         return personIdentifier
     }
 
-    RefBookAsnu getMaxPriorityAsnu(List<PersonIdentifier> personIdentifiers) {
+    /**
+     * Определение Системы-источника у ФЛ
+     */
+    RefBookAsnu getMaxPriorityAsnu(List<PersonIdentifier> identifiers) {
         def maxPriorityAsnu = null
-        for (def personIdentifier : personIdentifiers) {
-            if (!maxPriorityAsnu || personIdentifier.asnu?.priority > maxPriorityAsnu.priority) {
-                maxPriorityAsnu = personIdentifier.asnu
+        for (def identifier : identifiers) {
+            // 1. Найдена АСНУ в справочнике
+            // 2. Из всех найденных записей отбор записей с максимальным значением атрибута "Приоритет".
+            // 3. Среди отобранных с максимальным Приоритетом отбор записи с минимальным значением атрибута "Код АСНУ".
+            if (identifier.asnu != null &&
+                    (maxPriorityAsnu == null || identifier.asnu.priority > maxPriorityAsnu.priority ||
+                            identifier.asnu.priority == maxPriorityAsnu.priority && identifier.asnu.code > maxPriorityAsnu.code)
+            ) {
+                maxPriorityAsnu = identifier.asnu
             }
         }
         return maxPriorityAsnu
     }
 
     String getAttrValue(XMLStreamReader reader, String attrName) {
-        return reader?.getAttributeValue(null, attrName)
+        return reader?.getAttributeValue(null, attrName)?.trim()
     }
 
     Date toDate(String value) {
@@ -240,97 +257,140 @@ class Person extends AbstractScriptClass {
         return null
     }
 
-    void save(List<NaturalPerson> persons) {
+    List<NaturalPerson> save(List<NaturalPerson> persons) {
         if (persons) {
-            List<Address> addresses = []
-            List<PersonDocument> documents = []
-            List<PersonIdentifier> identifiers = []
+            List<Address> addressesToCreate = []
+            List<PersonDocument> documentsToCreate = []
+            List<PersonIdentifier> identifiersToCreate = []
 
             for (def person : persons) {
-                Address address = person.getAddress()
-                if (address != null) {
-                    addresses.add(person.address)
+                person.address != null && addressesToCreate.add(person.address)
+
+                for (def identifier : person.personIdentityList) {
+                    if (identifier.asnu != null && identifier.inp) {
+                        identifiersToCreate.add(identifier)
+                    }
                 }
 
-                PersonDocument document = person.getPersonDocument()
-                if (document != null) {
-                    documents.addAll(person.personDocumentList)
-                }
-
-                PersonIdentifier identifier = person.getPersonIdentifier()
-                if (identifier != null) {
-                    identifiers.addAll(person.personIdentityList)
-                }
-            }
-
-            insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), addresses, this.&mapAddressAttr)
-
-            insertBatchRecords(RefBook.Id.PERSON.getId(), persons, this.&mapPersonAttr)
-
-            insertBatchRecords(RefBook.Id.ID_DOC.getId(), documents, this.&mapPersonDocumentAttr)
-
-            def validIdentifiers = checkPersonIdentifiers(identifiers)
-            insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), validIdentifiers, this.&mapPersonIdentifierAttr)
-        }
-    }
-
-    List<NaturalPerson> validatePersons(List<NaturalPerson> persons) {
-        List<NaturalPerson> validPersons = []
-        for (def person : persons) {
-            List<String> errors = [] // фатальные (локальные), т.е. не будут созданы записи
-            addIfNotNull(errors, ScriptUtils.checkName(person.lastName, "Фамилия"))
-            addIfNotNull(errors, ScriptUtils.checkName(person.firstName, "Имя"))
-            warnIfNotNull(ScriptUtils.checkInn(person.inn))
-            for (def document : person.personDocumentList) {
-                if (document.docType) {
-                    addIfNotNull(errors, ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер"))
-                }
-            }
-            if (!errors) {
-                validPersons.add(person)
-            } else {
-                if (1 == errors.size()) {
-                    logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\"" +
-                            ", \"${person.majorDocument?.documentNumber}\", \"${person.source?.name}\". " +
-                            "Не пройдены проверки: " + errors[0])
-                } else {
-                    logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\"" +
-                            ", \"${person.majorDocument?.documentNumber}\", \"${person.source?.name}\". " +
-                            "Не пройдены проверки:")
-                    for (int i = 0; i < errors.size(); i++) {
-                        logger.warn("${i + 1}. ${errors[i]}")
+                for (def document : person.personDocumentList) {
+                    if (document.docType != null && document.documentNumber) {
+                        documentsToCreate.add(document)
                     }
                 }
             }
+
+            insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), addressesToCreate, this.&mapAddressAttr)
+
+            insertBatchRecords(RefBook.Id.PERSON.getId(), persons, this.&mapPersonAttr)
+
+            insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentsToCreate, this.&mapPersonDocumentAttr)
+
+            insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), identifiersToCreate, this.&mapPersonIdentifierAttr)
         }
-        return validPersons
+        return persons
     }
 
-    void addIfNotNull(Collection collection, Object object) {
-        if (object) {
-            collection.add(object)
-        }
-    }
+    /**
+     * Обработка ошибочных ситуаций алгоритма
+     */
+    void checkPersons(List<NaturalPerson> persons) {
+        for (def person : persons) {
+            // 3.a Ошибки возникшие при создании записей
+            for (def identifier : person.personIdentityList) {
+                def asnuName = (identifier as PersonIdentifierExt).asnuName
+                if (asnuName && identifier.asnu == null) {
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                            " АСНУ=\"$asnuName\" не найдена запись в справочнике \"АСНУ\".")
+                }
+            }
+            if (person.source == null) {
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                        " невозможно определить систему-источник. Атрибут \"Система-источник\" не был заполнен.")
+            }
+            for (def document : person.personDocumentList) {
+                def docTypeCode = (document as PersonDocumentExt).docTypeCode
+                if (docTypeCode && document.docType == null) {
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
+                            " указан код ДУЛ ($docTypeCode), отсутствующий в справочнике \"Коды документов\".")
+                }
+            }
+            def taxPayerStatusCode = (person as NaturalPersonExt).taxPayerStatusCode
+            if (taxPayerStatusCode && person.taxPayerStatus == null) {
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, \"${person.majorDocument?.documentNumber ?: "(документ не определен)"}\"" +
+                        " cтатус налогоплательщика ($taxPayerStatusCode) не найден в справочнике \"Статусы налогоплательщика\".")
+            }
+            def citizenshipCode = (person as NaturalPersonExt).citizenshipCode
+            if (citizenshipCode && person.citizenship == null) {
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                        " код страны гражданства ($citizenshipCode) не найден в справочнике \"Общероссийский классификатор стран мира\".")
+            }
+            if (person.address != null) {
+                def countryCode = person.address.countryCode
+                if (countryCode && person.address.country == null) {
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                            " код страны адреса за пределами РФ ($countryCode) не найден в справочнике \"Общероссийский классификатор стран мира\".")
+                }
+            }
+            // Проверки заполненности обязательный полей
+            checkFilled(person.lastName, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ФамФЛ")
+            checkFilled(person.firstName, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ИмяФЛ")
+            checkFilled((person as NaturalPersonExt).birthDateStr, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ДатаРожд")
+            checkFilled((person as NaturalPersonExt).citizenshipCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.Гражд")
+            checkFilled((person as NaturalPersonExt).taxPayerStatusCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.СтатусФЛ")
+            for (def document : person.personDocumentList) {
+                checkFilled((document as PersonDocumentExt).docTypeCode, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛВид")
+                checkFilled(document.documentNumber, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛНом")
+                checkFilled((document as PersonDocumentExt).incRepStr, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛГл")
+            }
+            for (def identifier : person.personIdentityList) {
+                checkFilled((identifier as PersonIdentifierExt).asnuName, person, "Файл.ИнфЧасть.СисИсточ.СисИсточНам")
+            }
 
-    void warnIfNotNull(String message) {
-        if (message) {
-            logger.warn(message)
-        }
-    }
+            // 3.b Проверки данных ФЛ
+            List<String> warnings = []
+            // 1. Проверка корректности формата ДУЛ
+            for (def document : person.personDocumentList) {
+                if (document.docType && document.documentNumber) {
+                    warnings << ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер")
+                }
+            }
+            if (person.citizenship?.code == "643") {
+                // 2. Проверка разрешеннных символов в фамилии для граждан РФ
+                warnings << ScriptUtils.checkName(person.lastName, "Фамилия")
+                // 3. Проверка разрешеннных символов в имени для граждан РФ
+                warnings << ScriptUtils.checkName(person.firstName, "Имя")
+            }
+            // 4. Проверка корректности ИНН РФ
+            def message = ScriptUtils.checkInn(person.inn)
+            if (message) {
+                warnings << "Указан некорректный ИНН РФ. $message"
+            }
+            // 5. Проверка наличия ИНП для указанных систем-источников
+            for (def identifier : person.personIdentityList) {
+                if (!identifier.inp) {
+                    warnings << "В файле загрузки для системы-источника (${(identifier as PersonIdentifierExt).asnuName}) не указан элемент ИНП"
+                }
+            }
+            // 6. Проверка, что среди ДУЛ имеется ДУЛ с признаком "главный ДУЛ"
+            if (person.majorDocument == null) {
+                warnings << "Среди записей о ДУЛ отсутствует запись, для которой признак \"Включается в отчетность\"=1"
+            }
 
-    List<PersonIdentifier> checkPersonIdentifiers(List<PersonIdentifier> identifiers) {
-        List<PersonIdentifier> validIdentifiers = []
-        for (def identifier : identifiers) {
-            if (identifier.inp) {
-                validIdentifiers.add(identifier)
-            } else {
-                def person = identifier.naturalPerson
-                logger.warn("Не удалось создать запись об идентификаторе налогоплательщика у записи  \"${person.id}\", " +
-                        "\"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\", \"${versionFromString}\". Причина: отсутствует \"ИНП\".")
-                identifier.naturalPerson.personIdentityList.remove(identifier)
+            for (def warning : warnings) {
+                if (warning) {
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                            " не пройдена проверка: $warning")
+                }
             }
         }
-        return validIdentifiers
+    }
+
+    String checkFilled(String value, NaturalPerson person, String attrName) {
+        if (value != null && value.isEmpty()) {
+            logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                    " было указано пустое значение либо значение, состоящее из одних пробелов, для атрибута ($attrName)")
+        }
+        return value
     }
 
     void insertBatchRecords(Long refBookId, List<? extends IdentityObject> identityObjects, Closure refBookMapper) {
@@ -421,15 +481,6 @@ class Person extends AbstractScriptClass {
 
     void putValue(Map<String, RefBookValue> values, String attrName, RefBookAttributeType type, Object value) {
         values.put(attrName, new RefBookValue(type, value))
-    }
-
-    String truncateIfNeeded(String stringToTruncate, NaturalPerson personRecord, String idFL, int maxLength, String fieldName) {
-        if (stringToTruncate && stringToTruncate.length() > maxLength) {
-            logger.warn("\"${fieldName}\" превышает допустимые размеры поля. Значение обрезано. Запись ${idFL}, ${personRecord.lastName} " +
-                    "${personRecord.firstName} ${personRecord.middleName}, ${personRecord.birthDate.format("dd.MM.yyyy")}. Причина: \"Превышено допустимое значение в поле\"")
-            return stringToTruncate.substring(0, maxLength)
-        }
-        return stringToTruncate
     }
 
     /**
@@ -551,6 +602,25 @@ class Person extends AbstractScriptClass {
         }
     }
 
+    String formatDate(Date date) {
+        return date ? ScriptUtils.formatDate(date) : ""
+    }
+
+    class NaturalPersonExt extends NaturalPerson {
+        String birthDateStr
+        String citizenshipCode
+        String taxPayerStatusCode
+    }
+
+    class PersonDocumentExt extends PersonDocument {
+        String docTypeCode
+        String incRepStr
+    }
+
+    class PersonIdentifierExt extends PersonIdentifier {
+        String asnuName
+    }
+
     /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
     /**
@@ -610,9 +680,6 @@ class Person extends AbstractScriptClass {
                     countriesCache.put(code, country)
                 }
             }
-            if (!country) {
-                logger.warn("Не найдена страна по коду \"${code}\"")
-            }
         }
         return country
     }
@@ -633,9 +700,6 @@ class Person extends AbstractScriptClass {
                     taxpayerStatus.setCode(record.get("CODE").getStringValue())
                     taxpayerStatusessCache.put(code, taxpayerStatus)
                 }
-            }
-            if (!taxpayerStatus) {
-                logger.warn("Не найден статус налогоплательщика по коду \"${code}\"")
             }
         }
         return taxpayerStatus
@@ -658,9 +722,6 @@ class Person extends AbstractScriptClass {
                     docTypesCache.put(code, docType)
                 }
             }
-            if (!docType) {
-                logger.warn("Не найден вид документа по коду \"${code}\"")
-            }
         }
         return docType
     }
@@ -675,9 +736,6 @@ class Person extends AbstractScriptClass {
             if (!asnu) {
                 asnu = refBookAsnuService.fetchByName(name)
                 asnuCache.put(name, asnu)
-            }
-            if (!asnu) {
-                logger.error("Не найден АСНУ по наименованию \"${name}\"")
             }
         }
         return asnu
