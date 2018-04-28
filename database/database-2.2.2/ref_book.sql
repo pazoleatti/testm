@@ -46,5 +46,9 @@ BEGIN
 	values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name, b.version, b.status, b.record_id);
 
 	update ref_book set is_versioned = 1 where id = 933;
+	
+	delete from REF_BOOK_ID_DOC where doc_id in (select id from REF_BOOK_DOC_TYPE where code in ('22', '09', '28', '26', '27', '05', '81', '60', '61', '62', '63', '01', '02', '18', '04', '06'));
+	
+	delete from REF_BOOK_DOC_TYPE where code in ('22', '09', '28', '26', '27', '05', '81', '60', '61', '62', '63', '01', '02', '18', '04', '06');
 END;
 /
