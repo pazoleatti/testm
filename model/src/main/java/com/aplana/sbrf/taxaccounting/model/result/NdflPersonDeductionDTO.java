@@ -23,7 +23,7 @@ public class NdflPersonDeductionDTO {
     /**
      * Порядковый номер строки
      */
-    protected BigDecimal rowNum;
+    protected String rowNum;
 
     // Код вычета (Графа 3)
     private String typeCode;
@@ -82,7 +82,7 @@ public class NdflPersonDeductionDTO {
     public NdflPersonDeductionDTO() {
     }
 
-    public NdflPersonDeductionDTO(String operationId, Long sourceId, BigDecimal rowNum, String typeCode, String notifType, Date notifDate, String notifNum, String notifSource, BigDecimal notifSumm, Date incomeAccrued, String incomeCode, BigDecimal incomeSumm, Date periodPrevDate, BigDecimal periodPrevSumm, Date periodCurrDate, BigDecimal periodCurrSumm, String inp) {
+    public NdflPersonDeductionDTO(String operationId, Long sourceId, String rowNum, String typeCode, String notifType, Date notifDate, String notifNum, String notifSource, BigDecimal notifSumm, Date incomeAccrued, String incomeCode, BigDecimal incomeSumm, Date periodPrevDate, BigDecimal periodPrevSumm, Date periodCurrDate, BigDecimal periodCurrSumm, String inp) {
         this.operationId = operationId;
         this.sourceId = sourceId;
         this.rowNum = rowNum;
@@ -118,11 +118,11 @@ public class NdflPersonDeductionDTO {
         this.sourceId = sourceId;
     }
 
-    public BigDecimal getRowNum() {
+    public String getRowNum() {
         return rowNum;
     }
 
-    public void setRowNum(BigDecimal rowNum) {
+    public void setRowNum(String rowNum) {
         this.rowNum = rowNum;
     }
 

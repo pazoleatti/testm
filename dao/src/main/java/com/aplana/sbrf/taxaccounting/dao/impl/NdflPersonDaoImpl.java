@@ -26,6 +26,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -146,8 +147,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     @Override
                     public NdflPersonIncomeDTO mapRow(ResultSet rs, int i) throws SQLException {
                         NdflPersonIncomeDTO personIncome = new NdflPersonIncomeDTO();
-
-                        personIncome.setRowNum(rs.getBigDecimal("row_num"));
+                        BigDecimal rowNum = rs.getBigDecimal("row_num");
+                        personIncome.setRowNum(rowNum != null ? rowNum.toString() : "");
                         personIncome.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
                         personIncome.setOperationId(rs.getString("operation_id"));
@@ -255,7 +256,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     public NdflPersonDeductionDTO mapRow(ResultSet rs, int i) throws SQLException {
                         NdflPersonDeductionDTO personDeduction = new NdflPersonDeductionDTO();
 
-                        personDeduction.setRowNum(rs.getBigDecimal("row_num"));
+                        BigDecimal rowNum = rs.getBigDecimal("row_num");
+                        personDeduction.setRowNum(rowNum != null ? rowNum.toString() : "");
                         personDeduction.setOperationId(rs.getString("operation_id"));
                         personDeduction.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
@@ -354,7 +356,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     @Override
                     public NdflPersonPrepaymentDTO mapRow(ResultSet rs, int i) throws SQLException {
                         NdflPersonPrepaymentDTO personPrepayment = new NdflPersonPrepaymentDTO();
-                        personPrepayment.setRowNum(rs.getBigDecimal("row_num"));
+                        BigDecimal rowNum = rs.getBigDecimal("row_num");
+                        personPrepayment.setRowNum(rowNum != null ? rowNum.toString() : "");
                         personPrepayment.setOperationId(rs.getString("operation_id"));
                         personPrepayment.setNdflPersonId(rs.getLong("ndfl_person_id"));
 
