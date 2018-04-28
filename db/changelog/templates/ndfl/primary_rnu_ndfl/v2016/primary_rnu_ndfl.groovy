@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
@@ -2077,8 +2076,9 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_0.setCellStyle(centeredStyle)
                 Cell cell_1 = row.createCell(1)
                 cell_1.setCellStyle(centeredStyle)
+                cell_1.setCellType(Cell.CELL_TYPE_STRING)
                 if (i < np.incomes.size()) {
-                    cell_1.setCellValue(np.incomes.get(i).rowNum)
+                    cell_1.setCellValue(np.incomes.get(i).rowNum != null ? np.incomes.get(i).rowNum.toString() : "")
                 }
                 Cell cell_2 = row.createCell(2);
                 cell_2.setCellStyle(centeredStyle)
