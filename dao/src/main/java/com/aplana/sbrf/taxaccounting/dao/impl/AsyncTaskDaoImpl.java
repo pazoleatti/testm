@@ -157,7 +157,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         params.addValue("queue", queue.getId());
         return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = (select id from (" +
                         "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) " +
-                        "and (task_group is null or (task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null))) order by create_date) " +
+                        "and (task_group is null or (task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) order by create_date) " +
                         "where rownum = 1)",
                 params);
     }
