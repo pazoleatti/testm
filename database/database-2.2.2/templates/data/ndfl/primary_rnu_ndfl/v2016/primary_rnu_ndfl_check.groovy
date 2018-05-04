@@ -708,7 +708,8 @@ class Check extends AbstractScriptClass {
                         incomeTypeRowList.each { incomeTypeRow ->
                             if (ndflPersonIncome.incomeAccruedDate >= incomeTypeRow.record_version_from?.dateValue &&
                                     ndflPersonIncome.incomeAccruedDate <= incomeTypeRow.record_version_to?.dateValue) {
-                                def incomeCodeRef = incomeCodeMap.get(incomeTypeRow?.income_type_id?.numberValue)
+                                RefBookValue refBookValue = incomeTypeRow?.INCOME_TYPE_ID
+                                def incomeCodeRef = incomeCodeMap.get((Long) refBookValue?.getValue())
                                 incomeCodeRefList.add(incomeCodeRef)
                             }
                         }
@@ -1495,7 +1496,7 @@ class Check extends AbstractScriptClass {
                     ) {
                         // "Графа 15" = "Графа 7"
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            logTypeMessagePairList.add(new CheckData("\"Дата удержанного налога\" указана некорректно",
+                            logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                     ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
                                             "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
                                     section_2_15_fatal))
