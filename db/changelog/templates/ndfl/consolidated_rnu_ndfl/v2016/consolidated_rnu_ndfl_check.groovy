@@ -1985,13 +1985,14 @@ class Check extends AbstractScriptClass {
 
         Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId =
                 ndflPersonIncomeList.groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
-        Map<Long, Map<String, List<NdflPersonDeduction>>> deductionsByPersonIdAndOperationId =
-                ndflPersonDeductionList.groupBy({ NdflPersonDeduction it -> it.ndflPersonId }, { NdflPersonDeduction it -> it.operationId })
         def col16CheckDeductionGroups = ndflPersonDeductionList.findAll {
             it.notifType == "2"
         }.groupBy({ it.ndflPersonId }, { it.operationId }, { it.notifDate },
                 { it.notifNum }, { it.notifSource }, { it.notifSumm }
         )
+        def col16CheckDeductionGroups_1 = ndflPersonDeductionList.findAll {
+            it.notifType == "1"
+        }.groupBy({ it.ndflPersonId }, { it.operationId })
 
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted();
@@ -2093,6 +2094,25 @@ class Check extends AbstractScriptClass {
                                 ndflPersonDeduction.operationId, ndflPersonDeduction.notifType, ndflPersonDeduction.notifNum,
                                 formatDate(ndflPersonDeduction.notifDate), ndflPersonDeduction.notifSource, ndflPersonDeduction.notifSumm,
                                 sum16, ndflPersonDeduction.notifSumm
+                        )
+                        logger.logCheck(errMsg,
+                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                                LOG_TYPE_3_16, fioAndInpAndOperId)
+                    }
+                    deductionsGroup.clear()
+                }
+            }
+            // Выч6.1
+            if (ndflPersonDeduction.notifType == "1") {
+                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
+                        ?.get(ndflPersonDeduction.operationId) ?: []
+                if (deductionsGroup) {
+                    BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
+                    BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
+                    if (sum16 > sum8) {
+                        String errMsg = String.format("Раздел 3. ID операции: \"%s\". Для строк, у которых указан тип: \"%s\",  сумма значений гр. \"%s\" (%s) должна быть меньше или равна сумме значений гр. \"%s\" (%s)",
+                                ndflPersonDeduction.operationId, ndflPersonDeduction.notifType,
+                                C_PERIOD_CURR_SUMM, sum16, C_NOTIF_SUMM, sum8
                         )
                         logger.logCheck(errMsg,
                                 declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
