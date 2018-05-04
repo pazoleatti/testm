@@ -1536,7 +1536,7 @@ class Check extends AbstractScriptClass {
                     ) {
                         // "Графа 15" = "Графа 7"
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            logTypeMessagePairList.add(new CheckData("\"Дата удержанного налога\" указана некорректно",
+                            logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                     ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
                                             "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
                                     section_2_15_fatal))
