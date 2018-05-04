@@ -1525,7 +1525,7 @@ class Check extends AbstractScriptClass {
                         if (foundIncomeMaxCol7 != null && dateRelateToCurrentPeriod(foundIncomeMaxCol7.incomePayoutDate)) {
                             // "Графа 15" = "Графа 6"
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
-                                logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
+                                logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
                                                 "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
                                         section_2_15_fatal))
