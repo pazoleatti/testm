@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ndfl</artifactId>
         <groupId>com.aplana.taxaccounting</groupId>
-        <version>2.2.2</version>
+        <version>3.0</version>
     </parent>
 
     <artifactId>script-test</artifactId>
