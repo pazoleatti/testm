@@ -708,7 +708,8 @@ class Check extends AbstractScriptClass {
                         incomeTypeRowList.each { incomeTypeRow ->
                             if (ndflPersonIncome.incomeAccruedDate >= incomeTypeRow.record_version_from?.dateValue &&
                                     ndflPersonIncome.incomeAccruedDate <= incomeTypeRow.record_version_to?.dateValue) {
-                                def incomeCodeRef = incomeCodeMap.get(incomeTypeRow?.income_type_id?.numberValue)
+                                RefBookValue refBookValue = incomeTypeRow?.INCOME_TYPE_ID
+                                def incomeCodeRef = incomeCodeMap.get((Long) refBookValue?.getValue())
                                 incomeCodeRefList.add(incomeCodeRef)
                             }
                         }
