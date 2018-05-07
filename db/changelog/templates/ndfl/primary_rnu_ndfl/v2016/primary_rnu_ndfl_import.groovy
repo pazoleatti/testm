@@ -1284,7 +1284,7 @@ class Import extends AbstractScriptClass {
             ndflPersonService.deleteNdflPersonBatch(ndflPersonIdForRemove)
         }
 
-        logger.info("При загрузке файла было удалено: %d, из: %d", removedCounter, initialCounter)
+        removedCounter !=0 ? logger.info("При загрузке файла было удалено: %d, из: %d", removedCounter, initialCounter) :
         logger.getEntries().addAll(removeMessages)
     }
 
