@@ -2002,10 +2002,16 @@ class Check extends AbstractScriptClass {
             if (ndflPersonDeduction.periodCurrDate != null) {
                 // "Графа 15" принадлежит к отчетному периоду
                 if (!dateRelateToCurrentPeriod(ndflPersonDeduction.periodCurrDate)) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не соответствует значению гр. \"%s\" (\"%s\")",
+                    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+                    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+                    String strCorrPeriod = ""
+                    if (departmentReportPeriod.getCorrectionDate() != null) {
+                        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+                    }
+                    Department department = departmentService.get(departmentReportPeriod.departmentId)
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не входит в отчетный период налоговой формы \"%s\"",
                             C_PERIOD_CURR_DATE, formatDate(ndflPersonDeduction.periodCurrDate),
-                            C_INCOME_ACCRUED, formatDate(ndflPersonDeduction.incomeAccrued)
-                    )
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod)
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.logCheck("%s. %s.",
                             declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId),
