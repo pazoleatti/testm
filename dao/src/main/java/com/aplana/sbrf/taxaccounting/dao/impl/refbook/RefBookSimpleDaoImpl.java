@@ -15,13 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -62,6 +56,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     private DBUtils dbUtils;
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private RefBookMapperFactory refBookMapperFactory;
 
     private static int IN_CLAUSE_LIMIT = 10000;
 
@@ -116,7 +112,18 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         return result;
     }
 
-	@Override
+    @Override
+    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, PagingParams pagingParams, List<String> columns, String filter) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsQueryWithFilter(refBook, columns, filter, pagingParams, pagingParams.getDirection().toLowerCase().equals("asc"));
+        List<T> records = refBookDao.getMappedRecordsData(ps, refBook);
+
+        PagingResult<T> result = new PagingResult<>(records);
+        ps = queryBuilder.psGetRecordsQueryWithFilter(refBook, columns, filter, null, pagingParams.getDirection().toLowerCase().equals("asc"));
+        result.setTotalCount(refBookDao.getRecordsCount(ps));
+        return result;
+    }
+
+    @Override
 	public PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
 		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
 		LOG.debug(ps.getQuery().toString());
@@ -140,6 +147,18 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         ps.addNamedParam("id", id);
         try {
             return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), getRowMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public <T extends RefBookSimple> T getRecord(RefBook refBook, Long recordId) {
+        PreparedStatementData ps = queryBuilder.psGetRecordData(refBook);
+        ps.addNamedParam("id", recordId);
+        try {
+            RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook);
+            return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), rowMapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

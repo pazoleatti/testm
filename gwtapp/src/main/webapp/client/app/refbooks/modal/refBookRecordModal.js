@@ -10,12 +10,18 @@
      * @description Контроллер для создания, просмотра и редактирования записей справочников
      */
         .controller('refBookRecordModalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData',
-            '$http', '$logPanel', 'LogEntryResource', '$dialogs', "$injector", "$compile", "$timeout",
-            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs, $injector, $compile, $timeout) {
+            '$http', '$logPanel', 'LogEntryResource', '$dialogs',
+            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.refBook = $shareData.refBook;
                 $scope.record = $shareData.record;
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
+                $scope.mode = $shareData.mode;
+
                 $scope.refBook.attributes.forEach(function (attribute) {
+                    if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
+                        // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
+                        $scope.record[attribute.alias].dateValue = new Date($scope.record[attribute.alias].dateValue);
+                    }
                     if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
                         $scope.versionFromAttribute = attribute
                     }
@@ -34,17 +40,17 @@
                         var refBookValue = $scope.record[attribute.alias];
                         switch (attribute.attributeType) {
                             case 'STRING':
-                                value = refBookValue && refBookValue.stringValue ? refBookValue.stringValue : "";
+                                value = refBookValue && refBookValue.stringValue && typeof refBookValue.stringValue !== 'undefined' ? refBookValue.stringValue : "";
                                 break;
                             case 'NUMBER':
-                                value = refBookValue && refBookValue.numberValue ? refBookValue.numberValue : "";
+                                value = refBookValue && refBookValue.numberValue && typeof refBookValue.numberValue !== 'undefined' ? refBookValue.numberValue : "";
                                 break;
                             case 'DATE':
                                 //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
-                                value = refBookValue && refBookValue.dateValue ? $filter('dateFormatter')(refBookValue.dateValue) : "";
+                                value = refBookValue && refBookValue.dateValue && typeof refBookValue.dateValue !== 'undefined' ? $filter('dateFormatter')(refBookValue.dateValue) : "";
                                 break;
                             case 'REFERENCE':
-                                value = refBookValue && refBookValue.referenceValue ? refBookValue.referenceValue : "";
+                                value = refBookValue && refBookValue.referenceObject && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
                                 break;
                         }
                         return value;
@@ -52,37 +58,23 @@
                 };
 
                 /**
-                 * Динамически добавляет поля в диалог в зависимости от его режима работы и типа справочника
+                 * Сохранение
                  */
-                $scope.constructFields = function () {
-                    var fieldsHtml = "";
+                $scope.save = function () {
                     $scope.refBook.attributes.forEach(function (attribute) {
-                        if (attribute.visible && (!$scope.refBook.versioned || (
-                                attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS &&
-                                attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS))) {
-                            if ($shareData.mode === 'VIEW') {
-                                fieldsHtml += "<div class=\"row-fluid\">\n" +
-                                    "    <div class=\"span4\">\n" +
-                                    "        <label class=\"control-label\">" + attribute.name + ":</label>\n" +
-                                    "    </div>\n" +
-                                    "    <div class=\"span8\">\n" +
-                                    "        <label class=\"font-normal info-text\">" + $scope.getAttributeValue(attribute) + "</label>\n" +
-                                    "    </div>\n" +
-                                    "</div>"
-                            }
+                        if (attribute.attributeType === 'REFERENCE' && $scope.record[attribute.alias] && $scope.record[attribute.alias].referenceValue) {
+                            // Преобразуем ссылочные поля записи в подходящие для сервера
+                            $scope.record[attribute.alias].referenceValue = $scope.record[attribute.alias].referenceValue.id;
                         }
                     });
-                    $injector.invoke(function ($compile) {
-                        var fieldsContainer = angular.element(document.querySelector("#refBookRecordFieldsContainer"));
-                        var fields = $compile(fieldsHtml)(fieldsContainer.scope());
-                        fieldsContainer.append(fields);
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.numberValue,
+                        data: $scope.record
+                    }).then(function () {
+                        $modalInstance.close(true);
                     });
                 };
-
-                $timeout(function () {
-                    // Загружаем поля через таймаут, т.к на момент старта контроллера диалог еще не открыт и контейнер для полей не существует
-                    $scope.constructFields();
-                }, 500);
 
                 /**
                  * @description закрытие модального окна

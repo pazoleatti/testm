@@ -57,7 +57,28 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return dao.getRecordsWithVersionInfo(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecordsWithVersionInfo(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
+
+        // Собираем атрибуты, которые ссылаются на другие справочники
+        Map<String, RefBookDataProvider> referenceAttributes = new HashMap<>();
+        for (RefBookAttribute attribute : getRefBook().getAttributes()) {
+            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                referenceAttributes.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+            }
+        }
+
+        if (!referenceAttributes.isEmpty()) {
+            // Разыменовываем справочные атрибуты
+            for (Map<String, RefBookValue> record : records) {
+                for (Map.Entry<String, RefBookDataProvider> reference : referenceAttributes.entrySet()) {
+                    String referenceAlias = reference.getKey();
+                    Map<String, RefBookValue> referenceObject = reference.getValue().getRecordData(record.get(referenceAlias).getReferenceValue());
+                    record.put(referenceAlias, new RefBookValue(RefBookAttributeType.REFERENCE, referenceObject));
+                }
+            }
+        }
+
+        return records;
     }
 
     @Override

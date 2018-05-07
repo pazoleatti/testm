@@ -1,0 +1,57 @@
+package com.aplana.sbrf.taxaccounting.service.refbook;
+
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Общий сервис для работы со справочниками. Содержимт методы обработки небольших справочников, не имеющих собственной крупной логики из которых требуется только получать данные
+ */
+public interface CommonRefBookService {
+
+    /**
+     * Получить все справочники
+     *
+     * @return список объектов содержащих данные о справочниках
+     */
+    PagingResult<RefBookListResult> fetchAllRefBooks();
+
+    /**
+     * Получение всех значений указанного справочника
+     *
+     * @param refBookId    идентификатор справочника
+     * @param columns      список столбцов таблицы справочника, по которым будет выполняться фильтрация
+     * @param filter       параметр фильтрации
+     * @param pagingParams параметры пейджинга
+     * @return значения справочника
+     */
+    <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String filter, PagingParams pagingParams);
+
+    /**
+     * Получение одного значения указанного справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordId  идентификатор записи
+     * @return значение записи справочника
+     */
+    <T extends RefBookSimple> T fetchRecord(Long refBookId, Long recordId);
+
+    /**
+     * Сохраняет изменения в записи справочника
+     *
+     * @param userInfo  текущий пользователь
+     * @param refBookId идентификатор справочника
+     * @param recordId  идентификатор записи справочника
+     * @param record    данные записи в структуре аттрибут-значение
+     * @return результат сохранения
+     */
+    ActionResult editRecord(TAUserInfo userInfo, long refBookId, long recordId, Map<String, RefBookValue> record);
+}

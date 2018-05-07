@@ -529,7 +529,83 @@
                     $scope.oktmoSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/96", {}, {
                         property: "name",
                         direction: "asc"
-                    }, "oktmoFormatter");
+                    }, "codeNameFormatter");
+                };
+            }
+        ])
+
+        /**
+         * Универсальный контроллер для выбора из любого справочника
+         */
+        .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http',
+            function ($scope, GetSelectOption, $http) {
+                $scope.select = {};
+
+                // Список конфигов для разных справочников
+                $scope.refBookConfig = {
+                    96: {   // ОКТМО
+                        filter: {
+                            columns: ["name", "code"]
+                        },
+                        formatter: "codeNameFormatter"
+                    },
+                    922: {   // Коды видов доходов
+                        filter: {
+                            columns: ["name", "code"]
+                        },
+                        formatter: "codeNameFormatter"
+                    },
+                    904: {   // Физические лица TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет
+                        sort: {
+                            property: "last_name",
+                            direction: "asc"
+                        },
+                        filter: {
+                            columns: ["first_name, last_name, middle_name"]
+                        },
+                        formatter: "personFormatter"
+                    },
+                    default: {
+                        // ОК 025-2001 (Общероссийский классификатор стран мира)
+                        // Виды документов, удостоверяющих личность
+                        // АСНУ
+                        // Признак кода вычета
+                        sort: {
+                            property: "name",
+                            direction: "asc"
+                        },
+                        filter: {
+                            columns: ["name"]
+                        }
+                    }
+                };
+
+                /**
+                 * Инициализация полного списка ОКТМО
+                 */
+                $scope.initSelect = function (attribute) {
+
+                    /**
+                     * Событие изменения значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
+                     */
+                    $scope.$watch("record", function(newValue, oldValue) {
+                        if (newValue[attribute.alias].referenceObject && !newValue[attribute.alias].referenceValue) {
+                            $http({
+                                method: "GET",
+                                url: "controller//rest/refBook/" + attribute.refBookId + "/record/" + newValue[attribute.alias].referenceObject.id.numberValue
+                            }).success(function (record) {
+                                $scope.record[attribute.alias].referenceValue = record
+                            });
+                        }
+                    });
+
+                    var config = $scope.refBookConfig[attribute.refBookId] ? $scope.refBookConfig[attribute.refBookId] : $scope.refBookConfig.default;
+                    $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBook/" + attribute.refBookId + "/records",
+                        config.filter,
+                        config.sort ? config.sort : $scope.refBookConfig.default.sort,
+                        config.formatter,
+                        "filter"
+                    );
                 };
             }
         ])

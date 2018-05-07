@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
- * Справочник "ОК 025-2001 (Общероссийский классификатор стран мира)"
- * @author Andrey Drunk
+ * Справочник "Признак кода вычета"
+ *
+ * @author dloshkarev
  */
-public class RefBookCountry extends RefBookSimple<Long> {
+public class RefBookDeductionMark extends RefBookSimple<Long> {
+    //Код
     private String code;
+    //Наименование дохода
     private String name;
 
     public String getCode() {

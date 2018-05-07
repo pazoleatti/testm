@@ -77,6 +77,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Autowired
     private DBUtils dbUtils;
 
+    @Autowired
+    private RefBookMapperFactory refBookMapperFactory;
+
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -2821,6 +2824,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
         RowMapper<Map<String, RefBookValue>> rowMapper = getRowMapper(refBook);
+        if (!ps.getParams().isEmpty()) {
+            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
+        } else {
+            return getJdbcTemplate().query(ps.getQuery().toString(), rowMapper);
+        }
+    }
+
+    @Override
+    public <T extends RefBookSimple> List<T> getMappedRecordsData(PreparedStatementData ps, RefBook refBook) {
+        RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook);
         if (!ps.getParams().isEmpty()) {
             return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
         } else {

@@ -42,6 +42,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             return result;
         }
     }
+
     @Override
     public PagingResult<RefBookOktmo> fetchAll(String filter, PagingParams pagingParams) {
         StringBuilder baseSql =

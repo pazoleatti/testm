@@ -76,6 +76,7 @@
                                     index: attribute.alias,
                                     width: attribute.width * 20, //TODO: пока так, потому что в БД ширина задана в em, а оно не поддерживается в jqgrid
                                     type: attribute.attributeType,
+                                    referenceAttribute: attribute.refBookAttribute,
                                     formatter: refBookValueFormatter
                                 }
                             )
@@ -89,17 +90,17 @@
                     var value = "";
                     switch (colModel.type) {
                         case 'STRING':
-                            value = record && record.stringValue ? record.stringValue : "";
+                            value = record && record.stringValue && typeof record.stringValue !== 'undefined' ? record.stringValue : "";
                             break;
                         case 'NUMBER':
-                            value = record && record.numberValue ? record.numberValue : "";
+                            value = record && record.numberValue && typeof record.numberValue !== 'undefined' ? record.numberValue : "";
                             break;
                         case 'DATE':
                             //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
-                            value = record && record.dateValue ? $filter('dateFormatter')(record.dateValue) : "";
+                            value = record && record.dateValue && typeof record.dateValue !== 'undefined' ? $filter('dateFormatter')(record.dateValue) : "";
                             break;
                         case 'REFERENCE':
-                            value = record && record.referenceValue ? record.referenceValue : "";
+                            value = record && record.referenceObject && typeof record.referenceObject !== 'undefined' ? record.referenceObject[colModel.referenceAttribute.alias].value : "";
                             break;
                     }
                     return value;
@@ -144,6 +145,7 @@
                             viewrecords: true,
                             hidegrid: false,
                             multiselect: true,
+                            // TODO: задать сортировку по умолчанию
                             ondblClickRow: function (rowId) {
                                 $scope.showRecord($scope.refBookGrid.ctrl.getRawData(rowId))
                             }
@@ -227,8 +229,10 @@
                                 };
                             }
                         }
-                    }).result.then(function () {
-                        $scope.refBookGrid.ctrl.refreshGrid(1);
+                    }).result.then(function (needToRefresh) {
+                        if (needToRefresh) {
+                            $scope.refBookGrid.ctrl.refreshGrid(1);
+                        }
                     });
                 };
 

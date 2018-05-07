@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.json.RefBookValueDeserializer;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -13,6 +15,7 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 23.05.13 17:43
  */
+@JsonDeserialize(using = RefBookValueDeserializer.class)
 public class RefBookValue implements Serializable {
 
 	private static final long serialVersionUID = 1L;

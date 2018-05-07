@@ -47,6 +47,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
     @Autowired
     private TAUserService userService;
 
+    // Кэш провайдеров
+    private WeakHashMap<Long, RefBookDataProvider> providers = new WeakHashMap<>();
+
     private static final Log LOG = LogFactory.getLog(RefBookFactoryImpl.class);
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -75,8 +78,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
     private ApplicationContext applicationContext;
     @Autowired
     private RefBookScriptingService refBookScriptingService;
-    @Autowired
-    private LockDataService lockDataService;
 
     @Override
     public RefBook get(Long refBookId) {
@@ -99,8 +100,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
         return refBookDao.getByAttribute(attributeId);
     }
 
-    @Override
-    public RefBookDataProvider getDataProvider(Long refBookId) {
+    private RefBookDataProvider getDataProviderInternal(Long refBookId) {
         RefBook refBook = get(refBookId);
 
         if (simpleEditableRefBooks.contains(refBookId)) {
@@ -134,6 +134,17 @@ public class RefBookFactoryImpl implements RefBookFactory {
             RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
             refBookUniversal.setRefBookId(refBookId);
             return refBookUniversal;
+        }
+    }
+
+    @Override
+    public RefBookDataProvider getDataProvider(Long refBookId) {
+        if (providers.containsKey(refBookId)) {
+            return providers.get(refBookId);
+        } else {
+            RefBookDataProvider provider = getDataProviderInternal(refBookId);
+            providers.put(refBookId, provider);
+            return provider;
         }
     }
 

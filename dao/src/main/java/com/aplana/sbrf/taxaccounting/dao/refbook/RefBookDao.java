@@ -4,23 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Дао для версионных справочников.
@@ -610,6 +599,13 @@ public interface RefBookDao {
      * @return
      */
     List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook);
+
+    /**
+     * Получает данные записей справочника замапленные на сущности
+     * @param ps объект с sql-запросом и его параметрами
+     * @param refBook справочник
+     */
+    <T extends RefBookSimple> List<T> getMappedRecordsData(PreparedStatementData ps, RefBook refBook);
 
     List<Map<String, RefBookValue>> getRecordsWithHasChild(PreparedStatementData ps, RefBook refBook);
 
