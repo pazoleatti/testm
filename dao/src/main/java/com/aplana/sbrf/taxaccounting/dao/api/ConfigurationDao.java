@@ -107,10 +107,24 @@ public interface ConfigurationDao {
     void updateAsyncParam(AsyncTaskTypeData asyncParam);
 
     /**
+     * Обновление записи конфигурационного параметра електронной почты
+     *
+     * @param emailParam обновляемый параметр
+     */
+    void updateEmailParam(Configuration emailParam);
+
+    /**
      * Получение конфигурационных параметров электронной почты
      *
      * @param pagingParams параметры пагинации
      * @return страница {@link PagingResult} с данными {@link Configuration}
      */
     PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams);
+
+    /**
+     * Получение конфигурационных параметров электронной почты, необходимые для авторизации почтового клиента
+     *
+     * @return мапа <название, значение> с данными {@link Configuration}
+     */
+    List<Configuration> getAuthEmailParams();
 }

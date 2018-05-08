@@ -100,7 +100,7 @@ public class ConfigurationController {
      * @return страница {@link JqgridPagedList} с данными {@link Configuration}
      */
     @GetMapping(value = "/rest/emailParam")
-    public JqgridPagedList<Configuration> fetchEmailConfigParams(@RequestParam PagingParams pagingParams){
+    public JqgridPagedList<Configuration> fetchEmailConfigParams(@RequestParam PagingParams pagingParams) {
         PagingResult<Configuration> data = configurationService.fetchEmailParams(pagingParams, securityService.currentUserInfo());
         setCommonConfigParamPermission(data);
         return JqgridPagedResourceAssembler.buildPagedList(
@@ -187,6 +187,17 @@ public class ConfigurationController {
     @PostMapping(value = "/rest/asyncParam/update")
     public String updateAsyncParam(@RequestParam AsyncTaskTypeData asyncParam) {
         return configurationService.updateAsyncParam(asyncParam, securityService.currentUserInfo());
+    }
+
+    /**
+     * Сохранение параметра конфигурации
+     *
+     * @param emailParam конфигурационный параметр
+     * @return uuid идентификатор логгера с результатом сохранения параметра
+     */
+    @PostMapping(value = "/rest/emailParam/update")
+    public String updateEmailParam(@RequestParam Configuration emailParam) {
+        return configurationService.updateEmailParam(emailParam, securityService.currentUserInfo());
     }
 
     /**

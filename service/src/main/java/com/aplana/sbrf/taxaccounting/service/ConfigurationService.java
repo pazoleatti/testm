@@ -162,6 +162,15 @@ public interface ConfigurationService {
     String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo);
 
     /**
+     * Сохранение конфигурационных параметров электронной почты
+     *
+     * @param emailParam конфигурационный параметр
+     * @param userInfo   информация о пользователе
+     * @return uuid идентификатор логгера
+     */
+    String updateEmailParam(Configuration emailParam, TAUserInfo userInfo);
+
+    /**
      * Проверка конфигурационного параметра на валидность введенных значений и доступа к чтению/записи пути фаловой системы,
      * указанного в параметре
      *
@@ -179,4 +188,6 @@ public interface ConfigurationService {
      * @return страница {@link PagingResult} с данными {@link Configuration}
      */
     PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams, TAUserInfo userInfo);
+
+    Map<String, String> fetchAuthEmailParamsMap();
 }

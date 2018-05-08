@@ -47,7 +47,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         if (group.equals(ConfigurationParamGroup.COMMON) || group.equals(ConfigurationParamGroup.FORM)) {
             configurationService.checkFileSystemAccess(securityService.currentUserInfo(), model, logger);
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
-            boolean success = emailService.testAuth(logger);
+            boolean success = emailService.checkAuthAccess(null, logger);
             if (!success) {
                 auditService.add(FormDataEvent.SEND_EMAIL, securityService.currentUserInfo(), 0, null, null, null, null,
                         logger.getEntries().get(0).getMessage(), uuid);

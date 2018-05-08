@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -86,30 +87,32 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean testAuth(Logger logger) {
+    public boolean checkAuthAccess(Configuration emailParam, Logger logger) {
         try {
-            List<Map<String, String>> params = configurationService.getEmailConfig();
             Properties props = new Properties();
             String login = null;
             String password = null;
             String host = null;
             String port = null;
-            for (Map<String, String> param : params) {
-                String key = param.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE);
-                String value = param.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE);
-                if (value != null && !value.isEmpty()) {
-                    if ("mail.smtp.user".equals(key)) {
-                        login = value;
-                    } else if ("mail.smtp.password".equals("mail.smtp.password")) {
-                        password = value;
-                    } else if ("mail.smtp.host".equals(key)) {
-                        host = value;
-                        props.setProperty(key, value);
-                    } else if ("mail.smtp.port".equals(key)) {
-                        port = value;
-                        props.setProperty(key, value);
-                    } else {
-                        props.setProperty(key, value);
+            Map<String, String> authEmailParams = configurationService.fetchAuthEmailParamsMap();
+            authEmailParams.put(emailParam.getCode(), emailParam.getValue());
+            for (String key : authEmailParams.keySet()) {
+                switch (key){
+                    case "mail.smtp.user" : {
+                        login = authEmailParams.get(key);
+                        break;
+                    }
+                    case "mail.smtp.password" : {
+                        password = authEmailParams.get(key);
+                        break;
+                    }
+                    case "mail.smtp.host" : {
+                        host = authEmailParams.get(key);
+                        break;
+                    }
+                    case "mail.smtp.port" : {
+                        port = authEmailParams.get(key);
+                        break;
                     }
                 }
             }

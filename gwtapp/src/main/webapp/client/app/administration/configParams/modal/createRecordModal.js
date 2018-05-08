@@ -117,6 +117,7 @@
                                     params: {
                                         emailParam: JSON.stringify({
                                             id: $scope.emailParam.id,
+                                            code: $scope.emailParam.code,
                                             value: $scope.emailParam.value
                                         })
                                     }
@@ -274,6 +275,8 @@
                             checkAccessQDefer.resolve(false);
                             return checkAccessQDefer.promise;
                         }
+                        checkAccessQDefer.resolve(true);
+                    } else if ($scope.emailParamTabActive){
                         checkAccessQDefer.resolve(true);
                     }
                     return checkAccessQDefer.promise;

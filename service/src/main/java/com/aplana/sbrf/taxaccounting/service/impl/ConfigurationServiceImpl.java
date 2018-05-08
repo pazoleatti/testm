@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -65,6 +66,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String ASYNC_PARAM_SHORT_QUEUE_LIMIT = "Ограничение на выполнение задания в очереди быстрых заданий";
     private static final String SEARCH_WITOUT_ERROR_MESSAGE = "Проверка выполнена, ошибок не найдено";
     private static final String EDIT_ASYNC_PARAM_MESSAGE = "%s. Изменён параметр \"%s\" для задания \"%s\": %s.";
+    private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
 
 
     @Autowired
@@ -79,6 +81,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private LogEntryService logEntryService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
+    @Autowired
+    private EmailService emailService;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -635,6 +639,32 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
+    public String updateEmailParam(Configuration emailParam, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+        if (SMTP_CONNECTION_PARAMS.contains(emailParam.getCode())) {
+            configurationDao.updateEmailParam(emailParam);
+        } else {
+            configurationDao.updateEmailParam(emailParam);
+        }
+        String message = ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" + emailParam.getCode() + "\": " + emailParam.getValue();
+        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+        logger.info(message);
+
+        return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
+    public Map<String, String> fetchAuthEmailParamsMap() {
+        List<Configuration> configurations = configurationDao.getAuthEmailParams();
+        Map<String, String> result = new HashMap<>();
+        for (Configuration configuration : configurations) {
+            result.put(configuration.getCode(), configuration.getValue());
+        }
+        return result;
     }
 
     /**

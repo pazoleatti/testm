@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,9 @@ import java.util.Map;
  */
 @Repository
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
+
+    private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
+
 
     class ConfigurationRowCallbackHandler implements RowCallbackHandler {
         final ConfigurationParamModel model;
@@ -233,6 +237,16 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
+    public void updateEmailParam(Configuration emailParam) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("code", ConfigurationParam.getNameValueAsDB(emailParam.getCode()));
+        params.addValue("value", emailParam.getValue());
+        getNamedParameterJdbcTemplate().update(
+                "update configuration_email set value = :value where name = :code",
+                params);
+    }
+
+    @Override
     public PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("start", pagingParams.getStartIndex() + 1);
@@ -272,5 +286,18 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                     updateParams
             );
         }
+    }
+
+    @Override
+    public List<Configuration> getAuthEmailParams() {
+        return getJdbcTemplate().query("select code, value from configuration_email where " + SqlUtils.transformToSqlInStatement("code", SMTP_CONNECTION_PARAMS), new RowMapper<Configuration>() {
+            @Override
+            public Configuration mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Configuration configuration = new Configuration();
+                configuration.setCode(rs.getString("code"));
+                configuration.setValue(rs.getString("value"));
+                return configuration;
+            }
+        });
     }
 }
