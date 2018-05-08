@@ -765,6 +765,7 @@
         "configParam.modal.editParam.title": "Редактирование конфигурационного параметра",
         "tab.configParam.commonParam": "Общие параметры",
         "tab.configParam.asyncParam": "Параметры асинхронных заданий",
+        "tab.configParam.emailConfig": "Электронная почта",
         "configParam.button.createRecord": "Добавить запись",
         "configParam.button.editRecord": "Редактировать запись",
         "configParam.button.removeRecord": "Удалить запись",
@@ -778,6 +779,9 @@
         "asyncParam.modal.field.shortQueueLimit": "Ограничение на выполнение задания в очереди быстрых заданий",
         "commonParam.grid.columnName.code": "Параметр",
         "commonParam.grid.columnName.value": "Значение",
+        "emailParam.field.code": "Параметр",
+        "emailParam.field.value": "Значение",
+        "emailParam.field.description": "Описание",
         "asyncParam.validate.checkLimit": "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
         "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
         "asyncParam.validate.checkNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым (больше нуля)!",

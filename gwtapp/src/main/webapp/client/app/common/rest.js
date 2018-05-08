@@ -309,6 +309,15 @@
         }])
 
         /**
+         * @description Получить данные о типах асинхронных задач
+         */
+        .factory('EmailResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/emailParam', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
          * @description Получить данные об общих параметрах (isArray: false)
          */
         .factory('CommonParamResource', ['$resource', function ($resource) {

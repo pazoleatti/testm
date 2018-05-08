@@ -1,6 +1,6 @@
 <form class="form-horizontal" data-aplana-submit-valid="save()">
     <div class="modal-body">
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
             <tbody>
 
             <!-- "Параметр" для "Общие параметры"-->
@@ -54,7 +54,6 @@
                 </td>
             </tr>
 
-
             <!-- "Тип задания" для "Параметры асинхронных заданий"-->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
@@ -99,7 +98,8 @@
             <!-- "Значение параметра "Ограничение на выполнение задания в очереди быстрых заданий"" для "Параметры асинхронных заданий" -->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
-                    <label class="control-label" style="width: 250px; white-space: pre-line" for="asyncParamShortQueueLimit">{{::'asyncParam.modal.field.shortQueueLimit'
+                    <label class="control-label" style="width: 250px; white-space: pre-line"
+                           for="asyncParamShortQueueLimit">{{::'asyncParam.modal.field.shortQueueLimit'
                         |
                         translate}}:</label>
                 </td>
@@ -112,6 +112,46 @@
                                style="width: 300px"
                         />
                     </div>
+                </td>
+            </tr>
+
+            <!-- "Параметр" для "Электронная почта" -->
+            <tr data-ng-if="emailParamTabActive">
+                <td>
+                    <label class="control-label">{{::'emailParam.field.code' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <span data-ng-bind="emailParam.code"></span>
+                </td>
+            </tr>
+
+            <!-- "Значение" для "Электронная почта" -->
+            <tr data-ng-if="emailParamTabActive">
+                <td>
+                    <label class="control-label" for="emailParamValue">{{::'emailParam.field.value' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <input data-ng-model="emailParam.value"
+                               type="text"
+                               id="emailParamValue"
+                               class="form-control"
+                               style="width: 300px"
+                        />
+                    </div>
+                </td>
+            </tr>
+
+            <!-- "Описание" для "Электронная почта" -->
+            <tr data-ng-if="emailParamTabActive">
+                <td>
+                    <label class="control-label">{{::'emailParam.field.description' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <span data-ng-bind="emailParam.description"></span>
                 </td>
             </tr>
 

@@ -95,6 +95,22 @@ public class ConfigurationController {
     }
 
     /**
+     * Получение страницы параметров электронной почты
+     *
+     * @return страница {@link JqgridPagedList} с данными {@link Configuration}
+     */
+    @GetMapping(value = "/rest/emailParam")
+    public JqgridPagedList<Configuration> fetchEmailConfigParams(@RequestParam PagingParams pagingParams){
+        PagingResult<Configuration> data = configurationService.fetchEmailParams(pagingParams, securityService.currentUserInfo());
+        setCommonConfigParamPermission(data);
+        return JqgridPagedResourceAssembler.buildPagedList(
+                data,
+                data.getTotalCount(),
+                pagingParams
+        );
+    }
+
+    /**
      * Полученние страницы общих параметров администрирования, которые не созданы
      *
      * @return страница {@link JqgridPagedList} с данными {@link Configuration}

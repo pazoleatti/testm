@@ -11,6 +11,7 @@
             'app.rest',
             'app.asyncParam',
             'app.commonParam',
+            'app.emailParam',
             'app.createRecordModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('configParam', {
@@ -46,8 +47,14 @@
                     fetchTab: true,
                     active: false
                 };
+                $scope.emailParam = {
+                    title: $filter('translate')('tab.configParam.emailConfig'),
+                    contentUrl: 'client/app/administration/configParams/configTabs/emailParam.html?v=${buildUuid}',
+                    fetchTab: true,
+                    active: false
+                };
 
-                $scope.configParamTabs = [$scope.commonParam, $scope.asyncParam];
+                $scope.configParamTabs = [$scope.commonParam, $scope.asyncParam, $scope.emailParam];
             }
         ])
 
