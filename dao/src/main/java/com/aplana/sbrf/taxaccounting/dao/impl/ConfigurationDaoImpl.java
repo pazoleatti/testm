@@ -56,6 +56,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 
     /**
      * Маппер для представления значений из {@link ResultSet} в виде объекта {@link Configuration}
+     * для таблицы CONFIGURATION
      */
     private RowMapper<Configuration> configurationRowMapper = new RowMapper<Configuration>() {
         @Override
@@ -70,6 +71,22 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 // Если параметр не найден в ConfigurationParam, то пропускаем
             }
             param.setDepartmentId(rs.getInt("department_id"));
+            param.setValue(rs.getString("value"));
+            return param;
+        }
+    };
+
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link Configuration}
+     * для таблицы CONFIGURATION_EMAIL
+     */
+    private RowMapper<Configuration> emailConfigurationRowMapper = new RowMapper<Configuration>() {
+        @Override
+        public Configuration mapRow(ResultSet rs, int index) throws SQLException {
+            Configuration param = new Configuration();
+            param.setId(rs.getInt("id"));
+            param.setCode(rs.getString("name"));
+            param.setDescription(rs.getString("description"));
             param.setValue(rs.getString("value"));
             return param;
         }
@@ -213,6 +230,22 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 },
                 new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
         );
+    }
+
+    @Override
+    public PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+        List<Configuration> emailParamList = getNamedParameterJdbcTemplate().query(
+                "select * from (" +
+                        "   select rownum rn, ordered.* from (select id, name, value, description from configuration_email) ordered " +
+                        ") numbered " +
+                        "where rn between :start and :end order by name",
+                params, emailConfigurationRowMapper
+        );
+        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select id, value from configuration_email)", Integer.class);
+        return new PagingResult<>(emailParamList, totalCount);
     }
 
     @Override

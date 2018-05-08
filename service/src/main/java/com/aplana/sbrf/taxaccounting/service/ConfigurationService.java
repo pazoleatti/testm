@@ -170,4 +170,13 @@ public interface ConfigurationService {
      * @return uuid идентификатор логгера
      */
     String checkConfigParam(Configuration param, TAUserInfo userInfo);
+
+    /**
+     * Получение конфигурационных параметров электронной почты
+     *
+     * @param pagingParams параметры пагинации
+     * @param userInfo     информация о пользователе
+     * @return страница {@link PagingResult} с данными {@link Configuration}
+     */
+    PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams, TAUserInfo userInfo);
 }

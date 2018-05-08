@@ -56,6 +56,9 @@ public abstract class ConfigurationPermission extends AbstractPermission<Configu
         @Override
         protected boolean isGrantedInternal(User user, Configuration targetDomainObject, Logger logger) {
             if (targetDomainObject != null) {
+                if(targetDomainObject.getId() != null){
+                    return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN);
+                }
                 ConfigurationParam param = ConfigurationParam.valueOf(targetDomainObject.getCode());
                 if (param != null) {
                     switch (param.getGroup()) {
@@ -86,6 +89,9 @@ public abstract class ConfigurationPermission extends AbstractPermission<Configu
         @Override
         protected boolean isGrantedInternal(User user, Configuration targetDomainObject, Logger logger) {
             if (targetDomainObject != null) {
+                if(targetDomainObject.getId() != null){
+                    return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN);
+                }
                 ConfigurationParam param = ConfigurationParam.valueOf(targetDomainObject.getCode());
                 switch (param.getGroup()) {
                     case COMMON: {
