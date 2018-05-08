@@ -15,6 +15,7 @@
 
                 $scope.commonParamTabActive = false;
                 $scope.asyncParamTabActive = false;
+                $scope.emailParamTabActive = false;
                 $scope.isCreate = $shareData.isCreate;
                 $scope.commonParam = {};
                 $scope.asyncParam = {};
@@ -40,6 +41,10 @@
                             $scope.asyncParam.shortQueueLimit = $shareData.asyncParam.shortQueueLimit === 0 ? "" : $shareData.asyncParam.shortQueueLimit;
                             $scope.asyncParam.handlerClassName = $shareData.asyncParam.handlerClassName ? $shareData.asyncParam.handlerClassName : "";
                         }
+                        break;
+                    case APP_CONSTANTS.CONFIGURATION_PARAM_TAB.EMAIL_PARAM :
+                        $scope.emailParamTabActive = true;
+                        $scope.emailParam = $shareData.emailParam;
                         break;
                     default:
                         $modalInstance.close();
@@ -89,6 +94,30 @@
                                             taskLimit: $scope.asyncParam.taskLimit ? Math.floor($scope.asyncParam.taskLimit) : null,
                                             shortQueueLimit: $scope.asyncParam.shortQueueLimit ? Math.floor($scope.asyncParam.shortQueueLimit) : null,
                                             handlerClassName: $scope.asyncParam.handlerClassName
+                                        })
+                                    }
+                                }).then(function (logger) {
+                                    if (logger.data) {
+                                        LogEntryResource.query({
+                                            uuid: logger.data,
+                                            projection: 'count'
+                                        }, function (data) {
+                                            $logPanel.open('log-panel-container', logger.data);
+                                            if (data.ERROR + data.WARNING < 1) {
+                                                $rootScope.$broadcast("UPDATE_CONFIG_GRID_DATA");
+                                                $modalInstance.close(true);
+                                            }
+                                        });
+                                    }
+                                });
+                            } else if ($scope.emailParamTabActive) {
+                                $http({
+                                    method: "POST",
+                                    url: "controller/rest/emailParam/update",
+                                    params: {
+                                        emailParam: JSON.stringify({
+                                            id: $scope.emailParam.id,
+                                            value: $scope.emailParam.value
                                         })
                                     }
                                 }).then(function (logger) {

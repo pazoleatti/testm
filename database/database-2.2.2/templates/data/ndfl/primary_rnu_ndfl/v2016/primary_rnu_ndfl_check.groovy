@@ -708,7 +708,8 @@ class Check extends AbstractScriptClass {
                         incomeTypeRowList.each { incomeTypeRow ->
                             if (ndflPersonIncome.incomeAccruedDate >= incomeTypeRow.record_version_from?.dateValue &&
                                     ndflPersonIncome.incomeAccruedDate <= incomeTypeRow.record_version_to?.dateValue) {
-                                def incomeCodeRef = incomeCodeMap.get(incomeTypeRow?.income_type_id?.numberValue)
+                                RefBookValue refBookValue = incomeTypeRow?.INCOME_TYPE_ID
+                                def incomeCodeRef = incomeCodeMap.get((Long) refBookValue?.getValue())
                                 incomeCodeRefList.add(incomeCodeRef)
                             }
                         }
@@ -1315,7 +1316,7 @@ class Check extends AbstractScriptClass {
                     BigDecimal deductionsSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (!comparNumbEquals(incomesDeductionsSum, deductionsSum)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Сумма значений Значение гр. \"%s\" (\"%s\") Раздела 2 должно быть равно сумме гр. \"%s\" " +
+                        String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") Раздела 2 должно быть равно сумме гр. \"%s\" " +
                                 "(\"%s\") Раздела 3 для всех строк одной операции",
                                 C_TOTAL_DEDUCTIONS_SUMM, incomesDeductionsSum,
                                 C_PERIOD_CURR_SUMM, deductionsSum)
@@ -1324,7 +1325,7 @@ class Check extends AbstractScriptClass {
                     }
                     if (comparNumbGreater(deductionsSum, incomesAccruedSum)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Сумма значений Значение гр. \"%s\" (\"%s\") Раздела 3 должно быть меньше или равно сумме значений гр. \"%s\" " +
+                        String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") Раздела 3 должно быть меньше или равно сумме значений гр. \"%s\" " +
                                 "(\"%s\") Раздела 2 для всех строк одной операции",
                                 C_PERIOD_CURR_SUMM, incomesDeductionsSum,
                                 C_INCOME_ACCRUED_SUMM, incomesAccruedSum)
@@ -1495,7 +1496,7 @@ class Check extends AbstractScriptClass {
                     ) {
                         // "Графа 15" = "Графа 7"
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            logTypeMessagePairList.add(new CheckData("\"Дата удержанного налога\" указана некорректно",
+                            logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                     ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
                                             "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
                                     section_2_15_fatal))
@@ -1524,7 +1525,7 @@ class Check extends AbstractScriptClass {
                         if (foundIncomeMaxCol7 != null && dateRelateToCurrentPeriod(foundIncomeMaxCol7.incomePayoutDate)) {
                             // "Графа 15" = "Графа 6"
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
-                                logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
+                                logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
                                                 "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
                                         section_2_15_fatal))
@@ -1947,15 +1948,20 @@ class Check extends AbstractScriptClass {
 
         Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId =
                 ndflPersonIncomeList.groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
-        Map<Long, Map<String, List<NdflPersonDeduction>>> deductionsByPersonIdAndOperationId =
-                ndflPersonDeductionList.groupBy({ NdflPersonDeduction it -> it.ndflPersonId }, { NdflPersonDeduction it -> it.operationId })
+        def col16CheckDeductionGroups = ndflPersonDeductionList.findAll {
+            it.notifType == "2"
+        }.groupBy({ it.ndflPersonId }, { it.operationId }, { it.notifDate },
+                { it.notifNum }, { it.notifSource }, { it.notifSumm }
+        )
+        def col16CheckDeductionGroups_1 = ndflPersonDeductionList.findAll {
+            it.notifType == "1"
+        }.groupBy({ it.ndflPersonId }, { it.operationId })
 
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted();
 
             def operationId = ndflPersonDeduction.operationId
             def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(ndflPersonDeduction.ndflPersonId)?.get(operationId) ?: []
-            def allDeductionsOfOperation = deductionsByPersonIdAndOperationId.get(ndflPersonDeduction.ndflPersonId)?.get(operationId) ?: []
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
@@ -1996,10 +2002,16 @@ class Check extends AbstractScriptClass {
             if (ndflPersonDeduction.periodCurrDate != null) {
                 // "Графа 15" принадлежит к отчетному периоду
                 if (!dateRelateToCurrentPeriod(ndflPersonDeduction.periodCurrDate)) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не соответствует значению гр. \"%s\" (\"%s\")",
+                    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+                    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+                    String strCorrPeriod = ""
+                    if (departmentReportPeriod.getCorrectionDate() != null) {
+                        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+                    }
+                    Department department = departmentService.get(departmentReportPeriod.departmentId)
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не входит в отчетный период налоговой формы \"%s\"",
                             C_PERIOD_CURR_DATE, formatDate(ndflPersonDeduction.periodCurrDate),
-                            C_INCOME_ACCRUED, formatDate(ndflPersonDeduction.incomeAccrued)
-                    )
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod)
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.logCheck("%s. %s.",
                             declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId),
@@ -2037,16 +2049,45 @@ class Check extends AbstractScriptClass {
             }*/
 
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
-            if (ndflPersonDeduction.periodCurrSumm != null && ndflPersonDeduction.notifSumm != null) {
-                BigDecimal deductionsPeriodCurrSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
-                if (comparNumbGreater(deductionsPeriodCurrSum, ndflPersonDeduction.notifSumm)) {
-                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть меньше или равно значению гр. \"%s\" (\"%s\") для всех строк одной операции.",
-                            C_PERIOD_CURR_SUMM, deductionsPeriodCurrSum, C_NOTIF_SUMM, ndflPersonDeduction.notifSumm
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                    logger.logCheck("%s. %s.",
-                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
-                            LOG_TYPE_3_16, fioAndInpAndOperId, pathError, errMsg)
+            if (ndflPersonDeduction.notifType == "2") {
+                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
+                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                        ?.get(ndflPersonDeduction.notifSumm) ?: []
+                if (deductionsGroup) {
+                    BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
+                    if (sum16 > ndflPersonDeduction.notifSumm) {
+                        String errMsg = String.format("Раздел 3. ID операции: \"%s\". Для строк документа (тип: \"%s\", номер: \"%s\", дата: \"%s\", " +
+                                "код источника:  \"%s\", сумма: \"%s\") сумма значений гр. \"Вычет.Текущий период.Сумма\" (%s) должна быть меньше или равна " +
+                                "значения гр. \"Подтверждающий документ.Сумма\" (%s)",
+                                ndflPersonDeduction.operationId, ndflPersonDeduction.notifType, ndflPersonDeduction.notifNum,
+                                formatDate(ndflPersonDeduction.notifDate), ndflPersonDeduction.notifSource, ndflPersonDeduction.notifSumm,
+                                sum16, ndflPersonDeduction.notifSumm
+                        )
+                        logger.logCheck(errMsg,
+                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                                LOG_TYPE_3_16, fioAndInpAndOperId)
+                    }
+                    deductionsGroup.clear()
+                }
+            }
+            // Выч6.1
+            if (ndflPersonDeduction.notifType == "1") {
+                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
+                        ?.get(ndflPersonDeduction.operationId) ?: []
+                if (deductionsGroup) {
+                    BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
+                    BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
+                    if (sum16 > sum8) {
+                        String errMsg = String.format("Раздел 3. ID операции: \"%s\". Для строк, у которых указан тип: \"%s\",  сумма значений гр. \"%s\" (%s) должна быть меньше или равна сумме значений гр. \"%s\" (%s)",
+                                ndflPersonDeduction.operationId, ndflPersonDeduction.notifType,
+                                C_PERIOD_CURR_SUMM, sum16, C_NOTIF_SUMM, sum8
+                        )
+                        logger.logCheck(errMsg,
+                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                                LOG_TYPE_3_16, fioAndInpAndOperId)
+                    }
+                    deductionsGroup.clear()
                 }
             }
         }

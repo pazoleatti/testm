@@ -287,6 +287,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG)")
+    public PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams, TAUserInfo userInfo) {
+        return configurationDao.fetchEmailParams(pagingParams);
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String checkFileSystemAccess(Configuration param, TAUserInfo userInfo) {
         Logger logger = checkConfigurationParam(param);

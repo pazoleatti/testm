@@ -31,6 +31,33 @@ import static com.aplana.generatorTF.Utils.*;
  */
 public class GeneratorXlsx {
 
+    //Номера столбцов в таблице
+    private static final int COL_N = 1;
+
+    private static final int COL_INP = 2;
+
+    private static final int COL_SURNAME = 3;
+
+    private static final int COL_NAME = 4;
+
+    private static final int COL_NAME_2 = 5;
+
+    private static final int COL_BIRTHDAY = 6;
+
+    private static final int COL_INN_RF = 8;
+
+    private static final int COL_DUL_CODE = 10;
+
+    private static final int COL_DUL_N = 11;
+
+    private static final int COL_SNILS = 22;
+
+    private static final int COL_OPER_ID = 23;
+
+    private static final int SHEET_DATA = 1;
+
+    private static final int ROW_START = 2;
+
     private Random random = new Random(System.currentTimeMillis());
 
     private DataFormatter formatter = new DataFormatter();
@@ -40,21 +67,23 @@ public class GeneratorXlsx {
         SXSSFWorkbook workBook = null;
         XSSFSheet sourceSheet;
         File outFile = new File(sourceFile.getAbsoluteFile().getParent() + "\\out.xlsx");
+
         try (OutputStream out = new FileOutputStream(outFile)) {
             sourceWorkbook = new XSSFWorkbook(new FileInputStream(sourceFile));
-            workBook = new SXSSFWorkbook(sourceWorkbook, 100);
-            sourceSheet = sourceWorkbook.getSheetAt(0);
+            workBook = new SXSSFWorkbook(sourceWorkbook, 1000);
+            sourceSheet = sourceWorkbook.getSheetAt(SHEET_DATA);
+
             for (int i = 0; i <= sourceSheet.getLastRowNum(); i++) {
                 if (isRowEmpty(sourceSheet.getRow(i))) {
                     sourceSheet.removeRow(sourceSheet.getRow(i));
                 }
             }
 
-            SXSSFSheet sheet = (SXSSFSheet) workBook.getSheetAt(0);
+            SXSSFSheet sheet = (SXSSFSheet) workBook.getSheetAt(SHEET_DATA);
 
             List<Integer> personsPositions = new ArrayList<>();
             Row lastRow = null;
-            for (int i = 2; i < sourceSheet.getLastRowNum(); i++) {
+            for (int i = ROW_START; i < sourceSheet.getLastRowNum(); i++) {
                 if (lastRow == null || !isRowsEqualByFL(lastRow, sourceSheet.getRow(i))) {
                     personsPositions.add(i);
                 }
@@ -78,7 +107,7 @@ public class GeneratorXlsx {
                             personIndex < personsPositions.size() - 1 && personRowIndex < personsPositions.get(personIndex + 1)) {
                         row = sheet.createRow(Math.max(sheet.getLastRowNum() + 1, sourceSheet.getLastRowNum() + 1));
                         copyRow(sourceSheet.getRow(personRowIndex), row, rowNum);
-                        copyRow(sheet.getRow(startIndex), row, Range.closed(1, 22), rowNum);
+                        copyRow(sheet.getRow(startIndex), row, Range.closed(COL_N, COL_OPER_ID), rowNum);
                         personRowIndex++;
                         rowNum++;
                     }
@@ -102,41 +131,41 @@ public class GeneratorXlsx {
     private void mutateRow(Row row, Row rowStyle) {
         //генерация ИНП
         String inp = String.valueOf(1000000000 + random.nextInt(2000000000));
-        row.createCell(1).setCellValue(inp.length() == 10 ? inp : inp.substring(inp.length() - 10, inp.length()));
-        row.getCell(1).setCellStyle(rowStyle.getCell(1).getCellStyle());
+        row.createCell(COL_INP).setCellValue(inp.length() == 10 ? inp : inp.substring(inp.length() - 10, inp.length()));
+        row.getCell(COL_INP).setCellStyle(rowStyle.getCell(COL_INP).getCellStyle());
 
         //генерация СНИЛС
-        row.createCell(21).setCellValue(generateSnils(random));
-        row.getCell(21).setCellStyle(rowStyle.getCell(21).getCellStyle());
+        row.createCell(COL_SNILS).setCellValue(generateSnils(random));
+        row.getCell(COL_SNILS).setCellStyle(rowStyle.getCell(COL_SNILS).getCellStyle());
 
         //генерация ФИО
-        row.createCell(2).setCellValue(lastnameDictionary.get(random.nextInt(lastnameDictionary.size())));
-        row.getCell(2).setCellStyle(rowStyle.getCell(2).getCellStyle());
-        row.createCell(3).setCellValue(firstnameDictionary.get(random.nextInt(firstnameDictionary.size())));
-        row.getCell(3).setCellStyle(rowStyle.getCell(3).getCellStyle());
-        row.createCell(4).setCellValue(middlenameDictionary.get(random.nextInt(middlenameDictionary.size())));
-        row.getCell(4).setCellStyle(rowStyle.getCell(4).getCellStyle());
+        row.createCell(COL_SURNAME).setCellValue(lastnameDictionary.get(random.nextInt(lastnameDictionary.size())));
+        row.getCell(COL_SURNAME).setCellStyle(rowStyle.getCell(COL_SURNAME).getCellStyle());
+        row.createCell(COL_NAME).setCellValue(firstnameDictionary.get(random.nextInt(firstnameDictionary.size())));
+        row.getCell(COL_NAME).setCellStyle(rowStyle.getCell(COL_NAME).getCellStyle());
+        row.createCell(COL_NAME_2).setCellValue(middlenameDictionary.get(random.nextInt(middlenameDictionary.size())));
+        row.getCell(COL_NAME_2).setCellStyle(rowStyle.getCell(COL_NAME_2).getCellStyle());
 
         //генерация номера уд.лич.
-        if (formatter.formatCellValue(row.getCell(9)).equals("21")) {
-            row.createCell(10).setCellValue(generateNumberDul(random));
-            row.getCell(10).setCellStyle(rowStyle.getCell(10).getCellStyle());
+        if (formatter.formatCellValue(row.getCell(COL_DUL_CODE)).equals("21")) {
+            row.createCell(COL_DUL_N).setCellValue(generateNumberDul(random));
+            row.getCell(COL_DUL_N).setCellStyle(rowStyle.getCell(COL_DUL_N).getCellStyle());
         }
 
         // генерация даты рождения
-        row.createCell(5).setCellValue(generateDate(random));
-        row.getCell(5).setCellStyle(rowStyle.getCell(5).getCellStyle());
+        row.createCell(COL_BIRTHDAY).setCellValue(generateDate(random));
+        row.getCell(COL_BIRTHDAY).setCellStyle(rowStyle.getCell(COL_BIRTHDAY).getCellStyle());
 
         // генерация ИНН
-        row.createCell(7).setCellValue(generateInn(random));
-        row.getCell(7).setCellStyle(rowStyle.getCell(7).getCellStyle());
+        row.createCell(COL_INN_RF).setCellValue(generateInn(random));
+        row.getCell(COL_INN_RF).setCellStyle(rowStyle.getCell(COL_INN_RF).getCellStyle());
     }
 
     private boolean isRowsEqualByFL(Row row1, Row row2) {
         if (row1.getFirstCellNum() != row2.getFirstCellNum() || row1.getLastCellNum() != row2.getLastCellNum()) {
             return false;
         }
-        for (int i = 1; i < 22; i++) {
+        for (int i = COL_INP; i < COL_OPER_ID; i++) {
             Cell cell = row1.getCell(i);
             if (!Objects.equals(formatter.formatCellValue(cell), formatter.formatCellValue(row2.getCell(cell.getColumnIndex())))) {
                 return false;
@@ -169,7 +198,10 @@ public class GeneratorXlsx {
             }
             newCell = toRow.createCell(cell.getColumnIndex());
             newCell.setCellStyle(cell.getCellStyle());
-            if (i == 0) {
+
+            if (i < COL_N) {
+                newCell.setCellValue("");
+            } else if (i == COL_N) {
                 newCell.setCellValue(rowNum);
             } else {
                 newCell.setCellType(cell.getCellType());

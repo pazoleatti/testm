@@ -9,6 +9,8 @@ public class Configuration implements Serializable, SecuredEntity {
 
     private static final long serialVersionUID = -4129485177345542519L;
 
+    private Integer id;
+
     private String code;
 
     private String description;
@@ -18,6 +20,14 @@ public class Configuration implements Serializable, SecuredEntity {
     private String value;
 
     private long permissions;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getCode() {
         return code;

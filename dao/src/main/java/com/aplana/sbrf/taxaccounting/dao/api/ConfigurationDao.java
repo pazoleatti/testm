@@ -105,4 +105,12 @@ public interface ConfigurationDao {
      * @param asyncParam обновляемый параметр
      */
     void updateAsyncParam(AsyncTaskTypeData asyncParam);
+
+    /**
+     * Получение конфигурационных параметров электронной почты
+     *
+     * @param pagingParams параметры пагинации
+     * @return страница {@link PagingResult} с данными {@link Configuration}
+     */
+    PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams);
 }

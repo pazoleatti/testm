@@ -1284,7 +1284,7 @@ class Import extends AbstractScriptClass {
             ndflPersonService.deleteNdflPersonBatch(ndflPersonIdForRemove)
         }
 
-        logger.info("При загрузке файла было удалено: %d, из: %d", removedCounter, initialCounter)
+        removedCounter !=0 ? logger.info("При загрузке файла было удалено: %d, из: %d", removedCounter, initialCounter) :
         logger.getEntries().addAll(removeMessages)
     }
 
@@ -1437,6 +1437,7 @@ class Import extends AbstractScriptClass {
             if (value != null && !value.isEmpty()) {
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
+                    formatter.setLenient(false)
                     return formatter.parse(value)
                 } catch (Exception ignored) {
                     logIncorrectTypeError("Дата")
@@ -1477,7 +1478,7 @@ class Import extends AbstractScriptClass {
         }
 
         void logIncorrectTypeError(def type) {
-            logger.error("Ошибка при определении значения ячейки файла \"$fileName\". Тип данных ячейки столбца \"${header[index - 1]}\" № $index" +
+            logger.error("Ошибка при определении значения ячейки файла \"$fileName\". Тип данных ячейки столбца \"${header[index - 1]}\" № " + (index - 1) +
                     " строки ${row.index} не соответствует ожидаемому \"$type\".")
         }
     }

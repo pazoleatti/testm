@@ -183,7 +183,8 @@
             },
             CONFIGURATION_PARAM_TAB: {
                 COMMON_PARAM: "commonParam",
-                ASYNC_PARAM: "asyncParam"
+                ASYNC_PARAM: "asyncParam",
+                EMAIL_PARAM: "emailParam"
             },
             ASYNC_HANDLER_CLASS_NAME: {
                 UPLOAD_REFBOOK_ASYNC_TASK: "UploadRefBookAsyncTask"
