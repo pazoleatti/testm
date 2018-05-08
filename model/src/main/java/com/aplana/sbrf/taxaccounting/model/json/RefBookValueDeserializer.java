@@ -32,7 +32,7 @@ public class RefBookValueDeserializer extends JsonDeserializer<RefBookValue> {
                 break;
             case DATE:
                 try {
-                    value = format.parse(jsonNode.get("dateValue").asText());
+                    value = !jsonNode.get("dateValue").isNull() ? format.parse(jsonNode.get("dateValue").asText()) : null;
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("Не удалось получить дату из строки: " + jsonNode.get("dateValue").asText());
                 }

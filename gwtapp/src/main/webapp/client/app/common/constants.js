@@ -219,6 +219,7 @@
                 NOT_IS_READ_ONLY: "Редактируемый"
             },
             REFBOOK_ALIAS: {
+                BUSINESS_ID_ALIAS: "record_id",
                 RECORD_VERSION_FROM_ALIAS: "record_version_from",
                 RECORD_VERSION_TO_ALIAS: "record_version_to"
             }

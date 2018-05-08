@@ -7,18 +7,19 @@
     angular.module('app.linearRefBook', ['app.refBookRecordModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('linearRefBook', {
-                url: '/refBooks/linearRefBook/{refBookId}?uuid',
+                url: '/refBooks/linearRefBook/{refBookId}?recordId',
                 templateUrl: 'client/app/refbooks/linearRefBook.html?v=${buildUuid}',
                 controller: 'linearRefBookCtrl'
             });
         }])
         .controller('linearRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
-            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter',
-            function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource, $aplanaModal, $filter) {
+            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', '$window', "$http",
+            function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource, $aplanaModal, $filter, $window, $http) {
                 $scope.columnNames = [];
                 $scope.columnModel = [];
                 $scope.data = {};
                 $scope.data.recordVersion = new Date();
+                $scope.versionMode = $stateParams.recordId && $stateParams.recordId !== 'undefined';
 
                 // Получаем данные справочника
                 RefBookResource.query({
@@ -27,17 +28,17 @@
                     $scope.refBook = data;
                     if ($scope.refBook.versioned) {
                         // Если справочник версионируемый - добавляем информацию о периоде действия записей
-                        $scope.refBook.attributes.push({
-                            name: $filter('translate')('refBook.versionFrom'),
-                            alias: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS,
+                        $scope.refBook.attributes.unshift({
+                            name: $filter('translate')('refBook.versionTo'),
+                            alias: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS,
                             attributeType: 'DATE',
                             required: true,
                             visible: true,
                             width: 5
                         });
-                        $scope.refBook.attributes.push({
-                            name: $filter('translate')('refBook.versionTo'),
-                            alias: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS,
+                        $scope.refBook.attributes.unshift({
+                            name: $filter('translate')('refBook.versionFrom'),
+                            alias: APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS,
                             attributeType: 'DATE',
                             required: true,
                             visible: true,
@@ -135,6 +136,7 @@
                             requestParameters: function () {
                                 return {
                                     refBookId: $stateParams.refBookId,
+                                    recordId: $stateParams.recordId,
                                     version: $scope.data.recordVersion
                                 };
                             },
@@ -148,6 +150,18 @@
                             // TODO: задать сортировку по умолчанию
                             ondblClickRow: function (rowId) {
                                 $scope.showRecord($scope.refBookGrid.ctrl.getRawData(rowId))
+                            },
+                            onSelectRow: function (rowId, status) {
+                                if (($scope.refBookGrid.value.length === 0 && status) || $scope.refBookGrid.value.length === 2 && !status) {
+                                    $http({
+                                        method: "GET",
+                                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/recordVersionCount/" + rowId
+                                    }).then(function (response) {
+                                        $scope.versionsCount = response.data;
+                                    });
+                                } else {
+                                    $scope.versionsCount = null;
+                                }
                             }
                         }
                     };
@@ -181,11 +195,13 @@
                             $shareData: function () {
                                 return {
                                     mode: "CREATE",
-                                    refBook: $scope.refBook
+                                    refBook: $scope.refBook,
+                                    recordId: $stateParams.recordId
                                 };
                             }
                         }
                     }).result.then(function () {
+                        // TODO: лог панель отображается на заднем плане и ее нельзя пролистать
                         $scope.refBookGrid.ctrl.refreshGrid(1);
                     });
                 };
@@ -230,6 +246,7 @@
                             }
                         }
                     }).result.then(function (needToRefresh) {
+                        // TODO: лог панель отображается на заднем плане и ее нельзя пролистать
                         if (needToRefresh) {
                             $scope.refBookGrid.ctrl.refreshGrid(1);
                         }
@@ -240,6 +257,29 @@
                  * Удаляет записи справочника, выбранные в таблице
                  */
                 $scope.deleteRecords = function () {
+                    var ids = [];
+                    $scope.refBookGrid.value.forEach(function (record) {
+                        ids.push(record.id.value)
+                    });
+
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBook/" + $scope.refBook.id + "/deleteRecords",
+                        data: ids
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        } else {
+                            $scope.refBookGrid.ctrl.refreshGrid(1);
+                        }
+                    });
+                };
+
+                /**
+                 * Отображает список версий записи справочника
+                 */
+                $scope.showVersions = function () {
+                    $window.location = "index.html#/refBooks/linearRefBook/" + $scope.refBook.id + "?recordId=" + $scope.refBookGrid.value[0].record_id.numberValue;
                 }
             }]);
 }());

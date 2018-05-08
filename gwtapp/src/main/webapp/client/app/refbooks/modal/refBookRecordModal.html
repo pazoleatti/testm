@@ -1,10 +1,28 @@
 <form id="refBookRecordForm" name="refBookRecordForm" class="form-horizontal" data-aplana-submit-valid="save()" novalidate>
     <div id="refBookRecordFieldsContainer" class="modal-body">
         <div class="row-fluid" style="margin-bottom: 20px;" data-ng-show="refBook.versioned">
-            <label class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
-            <label class="inline-value">{{getAttributeValue(versionFromAttribute)}}</label>
-            <label class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
-            <label class="inline-value">{{getAttributeValue(versionToAttribute)}}</label>
+            <div data-ng-if="mode === 'VIEW' || mode === 'EDIT'" >
+                <label class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
+                <label class="inline-value">{{getAttributeValue(versionFromAttribute)}}</label>
+                <label class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
+                <label class="inline-value">{{getAttributeValue(versionToAttribute)}}</label>
+            </div>
+            <div data-ng-if="mode === 'CREATE'" >
+                <label style="float: left" class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
+                <span style="float: left" data-aplana-field>
+                    <span data-aplana-datepicker
+                         aplana-picker-outer-width="150px"
+                         data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].dateValue"
+                         data-ng-required="true"></span>
+                    <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                </span>
+                <label style="float: left; margin-left: 20px;" class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
+                <span data-aplana-field>
+                    <span data-aplana-datepicker
+                         aplana-picker-outer-width="150px"
+                         data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].dateValue"></span>
+                </span>
+            </div>
         </div>
         <div data-ng-repeat="attribute in refBook.attributes"
              data-ng-if="attribute.visible && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS &&
@@ -15,21 +33,24 @@
                 </div>
                 <div class="span8">
                     <!-- Режим просмотра -->
-                    <label data-ng-if="mode == 'VIEW'" class="inline-value">{{getAttributeValue(attribute)}}</label>
+                    <label data-ng-if="mode === 'VIEW'" class="inline-value">{{getAttributeValue(attribute)}}</label>
                     <!-- Режим редактирования -->
-                    <div data-ng-if="mode == 'EDIT'" data-ng-switch="attribute.attributeType">
+                    <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" data-ng-switch="attribute.attributeType">
                         <div data-ng-switch-when="STRING">
-                            <input data-ng-model="record[attribute.alias].stringValue"
-                                   type="text"
-                                   aplana-input-outer-width="80%"
-                                   maxlength="{{attribute.maxLength}}"
-                                   title="{{attribute.name}}"/>
+                            <div data-aplana-field data-model-id="{{attribute.alias}}">
+                                <input type="text"
+                                       data-ng-model="record[attribute.alias].stringValue"
+                                       title="{{attribute.name}}"
+                                       aplana-input-outer-width="80%"
+                                       maxlength="{{attribute.maxLength}}"
+                                       data-ng-required="{{attribute.required}}"/>
+                                <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
+                            </div>
                         </div>
-                        <div data-ng-switch-when="NUMBER">
+                        <div data-ng-switch-when="NUMBER" data-model-id="{{attribute.alias}}">
                             <div data-aplana-field>
                                 <input type='text'
                                        data-ng-model="record[attribute.alias].numberValue"
-                                       placeholder="{{attribute.name}}"
                                        title="{{attribute.name}}"
                                        aplana-input-outer-width="80%"
                                        data-ng-pattern="patterns.number"
@@ -38,16 +59,14 @@
                                 <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
                             </div>
                         </div>
-                        <div data-ng-switch-when="DATE">
+                        <div data-ng-switch-when="DATE" data-model-id="{{attribute.alias}}">
                             <div data-aplana-field>
                                 <div data-aplana-datepicker
                                      aplana-picker-outer-width="150px"
                                      data-ng-model="record[attribute.alias].dateValue"
                                      title="{{attribute.name}}"
                                      data-ng-required="{{attribute.required}}"></div>
-                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                    translate}}
-                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             </div>
                         </div>
                         <div data-ng-switch-when="REFERENCE">

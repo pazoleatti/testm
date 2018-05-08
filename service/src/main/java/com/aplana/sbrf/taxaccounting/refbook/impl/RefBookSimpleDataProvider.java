@@ -377,9 +377,17 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
     }
 
+    /**
+     * Блокирует справочник для указанного пользователя, если тот же справочник уже был ранее заблокирован тем же пользователем ошибкой не считаем
+     * @param refBook справочник
+     * @param userId пользователь
+     * @param lockKey ключ блокировки
+     * @return флаг успешности установки блокировки
+     */
     private boolean lockRefBook(RefBook refBook, int userId, String lockKey) {
-        return lockService.lock(lockKey, userId,
-                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null;
+        LockData lockData = lockService.lock(lockKey, userId,
+                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName()));
+        return lockData == null || lockData.getUserId() == userId;
     }
 
     private void lockReferencedBooks(@NotNull Logger logger, List<String> lockedObjects) {

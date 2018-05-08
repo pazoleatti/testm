@@ -797,9 +797,12 @@
         "refBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
         "refBooks.refBooksList.columnHeader.refBookType": "Тип справочника",
         "refBooks.title": "Справочники",
+        "refBook.title": "Справочник",
+        "refBook.version.title": "Все версии записи",
         "refBooks.createRecord": "Создание записи справочника",
         "refBooks.showRecord": "Запись справочника",
         "refBooks.editRecord": "Редактирование записи справочника",
+        "refBooks.button.versions": "Версии",
 
         "refBook.version": "Дата актуальности",
         "refBook.versionFrom": "Дата начала актуальности",

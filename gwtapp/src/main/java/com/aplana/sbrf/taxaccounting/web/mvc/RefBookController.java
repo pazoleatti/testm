@@ -65,19 +65,28 @@ public class RefBookController {
      * Получение списка записей справочника
      *
      * @param refBookId    Идентификатор справочника
+     * @param recordId     Идентификатор группы версий записи справочника
      * @param version      Дата актуальности для выборки записей справочника
      * @param pagingParams Параметры пейджинга
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookRecords/{refBookId}")
     public JqgridPagedList<Map<String, RefBookValue>> fetchRefBookRecords(@PathVariable Long refBookId,
+                                                                          @RequestParam(required = false) Long recordId,
                                                                           @RequestParam Date version,
                                                                           @RequestParam PagingParams pagingParams) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
                 refBookFactory.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
-        PagingResult<Map<String, RefBookValue>> records = provider.getRecordsWithVersionInfo(version,
-                pagingParams, null, sortAttribute, pagingParams.getDirection().toLowerCase().equals("asc"));
+        PagingResult<Map<String, RefBookValue>> records;
+        if (recordId == null) {
+            // Отбираем все записи справочника
+            records = provider.getRecordsWithVersionInfo(version,
+                    pagingParams, null, sortAttribute, pagingParams.getDirection().toLowerCase().equals("asc"));
+        } else {
+            // Отбираем все версии записи правочника
+            records = provider.getRecordVersionsByRecordId(recordId, pagingParams, null, sortAttribute);
+        }
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
@@ -170,5 +179,41 @@ public class RefBookController {
     @PostMapping(value = "/actions/refBook/{refBookId}/editRecord/{recordId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ActionResult editRecord(@PathVariable Long refBookId, @PathVariable Long recordId, @RequestBody Map<String, RefBookValue> record) {
         return commonRefBookService.editRecord(securityService.currentUserInfo(), refBookId, recordId, record);
+    }
+
+    /**
+     * Создает новую запись справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param record    данные записи в структуре аттрибут-значение
+     * @return результат сохранения
+     */
+    @PostMapping(value = "/actions/refBook/{refBookId}/createRecord", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ActionResult createRecord(@PathVariable Long refBookId, @RequestBody Map<String, RefBookValue> record) {
+        return commonRefBookService.createRecord(securityService.currentUserInfo(), refBookId, record);
+    }
+
+    /**
+     * Удаляет указанные записи правочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordIds идентификаторы записей для удаления
+     * @return результат удаления
+     */
+    @PostMapping(value = "/actions/refBook/{refBookId}/deleteRecords", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ActionResult deleteRecords(@PathVariable Long refBookId, @RequestBody List<Long> recordIds) {
+        return commonRefBookService.deleteRecords(securityService.currentUserInfo(), refBookId, recordIds);
+    }
+
+    /**
+     * Получение количества версий для записи справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordId  идентификатор записи
+     * @return значение записи справочника
+     */
+    @GetMapping(value = "/actions/refBook/{refBookId}/recordVersionCount/{recordId}")
+    public int getRecordVersionCount(@PathVariable Long refBookId, @PathVariable Long recordId) {
+        return commonRefBookService.getRecordVersionCount(refBookId, recordId);
     }
 }

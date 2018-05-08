@@ -345,6 +345,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(", t.version AS ").appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS)
                         .appendQuery(", nve.version - interval '1' day AS ").appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
             }
+            ps.appendQuery(", t.record_id AS ").appendQuery(RefBook.BUSINESS_ID_ALIAS);
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -738,6 +739,9 @@ public class RefBookSimpleQueryBuilderComponent {
     public PreparedStatementData psGetRecordsData(RefBook refBook, String whereClause) {
         PreparedStatementData sql = new PreparedStatementData("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
+        if (refBook.isVersioned()) {
+            sql.appendQuery(", ").appendQuery(RefBook.BUSINESS_ID_ALIAS);
+        }
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ").append(attribute.getAlias());
         }

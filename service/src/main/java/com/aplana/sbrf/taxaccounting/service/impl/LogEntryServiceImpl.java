@@ -44,7 +44,6 @@ public class LogEntryServiceImpl implements LogEntryService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String save(final List<LogEntry> logEntries) {
-
         return tx.executeInNewTransaction(new TransactionLogic<String>() {
             @Override
             public String execute() {

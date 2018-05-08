@@ -8,10 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -21,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CommonRefBookServiceImpl implements CommonRefBookService {
@@ -78,5 +72,39 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         } else {
             return new ActionResult(uuid);
         }
+    }
+
+    @Override
+    public ActionResult createRecord(TAUserInfo userInfo, Long refBookId, Map<String, RefBookValue> record) {
+        Logger logger = new Logger();
+        logger.setTaUserInfo(userInfo);
+        Date versionFrom = record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS) ? record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue() : null;
+        Date versionTo = record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS) ? record.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue() : null;
+        Long recordId = record.containsKey(RefBook.BUSINESS_ID_ALIAS) ? record.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue().longValue() : null;
+        RefBookRecord refBookRecord = new RefBookRecord();
+        refBookRecord.setValues(record);
+        refBookRecord.setRecordId(recordId);
+        refBookRecord.setVersionTo(versionTo);
+
+        refBookFactory.getDataProvider(refBookId).createRecordVersion(logger, versionFrom, versionTo, Collections.singletonList(refBookRecord));
+        String uuid = logEntryService.save(logger.getEntries());
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException("Не удалось создать запись справочника!", uuid);
+        } else {
+            return new ActionResult(uuid);
+        }
+    }
+
+    @Override
+    public ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
+        Logger logger = new Logger();
+        logger.setTaUserInfo(userInfo);
+        refBookFactory.getDataProvider(refBookId).deleteRecordVersions(logger, recordIds);
+        return new ActionResult(logEntryService.save(logger.getEntries()));
+    }
+
+    @Override
+    public int getRecordVersionCount(Long refBookId, Long recordId) {
+        return refBookFactory.getDataProvider(refBookId).getRecordVersionsCount(recordId);
     }
 }

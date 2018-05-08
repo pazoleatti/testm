@@ -54,4 +54,31 @@ public interface CommonRefBookService {
      * @return результат сохранения
      */
     ActionResult editRecord(TAUserInfo userInfo, long refBookId, long recordId, Map<String, RefBookValue> record);
+
+    /**
+     * Создает новую запись справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param record    данные записи в структуре аттрибут-значение
+     * @return результат сохранения
+     */
+    ActionResult createRecord(TAUserInfo userInfo, Long refBookId, Map<String, RefBookValue> record);
+
+    /**
+     * Удаляет указанные записи правочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordIds идентификаторы записей для удаления
+     * @return результат удаления
+     */
+    ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds);
+
+    /**
+     * Получение количества версий для записи справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordId  идентификатор записи
+     * @return значение записи справочника
+     */
+    int getRecordVersionCount(Long refBookId, Long recordId);
 }

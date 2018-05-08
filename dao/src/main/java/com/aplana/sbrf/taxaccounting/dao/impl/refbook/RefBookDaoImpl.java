@@ -688,6 +688,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(" frb.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         ps.appendQuery(",\n");
+        if (refBook.isVersioned()) {
+            ps.appendQuery(" frb.record_id as ");
+            ps.appendQuery(RefBook.BUSINESS_ID_ALIAS);
+            ps.appendQuery(",\n");
+        }
 
         if (version == null) {
             ps.appendQuery("  t.version as \"");
@@ -1184,7 +1189,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : records.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias)) {
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) || RefBook.BUSINESS_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);

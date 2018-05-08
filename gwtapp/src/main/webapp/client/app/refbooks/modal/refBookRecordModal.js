@@ -13,20 +13,35 @@
             '$http', '$logPanel', 'LogEntryResource', '$dialogs',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.refBook = $shareData.refBook;
-                $scope.record = $shareData.record;
+                $scope.record = $shareData.mode === 'CREATE' ? {} : $shareData.record;
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
                 $scope.mode = $shareData.mode;
 
+                if ($scope.mode === 'CREATE' && $shareData.recordId) {
+                    // Добавляем id группы версий записи справочника для создания новой версии
+                    $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.BUSINESS_ID_ALIAS] = {
+                        numberValue: $shareData.recordId,
+                        attributeType: "NUMBER"
+                    }
+                }
+
                 $scope.refBook.attributes.forEach(function (attribute) {
-                    if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
-                        // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
-                        $scope.record[attribute.alias].dateValue = new Date($scope.record[attribute.alias].dateValue);
-                    }
-                    if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
-                        $scope.versionFromAttribute = attribute
-                    }
-                    if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS) {
-                        $scope.versionToAttribute = attribute
+                    if ($scope.mode === 'CREATE') {
+                        // При создании надо указать тип атрибутов для корректной десериализации
+                        $scope.record[attribute.alias] = {
+                            attributeType: attribute.attributeType
+                        }
+                    } else {
+                        if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
+                            // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
+                            $scope.record[attribute.alias].dateValue = new Date($scope.record[attribute.alias].dateValue);
+                        }
+                        if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
+                            $scope.versionFromAttribute = attribute
+                        }
+                        if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS) {
+                            $scope.versionToAttribute = attribute
+                        }
                     }
                 });
 
@@ -67,9 +82,15 @@
                             $scope.record[attribute.alias].referenceValue = $scope.record[attribute.alias].referenceValue.id;
                         }
                     });
+                    var url;
+                    if ($scope.mode === 'EDIT') {
+                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.numberValue
+                    } else {
+                        url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"
+                    }
                     $http({
                         method: "POST",
-                        url: "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.numberValue,
+                        url: url,
                         data: $scope.record
                     }).then(function () {
                         $modalInstance.close(true);
