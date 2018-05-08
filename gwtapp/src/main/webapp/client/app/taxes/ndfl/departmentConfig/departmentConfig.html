@@ -1,0 +1,25 @@
+<div class="flex-column">
+    <div class="content-header">
+        <h1>{{::'departmentConfig.title' | translate}}</h1>
+    </div>
+    <div class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto">
+        <div id="departmentConfigTop">
+            <span data-ng-include="'client/app/taxes/ndfl/departmentConfig/departmentConfigFilter.html'"></span>
+        </div>
+        <div align="right">
+            {{versionLabelInfo}}
+        </div>
+        <div class="container-grid box-shadow-block flex-fill flex-column">
+            <div class="flex-grid flex-fill"
+                 data-aplana-grid
+                 data-grid-fill-space="true"
+                 data-grid-fill-space-container-selector="#departmentConfig"
+                 data-grid-fill-space-container-selector-top="#departmentConfigTop"
+                 data-grid-options="departmentConfigGrid.options"
+                 data-grid-ctrl="departmentConfigGrid.ctrl"
+                 data-ng-model="departmentConfigGrid.value"
+                 id="departmentConfigTable"
+                 style="float: left; width: 100%;"></div>
+        </div>
+    </div>
+</div>

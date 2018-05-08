@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -54,5 +55,13 @@ public class ReportPeriodController {
         return periodService.getPeriodsByDepartments(Collections.singletonList(user.getDepartmentId()));
     }
 
-
+    /**
+     * Получает периоды назначенные подразделению
+     * @param departmentId  идентификатор подразделения
+     * @return  возвращает список периодов назначенных подразделению
+     */
+    @GetMapping(value = "/rest/reportPeriod", params = "projection=forDepartment")
+    public List<ReportPeriod> fetchForDepartment(@RequestParam Integer departmentId) {
+        return periodService.getPeriodsByDepartments(Collections.singletonList(departmentId));
+    }
 }

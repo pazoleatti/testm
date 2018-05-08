@@ -525,6 +525,29 @@
         "reportPeriod.error.openCorrectionPeriod.alreadyOpen.text": "Корректирующий с датой корректировки {{correctDate}} период уже открыт!",
         "reportPeriod.error.deletePeriod.text": "Удаление периода невозможно!",
 
+        "departmentConfig.title": "НДФЛ - Настройки подразделений",
+        "departmentConfig.label.version": "Период действия настроек с {0} по {1}",
+        "departmentConfig.filter.label.department": "Подразделения",
+        "departmentConfig.filter.label.period": "Период",
+        "departmentConfig.filter.btn.search": "Найти",
+        "departmentConfig.header.rowOrd": "№",
+        "departmentConfig.header.taxOrganCode": "Код НО конечного",
+        "departmentConfig.header.kpp": "КПП",
+        "departmentConfig.header.oktmo": "ОКТМО",
+        "departmentConfig.header.presentPlace": "Код места предоставления",
+        "departmentConfig.header.name": "Наименование для титульного листа",
+        "departmentConfig.header.phone": "Номер контактного телефона",
+        "departmentConfig.header.reorganization": "Код формы реорганизации и ликвидации",
+        "departmentConfig.header.reorgInn": "ИНН реорганизованной обособленного подразделения",
+        "departmentConfig.header.reorgKpp": "КПП реорганизованного обособленного подразделения",
+        "departmentConfig.header.signatoryId": "Признак лица, подписавшего документ",
+        "departmentConfig.header.signatorySurName": "Фамилия подписанта",
+        "departmentConfig.header.signatoryFirstName": "Имя подписанта",
+        "departmentConfig.header.signatoryLastName": "Отчество подписанта",
+        "departmentConfig.header.approveDocName": "Наименование документа, подтверждающего полномочия представителя",
+        "departmentConfig.header.approveOrgName": "Наименование организации-представителя налогоплательщика",
+        "departmentConfig.header.modifiedDate": "Дата и время редактирования",
+        "departmentConfig.header.modifiedBy": "Обновил",
 
         "ndflFL.title.numberpp": "№ п/п\n Гр. 1",
         "ndflFL.title.inp": "ИНП\n Гр. 2",
@@ -854,7 +877,8 @@
         'app.refBookList',
         'app.linearRefBook',
         'app.hierRefBook',
-        'app.refBookConfList'
+        'app.refBookConfList',
+        'app.departmentConfig'
     ]);
 
     /**

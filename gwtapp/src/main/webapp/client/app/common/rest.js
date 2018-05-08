@@ -371,5 +371,25 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Работа со справочником подразделений
+         */
+        .factory('DepartmentResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/department/:departmentId?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+
+            });
+        }])
+
+        /**
+         * @description Настройки подразделений
+         */
+        .factory('DepartmentConfigResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/departmentConfig', {}, {
+                query: {
+                    method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

@@ -37,5 +37,15 @@ public class DepartmentController {
         return !departmentService.getChildren(departmentId).isEmpty();
     }
 
-
+    /**
+     * Получает родительский ТБ для подразделения.
+     *
+     * @param departmentId иденетификатор подразделения, для которого надо получить терр. банк.
+     * @return терр. банк. Возвращает null, если departmentId корневое подразделение.
+     * Возвращает переданное подразделение, если оно и есть террбанк.
+     */
+    @GetMapping(value = "/rest/department/{departmentId}", params = "projection=fetchParentTB")
+    public Department fetchParentTB(@PathVariable Integer departmentId) {
+        return departmentService.getParentTB(departmentId);
+    }
 }

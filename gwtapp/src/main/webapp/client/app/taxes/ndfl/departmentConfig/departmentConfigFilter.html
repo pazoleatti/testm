@@ -1,0 +1,32 @@
+<div class="grid-filter">
+    <form class="form-horizontal info-wrapper" role="form" novalidate>
+        <div class="row">
+            <div class="row-fluid form-group">
+                <div class="span1">
+                    <label class="control-label">{{::'departmentConfig.filter.label.department' | translate}}:</label>
+                </div>
+                <div data-ng-controller="SelectDepartmentCtrl"
+                     data-ui-select2="departmentsSelect.options"
+                     data-ng-init="initAvailableTBSelect()"
+                     data-ng-model="searchFilter.params.department"
+                     class="span2"></div>
+                <div class="span1">
+                    <label class="control-label">{{::'departmentConfig.filter.label.period' | translate}}:</label>
+                </div>
+                <div data-ng-controller="SelectPeriodCtrl"
+                     data-ui-select2="periodSelect.options"
+                     data-ng-init="initEmptySelect()"
+                     data-ng-model="searchFilter.params.period"
+                     class="span2"></div>
+                <div class="span1">
+                    <button type="button"
+                            class="btn btn-default"
+                            data-ng-click="refreshGrid(1)"
+                            data-ng-disabled="disableSearchButton">
+                        <span data-translate-once="departmentConfig.filter.btn.search"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

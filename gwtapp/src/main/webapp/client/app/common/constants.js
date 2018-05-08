@@ -216,6 +216,11 @@
             REFBOOK_EDITING: {
                 IS_READ_ONLY: "Только для чтения",
                 NOT_IS_READ_ONLY: "Редактируемый"
+            },
+            EVENTS: {
+                DEPARTMENT_SELECTED: "DEPARTMENT_SELECTED",
+                USER_TB_SELECT: "USER_TB_SELECT",
+                LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT"
             }
         });
 }());

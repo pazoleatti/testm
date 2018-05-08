@@ -167,7 +167,7 @@
                     }
 
                     $scope.declarationKindSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, declarationKinds);
-                }
+                };
             }])
 
         /**
@@ -371,13 +371,32 @@
                     $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
                     fillSelectListAndFindLatestPeriod("opened", latestPeriod);
                 };
+
+                /**
+                 * @description Инициализировать выпадающий список пустым массивом
+                 */
+                $scope.initEmptySelect = function () {
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
+                    $scope.periodSelect.options.data.results = [];
+
+                };
+                // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
+                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId) {
+                    ReportPeriodResource.query({
+                        projection: "forDepartment",
+                        departmentId: departmentId
+                    }, function (data) {
+                        $scope.$emit(APP_CONSTANTS.EVENTS.LAST_PERIOD_SELECT, data[0]);
+                        $scope.periodSelect.options.data.results = data;
+                    });
+                });
             }])
 
         /**
          * Контроллер для выбора подразделений
          */
-        .controller('SelectDepartmentCtrl', ['$scope', 'GetSelectOption', 'APP_CONSTANTS', 'RefBookValuesResource',
-            function ($scope, GetSelectOption, APP_CONSTANTS, RefBookValuesResource) {
+        .controller('SelectDepartmentCtrl', ['$scope', '$rootScope', 'GetSelectOption', 'APP_CONSTANTS', 'RefBookValuesResource', 'DepartmentResource',
+            function ($scope, $rootScope, GetSelectOption, APP_CONSTANTS, RefBookValuesResource, DepartmentResource) {
                 $scope.departmentsSelect = {};
 
                 /**
@@ -459,6 +478,33 @@
                         }
                     });
                 };
+
+                /**
+                 * @description Инициализировать список с загрузкой действующих доступных ТБ для фильтрации настроек подразделений
+                 */
+                $scope.initAvailableTBSelect = function () {
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "fullNameFormatter");
+                    RefBookValuesResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
+                        projection: "activeAvailableTB"
+                    }, function (availableTBs) {
+                        $scope.departmentsSelect.options.data.results = availableTBs;
+                        // получаем тербанк пользователя
+                        DepartmentResource.query({
+                                departmentId: $rootScope.user.department.id,
+                                projection: 'fetchParentTB'
+                            }, function (userTB) {
+                            // находим в списке тербанков тербанк пользователя и инициируем событие для выделения этого тербанка в выпадающем списке
+                                angular.forEach(availableTBs, function (department) {
+                                    if (userTB.id === department.id) {
+                                        $scope.$emit(APP_CONSTANTS.EVENTS.USER_TB_SELECT, department);
+                                    }
+                                });
+                            }
+                        );
+                    });
+                };
+
             }])
 
         /**
@@ -502,7 +548,7 @@
                             count: 10000
                         }
                     }, function (data) {
-                        if(data && data.rows){
+                        if (data && data.rows) {
                             var id = 0;
                             angular.forEach(data.rows, function (item) {
                                 item.id = id;
