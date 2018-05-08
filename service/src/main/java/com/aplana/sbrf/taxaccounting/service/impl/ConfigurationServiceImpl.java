@@ -642,6 +642,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String updateEmailParam(Configuration emailParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         if (SMTP_CONNECTION_PARAMS.contains(emailParam.getCode())) {
