@@ -65,25 +65,34 @@ public class RefBookController {
     /**
      * Получение списка записей справочника
      *
-     * @param refBookId    Идентификатор справочника
-     * @param recordId     Идентификатор группы версий записи справочника
-     * @param version      Дата актуальности для выборки записей справочника
-     * @param pagingParams Параметры пейджинга
+     * @param refBookId     Идентификатор справочника
+     * @param recordId      Идентификатор группы версий записи справочника
+     * @param version       Дата актуальности для выборки записей справочника
+     * @param pagingParams  Параметры пейджинга
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookRecords/{refBookId}")
     public JqgridPagedList<Map<String, RefBookValue>> fetchRefBookRecords(@PathVariable Long refBookId,
                                                                           @RequestParam(required = false) Long recordId,
                                                                           @RequestParam(required = false) Date version,
+                                                                          @RequestParam(required = false) String searchPattern,
+                                                                          @RequestParam(required = false) boolean exactSearch,
                                                                           @RequestParam PagingParams pagingParams) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
                 refBookFactory.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         PagingResult<Map<String, RefBookValue>> records;
         if (recordId == null) {
+            String filter = null;
+            if (StringUtils.isNotEmpty(searchPattern)) {
+                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
+                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+            }
             // Отбираем все записи справочника
             records = provider.getRecordsWithVersionInfo(version,
-                    pagingParams, null, sortAttribute, pagingParams.getDirection().toLowerCase().equals("asc"));
+                    pagingParams, filter, sortAttribute, pagingParams.getDirection().toLowerCase().equals("asc"));
         } else {
             // Отбираем все версии записи правочника
             records = provider.getRecordVersionsByRecordId(recordId, pagingParams, null, sortAttribute);
@@ -95,38 +104,16 @@ public class RefBookController {
      * Получение списка всех записей иерархического справочника без учета пэйджинга
      * Версии так же не учитываются, считаем, что у нас нет версионируемых иерархических справочников
      *
-     * @param refBookId Идентификатор справочника
+     * @param refBookId     Идентификатор справочника
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @return Страница списка значений справочника
      */
-    @SuppressWarnings("unchecked")
     @GetMapping(value = "/rest/refBookRecords/{refBookId}", params = "projection=hier")
-    public Collection<Map<String, RefBookValue>> fetchHierRefBookRecords(@PathVariable Long refBookId) {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
-        List<Map<String, RefBookValue>> records = provider.getRecords(null, null, null, null, true);
-        Map<Number, Map<String, RefBookValue>> recordsById = new HashMap<>();
-        List<Map<String, RefBookValue>> result = new ArrayList<>();
-
-        // Группируем по id
-        for (Map<String, RefBookValue> record : records) {
-            recordsById.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue(), record);
-        }
-        // Собираем дочерние подразделения внутри родительских
-        for (Map<String, RefBookValue> record : recordsById.values()) {
-            Number parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-            if (parentId != null) {
-                Map<String, RefBookValue> parent = recordsById.get(parentId);
-                if (parent.containsKey(RefBook.RECORD_CHILDREN_ALIAS)) {
-                    parent.get(RefBook.RECORD_CHILDREN_ALIAS).getCollectionValue().add(record);
-                } else {
-                    parent.put(RefBook.RECORD_CHILDREN_ALIAS, new RefBookValue(RefBookAttributeType.COLLECTION, new ArrayList()));
-                }
-                if (parentId.intValue() == Department.ROOT_DEPARTMENT_ID) {
-                    // Отбираем только ТБ - все остальные подразделения будут уже как дочерние
-                    result.add(record);
-                }
-            }
-        }
-        return result;
+    public Collection<Map<String, RefBookValue>> fetchHierRefBookRecords(@PathVariable Long refBookId,
+                                                                         @RequestParam(required = false) String searchPattern,
+                                                                         @RequestParam(required = false) boolean exactSearch) {
+        return commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch);
     }
 
     /**
@@ -142,7 +129,8 @@ public class RefBookController {
     }
 
     /**
-     * Получение всех значений указанного справочника замапленных на определенные сущности
+     * Получение всех значений указанного справочника замапленных на определенные сущности.
+     * Используется для заполнения данными выпадашек.
      *
      * @param refBookId    идентификатор справочника
      * @param columns      список столбов таблицы справочника, по которым будет выполняться фильтрация
@@ -224,13 +212,18 @@ public class RefBookController {
      * @param refBookId    идентификатор справочника
      * @param version      версия, на которую строится отчет (для версионируемых справочников)
      * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportXlsx")
     public ActionResult createDeclarationReportXlsx(@PathVariable long refBookId,
                                                     @RequestParam(required = false) Date version,
-                                                    @RequestParam(required = false) PagingParams pagingParams) {
-        return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams, AsyncTaskType.EXCEL_REF_BOOK);
+                                                    @RequestParam(required = false) PagingParams pagingParams,
+                                                    @RequestParam(required = false) String searchPattern,
+                                                    @RequestParam(required = false) boolean exactSearch) {
+        return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
+                searchPattern, exactSearch, AsyncTaskType.EXCEL_REF_BOOK);
     }
 
     /**
@@ -239,12 +232,17 @@ public class RefBookController {
      * @param refBookId    идентификатор справочника
      * @param version      версия, на которую строится отчет (для версионируемых справочников)
      * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportCsv")
     public ActionResult createDeclarationReportCsv(@PathVariable long refBookId,
                                                    @RequestParam(required = false) Date version,
-                                                   @RequestParam(required = false) PagingParams pagingParams) {
-        return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams, AsyncTaskType.CSV_REF_BOOK);
+                                                   @RequestParam(required = false) PagingParams pagingParams,
+                                                   @RequestParam(required = false) String searchPattern,
+                                                   @RequestParam(required = false) boolean exactSearch) {
+        return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
+                searchPattern, exactSearch, AsyncTaskType.CSV_REF_BOOK);
     }
 }

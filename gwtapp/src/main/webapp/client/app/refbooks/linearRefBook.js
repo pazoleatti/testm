@@ -21,6 +21,10 @@
                 $scope.data = {};
                 $scope.data.recordVersion = new Date();
                 $scope.versionMode = $stateParams.recordId && $stateParams.recordId !== 'undefined';
+                $scope.search = {
+                    text: "",
+                    precise: false
+                };
 
                 // Получаем данные справочника
                 RefBookResource.query({
@@ -153,7 +157,9 @@
                                 return {
                                     refBookId: $stateParams.refBookId,
                                     recordId: $stateParams.recordId,
-                                    version: $scope.data.recordVersion
+                                    version: $scope.data.recordVersion,
+                                    searchPattern: $scope.search.text,
+                                    exactSearch: $scope.search.precise
                                 };
                             },
                             colNames: $scope.columnNames,
@@ -219,7 +225,6 @@
                             }
                         }
                     }).result.then(function () {
-                        // TODO: лог панель отображается на заднем плане и ее нельзя пролистать
                         $scope.refBookGrid.ctrl.refreshGrid(1);
                     });
                 };
@@ -264,7 +269,6 @@
                             }
                         }
                     }).result.then(function (needToRefresh) {
-                        // TODO: лог панель отображается на заднем плане и ее нельзя пролистать
                         if (needToRefresh) {
                             $scope.refBookGrid.ctrl.refreshGrid(1);
                         }
@@ -312,7 +316,9 @@
                             pagingParams: JSON.stringify({
                                 property: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
                                 direction: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
-                            })
+                            }),
+                            searchPattern: $scope.search.text,
+                            exactSearch: $scope.search.precise
                         }
                     }).success(function (response) {
                         $logPanel.open('log-panel-container', response.uuid);
@@ -331,11 +337,20 @@
                             pagingParams: JSON.stringify({
                                 property: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
                                 direction: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
-                            })
+                            }),
+                            searchPattern: $scope.search.text,
+                            exactSearch: $scope.search.precise
                         }
                     }).success(function (response) {
                         $logPanel.open('log-panel-container', response.uuid);
                     });
                 };
+
+                /**
+                 * Поиск по справочнику
+                 */
+                $scope.searchRecords = function () {
+                    $scope.refBookGrid.ctrl.refreshGrid(1);
+                }
             }]);
 }());

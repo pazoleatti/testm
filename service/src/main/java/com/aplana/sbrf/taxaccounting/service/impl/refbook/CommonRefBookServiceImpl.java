@@ -10,10 +10,12 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -121,7 +123,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    public ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, AsyncTaskType reportType) {
+    public ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, String searchPattern, boolean exactSearch, AsyncTaskType reportType) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
         RefBook refBook = refBookFactory.get(refBookId);
@@ -129,35 +131,11 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
         if (lockData == null) {
             String filter = "";
-            String searchPattern = "";
-            // TODO: возможно это пригодится после реализации поиска
-            /*String filter = null;
-            String lastNamePattern = action.getLastNamePattern();
-            String firstNamePattern = action.getFirstNamePattern();
-            String searchPattern = action.getSearchPattern();
-            boolean isPerson = action.getRefBookId() == RefBook.Id.PERSON.getId();
-            if (searchPattern != null && !searchPattern.isEmpty() && (!isPerson || (firstNamePattern == null && lastNamePattern == null))) {
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
+            if (StringUtils.isNotEmpty(searchPattern)) {
+                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
+                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
                 searchPattern = "Фильтр: \"" + searchPattern + "\"";
-            } else if (isPerson && (firstNamePattern != null && !firstNamePattern.isEmpty() || lastNamePattern != null && !lastNamePattern.isEmpty())) {
-                Map<String, String> params = new HashMap<String, String>();
-                StringBuilder sb = new StringBuilder();
-                if (lastNamePattern != null && !lastNamePattern.isEmpty()) {
-                    sb.append("Фильтр по фамилии: \"").append(lastNamePattern).append("\"");
-                    params.put("LAST_NAME", lastNamePattern);
-                }
-                if (firstNamePattern != null && !firstNamePattern.isEmpty()) {
-                    sb.append(sb.length() != 0 ? ", " : "");
-                    sb.append("Фильтр по имени: \"").append(firstNamePattern).append("\"");
-                    params.put("FIRST_NAME", firstNamePattern);
-                }
-                if (searchPattern != null && !searchPattern.isEmpty()) {
-                    sb.append(sb.length() != 0 ? ", " : "");
-                    sb.append("Фильтр по всем полям: \"").append(searchPattern).append("\"");
-                }
-                filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
-                searchPattern = sb.toString();
-            }*/
+            }
             RefBookAttribute sortAttribute;
             boolean isAscSorting;
             if (refBook.isHierarchic()) {
@@ -193,5 +171,72 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             logger.info(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
             throw new ServiceLoggerException("Для текущего справочника запущена операция, при которой формирование отчета невозможно", logEntryService.save(logger.getEntries()));
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch) {
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+        String filter = null;
+        if (StringUtils.isNotEmpty(searchPattern)) {
+            // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
+            filter = refBookFactory.getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+        }
+        List<Map<String, RefBookValue>> records = provider.getRecords(null, null, filter, null, true);
+        Map<Number, Map<String, RefBookValue>> recordsById = new HashMap<>();
+        List<Map<String, RefBookValue>> result = new ArrayList<>();
+
+        // Группируем по id
+        for (Map<String, RefBookValue> record : records) {
+            recordsById.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue(), record);
+        }
+        if (StringUtils.isNotEmpty(filter)) {
+            Map<Number, Map<String, RefBookValue>> parents = new HashMap<>();
+            // Если есть фильтр, то надо для найденных записей найти все родительские для корректного отображения в дереве
+            for (Map<String, RefBookValue> record : recordsById.values()) {
+                parents = fetchParentsRecursively(provider, record, parents);
+            }
+            recordsById.putAll(parents);
+        }
+
+        // Собираем дочерние подразделения внутри родительских
+        for (Map<String, RefBookValue> record : recordsById.values()) {
+            Number parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+            if (parentId != null) {
+                Map<String, RefBookValue> parent = recordsById.get(parentId);
+                if (!parent.containsKey(RefBook.RECORD_CHILDREN_ALIAS)) {
+                    parent.put(RefBook.RECORD_CHILDREN_ALIAS, new RefBookValue(RefBookAttributeType.COLLECTION, new ArrayList()));
+                }
+                parent.get(RefBook.RECORD_CHILDREN_ALIAS).getCollectionValue().add(record);
+                if (parentId.intValue() == Department.ROOT_DEPARTMENT_ID) {
+                    // Отбираем только ТБ - все остальные подразделения будут уже как дочерние
+                    result.add(record);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Рекурсивно находит все родительские записи для указанной. В первую очередь запись ищется среди ранее найденных, т.к в этом случае искать дальше смысла нет - все родительские уже в этом списке
+     * @param provider провайдер для доступа к справочнику
+     * @param record текущая запись
+     * @param parents все ранее найденные родительские записи упорядоченные по ID
+     * @return дополненный список родительских записей
+     */
+    private Map<Number, Map<String, RefBookValue>> fetchParentsRecursively(RefBookDataProvider provider, Map<String, RefBookValue> record, Map<Number, Map<String, RefBookValue>> parents) {
+        if (record.containsKey(RefBook.RECORD_PARENT_ID_ALIAS)) {
+            Long parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+            if (parentId != null && !parents.containsKey(parentId)) {
+                Map<String, RefBookValue> parent = provider.getRecordData(parentId);
+                parents.put(parentId, parent);
+                if (parentId == Department.ROOT_DEPARTMENT_ID) {
+                    return parents;
+                } else {
+                    fetchParentsRecursively(provider, parent, parents);
+                }
+            }
+        }
+        return parents;
     }
 }

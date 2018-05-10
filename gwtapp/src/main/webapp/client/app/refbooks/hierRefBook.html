@@ -13,6 +13,28 @@
                 </button>
             </div>
         </div>
+        <!--Поиск-->
+        <div class="btn-toolbar pull-left" style="margin-left: 40px;" role="toolbar">
+                <span class="pull-left">
+                    <input data-ng-model="search.text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control" style="margin-top: 3px"/>
+                </span>
+            <span style="margin-left: 10px">
+                    <button type="button"
+                            class="btn btn-default"
+                            id="searchButton"
+                            data-ng-click="fetchRecords()">
+                        <span data-translate-once="common.button.search"></span>
+                    </button>
+                </span>
+            <span style="margin-left: 10px">
+                    <label style="margin-bottom: 0">
+                        <input class="cbox" type="checkbox" data-ng-model="search.precise"/>
+                        <span>{{::'refBook.checkbox.search' | translate}}</span>
+                    </label>
+                </span>
+        </div>
         <!--Формирование отчетов-->
         <div class="w200 pull-right" style="margin: 5px 10px 10px 0;">
             <div class="btn-group pull-right">

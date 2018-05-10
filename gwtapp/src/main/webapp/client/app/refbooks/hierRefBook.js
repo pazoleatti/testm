@@ -16,20 +16,34 @@
         .controller('hierRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
             "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', "$http", "$logPanel",
             function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource, $aplanaModal, $filter, $http, $logPanel) {
-                // Получаем данные справочника
-                RefBookResource.query({
-                    id: $stateParams.refBookId
-                }, function (data) {
-                    $scope.refBook = data;
-                    // Получаем записи справочника
-                    RefBookRecordResource.querySource({
-                        refBookId: $stateParams.refBookId,
-                        projection: "hier"
+                $scope.search = {
+                    text: "",
+                    precise: false
+                };
+
+                /**
+                 * Получение записей спраочника и обновление дерева
+                 */
+                $scope.fetchRecords = function () {
+                    // Получаем данные справочника
+                    RefBookResource.query({
+                        id: $stateParams.refBookId
                     }, function (data) {
-                        $scope.records = data;
-                        $scope.constructTree();
+                        $scope.refBook = data;
+                        // Получаем записи справочника
+                        RefBookRecordResource.querySource({
+                            refBookId: $stateParams.refBookId,
+                            searchPattern: $scope.search.text,
+                            exactSearch: $scope.search.precise,
+                            projection: "hier"
+                        }, function (data) {
+                            $scope.records = data;
+                            $scope.constructTree();
+                        });
                     });
-                });
+                };
+
+                $scope.fetchRecords();
 
                 /**
                  * Динамически добавляет дерево на страницу и заполняет его данными
@@ -57,7 +71,7 @@
                             "         data-multi-select=\"false\"\n" +
                             "         data-collapsed=\"true\"\n" +
                             "         data-ng-model=\"refBookTree.selectedNode\"></div>")(parent.scope());
-                        parent.append(refBookGrid);
+                        parent.html(refBookGrid);
                     });
                 };
 
@@ -88,7 +102,11 @@
                 $scope.createReportXlsx = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportXlsx"
+                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportXlsx",
+                        params: {
+                            searchPattern: $scope.search.text,
+                            exactSearch: $scope.search.precise
+                        }
                     }).success(function (response) {
                         $logPanel.open('log-panel-container', response.uuid);
                     });
@@ -100,7 +118,11 @@
                 $scope.createReportCsv = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportCsv"
+                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportCsv",
+                        params: {
+                            searchPattern: $scope.search.text,
+                            exactSearch: $scope.search.precise
+                        }
                     }).success(function (response) {
                         $logPanel.open('log-panel-container', response.uuid);
                     });

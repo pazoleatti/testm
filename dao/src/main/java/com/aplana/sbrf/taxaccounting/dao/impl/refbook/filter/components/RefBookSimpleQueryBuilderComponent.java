@@ -349,7 +349,7 @@ public class RefBookSimpleQueryBuilderComponent {
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)) {
+            if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS) && !attribute.getAlias().equalsIgnoreCase(RefBook.BUSINESS_ID_ALIAS)) {
                 ps.appendQuery(", frb.");
                 ps.appendQuery(attribute.getAlias());
             }
@@ -364,6 +364,7 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("left join nextVersionEnd nve on nve.record_id = frb.record_id \n");
         }
 
+        PreparedStatementData filterPS = new PreparedStatementData();
         if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(filter)) {
             ps.appendQuery(" WHERE (");
             for (Iterator<String> it = columns.iterator(); it.hasNext(); ) {
@@ -373,13 +374,8 @@ public class RefBookSimpleQueryBuilderComponent {
                     ps.appendQuery(" or ");
                 }
             }
-            if (refBook.isVersioned()) {
-                ps.appendQuery(") AND ");
-            } else {
-                ps.appendQuery(") ");
-            }
+            ps.appendQuery(") ");
         } else if (StringUtils.isNotEmpty(filter)) {
-            PreparedStatementData filterPS = new PreparedStatementData();
             SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
             simpleFilterTreeListener.setRefBook(refBook);
             simpleFilterTreeListener.setPs(filterPS);
@@ -396,17 +392,13 @@ public class RefBookSimpleQueryBuilderComponent {
                 }
                 ps.appendQuery(") ");
             }
-
-            if (filterPS.getQuery().length() > 0) {
-                ps.appendQuery(" AND ");
-            } else if (refBook.isVersioned()) {
-                ps.appendQuery(" WHERE ");
-            }
-        } else if (refBook.isVersioned()) {
-            ps.appendQuery(" WHERE ");
         }
-
         if (refBook.isVersioned()) {
+            if (CollectionUtils.isEmpty(columns) && StringUtils.isEmpty(filter) && StringUtils.isEmpty(filterPS.getQuery())) {
+                ps.appendQuery(" WHERE ");
+            } else {
+                ps.appendQuery(" AND ");
+            }
             ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
         }
 

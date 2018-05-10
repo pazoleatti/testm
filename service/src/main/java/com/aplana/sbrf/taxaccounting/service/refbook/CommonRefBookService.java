@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -89,8 +90,21 @@ public interface CommonRefBookService {
      * @param refBookId    идентификатор справочника
      * @param version      версия, на которую строится отчет (для версионируемых справочников)
      * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @param reportType   тип отчета
      * @return информация о создании отчета
      */
-    ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, AsyncTaskType reportType);
+    ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, String searchPattern, boolean exactSearch, AsyncTaskType reportType);
+
+    /**
+     * Получает данные иерархического справочника. В случае применения фильтра для элементов дополнительно подгружаются
+     * родительские элементы вплоть до корневого для корректного отображения в дереве
+     *
+     * @param refBookId     идентификатор справочника
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return
+     */
+    Collection<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch);
 }

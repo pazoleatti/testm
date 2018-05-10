@@ -805,6 +805,7 @@
         "refBooks.button.versions": "Версии",
         "refBook.button.reportXlsx": "Сформировать XLSX",
         "refBook.button.reportCsv": "Сформировать CSV",
+        "refBook.checkbox.search": "Искать по точному совпадению",
 
         "refBook.version": "Дата актуальности",
         "refBook.versionFrom": "Дата начала актуальности",
