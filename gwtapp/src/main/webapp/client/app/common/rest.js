@@ -302,16 +302,16 @@
         /**
          * @description Получить данные о типах асинхронных задач
          */
-        .factory('AsyncTaskResource', ['$resource', function ($resource) {
+        .factory('AsyncParamResource', ['$resource', function ($resource) {
             return $resource('controller/rest/asyncParam', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
 
         /**
-         * @description Получить данные о типах асинхронных задач
+         * @description Получить данные параметров конфигурации электронной почты
          */
-        .factory('EmailResource', ['$resource', function ($resource) {
+        .factory('EmailParamResource', ['$resource', function ($resource) {
             return $resource('controller/rest/emailParam', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
