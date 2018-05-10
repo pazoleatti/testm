@@ -163,6 +163,8 @@
                                     });
                                     grid.trigger("reloadGrid");
                                 }
+                            } else if (response.data && response.data.errorUuid) {
+                                $logPanel.open('log-panel-container', response.data.errorUuid);
                             }
                         });
                     }
@@ -225,7 +227,7 @@
                                     $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
                                     $scope.commentForm.comment = data.comment;
                                 }
-                            }else {
+                            } else {
                                 $scope.dSave.reject("Fail");
                             }
                         });
@@ -245,7 +247,7 @@
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
                                     okBtnClick: function () {
-                                        $scope.save().then(function(res) {
+                                        $scope.save().then(function (res) {
                                             $scope.unlock();
                                         });
                                         $modalInstance.close('Saved');
@@ -255,12 +257,12 @@
                                         $modalInstance.dismiss("Canceled");
                                     }
                                 });
-                            }else {
+                            } else {
                                 $scope.unlock();
                                 $modalInstance.dismiss("Canceled");
                             }
                         });
-                    }else {
+                    } else {
                         $modalInstance.dismiss();
                     }
                 };
@@ -270,22 +272,22 @@
                  */
                 var equals = function (dbFiles, formFiles) {
 
-                    if(dbFiles.length !== formFiles.length){
+                    if (dbFiles.length !== formFiles.length) {
                         return false;
                     }
                     var contains = true;
                     dbFiles.forEach(function (dbFile) {
                         contains = false;
                         formFiles.forEach(function (formFile) {
-                            if (dbFile.uuid === formFile.uuid && dbFile.fileTypeId === dbFile.fileTypeId && formFile.note === dbFile.note){
+                            if (dbFile.uuid === formFile.uuid && dbFile.fileTypeId === dbFile.fileTypeId && formFile.note === dbFile.note) {
                                 contains = true;
                             }
-                            if (!contains){
+                            if (!contains) {
                                 contains = false;
                                 return;
                             }
                         });
-                        if (!contains){
+                        if (!contains) {
                             return;
                         }
                     });
@@ -333,7 +335,7 @@
                         function (data) {
                             if (data) {
                                 $scope.d.resolve(data);
-                            }else {
+                            } else {
                                 $scope.d.reject();
                             }
                         }
