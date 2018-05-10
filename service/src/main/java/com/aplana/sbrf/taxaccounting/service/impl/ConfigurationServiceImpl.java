@@ -645,11 +645,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String updateEmailParam(Configuration emailParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
-        if (SMTP_CONNECTION_PARAMS.contains(emailParam.getCode())) {
-            configurationDao.updateEmailParam(emailParam);
-        } else {
-            configurationDao.updateEmailParam(emailParam);
-        }
+        configurationDao.updateEmailParam(emailParam);
         String message = ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" + emailParam.getCode() + "\": " + emailParam.getValue();
         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                 userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
@@ -660,7 +656,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public Map<String, String> fetchAuthEmailParamsMap() {
-        List<Configuration> configurations = configurationDao.getAuthEmailParams();
+        List<Configuration> configurations = configurationDao.fetchAuthEmailParams();
         Map<String, String> result = new HashMap<>();
         for (Configuration configuration : configurations) {
             result.put(configuration.getCode(), configuration.getValue());

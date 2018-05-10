@@ -189,5 +189,10 @@ public interface ConfigurationService {
      */
     PagingResult<Configuration> fetchEmailParams(PagingParams pagingParams, TAUserInfo userInfo);
 
+    /**
+     * Получение конфигурционных параметров электронной почты, необходимых для авторизации почтового клиента
+     *
+     * @return мапа <название, значение> с данными {@link Configuration}
+     */
     Map<String, String> fetchAuthEmailParamsMap();
 }

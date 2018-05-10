@@ -179,9 +179,9 @@ public class ConfigurationController {
     }
 
     /**
-     * Сохранение параметра конфигурации
+     * Сохранение конфигурационного параметра ассинхронных заданий
      *
-     * @param asyncParam конфигурационный параметр
+     * @param asyncParam конфигурационный параметр ассинхронных заданий
      * @return uuid идентификатор логгера с результатом сохранения параметра
      */
     @PostMapping(value = "/rest/asyncParam/update")
@@ -190,9 +190,9 @@ public class ConfigurationController {
     }
 
     /**
-     * Сохранение параметра конфигурации
+     * Сохранение конфигурационного параметра электронной почты
      *
-     * @param emailParam конфигурационный параметр
+     * @param emailParam конфигурационный параметр эктронной почты
      * @return uuid идентификатор логгера с результатом сохранения параметра
      */
     @PostMapping(value = "/rest/emailParam/update")

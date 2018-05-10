@@ -19,7 +19,7 @@ public interface EmailService {
     void send(List<String> destinations, String subject, String text);
 
     /**
-     * Проверка авторизации почтоыого клиента
+     * Проверка авторизации почтового клиента
      *
      * @param emailPram параметр элетронной почты
      * @param logger логгер для вывода ошибок

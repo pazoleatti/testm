@@ -289,7 +289,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public List<Configuration> getAuthEmailParams() {
+    public List<Configuration> fetchAuthEmailParams() {
         return getJdbcTemplate().query("select code, value from configuration_email where " + SqlUtils.transformToSqlInStatement("code", SMTP_CONNECTION_PARAMS), new RowMapper<Configuration>() {
             @Override
             public Configuration mapRow(ResultSet rs, int rowNum) throws SQLException {
