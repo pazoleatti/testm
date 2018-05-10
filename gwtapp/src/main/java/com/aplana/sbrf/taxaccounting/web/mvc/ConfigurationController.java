@@ -6,9 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.permissions.ConfigurationPermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,9 @@ public class ConfigurationController {
     private SecurityService securityService;
 
     private ConfigurationPermissionSetter configurationPermissionSetter;
+
+    @Autowired
+    private EmailService emailService;
 
     public ConfigurationController(ConfigurationService configurationService, SecurityService securityService, ConfigurationPermissionSetter configurationPermissionSetter) {
         this.configurationService = configurationService;
@@ -119,6 +124,11 @@ public class ConfigurationController {
     public JqgridPagedList<Configuration> fetchNonCreatedCommonParams(@RequestParam PagingParams pagingParams) {
         PagingResult<Configuration> result = configurationService.fetchNonCreatedCommonParams(pagingParams, securityService.currentUserInfo());
         return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+    }
+
+    @PostMapping(value = "/actions/emailParam/checkValidate")
+    public String checkEmailParam(){
+        return emailService.checkAuthAccess(securityService.currentUserInfo());
     }
 
     /**

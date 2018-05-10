@@ -81,8 +81,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private LogEntryService logEntryService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
-    @Autowired
-    private EmailService emailService;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -156,7 +154,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
         if (model == null) {
             return;

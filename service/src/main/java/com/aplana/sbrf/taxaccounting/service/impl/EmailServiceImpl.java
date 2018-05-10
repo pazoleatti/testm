@@ -1,15 +1,17 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -26,6 +28,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private ConfigurationService configurationService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Override
     public void send(List<String> destinations, String subject, String text) {
@@ -87,7 +92,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean checkAuthAccess(Configuration emailParam, Logger logger) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG)")
+    public String checkAuthAccess(TAUserInfo userInfo) {
+        Logger logger = new Logger();
         try {
             Properties props = new Properties();
             String login = null;
@@ -95,7 +102,6 @@ public class EmailServiceImpl implements EmailService {
             String host = null;
             String port = null;
             Map<String, String> authEmailParams = configurationService.fetchAuthEmailParamsMap();
-            authEmailParams.put(emailParam.getCode(), emailParam.getValue());
             for (String key : authEmailParams.keySet()) {
                 switch (key){
                     case "mail.smtp.user" : {
@@ -122,19 +128,19 @@ public class EmailServiceImpl implements EmailService {
             if (login == null || password == null || host == null || port == null) {
                 logger.error("Не указан один из обязательных параметров!");
                 logger.error("Авторизация с указанными параметрами не выполнена!");
-                return false;
+                return logEntryService.save(logger.getEntries());
             } else {
                 Session session = Session.getInstance(props);
                 Transport transport = session.getTransport();
                 transport.connect(host, Integer.parseInt(port), login, password);
                 logger.info("Авторизация выполнена успешно");
+                return logEntryService.save(logger.getEntries());
             }
         } catch (Exception e) {
             LOG.error("Авторизация с указанными параметрами не выполнена!", e);
             logger.error(e.getLocalizedMessage());
             logger.error("Авторизация с указанными параметрами не выполнена!");
-			return false;
+            return logEntryService.save(logger.getEntries());
         }
-		return true;
     }
 }

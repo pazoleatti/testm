@@ -10,8 +10,10 @@
     /**
      * @description контроллер вкладки "Электронная почта"
      */
-        .controller('emailParamController', ['$scope', '$filter', 'EmailResource', 'APP_CONSTANTS', '$aplanaModal', 'PermissionChecker', '$rootScope',
-            function ($scope, $filter, EmailResource, APP_CONSTANTS, $aplanaModal, PermissionChecker, $rootScope) {
+        .controller('emailParamController', ['$scope', '$filter', 'EmailParamResource', 'APP_CONSTANTS', '$aplanaModal', 'PermissionChecker', '$rootScope',
+            'EmailParamCheckerResource', 'LogEntryResource', '$logPanel', '$http',
+            function ($scope, $filter, EmailParamResource, APP_CONSTANTS, $aplanaModal, PermissionChecker, $rootScope,
+                      EmailParamCheckerResource, LogEntryResource, $logPanel, $http) {
 
                 $scope.emailParamGrid = {
                     ctrl: {},
@@ -19,7 +21,7 @@
                     options: {
                         gridName: 'emailParamGrid',
                         datatype: "angularResource",
-                        angularResource: EmailResource,
+                        angularResource: EmailParamResource,
                         value: [],
                         colNames: [
                             $filter('translate')('emailParam.field.code'),
@@ -35,7 +37,7 @@
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
-                        sortname: 'name',
+                        sortname: 'id',
                         viewrecords: true,
                         sortorder: "asc",
                         hidegrid: false,
@@ -66,6 +68,17 @@
                             $scope.emailParamGrid.ctrl.refreshGrid(1);
                         }
                     });
+                };
+
+                $scope.checkRecords = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/emailParam/checkValidate"
+                    }).then(function (logger) {
+                            if (logger.data) {
+                                $logPanel.open('log-panel-container', logger.data);
+                            }
+                        });
                 };
 
                 /**

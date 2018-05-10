@@ -12,10 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -27,7 +24,7 @@ import java.util.Map;
 @Repository
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
 
-    private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
+    private static final List<String> SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
 
 
     class ConfigurationRowCallbackHandler implements RowCallbackHandler {
@@ -255,7 +252,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 "select * from (" +
                         "   select rownum rn, ordered.* from (select id, name, value, description from configuration_email) ordered " +
                         ") numbered " +
-                        "where rn between :start and :end order by name",
+                        "where rn between :start and :end order by id",
                 params, emailConfigurationRowMapper
         );
         int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select id, value from configuration_email)", Integer.class);
@@ -290,11 +287,11 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 
     @Override
     public List<Configuration> fetchAuthEmailParams() {
-        return getJdbcTemplate().query("select code, value from configuration_email where " + SqlUtils.transformToSqlInStatement("code", SMTP_CONNECTION_PARAMS), new RowMapper<Configuration>() {
+        return getJdbcTemplate().query("select name, value from configuration_email where " + SqlUtils.transformToSqlInStatementForString("name", SMTP_CONNECTION_PARAMS), new RowMapper<Configuration>() {
             @Override
             public Configuration mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Configuration configuration = new Configuration();
-                configuration.setCode(rs.getString("code"));
+                configuration.setCode(rs.getString("name"));
                 configuration.setValue(rs.getString("value"));
                 return configuration;
             }

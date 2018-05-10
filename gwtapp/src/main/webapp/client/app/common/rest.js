@@ -318,6 +318,15 @@
         }])
 
         /**
+         * @description Проверка валидности конфигурационных параметров электронной почты
+         */
+        .factory('EmailParamCheckerResource', ['$resource', function ($resource) {
+            return $resource('controller/actions/emailParam/checkValidate', {}, {
+                query: {method: 'POST', isArray: false, cache: false}
+            });
+        }])
+
+        /**
          * @description Получить данные об общих параметрах (isArray: false)
          */
         .factory('CommonParamResource', ['$resource', function ($resource) {

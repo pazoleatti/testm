@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.List;
 
@@ -21,9 +20,8 @@ public interface EmailService {
     /**
      * Проверка авторизации почтового клиента
      *
-     * @param emailPram параметр элетронной почты
-     * @param logger логгер для вывода ошибок
-     * @return true - если авторизация прошла успешно, иначе false
+     * @return uuid идентификатор логгера
+     * @param userInfo
      */
-     boolean checkAuthAccess(Configuration emailPram, Logger logger);
+     String checkAuthAccess(TAUserInfo userInfo);
 }
