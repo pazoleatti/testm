@@ -91,7 +91,7 @@ public class NdflPersonIncomeDTO {
     /**
      * Порядковый номер строки
      */
-    protected BigDecimal rowNum;
+    protected String rowNum;
 
     private String inp;
 
@@ -107,7 +107,7 @@ public class NdflPersonIncomeDTO {
     public NdflPersonIncomeDTO() {
     }
 
-    public NdflPersonIncomeDTO(String incomeCode, String incomeType, Date incomeAccruedDate, Date incomePayoutDate, String oktmo, String kpp, BigDecimal incomeAccruedSumm, BigDecimal incomePayoutSumm, BigDecimal totalDeductionsSumm, BigDecimal taxBase, Integer taxRate, Date taxDate, BigDecimal calculatedTax, BigDecimal withholdingTax, BigDecimal notHoldingTax, BigDecimal overholdingTax, Long refoundTax, Date taxTransferDate, Date paymentDate, String paymentNumber, Long taxSumm, String operationId, Long sourceId, BigDecimal rowNum, String inp) {
+    public NdflPersonIncomeDTO(String incomeCode, String incomeType, Date incomeAccruedDate, Date incomePayoutDate, String oktmo, String kpp, BigDecimal incomeAccruedSumm, BigDecimal incomePayoutSumm, BigDecimal totalDeductionsSumm, BigDecimal taxBase, Integer taxRate, Date taxDate, BigDecimal calculatedTax, BigDecimal withholdingTax, BigDecimal notHoldingTax, BigDecimal overholdingTax, Long refoundTax, Date taxTransferDate, Date paymentDate, String paymentNumber, Long taxSumm, String operationId, Long sourceId, String rowNum, String inp) {
         this.incomeCode = incomeCode;
         this.incomeType = incomeType;
         this.incomeAccruedDate = incomeAccruedDate;
@@ -319,11 +319,11 @@ public class NdflPersonIncomeDTO {
         this.sourceId = sourceId;
     }
 
-    public BigDecimal getRowNum() {
+    public String getRowNum() {
         return rowNum;
     }
 
-    public void setRowNum(BigDecimal rowNum) {
+    public void setRowNum(String rowNum) {
         this.rowNum = rowNum;
     }
 

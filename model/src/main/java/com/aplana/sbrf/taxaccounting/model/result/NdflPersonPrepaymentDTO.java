@@ -23,7 +23,7 @@ public class NdflPersonPrepaymentDTO {
     /**
      * Порядковый номер строки
      */
-    protected BigDecimal rowNum;
+    protected String rowNum;
 
     // Сумма фиксированного авансового платежа (Графа 4)
     private BigDecimal summ;
@@ -52,7 +52,7 @@ public class NdflPersonPrepaymentDTO {
     public NdflPersonPrepaymentDTO() {
     }
 
-    public NdflPersonPrepaymentDTO(String operationId, Long sourceId, BigDecimal rowNum, BigDecimal summ, String notifNum, Date notifDate, String notifSource, String inp) {
+    public NdflPersonPrepaymentDTO(String operationId, Long sourceId, String rowNum, BigDecimal summ, String notifNum, Date notifDate, String notifSource, String inp) {
         this.operationId = operationId;
         this.sourceId = sourceId;
         this.rowNum = rowNum;
@@ -79,11 +79,11 @@ public class NdflPersonPrepaymentDTO {
         this.sourceId = sourceId;
     }
 
-    public BigDecimal getRowNum() {
+    public String getRowNum() {
         return rowNum;
     }
 
-    public void setRowNum(BigDecimal rowNum) {
+    public void setRowNum(String rowNum) {
         this.rowNum = rowNum;
     }
 
