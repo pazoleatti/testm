@@ -13,8 +13,9 @@
             });
         }])
         .controller('linearRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
-            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', '$window', "$http",
-            function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource, $aplanaModal, $filter, $window, $http) {
+            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', '$window', "$http", "$logPanel",
+            function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource,
+                      $aplanaModal, $filter, $window, $http, $logPanel) {
                 $scope.columnNames = [];
                 $scope.columnModel = [];
                 $scope.data = {};
@@ -26,6 +27,15 @@
                     id: $stateParams.refBookId
                 }, function (data) {
                     $scope.refBook = data;
+                    // Определяем атрибут для сортировки по умолчанию в справочнике
+                    if ($scope.refBook.sortAttribute) {
+                        // Если в настройках справочника указан атрибут для сортировки - берем его
+                        $scope.sortAttribute =  $scope.refBook.sortAttribute.alias;
+                    } else {
+                        // Иначе первый атрибут в списке
+                        $scope.sortAttribute =  $scope.refBook.attributes[0].alias;
+                    }
+
                     if ($scope.refBook.versioned) {
                         // Если справочник версионируемый - добавляем информацию о периоде действия записей
                         $scope.refBook.attributes.unshift({
@@ -44,6 +54,8 @@
                             visible: true,
                             width: 5
                         });
+                    } else {
+                        $scope.data.recordVersion = null;
                     }
                     $scope.constructGridColumns();
                     $scope.constructGrid();
@@ -78,13 +90,17 @@
                                     width: attribute.width * 20, //TODO: пока так, потому что в БД ширина задана в em, а оно не поддерживается в jqgrid
                                     type: attribute.attributeType,
                                     referenceAttribute: attribute.refBookAttribute,
-                                    formatter: refBookValueFormatter
+                                    formatter: refBookValueFormatter,
+                                    sortable: attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS
                                 }
-                            )
+                            );
                         }
                     });
                 };
 
+                /**
+                 * Получает значение атрибута в зависимости от его типа
+                 */
                 function refBookValueFormatter(cellValue, options, row) {
                     var colModel = options.index ? options : options.colModel;
                     var record = row[colModel.index];
@@ -147,11 +163,13 @@
                             viewrecords: true,
                             hidegrid: false,
                             multiselect: true,
-                            // TODO: задать сортировку по умолчанию
+                            sortname: $scope.sortAttribute,
+                            sortorder: "asc",
                             ondblClickRow: function (rowId) {
                                 $scope.showRecord($scope.refBookGrid.ctrl.getRawData(rowId))
                             },
                             onSelectRow: function (rowId, status) {
+                                // Обновляем количество версий на кнопке Версии
                                 if (($scope.refBookGrid.value.length === 0 && status) || $scope.refBookGrid.value.length === 2 && !status) {
                                     $http({
                                         method: "GET",
@@ -267,8 +285,8 @@
                         url: "controller/actions/refBook/" + $scope.refBook.id + "/deleteRecords",
                         data: ids
                     }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
+                        if (response.data && response.uuid && response.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.uuid);
                         } else {
                             $scope.refBookGrid.ctrl.refreshGrid(1);
                         }
@@ -280,6 +298,44 @@
                  */
                 $scope.showVersions = function () {
                     $window.location = "index.html#/refBooks/linearRefBook/" + $scope.refBook.id + "?recordId=" + $scope.refBookGrid.value[0].record_id.numberValue;
-                }
+                };
+
+                /**
+                 * Формирование XLSX выгрузки записей справочника
+                 */
+                $scope.createReportXlsx = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportXlsx",
+                        params: {
+                            version: $scope.data.recordVersion,
+                            pagingParams: JSON.stringify({
+                                property: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
+                                direction: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
+                            })
+                        }
+                    }).success(function (response) {
+                        $logPanel.open('log-panel-container', response.uuid);
+                    });
+                };
+
+                /**
+                 * Формирование CSV выгрузки записей справочника
+                 */
+                $scope.createReportCsv = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportCsv",
+                        params: {
+                            version: $scope.data.recordVersion,
+                            pagingParams: JSON.stringify({
+                                property: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
+                                direction: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
+                            })
+                        }
+                    }).success(function (response) {
+                        $logPanel.open('log-panel-container', response.uuid);
+                    });
+                };
             }]);
 }());

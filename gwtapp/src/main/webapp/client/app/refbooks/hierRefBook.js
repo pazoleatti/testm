@@ -14,8 +14,8 @@
         }])
 
         .controller('hierRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
-            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', "$aplanaModal",
-            function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource, $aplanaModal, $filter) {
+            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', "$http", "$logPanel",
+            function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource, $aplanaModal, $filter, $http, $logPanel) {
                 // Получаем данные справочника
                 RefBookResource.query({
                     id: $stateParams.refBookId
@@ -79,6 +79,30 @@
                                 };
                             }
                         }
+                    });
+                };
+
+                /**
+                 * Формирование XLSX выгрузки записей справочника
+                 */
+                $scope.createReportXlsx = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportXlsx"
+                    }).success(function (response) {
+                        $logPanel.open('log-panel-container', response.uuid);
+                    });
+                };
+
+                /**
+                 * Формирование CSV выгрузки записей справочника
+                 */
+                $scope.createReportCsv = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportCsv"
+                    }).success(function (response) {
+                        $logPanel.open('log-panel-container', response.uuid);
                     });
                 };
             }]);

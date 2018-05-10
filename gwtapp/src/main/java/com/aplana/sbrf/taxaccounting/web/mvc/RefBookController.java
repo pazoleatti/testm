@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -73,7 +74,7 @@ public class RefBookController {
     @GetMapping(value = "/rest/refBookRecords/{refBookId}")
     public JqgridPagedList<Map<String, RefBookValue>> fetchRefBookRecords(@PathVariable Long refBookId,
                                                                           @RequestParam(required = false) Long recordId,
-                                                                          @RequestParam Date version,
+                                                                          @RequestParam(required = false) Date version,
                                                                           @RequestParam PagingParams pagingParams) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
@@ -215,5 +216,35 @@ public class RefBookController {
     @GetMapping(value = "/actions/refBook/{refBookId}/recordVersionCount/{recordId}")
     public int getRecordVersionCount(@PathVariable Long refBookId, @PathVariable Long recordId) {
         return commonRefBookService.getRecordVersionCount(refBookId, recordId);
+    }
+
+    /**
+     * Формирование отчета в XLSX
+     *
+     * @param refBookId    идентификатор справочника
+     * @param version      версия, на которую строится отчет (для версионируемых справочников)
+     * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @return информация о создании отчета
+     */
+    @PostMapping(value = "/actions/refBook/{refBookId}/reportXlsx")
+    public ActionResult createDeclarationReportXlsx(@PathVariable long refBookId,
+                                                    @RequestParam(required = false) Date version,
+                                                    @RequestParam(required = false) PagingParams pagingParams) {
+        return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams, AsyncTaskType.EXCEL_REF_BOOK);
+    }
+
+    /**
+     * Формирование отчета в CSV
+     *
+     * @param refBookId    идентификатор справочника
+     * @param version      версия, на которую строится отчет (для версионируемых справочников)
+     * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @return информация о создании отчета
+     */
+    @PostMapping(value = "/actions/refBook/{refBookId}/reportCsv")
+    public ActionResult createDeclarationReportCsv(@PathVariable long refBookId,
+                                                   @RequestParam(required = false) Date version,
+                                                   @RequestParam(required = false) PagingParams pagingParams) {
+        return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams, AsyncTaskType.CSV_REF_BOOK);
     }
 }

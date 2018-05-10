@@ -2,15 +2,39 @@
     <div class="content-header">
         <h1><a href="index.html#/refbooks/refBookList">{{::'refBooks.title' | translate}}</a> - {{refBook.name}}</h1>
     </div>
-
-    <!--Панель кнопок -->
-    <div class="button_panel">
-        <div class="btn-toolbar" role="toolbar">
-            <!-- Открыть -->
-            <button type="button" class="btn btn-default" data-ng-disabled="!refBookTree.selectedNode"
-                    data-ng-click="showRecord()">
-                <span data-translate-once="button.open"></span>
-            </button>
+    <div>
+        <!--Панель кнопок -->
+        <div class="button_panel pull-left">
+            <div class="btn-toolbar" role="toolbar">
+                <!-- Открыть -->
+                <button type="button" class="btn btn-default" data-ng-disabled="!refBookTree.selectedNode"
+                        data-ng-click="showRecord()">
+                    <span data-translate-once="button.open"></span>
+                </button>
+            </div>
+        </div>
+        <!--Формирование отчетов-->
+        <div class="w200 pull-right" style="margin: 5px 10px 10px 0;">
+            <div class="btn-group pull-right">
+                <div id="single-button"
+                     data-aplana-dropdown
+                     data-placement="bottom-right"
+                     class="btn btn-default">
+                    <span data-translate-once="link.ndfl.reporting"></span>
+                </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReportXlsx()">{{::'refBook.button.reportXlsx' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReportCsv()">{{::'refBook.button.reportCsv' | translate}}</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 

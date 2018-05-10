@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -81,4 +82,15 @@ public interface CommonRefBookService {
      * @return значение записи справочника
      */
     int getRecordVersionCount(Long refBookId, Long recordId);
+
+    /**
+     * Формирование отчета по записям справочника в формате XLSX/CSV
+     *
+     * @param refBookId    идентификатор справочника
+     * @param version      версия, на которую строится отчет (для версионируемых справочников)
+     * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param reportType   тип отчета
+     * @return информация о создании отчета
+     */
+    ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, AsyncTaskType reportType);
 }

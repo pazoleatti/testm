@@ -6,7 +6,7 @@
     <div id="refBookGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
         <div id="refBookRecordsGridTop">
             <!--Панель кнопок -->
-            <div class="button_panel">
+            <div class="button_panel pull-left">
                 <div class="btn-toolbar" role="toolbar">
                     <span data-ng-show="refBook.versioned && !versionMode">
                         <!-- Выбор даты актуальности -->
@@ -41,6 +41,29 @@
                             data-ng-click="showVersions()">
                         {{::'refBooks.button.versions' | translate}}{{versionsCount ? ": " + versionsCount : ""}}
                     </button>
+                </div>
+            </div>
+            <!--Формирование отчетов-->
+            <div class="w200 pull-right" style="margin: 5px 10px 10px 0;" data-ng-hide="versionMode">
+                <div class="btn-group pull-right">
+                    <div id="single-button"
+                         data-aplana-dropdown
+                         data-placement="bottom-right"
+                         class="btn btn-default">
+                        <span data-translate-once="link.ndfl.reporting"></span>
+                    </div>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
+                        <li role="menuitem">
+                            <div class="row menuitem">
+                                <a ng-click="createReportXlsx()">{{::'refBook.button.reportXlsx' | translate}}</a>
+                            </div>
+                        </li>
+                        <li role="menuitem">
+                            <div class="row menuitem">
+                                <a ng-click="createReportCsv()">{{::'refBook.button.reportCsv' | translate}}</a>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

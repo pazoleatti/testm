@@ -803,6 +803,8 @@
         "refBooks.showRecord": "Запись справочника",
         "refBooks.editRecord": "Редактирование записи справочника",
         "refBooks.button.versions": "Версии",
+        "refBook.button.reportXlsx": "Сформировать XLSX",
+        "refBook.button.reportCsv": "Сформировать CSV",
 
         "refBook.version": "Дата актуальности",
         "refBook.versionFrom": "Дата начала актуальности",
