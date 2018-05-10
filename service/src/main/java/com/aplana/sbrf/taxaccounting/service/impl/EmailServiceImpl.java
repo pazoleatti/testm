@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.apache.commons.logging.Log;
@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.List;
@@ -24,7 +27,7 @@ import java.util.Properties;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-	private static final Log LOG = LogFactory.getLog(EmailServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(EmailServiceImpl.class);
 
     @Autowired
     private ConfigurationService configurationService;
@@ -69,11 +72,11 @@ public class EmailServiceImpl implements EmailService {
                 socketFactory.setTrustAllHosts(true);
                 props.put("mail.smtp.ssl.socketFactory", socketFactory);
                 Session session = Session.getInstance(props,
-                    new javax.mail.Authenticator() {
-                        protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication(finalLogin, finalPassword);
-                        }
-                    });
+                        new javax.mail.Authenticator() {
+                            protected PasswordAuthentication getPasswordAuthentication() {
+                                return new PasswordAuthentication(finalLogin, finalPassword);
+                            }
+                        });
 
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(login));
@@ -103,20 +106,20 @@ public class EmailServiceImpl implements EmailService {
             String port = null;
             Map<String, String> authEmailParams = configurationService.fetchAuthEmailParamsMap();
             for (String key : authEmailParams.keySet()) {
-                switch (key){
-                    case "mail.smtp.user" : {
+                switch (key) {
+                    case "mail.smtp.user": {
                         login = authEmailParams.get(key);
                         break;
                     }
-                    case "mail.smtp.password" : {
+                    case "mail.smtp.password": {
                         password = authEmailParams.get(key);
                         break;
                     }
-                    case "mail.smtp.host" : {
+                    case "mail.smtp.host": {
                         host = authEmailParams.get(key);
                         break;
                     }
-                    case "mail.smtp.port" : {
+                    case "mail.smtp.port": {
                         port = authEmailParams.get(key);
                         break;
                     }
