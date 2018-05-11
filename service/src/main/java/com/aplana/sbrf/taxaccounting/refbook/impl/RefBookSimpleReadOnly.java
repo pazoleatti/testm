@@ -25,11 +25,14 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	/** Дополнительная фильтрация выборки */
 	private String whereClause;
 
-	@Override
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
 			RefBookAttribute sortAttribute, boolean isSortAscending) {
-
-
 		return refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
     }
 

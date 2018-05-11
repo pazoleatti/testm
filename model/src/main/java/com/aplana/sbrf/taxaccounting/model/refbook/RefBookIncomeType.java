@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
- * Коды видов доходов
+ * Справочник "Коды видов доходов"
  *
  * @author dloshkarev
  */
 public class RefBookIncomeType extends RefBookSimple<Long> {
-    public static final int REF_BOOK_ID = 922;
-
     //Код
     private String code;
     //Наименование дохода

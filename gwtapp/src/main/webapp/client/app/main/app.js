@@ -815,6 +815,26 @@
         "taxes.commonParams.confirm.cancel.text": "На форме общих параметров системы имеются несохраненные данные. Выйти без сохранения?",
 
         "refBooks.refBooksList.title": "НСИ - Список справочников",
+        "refBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
+        "refBooks.refBooksList.columnHeader.refBookType": "Тип справочника",
+        "refBooks.title": "Справочники",
+        "refBook.title": "Справочник",
+        "refBook.version.title": "Все версии записи",
+        "refBooks.createRecord": "Создание записи справочника",
+        "refBooks.showRecord": "Запись справочника",
+        "refBooks.editRecord": "Редактирование записи справочника",
+        "refBooks.button.versions": "Версии",
+        "refBook.button.reportXlsx": "Сформировать XLSX",
+        "refBook.button.reportCsv": "Сформировать CSV",
+        "refBook.checkbox.search": "Искать по точному совпадению",
+
+        "refBook.version": "Дата актуальности",
+        "refBook.versionFrom": "Дата начала актуальности",
+        "refBook.versionTo": "Дата окончания актуальности",
+        "refBook.versionFromShort": "Действует с",
+        "refBook.versionToShort": "по",
+
+        "refBook.confirm.cancelEdit": "Вы уверены, что хотите отменить редактирование записи?"
         "refBrefBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
         "refBrefBooks.refBooksList.columnHeader.refBookType": "Тип справочника",
 

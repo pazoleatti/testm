@@ -1,4 +1,4 @@
-INSERT INTO ref_book (id, name) VALUES (74, 'Пользователи');
+INSERT INTO ref_book (id, name, is_versioned) VALUES (74, 'Пользователи', 0);
 
 INSERT INTO ref_book (id, name) VALUES (30, 'Подразделения');
 

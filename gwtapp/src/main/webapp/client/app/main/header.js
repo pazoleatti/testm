@@ -105,8 +105,7 @@
 
                         $scope.treeNsi = [{
                             name: $filter('translate')('menu.nsi.refbooks'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!refbooklist"
-                            //href: $state.href('refBookList')
+                            href: $state.href('refBookList')
                         }];
 
                         $scope.treeAdministration = [];

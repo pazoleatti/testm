@@ -123,7 +123,6 @@
                 /**
                  * @description Проверяет готовность отчетов у открытой формы
                  */
-                // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,

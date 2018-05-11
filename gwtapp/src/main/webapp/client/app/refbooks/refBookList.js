@@ -13,7 +13,7 @@
             });
         }])
 
-        .controller('refBookListCtrl', ['$scope', '$filter', 'refBookListResource', 'APP_CONSTANTS', function ($scope, $filter, refBookListResource, APP_CONSTANTS) {
+        .controller('refBookListCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', function ($scope, $filter, RefBookListResource, APP_CONSTANTS) {
 
             function linkFormatter(cellValue, options, row) {
                 if (row.refBookType === APP_CONSTANTS.REFBOOK_TYPE.LINEAR) {
@@ -36,16 +36,16 @@
                 value: [],
                 options: {
                     datatype: "angularResource",
-                    angularResource: refBookListResource,
+                    angularResource: RefBookListResource,
                     colNames: [
-                        $filter('translate')('refBrefBooks.refBooksList.columnHeader.refBookName'),
-                        $filter('translate')('refBrefBooks.refBooksList.columnHeader.refBookType')
+                        $filter('translate')('refBooks.refBooksList.columnHeader.refBookName'),
+                        $filter('translate')('refBooks.refBooksList.columnHeader.refBookType')
                     ],
                     colModel: [
                         {
                             name: 'refBookName',
                             index: 'refBookName',
-                            width: 250,
+                            width: 600,
                             formatter: linkFormatter
                         },
                         {
@@ -63,8 +63,6 @@
                     hidegrid: false
                 }
             };
-
-
         }])
     ;
 }());

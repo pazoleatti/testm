@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.refbook.*;
@@ -39,15 +38,13 @@ public class RefBookValuesController {
     private final RefBookOktmoService oktmoService;
 
     private final DepartmentService departmentService;
-    
-    private final RefBookFormTypeService refBookFormTypeService;
 
-    private final RefBookListService refBookListService;
+    private final RefBookFormTypeService refBookFormTypeService;
 
     public RefBookValuesController(RefBookAttachFileTypeService refBookAttachFileTypeService, RefBookAsnuService refBookAsnuService,
                                    RefBookDeclarationTypeService refBookDeclarationTypeService, RefBookDepartmentDataService refBookDepartmentDataService,
                                    PeriodService periodService, SecurityService securityService, DepartmentService departmentService, RefBookOktmoService oktmoService,
-                                   RefBookFormTypeService refBookFormTypeService, RefBookListService refBookListService) {
+                                   RefBookFormTypeService refBookFormTypeService) {
         this.refBookAttachFileTypeService = refBookAttachFileTypeService;
         this.refBookAsnuService = refBookAsnuService;
         this.refBookDeclarationTypeService = refBookDeclarationTypeService;
@@ -57,7 +54,6 @@ public class RefBookValuesController {
         this.departmentService = departmentService;
         this.oktmoService = oktmoService;
         this.refBookFormTypeService = refBookFormTypeService;
-        this.refBookListService = refBookListService;
     }
 
     /**
@@ -236,16 +232,5 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/931")
     public List<RefBookFormType> fetchAllFormType() {
         return refBookFormTypeService.fetchAll();
-    }
-
-    /**
-     * Получение всех даных о справочниках для отображения в списке справочников
-     * @param pagingParams  параметры пейджинга
-     * @return  список объектов содержащих данные о справочниках
-     */
-    @GetMapping(value = "rest/refBookList")
-    public JqgridPagedList<RefBookListResult> fetchAllRefbooks(@RequestParam PagingParams pagingParams){
-        PagingResult<RefBookListResult> result = refBookListService.fetchAllRefbooks();
-        return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
     }
 }

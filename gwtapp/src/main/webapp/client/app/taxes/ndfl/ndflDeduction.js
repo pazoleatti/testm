@@ -125,7 +125,6 @@
                             if (status) {
                                 $rootScope.$emit("selectedRowCountChanged", $scope.deductionGrid.value.length + 1)
                             } else $rootScope.$emit("selectedRowCountChanged", $scope.deductionGrid.value.length - 1)
-
                         }
                     }
                 };

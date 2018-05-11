@@ -17,11 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Дао для версионных справочников.
@@ -329,6 +325,15 @@ public interface RefBookDao {
     RefBookAttribute getAttribute(@NotNull Long attributeId);
 
     /**
+     * Возвращает атрибут справочника по его алиасу
+     *
+     * @param refBookId идентификатор справочника
+     * @param attributeAlias алиас аттрибута
+     * @return атрибут справочника
+     */
+    RefBookAttribute getAttribute(@NotNull Long refBookId, @NotNull String attributeAlias);
+
+    /**
      * По коду справочника возвращает набор его атрибутов
      *
      * @param refBookId код справочника
@@ -603,7 +608,20 @@ public interface RefBookDao {
     PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute, String whereClause);
 
+    /**
+     * Получает данные справочника по sql-запросу, сформированному ранее
+     * @param ps объект с sql-запросом и его параметрами
+     * @param refBook справочник
+     * @return
+     */
     List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook);
+
+    /**
+     * Получает данные записей справочника замапленные на сущности
+     * @param ps объект с sql-запросом и его параметрами
+     * @param refBook справочник
+     */
+    <T extends RefBookSimple> List<T> getMappedRecordsData(PreparedStatementData ps, RefBook refBook);
 
     List<Map<String, RefBookValue>> getRecordsWithHasChild(PreparedStatementData ps, RefBook refBook);
 
@@ -623,6 +641,17 @@ public interface RefBookDao {
 
     PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, String whereClause);
 
+    /**
+     * Получение данных справочника
+     * @param refBookId идентификатор справочника
+     * @param tableName название таблицы справочника в БД
+     * @param pagingParams параметры пэйджинга
+     * @param filter фильтрация данных
+     * @param sortAttribute параметры сортировки
+     * @param isSortAscending направление сортировки
+     * @param whereClause дополнительное условие фильтрации
+     * @return
+     */
     PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause);
 

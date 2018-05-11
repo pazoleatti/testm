@@ -29,6 +29,18 @@ public interface RefBookDataProvider {
     String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
     /**
+     * Загружает данные справочника (включая информацию о дате начала и окончания действия версии) на определенную дату актуальности
+     *
+     * @param version       дата актуальности
+     * @param pagingParams  определяет параметры запрашиваемой страницы данных. Могут быть не заданы. Отсчет идет с 1,а не с 0
+     * @param filter        условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(@NotNull Date version, PagingParams pagingParams,
+                                                       String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
      * Загружает данные справочника на определенную дату актуальности
      *
      * @param version       дата актуальности

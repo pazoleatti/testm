@@ -2053,6 +2053,7 @@
                         hiderow = ts.p.groupingView.groupCollapse === true;
                         groupingPrepare = $.jgrid.getMethod("groupingPrepare");
                     }
+                    var frmt = null;
                     while (i<len) {
                         cur = drows[i];
                         idr = $.jgrid.getAccessor(cur,idn);
@@ -2060,6 +2061,12 @@
                             if (typeof idn === "number" && ts.p.colModel[idn+gi+si+ni] != null) {
                                 // reread id by name
                                 idr = $.jgrid.getAccessor(cur,ts.p.colModel[idn+gi+si+ni].name);
+                                // Дополнительная обработка для случая, когда у ячейки с id строки указан форматтер для получения его значения
+                                // Нужно, например в случаях когда таблица заполняется объектами типа Map
+                                frmt = ts.p.colModel[idn+gi+si+ni].formatter
+                                if (idr && frmt && idr.attributeType) {
+                                    idr = frmt(idr, ts.p.colModel[idn+gi+si+ni], cur)
+                                }
                             }
                             if(idr === undefined) {
                                 idr = br+i;
