@@ -201,7 +201,7 @@
                         title: $filter('translate')('refBooks.createRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal1200',
+                        windowClass: 'modal800',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -224,7 +224,7 @@
                         title: $filter('translate')('refBooks.showRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal1200',
+                        windowClass: 'modal800',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -245,7 +245,7 @@
                         title: $filter('translate')('refBooks.editRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal1200',
+                        windowClass: 'modal800',
                         resolve: {
                             $shareData: function () {
                                 return {
