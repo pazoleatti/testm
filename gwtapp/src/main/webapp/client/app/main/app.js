@@ -834,7 +834,7 @@
         "refBook.versionFromShort": "Действует с",
         "refBook.versionToShort": "по",
 
-        "refBook.confirm.cancelEdit": "Вы уверены, что хотите отменить редактирование записи?"
+        "refBook.confirm.cancelEdit": "Вы уверены, что хотите отменить редактирование записи?",
         "refBrefBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
         "refBrefBooks.refBooksList.columnHeader.refBookType": "Тип справочника",
 
