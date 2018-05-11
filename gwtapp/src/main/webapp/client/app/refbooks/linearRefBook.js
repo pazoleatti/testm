@@ -173,19 +173,6 @@
                             sortorder: "asc",
                             ondblClickRow: function (rowId) {
                                 $scope.showRecord($scope.refBookGrid.ctrl.getRawData(rowId))
-                            },
-                            onSelectRow: function (rowId, status) {
-                                // Обновляем количество версий на кнопке Версии
-                                if (($scope.refBookGrid.value.length === 0 && status) || $scope.refBookGrid.value.length === 2 && !status) {
-                                    $http({
-                                        method: "GET",
-                                        url: "controller/actions/refBook/" + $stateParams.refBookId + "/recordVersionCount/" + rowId
-                                    }).then(function (response) {
-                                        $scope.versionsCount = response.data;
-                                    });
-                                } else {
-                                    $scope.versionsCount = null;
-                                }
                             }
                         }
                     };

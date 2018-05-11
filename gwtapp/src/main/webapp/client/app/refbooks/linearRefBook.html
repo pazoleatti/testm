@@ -19,7 +19,7 @@
                         </div>
                     </span>
                     <!-- Создать -->
-                    <button type="button" class="btn btn-default" data-ng-disabled="refBook.readOnly"
+                    <button type="button" class="btn btn-default" data-ng-hide="refBook.readOnly"
                             data-ng-click="createRecord()">
                         <span data-translate-once="button.create"></span>
                     </button>
@@ -30,21 +30,24 @@
                     </button>
                     <!-- Редактировать -->
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="refBook.readOnly || refBookGrid.value.length != 1"
+                            data-ng-hide="refBook.readOnly"
+                            data-ng-disabled="refBookGrid.value.length != 1"
                             data-ng-click="editRecord()">
                         <span data-translate-once="button.edit"></span>
                     </button>
                     <!-- Удалить -->
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="refBook.readOnly || refBookGrid.value.length == 0"
+                            data-ng-hide="refBook.readOnly"
+                            data-ng-disabled="refBookGrid.value.length == 0"
                             data-ng-click="deleteRecords()">
                         <span data-translate-once="button.delete"></span>
                     </button>
                     <!-- Версии -->
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="!refBook.versioned || refBookGrid.value.length != 1"
+                            data-ng-hide="!refBook.versioned"
+                            data-ng-disabled="refBookGrid.value.length != 1"
                             data-ng-click="showVersions()">
-                        {{::'refBooks.button.versions' | translate}}{{versionsCount ? ": " + versionsCount : ""}}
+                        <span data-translate-once="refBooks.button.versions"></span>
                     </button>
                 </div>
             </div>

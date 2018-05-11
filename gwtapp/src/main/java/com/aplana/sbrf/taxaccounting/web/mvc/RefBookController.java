@@ -195,18 +195,6 @@ public class RefBookController {
     }
 
     /**
-     * Получение количества версий для записи справочника
-     *
-     * @param refBookId идентификатор справочника
-     * @param recordId  идентификатор записи
-     * @return значение записи справочника
-     */
-    @GetMapping(value = "/actions/refBook/{refBookId}/recordVersionCount/{recordId}")
-    public int getRecordVersionCount(@PathVariable Long refBookId, @PathVariable Long recordId) {
-        return commonRefBookService.getRecordVersionCount(refBookId, recordId);
-    }
-
-    /**
      * Формирование отчета в XLSX
      *
      * @param refBookId    идентификатор справочника
