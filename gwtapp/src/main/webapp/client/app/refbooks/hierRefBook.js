@@ -69,8 +69,7 @@
                             "         data-options=\"refBookTree.options\"\n" +
                             "         data-tree-data=\"refBookTree.data\"\n" +
                             "         data-multi-select=\"false\"\n" +
-                            "         data-collapsed=\"true\"\n" +
-                            "         data-ng-model=\"refBookTree.selectedNode\"></div>")(parent.scope());
+                            "         data-collapsed=\"true\"></div>")(parent.scope());
                         parent.html(refBookGrid);
                     });
                 };
@@ -83,13 +82,13 @@
                         title: $filter('translate')('refBooks.showRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
                         controller: 'refBookRecordModalCtrl',
-                        windowClass: 'modal1200',
+                        windowClass: 'modal800',
                         resolve: {
                             $shareData: function () {
                                 return {
                                     mode: "VIEW",
                                     refBook: $scope.refBook,
-                                    record: $scope.refBookTree.selectedNode
+                                    record: $scope.refBookTree.ctrl.selection
                                 };
                             }
                         }
