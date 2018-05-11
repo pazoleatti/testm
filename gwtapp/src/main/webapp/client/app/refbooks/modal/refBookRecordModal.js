@@ -26,8 +26,8 @@
                 }
 
                 $scope.refBook.attributes.forEach(function (attribute) {
-                    if ($scope.mode === 'CREATE') {
-                        // При создании надо указать тип атрибутов для корректной десериализации
+                    if ($scope.mode === 'CREATE' || !$scope.record[attribute.alias]) {
+                        // При создании (и просто для пустых значений) надо указать тип атрибутов для корректной десериализации
                         $scope.record[attribute.alias] = {
                             attributeType: attribute.attributeType
                         }
@@ -36,12 +36,12 @@
                             // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
                             $scope.record[attribute.alias].dateValue = new Date($scope.record[attribute.alias].dateValue);
                         }
-                        if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
-                            $scope.versionFromAttribute = attribute
-                        }
-                        if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS) {
-                            $scope.versionToAttribute = attribute
-                        }
+                    }
+                    if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
+                        $scope.versionFromAttribute = attribute
+                    }
+                    if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS) {
+                        $scope.versionToAttribute = attribute
                     }
                 });
 
@@ -70,6 +70,18 @@
                         }
                         return value;
                     }
+                };
+
+                /**
+                 * Получает "красивое" значение атрибута, отображаемое в GUI.
+                 * @param attribute
+                 */
+                $scope.getAttributeFineValue = function(attribute) {
+                    var value = $scope.getAttributeValue(attribute);
+                    if (value === '' || value === null) {
+                        return "-";
+                    }
+                    return value;
                 };
 
                 /**

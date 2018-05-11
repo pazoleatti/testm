@@ -71,6 +71,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
     public ActionResult editRecord(TAUserInfo userInfo, long refBookId, long recordId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -89,6 +90,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
     public ActionResult createRecord(TAUserInfo userInfo, Long refBookId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -110,6 +112,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
     public ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);

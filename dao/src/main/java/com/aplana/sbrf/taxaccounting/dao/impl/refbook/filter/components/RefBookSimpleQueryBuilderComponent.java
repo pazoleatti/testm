@@ -394,7 +394,7 @@ public class RefBookSimpleQueryBuilderComponent {
             }
         }
         if (refBook.isVersioned()) {
-            if (CollectionUtils.isEmpty(columns) && StringUtils.isEmpty(filter) && StringUtils.isEmpty(filterPS.getQuery())) {
+            if (StringUtils.isEmpty(filter) && StringUtils.isEmpty(filterPS.getQuery())) {
                 ps.appendQuery(" WHERE ");
             } else {
                 ps.appendQuery(" AND ");

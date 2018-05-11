@@ -537,8 +537,8 @@
         /**
          * Универсальный контроллер для выбора из любого справочника
          */
-        .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http',
-            function ($scope, GetSelectOption, $http) {
+        .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http', "$filter",
+            function ($scope, GetSelectOption, $http, $filter) {
                 $scope.select = {};
 
                 // Список конфигов для разных справочников
@@ -576,7 +576,8 @@
                         },
                         filter: {
                             columns: ["name"]
-                        }
+                        },
+                        formatter: "nameFormatter"
                     }
                 };
 
@@ -586,24 +587,31 @@
                 $scope.initSelect = function (attribute) {
 
                     /**
-                     * Событие изменения значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
+                     * Событие первичного проставления значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
                      */
-                    $scope.$watch("record", function(newValue, oldValue) {
-                        if (newValue[attribute.alias].referenceObject && !newValue[attribute.alias].referenceValue) {
-                            $http({
-                                method: "GET",
-                                url: "controller//rest/refBook/" + attribute.refBookId + "/record/" + newValue[attribute.alias].referenceObject.id.numberValue
-                            }).success(function (record) {
-                                $scope.record[attribute.alias].referenceValue = record
-                            });
+                    $scope.$watch("record." + attribute.alias + ".referenceObject", function(newValue, oldValue) {
+                        $http({
+                            method: "GET",
+                            url: "controller//rest/refBook/" + attribute.refBookId + "/record/" + newValue.id.numberValue
+                        }).success(function (record) {
+                            $scope.record[attribute.alias].referenceValue = record
+                        });
+                    });
+
+                    /**
+                     * Событие изменения значения в выпадашке. Используется для изменения title
+                     */
+                    $scope.$watch("record." + attribute.alias + ".referenceValue", function(newValue, oldValue) {
+                        if (newValue !== oldValue) {
+                            $scope.attributeTitle = $filter($scope.config.formatter)(newValue);
                         }
                     });
 
-                    var config = $scope.refBookConfig[attribute.refBookId] ? $scope.refBookConfig[attribute.refBookId] : $scope.refBookConfig.default;
+                    $scope.config = $scope.refBookConfig[attribute.refBookId] ? $scope.refBookConfig[attribute.refBookId] : $scope.refBookConfig.default;
                     $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBook/" + attribute.refBookId + "/records",
-                        config.filter,
-                        config.sort ? config.sort : $scope.refBookConfig.default.sort,
-                        config.formatter,
+                        $scope.config.filter,
+                        $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
+                        $scope.config.formatter,
                         "filter"
                     );
                 };
