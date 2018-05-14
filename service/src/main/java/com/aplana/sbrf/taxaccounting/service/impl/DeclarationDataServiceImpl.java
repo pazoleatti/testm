@@ -3343,6 +3343,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
     public ImportDeclarationExcelResult createTaskToImportExcel(final long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force) {
         final ImportDeclarationExcelResult result = new ImportDeclarationExcelResult();
@@ -3381,6 +3382,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Map<String, Object> params = new HashMap<>();
                     params.put("declarationDataId", declarationDataId);
                     params.put("blobDataId", uuid);
+                    params.put("fileName", fileName);
                     asyncManager.executeTask(asyncLockKey, AsyncTaskType.IMPORT_DECLARATION_EXCEL, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                         @Override
                         public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
