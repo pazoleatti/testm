@@ -36,22 +36,33 @@ public class RefBookValueSerializer extends JsonSerializer<RefBookValue> {
                     json.writeStringField("value", DF.format(value.getDateValue()));
                     break;
                 case REFERENCE:
-                    json.writeNumberField("value", value.getReferenceValue());
+                    if (value.getReferenceValue() != null) {
+                        // Ссылка как id
+                        json.writeNumberField("value", value.getReferenceValue());
+                    } else {
+                        // Ссылка как объект
+                        json.writeFieldName("referenceObject");
+                        serializeRecord(value.getReferenceObject(), json);
+                    }
                     break;
                 case COLLECTION:
                     json.writeFieldName("collectionValue");
                     json.writeStartArray();
                     for (Map<String, RefBookValue> record : value.getCollectionValue()) {
-                        json.writeStartObject();
-                        for (Map.Entry<String, RefBookValue> child : record.entrySet()) {
-                            json.writeFieldName(child.getKey());
-                            serializeValue(child.getValue(), json);
-                        }
-                        json.writeEndObject();
+                        serializeRecord(record, json);
                     }
                     json.writeEndArray();
                     break;
             }
+        }
+        json.writeEndObject();
+    }
+
+    private void serializeRecord(Map<String, RefBookValue> record, JsonGenerator json) throws IOException {
+        json.writeStartObject();
+        for (Map.Entry<String, RefBookValue> child : record.entrySet()) {
+            json.writeFieldName(child.getKey());
+            serializeValue(child.getValue(), json);
         }
         json.writeEndObject();
     }
