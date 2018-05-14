@@ -345,7 +345,10 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(", t.version AS ").appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS)
                         .appendQuery(", nve.version - interval '1' day AS ").appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
             }
-            ps.appendQuery(", t.record_id AS ").appendQuery(RefBook.BUSINESS_ID_ALIAS);
+
+            if (refBook.getId() != RefBook.Id.DEPARTMENT.getId()) {
+                ps.appendQuery(", t.record_id AS ").appendQuery(RefBook.BUSINESS_ID_ALIAS);
+            }
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -731,7 +734,7 @@ public class RefBookSimpleQueryBuilderComponent {
     public PreparedStatementData psGetRecordsData(RefBook refBook, String whereClause) {
         PreparedStatementData sql = new PreparedStatementData("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
-        if (refBook.isVersioned()) {
+        if (refBook.isVersioned() && refBook.getId() != RefBook.Id.DEPARTMENT.getId() && !refBook.hasAttribute(RefBook.BUSINESS_ID_ALIAS)) {
             sql.appendQuery(", ").appendQuery(RefBook.BUSINESS_ID_ALIAS);
         }
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -777,10 +780,13 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.appendQuery(String.format(WITH_STATEMENT, refBook.getTableName(), refBook.getTableName()));
         ps.addParam(version);
         ps.addParam(version);
-        ps.appendQuery("SELECT * FROM (");
-        ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
-        ps.appendQuery("(SELECT frb.id AS ");
-        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("SELECT * FROM (")
+                .appendQuery("SELECT res.*, rownum row_number_over FROM ")
+                .appendQuery("(SELECT frb.id AS ")
+                .appendQuery(RefBook.RECORD_ID_ALIAS);
+        if (refBook.isVersioned() && refBook.getId() != RefBook.Id.DEPARTMENT.getId() && !refBook.hasAttribute(RefBook.BUSINESS_ID_ALIAS)) {
+            ps.appendQuery(", frb.").appendQuery(RefBook.BUSINESS_ID_ALIAS);
+        }
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)) {
                 ps.appendQuery(", frb.");
