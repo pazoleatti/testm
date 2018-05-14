@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -129,6 +131,25 @@ public class DeclarationTemplateController {
         resp.setCharacterEncoding(UTF_8);
         try {
             declarationTemplateService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
+        } finally {
+            IOUtils.closeQuietly(resp.getOutputStream());
+        }
+    }
+
+    /**
+     * Выгрузка архива с содержимым всех макетов деклараций
+     *
+     * @param resp                  ответ
+     * @throws IOException IOException
+     */
+    @GetMapping(value = "/actions/declarationTemplate/downloadAll")
+    public void exportDeclarationTemplate(HttpServletResponse resp) throws IOException {
+        String fileName = String.format("Templates(%s).zip", new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+        resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        resp.setCharacterEncoding(UTF_8);
+        try {
+            declarationTemplateService.exportAllDeclarationTemplates(securityService.currentUserInfo(), resp.getOutputStream());
         } finally {
             IOUtils.closeQuietly(resp.getOutputStream());
         }

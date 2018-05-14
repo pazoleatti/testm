@@ -1,14 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -43,17 +46,15 @@ public class DeclarationTemplateControllerGWT {
     private final MainOperatingService mainOperatingService;
     private BlobDataService blobDataService;
     private LogEntryService logEntryService;
-    private FormTemplateImpexService formTemplateImpexService;
 
     public DeclarationTemplateControllerGWT(SecurityService securityService, DeclarationTemplateService declarationTemplateService,
                                             @Qualifier("declarationTemplateMainOperatingService") MainOperatingService mainOperatingService, BlobDataService blobDataService,
-                                            LogEntryService logEntryService, FormTemplateImpexService formTemplateImpexService) {
+                                            LogEntryService logEntryService) {
         this.securityService = securityService;
         this.declarationTemplateService = declarationTemplateService;
         this.mainOperatingService = mainOperatingService;
         this.blobDataService = blobDataService;
         this.logEntryService = logEntryService;
-        this.formTemplateImpexService = formTemplateImpexService;
     }
 
     /**
@@ -208,26 +209,6 @@ public class DeclarationTemplateControllerGWT {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Выгрузка макетов делкараций
-     *
-     * @param response ответ
-     * @throws IOException IOException
-     */
-    @RequestMapping(value = "/actions/declarationTemplate/downloadAll")
-    public void downloadAll(HttpServletResponse response) throws IOException {
-        response.setHeader("Content-Disposition",
-                String.format("attachment; filename=\"Templates(%s).zip\"",
-                        new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
-        );
-        response.setCharacterEncoding(UTF_8);
-        try {
-            formTemplateImpexService.exportAllTemplates(response.getOutputStream());
-        } finally {
-            IOUtils.closeQuietly(response.getOutputStream());
-        }
     }
 
     @ExceptionHandler(ServiceLoggerException.class)
