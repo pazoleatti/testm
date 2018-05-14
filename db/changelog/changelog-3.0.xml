@@ -21,4 +21,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.0-ytrofimov-0" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

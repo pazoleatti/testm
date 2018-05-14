@@ -411,7 +411,7 @@ class Import extends AbstractScriptClass {
                             persistedIncome = ndflPersonService.getIncome(income.id)
                         }
                         if (persistedIncome == null) {
-                            income.ndflPersonId = ndflPerson.id
+                            income.ndflPersonId = ndflPerson.importId
                             incomesForCreate << income
                             incomesCreateCount++
                         } else {
@@ -548,7 +548,7 @@ class Import extends AbstractScriptClass {
                             persistedDeduction = ndflPersonService.getDeduction(deduction.id)
                         }
                         if (persistedDeduction == null) {
-                            deduction.ndflPersonId = ndflPerson.id
+                            deduction.ndflPersonId = ndflPerson.importId
                             deductionsForCreate << deduction
                             deductionsCreateCount++
                         } else {
@@ -642,7 +642,7 @@ class Import extends AbstractScriptClass {
                             persistedPrepayment = ndflPersonService.getPrepayment(prepayment.id)
                         }
                         if (persistedPrepayment == null) {
-                            prepayment.ndflPersonId = ndflPerson.id
+                            prepayment.ndflPersonId = ndflPerson.importId
                             prepaymentsForCreate << prepayment
                             prepaymentsCreateCount++
                         } else {
@@ -1283,7 +1283,6 @@ class Import extends AbstractScriptClass {
         if (!ndflPersonIdForRemove.isEmpty()) {
             ndflPersonService.deleteNdflPersonBatch(ndflPersonIdForRemove)
         }
-
         removedCounter !=0 ? logger.info("При загрузке файла было удалено: %d, из: %d", removedCounter, initialCounter) :
         logger.getEntries().addAll(removeMessages)
     }
@@ -1437,7 +1436,7 @@ class Import extends AbstractScriptClass {
             if (value != null && !value.isEmpty()) {
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
-                    formatter.setLenient(false)
+                    formatter.setLenient(false);
                     return formatter.parse(value)
                 } catch (Exception ignored) {
                     logIncorrectTypeError("Дата")
