@@ -53,7 +53,7 @@
                         ctrl: {},
                         required: true,
                         options: {
-                            nodeLabel: 'NAME.stringValue',
+                            nodeLabel: 'NAME.value',
                             nodeChildren: 'children.collectionValue',
                             iconFolderCloseClass: 'tree-node-closed',
                             iconFolderOpenClass: 'tree-node-open',

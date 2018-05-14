@@ -638,16 +638,16 @@
                     $scope.$watch("record." + attribute.alias + ".referenceObject", function(newValue, oldValue) {
                         $http({
                             method: "GET",
-                            url: "controller//rest/refBook/" + attribute.refBookId + "/record/" + newValue.id.numberValue
+                            url: "controller//rest/refBook/" + attribute.refBookId + "/record/" + newValue.id.value
                         }).success(function (record) {
-                            $scope.record[attribute.alias].referenceValue = record
+                            $scope.record[attribute.alias].value = record
                         });
                     });
 
                     /**
                      * Событие изменения значения в выпадашке. Используется для изменения title
                      */
-                    $scope.$watch("record." + attribute.alias + ".referenceValue", function(newValue, oldValue) {
+                    $scope.$watch("record." + attribute.alias + ".value", function(newValue, oldValue) {
                         if (newValue !== oldValue) {
                             $scope.attributeTitle = $filter($scope.config.formatter)(newValue);
                         }

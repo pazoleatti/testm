@@ -22,23 +22,23 @@ public class RefBookValueDeserializer extends JsonDeserializer<RefBookValue> {
     public RefBookValue deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode jsonNode = jp.readValueAsTree();
         RefBookAttributeType attributeType = RefBookAttributeType.valueOf(jsonNode.get("attributeType").asText());
-        Object value = null;
+        Object value;
         switch (attributeType) {
             case STRING:
-                value = jsonNode.get("stringValue").asText();
+                value = jsonNode.get("value").asText();
                 break;
             case NUMBER:
-                value = NumberUtils.createNumber(jsonNode.get("numberValue").asText());
+                value = NumberUtils.createNumber(jsonNode.get("value").asText());
                 break;
             case DATE:
                 try {
-                    value = !jsonNode.get("dateValue").isNull() ? format.parse(jsonNode.get("dateValue").asText()) : null;
+                    value = !jsonNode.get("value").isNull() ? format.parse(jsonNode.get("value").asText()) : null;
                 } catch (ParseException e) {
-                    throw new IllegalArgumentException("Не удалось получить дату из строки: " + jsonNode.get("dateValue").asText());
+                    throw new IllegalArgumentException("Не удалось получить дату из строки: " + jsonNode.get("value").asText());
                 }
                 break;
             case REFERENCE:
-                value = jsonNode.get("referenceValue").asLong();
+                value = jsonNode.get("value").asLong();
                 break;
             default:
                 throw new IllegalArgumentException("Unknown attribute type: " + attributeType);

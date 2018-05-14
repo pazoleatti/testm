@@ -73,7 +73,7 @@
                     $scope.columnNames.push('');
                     $scope.columnModel.push(
                         {
-                            name: 'id.numberValue',
+                            name: 'id.value',
                             index: 'id',
                             width: 100,
                             key: true,
@@ -111,14 +111,12 @@
                     var value = "";
                     switch (colModel.type) {
                         case 'STRING':
-                            value = record && record.stringValue && typeof record.stringValue !== 'undefined' ? record.stringValue : "";
-                            break;
                         case 'NUMBER':
-                            value = record && record.numberValue && typeof record.numberValue !== 'undefined' ? record.numberValue : "";
+                            value = record && record.value && typeof record.value !== 'undefined' ? record.value : "";
                             break;
                         case 'DATE':
                             //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
-                            value = record && record.dateValue && typeof record.dateValue !== 'undefined' ? $filter('dateFormatter')(record.dateValue) : "";
+                            value = record && record.value && typeof record.value !== 'undefined' ? $filter('dateFormatter')(record.value) : "";
                             break;
                         case 'REFERENCE':
                             value = record && record.referenceObject && typeof record.referenceObject !== 'undefined' ? record.referenceObject[colModel.referenceAttribute.alias].value : "";
@@ -288,7 +286,7 @@
                  * Отображает список версий записи справочника
                  */
                 $scope.showVersions = function () {
-                    $window.location = "index.html#/refBooks/linearRefBook/" + $scope.refBook.id + "?recordId=" + $scope.refBookGrid.value[0].record_id.numberValue;
+                    $window.location = "index.html#/refBooks/linearRefBook/" + $scope.refBook.id + "?recordId=" + $scope.refBookGrid.value[0].record_id.value;
                 };
 
                 /**

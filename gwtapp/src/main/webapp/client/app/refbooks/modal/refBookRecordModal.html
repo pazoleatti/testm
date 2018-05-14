@@ -13,7 +13,7 @@
                 <span style="float: left" data-aplana-field>
                     <span data-aplana-datepicker
                           aplana-picker-outer-width="150px"
-                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].dateValue"
+                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value"
                           data-ng-required="true"></span>
                     <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                 </span>
@@ -21,7 +21,7 @@
                 <span data-aplana-field>
                     <span data-aplana-datepicker
                           aplana-picker-outer-width="150px"
-                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].dateValue"></span>
+                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value"></span>
                 </span>
             </div>
         </div>
@@ -41,8 +41,8 @@
                         <div data-ng-switch-when="STRING">
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
                                 <input type="text"
-                                       data-ng-model="record[attribute.alias].stringValue"
-                                       title="{{record[attribute.alias].stringValue}}"
+                                       data-ng-model="record[attribute.alias].value"
+                                       title="{{record[attribute.alias].value}}"
                                        aplana-input-outer-width="80%"
                                        maxlength="{{attribute.maxLength}}"
                                        data-ng-required="{{attribute.required}}"/>
@@ -52,7 +52,7 @@
                         <div data-ng-switch-when="NUMBER" data-model-id="{{attribute.alias}}">
                             <div data-aplana-field>
                                 <input type='text'
-                                       data-ng-model="record[attribute.alias].numberValue"
+                                       data-ng-model="record[attribute.alias].value"
                                        title="{{attribute.name}}"
                                        aplana-input-outer-width="80%"
                                        data-ng-pattern="patterns.number"
@@ -65,7 +65,7 @@
                             <div data-aplana-field>
                                 <div data-aplana-datepicker
                                      aplana-picker-outer-width="150px"
-                                     data-ng-model="record[attribute.alias].dateValue"
+                                     data-ng-model="record[attribute.alias].value"
                                      title="{{attribute.name}}"
                                      data-ng-required="{{attribute.required}}"></div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
@@ -76,7 +76,7 @@
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
                                 <div data-ui-select2="select.options"
                                      data-ng-init="initSelect(attribute)"
-                                     data-ng-model="record[attribute.alias].referenceValue"
+                                     data-ng-model="record[attribute.alias].value"
                                      data-ng-required="{{attribute.required}}"
                                      class="span8"></div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>

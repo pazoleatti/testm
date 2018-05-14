@@ -20,7 +20,7 @@
                 if ($scope.mode === 'CREATE' && $shareData.recordId) {
                     // Добавляем id группы версий записи справочника для создания новой версии
                     $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.BUSINESS_ID_ALIAS] = {
-                        numberValue: $shareData.recordId,
+                        value: $shareData.recordId,
                         attributeType: "NUMBER"
                     }
                 }
@@ -34,7 +34,7 @@
                     } else {
                         if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
                             // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
-                            $scope.record[attribute.alias].dateValue = new Date($scope.record[attribute.alias].dateValue);
+                            $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
                         }
                     }
                     if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
@@ -55,14 +55,11 @@
                         var refBookValue = $scope.record[attribute.alias];
                         switch (attribute.attributeType) {
                             case 'STRING':
-                                value = refBookValue && refBookValue.stringValue && typeof refBookValue.stringValue !== 'undefined' ? refBookValue.stringValue : "";
-                                break;
-                            case 'NUMBER':
-                                value = refBookValue && refBookValue.numberValue && typeof refBookValue.numberValue !== 'undefined' ? refBookValue.numberValue : "";
+                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
                                 break;
                             case 'DATE':
                                 //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
-                                value = refBookValue && refBookValue.dateValue && typeof refBookValue.dateValue !== 'undefined' ? $filter('dateFormatter')(refBookValue.dateValue) : "";
+                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? $filter('dateFormatter')(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
                                 value = refBookValue && refBookValue.referenceObject && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
@@ -89,14 +86,14 @@
                  */
                 $scope.save = function () {
                     $scope.refBook.attributes.forEach(function (attribute) {
-                        if (attribute.attributeType === 'REFERENCE' && $scope.record[attribute.alias] && $scope.record[attribute.alias].referenceValue) {
+                        if (attribute.attributeType === 'REFERENCE' && $scope.record[attribute.alias] && $scope.record[attribute.alias].value) {
                             // Преобразуем ссылочные поля записи в подходящие для сервера
-                            $scope.record[attribute.alias].referenceValue = $scope.record[attribute.alias].referenceValue.id;
+                            $scope.record[attribute.alias].value = $scope.record[attribute.alias].value.id;
                         }
                     });
                     var url;
                     if ($scope.mode === 'EDIT') {
-                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.numberValue
+                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.value
                     } else {
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"
                     }
