@@ -381,4 +381,11 @@ public interface DeclarationTemplateService {
      * @param declarationTemplateId идентификатор макета
      */
     void deleteJrxmlReports(TAUserInfo userInfo, int declarationTemplateId);
+
+    /**
+     * Экспорт скриптов, xsd и jrxml из всех макетов в архив
+     *
+     * @param os                    поток, в который надо записать результирующий файл
+     */
+    void exportAllDeclarationTemplates(TAUserInfo userInfo, OutputStream os);
 }

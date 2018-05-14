@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
 import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
@@ -45,13 +47,14 @@ import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 
 /**
  * Сервис для работы с шаблонами деклараций
+ *
  * @author Eugene Stetsenko
  */
 @Service
 @Transactional
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
 
-	private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private static final String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон налоговой формы!";
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -71,32 +74,44 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public final static String CONTENT_FILE = "content.xml";
     public final static String XSD = "main.xsd";
 
-	@Autowired
-	private DeclarationTemplateDao declarationTemplateDao;
+    private static final String DEC_TEMPLATES_FOLDER = "declaration";
+    private static final String TEMPLATE_OF_FOLDER_NAME =
+            "%s" + File.separator + "%s-%s" + File.separator + "%s";
+    private static final int MAX_NAME_OF_DIR = 50;
+    private static final String REG_EXP = "[^\\d\\sA-Za-z'-]";
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_YEAR = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy");
+        }
+    };
+
     @Autowired
-	private BlobDataService blobDataService;
+    private DeclarationTemplateDao declarationTemplateDao;
     @Autowired
-	private TransactionHelper tx;
+    private BlobDataService blobDataService;
     @Autowired
-	private LockDataService lockDataService;
+    private TransactionHelper tx;
     @Autowired
-	private DepartmentService departmentService;
+    private LockDataService lockDataService;
     @Autowired
-	private DeclarationDataService declarationDataService;
+    private DepartmentService departmentService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
     @Autowired
     private DeclarationDataDao declarationDataDao;
     @Autowired
-	private PeriodService periodService;
+    private PeriodService periodService;
     @Autowired
     private ReportDao reportDao;
     @Autowired
-	private DepartmentReportPeriodService departmentReportPeriodService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
     @Autowired
     private LogEntryService logEntryService;
-	@Autowired
-	private TAUserService userService;
+    @Autowired
+    private TAUserService userService;
     @Autowired
     private DeclarationSubreportDao declarationSubreportDao;
     @Autowired
@@ -108,18 +123,18 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private AsyncManager asyncManager;
 
     @Override
-	public List<DeclarationTemplate> listAll() {
-		return declarationTemplateDao.listAll();
-	}
+    public List<DeclarationTemplate> listAll() {
+        return declarationTemplateDao.listAll();
+    }
 
-	@Override
-	public DeclarationTemplate get(int declarationTemplateId) {
-        try{
+    @Override
+    public DeclarationTemplate get(int declarationTemplateId) {
+        try {
             return declarationTemplateDao.get(declarationTemplateId);
-        } catch (DaoException e){
+        } catch (DaoException e) {
             throw new ServiceException("Ошибка получения шаблона налоговой формы.", e);
         }
-	}
+    }
 
     @Override
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
@@ -131,9 +146,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return declarationTemplate;
     }
 
-	@Override
-	public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
-        if (declarationTemplate.getId() == null){
+    @Override
+    public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
+        if (declarationTemplate.getId() == null) {
             int declarationTemplateId = declarationTemplateDao.create(declarationTemplate);
             saveDeclarationTemplateFile(declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
             return declarationTemplateId;
@@ -147,9 +162,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             blobDataService.delete(declarationTemplateBase.getJrxmlBlobId());
         saveDeclarationTemplateFile(savedId, declarationTemplateBase.getDeclarationTemplateFiles(), declarationTemplate.getDeclarationTemplateFiles());
         return savedId;
-	}
+    }
 
-	private void saveDeclarationTemplateFile(int declarationTemplateId, List<DeclarationTemplateFile> oldFiles, List<DeclarationTemplateFile> newFiles) {
+    private void saveDeclarationTemplateFile(int declarationTemplateId, List<DeclarationTemplateFile> oldFiles, List<DeclarationTemplateFile> newFiles) {
         List<String> deleteBlobIds = new ArrayList<String>();
         List<String> createBlobIds = new ArrayList<String>();
 
@@ -173,7 +188,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (declarationTemplate.getCreateScript() == null || declarationTemplate.getCreateScript().isEmpty())
             return;
         Logger tempLogger = new Logger();
-        try{
+        try {
             // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
             DeclarationData declaration = new DeclarationData();
             declaration.setDepartmentReportPeriodId(1);
@@ -198,23 +213,23 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         try {
             if (ArrayUtils.contains(declarationTemplateDao.update(declarationTemplates), 0))
                 throw new ServiceException("Не все записи макета обновились.");
-        } catch (DaoException e){
-            throw new ServiceException("Ошибки при обновлении списка версий макета.",e);
+        } catch (DaoException e) {
+            throw new ServiceException("Ошибки при обновлении списка версий макета.", e);
         }
     }
 
     @Override
-	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
+    public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
         try {
             return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
-        } catch (DaoException e){
+        } catch (DaoException e) {
             throw new ServiceException(e.getMessage(), e);
         }
 
-	}
+    }
 
-	@Override
-	public String getJrxml(int declarationTemplateId) {
+    @Override
+    public String getJrxml(int declarationTemplateId) {
         BlobData jrxmlBlobData = blobDataService.get(this.get(declarationTemplateId).getJrxmlBlobId());
         if (jrxmlBlobData == null) {
             return null;
@@ -232,15 +247,15 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
     }
 
- 	@Override
-	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
-		if (declarationTemplateId!=null){
-			LockData objectLock = lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
-			if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
-				throw new AccessDeniedException("Шаблон налоговой формы заблокирован другим пользователем");
-			}
-		}
-	}
+    @Override
+    public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo) {
+        if (declarationTemplateId != null) {
+            LockData objectLock = lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
+            if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
+                throw new AccessDeniedException("Шаблон налоговой формы заблокирован другим пользователем");
+            }
+        }
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -277,7 +292,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
-        List<Integer> declarationTemplateIds =  declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<Integer> declarationTemplateIds = declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
         List<DeclarationTemplate> declarationTemplates = new ArrayList<DeclarationTemplate>();
         for (Integer id : declarationTemplateIds)
             declarationTemplates.add(declarationTemplateDao.get(id));
@@ -337,8 +352,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (formTypeIds.isEmpty())
             return integerMap;
         List<Map<String, Object>> mapList = declarationTemplateDao.versionTemplateCountByType(formTypeIds);
-        for (Map<String, Object> map : mapList){
-            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        for (Map<String, Object> map : mapList) {
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal) map.get("version_count")).intValue());
         }
         return integerMap;
     }
@@ -347,7 +362,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public int updateVersionStatus(VersionedObjectStatus versionStatus, int declarationTemplateId) {
         try {
             return declarationTemplateDao.updateVersionStatus(versionStatus, declarationTemplateId);
-        }catch (DaoException e){
+        } catch (DaoException e) {
             throw new ServiceException("Обновление статуса налоговой формы.", e);
         }
     }
@@ -358,7 +373,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             DeclarationTemplate template = get(dtId);
             declarationTemplateDao.deleteXsd(dtId);
             blobDataService.delete(template.getXsdId());
-        } catch (DaoException e){
+        } catch (DaoException e) {
             throw new ServiceException("Ошибка при удалении xsd", e);
         }
     }
@@ -369,7 +384,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             DeclarationTemplate template = get(dtId);
             declarationTemplateDao.deleteJrxml(dtId);
             blobDataService.delete(template.getJrxmlBlobId());
-        } catch (DaoException e){
+        } catch (DaoException e) {
             throw new ServiceException("Ошибка при удалении jrxml", e);
         }
     }
@@ -387,7 +402,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         ArrayList<String> existDec = new ArrayList<String>();
         ArrayList<String> existInLockDec = new ArrayList<String>();
 
-        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
+        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             DeclarationData data = declarationDataDao.get(dataId);
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
@@ -409,7 +424,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         data.getKpp() != null ? ", КПП " + data.getKpp() : ""
                 ));
 
-            }  else if(lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)){
+            } else if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
                 existInLockDec.add(String.format(
                         DEC_DATA_EXIST_IN_TASK,
                         template.getName(),
@@ -423,17 +438,17 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 ));
             }
         }
-        if(!existInLockDec.isEmpty()){
+        if (!existInLockDec.isEmpty()) {
             isExist = true;
             logger.warn("По следующим экземплярам налоговых форм запущена операция формирования pdf/xlsx отчета:");
-            for (String s : existInLockDec){
+            for (String s : existInLockDec) {
                 logger.warn(s);
             }
         }
-        if(!existDec.isEmpty()){
+        if (!existDec.isEmpty()) {
             isExist = true;
             logger.warn("По следующим экземплярам налоговых форм сформирован pdf/xlsx отчет:");
-            for (String s : existDec){
+            for (String s : existDec) {
                 logger.warn(s);
             }
         }
@@ -446,10 +461,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public Collection<Long> getDataIdsThatUseJrxml(int dtId, TAUserInfo userInfo) {
         HashSet<Long> dataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
-        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            if(reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
+        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
+            if (reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
                     ||
-                    reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null){
+                    reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
                 dataIds.add(dataId);
             }
         }
@@ -461,7 +476,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public Collection<Long> getLockDataIdsThatUseJrxml(int dtId) {
         HashSet<Long> lockDataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
-        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
+        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
@@ -472,7 +487,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-	public LockData lock(int declarationTemplateId, TAUserInfo userInfo){
+    public LockData lock(int declarationTemplateId, TAUserInfo userInfo) {
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         Date endVersion = getDTEndDate(declarationTemplateId);
         return lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
@@ -485,20 +500,20 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 ));
     }
 
-	@Override
-	public boolean unlock(int declarationTemplateId, TAUserInfo userInfo){
+    @Override
+    public boolean unlock(int declarationTemplateId, TAUserInfo userInfo) {
         lockDataService.unlock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
                 userInfo.getUser().getId());
         return true;
-	}
+    }
 
-    private List<Integer> createStatusList(VersionedObjectStatus[] status){
+    private List<Integer> createStatusList(VersionedObjectStatus[] status) {
         List<Integer> statusList = new ArrayList<Integer>();
-        if (status.length == 0){
+        if (status.length == 0) {
             statusList.add(VersionedObjectStatus.NORMAL.getId());
             statusList.add(FAKE.getId());
             statusList.add(VersionedObjectStatus.DRAFT.getId());
-        }else {
+        } else {
             for (VersionedObjectStatus objectStatus : status)
                 statusList.add(objectStatus.getId());
         }
@@ -558,11 +573,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
             if (subreport.getName() == null || subreport.getName().isEmpty()) {
                 logger.error("Отчет №\"%s\". Поле \"Наименование\" обязательно для заполнения.",
-                            subreport.getOrder(), subreport.getName());
+                        subreport.getOrder(), subreport.getName());
             } else {
                 if (subreport.getName().getBytes().length > SUBREPORT_NAME_MAX_VALUE) {
                     logger.error("Отчет №\"%s\". Значение для имени отчета слишком велико (фактическое: %d, максимальное: %d)",
-                                 subreport.getOrder(), subreport.getName().getBytes().length, SUBREPORT_NAME_MAX_VALUE);
+                            subreport.getOrder(), subreport.getName().getBytes().length, SUBREPORT_NAME_MAX_VALUE);
                 }
             }
         }
@@ -653,78 +668,114 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             ZipOutputStream zos = new ZipOutputStream(os);
             DeclarationTemplate dt = get(id);
             dt.setCreateScript(getDeclarationTemplateScript(id));
-
-            // Version
-            ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
-            /*zos.putNextEntry(ze);
-			zos.write("1.0".getBytes());
-			zos.closeEntry();*/
-
-            // Структура формы
-            ze = new ZipEntry(CONTENT_FILE);
-            zos.putNextEntry(ze);
-            DeclarationTemplateContent dtc = new DeclarationTemplateContent();
-            dtc.fillDeclarationTemplateContent(dt);
-            for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
-                if (declarationSubreportContent.getBlobDataId() != null) {
-                    declarationSubreportContent.setFileName(blobDataService.get(declarationSubreportContent.getBlobDataId()).getName());
-                }
-            }
-            JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            jaxbMarshaller.marshal(dtc, zos);
-            zos.closeEntry();
-
-            // Основной скрипт
-            String dtScript = dt.getCreateScript();
-            if (dtScript != null) {
-                ze = new ZipEntry(SCRIPT_FILE);
-                zos.putNextEntry(ze);
-                zos.write(dtScript.getBytes(ENCODING));
-                zos.closeEntry();
-            }
-
-            // Скрипты событий
-            for (DeclarationTemplateEventScript eventScript : dt.getEventScripts()) {
-                ze = new ZipEntry(eventScript.getEventId() + "_" + SCRIPT_FILE);
-                zos.putNextEntry(ze);
-                zos.write(eventScript.getScript().getBytes(ENCODING));
-                zos.closeEntry();
-            }
-
-            // JRXML-файл
-            putBlobIntoZip(REPORT_FILE, dt.getJrxmlBlobId(), zos);
-
-            // JRXML-файлы спецотчетов
-            for (DeclarationSubreport subreport : dt.getSubreports()) {
-                putBlobIntoZip(subreport.getBlobDataId(), zos);
-            }
-
-            // XSD и XLSX файлы
-            putBlobIntoZip(XSD, dt.getXsdId(), zos);
-            for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
-                putBlobIntoZip(file.getBlobDataId(), zos);
-            }
-
+            doExportDeclarationTemplate("", dt, zos);
             zos.finish();
         } catch (Exception e) {
             throw new ServiceException("Не удалось экспортировать шаблон", e);
         }
     }
 
+    private void doExportDeclarationTemplate(String path, DeclarationTemplate dt, ZipOutputStream zos) throws IOException, JAXBException {
+        // Version
+        ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
+            /*zos.putNextEntry(ze);
+			zos.write("1.0".getBytes());
+			zos.closeEntry();*/
+
+        // Структура формы
+        ze = new ZipEntry(path + CONTENT_FILE);
+        zos.putNextEntry(ze);
+        DeclarationTemplateContent dtc = new DeclarationTemplateContent();
+        dtc.fillDeclarationTemplateContent(dt);
+        for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
+            if (declarationSubreportContent.getBlobDataId() != null) {
+                declarationSubreportContent.setFileName(blobDataService.get(declarationSubreportContent.getBlobDataId()).getName());
+            }
+        }
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        jaxbMarshaller.marshal(dtc, zos);
+        zos.closeEntry();
+
+        // Основной скрипт
+        String dtScript = dt.getCreateScript();
+        if (dtScript != null) {
+            ze = new ZipEntry(path + SCRIPT_FILE);
+            zos.putNextEntry(ze);
+            zos.write(dtScript.getBytes(ENCODING));
+            zos.closeEntry();
+        }
+
+        // Скрипты событий
+        for (DeclarationTemplateEventScript eventScript : dt.getEventScripts()) {
+            ze = new ZipEntry(path + eventScript.getEventId() + "_" + SCRIPT_FILE);
+            zos.putNextEntry(ze);
+            zos.write(eventScript.getScript().getBytes(ENCODING));
+            zos.closeEntry();
+        }
+
+        // JRXML-файл
+        putBlobIntoZip(path, REPORT_FILE, dt.getJrxmlBlobId(), zos);
+
+        // JRXML-файлы спецотчетов
+        for (DeclarationSubreport subreport : dt.getSubreports()) {
+            putBlobIntoZip(path, subreport.getBlobDataId(), zos);
+        }
+
+        // XSD и XLSX файлы
+        putBlobIntoZip(path, XSD, dt.getXsdId(), zos);
+        for (DeclarationTemplateFile file : dt.getDeclarationTemplateFiles()) {
+            putBlobIntoZip(path, file.getBlobDataId(), zos);
+        }
+    }
+
+    @Override
+    public void exportAllDeclarationTemplates(TAUserInfo userInfo, OutputStream os) {
+        ZipOutputStream zos = new ZipOutputStream(os);
+        try {
+            List<DeclarationTemplate> allTemplates = listAll();
+            for (DeclarationTemplate dt : allTemplates) {
+                dt.setCreateScript(getDeclarationTemplateScript(dt.getId()));
+                String translatedName = Translator.transliterate(dt.getType().getName());
+                String folderTemplateName =
+                        Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
+                                TaxType.NDFL.name().toLowerCase(),
+                                dt.getType().getId(),
+                                (translatedName.length() > MAX_NAME_OF_DIR
+                                        ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP, "")
+                                        : translatedName.trim().replaceAll(REG_EXP, "")).trim(),
+                                SIMPLE_DATE_FORMAT_YEAR.get().format(dt.getVersion()))) + System.getProperty("file.separator");
+                ZipArchiveEntry ze = new ZipArchiveEntry(folderTemplateName);
+                zos.putNextEntry(ze);
+                doExportDeclarationTemplate(folderTemplateName, dt, zos);
+                zos.closeEntry();
+            }
+        } catch (Exception e) {
+            throw new ServiceException("Не удалось экспортировать шаблоны", e);
+        } finally {
+            try {
+                zos.close();
+            } catch (IOException e) {
+                // ignored
+            }
+        }
+    }
+
     /**
      * Добавляет содержимое блоба в архив
+     *
+     * @param path     путь к файлу внутри архива
      * @param fileName имя файла, которое будет ему присвоено в архиве. Если null - присваивается имя из блоба
-     * @param blobId идентификатор блоба из БД
-     * @param zos поток записи в архив
+     * @param blobId   идентификатор блоба из БД
+     * @param zos      поток записи в архив
      * @throws IOException
      */
-    private void putBlobIntoZip(String fileName, String blobId, ZipOutputStream zos) throws IOException {
+    private void putBlobIntoZip(String path, String fileName, String blobId, ZipOutputStream zos) throws IOException {
         if (blobId != null) {
             BlobData blob = blobDataService.get(blobId);
             if (blob != null) {
-                ZipEntry ze = new ZipEntry(fileName != null ? fileName : blob.getName());
+                ZipEntry ze = new ZipEntry(path + (fileName != null ? fileName : blob.getName()));
                 zos.putNextEntry(ze);
                 IOUtils.copy(blob.getInputStream(), zos);
                 zos.closeEntry();
@@ -732,8 +783,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
     }
 
-    private void putBlobIntoZip(String blobId, ZipOutputStream zos) throws IOException {
-        putBlobIntoZip(null, blobId, zos);
+    private void putBlobIntoZip(String path, String blobId, ZipOutputStream zos) throws IOException {
+        putBlobIntoZip(path, null, blobId, zos);
     }
 
     @Override
@@ -783,7 +834,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         declarationDataService.cleanBlobs(
                 getDataIdsThatUseJrxml(declarationTemplateId, userInfo),
                 Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
-        for (Long id : getLockDataIdsThatUseJrxml(declarationTemplateId)){
+        for (Long id : getLockDataIdsThatUseJrxml(declarationTemplateId)) {
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.PDF_DEC);
             String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.EXCEL_DEC);
             asyncManager.interruptTask(keyPDF, userInfo, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
@@ -794,8 +845,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     /**
      * Выполняет непосредственно импорт файла в макет
+     *
      * @param declarationTemplateId идентификатор макета
-     * @param data содержимое архива
+     * @param data                  содержимое архива
      * @return
      */
     private DeclarationTemplate doImportDeclarationTemplate(int declarationTemplateId, InputStream data) {
