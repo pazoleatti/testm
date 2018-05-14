@@ -360,7 +360,7 @@
         "title.prepayment.notifSource": "Код налогового органа, выдавшего уведомление",
         "title.prepayment.filter.notifSource": "Код НО, выдавшего уведомление",
 
-        "logBusiness.title": "Информация по налоговой форме",
+        "logBusiness.title": "История изменений формы",
         "logBusiness.title.event": "Событие",
         "logBusiness.title.logDate": "Дата-время",
         "logBusiness.title.user": "Пользователь",
