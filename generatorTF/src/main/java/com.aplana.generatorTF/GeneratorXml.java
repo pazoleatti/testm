@@ -69,7 +69,7 @@ class GeneratorXml {
     static {
         inputFactory = XMLInputFactory.newInstance();
         outputFactory = XMLOutputFactory.newInstance();
-        EMPTY_TAGS = new HashSet<String>(Arrays.asList(TAG_SERVICE_PART, TAG_INCOME, TAG_INCOME_TAX, TAG_DEDUCTION));
+        EMPTY_TAGS = new HashSet<String>(Arrays.asList(TAG_SERVICE_PART, TAG_INCOME, TAG_INCOME_TAX, TAG_DEDUCTION, TAG_PREPAYMENT));
         NOT_EMPTY_TAGS = new HashSet<String>(Arrays.asList(TAG_FILE, TAG_INFO_PART, TAG_OPER_INFO));
     }
 

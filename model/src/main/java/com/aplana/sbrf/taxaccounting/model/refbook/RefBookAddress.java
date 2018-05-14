@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
- * Адреса физических лиц
+ * Справочник "Адреса физических лиц"
  *
  * @author Andrey Drunk
  */

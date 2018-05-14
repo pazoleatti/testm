@@ -242,14 +242,16 @@
                         var PRISTINE_CLASS = 'ng-pristine',
                             DIRTY_CLASS = 'ng-dirty';
                         var parentForm = element.inheritedData('$formController');
-                        controller.$setDirty = function () {
-                            if (this.$pristine) {
-                                this.$dirty = true;
-                                this.$pristine = false;
-                                element.removeClass(PRISTINE_CLASS).addClass(DIRTY_CLASS);
-                                parentForm.$setDirty();
-                            }
-                        };
+                        if (parentForm) {
+                            controller.$setDirty = function () {
+                                if (this.$pristine) {
+                                    this.$dirty = true;
+                                    this.$pristine = false;
+                                    element.removeClass(PRISTINE_CLASS).addClass(DIRTY_CLASS);
+                                    parentForm.$setDirty();
+                                }
+                            };
+                        }
                     }
                 };
             }])

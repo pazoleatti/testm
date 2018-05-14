@@ -222,6 +222,11 @@
                 DEPARTMENT_SELECTED: "DEPARTMENT_SELECTED",
                 USER_TB_SELECT: "USER_TB_SELECT",
                 LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT"
+            },
+            REFBOOK_ALIAS: {
+                BUSINESS_ID_ALIAS: "record_id",
+                RECORD_VERSION_FROM_ALIAS: "record_version_from",
+                RECORD_VERSION_TO_ALIAS: "record_version_to"
             }
         });
 }());

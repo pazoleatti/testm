@@ -78,6 +78,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Autowired
     private DBUtils dbUtils;
 
+    @Autowired
+    private RefBookMapperFactory refBookMapperFactory;
+
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -313,6 +316,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             );
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найден атрибут с id = %d", attributeId));
+        }
+    }
+
+    @Override
+    public RefBookAttribute getAttribute(Long refBookId, String attributeAlias) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("refBookId", refBookId);
+            params.addValue("attributeAlias", attributeAlias);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
+                            "is_unique, sort_order, format, read_only, max_length " +
+                            "from ref_book_attribute where ref_book_id = :refBookId and alias = :attributeAlias",
+                    params, new RefBookAttributeRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найден атрибут с алиасом = %s для справочника с id = %s" , attributeAlias, refBookId));
         }
     }
 
@@ -702,6 +722,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(" frb.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         ps.appendQuery(",\n");
+        if (refBook.isVersioned()) {
+            ps.appendQuery(" frb.record_id as ");
+            ps.appendQuery(RefBook.BUSINESS_ID_ALIAS);
+            ps.appendQuery(",\n");
+        }
 
         if (version == null) {
             ps.appendQuery("  t.version as \"");
@@ -1198,7 +1223,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : records.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias)) {
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) || RefBook.BUSINESS_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
@@ -2838,6 +2863,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
         RowMapper<Map<String, RefBookValue>> rowMapper = getRowMapper(refBook);
+        if (!ps.getParams().isEmpty()) {
+            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
+        } else {
+            return getJdbcTemplate().query(ps.getQuery().toString(), rowMapper);
+        }
+    }
+
+    @Override
+    public <T extends RefBookSimple> List<T> getMappedRecordsData(PreparedStatementData ps, RefBook refBook) {
+        RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook);
         if (!ps.getParams().isEmpty()) {
             return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
         } else {

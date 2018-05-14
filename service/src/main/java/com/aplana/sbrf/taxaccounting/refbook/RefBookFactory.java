@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.refbook;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
@@ -116,4 +117,12 @@ public interface RefBookFactory {
 	 * @return информация о блокировке с деталями
      */
 	String getRefBookLockDescription(LockData lockData, long refBookId);
+
+	/**
+	 * Возвращает данные атрибута справочника по его алиасу
+	 * @param refBookId идентификатор справочника
+	 * @param attributeAlias алиас аттрибута
+	 * @return данные аттрибута
+	 */
+    RefBookAttribute getAttributeByAlias(long refBookId, String attributeAlias);
 }

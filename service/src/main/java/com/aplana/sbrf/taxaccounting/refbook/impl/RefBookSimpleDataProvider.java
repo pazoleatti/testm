@@ -56,6 +56,32 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     private RefBook refBook;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecordsWithVersionInfo(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
+
+        // Собираем атрибуты, которые ссылаются на другие справочники
+        Map<String, RefBookDataProvider> referenceAttributes = new HashMap<>();
+        for (RefBookAttribute attribute : getRefBook().getAttributes()) {
+            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                referenceAttributes.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+            }
+        }
+
+        if (!referenceAttributes.isEmpty()) {
+            // Разыменовываем справочные атрибуты
+            for (Map<String, RefBookValue> record : records) {
+                for (Map.Entry<String, RefBookDataProvider> reference : referenceAttributes.entrySet()) {
+                    String referenceAlias = reference.getKey();
+                    Map<String, RefBookValue> referenceObject = reference.getValue().getRecordData(record.get(referenceAlias).getReferenceValue());
+                    record.put(referenceAlias, new RefBookValue(RefBookAttributeType.REFERENCE, referenceObject));
+                }
+            }
+        }
+
+        return records;
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute, boolean isSortAscending) {
         return dao.getRecords(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
@@ -351,9 +377,17 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
     }
 
+    /**
+     * Блокирует справочник для указанного пользователя, если тот же справочник уже был ранее заблокирован тем же пользователем ошибкой не считаем
+     * @param refBook справочник
+     * @param userId пользователь
+     * @param lockKey ключ блокировки
+     * @return флаг успешности установки блокировки
+     */
     private boolean lockRefBook(RefBook refBook, int userId, String lockKey) {
-        return lockService.lock(lockKey, userId,
-                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null;
+        LockData lockData = lockService.lock(lockKey, userId,
+                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName()));
+        return lockData == null || lockData.getUserId() == userId;
     }
 
     private void lockReferencedBooks(@NotNull Logger logger, List<String> lockedObjects) {

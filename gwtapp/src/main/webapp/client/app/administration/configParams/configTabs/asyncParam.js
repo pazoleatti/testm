@@ -10,8 +10,8 @@
     /**
      * @description контроллер вкладки "Параметры асинхронных заданий"
      */
-        .controller('asyncParamController', ['$scope', '$filter', 'AsyncTaskResource', 'APP_CONSTANTS', '$aplanaModal', 'PermissionChecker', '$rootScope',
-            function ($scope, $filter, AsyncTaskResource, APP_CONSTANTS, $aplanaModal, PermissionChecker, $rootScope) {
+        .controller('asyncParamController', ['$scope', '$filter', 'AsyncParamResource', 'APP_CONSTANTS', '$aplanaModal', 'PermissionChecker', '$rootScope',
+            function ($scope, $filter, AsyncParamResource, APP_CONSTANTS, $aplanaModal, PermissionChecker, $rootScope) {
 
                 $scope.asyncParamGrid = {
                     ctrl: {},
@@ -19,7 +19,7 @@
                     options: {
                         gridName: 'asyncParamGrid',
                         datatype: "angularResource",
-                        angularResource: AsyncTaskResource,
+                        angularResource: AsyncParamResource,
                         value: [],
                         colNames: [
                             $filter('translate')('asyncParam.grid.columnName.taskType'),

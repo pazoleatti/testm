@@ -91,6 +91,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     private RefBookFactory refBookFactory;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         return refBookDepartmentDao.getRecords(pagingParams, filter, sortAttribute, isSortAscending);
     }

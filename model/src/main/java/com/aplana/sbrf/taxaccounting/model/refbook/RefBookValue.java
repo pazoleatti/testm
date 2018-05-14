@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.json.RefBookValueDeserializer;
+import com.aplana.sbrf.taxaccounting.model.json.RefBookValueSerializer;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -12,6 +17,8 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 23.05.13 17:43
  */
+@JsonDeserialize(using = RefBookValueDeserializer.class)
+@JsonSerialize(using = RefBookValueSerializer.class)
 public class RefBookValue implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -56,6 +63,14 @@ public class RefBookValue implements Serializable {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Collection<Map<String, RefBookValue>> getCollectionValue() {
+		if (value != null && attributeType == RefBookAttributeType.COLLECTION) {
+			return (Collection<Map<String, RefBookValue>>) value;
+		}
+		return null;
+	}
+
 	/**
 	 * Возвращает значение ссылки в виде кода записи справочника
 	 * @return
@@ -71,6 +86,7 @@ public class RefBookValue implements Serializable {
 	 * Возвращает значение ссылки в виде объекта
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Map<String, RefBookValue> getReferenceObject() {
 		if (RefBookAttributeType.REFERENCE.equals(attributeType) && value instanceof Map) {
 			return (Map<String, RefBookValue>) value;
@@ -89,6 +105,7 @@ public class RefBookValue implements Serializable {
 				(attributeType == RefBookAttributeType.NUMBER && value instanceof Number) ||
 				(attributeType == RefBookAttributeType.STRING && value instanceof String) ||
 				(attributeType == RefBookAttributeType.DATE && value instanceof Date) ||
+				(attributeType == RefBookAttributeType.COLLECTION && value instanceof Collection) ||
 				(attributeType == RefBookAttributeType.REFERENCE && (value instanceof Long || value instanceof Map))) {
             if (attributeType == RefBookAttributeType.STRING && value != null) {
                 value = StringUtils.cleanString((String)value);

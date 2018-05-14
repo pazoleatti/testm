@@ -1,0 +1,99 @@
+<form id="refBookRecordForm" name="refBookRecordForm" class="form-horizontal" data-aplana-submit-valid="save()" novalidate>
+    <div id="refBookRecordFieldsContainer" class="modal-body">
+        <!-- Данные о периоде актуальности записи -->
+        <div class="row-fluid" style="margin-bottom: 20px;" data-ng-show="refBook.versioned">
+            <div data-ng-if="mode === 'VIEW'" >
+                <label class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
+                <label class="inline-value">{{getAttributeFineValue(versionFromAttribute)}}</label>
+                <label class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
+                <label class="inline-value">{{getAttributeFineValue(versionToAttribute)}}</label>
+            </div>
+            <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" >
+                <label style="float: left" class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
+                <span style="float: left" data-aplana-field>
+                    <span data-aplana-datepicker
+                          aplana-picker-outer-width="150px"
+                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value"
+                          data-ng-required="true"></span>
+                    <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                </span>
+                <label style="float: left; margin-left: 20px;" class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
+                <span data-aplana-field>
+                    <span data-aplana-datepicker
+                          aplana-picker-outer-width="150px"
+                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value"></span>
+                </span>
+            </div>
+        </div>
+        <!-- Список атрибутов -->
+        <div data-ng-repeat="attribute in refBook.attributes"
+             data-ng-if="attribute.visible && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS &&
+             attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS">
+            <div class="row-fluid">
+                <div class="span4">
+                    <label class="control-label">{{attribute.name}}:</label>
+                </div>
+                <div class="span8">
+                    <!-- Режим просмотра -->
+                    <label data-ng-if="mode === 'VIEW'" class="inline-value">{{getAttributeFineValue(attribute)}}</label>
+                    <!-- Режим редактирования и создания -->
+                    <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" data-ng-switch="attribute.attributeType">
+                        <div data-ng-switch-when="STRING">
+                            <div data-aplana-field data-model-id="{{attribute.alias}}">
+                                <input type="text"
+                                       data-ng-model="record[attribute.alias].value"
+                                       title="{{record[attribute.alias].value}}"
+                                       aplana-input-outer-width="80%"
+                                       maxlength="{{attribute.maxLength}}"
+                                       data-ng-required="{{attribute.required}}"/>
+                                <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
+                            </div>
+                        </div>
+                        <div data-ng-switch-when="NUMBER" data-model-id="{{attribute.alias}}">
+                            <div data-aplana-field>
+                                <input type='text'
+                                       data-ng-model="record[attribute.alias].value"
+                                       title="{{attribute.name}}"
+                                       aplana-input-outer-width="80%"
+                                       data-ng-pattern="patterns.number"
+                                       data-ng-required="{{attribute.required}}">
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' | translate}}</div>
+                                <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
+                            </div>
+                        </div>
+                        <div data-ng-switch-when="DATE" data-model-id="{{attribute.alias}}">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     aplana-picker-outer-width="150px"
+                                     data-ng-model="record[attribute.alias].value"
+                                     title="{{attribute.name}}"
+                                     data-ng-required="{{attribute.required}}"></div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                            </div>
+                        </div>
+                        <div data-ng-switch-when="REFERENCE" data-ng-controller="SelectRefBookCtrl" title="{{attributeTitle}}">
+                            <!-- TODO: почему то для выпадашки не работает нормально валидация - сообщение появляется для другого поля, сходу решить проблему не удалось -->
+                            <div data-aplana-field data-model-id="{{attribute.alias}}">
+                                <div data-ui-select2="select.options"
+                                     data-ng-init="initSelect(attribute)"
+                                     data-ng-model="record[attribute.alias].value"
+                                     data-ng-required="{{attribute.required}}"
+                                     class="span8"></div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default" id="openButton" ng-show="isEditMode" data-ng-disabled="refBookRecordForm.$invalid">
+            <span data-translate-once="button.save"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

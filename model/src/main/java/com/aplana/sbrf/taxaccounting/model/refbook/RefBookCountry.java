@@ -1,19 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
+ * Справочник "ОК 025-2001 (Общероссийский классификатор стран мира)"
  * @author Andrey Drunk
  */
 public class RefBookCountry extends RefBookSimple<Long> {
-    //Код
     private String code;
-
-    public RefBookCountry() {
-    }
-
-    public RefBookCountry(Long id, String code) {
-        this.id = id;
-        this.code = code;
-    }
+    private String name;
 
     public String getCode() {
         return code;
@@ -23,10 +16,11 @@ public class RefBookCountry extends RefBookSimple<Long> {
         this.code = code;
     }
 
-    @Override
-    public String toString() {
-        return new StringBuilder().append("[").append(id).append(", ").append(code).append("]").toString();
+    public String getName() {
+        return name;
     }
 
-
+    public void setName(String name) {
+        this.name = name;
+    }
 }

@@ -96,7 +96,7 @@
                             } else {
                                 //noinspection JSUnresolvedVariable
                                 messageType = addMessage.messageType;
-                                if (messageType === 'MULTI_ERROR'){
+                                if (messageType === 'MULTI_ERROR' && addMessage.additionInfo.uuid){
                                     //Отображаем список ошибок
                                     $injector.invoke(['$logPanel', function ($logPanel) {
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);

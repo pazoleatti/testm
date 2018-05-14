@@ -71,8 +71,9 @@ public class PreparedStatementData {
         namedParams.addValue(key, value, sqlType);
     }
 
-    public void appendQuery(String query){
+    public PreparedStatementData appendQuery(String query){
         this.query.append(query);
+        return this;
     }
 
     public PreparedStatementData append(Object query) {

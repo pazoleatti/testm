@@ -274,12 +274,22 @@
         })
 
         /**
-         * @description Форматтер для получения наименования ОКТМО в нужном формате "код: наименование"
-         * @param oktmo запись из справочника ОКТМО
+         * @description Форматтер для получения наименования записи в формате "код: наименование"
+         * @param record запись из справочника
          */
-        .filter('oktmoFormatter', function () {
-            return function (oktmo) {
-                return oktmo ? oktmo.code + ": " + oktmo.name : "";
+        .filter('codeNameFormatter', function () {
+            return function (record) {
+                return record ? record.code + ": " + record.name : "";
+            };
+        })
+
+        /**
+         * @description Форматтер для получения данных о физ. лице в нужном формате
+         * @param person запись из справочника физических лиц
+         */
+        .filter('personFormatter', function () {
+            return function (person) {
+                return person ? person.lastName + " " + person.firstName + " " + person.middleName : "";
             };
         })
         /**

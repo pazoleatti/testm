@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
 
 @Configurable
-public abstract class ConfigurationPermission extends AbstractPermission<Configuration>{
+public abstract class ConfigurationPermission extends AbstractPermission<Configuration> {
 
     /**
      * Право на просмотр конфигураций
@@ -56,7 +56,7 @@ public abstract class ConfigurationPermission extends AbstractPermission<Configu
         @Override
         protected boolean isGrantedInternal(User user, Configuration targetDomainObject, Logger logger) {
             if (targetDomainObject != null) {
-                if(targetDomainObject.getId() != null){
+                if (targetDomainObject.getId() != null) {
                     return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN);
                 }
                 ConfigurationParam param = ConfigurationParam.valueOf(targetDomainObject.getCode());
@@ -89,7 +89,7 @@ public abstract class ConfigurationPermission extends AbstractPermission<Configu
         @Override
         protected boolean isGrantedInternal(User user, Configuration targetDomainObject, Logger logger) {
             if (targetDomainObject != null) {
-                if(targetDomainObject.getId() != null){
+                if (targetDomainObject.getId() != null) {
                     return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN);
                 }
                 ConfigurationParam param = ConfigurationParam.valueOf(targetDomainObject.getCode());

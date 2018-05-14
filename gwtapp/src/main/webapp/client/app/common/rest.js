@@ -302,18 +302,27 @@
         /**
          * @description Получить данные о типах асинхронных задач
          */
-        .factory('AsyncTaskResource', ['$resource', function ($resource) {
+        .factory('AsyncParamResource', ['$resource', function ($resource) {
             return $resource('controller/rest/asyncParam', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
 
         /**
-         * @description Получить данные о типах асинхронных задач
+         * @description Получить данные параметров конфигурации электронной почты
          */
-        .factory('EmailResource', ['$resource', function ($resource) {
+        .factory('EmailParamResource', ['$resource', function ($resource) {
             return $resource('controller/rest/emailParam', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Проверка валидности конфигурационных параметров электронной почты
+         */
+        .factory('EmailParamCheckerResource', ['$resource', function ($resource) {
+            return $resource('controller/actions/emailParam/checkValidate', {}, {
+                query: {method: 'POST', isArray: false, cache: false}
             });
         }])
 
@@ -366,9 +375,28 @@
         /**
          * @description Список справочников
          */
-        .factory('refBookListResource', ['$resource', function ($resource) {
+        .factory('RefBookListResource', ['$resource', function ($resource) {
             return $resource('controller/rest/refBookList', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Данные справочника
+         */
+        .factory('RefBookResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/:id', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Список записей справочников
+         */
+        .factory('RefBookRecordResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookRecords/:refBookId', {}, {
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
 

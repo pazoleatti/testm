@@ -15,13 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -62,6 +56,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     private DBUtils dbUtils;
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private RefBookMapperFactory refBookMapperFactory;
 
     private static int IN_CLAUSE_LIMIT = 10000;
 
@@ -73,6 +69,21 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         } else {
             return new RefBookValueMapper(refBook);
         }
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false, true);
+        List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
+
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>(records);
+        if (pagingParams != null) {
+            ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false, false);
+            result.setTotalCount(refBookDao.getRecordsCount(ps));
+        } else {
+            result.setTotalCount(records.size());
+        }
+        return result;
     }
 
     /**
@@ -88,12 +99,12 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false);
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false, false);
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
 
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
 		if (pagingParams != null) {
-			ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false);
+			ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false, false);
 			result.setTotalCount(refBookDao.getRecordsCount(ps));
 		} else {
 			result.setTotalCount(records.size());
@@ -101,7 +112,18 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         return result;
     }
 
-	@Override
+    @Override
+    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, PagingParams pagingParams, List<String> columns, String filter) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsQueryWithFilter(refBook, columns, filter, pagingParams, pagingParams.getDirection().toLowerCase().equals("asc"));
+        List<T> records = refBookDao.getMappedRecordsData(ps, refBook);
+
+        PagingResult<T> result = new PagingResult<>(records);
+        ps = queryBuilder.psGetRecordsQueryWithFilter(refBook, columns, filter, null, pagingParams.getDirection().toLowerCase().equals("asc"));
+        result.setTotalCount(refBookDao.getRecordsCount(ps));
+        return result;
+    }
+
+    @Override
 	public PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
 		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
 		LOG.debug(ps.getQuery().toString());
@@ -125,6 +147,18 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         ps.addNamedParam("id", id);
         try {
             return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), getRowMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public <T extends RefBookSimple> T getRecord(RefBook refBook, Long recordId) {
+        PreparedStatementData ps = queryBuilder.psGetRecordData(refBook);
+        ps.addNamedParam("id", recordId);
+        try {
+            RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook);
+            return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), rowMapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -257,8 +291,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      */
     @Override
     public Long getRowNum(@NotNull RefBook refBook, Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, recordId, null, version, sortAttribute, filter, null, isSortAscending, false);
-
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, recordId, null, version, sortAttribute, filter, null, isSortAscending, false, false);
         return refBookDao.getRowNum(ps, recordId);
     }
 
@@ -272,8 +305,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      */
     @Override
     public List<Long> getUniqueRecordIds(RefBook refBook, Date version, String filter) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, null, filter, null, false, true);
-
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, null, filter, null, false, true, false);
         return getJdbcTemplate().queryForList(ps.getQuery().toString(), ps.getParams().toArray(), Long.class);
     }
 
@@ -285,7 +317,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      */
     @Override
     public int getRecordsCount(RefBook refBook, Date version, String filter) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, null, filter, null, false, false);
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, null, filter, null, false, false, false);
         return refBookDao.getRecordsCount(ps);
     }
 
@@ -375,7 +407,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         refBookClone.getAttributes().addAll(refBook.getAttributes());
 
         // Получение количества данных в справочнике
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, false);
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, false, false);
         Integer recordsCount = refBookDao.getRecordsCount(ps);
 
         refBookClone.addAttribute(RefBook.getVersionFromAttribute());
@@ -762,7 +794,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(RefBook refBook, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         RefBook newRefBook = SerializationUtils.clone(refBook);
         // получаем страницу с данными
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(newRefBook, null, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, false);
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(newRefBook, null, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, false, false);
 
         //Добавляем атрибуты версии, т.к они не хранятся в бд
         newRefBook.getAttributes().add(RefBook.getVersionFromAttribute());

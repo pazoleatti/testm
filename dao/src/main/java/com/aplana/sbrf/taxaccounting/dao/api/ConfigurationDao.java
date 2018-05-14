@@ -126,5 +126,5 @@ public interface ConfigurationDao {
      *
      * @return мапа <название, значение> с данными {@link Configuration}
      */
-    List<Configuration> getAuthEmailParams();
+    List<Configuration> fetchAuthEmailParams();
 }
