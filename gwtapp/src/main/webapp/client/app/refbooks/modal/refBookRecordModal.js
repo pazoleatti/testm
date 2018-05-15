@@ -55,11 +55,12 @@
                         var refBookValue = $scope.record[attribute.alias];
                         switch (attribute.attributeType) {
                             case 'STRING':
+                            case 'NUMBER':
                                 value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
                                 break;
                             case 'DATE':
                                 //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
-                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? $filter('dateFormatter')(refBookValue.value) : "";
+                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' && !isNaN(refBookValue.value) ? $filter('dateFormatter')(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
                                 value = refBookValue && refBookValue.referenceObject && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";

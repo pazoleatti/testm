@@ -611,6 +611,22 @@
                         },
                         formatter: "personFormatter"
                     },
+                    901: {   // Адреса физических лиц TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет
+                        sort: {
+                            property: "id", //TODO: тут нужна комбинация полей
+                            direction: "asc"
+                        },
+                        filter: {
+                            columns: ["REGION_CODE, POSTAL_CODE, DISTRICT, CITY, LOCALITY, STREET, HOUSE, BUILD, APPARTMENT"]
+                        },
+                        formatter: "personAddressFormatter"
+                    },
+                    903: {   // Статусы налогоплательщика
+                        filter: {
+                            columns: ["name", "code"]
+                        },
+                        formatter: "codeNameFormatter"
+                    },
                     default: {
                         // ОК 025-2001 (Общероссийский классификатор стран мира)
                         // Виды документов, удостоверяющих личность
