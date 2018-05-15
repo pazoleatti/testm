@@ -111,7 +111,7 @@
                             {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 210},
                             {name: 'id', index: 'id', width: 200},
                             {name: 'modifiedDate', index: 'modifiedDate', width: 230, formatter: $filter('dateTimeFormatter')},
-                            {name: 'modifiedBy', index: 'modifiedBy', width: 170}
+                            {name: 'modifiedBy', index: 'modifiedBy', width: 300}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
