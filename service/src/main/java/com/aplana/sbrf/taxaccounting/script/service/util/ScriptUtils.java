@@ -1720,11 +1720,10 @@ public final class ScriptUtils {
     /**
      * Работает аналогично {@link ScriptUtils#checkAndReadFile(InputStream, String, List, List, String, String, int, Map)}
      * Однако читает данные не с первого листа, а с диапазона листов.
-     * @param inputStream       потом данных
+     * @param file              файл xlsx
      * @param allValues         список для хранения списков значении каждой строки данных
      * @param headerValues      список для хранения списков значении каждой строки шапки таблицы
-     * @param tableStartValue   начальное значение, с которого начинается сбор данных
-     * @param tableEndValue     конечное значение, с которого прекращается сбор данных
+     * @param headerStartValue  значение с которого начинается заголовок
      * @param headerRowCount    количество строк в шапке таблицы
      * @param paramsMap         мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
      * @param startSheetIndex   индекс начального листа, не должен быть null
@@ -1735,7 +1734,7 @@ public final class ScriptUtils {
      * @throws SAXException
      */
     public static void readSheetsRange(File file, List<List<String>> allValues, List<List<String>>headerValues,
-                                       String tableStartValue, String tableEndValue, int headerRowCount,
+                                       String headerStartValue, int headerRowCount,
                                        Map<String, Object> paramsMap, Integer startSheetIndex, Integer endSheetIndex) throws IOException, OpenXML4JException, SAXException {
         if (startSheetIndex == null) {
             throw new IllegalArgumentException("Начальный индекс не должен быть равен null");
@@ -1746,7 +1745,7 @@ public final class ScriptUtils {
         SharedStringsTable sst = r.getSharedStringsTable();
         XMLReader parser = XMLReaderFactory.createXMLReader();
         StylesTable styles = r.getStylesTable();
-        ContentHandler handler = new SheetHandler(sst, styles, allValues, headerValues, tableStartValue, tableEndValue, headerRowCount, paramsMap);
+        ContentHandler handler = new MultiHeaderSheetWorkbookHandler(sst, styles, allValues, headerValues, headerStartValue, headerRowCount, paramsMap);
         parser.setContentHandler(handler);
         Iterator<InputStream> sheets = r.getSheetsData();
         int i = 0;
@@ -2219,37 +2218,37 @@ public final class ScriptUtils {
         Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns);
     }
 
-    static final class SheetHandler extends DefaultHandler {
+    static class SheetHandler extends DefaultHandler {
         enum XssfDataType {
             BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, NUMBER
         }
 
-        private XssfDataType dataType;
-        private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
-        private StylesTable stylesTable;    // таблица со стилями ячеек
-        private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
-        private List<List<String>> headerValues;  // список для хранения списков значении каждой строки шапки таблицы
-        private String tableStartValue;     // начальное значение, с которого начинается сбор данных
-        private String tableEndValue;       // конечное значение, с которого прекращается сбор данных
-        private int headerRowCount;         // количество строк в шапке таблицы
-        private Map<String, Object> paramsMap;  // мапа с параметрами
-        private StringBuffer lastValue;     // последнее считаное значение
-        private boolean nextIsString;       // признак того что следующее считаное значение хранится в виде строки в sst (Shared Strings Table)
-        private List<String> rowValues;     // список значении строки из файла
-        private boolean isData = false;     // признак того что считанные значения относятся к данным
-        private boolean isHeader = false;   // признак того что считанные значения относятся к шапке таблицы
-        private boolean endRead = false;    // признак того что встретилось значение окончания таблицы
-        private String position;            // позиция ячейки (A1, B2, C1 ... AB12)
-        private int maxColumnCount;         // максимальное количество значении в строке файла (определяется по шапке таблицы - строка с нумерацией столбцов)
-        private Integer rowOffset;          // отступ сверху (до данных)
-        private Integer colOffset;          // отступ слева
-        private int prevRowIndex = 0;       // номер предыдущей строки
-        private Map<String, XSSFCellStyle> styleMap = new HashMap<String, XSSFCellStyle>();// мапа со стилями
-        private Map<String, String> lastValuesMap = new HashMap<String, String>();  // мапа со считанными строковыми значениями из sst
-        private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
-        private String formatString;        // формат даты
-        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
-        private boolean inlineString;
+        XssfDataType dataType;
+        SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
+        StylesTable stylesTable;    // таблица со стилями ячеек
+        List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
+        List<List<String>> headerValues;  // список для хранения списков значении каждой строки шапки таблицы
+        String tableStartValue;     // начальное значение, с которого начинается сбор данных
+        String tableEndValue;       // конечное значение, с которого прекращается сбор данных
+        int headerRowCount;         // количество строк в шапке таблицы
+        Map<String, Object> paramsMap;  // мапа с параметрами
+        StringBuffer lastValue;     // последнее считаное значение
+        boolean nextIsString;       // признак того что следующее считаное значение хранится в виде строки в sst (Shared Strings Table)
+        List<String> rowValues;     // список значении строки из файла
+        boolean isData = false;     // признак того что считанные значения относятся к данным
+        boolean isHeader = false;   // признак того что считанные значения относятся к шапке таблицы
+        boolean endRead = false;    // признак того что встретилось значение окончания таблицы
+        String position;            // позиция ячейки (A1, B2, C1 ... AB12)
+        int maxColumnCount;         // максимальное количество значении в строке файла (определяется по шапке таблицы - строка с нумерацией столбцов)
+        Integer rowOffset;          // отступ сверху (до данных)
+        Integer colOffset;          // отступ слева
+        int prevRowIndex = 0;       // номер предыдущей строки
+        Map<String, XSSFCellStyle> styleMap = new HashMap<String, XSSFCellStyle>();// мапа со стилями
+        Map<String, String> lastValuesMap = new HashMap<String, String>();  // мапа со считанными строковыми значениями из sst
+        short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
+        String formatString;        // формат даты
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
+        boolean inlineString;
 
         /**
          * Для обработки листа экселя.
@@ -2369,21 +2368,7 @@ public final class ScriptUtils {
                     endRead = (rowValues != null && rowValues.contains(tableEndValue));
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
-                        if (rowValues != null && rowValues.size() < maxColumnCount) {
-                            int n = maxColumnCount - rowValues.size();
-                            for (int i = 1; i <= n; i++) {
-                                rowValues.add(null);
-                            }
-                        }
-                        int rowIndex = getRowIndex(position);
-                        if (rowIndex > prevRowIndex + 1) {
-                            int n = rowIndex - prevRowIndex - 1;
-                            for (int i = 1; i <= n; i++) {
-                                allValues.add(new ArrayList<String>());
-                            }
-                        }
-                        allValues.add(rowValues);
-                        prevRowIndex = rowIndex;
+                        performRowData();
                     }
                 } else {
                     if (headerValues.isEmpty() && rowValues != null && (tableStartValue == null || rowValues.contains(tableStartValue))) {
@@ -2400,11 +2385,7 @@ public final class ScriptUtils {
                         headerValues.add(rowValues);
                         if (headerValues.size() == headerRowCount) {
                             // дальше только данные
-                            isData = true;
-                            isHeader = false;
-                            maxColumnCount = (rowValues != null ? rowValues.size() : 0); // максимальное количество значении в строке
-                            rowOffset = getRowIndex(position); // отступ сверху
-                            prevRowIndex = getRowIndex(position);
+                            performRowHeader();
                         }
                     }
                 }
@@ -2417,19 +2398,45 @@ public final class ScriptUtils {
             }
         }
 
+        void performRowData() {
+            if (rowValues != null && rowValues.size() < maxColumnCount) {
+                int n = maxColumnCount - rowValues.size();
+                for (int i = 1; i <= n; i++) {
+                    rowValues.add(null);
+                }
+            }
+            int rowIndex = getRowIndex(position);
+            if (rowIndex > prevRowIndex + 1) {
+                int n = rowIndex - prevRowIndex - 1;
+                for (int i = 1; i <= n; i++) {
+                    allValues.add(new ArrayList<String>());
+                }
+            }
+            allValues.add(rowValues);
+            prevRowIndex = rowIndex;
+        }
+
+        void performRowHeader() {
+            isData = true;
+            isHeader = false;
+            maxColumnCount = (rowValues != null ? rowValues.size() : 0); // максимальное количество значении в строке
+            rowOffset = getRowIndex(position); // отступ сверху
+            prevRowIndex = getRowIndex(position);
+        }
+
         @Override
         public void characters(char[] ch, int start, int length) {
             lastValue.append(ch, start, length);
         }
 
         /** Получить номер столбца по значению позиции (A1, B1 ... AB12). */
-        private int getColumnIndex(String position) {
+        int getColumnIndex(String position) {
             String onlyColumnName = position.replaceAll("[\\d]+", "");
             return CellReference.convertColStringToIndex(onlyColumnName);
         }
 
         /** Получить номер строки по значению позиции (A1, B1 ... AB12). */
-        private int getRowIndex(String position) {
+        int getRowIndex(String position) {
             return Integer.parseInt(position.replaceAll("[^\\d]+", ""));
         }
 
@@ -2441,7 +2448,7 @@ public final class ScriptUtils {
             return styleMap.get(cellStyleStr);
         }
 
-        private String getLastValue(String value) {
+        String getLastValue(String value) {
             if (lastValuesMap.get(value) == null) {
                 int idx = Integer.parseInt(value);
                 lastValuesMap.put(value, new XSSFRichTextString(sst.getEntryAt(idx)).toString());
@@ -2450,7 +2457,7 @@ public final class ScriptUtils {
         }
 
         /** Получить значение в виде строки. */
-        private String getValue() {
+         String getValue() {
             String value;
 
             switch (dataType) {
@@ -2500,6 +2507,74 @@ public final class ScriptUtils {
             }
 
             return cleanString(value);
+        }
+    }
+
+    /**
+     * Обработчик книги в которой таблица находится на нескольких листах и продублирована шапка
+     */
+    static class MultiHeaderSheetWorkbookHandler extends SheetHandler {
+
+        final String headerStartValue; // значение с которого начинается заголовок
+
+        private MultiHeaderSheetWorkbookHandler(SharedStringsTable sst, StylesTable stylesTable, List<List<String>> allValues, List<List<String>> headerValues, String headerStartValue, int headerRowCount, Map<String, Object> paramsMap) {
+            super(sst, stylesTable, allValues, headerValues, null, null, headerRowCount, paramsMap);
+            this.headerStartValue = headerStartValue;
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String name) {
+            if (endRead) {
+                return;
+            }
+            if (nextIsString) {
+                String v = getLastValue(lastValue.toString());
+                lastValue.setLength(0);
+                lastValue.append(v);
+                nextIsString = false;
+            }
+
+            if (name.equals("v") || inlineString && name.equals("t")) { // конец значения
+                // добавить отступ: если первое значение таблицы нашлось не в первом столбце, то делается отступ - пропуск лишних столбцов слева
+                int columnIndex = getColumnIndex(position);
+                if (columnIndex < colOffset) {
+                    endRead = (tableEndValue != null && tableEndValue.equals(getValue()));
+                    return;
+                }
+                // добавить отсутствующие/пропущенные ячейки
+                if (rowValues.size() < columnIndex - colOffset) {
+                    int n = (columnIndex - rowValues.size() - colOffset);
+                    for (int i = 1; i <= n; i++) {
+                        rowValues.add("");
+                    }
+                }
+                // строка
+                rowValues.add(getValue());
+            } else if (name.equals("row")) { // конец строки
+                if (isData && rowValues != null && !rowValues.get(0).startsWith(headerStartValue)) {
+                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
+                    if (!endRead) {
+                        // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
+                        performRowData();
+                    }
+                } else {
+                    isData = false;
+                    if (rowValues != null && rowValues.get(0).startsWith(headerStartValue)) {
+                        colOffset = 0;
+                        isHeader = true;
+                    }
+                    if (isHeader) {
+                        headerValues.add(rowValues);
+                        performRowHeader();
+                    }
+                }
+            } else if (name.equals("sheetData")) {
+                // конец данных - обновить значения переданных параметов для использования в дальнейшем
+                paramsMap.put("rowOffset", rowOffset);
+                paramsMap.put("colOffset", colOffset + 1);
+            } else if (name.equals("is")) {
+                inlineString = false;
+            }
         }
     }
 

@@ -294,6 +294,44 @@ public class ScriptUtilsTest {
     }
 
     @Test
+    public void checkAndReadMultiheadFileTest() throws IOException, OpenXML4JException, SAXException {
+        File file = new File("src/test/resources/script/multiHeaderFile.xlsx");
+        List<List<String>> allValues = new ArrayList<List<String>>();
+        List<List<String>> headerValues = new ArrayList<List<String>>();
+        Map<String, Object> paramsMap = new HashMap<String, Object>();
+        paramsMap.put("rowOffset", 0);
+        paramsMap.put("colOffset", 0);
+
+        ScriptUtils.readSheetsRange(file, allValues, headerValues, "Start read from", 1, paramsMap, 1, null);
+
+        Assert.assertEquals(8, allValues.size());
+        Assert.assertEquals("initial data1", allValues.get(0).get(0));
+        Assert.assertEquals("1", allValues.get(0).get(1));
+        Assert.assertEquals("final data1", allValues.get(0).get(2));
+        Assert.assertEquals("initial data2", allValues.get(1).get(0));
+        Assert.assertEquals("2", allValues.get(1).get(1));
+        Assert.assertEquals("final data2", allValues.get(1).get(2));
+        Assert.assertEquals("initial data3", allValues.get(2).get(0));
+        Assert.assertEquals("3", allValues.get(2).get(1));
+        Assert.assertEquals("final data3", allValues.get(2).get(2));
+        Assert.assertEquals("initial data4", allValues.get(3).get(0));
+        Assert.assertEquals("4", allValues.get(3).get(1));
+        Assert.assertEquals("final data4", allValues.get(3).get(2));
+        Assert.assertEquals("initial data5", allValues.get(4).get(0));
+        Assert.assertEquals("5", allValues.get(4).get(1));
+        Assert.assertEquals("final data5", allValues.get(4).get(2));
+        Assert.assertEquals("initial data6", allValues.get(5).get(0));
+        Assert.assertEquals("6", allValues.get(5).get(1));
+        Assert.assertEquals("final data6", allValues.get(5).get(2));
+        Assert.assertEquals("initial data7", allValues.get(6).get(0));
+        Assert.assertEquals("7", allValues.get(6).get(1));
+        Assert.assertEquals("final data7", allValues.get(6).get(2));
+        Assert.assertEquals("initial data8", allValues.get(7).get(0));
+        Assert.assertEquals("8", allValues.get(7).get(1));
+        Assert.assertEquals("final data8", allValues.get(7).get(2));
+    }
+
+    @Test
     public void testCheckSnils() {
         Assert.assertTrue(ScriptUtils.checkSnils("112-233-445 95"));
         Assert.assertTrue(ScriptUtils.checkSnils("112 233 445 95"));
