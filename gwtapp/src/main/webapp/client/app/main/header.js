@@ -238,6 +238,6 @@
 
                 setInterval(function () {
                     $scope.updateNotificationCount();
-                }, 10000);
+                }, 4000);
             }]);
 }());

@@ -292,6 +292,19 @@
                 return person ? person.lastName + " " + person.firstName + " " + person.middleName : "";
             };
         })
+
+        /**
+         * @description Форматтер для получения данных об адресе физ. лица в нужном формате
+         * @param person запись из справочника физических лиц
+         */
+        .filter('personAddressFormatter', function () {
+            return function (personAddress) {
+                return personAddress ? (personAddress.regionCode ? personAddress.regionCode : "" ) + ", " + (personAddress.postalCode ? personAddress.postalCode : "" ) + ", " +
+                    (personAddress.district ? personAddress.district : "" ) + ", " + (personAddress.city ? personAddress.city : "" ) + ", " + (personAddress.locality ? personAddress.locality : "" ) + ", " +
+                    (personAddress.street ? personAddress.street : "" ) + ", " + (personAddress.house ? personAddress.house : "" ) + ", " + (personAddress.build ? personAddress.build : "" ) + ", " +
+                    (personAddress.appartment ? personAddress.appartment : "" ) + ", " : "";
+            };
+        })
         /**
          * @description Фильтр даты. Если значение даты будет равно '1901-01-01', то отображаться будет '00.00.0000'
          *

@@ -66,7 +66,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                                     "INSERT INTO blob_data (id, name, creation_date, data) VALUES (?,?,?,?)");
                     ps.setString(1, newBlobData.getUuid());
                     ps.setString(2, newBlobData.getName());
-                    ps.setDate(3, new java.sql.Date(newBlobData.getCreationDate().getTime()));
+                    ps.setTimestamp(3, new java.sql.Timestamp(newBlobData.getCreationDate().getTime()));
                     ps.setBlob(4, newBlobData.getInputStream());
                     return ps;
                 }

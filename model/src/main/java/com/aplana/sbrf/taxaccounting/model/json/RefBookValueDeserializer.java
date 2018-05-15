@@ -22,26 +22,29 @@ public class RefBookValueDeserializer extends JsonDeserializer<RefBookValue> {
     public RefBookValue deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode jsonNode = jp.readValueAsTree();
         RefBookAttributeType attributeType = RefBookAttributeType.valueOf(jsonNode.get("attributeType").asText());
-        Object value;
-        switch (attributeType) {
-            case STRING:
-                value = jsonNode.get("value").asText();
-                break;
-            case NUMBER:
-                value = NumberUtils.createNumber(jsonNode.get("value").asText());
-                break;
-            case DATE:
-                try {
-                    value = !jsonNode.get("value").isNull() ? format.parse(jsonNode.get("value").asText()) : null;
-                } catch (ParseException e) {
-                    throw new IllegalArgumentException("Не удалось получить дату из строки: " + jsonNode.get("value").asText());
-                }
-                break;
-            case REFERENCE:
-                value = jsonNode.get("value").asLong();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown attribute type: " + attributeType);
+        JsonNode jsonValue = jsonNode.get("value");
+        Object value = null;
+        if (jsonValue != null && !jsonValue.isNull()) {
+            switch (attributeType) {
+                case STRING:
+                    value = jsonValue.asText();
+                    break;
+                case NUMBER:
+                    value = NumberUtils.createNumber(jsonValue.asText());
+                    break;
+                case DATE:
+                    try {
+                        value = format.parse(jsonValue.asText());
+                    } catch (ParseException e) {
+                        throw new IllegalArgumentException("Не удалось получить дату из строки: " + jsonValue.asText());
+                    }
+                    break;
+                case REFERENCE:
+                    value = jsonValue.asLong();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown attribute type: " + attributeType);
+            }
         }
         return new RefBookValue(attributeType, value);
     }

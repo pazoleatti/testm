@@ -2729,7 +2729,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 fileUuid = blobDataService.create(dataFile, fileName, new Date());
             }
 
-            TAUser user = userService.getSystemUserInfo().getUser();
+            TAUser user = userService.getCurrentUser();
             RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
             Long fileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + fileType.getCode() + "").get(0);
 

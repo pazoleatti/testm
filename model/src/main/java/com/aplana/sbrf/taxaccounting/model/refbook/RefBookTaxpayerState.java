@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
- * Статусы налогоплательщика
+ * Справочник "Статусы налогоплательщика"
  *
  * @author Andrey Drunk
  */
