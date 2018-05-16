@@ -127,4 +127,20 @@ public class NdflPersonFilter {
     public void setDateTo(Date dateTo) {
         this.dateTo = dateTo;
     }
+
+    @Override
+    public String toString() {
+        return "NdflPersonFilter{" +
+                "inp='" + inp + '\'' +
+                ", innNp='" + innNp + '\'' +
+                ", innForeign='" + innForeign + '\'' +
+                ", snils='" + snils + '\'' +
+                ", idDocNumber='" + idDocNumber + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", middleName='" + middleName + '\'' +
+                ", dateFrom=" + dateFrom +
+                ", dateTo=" + dateTo +
+                '}';
+    }
 }

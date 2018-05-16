@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.PersonDao;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import static com.aplana.sbrf.taxaccounting.model.TaxType.ETR;
 @Service
 @Transactional
 public class PersonServiceImpl implements PersonService {
+    private static final Log LOG = LogFactory.getLog(PersonServiceImpl.class);
 
     @Autowired
     private PersonDao personDao;
@@ -35,16 +38,19 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void setOriginal(List<Long> recordIds) {
+        LOG.info(String.format("PersonServiceImpl.setOriginal. recordIds: %s", recordIds));
         personDao.setOriginal(recordIds);
     }
 
     @Override
     public void setDuplicate(List<Long> recordIds, Long originalId) {
+        LOG.info(String.format("PersonServiceImpl.setDuplicate. recordIds: %s; originalId: %s", recordIds, originalId));
         personDao.setDuplicate(recordIds, originalId);
     }
 
     @Override
     public void changeRecordId(List<Long> recordIds, Long originalId) {
+        LOG.info(String.format("PersonServiceImpl.changeRecordId. recordIds: %s; originalId: %s", recordIds, originalId));
         personDao.changeRecordId(recordIds, originalId);
     }
 }

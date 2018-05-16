@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -65,8 +64,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private PeriodService periodService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-    @Autowired
-    private LoadRefBookDataService loadRefBookDataService;
     @Autowired
     private DepartmentService departmentService;
     @Autowired
@@ -168,6 +165,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     @Override
     public UploadResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
+        LOG.info(String.format("UploadTransportDataServiceImpl.uploadFile. fileName: %s", fileName));
         UploadResult uploadResult = new UploadResult();
         ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream,
                 uploadResult.getFormDataFileNameList(), uploadResult.getFormDataDepartmentList(), logger);
@@ -180,6 +178,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     @Override
     public ActionResult upload(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
+        LOG.info(String.format("UploadTransportDataServiceImpl.upload. fileName: %s", fileName));
 
         if (fileName.contains("\\")) {
             // IE Выдает полный путь
@@ -226,6 +225,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     @Override
     public ActionResult uploadAll(TAUserInfo userInfo, Logger logger) {
+        LOG.info(String.format("UploadTransportDataServiceImpl.uploadAll. userInfo: %s", userInfo));
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         LockData lockData = lockDataService.lock(key, userId, DescriptionTemplate.LOAD_TRANSPORT_DATA.getText());

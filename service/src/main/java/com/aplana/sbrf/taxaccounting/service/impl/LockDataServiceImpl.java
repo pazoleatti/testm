@@ -48,8 +48,10 @@ public class LockDataServiceImpl implements LockDataService {
                     synchronized (LockDataServiceImpl.class) {
                         LockData lock = dao.get(key, false);
                         if (lock != null) {
+                            LOG.info(String.format("Lock with key \"%s\" already exists: %s", key, lock));
                             return lock;
                         }
+                        LOG.info(String.format("Set lock with key \"%s\" by user: %s", key, userId));
                         internalLock(key, userId, description);
                     }
                     return null;
@@ -69,8 +71,10 @@ public class LockDataServiceImpl implements LockDataService {
                     synchronized (LockDataServiceImpl.class) {
                         LockData lock = dao.get(key, false);
                         if (lock != null) {
+                            LOG.info(String.format("Lock with key \"%s\" already exists: %s", key, lock));
                             return lock;
                         }
+                        LOG.info(String.format("Set lock with key \"%s\" by user: %s", key, userId));
                         dao.lock(key, userId);
                     }
                     return null;
@@ -108,6 +112,7 @@ public class LockDataServiceImpl implements LockDataService {
                                         "пользователем \"%s\"", blocker.getLogin()));
                             }
                             dao.unlock(key);
+                            LOG.info(String.format("Lock with key \"%s\" was removed by user: %s", key, userId));
                         } else if (!force) {
                             LOG.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
                             return false;
@@ -125,6 +130,7 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public void unlockAll(TAUserInfo userInfo, boolean ignoreError) {
+        LOG.info(String.format("All locks was removed by user: %s", userInfo.getUser().getId()));
         dao.unlockAllByUserId(userInfo.getUser().getId(), ignoreError);
     }
 
@@ -180,6 +186,7 @@ public class LockDataServiceImpl implements LockDataService {
             for (String key : keyList) {
                 LockData lockData = dao.get(key, false);
                 dao.unlock(key);
+                LOG.info(String.format("Lock was removed by scheduler as outdated: %s", key));
                 auditLockDeletion(systemUserInfo, lockData, cause);
             }
         }
@@ -198,6 +205,7 @@ public class LockDataServiceImpl implements LockDataService {
             @Override
             public Boolean execute() {
                 synchronized (LockDataServiceImpl.class) {
+                    LOG.info(String.format("Bind async %s with lock %s", taskId, lockKey));
                     dao.bindTask(lockKey, taskId);
                 }
                 return null;

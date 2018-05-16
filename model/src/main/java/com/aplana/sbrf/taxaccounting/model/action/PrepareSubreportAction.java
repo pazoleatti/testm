@@ -42,4 +42,14 @@ public class PrepareSubreportAction {
     public void setSubreportParamValues(Map<String, Object> subreportParamValues) {
         this.subreportParamValues = subreportParamValues;
     }
+
+    @Override
+    public String toString() {
+        return "PrepareSubreportAction{" +
+                "declarationDataId=" + declarationDataId +
+                ", taxType=" + taxType +
+                ", type='" + type + '\'' +
+                ", subreportParamValues=" + subreportParamValues +
+                '}';
+    }
 }

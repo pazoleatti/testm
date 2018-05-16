@@ -15,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.util.*;
 @Service
 @Transactional
 public class SourceServiceImpl implements SourceService {
+    private static final Log LOG = LogFactory.getLog(SourceServiceImpl.class);
 
     private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: %s \"%s\" не назначена подразделению \"%s\"";
     private static final String FATAL_SAVE_MSG = "Назначение источников-приёмников не выполнено";
@@ -925,6 +928,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void updateDDTPerformers(int id, List<Integer> performerIds) {
+        LOG.info(String.format("SourceServiceImpl.updateDDTPerformers. id: %s, performerIds: %s", id, performerIds));
         //Удаляем всех исполнителей и назначаем новых
         departmentDeclarationTypeDao.deletePerformers(id);
         if (performerIds != null && !performerIds.isEmpty()) {
@@ -934,12 +938,14 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void saveDDT(Long departmentId, int declarationId, List<Integer> performerIds) {
+        LOG.info(String.format("SourceServiceImpl.saveDDT. departmentId: %s, declarationId: %s, performerIds: %s", departmentId, declarationId, performerIds));
         long ddtId = departmentDeclarationTypeDao.save(departmentId.intValue(), declarationId);
         departmentDeclarationTypeDao.savePerformers(ddtId, performerIds);
     }
 
     @Override
     public void deleteDDT(Collection<Long> ids) {
+        LOG.info(String.format("SourceServiceImpl.deleteDDT. ids: %s", ids));
         for (Long id : ids) {
             //TODO dloshkarev: можно переделать на in запрос
             departmentDeclarationTypeDao.delete(id);

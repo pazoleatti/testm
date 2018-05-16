@@ -18,6 +18,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import net.sf.jasperreports.web.actions.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ import java.util.*;
 @Service
 @Transactional
 public class PeriodServiceImpl implements PeriodService {
+    private static final Log LOG = LogFactory.getLog(PeriodServiceImpl.class);
 
     private static final Long PERIOD_CODE_REF_BOOK = RefBook.Id.PERIOD_CODE.getId();
 
@@ -91,6 +94,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
     public String open(DepartmentReportPeriod period) {
+        LOG.info(String.format("PeriodServiceImpl.open. period: %s", period));
         List<LogEntry> logs = new ArrayList<LogEntry>();
         TaxPeriod taxPeriod = taxPeriodDao.fetchAllByYear(period.getReportPeriod().getTaxPeriod().getYear());
         if (taxPeriod == null) {
@@ -147,6 +151,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
     public String close(Integer departmentReportPeriodId) {
+        LOG.info(String.format("PeriodServiceImpl.close. departmentReportPeriodId: %s", departmentReportPeriodId));
         List<LogEntry> logs = new ArrayList<>();
         DepartmentReportPeriod drp = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         if (drp == null) {
@@ -188,6 +193,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs) {
+        LOG.info(String.format("PeriodServiceImpl.saveOrOpen. departmentReportPeriod: %s; departmentIds: %s", departmentReportPeriod, departmentIds));
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setDepartmentIdList(Collections.singletonList(departmentService.getBankDepartment().getId()));
         filter.setReportPeriodIdList(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
@@ -388,11 +394,13 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public void removeReportPeriod(Integer drpId, Logger logger, TAUserInfo userg) {
+        LOG.info(String.format("PeriodServiceImpl.removeReportPeriod. userg: %s; drpId: %s", userg, drpId));
         removeReportPeriod(drpId, logger, userg, true);
     }
 
     @Override
     public String removeReportPeriod(Integer id, TAUserInfo userInfo) {
+        LOG.info(String.format("PeriodServiceImpl.removeReportPeriod. userInfo: %s; id: %s", userInfo, id));
         Logger logger = new Logger();
         removeReportPeriod(id, logger, userInfo, true);
         return logEntryService.save(logger.getEntries());
@@ -602,6 +610,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public String openCorrectionPeriod(DepartmentReportPeriod period) {
+        LOG.info(String.format("PeriodServiceImpl.openCorrectionPeriod. period: %s", period));
         List<LogEntry> logs = new ArrayList<LogEntry>();
         DepartmentReportPeriod periodInDb = departmentReportPeriodDao.fetchOne(period.getId());
         period.setCorrectionDate(SimpleDateUtils.toStartOfDay(period.getCorrectionDate()));
@@ -684,6 +693,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public String edit(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo) {
+        LOG.info(String.format("PeriodServiceImpl.edit. departmentReportPeriod: %s", departmentReportPeriod));
         List<LogEntry> logs = new ArrayList<>();
 
         TaxPeriod taxPeriod = taxPeriodDao.fetchAllByYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
@@ -721,6 +731,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public void edit(int reportPeriodId, int oldDepartmentId, long newDictTaxPeriodId, int newYear, TAUserInfo user,
                      int departmentId, List<LogEntry> logs) {
+        LOG.info(String.format("PeriodServiceImpl.edit. user: %s, reportPeriodId: %s; oldDepartmentId: %s; newYear: %s; departmentId: %s", user, reportPeriodId, oldDepartmentId, newYear, departmentId));
         ReportPeriod rp = fetchReportPeriod(reportPeriodId);
         RefBook refBook = rbFactory.get(PERIOD_CODE_REF_BOOK);
         RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());

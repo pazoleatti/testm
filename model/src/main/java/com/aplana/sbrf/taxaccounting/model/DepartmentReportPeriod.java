@@ -88,4 +88,16 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	public void setIsActive(boolean active) {
 		this.isActive = active;
 	}
+
+	@Override
+	public String toString() {
+		return "DepartmentReportPeriod{" +
+				"id=" + id +
+				", reportPeriod=" + reportPeriod +
+				", departmentId=" + departmentId +
+				", isActive=" + isActive +
+				", correctionDate=" + correctionDate +
+				", permissions=" + permissions +
+				'}';
+	}
 }

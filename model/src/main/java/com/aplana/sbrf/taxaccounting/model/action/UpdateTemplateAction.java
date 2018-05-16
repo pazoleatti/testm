@@ -48,4 +48,13 @@ public class UpdateTemplateAction {
     public void setFormsExistWarningConfirmed(boolean formsExistWarningConfirmed) {
         this.formsExistWarningConfirmed = formsExistWarningConfirmed;
     }
+
+    @Override
+    public String toString() {
+        return "UpdateTemplateAction{" +
+                "declarationTemplate=" + declarationTemplate.getId() +
+                ", checks=" + checks +
+                ", formsExistWarningConfirmed=" + formsExistWarningConfirmed +
+                '}';
+    }
 }

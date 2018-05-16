@@ -114,4 +114,17 @@ public class DeclarationTemplateCheck implements Serializable {
         result = 31 * result + (isFatal ? 1 : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "DeclarationTemplateCheck{" +
+                "id=" + id +
+                ", declarationTypeId=" + declarationTypeId +
+                ", declarationTemplateId=" + declarationTemplateId +
+                ", code=" + code +
+                ", checkType='" + checkType + '\'' +
+                ", description='" + description + '\'' +
+                ", isFatal=" + isFatal +
+                '}';
+    }
 }

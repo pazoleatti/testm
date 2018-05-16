@@ -94,7 +94,8 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, AsyncQueue queue, Map<String, Object> params) throws AsyncTaskException {
-        LOG.debug("Async task creation has been started");
+        LOG.info(String.format("Async creation started by %s. lockKey: %s; taskType: %s; queue: %s; params: %s",
+                user, lockKey, taskType, queue, params));
         LockData lockData = lockDataService.getLock(lockKey);
 
         if (lockData != null) {
@@ -143,6 +144,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTaskData executeTask(final String lockKey, final AsyncTaskType taskType, final TAUserInfo user, final Map<String, Object> params, final Logger logger, final boolean cancelConfirmed, final AbstractStartupAsyncTaskHandler handler) {
+        LOG.info(String.format("Complex ssync creation started by %s. lockKey: %s; taskType: %s; cancelConfirmed: %s; params: %s", user, lockKey, taskType, cancelConfirmed, params));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -199,6 +201,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public Pair<Boolean, String> restartTask(String lockKey, TAUserInfo user, boolean force, Logger logger) {
+        LOG.info(String.format("Async restarted by %s. lockKey: %s; force: %s", user, lockKey, force));
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null) {
             AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lockData.getTaskId());
@@ -234,8 +237,8 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void interruptTask(final AsyncTaskData taskData, final TAUserInfo user, final TaskInterruptCause cause) {
+        LOG.info(String.format("Async interrupted by %s. taskData: %s; cause: %s", user, taskData, cause));
         if (taskData != null) {
-            LOG.info(String.format("Останавливается асинхронная задача с id %s", taskData.getId()));
             tx.executeInNewTransaction(new TransactionLogic() {
                                            @Override
                                            public Object execute() {
@@ -283,6 +286,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void finishTask(final long taskId) {
+        LOG.info(String.format("Async finished: %s", taskId));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -308,6 +312,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void updateState(final long taskId, final AsyncTaskState state) {
+        LOG.info(String.format("Async state updated. taskId: %s; state: %s", taskId, state));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -324,19 +329,24 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public AsyncTaskData reserveTask(final String node,final String priorityNode,final int timeout,final AsyncQueue balancingVariants,final int maxTasksPerNode) {
+    public AsyncTaskData reserveTask(final String node, final String priorityNode, final int timeout,
+                                     final AsyncQueue balancingVariants, final int maxTasksPerNode) {
+        LOG.info(String.format("Async reservation per node. node: %s; priorityNode: %s; timeout: %s, balancingVariants: %s, maxTasksPerNode: %s",
+                node, priorityNode, timeout, balancingVariants, maxTasksPerNode));
         return tx.executeInNewTransaction(new TransactionLogic<AsyncTaskData>() {
             @Override
             public AsyncTaskData execute() {
                 int rowsUpdated = asyncTaskDao.lockTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
                 if (rowsUpdated != 0) {
-                    LOG.debug(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
+                    LOG.info(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
                 }
                 if (rowsUpdated > 1) {
                     throw new IllegalArgumentException("Incorrect tasks reserved per node!");
                 }
                 if (rowsUpdated == 1) {
-                    return asyncTaskDao.getLockedTask(node, balancingVariants);
+                    AsyncTaskData asyncTaskData = asyncTaskDao.getLockedTask(node, balancingVariants);
+                    LOG.info(String.format("Node '%s' reserved task: %s", node, asyncTaskData));
+                    return asyncTaskData;
                 }
                 return null;
             }
@@ -345,6 +355,8 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void addUserWaitingForTask(long taskId, int userId) {
+        LOG.info(String.format("Async add user for task. taskId: %s; userId: %s",
+                taskId, userId));
         if (asyncTaskDao.isTaskExists(taskId)) {
             if (!asyncTaskDao.getUsersWaitingForTask(taskId).contains(userId)) {
                 asyncTaskDao.addUserWaitingForTask(taskId, userId);

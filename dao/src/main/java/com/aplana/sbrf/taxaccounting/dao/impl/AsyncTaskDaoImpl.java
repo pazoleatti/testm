@@ -155,11 +155,24 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         params.addValue("priorityNode", priorityNode);
         params.addValue("maxTasksPerNode", maxTasksPerNode);
         params.addValue("queue", queue.getId());
-        return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = (select id from (" +
-                        "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) " +
-                        "and (task_group is null or (task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) order by create_date) " +
-                        "where rownum = 1)",
-                params);
+        try {
+            String sql = "select id from async_task where id = (select id from (\n" +
+                    "  select id from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and \n" +
+                    "  queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) and \n" +
+                    "  (task_group is null or (task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) \n" +
+                    "  order by create_date\n" +
+                    ") where rownum = 1) for update skip locked";
+            // Отбираем следующую задачу для выполнения на узле и блокируем эту строку на уровне БД, чтобы другой узел не успел ее перехватить
+            // skip locked используем для того, чтобы не выбрасывались исключения в случае, если подходящая запись уже заблокирована другим запросом
+            Long lockedAsyncId = getNamedParameterJdbcTemplate().queryForObject(sql, params, Long.class);
+            params.addValue("lockedAsyncId", lockedAsyncId);
+            // Привязываем задачу к узлу
+            return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp " +
+                            "where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = :lockedAsyncId",
+                    params);
+        } catch (EmptyResultDataAccessException e) {
+            return 0;
+        }
     }
 
     @Override
