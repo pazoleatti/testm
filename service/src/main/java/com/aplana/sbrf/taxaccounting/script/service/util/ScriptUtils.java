@@ -2565,7 +2565,10 @@ public final class ScriptUtils {
                     }
                     if (isHeader) {
                         headerValues.add(rowValues);
-                        performRowHeader();
+                        if (headerValues.size() % headerRowCount == 0) {
+                            // дальше только данные
+                            performRowHeader();
+                        }
                     }
                 }
             } else if (name.equals("sheetData")) {
