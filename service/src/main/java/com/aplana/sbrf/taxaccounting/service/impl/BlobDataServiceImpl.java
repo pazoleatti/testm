@@ -38,7 +38,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(InputStream is, String name) {
-        LOG.info(String.format("Blob created: %s", name));
+        LOG.info(String.format("BlobDataServiceImpl.create. name: %s", name));
         BlobData blobData = initBlob("", is, name, null);
         return blobDataDao.createWithSysdate(blobData);
     }
@@ -58,7 +58,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(File file, String name, Date createDate) {
-        LOG.info(String.format("Blob created: %s", name));
+        LOG.info(String.format("BlobDataServiceImpl.create. name: %s, createDate: %s", name, createDate));
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
@@ -89,7 +89,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void delete(List<String> blobIdStrings) {
-        LOG.info(String.format("Blobs deleted: %s", blobIdStrings));
+        LOG.info(String.format("BlobDataServiceImpl.delete. blobIdStrings: %s", blobIdStrings));
         try {
             blobDataDao.delete(blobIdStrings);
         } catch (DaoException e) {
@@ -99,7 +99,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void save(String blobId, InputStream is) {
-        LOG.info(String.format("Blobs updated: %s", blobId));
+        LOG.info(String.format("BlobDataServiceImpl.save. blobId: %s", blobId));
         blobDataDao.updateDataByUUID(blobId, is);
     }
 

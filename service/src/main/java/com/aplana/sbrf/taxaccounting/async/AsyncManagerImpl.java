@@ -94,7 +94,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, AsyncQueue queue, Map<String, Object> params) throws AsyncTaskException {
-        LOG.info(String.format("Async creation started by %s. lockKey: %s; taskType: %s; queue: %s; params: %s",
+        LOG.info(String.format("AsyncManagerImpl.executeTask by %s. lockKey: %s; taskType: %s; queue: %s; params: %s",
                 user, lockKey, taskType, queue, params));
         LockData lockData = lockDataService.getLock(lockKey);
 
@@ -144,7 +144,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTaskData executeTask(final String lockKey, final AsyncTaskType taskType, final TAUserInfo user, final Map<String, Object> params, final Logger logger, final boolean cancelConfirmed, final AbstractStartupAsyncTaskHandler handler) {
-        LOG.info(String.format("Complex ssync creation started by %s. lockKey: %s; taskType: %s; cancelConfirmed: %s; params: %s", user, lockKey, taskType, cancelConfirmed, params));
+        LOG.info(String.format("AsyncManagerImpl.executeTask by %s. lockKey: %s; taskType: %s; cancelConfirmed: %s; params: %s", user, lockKey, taskType, cancelConfirmed, params));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -201,7 +201,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public Pair<Boolean, String> restartTask(String lockKey, TAUserInfo user, boolean force, Logger logger) {
-        LOG.info(String.format("Async restarted by %s. lockKey: %s; force: %s", user, lockKey, force));
+        LOG.info(String.format("AsyncManagerImpl.restartTask by %s. lockKey: %s; force: %s", user, lockKey, force));
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null) {
             AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lockData.getTaskId());
@@ -237,7 +237,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void interruptTask(final AsyncTaskData taskData, final TAUserInfo user, final TaskInterruptCause cause) {
-        LOG.info(String.format("Async interrupted by %s. taskData: %s; cause: %s", user, taskData, cause));
+        LOG.info(String.format("AsyncManagerImpl.interruptTask by %s. taskData: %s; cause: %s", user, taskData, cause));
         if (taskData != null) {
             tx.executeInNewTransaction(new TransactionLogic() {
                                            @Override
@@ -286,7 +286,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void finishTask(final long taskId) {
-        LOG.info(String.format("Async finished: %s", taskId));
+        LOG.info(String.format("AsyncManagerImpl.finishTask. taskId: %s", taskId));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -312,7 +312,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void updateState(final long taskId, final AsyncTaskState state) {
-        LOG.info(String.format("Async state updated. taskId: %s; state: %s", taskId, state));
+        LOG.info(String.format("AsyncManagerImpl.updateState. taskId: %s; state: %s", taskId, state));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -355,7 +355,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void addUserWaitingForTask(long taskId, int userId) {
-        LOG.info(String.format("Async add user for task. taskId: %s; userId: %s",
+        LOG.info(String.format("AsyncManagerImpl.addUserWaitingForTask. taskId: %s; userId: %s",
                 taskId, userId));
         if (asyncTaskDao.isTaskExists(taskId)) {
             if (!asyncTaskDao.getUsersWaitingForTask(taskId).contains(userId)) {
