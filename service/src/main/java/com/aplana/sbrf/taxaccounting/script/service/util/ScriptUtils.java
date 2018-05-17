@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
 import java.text.SimpleDateFormat;
@@ -1594,17 +1595,16 @@ public final class ScriptUtils {
 
     /**
      * Получить индекс формата, для форматирования даты в Excel2007 в формат ДД.ММ.ГГГГ
-     * Поскольку apache poi не работает с русской локалью, используется французская как наиболее близкая по стандарту к русской
      * Пример применения результата:
      * cellStyle.setDataFormat(createXlsDateFormat(workbook));
      * cell.setCellValue(new Date());
      * cell.setCellStyle(cellStyle);
-     * @param workbook
-     * @return
+     * @param workbook объект книги xlsx
+     * @return код формата по спецификации OpenXML
      */
     @SuppressWarnings("unused")
     public static short createXlsDateFormat(Workbook workbook) {
-        String excelFormatPattern = DateFormatConverter.convert(Locale.FRANCE, "dd.MM.yyyy");
+        String excelFormatPattern = DateFormatConverter.getJavaDatePattern(DateFormat.DEFAULT, new Locale("ru"));
         DataFormat poiFormat = workbook.createDataFormat();
         return poiFormat.getFormat(excelFormatPattern);
     }
