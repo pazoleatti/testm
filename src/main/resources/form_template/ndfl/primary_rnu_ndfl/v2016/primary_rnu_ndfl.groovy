@@ -901,6 +901,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def success = 0
 
         for (infoPart in Файл.ИнфЧасть) {
+            ScriptUtils.checkInterrupted()
             if (processInfoPart(infoPart, ndflPersonNum)) {
                 success++
             }
