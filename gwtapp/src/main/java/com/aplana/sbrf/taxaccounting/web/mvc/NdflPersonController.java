@@ -19,6 +19,9 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -235,5 +238,10 @@ public class NdflPersonController {
     @GetMapping(value = "/rest/getPersonDocTypeName/{idDocType}")
     public String getPersonDocTypeName(@PathVariable Long idDocType) {
         return ndflPersonService.getPersonDocTypeName(idDocType);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity handleAccessDeniedException() {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 }
