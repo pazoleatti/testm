@@ -66,16 +66,24 @@ public class GeneratorXlsx {
         XSSFWorkbook sourceWorkbook;
         SXSSFWorkbook workBook = null;
         XSSFSheet sourceSheet;
+        XSSFSheet templateSheet;
         File outFile = new File(sourceFile.getAbsoluteFile().getParent() + "\\out.xlsx");
 
         try (OutputStream out = new FileOutputStream(outFile)) {
             sourceWorkbook = new XSSFWorkbook(new FileInputStream(sourceFile));
             workBook = new SXSSFWorkbook(sourceWorkbook, 1000);
-            sourceSheet = sourceWorkbook.getSheetAt(SHEET_DATA);
+            sourceSheet = sourceWorkbook.cloneSheet(SHEET_DATA);
+            templateSheet = sourceWorkbook.getSheetAt(SHEET_DATA);
 
-            for (int i = 0; i <= sourceSheet.getLastRowNum(); i++) {
+            // Идем по строкам с конца, потому что сначала нужно удалить пустые строки с обоих страниц,
+            // а потом удалить не пустые строки с шаблонной страницы, так как один итератор на 2 страницы.
+            for (int i = sourceSheet.getLastRowNum(); i >= 0; i--) {
+                if (i >= ROW_START && !isRowEmpty(sourceSheet.getRow(i))){
+                    templateSheet.removeRow(templateSheet.getRow(i));
+                }
                 if (isRowEmpty(sourceSheet.getRow(i))) {
                     sourceSheet.removeRow(sourceSheet.getRow(i));
+                    templateSheet.removeRow(templateSheet.getRow(i));
                 }
             }
 
@@ -91,13 +99,13 @@ public class GeneratorXlsx {
             }
 
             int personNum = 1;
-            int rowNum = sourceSheet.getLastRowNum();
+            int rowNum = templateSheet.getLastRowNum();
             for (int i = 0; i < personCount; i++) {
                 int personIndex = random.nextInt(personsPositions.size());
                 int personRowIndex = personsPositions.get(personIndex);
                 // копируем физика со всеми операциями
                 {
-                    int startIndex = Math.max(sheet.getLastRowNum() + 1, sourceSheet.getLastRowNum() + 1);
+                    int startIndex = Math.max(sheet.getLastRowNum() + 1, templateSheet.getLastRowNum() + 1);
                     Row row = sheet.createRow(startIndex);
                     copyRow(sourceSheet.getRow(personRowIndex), row, rowNum++);
                     mutateRow(row, sourceSheet.getRow(personRowIndex));
@@ -105,7 +113,7 @@ public class GeneratorXlsx {
 
                     while (personIndex == personsPositions.size() - 1 && personRowIndex <= sourceSheet.getLastRowNum() ||
                             personIndex < personsPositions.size() - 1 && personRowIndex < personsPositions.get(personIndex + 1)) {
-                        row = sheet.createRow(Math.max(sheet.getLastRowNum() + 1, sourceSheet.getLastRowNum() + 1));
+                        row = sheet.createRow(Math.max(sheet.getLastRowNum() + 1, templateSheet.getLastRowNum() + 1));
                         copyRow(sourceSheet.getRow(personRowIndex), row, rowNum);
                         copyRow(sheet.getRow(startIndex), row, Range.closed(COL_N, COL_OPER_ID), rowNum);
                         personRowIndex++;
@@ -119,6 +127,7 @@ public class GeneratorXlsx {
             }
 
             printStream.println("Идет сохранение...");
+            workBook.removeSheetAt(SHEET_DATA + 1);
             workBook.write(out);
             printStream.println(String.format("Данные сохранены в файл %s", outFile.getAbsolutePath()));
         } finally {
