@@ -139,4 +139,20 @@ public class ReportPeriod implements Serializable, SecuredEntity {
 	public void setPermissions(long permissions) {
 		this.permissions = permissions;
 	}
+
+	@Override
+	public String toString() {
+		return "ReportPeriod{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", accName='" + accName + '\'' +
+				", order=" + order +
+				", taxPeriod=" + taxPeriod +
+				", startDate=" + startDate +
+				", endDate=" + endDate +
+				", calendarStartDate=" + calendarStartDate +
+				", dictTaxPeriodId=" + dictTaxPeriodId +
+				", permissions=" + permissions +
+				'}';
+	}
 }

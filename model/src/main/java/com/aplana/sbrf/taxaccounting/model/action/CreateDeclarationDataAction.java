@@ -51,4 +51,15 @@ public class CreateDeclarationDataAction {
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
     }
+
+    @Override
+    public String toString() {
+        return "CreateDeclarationDataAction{" +
+                "declarationTypeId=" + declarationTypeId +
+                ", departmentId=" + departmentId +
+                ", periodId=" + periodId +
+                ", manuallyCreated=" + manuallyCreated +
+                ", asnuId=" + asnuId +
+                '}';
+    }
 }

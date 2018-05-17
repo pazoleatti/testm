@@ -70,6 +70,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, long taskId) {
+        LOG.info(String.format("LoadDeclarationDataServiceImpl.uploadFile. userInfo: %s; fileName: %s; taskId: %s",
+                userInfo, fileName, taskId));
         ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream, logger, taskId);
         logger.info(LogData.L35.getText(), importCounter.getSuccessCounter(), importCounter.getFailCounter());
         return StringUtils.join(importCounter.getMsgList().toArray(), ", ", null);
@@ -225,6 +227,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
                                       String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
+        LOG.info(String.format("LoadDeclarationDataServiceImpl.importDeclarationData. userInfo: %s; declarationData: %s; fileName: %s; attachFileType: %s",
+                userInfo, declarationData, fileName, attachFileType));
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declarationData.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationType declarationType = declarationTemplate.getType();

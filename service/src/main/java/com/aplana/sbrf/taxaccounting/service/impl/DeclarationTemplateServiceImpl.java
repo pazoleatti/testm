@@ -95,8 +95,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private DeclarationDataScriptingService declarationDataScriptingService;
     @Autowired
     private LogEntryService logEntryService;
-	@Autowired
-	private TAUserService userService;
     @Autowired
     private DeclarationSubreportDao declarationSubreportDao;
     @Autowired
@@ -133,6 +131,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	@Override
 	public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.save. declarationTemplate: %s",
+                declarationTemplate.getId()));
         if (declarationTemplate.getId() == null){
             int declarationTemplateId = declarationTemplateDao.create(declarationTemplate);
             saveDeclarationTemplateFile(declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
@@ -354,6 +354,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public void deleteXsd(int dtId) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteXsd. declarationTemplate: %s", dtId));
         try {
             DeclarationTemplate template = get(dtId);
             declarationTemplateDao.deleteXsd(dtId);
@@ -365,6 +366,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public void deleteJrxml(int dtId) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxml. declarationTemplate: %s", dtId));
         try {
             DeclarationTemplate template = get(dtId);
             declarationTemplateDao.deleteJrxml(dtId);
@@ -508,6 +510,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public void updateScript(DeclarationTemplate declarationTemplate, Logger log, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.updateScript. declarationTemplate: %s", declarationTemplate.getId()));
         try {
             checkScript(declarationTemplate, log, userInfo);
         } catch (ServiceLoggerException e) {
@@ -595,6 +598,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     @PreAuthorize("hasPermission(#action.declarationTemplate.id, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public UpdateTemplateResult update(UpdateTemplateAction action, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.update. action: %s", action));
         UpdateTemplateResult result = new UpdateTemplateResult();
         Logger logger = new Logger();
         DeclarationTemplate template = action.getDeclarationTemplate();
@@ -627,6 +631,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     @PreAuthorize("hasPermission(#action.templateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public UpdateTemplateStatusResult updateStatus(UpdateTemplateStatusAction action, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.updateStatus. action: %s", action));
         UpdateTemplateStatusResult result = new UpdateTemplateStatusResult();
         Logger logger = new Logger();
 
@@ -643,6 +648,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
     public String uploadXsd(int declarationTemplateId, InputStream inputStream, String fileName) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.uploadXsd. declarationTemplateId: %s; fileName: %s", declarationTemplateId, fileName));
         return blobDataService.create(inputStream, fileName);
     }
 
@@ -739,6 +745,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public ActionResult importDeclarationTemplate(TAUserInfo userInfo, int declarationTemplateId, InputStream fileData) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.importDeclarationTemplate. declarationTemplateId: %s", declarationTemplateId));
         try {
             //TODO: Для макета 100 запрос выполняется слишком долго, прерывается а потом процесс начинается заново. Что за фигня?
             // Проверки перед выполнением импорта + блокировка макета
@@ -780,6 +787,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public void deleteJrxmlReports(TAUserInfo userInfo, int declarationTemplateId) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxmlReports. declarationTemplateId: %s", declarationTemplateId));
         declarationDataService.cleanBlobs(
                 getDataIdsThatUseJrxml(declarationTemplateId, userInfo),
                 Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));

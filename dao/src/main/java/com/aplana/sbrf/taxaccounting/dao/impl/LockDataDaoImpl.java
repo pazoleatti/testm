@@ -150,9 +150,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     " AS rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
-                    "WHERE ld.task_id is null" +
                     (!StringUtils.isEmpty(filter) ?
-                            " AND (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
+                            " WHERE (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
                             : "")
                     + ") \n";
             if (LOG.isTraceEnabled()) {

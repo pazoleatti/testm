@@ -211,4 +211,25 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
     public void setLastDataModifiedDate(Date lastDataModifiedDate) {
         this.lastDataModifiedDate = lastDataModifiedDate;
     }
+
+    @Override
+    public String toString() {
+        return "DeclarationData{" +
+                "declarationTemplateId=" + declarationTemplateId +
+                ", reportPeriodId=" + reportPeriodId +
+                ", departmentId=" + departmentId +
+                ", departmentReportPeriodId=" + departmentReportPeriodId +
+                ", taxOrganCode='" + taxOrganCode + '\'' +
+                ", kpp='" + kpp + '\'' +
+                ", oktmo='" + oktmo + '\'' +
+                ", asnuId=" + asnuId +
+                ", note='" + note + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", state=" + state +
+                ", docState=" + docState +
+                ", permissions=" + permissions +
+                ", manuallyCreated=" + manuallyCreated +
+                ", lastDataModifiedDate=" + lastDataModifiedDate +
+                '}';
+    }
 }

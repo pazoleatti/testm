@@ -58,4 +58,14 @@ public class DeclarationTypeAssignmentIdModel implements Serializable {
     public void setPerformerIds(List<Integer> performerIds) {
         this.performerIds = performerIds;
     }
+
+    @Override
+    public String toString() {
+        return "DeclarationTypeAssignmentIdModel{" +
+                "id=" + id +
+                ", declarationTypeId=" + declarationTypeId +
+                ", departmentId=" + departmentId +
+                ", performerIds=" + performerIds +
+                '}';
+    }
 }
