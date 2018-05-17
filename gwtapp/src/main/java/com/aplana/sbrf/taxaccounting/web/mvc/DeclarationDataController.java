@@ -23,7 +23,6 @@ import org.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -788,10 +787,5 @@ public class DeclarationDataController {
     public String updatePersonData(@PathVariable long declarationDataId) throws JSONException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createUpdatePersonsDataTask(declarationDataId, userInfo);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity handleAccessDeniedException() {
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 }
