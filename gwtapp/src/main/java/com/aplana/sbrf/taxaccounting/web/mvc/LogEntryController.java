@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Контроллер для работы с уведомлениями
@@ -120,9 +121,11 @@ public class LogEntryController {
      */
     private String createHeader() {
         // Messages_yyyy-MM-dd_HH-mm-ss.csv
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
         return "attachment; filename=\"" +
                 "Messages_" +
-                new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) +
+                formatter.format(new Date()) +
                 ".csv" +
                 "\"";
     }
