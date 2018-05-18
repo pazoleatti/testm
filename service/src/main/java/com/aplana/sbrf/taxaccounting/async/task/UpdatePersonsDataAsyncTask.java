@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,8 @@ public class UpdatePersonsDataAsyncTask extends AbstractDeclarationAsyncTask {
     private DeclarationDataService declarationDataService;
     @Autowired
     private TAUserService userService;
+    @Autowired
+    private NdflPersonService ndflPersonService;
 
 
     @Override
@@ -53,5 +57,12 @@ public class UpdatePersonsDataAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.UPDATE_PERSONS_DATA;
+    }
+
+    @Override
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        Long declarationDataId = (Long) params.get("declarationDataId");
+        long value = ndflPersonService.getNdflPersonCount(declarationDataId);
+        return checkTask(value, taskDescription, getTaskLimitMsg(value, params));
     }
 }

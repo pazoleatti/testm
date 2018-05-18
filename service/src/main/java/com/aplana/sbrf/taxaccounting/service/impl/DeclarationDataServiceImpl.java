@@ -2576,7 +2576,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             case IDENTIFY_PERSON:
             case CONSOLIDATE:
-            case UPDATE_PERSONS_DATA:
             case XML_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
