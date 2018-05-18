@@ -122,7 +122,7 @@ public class LogEntryController {
     private String createHeader() {
         // Messages_yyyy-MM-dd_HH-mm-ss.csv
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT+3"));
         return "attachment; filename=\"" +
                 "Messages_" +
                 formatter.format(new Date()) +
