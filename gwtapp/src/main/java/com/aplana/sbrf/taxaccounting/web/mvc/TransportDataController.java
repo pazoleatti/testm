@@ -4,10 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,13 +22,10 @@ public class TransportDataController {
 
     private final SecurityService securityService;
     private final UploadTransportDataService uploadTransportDataService;
-    private final LoadRefBookDataService loadRefBookDataService;
 
-    public TransportDataController(SecurityService securityService, UploadTransportDataService uploadTransportDataService,
-                                   LoadRefBookDataService loadRefBookDataService) {
+    public TransportDataController(SecurityService securityService, UploadTransportDataService uploadTransportDataService) {
         this.securityService = securityService;
         this.uploadTransportDataService = uploadTransportDataService;
-        this.loadRefBookDataService = loadRefBookDataService;
     }
 
     /**
@@ -42,22 +37,11 @@ public class TransportDataController {
      */
     @PostMapping(value = "/actions/transportData/upload")
     public ActionResult upload(@RequestParam(value = "uploader") MultipartFile file) throws IOException {
-
         if (file == null || file.isEmpty()) {
             throw new ServiceException("Не указан файл для загрузки!");
         }
-        Logger logger = new Logger();
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        InputStream inputStream = file.getInputStream();
-        String fileName = file.getOriginalFilename();
-
-        if (fileName.startsWith("FL") && "xml".equals(FilenameUtils.getExtension(fileName))) {
-            return loadRefBookDataService.createTaskToImportXml(userInfo, fileName, inputStream, logger);
-        } else if (fileName.startsWith("FL") && "zip".equals(FilenameUtils.getExtension(fileName))) {
-            return loadRefBookDataService.createTaskToImportZip(userInfo, fileName, inputStream, logger);
-        } else {
-            return uploadTransportDataService.upload(userInfo, fileName, inputStream, logger);
-        }
+        return uploadTransportDataService.uploadFile(securityService.currentUserInfo(),
+                file.getOriginalFilename(), file.getInputStream());
     }
 
     /**

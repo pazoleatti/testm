@@ -6,13 +6,14 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadDeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 /**
- * Загрузка ТФ
+ * Загрузка ТФ (ТФ РНУ НДФЛ, файла ответа 6-НДФЛ, файла ответа 2-НДФЛ)
  */
 @Component("LoadTransportFileAsyncTask")
 public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
@@ -24,9 +25,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     private AsyncManager asyncManager;
 
     @Autowired
-    private LoadDeclarationDataService loadDeclarationDataService;
-
-    private String msg;
+    private UploadTransportDataService uploadTransportDataService;
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
@@ -39,9 +38,10 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
         final String blobDataId = (String) params.get("blobDataId");
+        final TransportFileType fileType = (TransportFileType) params.get("fileType");
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
-        msg = loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), taskData.getId());
+        uploadTransportDataService.processTransportFileUploading(logger, userInfo, fileType, blobData.getName(), blobData.getInputStream(), taskData.getId());
         return new BusinessLogicResult(true, null);
     }
 
@@ -50,7 +50,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
         String fileName= blobData.getName();
-        return "Загрузка файла \"" + fileName + "\" завершена" + (msg.isEmpty() ? "" : (": " + msg));
+        return "Загрузка файла \"" + fileName + "\" завершена";
     }
 
     @Override

@@ -73,13 +73,13 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(BlobData data) {
-        LOG.info(String.format("Blob deleted: %s", data.getName()));
+        LOG.info(String.format("BlobDataServiceImpl.create. name: %s", data.getName()));
         return blobDataDao.createWithSysdate(data);
     }
 
     @Override
     public void delete(String blobId) {
-        LOG.info(String.format("Blob deleted: %s", blobId));
+        LOG.info(String.format("BlobDataServiceImpl.delete. blobId: %s", blobId));
         try {
             blobDataDao.delete(blobId);
         } catch (DaoException e) {
