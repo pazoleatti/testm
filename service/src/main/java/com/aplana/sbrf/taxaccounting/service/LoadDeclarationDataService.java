@@ -15,16 +15,6 @@ import java.util.Date;
  * @author lhaziev
  */
 public interface LoadDeclarationDataService {
-    /**
-     * Загрузка файла
-     *
-     * @param logger
-     * @param userInfo
-     * @param fileName
-     * @param inputStream
-     * @param taskId      идентификатор асинхронной задачи, которая занимается обработкой файла (необходим для логирования)
-     */
-    String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, long taskId);
 
     /**
      * @param logger

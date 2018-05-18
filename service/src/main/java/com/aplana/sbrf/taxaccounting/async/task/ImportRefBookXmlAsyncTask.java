@@ -37,7 +37,7 @@ public class ImportRefBookXmlAsyncTask extends AbstractAsyncTask {
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        return getAsyncTaskType().getDescription();
+        return String.format(getAsyncTaskType().getDescription(), params.get("refBookName"));
     }
 
     @Override

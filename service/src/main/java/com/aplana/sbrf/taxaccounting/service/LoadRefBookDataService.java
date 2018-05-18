@@ -46,17 +46,6 @@ public interface LoadRefBookDataService {
                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
 
     /**
-     * Запускает новую задачу на загрузку данных из xml-файла в справочник ФЛ
-     *
-     * @param userInfo    пользователь, запустивший задачу
-     * @param fileName    имя файла
-     * @param inputStream данные файла
-     * @param logger      логгер
-     * @return результат запуска задачи
-     */
-    ActionResult createTaskToImportXml(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger);
-
-    /**
      * Загрузка данных из xml в справочник
      *
      * @param refBookId идентификатор справочника
@@ -65,15 +54,4 @@ public interface LoadRefBookDataService {
      * @param logger    логгер
      */
     void importXml(long refBookId, BlobData blobData, TAUserInfo userInfo, Logger logger);
-
-    /**
-     * Запускает новую задачу на загрузку данных из zip-архива в справочник ФЛ
-     *
-     * @param userInfo    пользователь, запустивший задачу
-     * @param fileName    имя файла
-     * @param inputStream данные файла
-     * @param logger      логгер
-     * @return результат запуска задачи
-     */
-    ActionResult createTaskToImportZip(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger);
 }
