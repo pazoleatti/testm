@@ -115,7 +115,6 @@
                             value = record && record.value && typeof record.value !== 'undefined' ? record.value : "";
                             break;
                         case 'DATE':
-                            //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
                             value = record && record.value && typeof record.value !== 'undefined' ? $filter('dateFormatter')(record.value) : "";
                             break;
                         case 'REFERENCE':

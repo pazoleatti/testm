@@ -13,14 +13,17 @@
             });
         }])
 
-        .controller('refBookListCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', function ($scope, $filter, RefBookListResource, APP_CONSTANTS) {
+        .controller('refBookListCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state',
+            function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state) {
 
             function linkFormatter(cellValue, options, row) {
+                var url;
                 if (row.refBookType === APP_CONSTANTS.REFBOOK_TYPE.LINEAR) {
-                    return "<a href='index.html#/refBooks/linearRefBook/" + row.refBookId + "'>" + cellValue + "</a>";
+                    url = $state.href('linearRefBook', {refBookId: row.refBookId});
                 } else {
-                    return "<a href='index.html#/refBooks/hierRefBook/" + row.refBookId + "'>" + cellValue + "</a>";
+                    url = $state.href('hierRefBook', {refBookId: row.refBookId});
                 }
+                return '<a href="' + url + '">' + cellValue + '</a>';
             }
 
             function typeFormatter(cellValue, options, row) {
@@ -55,8 +58,6 @@
                             formatter: typeFormatter
                         }
                     ],
-                    rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
-                    rowList: APP_CONSTANTS.COMMON.PAGINATION,
                     sortname: 'refBoookName',
                     viewrecords: true,
                     sortorder: "asc",

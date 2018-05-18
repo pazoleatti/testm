@@ -376,8 +376,8 @@
          * @description Список справочников
          */
         .factory('RefBookListResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBookList', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
+            return $resource('controller/rest/refBook', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
             });
         }])
 

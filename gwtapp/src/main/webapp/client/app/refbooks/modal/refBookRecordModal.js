@@ -59,7 +59,6 @@
                                 value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
                                 break;
                             case 'DATE':
-                                //TODO: проверить отображение дат на стенде, локально идут со смещением в 1 день
                                 value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' && !isNaN(refBookValue.value) ? $filter('dateFormatter')(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
