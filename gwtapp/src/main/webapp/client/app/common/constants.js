@@ -227,6 +227,7 @@
                 BUSINESS_ID_ALIAS: "record_id",
                 RECORD_VERSION_FROM_ALIAS: "record_version_from",
                 RECORD_VERSION_TO_ALIAS: "record_version_to"
-            }
+            },
+            REFBOOK_EM_TO_PX_CONVERSION_INDEX: 20
         });
 }());

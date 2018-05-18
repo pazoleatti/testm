@@ -91,7 +91,7 @@
                                 {
                                     name: attribute.alias,
                                     index: attribute.alias,
-                                    width: attribute.width * 20, //TODO: пока так, потому что в БД ширина задана в em, а оно не поддерживается в jqgrid
+                                    width: attribute.width * APP_CONSTANTS.REFBOOK_EM_TO_PX_CONVERSION_INDEX, //TODO: пока так, потому что в БД ширина задана в em, а оно не поддерживается в jqgrid
                                     type: attribute.attributeType,
                                     referenceAttribute: attribute.refBookAttribute,
                                     formatter: refBookValueFormatter,
