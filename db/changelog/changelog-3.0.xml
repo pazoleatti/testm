@@ -45,4 +45,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.0-ytrofimov-4" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -404,7 +404,7 @@ class Calculate extends AbstractScriptClass {
         Map<PersonalData, List<NaturalPerson>> personalDataReducedMatchedMap = new HashMap<>()
 
         for (NaturalPerson person : insertPersonList) {
-            String inp = person.personIdentityList.get(0).getInp()
+            String inp = person.personIdentityList.isEmpty() ? "" : person.personIdentityList.get(0)
             String snils = person.snils?.replaceAll("[\\s-]", "")?.toLowerCase()
             String inn = person.inn
             String innForeign = person.innForeign
