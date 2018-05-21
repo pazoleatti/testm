@@ -37,7 +37,7 @@ public class DeclarationResult {
     /**
      * Дата и время создания формы
      */
-    private String creationDate;
+    private Date creationDate;
     /**
      * Права
      */
@@ -149,11 +149,11 @@ public class DeclarationResult {
         this.creationUserName = creationUserName;
     }
 
-    public String getCreationDate() {
+    public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(String creationDate) {
+    public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
 

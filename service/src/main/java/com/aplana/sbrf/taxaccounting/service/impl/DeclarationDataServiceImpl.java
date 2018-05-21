@@ -782,7 +782,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
         }
 
-        result.setCreationDate(sdf.format(logBusinessService.getFormCreationDate(declaration.getId())));
+        result.setCreationDate(logBusinessService.getFormCreationDate(declaration.getId()));
         result.setKpp(declaration.getKpp());
         result.setOktmo(declaration.getOktmo());
         result.setTaxOrganCode(declaration.getTaxOrganCode());
