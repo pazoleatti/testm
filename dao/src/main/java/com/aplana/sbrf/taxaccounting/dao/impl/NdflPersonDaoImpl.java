@@ -2059,7 +2059,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
-        String sql = "select rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
+        String sql = "select distinct rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
                 "rbp.inn, rbp.inn_foreign, rbts.code as status, rbp.snils, rbdt.code as id_doc_type, rbid.doc_number, rba.region_code, " +
                 "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
                 "rba.appartment, rbc2.code as country_code, rba.address " +

@@ -110,280 +110,212 @@ class UpdatePersonsData extends AbstractScriptClass {
             if (refBookPerson.inp != declarationDataPerson.inp) {
                 if (refBookPerson.inp == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.INP_FULL, SharedConstants.REF_PERSON_REC_ID))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.INP_FULL, declarationDataPerson.inp ?: "", refBookPerson.inp ?: "")
+                    declarationDataPerson.inp = refBookPerson.inp
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.INP_FULL, declarationDataPerson.inp ?: "", refBookPerson.inp ?: "")
-                declarationDataPerson.inp = refBookPerson.inp
-                updated = true
             }
             if (refBookPerson.lastName != declarationDataPerson.lastName) {
                 if (refBookPerson.lastName == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.LAST_NAME_FULL, SharedConstants.REF_PERSON_LAST_NAME))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.LAST_NAME_FULL, declarationDataPerson.lastName ?: "", refBookPerson.lastName ?: "")
+                    declarationDataPerson.lastName = refBookPerson.lastName
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.LAST_NAME_FULL, declarationDataPerson.lastName ?: "", refBookPerson.lastName ?: "")
-                declarationDataPerson.lastName = refBookPerson.lastName
-                updated = true
             }
             if (refBookPerson.firstName != declarationDataPerson.firstName) {
                 if (refBookPerson.firstName == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.FIRST_NAME_FULL, SharedConstants.REF_PERSON_FIRST_NAME))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.FIRST_NAME_FULL, declarationDataPerson.firstName ?: "", refBookPerson.firstName ?: "")
+                    declarationDataPerson.firstName = refBookPerson.firstName
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.FIRST_NAME_FULL, declarationDataPerson.firstName ?: "", refBookPerson.firstName ?: "")
-                declarationDataPerson.firstName = refBookPerson.firstName
-                updated = true
             }
             if (refBookPerson.middleName != declarationDataPerson.middleName) {
                 if (refBookPerson.middleName == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.MIDDLE_NAME_FULL, SharedConstants.REF_PERSON_MIDDLE_NAME))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.MIDDLE_NAME_FULL, declarationDataPerson.middleName ?: "", refBookPerson.middleName ?: "")
+                    declarationDataPerson.middleName = refBookPerson.middleName
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.MIDDLE_NAME_FULL, declarationDataPerson.middleName ?: "", refBookPerson.middleName ?: "")
-                declarationDataPerson.middleName = refBookPerson.middleName
-                updated = true
             }
             if (refBookPerson.birthDay != declarationDataPerson.birthDay) {
                 if (refBookPerson.birthDay == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.BIRTH_DAY_FULL, SharedConstants.REF_PERSON_BIRTH_DAY))
-                    continue
+                } else {
+
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.BIRTH_DAY_FULL, declarationDataPerson.birthDay ? declarationDataPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "", refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "")
-                declarationDataPerson.birthDay = refBookPerson.birthDay
-                updated = true
             }
             if (refBookPerson.citizenship != declarationDataPerson.citizenship) {
                 if (refBookPerson.citizenship == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.CITIZENSHIP_FULL, SharedConstants.REF_PERSON_CITIZENSHIP))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.CITIZENSHIP_FULL, declarationDataPerson.citizenship ?: "", refBookPerson.citizenship ?: "")
+                    declarationDataPerson.citizenship = refBookPerson.citizenship
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.CITIZENSHIP_FULL, declarationDataPerson.citizenship ?: "", refBookPerson.citizenship ?: "")
-                declarationDataPerson.citizenship = refBookPerson.citizenship
-                updated = true
             }
             if (refBookPerson.innNp != declarationDataPerson.innNp) {
                 if (refBookPerson.innNp == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.INN_FULL, SharedConstants.REF_PERSON_INN))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.INN_FULL, declarationDataPerson.innNp ?: "", refBookPerson.innNp ?: "")
+                    declarationDataPerson.innNp = refBookPerson.innNp
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.INN_FULL, declarationDataPerson.innNp ?: "", refBookPerson.innNp ?: "")
-                declarationDataPerson.innNp = refBookPerson.innNp
-                updated = true
+
             }
             if (refBookPerson.innForeign != declarationDataPerson.innForeign) {
                 if (refBookPerson.innForeign == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.INN_FOREIGN_FULL, SharedConstants.REF_PERSON_INN_FOREIGN))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.INN_FOREIGN_FULL, declarationDataPerson.innForeign ?: "", refBookPerson.innForeign ?: "")
+                    declarationDataPerson.innForeign = refBookPerson.innForeign
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.INN_FOREIGN_FULL, declarationDataPerson.innForeign ?: "", refBookPerson.innForeign ?: "")
-                declarationDataPerson.innForeign = refBookPerson.innForeign
-                updated = true
+
             }
             if (refBookPerson.idDocType != declarationDataPerson.idDocType) {
                 if (refBookPerson.idDocType == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.ID_DOC_TYPE_FULL, SharedConstants.REF_ID_DOC_TYPE))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.ID_DOC_TYPE_FULL, declarationDataPerson.idDocType ?: "", refBookPerson.idDocType ?: "")
+                    declarationDataPerson.idDocType = refBookPerson.idDocType
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.ID_DOC_TYPE_FULL, declarationDataPerson.idDocType ?: "", refBookPerson.idDocType ?: "")
-                declarationDataPerson.idDocType = refBookPerson.idDocType
-                updated = true
             }
             if (refBookPerson.idDocNumber != declarationDataPerson.idDocNumber) {
                 if (refBookPerson.idDocNumber == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.ID_DOC_NUMBER_FULL, SharedConstants.REF_ID_DOC_NUMBER))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.ID_DOC_NUMBER_FULL, declarationDataPerson.idDocNumber ?: "", refBookPerson.idDocNumber ?: "")
+                    declarationDataPerson.idDocNumber = refBookPerson.idDocNumber
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.ID_DOC_NUMBER_FULL, declarationDataPerson.idDocNumber ?: "", refBookPerson.idDocNumber ?: "")
-                declarationDataPerson.idDocNumber = refBookPerson.idDocNumber
-                updated = true
             }
             if (refBookPerson.status != declarationDataPerson.status) {
                 if (refBookPerson.status == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.STATUS_FULL, SharedConstants.REF_PERSON_STATUS))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.STATUS_FULL, declarationDataPerson.status ?: "", refBookPerson.status ?: "")
+                    declarationDataPerson.status = refBookPerson.status
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.STATUS_FULL, declarationDataPerson.status ?: "", refBookPerson.status ?: "")
-                declarationDataPerson.status = refBookPerson.status
-                updated = true
             }
             if (refBookPerson.regionCode != declarationDataPerson.regionCode) {
                 if (refBookPerson.regionCode == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.REGION_CODE_FULL, SharedConstants.ADDRESS_REGION_CODE))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.REGION_CODE_FULL, declarationDataPerson.regionCode ?: "", refBookPerson.regionCode ?: "")
+                    declarationDataPerson.regionCode = refBookPerson.regionCode
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.REGION_CODE_FULL, declarationDataPerson.regionCode ?: "", refBookPerson.regionCode ?: "")
-                declarationDataPerson.regionCode = refBookPerson.regionCode
-                updated = true
             }
             if (refBookPerson.postIndex != declarationDataPerson.postIndex) {
                 if (refBookPerson.postIndex == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.POST_INDEX_FULL, SharedConstants.ADDRESS_POST_INDEX))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.POST_INDEX_FULL, declarationDataPerson.postIndex ?: "", refBookPerson.postIndex ?: "")
+                    declarationDataPerson.postIndex = refBookPerson.postIndex
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.POST_INDEX_FULL, declarationDataPerson.postIndex ?: "", refBookPerson.postIndex ?: "")
-                declarationDataPerson.postIndex = refBookPerson.postIndex
-                updated = true
             }
             if (refBookPerson.area != declarationDataPerson.area) {
                 if (refBookPerson.area == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.AREA_FULL, SharedConstants.ADDRESS_AREA))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.AREA_FULL, declarationDataPerson.area ?: "", refBookPerson.area ?: "")
+                    declarationDataPerson.area = refBookPerson.area
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.AREA_FULL, declarationDataPerson.area ?: "", refBookPerson.area ?: "")
-                declarationDataPerson.area = refBookPerson.area
-                updated = true
             }
             if (refBookPerson.city != declarationDataPerson.city) {
                 if (refBookPerson.city == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.CITY_FULL, SharedConstants.ADDRESS_CITY))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.CITY_FULL, declarationDataPerson.city ?: "", refBookPerson.city ?: "")
+                    declarationDataPerson.city = refBookPerson.city
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.CITY_FULL, declarationDataPerson.city ?: "", refBookPerson.city ?: "")
-                declarationDataPerson.city = refBookPerson.city
-                updated = true
             }
             if (refBookPerson.locality != declarationDataPerson.locality) {
                 if (refBookPerson.locality == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.LOCALITY_FULL, SharedConstants.ADDRESS_LOCALITY))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.LOCALITY_FULL, declarationDataPerson.locality ?: "", refBookPerson.locality ?: "")
+                    declarationDataPerson.locality = refBookPerson.locality
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.LOCALITY_FULL, declarationDataPerson.locality ?: "", refBookPerson.locality ?: "")
-                declarationDataPerson.locality = refBookPerson.locality
-                updated = true
             }
             if (refBookPerson.street != declarationDataPerson.street) {
                 if (refBookPerson.street == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.STREET_FULL, SharedConstants.ADDRESS_STREET))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.STREET_FULL, declarationDataPerson.street ?: "", refBookPerson.street ?: "")
+                    declarationDataPerson.street = refBookPerson.street
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.STREET_FULL, declarationDataPerson.street ?: "", refBookPerson.street ?: "")
-                declarationDataPerson.street = refBookPerson.street
-                updated = true
             }
             if (refBookPerson.house != declarationDataPerson.house) {
                 if (refBookPerson.house == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.HOUSE_FULL, SharedConstants.ADDRESS_HOUSE))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.HOUSE_FULL, declarationDataPerson.house ?: "", refBookPerson.house ?: "")
+                    declarationDataPerson.house = refBookPerson.house
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.HOUSE_FULL, declarationDataPerson.house ?: "", refBookPerson.house ?: "")
-                declarationDataPerson.house = refBookPerson.house
-                updated = true
             }
             if (refBookPerson.building != declarationDataPerson.building) {
                 if (refBookPerson.building == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.BUILDING_FULL, SharedConstants.ADDRESS_BUILDING))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.BUILDING_FULL, declarationDataPerson.building ?: "", refBookPerson.building ?: "")
+                    declarationDataPerson.building = refBookPerson.building
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.BUILDING_FULL, declarationDataPerson.building ?: "", refBookPerson.building ?: "")
-                declarationDataPerson.building = refBookPerson.building
-                updated = true
             }
             if (refBookPerson.flat != declarationDataPerson.flat) {
                 if (refBookPerson.flat == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.FLAT_FULL, SharedConstants.ADDRESS_FLAT))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.FLAT_FULL, declarationDataPerson.flat ?: "", refBookPerson.flat ?: "")
+                    declarationDataPerson.flat = refBookPerson.flat
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.FLAT_FULL, declarationDataPerson.flat ?: "", refBookPerson.flat ?: "")
-                declarationDataPerson.flat = refBookPerson.flat
-                updated = true
             }
             if (refBookPerson.snils != declarationDataPerson.snils) {
                 if (refBookPerson.snils == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.SNILS_FULL, SharedConstants.REF_PERSON_SNILS))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.SNILS_FULL, declarationDataPerson.snils ?: "", refBookPerson.snils ?: "")
+                    declarationDataPerson.snils = refBookPerson.snils
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.SNILS_FULL, declarationDataPerson.snils ?: "", refBookPerson.snils ?: "")
-                declarationDataPerson.snils = refBookPerson.snils
-                updated = true
             }
             if (refBookPerson.countryCode != declarationDataPerson.countryCode) {
                 if (refBookPerson.countryCode == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.COUNTRY_CODE_FULL, SharedConstants.ADDRESS_COUNTRY_CODE))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.COUNTRY_CODE_FULL, declarationDataPerson.countryCode ?: "", refBookPerson.countryCode ?: "")
+                    declarationDataPerson.countryCode = refBookPerson.countryCode
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.COUNTRY_CODE_FULL, declarationDataPerson.countryCode ?: "", refBookPerson.countryCode ?: "")
-                declarationDataPerson.countryCode = refBookPerson.countryCode
-                updated = true
             }
             if (refBookPerson.address != declarationDataPerson.address) {
                 if (refBookPerson.address == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.ADDRESS_FULL, SharedConstants.ADDRESS_ADDRESS))
-                    continue
+                } else {
+                    updateInfo << createUpdateInfo(SharedConstants.ADDRESS_FULL, declarationDataPerson.address ?: "", refBookPerson.address ?: "")
+                    declarationDataPerson.address = refBookPerson.address
+                    updated = true
                 }
-                if (!updated) {
-                    personInfo = createPersonInfo(declarationDataPerson)
-                }
-                updateInfo << createUpdateInfo(SharedConstants.ADDRESS_FULL, declarationDataPerson.address ?: "", refBookPerson.address ?: "")
-                declarationDataPerson.address = refBookPerson.address
-                updated = true
             }
             if (updated) {
+                personInfo = createPersonInfo(declarationDataPerson)
                 logs << createLogMessage(personInfo, updateInfo)
                 declarationDataPerson.modifiedDate = new Date()
                 declarationDataPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
