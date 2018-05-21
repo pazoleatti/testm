@@ -331,7 +331,6 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public AsyncTaskData reserveTask(final String node, final String priorityNode, final int timeout,
                                      final AsyncQueue balancingVariants, final int maxTasksPerNode) {
-                node, priorityNode, timeout, balancingVariants, maxTasksPerNode));
         return tx.executeInNewTransaction(new TransactionLogic<AsyncTaskData>() {
             @Override
             public AsyncTaskData execute() {
