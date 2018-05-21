@@ -1,11 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -119,13 +121,11 @@ public class RefBookController {
     /**
      * Получение всех даных о справочниках для отображения в списке справочников
      *
-     * @param pagingParams параметры пейджинга
      * @return список объектов содержащих данные о справочниках
      */
-    @GetMapping(value = "rest/refBookList")
-    public JqgridPagedList<RefBookListResult> fetchAllRefbooks(@RequestParam PagingParams pagingParams) {
-        PagingResult<RefBookListResult> result = commonRefBookService.fetchAllRefBooks();
-        return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
+    @GetMapping(value = "rest/refBook")
+    public PagingResult<RefBookListResult> fetchAllRefBooks() {
+        return commonRefBookService.fetchAllRefBooks();
     }
 
     /**

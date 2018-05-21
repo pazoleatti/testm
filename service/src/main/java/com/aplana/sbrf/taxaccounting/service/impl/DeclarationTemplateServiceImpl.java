@@ -852,7 +852,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
      */
     private DeclarationTemplate doImportDeclarationTemplate(int declarationTemplateId, InputStream data) {
         try {
-            ZipInputStream zis = new ZipInputStream(data);
+            // Такая кодировка нужна для исправления бага IllegalArgumentException: MALFORMED
+            ZipInputStream zis = new ZipInputStream(data, Charset.forName("CP866"));
             ZipEntry entry;
             DeclarationTemplate dt = SerializationUtils.clone(get(declarationTemplateId));
             dt.setXsdId(null);

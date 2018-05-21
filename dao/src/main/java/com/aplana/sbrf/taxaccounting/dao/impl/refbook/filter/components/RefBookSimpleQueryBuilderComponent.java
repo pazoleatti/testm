@@ -4,13 +4,11 @@ import com.aplana.sbrf.taxaccounting.dao.impl.DBInfo;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,8 @@ public class RefBookSimpleQueryBuilderComponent {
     private ApplicationContext applicationContext;
     @Autowired
     private DBInfo dbInfo;
+    @Autowired
+    private RefBookDao refbookDao;
 
     /**
      * @param refBook         справочник
@@ -366,6 +366,10 @@ public class RefBookSimpleQueryBuilderComponent {
         if (refBook.isVersioned() && withVersion) {
             ps.appendQuery("left join nextVersionEnd nve on nve.record_id = frb.record_id \n");
         }
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+            RefBook sortedRefBookLink = refbookDao.get(sortAttribute.getRefBookId());
+            ps.appendQuery(String.format("left join %s a_sort on a_sort.id = frb.%s \n", sortedRefBookLink.getTableName(), sortAttribute.getAlias()));
+        }
 
         PreparedStatementData filterPS = new PreparedStatementData();
         if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(filter)) {
@@ -406,8 +410,13 @@ public class RefBookSimpleQueryBuilderComponent {
         }
 
         if (sortAttribute != null) {
+            String tableAlias = "frb";
+            if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                sortAttribute = sortAttribute.getRefBookAttribute();
+                tableAlias = "a_sort";
+            }
             ps.appendQuery(" ORDER BY ")
-                    .appendQuery("frb." + sortAttribute.getAlias())
+                    .appendQuery(tableAlias + "." + sortAttribute.getAlias())
                     .appendQuery(isSortAscending ? " ASC" : " DESC");
         } else {
             ps.appendQuery(" ORDER BY frb.id");

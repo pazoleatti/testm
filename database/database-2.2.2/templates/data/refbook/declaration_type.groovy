@@ -39,6 +39,7 @@ class DeclarationType extends AbstractScriptClass {
     String UploadFileName
     InputStream ImportInputStream
     File dataFile
+    TransportFileType fileType
     RefBookFactory refBookFactory
     DeclarationService declarationService
     TAUserInfo userInfo
@@ -86,6 +87,9 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("dataFile")) {
             this.dataFile = (File) scriptClass.getProperty("dataFile");
+        }
+        if (scriptClass.getBinding().hasVariable("fileType")) {
+            this.fileType = (TransportFileType) scriptClass.getProperty("fileType");
         }
         if (scriptClass.getBinding().hasVariable("UploadFileName")) {
             this.UploadFileName = (String) scriptClass.getProperty("UploadFileName");
@@ -259,17 +263,16 @@ class DeclarationType extends AbstractScriptClass {
     }
 
     def importTF() {
-        if (UploadFileName != null
-                && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
-                && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
-        ) {
-            importNDFL()
-        } else if (isNdfl6Response(UploadFileName)) {
-            importNdflResponse()
-        } else if (isNdfl2Response(UploadFileName)) {
-            importNdflResponse()
-        } else {
-            logger.error("Некорректное количество символов в имени файла \"%s\"", UploadFileName)
+        switch (fileType) {
+            case TransportFileType.RNU_NDFL:
+                importNDFL()
+                break;
+            case TransportFileType.RESPONSE_6_NDFL:
+                importNdflResponse()
+                break;
+            case TransportFileType.RESPONSE_2_NDFL:
+                importNdflResponse()
+                break;
         }
     }
 
