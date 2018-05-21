@@ -897,58 +897,17 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             logger.warn("В ТФ неверно указана «Отчетная дата»: «${reportDate}». Должна быть указана дата окончания периода ТФ, равная «${reportPeriodEndDate}»")
         }
 
-        //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
-        QName infoPartName = QName.valueOf('ИнфЧасть')
-
-        //Используем StAX парсер для импорта
-        XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
-        xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
-        xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-        XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
-
         def ndflPersonNum = 1;
         def success = 0
-        def sb;
-        try {
-            while (reader.hasNext()) {
-                ScriptUtils.checkInterrupted()
-                XMLEvent event = reader.nextEvent()
 
-                if (event.isCharacters() && ((Characters) event).isWhiteSpace()) {
-                    continue;
-                }
-
-                if (!event.isStartElement() && !event.isEndElement()) {
-                    continue;
-                }
-
-                //Последовательно обрабатываем все элементы ИнфЧасть в документе
-                if (event.isStartElement() && event.getName().equals(infoPartName)) {
-                    sb = new StringBuilder()
-                }
-
-                if (event.isStartElement()) {
-                    sb?.append(processStartElement(event.asStartElement()))
-                }
-
-                if (event.isEndElement()) {
-                    sb?.append(processEndElement(event.asEndElement()))
-                }
-
-                if (event.isEndElement() && event.getName().equals(infoPartName)) {
-                    String personData = sb.toString();
-                    if (personData != null && !personData.isEmpty()) {
-                        def infoPart = new XmlSlurper().parseText(sb.toString())
-                        if (processInfoPart(infoPart, ndflPersonNum)) {
-                            success++
-                        }
-                        ndflPersonNum++
-                    }
-                }
+        for (infoPart in Файл.ИнфЧасть) {
+            ScriptUtils.checkInterrupted()
+            if (processInfoPart(infoPart, ndflPersonNum)) {
+                success++
             }
-        } finally {
-            reader?.close()
+            ndflPersonNum++
         }
+
         if (success == 0) {
             logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
             logger.error("Налоговая форма не создана.")
