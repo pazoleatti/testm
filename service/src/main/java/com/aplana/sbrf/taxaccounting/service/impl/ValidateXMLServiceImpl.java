@@ -213,7 +213,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                         throw new TAInterruptedException();
                     }
                 }
-                logger.info("Проверка выполнена по файлу xsd %s", xsdFileName);
+                logger.info("Проверка выполнена по файлу xsd: \"%s\"", xsdFileName);
                 fileInfo(logger, vsax3File);
             }
         } catch (IOException e) {

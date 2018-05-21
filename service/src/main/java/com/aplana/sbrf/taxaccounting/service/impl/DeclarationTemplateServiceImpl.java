@@ -754,11 +754,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         } catch (Exception e) {
             throw new ServiceException("Не удалось экспортировать шаблоны", e);
         } finally {
-            try {
-                zos.close();
-            } catch (IOException e) {
-                // ignored
-            }
+            IOUtils.closeQuietly(zos);
         }
     }
 
@@ -791,7 +787,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).UPDATE)")
     public ActionResult importDeclarationTemplate(TAUserInfo userInfo, int declarationTemplateId, InputStream fileData) {
         try {
-            //TODO: Для макета 100 запрос выполняется слишком долго, прерывается а потом процесс начинается заново. Что за фигня?
             // Проверки перед выполнением импорта + блокировка макета
             checkLockedByAnotherUser(declarationTemplateId, userInfo);
             lock(declarationTemplateId, userInfo);
@@ -856,7 +851,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             ZipInputStream zis = new ZipInputStream(data, Charset.forName("CP866"));
             ZipEntry entry;
             DeclarationTemplate dt = SerializationUtils.clone(get(declarationTemplateId));
-            dt.setXsdId(null);
             dt.setJrxmlBlobId(null);
             dt.setCreateScript("");
             dt.setSubreports(new ArrayList<DeclarationSubreport>());
@@ -900,8 +894,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                     if (entry.getName().equals(XSD)) {
                         // Основной XSD-файл
                         IOUtils.copy(zis, baos);
-                        String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
-                        dt.setXsdId(uuid);
+                        blobDataService.save(dt.getXsdId(), new ByteArrayInputStream(baos.toByteArray()));
                     }
                 } else if (entry.getName().equals(CONTENT_FILE)) {
                     IOUtils.copy(zis, baos);
