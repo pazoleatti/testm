@@ -27,6 +27,7 @@ new Import(this).run()
 @SuppressWarnings("GrMethodMayBeStatic")
 class Import extends AbstractScriptClass {
 
+    final String HEADER_START_VALUE = "Идентификаторы строк разделов РНУ НДФЛ";
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
     final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику \"%s\""
@@ -196,7 +197,7 @@ class Import extends AbstractScriptClass {
         List<List<String>> headerValues = []
         Map<String, Object> paramsMap = ['rowOffset': 0, 'colOffset': 0]  // отступы сверху и слева для таблицы
 
-        readSheetsRange(file, allValues, headerValues, null, null, 2, paramsMap, 1, null)
+        readSheetsRange(file, allValues, headerValues, HEADER_START_VALUE, 2, paramsMap, 1, null)
         checkHeaders(headerValues)
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
@@ -1145,11 +1146,13 @@ class Import extends AbstractScriptClass {
     void checkRequisitesEquality(List<NdflPerson> ndflPersonList) {
         Map<Long, List<NdflPerson>> ndflPersonsGroupedByImportid = [:]
         for (NdflPerson ndflPerson : ndflPersonList) {
-            List<NdflPerson> group = ndflPersonsGroupedByImportid.get(ndflPerson.importId)
-            if (group == null) {
-                ndflPersonsGroupedByImportid.put(ndflPerson.importId, [ndflPerson])
-            } else {
-                group << ndflPerson
+            if (ndflPerson.importId != null) {
+                List<NdflPerson> group = ndflPersonsGroupedByImportid.get(ndflPerson.importId)
+                if (group == null) {
+                    ndflPersonsGroupedByImportid.put(ndflPerson.importId, [ndflPerson])
+                } else {
+                    group << ndflPerson
+                }
             }
         }
         for (List<NdflPerson> ndflPersonGroup : ndflPersonsGroupedByImportid.values()) {
@@ -1359,7 +1362,7 @@ class Import extends AbstractScriptClass {
     class NdflPersonExt extends NdflPerson {
         int rowIndex
         def fio
-        long importId
+        Long importId
 
         NdflPersonExt(int rowIndex) {
             super()
