@@ -148,9 +148,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             // Файл первичной загрузки ФЛ
             createTaskToImportXmlFL(userInfo, archiveName, fileName, fileBlobUuid, logger);
         } else {
+            // ТФ РНУ НДФЛ, файла ответа 6-НДФЛ, файла ответа 2-НДФЛ
             TransportFileType fileType = getFileType(fileName);
             if (fileType != null) {
-                createTaskToImportTF(userInfo, TransportFileType.RESPONSE_2_NDFL, archiveName, fileName, fileBlobUuid, logger);
+                createTaskToImportTF(userInfo, fileType, archiveName, fileName, fileBlobUuid, logger);
             } else {
                 logger.error("Ошибка загрузки файла \"%s\"%s. Неверный тип загружаемого файла.", fileName,
                         archiveName != null ? String.format(ARCHIVE_INFO, archiveName) : "");
@@ -308,11 +309,14 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             try {
                 dataFile = File.createTempFile("dataFile", ".original");
                 dataFileOutputStream = new FileOutputStream(dataFile);
-                IOUtils.copy(inputStream, dataFileOutputStream);
-                IOUtils.closeQuietly(dataFileOutputStream);
+                try {
+                    IOUtils.copy(inputStream, dataFileOutputStream);
+                } finally {
+                    IOUtils.closeQuietly(dataFileOutputStream);
+                }
 
                 dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                Map<String, Object> additionalParameters = new HashMap<>();
                 StringBuilder msgBuilder = new StringBuilder();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
