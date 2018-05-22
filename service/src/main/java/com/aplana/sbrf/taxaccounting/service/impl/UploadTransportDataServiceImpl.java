@@ -317,12 +317,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
                 dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
                 Map<String, Object> additionalParameters = new HashMap<>();
-                StringBuilder msgBuilder = new StringBuilder();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 additionalParameters.put("dataFile", dataFile);
                 additionalParameters.put("fileType", fileType);
-                additionalParameters.put("msgBuilder", msgBuilder);
                 refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
             } catch (Exception e) {
                 LOG.error("Непредвиденная ошибка при обработке файла", e);
