@@ -810,10 +810,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
             asnuName = asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue();
         }
-        return String.format("ТФ_%s_%s %s%s_%s_%s.xlsx",
+        return String.format("ТФ_%s_%s_%s_%s.xlsx",
                 declarationData.getId(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
                 departmentReportPeriodService.formatPeriodName(reportPeriod, SharedConstants.DATE_FORMAT),
                 department.getCode(),
                 asnuName);
