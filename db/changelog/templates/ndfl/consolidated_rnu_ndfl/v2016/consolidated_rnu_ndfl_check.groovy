@@ -1500,7 +1500,7 @@ class Check extends AbstractScriptClass {
                                 it.periodCurrDate == ndflPersonIncome.taxDate
                             } != null
                             if (!isDeductionExists) {
-                                logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога}\" указана некорректно",
+                                logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") отсутствует в гр. " +
                                                 "\"${C_PERIOD_CURR_DATE}\" Раздела 3 для всех строк одной операции").toString(),
                                         section_2_15_fatal))
