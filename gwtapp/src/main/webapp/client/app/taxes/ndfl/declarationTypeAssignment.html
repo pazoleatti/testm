@@ -2,7 +2,8 @@
     <div class="content-header">
         <h1>{{::'header.declarationTypeAssignment' | translate}}</h1>
     </div>
-    <div id="declarationTypeAssignmentGridCotainer" class="container-grid box-shadow-block flex-fill flex-column">
+    <div id="declarationTypeAssignmentGridCotainer" class="container-grid box-shadow-block flex-fill flex-column"
+         style="overflow-y: auto">
         <div id='declarationTypeAssignmentGridTop'>
             <!-- Фильтр -->
             <div data-ng-controller="CommonFilterCtrl">
@@ -77,7 +78,7 @@
         </div>
 
         <!-- Таблица -->
-        <div class="flex-grid flex-fill"
+        <div class="full-height-grid flex-fill" style="overflow: visible"
              data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#declarationTypeAssignmentGridCotainer"
