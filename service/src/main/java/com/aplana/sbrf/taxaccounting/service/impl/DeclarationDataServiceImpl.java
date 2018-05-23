@@ -807,7 +807,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
             if (lockDataAccept == null) {
                 String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-                if (uuidXml != null) {
+                if (uuidXml != null || !isXmlRequired(userInfo, declarationDataId)) {
                     String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                     Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
@@ -864,7 +864,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
                     if (lockDataAccept == null) {
                         String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-                        if (uuidXml != null) {
+                        if (uuidXml != null || !isXmlRequired(userInfo, declarationDataId)) {
                             final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                             Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
                             if (restartStatus != null && restartStatus.getFirst()) {
@@ -1073,40 +1073,35 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ndflPerson.setStatus("");
             }
 
-            String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null) {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+            Logger logger = new Logger();
+            String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
+            if (restartStatus != null && restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                result.setRestartMsg(restartStatus.getSecond());
+            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
             } else {
-                Logger logger = new Logger();
-                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                    result.setRestartMsg(restartStatus.getSecond());
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    reportService.deleteDec(declarationDataId, ddReportType);
-                    Map<String, Object> params = new HashMap<String, Object>(10);
-                    params.put("declarationDataId", declarationDataId);
-                    if (ddReportType.isSubreport()) {
-                        params.put("alias", ddReportType.getReportAlias());
-                        params.put("viewParamValues", new LinkedHashMap<String, String>());
-                        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-                            params.put("subreportParamValues", filterParams);
-                            params.put("PERSON_ID", ndflPerson.getId());
-                        }
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                reportService.deleteDec(declarationDataId, ddReportType);
+                Map<String, Object> params = new HashMap<String, Object>(10);
+                params.put("declarationDataId", declarationDataId);
+                if (ddReportType.isSubreport()) {
+                    params.put("alias", ddReportType.getReportAlias());
+                    params.put("viewParamValues", new LinkedHashMap<String, String>());
+                    if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+                        params.put("subreportParamValues", filterParams);
+                        params.put("PERSON_ID", ndflPerson.getId());
                     }
-                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                        @Override
-                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    getDeclarationFullName(declarationDataId, ddReportType));
-                        }
-                    });
-                    result.setUuid(logEntryService.save(logger.getEntries()));
                 }
+                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                getDeclarationFullName(declarationDataId, ddReportType));
+                    }
+                });
+                result.setUuid(logEntryService.save(logger.getEntries()));
             }
         }
         return result;
@@ -1123,41 +1118,36 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setExistDeclarationData(false);
             result.setDeclarationDataId(declarationDataId);
         } else {
-            String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null) {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
-            } else {
-                Logger logger = new Logger();
-                for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
-                    final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
+            Logger logger = new Logger();
+            for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
+                final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
 
-                    ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB));
+                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB));
 
-                    final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                        result.setRestartMsg(restartStatus.getSecond());
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    } else {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        reportService.deleteDec(declarationDataId, ddReportType);
-                        Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("declarationDataId", declarationDataId);
-                        params.put("alias", ddReportType.getReportAlias());
-                        params.put("viewParamValues", new LinkedHashMap<String, String>());
+                final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    reportService.deleteDec(declarationDataId, ddReportType);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+                    params.put("alias", ddReportType.getReportAlias());
+                    params.put("viewParamValues", new LinkedHashMap<String, String>());
 
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                            @Override
-                            public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                                return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                            }
-                        });
-                    }
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
+                        }
+                    });
                 }
-                result.setUuid(logEntryService.save(logger.getEntries()));
             }
+            result.setUuid(logEntryService.save(logger.getEntries()));
         }
         return result;
     }
@@ -1172,35 +1162,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DeclarationData declarationData = get(declarationDataId, userInfo);
             DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), SubreportAliasConstants.REPORT_KPP_OKTMO);
             final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
-            String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null) {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+            Logger logger = new Logger();
+            String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+            if (restartStatus != null && restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                result.setRestartMsg(restartStatus.getSecond());
+            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
             } else {
-                Logger logger = new Logger();
-                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                    result.setRestartMsg(restartStatus.getSecond());
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    reportService.deleteDec(declarationDataId, ddReportType);
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("declarationDataId", declarationDataId);
-                    params.put("alias", ddReportType.getReportAlias());
-                    params.put("viewParamValues", new LinkedHashMap<String, String>());
-                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                        @Override
-                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    getDeclarationFullName(declarationDataId, ddReportType));
-                        }
-                    });
-                }
-                result.setUuid(logEntryService.save(logger.getEntries()));
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                reportService.deleteDec(declarationDataId, ddReportType);
+                Map<String, Object> params = new HashMap<>();
+                params.put("declarationDataId", declarationDataId);
+                params.put("alias", ddReportType.getReportAlias());
+                params.put("viewParamValues", new LinkedHashMap<String, String>());
+                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                getDeclarationFullName(declarationDataId, ddReportType));
+                    }
+                });
             }
+            result.setUuid(logEntryService.save(logger.getEntries()));
         }
         return result;
     }
@@ -1214,33 +1199,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setExistDeclarationData(false);
             result.setDeclarationDataId(declarationDataId);
         } else {
-            String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null) {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+            Logger logger = new Logger();
+            final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+            if (restartStatus != null && restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                result.setRestartMsg(restartStatus.getSecond());
+            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
             } else {
-                Logger logger = new Logger();
-                final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                    result.setRestartMsg(restartStatus.getSecond());
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    reportService.deleteDec(declarationDataId, ddReportType);
-                    Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationDataId", declarationDataId);
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                reportService.deleteDec(declarationDataId, ddReportType);
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("declarationDataId", declarationDataId);
 
-                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                        @Override
-                        public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                        }
-                    });
-                }
-                result.setUuid(logEntryService.save(logger.getEntries()));
+                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
+                        return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
+                    }
+                });
             }
+            result.setUuid(logEntryService.save(logger.getEntries()));
         }
         return result;
     }
@@ -1488,7 +1468,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 final String prefix = String.format("Постановка операции \"Принятие налоговой формы\" для формы № %d в очередь на исполнение: ", declarationId);
                 try {
                     String uuidXml = reportService.getDec(declarationId, DeclarationDataReportType.XML_DEC);
-                    if (uuidXml != null) {
+                    if (uuidXml != null || !isXmlRequired(userInfo, declarationId)) {
                         DeclarationData declarationData = get(declarationId, userInfo);
                         if (!declarationData.getState().equals(State.ACCEPTED)) {
                             final String keyTask = generateAsyncTaskKey(declarationId, ddToAcceptedReportType);
@@ -3007,7 +2987,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setDeclarationDataId(action.getDeclarationId());
         } else {
             String uuidXml = reportService.getDec(action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null) {
+            if (uuidXml == null || !isXmlRequired(userInfo, action.getDeclarationId())) {
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             } else {
                 DeclarationData declarationData = get(action.getDeclarationId(), userInfo);
@@ -3437,11 +3417,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
 
-                // TODO workaround, создаём пустую xml (но не должна использоваться)
-                if (reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
-                    String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
-                    reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.XML_DEC);
-                }
                 declarationDataFileDao.deleteTransportFileExcel(declarationDataId);
 
                 DeclarationDataFile declarationDataFile = new DeclarationDataFile();
@@ -3605,7 +3580,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 });
             } else {
-                DeclarationData declarationData =  declarationDataDao.get(declarationDataId);
+                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
                 DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
                 Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
                 logger.error("Невозможно обновить данные ФЛ формы: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\". Причина: \"Форма № %s из %s заблокирована. Попробуйте повторить операцию позднее",
@@ -3622,9 +3597,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).UPDATE_PERSONS_DATA)")
     public void performUpdatePersonsData(Long declarationDataId, Logger logger, TAUserInfo userInfo) {
-        DeclarationData declarationData =  declarationDataDao.get(declarationDataId);
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
         Logger scriptLogger = new Logger();
-        declarationDataScriptingService.executeScript(userInfo,  declarationData, FormDataEvent.UPDATE_PERSONS_DATA, scriptLogger, null);
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.UPDATE_PERSONS_DATA, scriptLogger, null);
         logger.getEntries().addAll(scriptLogger.getEntries());
+    }
+
+    /**
+     * Проверяет необходимо ли использовать xml формы для проведения операций с ней.
+     * @param userInfo          информация о пользователе
+     * @param declarationDataId идентификатор налоговой формы
+     * @return  true если данные формы для операции берутся из xml
+     */
+    private boolean isXmlRequired(TAUserInfo userInfo, long declarationDataId) {
+        DeclarationData declarationData = get(declarationDataId, userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        return declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS);
     }
 }

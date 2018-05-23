@@ -23,22 +23,19 @@
                             <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem"
-                        ng-show="availableReports">
+                    <li role="menuitem">
                         <div class="row menuitem">
                             <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
                             <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download'
                                 | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem"
-                        ng-show="availableReports">
+                    <li role="menuitem">
                         <div class="row menuitem">
                             <a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem"
-                        ng-show="availableReports">
+                    <li role="menuitem">
                         <div class="row menuitem">
                             <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' |
                                 translate}}</a>
@@ -47,7 +44,7 @@
                         </div>
                     </li>
                     <li role="menuitem"
-                        ng-show="availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                        ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <div class="row menuitem">
                             <a ng-click="createPairKppOktmo(false)">{{::'link.ndfl.reporting.formForKppOktmo'
                                 |
