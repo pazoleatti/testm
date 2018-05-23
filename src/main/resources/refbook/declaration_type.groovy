@@ -44,6 +44,7 @@ class DeclarationType extends AbstractScriptClass {
     DeclarationService declarationService
     TAUserInfo userInfo
     DepartmentService departmentService
+    StringBuilder msgBuilder
     BlobDataService blobDataServiceDaoImpl
     DepartmentReportPeriodService departmentReportPeriodService
     ReportPeriodService reportPeriodService
@@ -77,6 +78,9 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
             this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl");
+        }
+        if (scriptClass.getBinding().hasVariable("msgBuilder")) {
+            msgBuilder = (StringBuilder) scriptClass.getBinding().getProperty("msgBuilder")
         }
         if (scriptClass.getBinding().hasVariable("userInfo")) {
             this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
@@ -794,11 +798,12 @@ class DeclarationType extends AbstractScriptClass {
                 def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
                 def departmentName = departmentService.get(declarationData.departmentId)
 
-                logger.info("Выполнена загрузка ответа ФНС для формы: " +
-                        "№: \"" + declarationData.id + "\"" +
-                        ", Период: \"" + departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName() + "\"" +
-                        ", Подразделение: \"" + departmentName.getName() + "\"" +
-                        ", Вид: \"" + declarationTemplate.type.getName() + "\"");
+                msgBuilder.append("Выполнена загрузка ответа ФНС для формы: ")
+                        .append("№: \"").append(declarationData.id).append("\"")
+                        .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
+                        .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
+                        .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"");
+                logger.info(msgBuilder.toString())
             }
         }
         // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа
@@ -1144,13 +1149,14 @@ class DeclarationType extends AbstractScriptClass {
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
-            logger.info("Выполнено создание налоговой формы: "+
-                    "№: \"" + declarationDataId + "\"" +
-                    ", Период: \"" + reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName() + "\"" +
-                    getCorrectionDateString(departmentReportPeriod) +
-                    ", Подразделение: \"" + formDepartment.getName() + "\"" +
-                    ", Вид: \"" + declarationType.getName() + "\"" +
-                    ", АСНУ: \"" + asnuProvider.getRecordData(asnuId).get("NAME").getStringValue() + "\"");
+            msgBuilder.append("Выполнено создание налоговой формы: ")
+                    .append("№: \"").append(declarationDataId).append("\"")
+                    .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+                    .append(getCorrectionDateString(departmentReportPeriod))
+                    .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
+                    .append(", Вид: \"").append(declarationType.getName()).append("\"")
+                    .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
+            logger.info(msgBuilder.toString())
         }
     }
 

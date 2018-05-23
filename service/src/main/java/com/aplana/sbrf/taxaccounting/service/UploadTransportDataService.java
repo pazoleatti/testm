@@ -50,6 +50,7 @@ public interface UploadTransportDataService {
      * @param fileName    имя файла
      * @param inputStream содержимое файла
      * @param taskId      идентификатор асинхронной задачи, которая занимается обработкой файла (необходим для логирования)
+     * @return сообщение о результате выполнения загрузки файла, которое используеся в оповещениях
      */
-    void processTransportFileUploading(Logger logger, TAUserInfo userInfo, TransportFileType fileType, String fileName, InputStream inputStream, long taskId);
+    String processTransportFileUploading(Logger logger, TAUserInfo userInfo, TransportFileType fileType, String fileName, InputStream inputStream, long taskId);
 }

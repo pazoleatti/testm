@@ -288,7 +288,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     @Override
-    public void processTransportFileUploading(Logger logger, TAUserInfo userInfo, TransportFileType fileType, String fileName, InputStream inputStream, long taskId) {
+    public String processTransportFileUploading(Logger logger, TAUserInfo userInfo, TransportFileType fileType, String fileName, InputStream inputStream, long taskId) {
         // Дополнительные проверки, на случай, если блоб криво сохранился в БД
         if (fileName == null) {
             throw new ServiceLoggerException(NO_FILE_NAME_ERROR, logEntryService.save(logger.getEntries()));
@@ -298,6 +298,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         }
 
         File dataFile = null;
+        StringBuilder msgBuilder = new StringBuilder();
         LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                 userInfo.getUser().getId(),
                 String.format(DescriptionTemplate.FILE.getText(), fileName));
@@ -321,6 +322,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 additionalParameters.put("UploadFileName", fileName);
                 additionalParameters.put("dataFile", dataFile);
                 additionalParameters.put("fileType", fileType);
+                additionalParameters.put("msgBuilder", msgBuilder);
                 refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
             } catch (Exception e) {
                 LOG.error("Непредвиденная ошибка при обработке файла", e);
@@ -335,5 +337,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
             logger.info("Завершена обработка файла \"%s\"", fileName);
         }
+        return msgBuilder.toString();
     }
 }
