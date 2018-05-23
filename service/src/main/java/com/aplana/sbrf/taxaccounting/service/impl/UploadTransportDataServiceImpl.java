@@ -153,8 +153,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             if (fileType != null) {
                 createTaskToImportTF(userInfo, fileType, archiveName, fileName, fileBlobUuid, logger);
             } else {
-                logger.error("Ошибка загрузки файла \"%s\"%s. Неверный тип загружаемого файла.", fileName,
-                        archiveName != null ? String.format(ARCHIVE_INFO, archiveName) : "");
+                logger.error("Некорректное имя или формат файла \"%s\"", fileName);
             }
         }
     }
