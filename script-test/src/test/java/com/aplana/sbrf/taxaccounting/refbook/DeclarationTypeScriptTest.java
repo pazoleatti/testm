@@ -190,8 +190,6 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         Map<String, RefBookValue> correct15 = (Map<String, RefBookValue>) allValues.get(15);
         Assert.assertEquals("Текст ошибки от ФНС: \",141000,50,МЫТИЩИНСКИЙ Р-Н,МЫТИЩИ Г,,,ВЧ151,,\"; (Адрес признан верным (ИФНСМЖ - 5029))", correct15.get("ERRTEXT").getStringValue());
 
-        Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
-
         ArgumentCaptor<DeclarationDataFile> argumentSaveFile = ArgumentCaptor.forClass(DeclarationDataFile.class);
         verify(testHelper.getDeclarationService(), Mockito.times(1)).saveFile(argumentSaveFile.capture());
 
