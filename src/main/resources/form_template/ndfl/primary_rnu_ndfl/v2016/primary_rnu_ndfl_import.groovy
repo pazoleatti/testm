@@ -413,6 +413,8 @@ class Import extends AbstractScriptClass {
                         }
                         if (persistedIncome == null) {
                             income.ndflPersonId = ndflPerson.importId
+                            income.modifiedDate = new Date()
+                            income.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
                             incomesForCreate << income
                             incomesCreateCount++
                         } else {
@@ -550,6 +552,8 @@ class Import extends AbstractScriptClass {
                         }
                         if (persistedDeduction == null) {
                             deduction.ndflPersonId = ndflPerson.importId
+                            deduction.modifiedDate = new Date()
+                            deduction.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
                             deductionsForCreate << deduction
                             deductionsCreateCount++
                         } else {
@@ -645,6 +649,8 @@ class Import extends AbstractScriptClass {
                         if (persistedPrepayment == null) {
                             prepayment.ndflPersonId = ndflPerson.importId
                             prepaymentsForCreate << prepayment
+                            prepayment.modifiedDate = new Date()
+                            prepayment.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
                             prepaymentsCreateCount++
                         } else {
                             updateRowNumPrepaymentList << prepayment
