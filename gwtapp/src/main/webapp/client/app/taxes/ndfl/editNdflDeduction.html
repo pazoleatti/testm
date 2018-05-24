@@ -1,15 +1,19 @@
 <form class="form-horizontal" name="editNdflDeductionForm" data-aplana-submit-valid="save()">
     <div class="modal-body" style="min-height: 155px">
         <div class="row-fluid">
-            <label class="control-label">{{temp.person.lastName}} {{temp.person.firstName}} {{temp.person.middleName}},
+            <label class="control-label" style="text-align: left">{{temp.person.lastName}} {{temp.person.firstName}}
+                {{temp.person.middleName}},
                 {{temp.person.birthDay | dateFormatter}} , ИНП={{row.inp}}</label>
-            <label class="control-label">{{temp.docTypeName}} № {{temp.person.idDocNumber}}</label>
-            <label class="control-label">Гражданство={{temp.person.citizenship}}, ИНН в РФ={{temp.person.innNp}}</label>
+            <label class="control-label" style="text-align: left">{{temp.docTypeName}} №
+                {{temp.person.idDocNumber}}</label>
+            <label class="control-label" style="text-align: left">Гражданство={{temp.person.citizenship}}, ИНН в
+                РФ={{temp.person.innNp}}</label>
         </div>
 
         <div style="height: 400px; overflow-y: scroll">
             <!-- Информация о вычете -->
-            <legend style="margin-top: 20px; margin-bottom: 10px;">{{::'ndflDeduction.edit.title.deductionInfo' | translate}}
+            <legend style="margin-top: 20px; margin-bottom: 10px;">{{::'ndflDeduction.edit.title.deductionInfo' |
+                translate}}
             </legend>
 
             <div class="row">
@@ -18,18 +22,21 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.deductionCode' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.typeCode"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   maxlength="3"
-                                   data-required
-                                   title="{{row.deductionCode}}"/>
-                            <div data-aplana-validator data-key="maxlength">{{::'ndflDeduction.edit.validation.deductionCode' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.typeCode"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       maxlength="3"
+                                       data-required
+                                       title="{{row.deductionCode}}"/>
+                                <div data-aplana-validator data-key="maxlength">
+                                    {{::'ndflDeduction.edit.validation.deductionCode' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -46,18 +53,21 @@
                         <div class="span4">
                             <label class="control-label">{{::'ndflDeduction.edit.notifType' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.notifType"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="/^[1|2]$/"
-                                   data-required
-                                   title="{{ndflDeduction.edit.notifType}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'ndflDeduction.edit.validation.notifType' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.notifType"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="/^[1|2]$/"
+                                       data-required
+                                       title="{{ndflDeduction.edit.notifType}}"/>
+                                <div data-aplana-validator data-key="pattern">
+                                    {{::'ndflDeduction.edit.validation.notifType' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -65,18 +75,21 @@
                         <div class="span4">
                             <label class="control-label">{{::'ndflDeduction.edit.notifNum' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.notifNum"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   maxlength="20"
-                                   data-required
-                                   title="{{ndflDeduction.edit.notifNum}}"/>
-                            <div data-aplana-validator data-key="maxlength">{{::'ndflDeduction.edit.validation.notifNum' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.notifNum"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       maxlength="20"
+                                       data-required
+                                       title="{{ndflDeduction.edit.notifNum}}"/>
+                                <div data-aplana-validator data-key="maxlength">
+                                    {{::'ndflDeduction.edit.validation.notifNum' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -84,14 +97,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.documentAmount' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.notifSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{title.documentAmount}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.notifSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{title.documentAmount}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -101,18 +116,20 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.sourceCode' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.notifSource"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.fourDigits"
-                                   data-required
-                                   title="{{title.sourceCode}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.notifSource"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.fourDigits"
+                                       data-required
+                                       title="{{title.sourceCode}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -120,12 +137,14 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.documentDate' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-required
-                                 data-ng-model="row.notifDate"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-required
+                                     data-ng-model="row.notifDate"></div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -142,18 +161,20 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.incomeCode' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.incomeCode"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.fourDigits"
-                                   data-required
-                                   title="{{title.incomeCode}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.incomeCode"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.fourDigits"
+                                       data-required
+                                       title="{{title.incomeCode}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -161,18 +182,20 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.incomeAmount' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.incomeSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   data-required
-                                   title="{{title.incomeAmount}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.incomeSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       data-required
+                                       title="{{title.incomeAmount}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -182,12 +205,14 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.incomeDate' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-required
-                                 data-ng-model="row.incomeAccrued"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-required
+                                     data-ng-model="row.incomeAccrued"></div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -204,14 +229,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'ndflDeduction.edit.periodPrevSumm' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.periodPrevSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{ndflDeduction.edit.periodPrevSumm}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.periodPrevSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{ndflDeduction.edit.periodPrevSumm}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -219,18 +246,20 @@
                         <div class="span4">
                             <label class="control-label">{{::'ndflDeduction.edit.periodCurrSumm' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.periodCurrSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   data-required
-                                   title="{{ndflDeduction.edit.periodCurrSumm}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.periodCurrSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       data-required
+                                       title="{{ndflDeduction.edit.periodCurrSumm}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -240,21 +269,25 @@
                         <div class="span4">
                             <label class="control-label">{{::'ndflDeduction.edit.periodPrevDate' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-ng-model="row.periodPrevDate"></div>
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-ng-model="row.periodPrevDate"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">{{::'ndflDeduction.edit.periodCurrDate' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-required
-                                 data-ng-model="row.periodCurrDate"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-required
+                                     data-ng-model="row.periodCurrDate"></div>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -264,7 +297,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-default iconed-btn" id="saveButton" data-ng-disabled="editNdflDeductionForm.$invalid">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton"
+                data-ng-disabled="editNdflDeductionForm.$invalid">
             <span data-translate-once="button.save"></span>
             <span class="btn-icon-ok"></span>
         </button>
