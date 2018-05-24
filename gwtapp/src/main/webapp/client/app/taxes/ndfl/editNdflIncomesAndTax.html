@@ -1,10 +1,13 @@
 <form class="form-horizontal" name="editNdflIncomesAndTaxForm" data-aplana-submit-valid="save()">
     <div class="modal-body" style="min-height: 155px">
         <div class="row-fluid">
-            <label class="control-label">{{temp.person.lastName}} {{temp.person.firstName}} {{temp.person.middleName}},
+            <label class="control-label" style="text-align: left">{{temp.person.lastName}} {{temp.person.firstName}}
+                {{temp.person.middleName}},
                 {{temp.person.birthDay | dateFormatter}} , ИНП={{row.inp}}</label>
-            <label class="control-label">{{temp.docTypeName}} № {{temp.person.idDocNumber}}</label>
-            <label class="control-label">Гражданство={{temp.person.citizenship}}, ИНН в РФ={{temp.person.innNp}}</label>
+            <label class="control-label" style="text-align: left">{{temp.docTypeName}} №
+                {{temp.person.idDocNumber}}</label>
+            <label class="control-label" style="text-align: left">Гражданство={{temp.person.citizenship}}, ИНН в
+                РФ={{temp.person.innNp}}</label>
         </div>
 
         <div style="height: 400px; overflow-y: scroll">
@@ -18,14 +21,17 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.kpp' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.kpp"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   maxlength="9"
-                                   title="{{row.kpp}}"/>
-                            <div data-aplana-validator data-key="maxlength">{{::'incomesAndTax.edit.validation.kpp' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.kpp"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       maxlength="9"
+                                       title="{{row.kpp}}"/>
+                                <div data-aplana-validator data-key="maxlength">{{::'incomesAndTax.edit.validation.kpp'
+                                    |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -54,22 +60,26 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.incomeCode' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.incomeCode"
-                                   ng-required="isIncomeAttributesRequired() || row.incomeType"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   minlength="4"
-                                   maxlength="4"
-                                   title="{{row.incomeCode}}"/>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key="minlength">{{::'incomesAndTax.edit.validation.incomeCode' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key="maxlength">{{::'incomesAndTax.edit.validation.incomeCode' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.incomeCode"
+                                       ng-required="isIncomeAttributesRequired() || row.incomeType"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       minlength="4"
+                                       maxlength="4"
+                                       title="{{row.incomeCode}}"/>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key="minlength">
+                                    {{::'incomesAndTax.edit.validation.incomeCode' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key="maxlength">
+                                    {{::'incomesAndTax.edit.validation.incomeCode' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -77,23 +87,27 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.dateCalcIncome' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-ng-model="row.incomeAccruedDate"></div>
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-ng-model="row.incomeAccruedDate"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">{{::'title.amountCalcIncome' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.incomeAccruedSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   data-ng-pattern="patterns.number"
-                                   type="text"
-                                   title="{{row.amountCalcIncome}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.incomeAccruedSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-pattern="patterns.number"
+                                       type="text"
+                                       title="{{row.amountCalcIncome}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -103,18 +117,21 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.incomeAttr' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.incomeType"
-                                   ng-required="isIncomeAttributesRequired() || row.incomeCode"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   maxlength="2"
-                                   title="{{row.incomeAttr}}"/>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
-                            </div>
-                            <div data-aplana-validator data-key="maxlength">{{::'incomesAndTax.edit.validation.incomeType' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.incomeType"
+                                       ng-required="isIncomeAttributesRequired() || row.incomeCode"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       maxlength="2"
+                                       title="{{row.incomeAttr}}"/>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key="maxlength">
+                                    {{::'incomesAndTax.edit.validation.incomeType' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -122,23 +139,27 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.datePaymentIncome' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-ng-model="row.incomePayoutDate"></div>
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-ng-model="row.incomePayoutDate"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">{{::'title.amountPaymentIncome' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.incomePayoutSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   data-ng-pattern="patterns.number"
-                                   type="text"
-                                   title="{{row.amountPaymentIncome}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.incomePayoutSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-pattern="patterns.number"
+                                       type="text"
+                                       title="{{row.amountPaymentIncome}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,14 +176,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.taxBase' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.taxBase"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.taxBase}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.taxBase"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.taxBase}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -172,14 +195,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.amountDeduction' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.totalDeductionsSumm"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.amountDeduction}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.totalDeductionsSumm"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.amountDeduction}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -196,14 +221,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.taxRate' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.taxRate"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.twoDigits"
-                                   title="{{row.taxRate}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.taxRate"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.twoDigits"
+                                       title="{{row.taxRate}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -211,14 +238,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.calculatedTax' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.calculatedTax"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.calculatedTax}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.calculatedTax"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.calculatedTax}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -226,14 +255,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.withholdingTax' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.withholdingTax"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.withholdingTax}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.withholdingTax"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.withholdingTax}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -243,23 +274,27 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.taxDate' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <div data-aplana-datepicker
-                                 data-ng-model="row.taxDate"></div>
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <div data-aplana-datepicker
+                                     data-ng-model="row.taxDate"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">{{::'title.notHoldingTax' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.notHoldingTax"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.notHoldingTax}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.notHoldingTax"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.notHoldingTax}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -267,14 +302,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.overholdingTax' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.overholdingTax"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.overholdingTax}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.overholdingTax"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.overholdingTax}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -282,14 +319,16 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.refoundTax' | translate}}:</label>
                         </div>
-                        <div data-aplana-field>
-                            <input data-ng-model="row.refoundTax"
-                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                   type="text"
-                                   data-ng-pattern="patterns.number"
-                                   title="{{row.refoundTax}}"/>
-                            <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                translate}}
+                        <div class="span8 field-wrapper">
+                            <div data-aplana-field>
+                                <input data-ng-model="row.refoundTax"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       data-ng-pattern="patterns.number"
+                                       title="{{row.refoundTax}}"/>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -306,6 +345,7 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.taxTransferDate' | translate}}:</label>
                         </div>
+                        <div class="span8 field-wrapper">
                         <div data-aplana-field>
                             <div data-aplana-datepicker
                                  data-ng-show="!row.disableTaxTransferDate"
@@ -319,6 +359,7 @@
                                 {{APP_CONSTANTS.DATE_ZERO.AS_STRING}}
                             </label>
                         </div>
+                        </div>
                     </div>
                     <div class="row-fluid form-group">
 
@@ -327,6 +368,7 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.taxSumm' | translate}}:</label>
                         </div>
+                        <div class="span8 field-wrapper">
                         <div data-aplana-field>
                             <input data-ng-model="row.taxSumm"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
@@ -337,6 +379,7 @@
                                 translate}}
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
                 <div class="filter-col w400">
@@ -344,20 +387,24 @@
                         <div class="span4">
                             <label class="control-label">{{::'title.paymentDate' | translate}}:</label>
                         </div>
+                        <div class="span8 field-wrapper">
                         <div data-aplana-field>
                             <div data-aplana-datepicker
                                  data-ng-model="row.paymentDate"></div>
+                        </div>
                         </div>
                     </div>
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">{{::'title.paymentNumber' | translate}}:</label>
                         </div>
+                        <div class="span8 field-wrapper">
                         <div data-aplana-field>
                             <input data-ng-model="row.paymentNumber"
                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                    type="text"
                                    title="{{row.paymentNumber}}"/>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -366,7 +413,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-default iconed-btn" id="saveButton" data-ng-disabled="editNdflIncomesAndTaxForm.$invalid">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton"
+                data-ng-disabled="editNdflIncomesAndTaxForm.$invalid">
             <span data-translate-once="button.save"></span>
             <span class="btn-icon-ok"></span>
         </button>
