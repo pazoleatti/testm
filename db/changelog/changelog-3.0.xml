@@ -87,5 +87,29 @@
             <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4655 Реализовать хранимую процедуру удаления из справочника физлиц -->
+	<changeSet id="3.0-rnurgaleev-0" author="rnurgaleev">
+        <sql splitStatements="false">
+            create or replace 
+			procedure DeleteRefBookPerson(p_person_id number)
+			is
+			  v_address number;
+			begin
+			  delete from REF_BOOK_ID_TAX_PAYER where person_id=p_person_id;
+			  
+			  delete from REF_BOOK_ID_DOC where person_id=p_person_id;
+			  
+			  select address into v_address from REF_BOOK_PERSON where id=p_person_id;
+			  
+			  delete from REF_BOOK_PERSON where id=p_person_id;
+			  
+			  if v_address is not null then
+				delete from REF_BOOK_ADDRESS where id=v_address;
+			  end if;
+
+			end DeleteRefBookPerson;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
