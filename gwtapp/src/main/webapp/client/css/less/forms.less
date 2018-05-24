@@ -639,8 +639,11 @@ legend + .control-group {
     // don't inherit the margin of the parent, in this case .controls
     *display: inline-block;
     *padding-left: 20px;
-    margin-left: @horizontalComponentOffset;
+    margin-left: 0;
     *margin-left: 0;
+    input {
+      width: 100%;
+    }
     &:first-child {
       *padding-left: @horizontalComponentOffset;
     }

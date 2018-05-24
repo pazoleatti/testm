@@ -34,6 +34,8 @@
                     compile: function compile(element) {
 
                         element[0].removeAttribute("data-aplana-field");
+                        element[0].setAttribute("style", "width: 100%");
+
 
                         // Find all the [data-aplana-validator] child elements and extract their validation message info
                         var validationMessages = [];
