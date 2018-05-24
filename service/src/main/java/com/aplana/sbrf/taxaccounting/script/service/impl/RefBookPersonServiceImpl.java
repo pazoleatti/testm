@@ -363,7 +363,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private class PersonDataComparator implements Comparator<IdentityPerson> {
         @Override
         public int compare(IdentityPerson a, IdentityPerson b) {
-            int weightComp = Double.compare(a.getWeight(), b.getWeight());
+            int weightComp = Double.compare(b.getWeight(), a.getWeight());
             if (weightComp == 0) {
                 return Long.compare(b.getRecordId(), a.getRecordId());
             }
