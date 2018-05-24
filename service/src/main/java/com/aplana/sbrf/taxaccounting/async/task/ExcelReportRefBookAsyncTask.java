@@ -82,24 +82,24 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(AsyncTaskData taskData) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
-        Date version = (Date) taskData.getParams().get("version");
+        Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : new Date();
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, %s",
+        return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, Параметр поиска: %s",
                 getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
-                searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "Фильтр не задан");
+                searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "не задан");
     }
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
-        Date version = (Date) taskData.getParams().get("version");
+        Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : new Date();
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, %s",
+        return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, Параметр поиска: %s",
                 getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
-                searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "Фильтр не задан");
+                searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "не задан");
     }
 
     @Override
