@@ -278,7 +278,7 @@
         "title.deductionCode": "Код вычета",
         "title.documentOnTheRightToDeduct": "Документ о праве на вычет",
         "title.type": "Тип",
-        "title.documentDate": "Дата документа",
+        "title.documentDate": "Дата уведомления",
         "title.number": "Номер",
         "title.sourceCode": "Код источника",
         "title.documentAmount": "Сумма документа",
