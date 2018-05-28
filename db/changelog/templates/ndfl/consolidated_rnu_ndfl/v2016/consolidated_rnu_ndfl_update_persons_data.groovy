@@ -147,7 +147,9 @@ class UpdatePersonsData extends AbstractScriptClass {
                 if (refBookPerson.birthDay == null) {
                     logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.BIRTH_DAY_FULL, SharedConstants.REF_PERSON_BIRTH_DAY))
                 } else {
-
+                    updateInfo << createUpdateInfo(SharedConstants.BIRTH_DAY_FULL, declarationDataPerson.birthDay ? declarationDataPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "", refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "")
+                    declarationDataPerson.birthDay = refBookPerson.birthDay
+                    updated = true
                 }
             }
             if (refBookPerson.citizenship != declarationDataPerson.citizenship) {

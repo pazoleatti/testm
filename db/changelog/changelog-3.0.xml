@@ -112,4 +112,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.0-ytrofimov-8" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.0-ytrofimov-9" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+            <where>id=15</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
