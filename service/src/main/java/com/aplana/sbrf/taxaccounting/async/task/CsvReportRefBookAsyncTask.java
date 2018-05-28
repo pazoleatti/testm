@@ -69,7 +69,7 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
         if (filter.isEmpty())
             filter = null;
 
-        String uuid = printingService.generateRefBookCSV(refBookId, version, filter, sortAttribute, isSortAscending, new LockStateLogger() {
+        String uuid = printingService.generateRefBookCSV(refBookId, version, filter, sortAttribute, isSortAscending, (String) taskData.getParams().get("searchPattern"), (Boolean) taskData.getParams().get("exactSearch"), new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 asyncManager.updateState(taskData.getId(), state);

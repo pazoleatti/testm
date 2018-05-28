@@ -159,15 +159,15 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
             cellNumber = 0;
         }
         if (filter != null && !filter.isEmpty()) {
-            Row filterRow = sheet.createRow(1);
+            Row filterRow = sheet.createRow((refBook.isVersioned() ? 2 : 1));
             Cell filterCell = filterRow.createCell(cellNumber);
-            filterCell.setCellValue(filter);
+            filterCell.setCellValue("Параметр поиска: " + filter);
             filterCell.setCellStyle(cs);
             cellNumber = 0;
         }
 
         cellNumber = 0;
-        rowNumber = rowNumber + 2;
+        rowNumber = rowNumber + 1;
     }
 
     @Override

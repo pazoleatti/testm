@@ -28,16 +28,16 @@ public interface PrintingService {
 
     /**
      * Формирует csv-отчет по справочнику
-     *
-     * @param refBookId
+     *  @param refBookId
      * @param version
      * @param filter
      * @param sortAttribute
      * @param isSortAscending
-     * @param stateLogger
-     * @return
+     * @param searchPattern
+     * @param exactSearch
+     * @param stateLogger  @return
      */
-    String generateRefBookCSV(long refBookId, Date version, String filter, RefBookAttribute sortAttribute, boolean isSortAscending, LockStateLogger stateLogger);
+    String generateRefBookCSV(long refBookId, Date version, String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String searchPattern, Boolean exactSearch, LockStateLogger stateLogger);
 
     /**
      * Формирует excel-отчет по справочнику

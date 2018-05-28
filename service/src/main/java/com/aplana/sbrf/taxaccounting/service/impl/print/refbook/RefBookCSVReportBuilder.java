@@ -61,14 +61,18 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
     private Date version;
     private List<RefBookAttribute> refBookAttributeList;
     private RefBookAttribute sortAttribute;
+    private String searchPattern;
+    private Boolean exactSearch;
 
-    public RefBookCSVReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Map<Long, String>> dereferenceValues, Date version, RefBookAttribute sortAttribute) {
+    public RefBookCSVReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Map<Long, String>> dereferenceValues, Date version, RefBookAttribute sortAttribute, String searchPattern, Boolean exactSearch) {
         super("acctax", ".csv");
         this.records = records;
         this.refBook = refBook;
         this.version = version;
         this.dereferenceValues = dereferenceValues;
         this.sortAttribute = sortAttribute;
+        this.searchPattern = searchPattern;
+        this.exactSearch = exactSearch;
         refBookAttributeList = new LinkedList<RefBookAttribute>();
         if (refBook.isHierarchic()) {
             refBookAttributeList.add(levelAttribute);
@@ -119,6 +123,7 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         csvWriter = new CSVWriter(bufferedWriter, ';');
         try {
             List<String> headersNames = new ArrayList<String>();
+            fillHeaderInfo();
             for (RefBookAttribute attribute : refBookAttributeList) {
                 headersNames.add(attribute.getName());
             }
@@ -135,6 +140,25 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
             IOUtils.closeQuietly(bufferedWriter);
             IOUtils.closeQuietly(fileWriter);
         }
+    }
+
+    private void fillHeaderInfo() {
+        List<String> headerInfo = new ArrayList<>();
+
+        headerInfo.add("Справочник: " + refBook.getName());
+        if (refBook.isVersioned()){
+            headerInfo.add("Дата актуальности: " + new SimpleDateFormat("dd.MM.yyyy").format(version));
+        }
+        headerInfo.add("Параметр поиска: " + (searchPattern != null && !searchPattern.isEmpty() ? searchPattern + (exactSearch ? "(по точному совпадению)" : "") : "не задан"));
+
+        for (int i = 0; i < 4; i++){
+            if (i < headerInfo.size()) {
+                csvWriter.writeNext(new String[]{headerInfo.get(i)});
+            }else {
+                csvWriter.writeNext(new String[]{""});
+            }
+        }
+
     }
 
     private void printNode(Long parent_id, int level) {

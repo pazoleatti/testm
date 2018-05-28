@@ -155,7 +155,7 @@ public class PrintingServiceImpl implements PrintingService {
 
     @Override
     public String generateRefBookCSV(long refBookId, Date version, String filter,
-                                     RefBookAttribute sortAttribute, boolean isSortAscending, LockStateLogger stateLogger) {
+                                     RefBookAttribute sortAttribute, boolean isSortAscending, String searchPattern, Boolean exactSearch, LockStateLogger stateLogger) {
 
         String reportPath = null;
         try {
@@ -169,7 +169,7 @@ public class PrintingServiceImpl implements PrintingService {
             Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
             RefBookCSVReportBuilder refBookCSVReportBuilder;
             if (!refBook.isHierarchic()) {
-                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, refBookPage, dereferenceValues, version, sortAttribute);
+                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, refBookPage, dereferenceValues, version, sortAttribute, searchPattern, exactSearch);
             } else {
                 Map<Long, Map<String, RefBookValue>> hierarchicRecords = new HashMap<Long, Map<String, RefBookValue>>();
                 Iterator<Map<String, RefBookValue>> iterator = refBookPage.iterator();
@@ -193,7 +193,7 @@ public class PrintingServiceImpl implements PrintingService {
                     dereferenceValues.putAll(dereferenceParentValues);
                     refBookPage = parentRecords;
                 } while (!refBookPage.isEmpty());
-                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, version, sortAttribute);
+                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, version, sortAttribute, searchPattern, exactSearch);
             }
             stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
             reportPath = refBookCSVReportBuilder.createReport();

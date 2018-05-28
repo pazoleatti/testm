@@ -137,7 +137,6 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             if (StringUtils.isNotEmpty(searchPattern)) {
                 // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
                 filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
-                searchPattern = "Фильтр: \"" + searchPattern + "\"";
             }
             RefBookAttribute sortAttribute;
             boolean isAscSorting;
@@ -155,6 +154,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
                 params.put("version", version);
             }
             params.put("searchPattern", searchPattern);
+            params.put("exactSearch", exactSearch);
             params.put("filter", filter);
             params.put("sortAttribute", sortAttribute.getId());
             params.put("isSortAscending", isAscSorting);
