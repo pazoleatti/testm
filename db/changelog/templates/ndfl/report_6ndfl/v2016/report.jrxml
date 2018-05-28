@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1614"/>
+	<property name="ireport.y" value="1843"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -52,7 +52,7 @@
             "00" :
             ( 	$F{ФактДоход}.indexOf(".") < 0 ?
                 "00" :
-                ($F{ФактДоход}.substring(($F{ФактДоход}.indexOf("."))+1, $F{ФактДоход}.length())+"--").substring(0,2)
+                ($F{ФактДоход}.substring(($F{ФактДоход}.indexOf("."))+1, $F{ФактДоход}.length())+"00").substring(0,2)
             )
     )
 ).substring(0,18)]]></variableExpression>
@@ -135,8 +135,8 @@
      (
          ($F{НачислДох} == null || $F{НачислДох} == "")  ?
          "00" :
-         (    $F{НачислДох}.indexOf(".") < 0 ? "--" :
-             ($F{НачислДох}.substring(($F{НачислДох}.indexOf("."))+1, $F{НачислДох}.length())+"--").substring(0,2)
+         (    $F{НачислДох}.indexOf(".") < 0 ? "00" :
+             ($F{НачислДох}.substring(($F{НачислДох}.indexOf("."))+1, $F{НачислДох}.length())+"00").substring(0,2)
          )
      )
 ).substring(0,18)]]></variableExpression>
@@ -156,7 +156,7 @@
             "00" :
             ( 	$F{НачислДохДив}.indexOf(".") < 0 ?
                 "--" :
-                ($F{НачислДохДив}.substring(($F{НачислДохДив}.indexOf("."))+1, $F{НачислДохДив}.length())+"--").substring(0,2)
+                ($F{НачислДохДив}.substring(($F{НачислДохДив}.indexOf("."))+1, $F{НачислДохДив}.length())+"00").substring(0,2)
             )
     )
 ).substring(0,18)]]></variableExpression>
@@ -173,8 +173,8 @@
         )
     )  + "." +
     (($F{ВычетНал} == null ||$F{ВычетНал} == "" )  ?               "00" :
-        ( 	$F{ВычетНал}.indexOf(".") < 0 ?                  "--" :
-            ($F{ВычетНал}.substring(($F{ВычетНал}.indexOf("."))+1, $F{ВычетНал}.length())+"--").substring(0,2)
+        ( 	$F{ВычетНал}.indexOf(".") < 0 ?                  "00" :
+            ($F{ВычетНал}.substring(($F{ВычетНал}.indexOf("."))+1, $F{ВычетНал}.length())+"00").substring(0,2)
         )
     )
 ).substring(0,18)]]></variableExpression>
@@ -451,7 +451,12 @@
     ($F{НаимДок}+"----------------------------------------").substring(0,40)]]></initialValueExpression>
 	</variable>
 	<variable name="НачислДох" class="java.lang.String">
-		<variableExpression><![CDATA[((($F{НачислДох} == null || $F{НачислДох} == "" )  ?  "0--------------" :  (  	$F{НачислДох}.indexOf(".") < 0 ? ($F{НачислДох} + "-----------------").substring(0, 15) :  	($F{НачислДох}.substring(0, ($F{НачислДох}.indexOf(".")))+"-----------------").substring(0, 15)  ))  + "." +  (($F{НачислДох} == null )  ?  "--" :  (  	$F{НачислДох}.indexOf(".") < 0 ? "--" :  	($F{НачислДох}.substring(($F{НачислДох}.indexOf("."))+1, $F{НачислДох}.length())+"--").substring(0,2)  ))).substring(0,18)]]></variableExpression>
+		<variableExpression><![CDATA[((($F{НачислДох} == null || $F{НачислДох} == "" )  ?  "0--------------" :
+    (  	$F{НачислДох}.indexOf(".") < 0 ? ($F{НачислДох} + "-----------------").substring(0, 15) :
+        ($F{НачислДох}.substring(0, ($F{НачислДох}.indexOf(".")))+"-----------------").substring(0, 15)  ))
+    + "." +  (($F{НачислДох} == null )  ?  "00" :
+        (  	$F{НачислДох}.indexOf(".") < 0 ? "00" :
+            ($F{НачислДох}.substring(($F{НачислДох}.indexOf("."))+1, $F{НачислДох}.length())+"00").substring(0,2)  ))).substring(0,18)]]></variableExpression>
 		<initialValueExpression><![CDATA[((($F{НачислДох} == null || $F{НачислДох} == "" )  ?
     "0--------------" :
 (
@@ -476,10 +481,10 @@
             )
     )  + "." +
     (($F{НачислДохДив} == null)  ?
-            "--" :
+            "00" :
             ( 	$F{НачислДохДив}.indexOf(".") < 0 ?
-                "--" :
-                ($F{НачислДохДив}.substring(($F{НачислДохДив}.indexOf("."))+1, $F{НачислДохДив}.length())+"--").substring(0,2)
+                "00" :
+                ($F{НачислДохДив}.substring(($F{НачислДохДив}.indexOf("."))+1, $F{НачислДохДив}.length())+"00").substring(0,2)
             )
     )
 ).substring(0,18)]]></variableExpression>
@@ -488,7 +493,15 @@
 	</variable>
 	<variable name="ВычетНал" class="java.lang.String">
 		<variableExpression><![CDATA[((($F{ВычетНал} == null || $F{ВычетНал} == "" )  ?
-    "0--------------" :               ($F{ВычетНал}.indexOf(".") < 0 ?                  ($F{ВычетНал} + "-----------------").substring(0, 15) :  	                 ($F{ВычетНал}.substring(0, ($F{ВычетНал}.indexOf(".")))+"-----------------").substring(0, 15)              )     )  + "." +       (($F{ВычетНал} == null )  ?               "--" :               ( 	$F{ВычетНал}.indexOf(".") < 0 ?                  "--" :  	                 ($F{ВычетНал}.substring(($F{ВычетНал}.indexOf("."))+1, $F{ВычетНал}.length())+"--").substring(0,2)               )     ) ).substring(0,18)]]></variableExpression>
+    "0--------------" :
+    ($F{ВычетНал}.indexOf(".") < 0 ?
+        ($F{ВычетНал} + "-----------------").substring(0, 15) :
+        ($F{ВычетНал}.substring(0, ($F{ВычетНал}.indexOf(".")))+"-----------------").substring(0, 15)))
+    + "." +
+    (($F{ВычетНал} == null )  ?
+        "00" :
+        ($F{ВычетНал}.indexOf(".") < 0 ? "00" :
+            ($F{ВычетНал}.substring(($F{ВычетНал}.indexOf("."))+1, $F{ВычетНал}.length())+"00").substring(0,2)               )     ) ).substring(0,18)]]></variableExpression>
 		<initialValueExpression><![CDATA[((($F{ВычетНал} == null || $F{ВычетНал} == "" )  ?
     "0--------------" :
             ($F{ВычетНал}.indexOf(".") < 0 ?
