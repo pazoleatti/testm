@@ -60,6 +60,8 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
         long refBookId = (Long) params.get("refBookId");
         String filter = (String) params.get("filter");
         Date version = (Date) params.get("version");
+        String searchPattern = (String) taskData.getParams().get("searchPattern");
+        Boolean exactSearch = (Boolean) taskData.getParams().get("exactSearch");
         RefBookAttribute sortAttribute = null;
         if (params.containsKey("sortAttribute"))
             sortAttribute = refBookFactory.get(refBookId).getAttribute((Long) params.get("sortAttribute"));
@@ -69,7 +71,7 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
         if (filter.isEmpty())
             filter = null;
 
-        String uuid = printingService.generateRefBookCSV(refBookId, version, filter, sortAttribute, isSortAscending, (String) taskData.getParams().get("searchPattern"), (Boolean) taskData.getParams().get("exactSearch"), new LockStateLogger() {
+        String uuid = printingService.generateRefBookCSV(refBookId, version, filter, sortAttribute, isSortAscending, searchPattern, exactSearch, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 asyncManager.updateState(taskData.getId(), state);
