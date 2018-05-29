@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -12,27 +11,27 @@ import java.sql.SQLException;
 public class RefBookMapperFactory {
 
     @SuppressWarnings("unchecked")
-    public <T extends RefBookSimple> RowMapper<T> getMapper(RefBook refBook) {
-        if (RefBook.Id.OKTMO.getId() == refBook.getId()) {
+    public <T extends RefBookSimple> RowMapper<T> getMapper(long refBookId) {
+        if (RefBook.Id.OKTMO.getId() == refBookId) {
             return new OktmoMapper();
-        } else if (RefBook.Id.COUNTRY.getId() == refBook.getId()) {
+        } else if (RefBook.Id.COUNTRY.getId() == refBookId) {
             return new CountryMapper();
-        } else if (RefBook.Id.DOCUMENT_CODES.getId() == refBook.getId()) {
+        } else if (RefBook.Id.DOCUMENT_CODES.getId() == refBookId) {
             return new DepartmentDocTypeMapper();
-        } else if (RefBook.Id.ASNU.getId() == refBook.getId()) {
+        } else if (RefBook.Id.ASNU.getId() == refBookId) {
             return new AsnuMapper();
-        } else if (RefBook.Id.PERSON.getId() == refBook.getId()) {
+        } else if (RefBook.Id.PERSON.getId() == refBookId) {
             return new PersonMapper();
-        } else if (RefBook.Id.INCOME_CODE.getId() == refBook.getId()) {
+        } else if (RefBook.Id.INCOME_CODE.getId() == refBookId) {
             return new IncomeTypeMapper();
-        } else if (RefBook.Id.DEDUCTION_MARK.getId() == refBook.getId()) {
+        } else if (RefBook.Id.DEDUCTION_MARK.getId() == refBookId) {
             return new DeductionMarkMapper();
-        } else if (RefBook.Id.PERSON_ADDRESS.getId() == refBook.getId()) {
+        } else if (RefBook.Id.PERSON_ADDRESS.getId() == refBookId) {
             return new PersonAddressMapper();
-        } else if (RefBook.Id.TAXPAYER_STATUS.getId() == refBook.getId()) {
+        } else if (RefBook.Id.TAXPAYER_STATUS.getId() == refBookId) {
             return new TaxPayerStatusMapper();
         }
-        throw new IllegalArgumentException("Unknown mapper for refBook = " + refBook.getId());
+        throw new IllegalArgumentException("Unknown mapper for refBook = " + refBookId);
     }
 
     public class OktmoMapper<T> implements RowMapper<RefBookOktmo> {
@@ -87,12 +86,13 @@ public class RefBookMapperFactory {
         }
     }
 
-    public class PersonMapper<T> implements RowMapper<RefBookPerson> {
+    public static class PersonMapper<T> implements RowMapper<RefBookPerson> {
 
         @Override
         public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
             RefBookPerson result = new RefBookPerson();
             result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
             result.setFirstName(rs.getString("first_name"));
             result.setLastName(rs.getString("last_name"));
             result.setMiddleName(rs.getString("middle_name"));

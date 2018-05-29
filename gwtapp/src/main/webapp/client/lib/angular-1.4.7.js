@@ -15851,7 +15851,7 @@
                     // this piece should be kept in sync with the traversal in $broadcast
                     if (!(next = ((current.$$watchersCount && current.$$childHead) ||
                         (current !== target && current.$$nextSibling)))) {
-                      while (current !== target && !(next = current.$$nextSibling)) {
+                      while (current != null && current !== target && !(next = current.$$nextSibling)) {
                         current = current.$parent;
                       }
                     }

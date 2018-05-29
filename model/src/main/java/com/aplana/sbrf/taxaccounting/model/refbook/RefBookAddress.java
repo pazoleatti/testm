@@ -32,7 +32,6 @@ public class RefBookAddress extends RefBookSimple<Long> {
     //Адрес
     private String address;
 
-
     public Integer getAddressType() {
         return addressType;
     }

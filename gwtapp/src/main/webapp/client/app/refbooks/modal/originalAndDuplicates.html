@@ -1,0 +1,75 @@
+<form id="originalAndDuplicatesForm" name="originalAndDuplicatesForm" class="form-horizontal" data-aplana-submit-valid="save()" novalidate>
+    <div class="modal-body">
+        <!-- Данные о текущем ФЛ -->
+        <div class="row-fluid" style="margin-bottom: 20px;">
+            <label class="inline-label">{{::'refBook.fl.label.record' | translate}}:</label>
+            <label class="inline-value">{{"Идентификатор ФЛ = " + record.recordId +
+                (record.lastName ? ", Фамилия = " + record.lastName : "") +
+                (record.firstName ? ", Имя = " + record.firstName : "") +
+                (record.middleName ? ", Отчество = " + record.middleName : "") +
+                (record.inn ? ", ИНН в Российской Федерации = " + record.inn : "") +
+                (record.innForeign ? ", ИНН в стране гражданства = " + record.innForeign : "") +
+                (record.snils ? ", СНИЛС = " + record.snils : "") +
+                (record.docNumber ? ", Серия и номер ДУЛ = " + record.docNumber : "")}}</label>
+        </div>
+
+        <!-- Оригинал -->
+        <div class="row-fluid" style="margin-bottom: 20px;">
+            <label class="inline-label">{{::'refBook.fl.label.original' | translate}}:</label>
+            <label class="inline-value" data-ng-show="original">{{"Идентификатор ФЛ = " + original.recordId +
+                (original.lastName ? ", Фамилия = " + original.lastName : "") +
+                (original.firstName ? ", Имя = " + original.firstName : "") +
+                (original.middleName ? ", Отчество = " + original.middleName : "") +
+                (original.inn ? ", ИНН в Российской Федерации = " + original.inn : "") +
+                (original.innForeign ? ", ИНН в стране гражданства = " + original.innForeign : "") +
+                (original.snils ? ", СНИЛС = " + original.snils : "") +
+                (original.docNumber ? ", Серия и номер ДУЛ = " + original.docNumber : "")}}</label>
+            <div>
+                <data-ref-book-picker
+                        data-ng-model="original"
+                        data-ref-book-id="{{APP_CONSTANTS.REFBOOK.PERSON}}"></data-ref-book-picker>
+                <button type="button" class="btn btn-default"
+                        data-ng-click="deleteOriginal()">
+                    <span data-translate-once="button.delete"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Дубли -->
+        <div>
+            <label class="inline-label">{{::'refBook.fl.label.duplicates' | translate}}:</label>
+            <div style="margin-bottom: 10px">
+                <data-ref-book-picker
+                        button-title="{{::'button.add' | translate}}"
+                        data-ng-model="temp.duplicate"
+                        data-ref-book-id="{{APP_CONSTANTS.REFBOOK.PERSON}}"
+                        data-on-select="onSelectDuplicate(selectedRecord)"></data-ref-book-picker>
+                <button type="button" class="btn btn-default"
+                        data-ng-click="deleteDuplicates()">
+                    <span data-translate-once="button.delete"></span>
+                </button>
+            </div>
+
+            <!-- Таблица с дубликатами -->
+            <div class="flex-grid" data-aplana-grid
+                 data-grid-fill-space="true"
+                 data-grid-fill-space-container-selector=".modal-body"
+                 data-grid-fill-space-container-selector-top=".top-block"
+                 data-grid-options="duplicatesGrid.options"
+                 data-grid-ctrl="duplicatesGrid.ctrl"
+                 data-ng-model="duplicatesGrid.value"
+                 data-init-grid="fetchDuplicates(ctrl)"
+                 id="duplicatesGrid">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default" id="openButton">
+            <span data-translate-once="button.save"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

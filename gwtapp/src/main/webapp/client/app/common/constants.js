@@ -54,7 +54,8 @@
                 DECLARATION_TYPE: 207,
                 ASNU: 900,
                 ATTACH_FILE_TYPE: 934,
-                DECLARATION_DATA_TYPE_REF_BOOK: 931
+                DECLARATION_DATA_TYPE_REF_BOOK: 931,
+                PERSON: 904
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

@@ -82,12 +82,12 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
 
         // Получаем дубликаты
         PagingResult<Map<String, RefBookValue>> refBookPage = new PagingResult<Map<String, RefBookValue>>();
-        List<Long> duplicateIds = personService.getDuplicate(recordId);
+        /*List<Long> duplicateIds = personService.getDuplicate(recordId);
         duplicateIds.remove(action.getRecord().getRefBookRowId()); // Исключаем выбранную запись из дубликатов
         if (!duplicateIds.isEmpty()) {
             Map<Long, Map<String, RefBookValue>> recordData = refBookDataProvider.getRecordData(duplicateIds);
             refBookPage.addAll(recordData.values());
-        }
+        }*/
         rows = new ArrayList<RefBookDataRow>();
         GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, refBookPage, rows, refBookHelper, columnMap);
         result.setDuplicateRows(rows);

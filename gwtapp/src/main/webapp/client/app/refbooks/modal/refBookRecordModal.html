@@ -75,7 +75,7 @@
                             <!-- TODO: почему то для выпадашки не работает нормально валидация - сообщение появляется для другого поля, сходу решить проблему не удалось -->
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
                                 <div data-ui-select2="select.options"
-                                     data-ng-init="initSelect(attribute)"
+                                     data-ng-init="initSelect(attribute.refBookId, attribute.alias)"
                                      data-ng-model="record[attribute.alias].value"
                                      data-ng-required="{{attribute.required}}"
                                      class="span8"></div>

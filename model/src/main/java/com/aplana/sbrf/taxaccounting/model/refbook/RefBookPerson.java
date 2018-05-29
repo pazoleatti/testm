@@ -7,15 +7,13 @@ import java.util.Date;
  *
  * @author dloshkarev
  */
-public class RefBookPerson extends RefBookSimple<Long> {
+public class RefBookPerson extends RefBookVersioned<Long> {
     //Имя
     private String firstName;
     //Фамилия
     private String lastName;
     //Отчество
     private String middleName;
-    //Пол
-    private Byte sex;
     //ИНН в РФ
     private String inn;
     //ИНН в стране гражданства
@@ -32,15 +30,18 @@ public class RefBookPerson extends RefBookSimple<Long> {
     private RefBookCountry citizenship;
     //Место жительства
     private RefBookAddress address;
-    //Признак застрахованного лица в системе обязательного пенсионного страхования
-    private Boolean pension;
-    //Признак застрахованного лица в системе обязательного медицинского страхования
-    private Boolean medical;
-    //Признак застрахованного лица в системе обязательного социального страхования
-    private Boolean social;
     //Признак, показывающий, является ли ФЛ сотрудником Сбербанка
-    private Boolean employee;
+    private Integer employee;
+    //Система-источник: ссылка на справочник кодов АС НУ
+    private RefBookAsnu source;
+    //Старый идентификатор ФЛ
+    private Long oldId;
 
+    /** Вспомогательные поля для улучшения производительности. Заполняются не во всех случаях*/
+    //Адрес как текст, используется чтобы сразу получать данные из бд одним запросои без запросом на каждую запись
+    private String addressAsText;
+    //Серия и номер ДУЛ
+    private String docNumber;
 
     public String getFirstName() {
         return firstName;
@@ -64,14 +65,6 @@ public class RefBookPerson extends RefBookSimple<Long> {
 
     public void setMiddleName(String middleName) {
         this.middleName = middleName;
-    }
-
-    public Byte getSex() {
-        return sex;
-    }
-
-    public void setSex(Byte sex) {
-        this.sex = sex;
     }
 
     public String getInn() {
@@ -138,35 +131,45 @@ public class RefBookPerson extends RefBookSimple<Long> {
         this.address = address;
     }
 
-    public Boolean getPension() {
-        return pension;
-    }
-
-    public void setPension(Boolean pension) {
-        this.pension = pension;
-    }
-
-    public Boolean getMedical() {
-        return medical;
-    }
-
-    public void setMedical(Boolean medical) {
-        this.medical = medical;
-    }
-
-    public Boolean getSocial() {
-        return social;
-    }
-
-    public void setSocial(Boolean social) {
-        this.social = social;
-    }
-
-    public Boolean getEmployee() {
+    public Integer getEmployee() {
         return employee;
     }
 
-    public void setEmployee(Boolean employee) {
+    public void setEmployee(Integer employee) {
         this.employee = employee;
     }
+
+    public RefBookAsnu getSource() {
+        return source;
+    }
+
+    public void setSource(RefBookAsnu source) {
+        this.source = source;
+    }
+
+    public String getAddressAsText() {
+        return addressAsText;
+    }
+
+    public void setAddressAsText(String addressAsText) {
+        this.addressAsText = addressAsText;
+    }
+
+    public Long getOldId() {
+        return oldId;
+    }
+
+    public void setOldId(Long oldId) {
+        this.oldId = oldId;
+    }
+
+    public String getDocNumber() {
+        return docNumber;
+    }
+
+    public void setDocNumber(String docNumber) {
+        this.docNumber = docNumber;
+    }
+
+
 }

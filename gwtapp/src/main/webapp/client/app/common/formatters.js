@@ -294,6 +294,15 @@
         })
 
         /**
+         * @description Форматтер для получения кода из записи
+         */
+        .filter('codeFormatter', function () {
+            return function (record) {
+                return record && record.code ? record.code : "";
+            };
+        })
+
+        /**
          * @description Форматтер для получения данных об адресе физ. лица в нужном формате
          * @param person запись из справочника физических лиц
          */

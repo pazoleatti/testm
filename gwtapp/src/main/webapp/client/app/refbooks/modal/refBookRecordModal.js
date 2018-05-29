@@ -90,9 +90,11 @@
                             // Преобразуем ссылочные поля записи в подходящие для сервера
                             $scope.record[attribute.alias].value = $scope.record[attribute.alias].value.id;
                         }
+                        $scope.record[attribute.alias].attributeType = attribute.attributeType;
                     });
                     var url;
                     if ($scope.mode === 'EDIT') {
+                        $scope.record.id.attributeType = 'NUMBER';
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.value
                     } else {
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"

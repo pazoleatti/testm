@@ -2872,7 +2872,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public <T extends RefBookSimple> List<T> getMappedRecordsData(PreparedStatementData ps, RefBook refBook) {
-        RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook);
+        RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook.getId());
         if (!ps.getParams().isEmpty()) {
             return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
         } else {

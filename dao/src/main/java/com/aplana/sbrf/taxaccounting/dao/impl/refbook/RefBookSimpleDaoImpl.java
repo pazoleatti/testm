@@ -157,7 +157,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psGetRecordData(refBook);
         ps.addNamedParam("id", recordId);
         try {
-            RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook);
+            RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook.getId());
             return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), rowMapper);
         } catch (EmptyResultDataAccessException e) {
             return null;

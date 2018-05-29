@@ -401,6 +401,16 @@
         }])
 
         /**
+         * @description Справочник физических лиц
+         */
+        .factory('RefBookFLResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookFL', {}, {
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
+
+        /**
          * @description Настройки справочников
          */
         .factory('RefBookConfResource', ['$resource', function ($resource) {
