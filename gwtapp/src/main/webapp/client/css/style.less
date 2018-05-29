@@ -54,8 +54,15 @@ input:focus {
   outline: none;
 }
 
-form .row {
-  margin: 10px 0;
+form {
+  .row {
+    margin: 10px 0;
+  }
+  .modal-body {
+    .row {
+      margin: 0 0 10px 0;
+    }
+  }
 }
 
 a {
@@ -520,6 +527,11 @@ input[type="number"] {
 .modal1000 {
   width: 1000px;
   margin-left: -500px;
+}
+
+.modal900 {
+  width: 900px;
+  margin-left: -450px;
 }
 
 .modal800 {
@@ -1069,7 +1081,7 @@ button.btn.btn-default.ng-binding {
     }
     .form-group {
       display: flex;
-      margin-bottom: 20px;
+      margin-bottom: 0;
     }
     .field-wrapper{
       display: flex;
@@ -1669,12 +1681,13 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 .cbr-picker {
   .cbr-picker-button > button.btn {
     border-radius: 0;
+    height: 26px;
   }
   button.btn.btn-default:hover:not([disabled]):hover {
     border-top: 3px solid #6ec151;
   }
   .cbr-picker-input input {
-    height: 18px;
+    height: 16px;
     background-color: #fff;
     border: solid 1px rgba(0, 0, 0, 0.2);
     border-radius: 0;

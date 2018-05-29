@@ -649,7 +649,7 @@
                         }),
                         templateUrl: templateUrl,
                         controller: controller,
-                        windowClass: 'modal1000',
+                        windowClass: 'modal900',
                         resolve: {
                             $shareData: function () {
                                 return {
