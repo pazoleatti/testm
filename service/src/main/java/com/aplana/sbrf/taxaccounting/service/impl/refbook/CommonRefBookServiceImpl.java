@@ -220,6 +220,28 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         return result;
     }
 
+    @Override
+    public PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version, String searchPattern, boolean exactSearch, PagingParams pagingParams) {
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+        RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
+                refBookFactory.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
+        PagingResult<Map<String, RefBookValue>> records;
+        if (recordId == null) {
+            String filter = null;
+            if (StringUtils.isNotEmpty(searchPattern)) {
+                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
+                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+            }
+            // Отбираем все записи справочника
+            records = provider.getRecordsWithVersionInfo(version,
+                    pagingParams, filter, sortAttribute, pagingParams.getDirection().toLowerCase().equals("asc"));
+        } else {
+            // Отбираем все версии записи правочника
+            records = provider.getRecordVersionsByRecordId(recordId, pagingParams, null, sortAttribute);
+        }
+        return records;
+    }
+
     /**
      * Рекурсивно находит все родительские записи для указанной. В первую очередь запись ищется среди ранее найденных, т.к в этом случае искать дальше смысла нет - все родительские уже в этом списке
      * @param provider провайдер для доступа к справочнику

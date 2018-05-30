@@ -87,15 +87,16 @@ public interface CommonRefBookService {
     /**
      * Формирование отчета по записям справочника в формате XLSX/CSV
      *
-     * @param refBookId    идентификатор справочника
-     * @param version      версия, на которую строится отчет (для версионируемых справочников)
-     * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param refBookId     идентификатор справочника
+     * @param version       версия, на которую строится отчет (для версионируемых справочников)
+     * @param pagingParams  параметры сортировки для отображения записей в отчете так же как и в GUI
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
-     * @param reportType   тип отчета
+     * @param reportType    тип отчета
      * @return информация о создании отчета
      */
-    ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, String searchPattern, boolean exactSearch, AsyncTaskType reportType);
+    ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams,
+                              String searchPattern, boolean exactSearch, AsyncTaskType reportType);
 
     /**
      * Получает данные иерархического справочника. В случае применения фильтра для элементов дополнительно подгружаются
@@ -107,4 +108,18 @@ public interface CommonRefBookService {
      * @return
      */
     Collection<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch);
+
+    /**
+     * Получение всех значений указанного справочника с возможностью самостоятельно сформировать SQL-условие по входным параметрам фильтрации и поиска
+     *
+     * @param refBookId     идентификатор справочника
+     * @param recordId      идентификатор группы версий записей справочника. Если указано - отбираются только версии этой группы, иначе игнорируется
+     * @param version       версия, на которую будут отобраны записи
+     * @param searchPattern строка для полнотекстового поиска
+     * @param exactSearch   флаг для полнотекстового поиска с точным совпадением
+     * @param pagingParams  параметры пейджинга
+     * @return значения справочника
+     */
+    PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version,
+                                                            String searchPattern, boolean exactSearch, PagingParams pagingParams);
 }

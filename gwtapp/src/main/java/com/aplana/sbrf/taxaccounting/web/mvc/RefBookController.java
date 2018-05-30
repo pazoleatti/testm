@@ -5,18 +5,15 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
@@ -82,23 +79,8 @@ public class RefBookController {
                                                                           @RequestParam(required = false) String searchPattern,
                                                                           @RequestParam(required = false) boolean exactSearch,
                                                                           @RequestParam PagingParams pagingParams) {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
-        RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
-                refBookFactory.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
-        PagingResult<Map<String, RefBookValue>> records;
-        if (recordId == null) {
-            String filter = null;
-            if (StringUtils.isNotEmpty(searchPattern)) {
-                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBookId, exactSearch);
-            }
-            // Отбираем все записи справочника
-            records = provider.getRecordsWithVersionInfo(version,
-                    pagingParams, filter, sortAttribute, pagingParams.getDirection().toLowerCase().equals("asc"));
-        } else {
-            // Отбираем все версии записи правочника
-            records = provider.getRecordVersionsByRecordId(recordId, pagingParams, null, sortAttribute);
-        }
+        PagingResult<Map<String, RefBookValue>> records = commonRefBookService.fetchAllRecords(
+                refBookId, recordId, version, searchPattern, exactSearch, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
@@ -197,9 +179,9 @@ public class RefBookController {
     /**
      * Формирование отчета в XLSX
      *
-     * @param refBookId    идентификатор справочника
-     * @param version      версия, на которую строится отчет (для версионируемых справочников)
-     * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param refBookId     идентификатор справочника
+     * @param version       версия, на которую строится отчет (для версионируемых справочников)
+     * @param pagingParams  параметры сортировки для отображения записей в отчете так же как и в GUI
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @return информация о создании отчета
@@ -217,9 +199,9 @@ public class RefBookController {
     /**
      * Формирование отчета в CSV
      *
-     * @param refBookId    идентификатор справочника
-     * @param version      версия, на которую строится отчет (для версионируемых справочников)
-     * @param pagingParams параметры сортировки для отображения записей в отчете так же как и в GUI
+     * @param refBookId     идентификатор справочника
+     * @param version       версия, на которую строится отчет (для версионируемых справочников)
+     * @param pagingParams  параметры сортировки для отображения записей в отчете так же как и в GUI
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
      * @return информация о создании отчета
