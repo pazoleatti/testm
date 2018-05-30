@@ -137,4 +137,35 @@
         </update>
     </changeSet>
 
+    <!-- Перенос правок из 2.2.2 - Начало -->
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4605 -->
+    <changeSet id="3.0-dloshkarev-2" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+    <!--
+        https://jira.aplana.com/browse/SBRFNDFL-4608
+        https://jira.aplana.com/browse/SBRFNDFL-4689
+    -->
+    <changeSet id="3.0-dloshkarev-3" author="dloshkarev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
+    <!--
+        https://jira.aplana.com/browse/SBRFNDFL-4561
+        https://jira.aplana.com/browse/SBRFNDFL-4589
+    -->
+    <changeSet id="3.0-dloshkarev-4" author="dloshkarev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+        </update>
+    </changeSet>
+    <!-- Перенос правок из 2.2.2 - Конец -->
+
 </databaseChangeLog>
