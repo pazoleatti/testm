@@ -583,65 +583,69 @@
         /**
          * Универсальный контроллер для выбора из любого справочника
          */
-        .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http', "$filter",
-            function ($scope, GetSelectOption, $http, $filter) {
+        .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http', "$filter", "APP_CONSTANTS",
+            function ($scope, GetSelectOption, $http, $filter, APP_CONSTANTS) {
                 $scope.select = {};
 
                 // Список конфигов для разных справочников
-                $scope.refBookConfig = {
-                    96: {   // ОКТМО
-                        filter: {
-                            columns: ["name", "code"]
-                        },
-                        formatter: "codeNameFormatter"
+                $scope.refBookConfig = {};
+                // ОКТМО
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO] = {
+                    filter: {
+                        columns: ["name", "code"]
                     },
-                    922: {   // Коды видов доходов
-                        filter: {
-                            columns: ["name", "code"]
-                        },
-                        formatter: "codeNameFormatter"
+                    formatter: "codeNameFormatter"
+                };
+                // Коды видов доходов
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
+                    filter: {
+                        columns: ["name", "code"]
                     },
-                    904: {   // Физические лица
-                        // TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет. По крайней мере можно использовать новое апи для этого справочника, чтобы быстрее получать записи
-                        sort: {
-                            property: "last_name",
-                            direction: "asc"
-                        },
-                        filter: {
-                            columns: ["first_name, last_name, middle_name"]
-                        },
-                        formatter: "personFormatter"
+                    formatter: "codeNameFormatter"
+                };
+                // Физические лица
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON] = {
+                    // TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет. По крайней мере можно использовать новое апи для этого справочника, чтобы быстрее получать записи
+                    sort: {
+                        property: "last_name",
+                        direction: "asc"
                     },
-                    901: {   // Адреса физических лиц TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет
-                        sort: {
-                            property: "id", //TODO: тут нужна комбинация полей
-                            direction: "asc"
-                        },
-                        filter: {
-                            columns: ["REGION_CODE, POSTAL_CODE, DISTRICT, CITY, LOCALITY, STREET, HOUSE, BUILD, APPARTMENT"]
-                        },
-                        formatter: "personAddressFormatter"
+                    filter: {
+                        columns: ["first_name, last_name, middle_name"]
                     },
-                    903: {   // Статусы налогоплательщика
-                        filter: {
-                            columns: ["name", "code"]
-                        },
-                        formatter: "codeNameFormatter"
+                    formatter: "personFormatter"
+                };
+                // Адреса физических лиц TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON_ADDRESS] = {
+                    sort: {
+                        property: "id", //TODO: тут нужна комбинация полей
+                        direction: "asc"
                     },
-                    default: {
-                        // ОК 025-2001 (Общероссийский классификатор стран мира)
-                        // Виды документов, удостоверяющих личность
-                        // АСНУ
-                        // Признак кода вычета
-                        sort: {
-                            property: "name",
-                            direction: "asc"
-                        },
-                        filter: {
-                            columns: ["name"]
-                        },
-                        formatter: "nameFormatter"
-                    }
+                    filter: {
+                        columns: ["REGION_CODE, POSTAL_CODE, DISTRICT, CITY, LOCALITY, STREET, HOUSE, BUILD, APPARTMENT"]
+                    },
+                    formatter: "personAddressFormatter"
+                };
+                // Статусы налогоплательщика
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS] = {
+                    filter: {
+                        columns: ["name", "code"]
+                    },
+                    formatter: "codeNameFormatter"
+                };
+                // ОК 025-2001 (Общероссийский классификатор стран мира)
+                // Виды документов, удостоверяющих личность
+                // АСНУ
+                // Признак кода вычета
+                $scope.refBookConfig.default = {
+                    sort: {
+                        property: "name",
+                        direction: "asc"
+                    },
+                    filter: {
+                        columns: ["name"]
+                    },
+                    formatter: "nameFormatter"
                 };
 
                 /**

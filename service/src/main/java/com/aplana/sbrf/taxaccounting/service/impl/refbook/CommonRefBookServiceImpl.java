@@ -121,11 +121,6 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    public int getRecordVersionCount(Long refBookId, Long recordId) {
-        return refBookFactory.getDataProvider(refBookId).getRecordVersionsCount(recordId);
-    }
-
-    @Override
     public ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, String searchPattern, boolean exactSearch, AsyncTaskType reportType) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
@@ -244,9 +239,10 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     /**
      * Рекурсивно находит все родительские записи для указанной. В первую очередь запись ищется среди ранее найденных, т.к в этом случае искать дальше смысла нет - все родительские уже в этом списке
+     *
      * @param provider провайдер для доступа к справочнику
-     * @param record текущая запись
-     * @param parents все ранее найденные родительские записи упорядоченные по ID
+     * @param record   текущая запись
+     * @param parents  все ранее найденные родительские записи упорядоченные по ID
      * @return дополненный список родительских записей
      */
     private Map<Number, Map<String, RefBookValue>> fetchParentsRecursively(RefBookDataProvider provider, Map<String, RefBookValue> record, Map<Number, Map<String, RefBookValue>> parents) {

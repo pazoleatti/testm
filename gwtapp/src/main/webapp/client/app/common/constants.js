@@ -55,7 +55,11 @@
                 ASNU: 900,
                 ATTACH_FILE_TYPE: 934,
                 DECLARATION_DATA_TYPE_REF_BOOK: 931,
-                PERSON: 904
+                PERSON: 904,
+                OKTMO: 96,
+                INCOME_CODE: 922,
+                PERSON_ADDRESS: 901,
+                TAXPAYER_STATUS: 903,
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
