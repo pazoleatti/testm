@@ -30,4 +30,12 @@ public class UpdateTemplateStatusAction {
     public void setFormsExistWarningConfirmed(boolean formsExistWarningConfirmed) {
         this.formsExistWarningConfirmed = formsExistWarningConfirmed;
     }
+
+    @Override
+    public String toString() {
+        return "UpdateTemplateStatusAction{" +
+                "templateId=" + templateId +
+                ", formsExistWarningConfirmed=" + formsExistWarningConfirmed +
+                '}';
+    }
 }

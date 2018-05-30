@@ -803,6 +803,7 @@ class DeclarationType extends AbstractScriptClass {
                         .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
                         .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
                         .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"");
+                logger.info(msgBuilder.toString())
             }
         }
         // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа
@@ -1155,6 +1156,7 @@ class DeclarationType extends AbstractScriptClass {
                     .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
                     .append(", Вид: \"").append(declarationType.getName()).append("\"")
                     .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
+            logger.info(msgBuilder.toString())
         }
     }
 

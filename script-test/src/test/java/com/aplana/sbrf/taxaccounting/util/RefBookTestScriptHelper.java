@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.script.service.*;
+import com.aplana.sbrf.taxaccounting.service.impl.UploadTransportDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import net.sf.sevenzipjbinding.IInArchive;
 
@@ -163,6 +164,9 @@ public class RefBookTestScriptHelper {
                 name = fileName;
             }
             bindings.put("fileName", name);
+            if (uploadFileName != null) {
+                bindings.put("fileType", UploadTransportDataServiceImpl.getFileType(uploadFileName));
+            }
         }
 
         //для тестов загрузки фиас

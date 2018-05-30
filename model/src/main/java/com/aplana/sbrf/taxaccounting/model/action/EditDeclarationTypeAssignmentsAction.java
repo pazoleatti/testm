@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,5 +30,13 @@ public class EditDeclarationTypeAssignmentsAction {
 
     public void setPerformerIds(List<Integer> performerIds) {
         this.performerIds = performerIds;
+    }
+
+    @Override
+    public String toString() {
+        return "EditDeclarationTypeAssignmentsAction{" +
+                "assignmentIds=" + assignmentIds +
+                ", performerIds=" + performerIds +
+                '}';
     }
 }

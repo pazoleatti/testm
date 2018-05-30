@@ -46,4 +46,13 @@ public class AcceptDeclarationDataAction {
         this.cancelTask = cancelTask;
     }
 
+    @Override
+    public String toString() {
+        return "AcceptDeclarationDataAction{" +
+                "declarationId=" + declarationId +
+                ", taxType=" + taxType +
+                ", force=" + force +
+                ", cancelTask=" + cancelTask +
+                '}';
+    }
 }

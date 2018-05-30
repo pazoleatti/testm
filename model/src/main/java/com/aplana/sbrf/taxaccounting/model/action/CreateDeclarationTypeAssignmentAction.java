@@ -48,4 +48,13 @@ public class CreateDeclarationTypeAssignmentAction {
     public void setPerformerIds(List<Integer> performerIds) {
         this.performerIds = performerIds;
     }
+
+    @Override
+    public String toString() {
+        return "CreateDeclarationTypeAssignmentAction{" +
+                "departmentIds=" + departmentIds +
+                ", declarationTypeIds=" + declarationTypeIds +
+                ", performerIds=" + performerIds +
+                '}';
+    }
 }

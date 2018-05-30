@@ -67,6 +67,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void create(DepartmentReportPeriod departmentReportPeriod) {
+        LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s", departmentReportPeriod));
         try {
             departmentReportPeriodDao.create(departmentReportPeriod);
         } catch (ServiceException e) {
@@ -79,6 +80,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
+        LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s; departmentIds: %s", departmentReportPeriod, departmentIds));
         if (departmentIds == null || departmentIds.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
         try {
@@ -96,6 +98,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void updateActive(int id, boolean active) {
+        LOG.info(String.format("DepartmentReportPeriodServiceImpl.updateActive. id: %s; active: %s", id, active));
         try {
             departmentReportPeriodDao.updateActive(id, active);
         } catch (ServiceException e) {
@@ -108,6 +111,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void updateActive(List<Integer> ids, Integer reportPeriodId, boolean active) {
+        LOG.info(String.format("DepartmentReportPeriodServiceImpl.updateActive. ids: %s; reportPeriodId: %s; active: %s", ids, reportPeriodId, active));
         if (ids == null || ids.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
         try {
@@ -122,6 +126,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void delete(List<Integer> ids) {
+        LOG.info(String.format("DepartmentReportPeriodServiceImpl.delete. ids: %s", ids));
         try {
             departmentReportPeriodDao.delete(ids);
         } catch (ServiceException e) {

@@ -272,6 +272,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private Long doCreate(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                           DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
                           String oktmo, Long asunId, String fileName, String note, boolean writeAudit, boolean manuallyCreated) {
+        LOG.info(String.format("DeclarationDataServiceImpl.doCreate by %s. declarationTemplateId: %s; departmentReportPeriod: %s; taxOrganCode: %s; taxOrganKpp: %s; oktmo: %s; asunId: %s; fileName: %s; note: %s; writeAudit: %s; manuallyCreated: %s",
+                userInfo, declarationTemplateId, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit, manuallyCreated));
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -509,6 +511,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Transactional
     public void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.calculate by %s. declarationDataId: %s; docDate: %s; exchangeParams: %s",
+                userInfo, declarationDataId, docDate, exchangeParams));
         boolean createForm = calculateDeclaration(logger, declarationDataId, userInfo, docDate, exchangeParams, stateLogger);
         if (createForm) {
             declarationDataDao.setStatus(declarationDataId, State.CREATED);
@@ -518,6 +522,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasPermission(#targetIdAndLogger, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IDENTIFY)")
     public void identify(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.identify by %s. docDate: %s; docDate: %s; exchangeParams: %s",
+                userInfo, docDate, docDate, exchangeParams));
         calculate(targetIdAndLogger.getLogger(), targetIdAndLogger.getId(),
                 userInfo, docDate, exchangeParams, stateLogger);
     }
@@ -525,12 +531,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasPermission(#targetIdAndLogger, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CONSOLIDATE)")
     public void consolidate(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.consolidate by %s. docDate: %s; exchangeParams: %s",
+                userInfo, docDate, exchangeParams));
         calculate(targetIdAndLogger.getLogger(), targetIdAndLogger.getId(),
                 userInfo, docDate, exchangeParams, stateLogger);
     }
 
     private boolean calculateDeclaration(Logger logger, Long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-
         DeclarationData declarationData = declarationDataDao.get(declarationDataId);
 
         //2. проверяет состояние XML отчета экземпляра декларации
@@ -605,6 +612,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, final long declarationDataId,
                                                                 final boolean force, final boolean cancelTask,
                                                                 final DeclarationDataReportType ddReportType) {
+        LOG.info(String.format("DeclarationDataServiceImpl.recalculateDeclaration by %s. declarationDataId: %s; force: %s; cancelTask: %s; ddReportType: %s",
+                userInfo, declarationDataId, force, cancelTask, ddReportType));
         final RecalculateDeclarationResult result = new RecalculateDeclarationResult();
         if (!existDeclarationData(declarationDataId)) {
             result.setExistDeclarationData(false);
@@ -682,6 +691,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Transactional
     protected ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds, Permission permission) {
+        LOG.info(String.format("DeclarationDataServiceImpl.recalculateDeclarationList by %s. ddReportType: %s; declarationDataIds: %s; permission: %s",
+                userInfo, ddReportType, declarationDataIds, permission));
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
@@ -1045,6 +1056,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     //Формирование рну ндфл для физ лица
     @Override
     public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long ndflPersonId, final NdflPersonFilter ndflPersonFilter) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportRnu by %s. declarationDataId: %s; ndflPersonId: %s; ndflPersonFilter: %s",
+                userInfo, declarationDataId, ndflPersonId, ndflPersonFilter));
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -1109,6 +1122,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public CreateDeclarationReportResult createReportAllRnu(final TAUserInfo userInfo, final long declarationDataId, boolean force) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportAllRnu by %s. declarationDataId: %s; force: %s",
+                userInfo, declarationDataId, force));
         DeclarationData declaration = get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
 
@@ -1154,6 +1169,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId, boolean force) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createPairKppOktmoReport by %s. declarationDataId: %s; force: %s",
+                userInfo, declarationDataId, force));
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
             result.setExistDeclarationData(false);
@@ -1193,6 +1210,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public CreateDeclarationReportResult createReportXlsx(final TAUserInfo userInfo, final long declarationDataId,
                                                           boolean force) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportXlsx by %s. declarationDataId: %s; force: %s",
+                userInfo, declarationDataId, force));
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -1291,6 +1310,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public ActionResult deleteIfExists(long id, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.deleteIfExists by %s. id: %s",
+                userInfo, id));
         if (existDeclarationData(id)) {
             return delete(id, userInfo);
         }
@@ -1301,6 +1322,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public ActionResult delete(final long id, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.delete by %s. id: %s",
+                userInfo, id));
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
@@ -1342,6 +1365,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public void deleteSync(long id, TAUserInfo userInfo, boolean createLock) {
+        LOG.info(String.format("DeclarationDataServiceImpl.deleteSync by %s. id: %s",
+                userInfo, id));
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
         LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
@@ -1401,6 +1426,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public ActionResult deleteDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds) {
+        LOG.info(String.format("DeclarationDataServiceImpl.deleteDeclarationList by %s. declarationDataIds: %s",
+                userInfo, declarationDataIds));
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
 
@@ -1431,6 +1458,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).ACCEPTED)")
     public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.accept by %s. id: %s",
+                userInfo, id));
         DeclarationData declarationData = declarationDataDao.get(id);
 
         Logger scriptLogger = new Logger();
@@ -1457,6 +1486,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public ActionResult acceptDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
+        LOG.info(String.format("DeclarationDataServiceImpl.acceptDeclarationList by %s. declarationDataIds: %s",
+                userInfo, declarationDataIds));
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
@@ -1523,6 +1554,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.cancel by %s. id: %s; note: %s",
+                userInfo, declarationDataId, note));
         try {
             List<Long> receiversIdList = getReceiversAcceptedPrepared(declarationDataId, logger, userInfo);
             if (receiversIdList.isEmpty()) {
@@ -1560,6 +1593,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public ActionResult cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
+                userInfo, declarationDataIds, note));
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
@@ -1745,6 +1780,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createJasperReport by %s. declarationData: %s",
+                userInfo, declarationData));
         String xmlUuid = reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
         try {
@@ -1823,6 +1860,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createSpecificReport by %s. declarationData: %s; ddReportType: %s; subreportParamValues: %s; viewParamValues: %s; selectedRecord: %s",
+                userInfo, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord));
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = null;
@@ -1865,6 +1904,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.prepareSpecificReport by %s. declarationData: %s; ddReportType: %s; subreportParamValues: %s",
+                userInfo, declarationData, ddReportType, subreportParamValues));
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         InputStream inputStream = null;
@@ -1890,6 +1931,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
     public String setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.setXlsxDataBlobs by %s. declarationData: %s",
+                userInfo, declarationData));
         String script = declarationTemplateService.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
         if (DeclarationDataScriptingServiceImpl.canExecuteScript(script, FormDataEvent.CREATE_EXCEL_REPORT)) {
             Map<String, Object> params = new HashMap<String, Object>();
@@ -2392,6 +2435,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, AsyncTaskType reportType, TaskInterruptCause cause) {
+        LOG.info(String.format("DeclarationDataServiceImpl.interruptAsyncTask by %s. declarationData: %s; reportType: %s; cause: %s",
+                userInfo, declarationDataId, reportType, cause));
         DeclarationDataReportType[] ddReportTypes = getCheckTaskList(reportType);
         if (ddReportTypes == null) return;
         DeclarationData declarationData = get(declarationDataId, userInfo);
@@ -2666,6 +2711,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream,
                                       String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
                                       AttachFileType fileType, Date createDateFile) {
+        LOG.info(String.format("Declaration imported by %s. declarationDataId: %s; fileName: %s; formDataEvent: %s; fileType: %s; createDateFile: %s",
+                userInfo, declarationDataId, fileName, formDataEvent, fileType, createDateFile));
         try {
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
@@ -2798,6 +2845,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
+                userInfo, departmentReportPeriod, declarationTypeId));
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
         additionalParameters.put("formMap", formMap);
@@ -2845,6 +2894,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. departmentReportPeriod: %s; declarationTypeId: %s",
+                userInfo, departmentReportPeriod, declarationTypeId));
         DeclarationData declarationDataTemp = new DeclarationData();
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
@@ -2884,6 +2935,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId) {
+        LOG.info(String.format("DeclarationDataServiceImpl.changeDocState by %s. declarationDataId: %s; docStateId: %s",
+                userInfo, declarationDataId, docStateId));
         DeclarationData declarationData = get(declarationDataId, userInfo);
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         additionalParameters.put("docStateId", docStateId);
@@ -2942,6 +2995,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. declarationTypeId: %s; departmentId: %s; periodId: %s",
+                userInfo, declarationTypeId, departmentId, periodId));
         // логика взята из CreateFormsDeclarationHandler
         Logger logger = new Logger();
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
@@ -2980,6 +3035,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_NS', 'N_ROLE_CONTROL_UNP')")
     public AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final AcceptDeclarationDataAction action) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createAcceptDeclarationTask by %s. action: %s",
+                userInfo, action));
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
         final AcceptDeclarationResult result = new AcceptDeclarationResult();
         if (!existDeclarationData(action.getDeclarationId())) {
@@ -3099,6 +3156,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private String createReports(List<DeclarationData> declarationDataList, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. declarationDataList: %s",
+                userInfo, declarationDataList));
         File reportFile;
         ZipArchiveOutputStream zos = null;
         try {
@@ -3154,6 +3213,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public CreateReportResult createReportForReportDD(TAUserInfo userInfo, final CreateReportAction action) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportForReportDD by %s. action: %s",
+                userInfo, action));
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
         CreateReportResult result = new CreateReportResult();
         if (!existDeclarationData(action.getDeclarationDataId())) {
@@ -3228,6 +3289,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public PrepareSubreportResult prepareSubreport(TAUserInfo userInfo, PrepareSubreportAction action) {
+        LOG.info(String.format("DeclarationDataServiceImpl.prepareSubreport by %s. action: %s",
+                userInfo, action));
         PrepareSubreportResult result = new PrepareSubreportResult();
         if (!existDeclarationData(action.getDeclarationDataId())) {
             result.setExistDeclarationData(false);
@@ -3263,6 +3326,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public CreateDeclarationExcelTemplateResult createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo, boolean force) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateExcelTemplate by %s. declarationDataId: %s; force: %s",
+                userInfo, declarationDataId, force));
         final CreateDeclarationExcelTemplateResult result = new CreateDeclarationExcelTemplateResult();
         final TAUser user = userInfo.getUser();
         Logger logger = new Logger();
@@ -3294,6 +3359,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) throws IOException {
+        LOG.info(String.format("DeclarationDataServiceImpl.createExcelTemplate by %s. declaration: %s",
+                userInfo, declaration));
         Map<String, Object> params = new HashMap<>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = File.createTempFile("report", ".dat");
@@ -3325,6 +3392,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
     public ImportDeclarationExcelResult createTaskToImportExcel(final long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToImportExcel by %s. declarationDataId: %s; fileName: %s; force: %s",
+                userInfo, declarationDataId, fileName, force));
         final ImportDeclarationExcelResult result = new ImportDeclarationExcelResult();
         final TAUser user = userInfo.getUser();
         Logger logger = new Logger();
@@ -3395,6 +3464,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
     public void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.importExcel by %s. declarationDataId: %s; blobData: %s",
+                userInfo, declarationDataId, blobData.getUuid()));
         TAUser user = userInfo.getUser();
         File tempFile = null;
         try {

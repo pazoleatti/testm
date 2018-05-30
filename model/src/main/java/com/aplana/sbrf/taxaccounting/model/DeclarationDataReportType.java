@@ -140,4 +140,12 @@ public class DeclarationDataReportType implements Serializable {
             throw new IllegalArgumentException("Некорректный тип отчета: " + reportType.getName());
         }
     }
+
+    @Override
+    public String toString() {
+        return "DeclarationDataReportType{" +
+                "reportType=" + reportType +
+                ", subreport=" + subreport +
+                '}';
+    }
 }

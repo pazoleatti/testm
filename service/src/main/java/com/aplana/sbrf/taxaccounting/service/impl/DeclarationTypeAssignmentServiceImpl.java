@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmen
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,8 @@ import java.util.*;
 @Service
 @Transactional
 public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssignmentService {
+    private static final Log LOG = LogFactory.getLog(DeclarationTypeAssignmentServiceImpl.class);
+
     private DepartmentService departmentService;
     private SourceService sourceService;
     private LogEntryService logEntryService;
@@ -87,6 +91,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
     public CreateDeclarationTypeAssignmentResult createDeclarationTypeAssignment(TAUserInfo userInfo, CreateDeclarationTypeAssignmentAction action) {
+        LOG.info(String.format("DeclarationTypeAssignmentServiceImpl.createDeclarationTypeAssignment. userInfo: %s; action: %s", userInfo, action));
         List<LogEntry> logs = new ArrayList<>();
 
         // Пользователь пытается создать назначения, которые уже существуют
@@ -143,6 +148,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
     public void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action) {
+        LOG.info(String.format("DeclarationTypeAssignmentServiceImpl.editDeclarationTypeAssignments. userInfo: %s; action: %s", userInfo, action));
         if (!CollectionUtils.isEmpty(action.getAssignmentIds())) {
             for (Integer assignmentId : action.getAssignmentIds()) {
                 sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
@@ -166,6 +172,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
     public ActionResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments) {
+        LOG.info(String.format("DeclarationTypeAssignmentServiceImpl.deleteDeclarationTypeAssignments. userInfo: %s; assignments: %s", userInfo, assignments));
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
         boolean declarationsExist = false;

@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.util.Map;
@@ -70,5 +68,18 @@ public class CreateReportAction {
 
     public void setSelectedRow(Map<String, Object> selectedRow) {
         this.selectedRow = selectedRow;
+    }
+
+    @Override
+    public String toString() {
+        return "CreateReportAction{" +
+                "declarationDataId=" + declarationDataId +
+                ", isForce=" + isForce +
+                ", taxType=" + taxType +
+                ", type='" + type + '\'' +
+                ", create=" + create +
+                ", subreportParamValues=" + subreportParamValues +
+                ", selectedRow=" + selectedRow +
+                '}';
     }
 }

@@ -16,19 +16,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Сервис работы с периодами
- * <p>
- * Только этот сервис должен использоваться для работы с отчетными и налоговыми периодами
+ * Сервис работы Физическими лицами. Заменяет некоторые операции провайдера справочников для лучшей производительности
  */
 @Service
 @Transactional
 public class PersonServiceImpl implements PersonService {
+    private static final Log LOG = LogFactory.getLog(PersonServiceImpl.class);
 
     @Autowired
     private RefBookPersonDao refBookPersonDao;
@@ -264,16 +265,19 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void setOriginal(List<Long> recordIds) {
+        LOG.info(String.format("PersonServiceImpl.setOriginal. recordIds: %s", recordIds));
         refBookPersonDao.setOriginal(recordIds);
     }
 
     @Override
     public void setDuplicate(List<Long> recordIds, Long originalId) {
+        LOG.info(String.format("PersonServiceImpl.setDuplicate. recordIds: %s; originalId: %s", recordIds, originalId));
         refBookPersonDao.setDuplicate(recordIds, originalId);
     }
 
     @Override
     public void changeRecordId(List<Long> recordIds, Long originalId) {
+        LOG.info(String.format("PersonServiceImpl.changeRecordId. recordIds: %s; originalId: %s", recordIds, originalId));
         refBookPersonDao.changeRecordId(recordIds, originalId);
     }
 }

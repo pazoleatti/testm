@@ -162,7 +162,7 @@ public class TAUser implements SecuredEntity, Serializable {
                 "id: " + id +
                 ",login: " + login +
                 ",name: " + name +
-                ",roles: " + roles.toString() +
+                ",roles: " + (roles != null ? roles.toString() : null) +
                 ",departmentId: " + departmentId +
                 ",active: " + active +
                 ",email: " + email +

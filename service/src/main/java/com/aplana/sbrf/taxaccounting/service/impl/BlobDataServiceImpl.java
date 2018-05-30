@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.UUID;
 @Service
 @Transactional
 public class BlobDataServiceImpl implements BlobDataService {
+    private static final Log LOG = LogFactory.getLog(BlobDataServiceImpl.class);
 
     @Autowired
     BlobDataDao blobDataDao;
@@ -35,6 +38,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(InputStream is, String name) {
+        LOG.info(String.format("BlobDataServiceImpl.create. name: %s", name));
         BlobData blobData = initBlob("", is, name, null);
         return blobDataDao.createWithSysdate(blobData);
     }
@@ -54,6 +58,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(File file, String name, Date createDate) {
+        LOG.info(String.format("BlobDataServiceImpl.create. name: %s, createDate: %s", name, createDate));
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
@@ -68,11 +73,13 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(BlobData data) {
+        LOG.info(String.format("BlobDataServiceImpl.create. name: %s", data.getName()));
         return blobDataDao.createWithSysdate(data);
     }
 
     @Override
     public void delete(String blobId) {
+        LOG.info(String.format("BlobDataServiceImpl.delete. blobId: %s", blobId));
         try {
             blobDataDao.delete(blobId);
         } catch (DaoException e) {
@@ -82,6 +89,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void delete(List<String> blobIdStrings) {
+        LOG.info(String.format("BlobDataServiceImpl.delete. blobIdStrings: %s", blobIdStrings));
         try {
             blobDataDao.delete(blobIdStrings);
         } catch (DaoException e) {
@@ -91,6 +99,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void save(String blobId, InputStream is) {
+        LOG.info(String.format("BlobDataServiceImpl.save. blobId: %s", blobId));
         blobDataDao.updateDataByUUID(blobId, is);
     }
 

@@ -5,14 +5,14 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.LoadDeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 /**
- * Загрузка ТФ
+ * Загрузка ТФ (ТФ РНУ НДФЛ, файла ответа 6-НДФЛ, файла ответа 2-НДФЛ)
  */
 @Component("LoadTransportFileAsyncTask")
 public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
@@ -24,7 +24,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     private AsyncManager asyncManager;
 
     @Autowired
-    private LoadDeclarationDataService loadDeclarationDataService;
+    private UploadTransportDataService uploadTransportDataService;
 
     private String msg;
 
@@ -39,9 +39,10 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
         final String blobDataId = (String) params.get("blobDataId");
+        final TransportFileType fileType = (TransportFileType) params.get("fileType");
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
-        msg = loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), taskData.getId());
+        msg = uploadTransportDataService.processTransportFileUploading(logger, userInfo, fileType, blobData.getName(), blobData.getInputStream(), taskData.getId());
         return new BusinessLogicResult(true, null);
     }
 
