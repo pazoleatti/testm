@@ -1,79 +1,72 @@
+using Snp.VSAX3.BF.Xml.Schema.Schematron.Extensions;
+using Snp.VSAX3.Contract.Xml.Schema;
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Threading;
+using System.IO;
+using System.Xml;
 using System.Xml.Schema;
-using VSAX3; //Версия 3.3.147.101
 
-class Schematron {
+class Program
+{
+    static void Main(string[] args)
+    {
+        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
+        Stopwatch pSw = new Stopwatch();
+        pSw.Start();
+        try
+        {
+            // Проверка количества аргументов. Вывод справки
+            if (args.Length != 2 && args.Length != 3)
+            {
+                throw new Exception(
+                    "Program description: Check xml by xsd scheme with schematron extension.\n" +
+                    "Usage syntax1: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\" \n" +
+                    "Usage syntax2: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\" \"TARGET_XML_FILE_NAME\"\n" +
+                    "Result: Warnings or info of success result will be writed in system out.");
+            }
+            string xmlFilePath = args[0];
+            string xsdFilePath = args[1];
+            string xmlFileName = args.Length == 2 ? xmlFilePath : args[2] + ".xml";
 
-	// параметры командной строки
-	private static string[] args;
+            var xmlStream = File.OpenRead(xmlFilePath);
+            var schema = new XmlSchemaSet();
+            schema.Add("", xsdFilePath);
 
-	static void Main(string[] appArgs) {
-		args = appArgs;
-    	Thread t = new Thread(check);
-		t.CurrentCulture = new CultureInfo("ru-RU");
-		t.Start();
-		t.Join();
-	}
+            var readerSettings = new XmlReaderSettings()
+            {
+                ValidationType = ValidationType.Schema,
+                Schemas = schema
+            };
+            var validatorSettings = new SnpXmlValidatorSettings
+            {
+                ValidatingType = EValidateType.FormatAndLogic,
+                ErrorsLimit = 10000,
+                Settings = readerSettings
+            };
+            var validator = new SnpXmlValidator(validatorSettings);
 
-	static void check() {
-		Stopwatch pSw = new Stopwatch();
-		pSw.Start();
-		try {
-			// Проверка количества аргументов. Вывод справки
-			if (args.Length != 2 && args.Length != 3) {
-				throw new Exception (
-					"Program description: Check xml by xsd scheme with schematron extension.\n" +
-					"Usage syntax1: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\" \n" +
-					"Usage syntax2: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\" \"TARGET_XML_FILE_NAME\"\n" +
-					"Result: Warnings or info of success result will be writed in system out.");
-			}
-			string xmlFleName = args[0];
-			string xsdFleName = args[1];
-			string xmlTargetFileName = args.Length == 2 ? xmlFleName : args[2];
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(xmlFileName);
+            var result = validator.Validate(new Tuple<Stream, string>(xmlStream, fileNameWithoutExtension));
 
-			FileStream pXml = new FileStream(xmlFleName, FileMode.Open, FileAccess.Read);
-			XmlSchemaSet pXsd = new System.Xml.Schema.XmlSchemaSet();
-			pXsd.Add("", xsdFleName);
-
-			// #1: Валидация Xml по Xsd без схематрона
-			// Версия: (3.3.145.301)+
-			//var reader = new SnpXmlValidatingReader {ValidatingType = EVsaxValidateType.SnpSax};
-
-			// #2: Валидация Xml по Xsd со схематроном 'usch' с ограничением кол-ва ошибок по схематрону 100:
-			// Версия: (3.3.147.101)+
-			SnpXmlValidatingReader reader = new SnpXmlValidatingReader ();// { ValidatingType = EVsaxValidateType.SaxSchematronUsch, ErrorCounter = 100 };
-			reader.ValidatingType = EVsaxValidateType.SaxSchematronUsch;
-			reader.ErrorCounter = 10000;
-			// #3: Валидация Xml по Xsd со схематроном 'snp' (Способ проверки добавленный в VSAX3* )
-			// Версия: (3.3.145.301)+
-			// * - расширение схематрона для пофрагментарной обработки файла (фирменный метод решающий вопрос проверки больших файлов, но
-			// затратный по времени валидации по сравнению с предыдущим способом).
-			//var reader = new SnpXmlValidatingReader { ValidatingType = EVsaxValidateType.SaxSchematronSnp };
-
-			bool result = reader.Validate(pXml, xmlTargetFileName, pXsd);
-			IVsaxErrorHandler errors = reader.ErrorHandler;
-			Console.WriteLine(result && errors.Errors.Count == 0 ? "Result: SUCCESS" : "Result: FAIL");
-			int errcounter = 0;
-			foreach (ErrorsStruct e in errors.Errors) {
-				if (errcounter > 10000)
-				{
-					break;
-				}
-				Console.WriteLine(e.XPath + " : " + e.ErrorText);
-				errcounter++;
-			}
-			//VsaxProtocol.WriteProtocolTo("Protocol.xml", errors);
-
-			reader.Close();
-		} catch (Exception e) {
-			Console.WriteLine("Result: FAIL");
-			Console.WriteLine(e.Message);
-		}
-		pSw.Stop();
-		Console.WriteLine("Execution time: " + pSw.Elapsed.ToString());
-	}
+            Console.WriteLine(result.IsSuccess && result.Errors.Count == 0 ? "Result: SUCCESS" : "Result: FAIL");
+            int errcounter = 0;
+            foreach (var e in result.Errors)
+            {
+                if (errcounter > 10000)
+                {
+                    break;
+                }
+                Console.WriteLine(e.XPath + " : " + e.Message);
+                errcounter++;
+            }
+        }
+        catch (Exception e) {
+            Console.WriteLine("Result: FAIL");
+            Console.WriteLine(e.Message);
+        }
+        pSw.Stop();
+        Console.WriteLine("Execution time: " + pSw.Elapsed.ToString());
+    }
 }
