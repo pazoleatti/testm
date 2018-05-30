@@ -168,4 +168,11 @@
     </changeSet>
     <!-- Перенос правок из 2.2.2 - Конец -->
 
+    <changeSet id="3.0-dnovikov-0" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 5</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -1297,8 +1297,8 @@ class Check extends AbstractScriptClass {
                             if (!check) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format(dateConditionData.conditionMessage,
-                                        C_INCOME_ACCRUED_DATE, ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : "",
-                                        C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : "",
+                                        C_INCOME_ACCRUED_DATE, formatDate(ndflPersonIncome.incomeAccruedDate),
+                                        C_INCOME_PAYOUT_DATE, formatDate(ndflPersonIncome.incomePayoutDate),
                                         C_INCOME_CODE, ndflPersonIncome.incomeCode,
                                         C_INCOME_TYPE, ndflPersonIncome.incomeType
                                 )
