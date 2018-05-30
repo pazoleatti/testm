@@ -9,20 +9,28 @@
                 <label class="inline-value">{{getAttributeFineValue(versionToAttribute)}}</label>
             </div>
             <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" >
-                <label style="float: left" class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
-                <span style="float: left" data-aplana-field>
-                    <span data-aplana-datepicker
-                          aplana-picker-outer-width="150px"
-                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value"
-                          data-ng-required="true"></span>
-                    <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
-                </span>
-                <label style="float: left; margin-left: 20px;" class="inline-label">{{::'refBook.versionToShort' | translate}}:</label>
-                <span data-aplana-field>
-                    <span data-aplana-datepicker
-                          aplana-picker-outer-width="150px"
-                          data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value"></span>
-                </span>
+                <div class="row-fluid">
+                    <div class="span2">
+                        <label class="control-label">{{::'refBook.versionFromShort' | translate}}:</label>
+                    </div>
+                    <div class="span2">
+                        <span data-aplana-field>
+                            <span data-aplana-datepicker
+                                  data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value"
+                                  data-ng-required="true"></span>
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                        </span>
+                    </div>
+                    <div class="span1">
+                        <label class="control-label">{{::'refBook.versionToShort' | translate}}:</label>
+                    </div>
+                    <div class="span2">
+                        <span data-aplana-field>
+                            <span data-aplana-datepicker
+                                  data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value"></span>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- Список атрибутов -->
@@ -88,12 +96,24 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-default" id="openButton" ng-show="isEditMode" data-ng-disabled="refBookRecordForm.$invalid">
-            <span data-translate-once="button.save"></span>
-        </button>
-        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
-            <span data-translate-once="button.cancel"></span>
-            <span class="btn-icon-noneBg-close"></span>
-        </button>
+        <div class="row-fluid">
+            <div class="span6">
+                <button type="button" class="btn btn-default" ng-hide="isEditMode || refBook.hierarchic" data-ng-click="showPreviousRecord()">
+                    <span data-translate-once="button.prev"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-hide="isEditMode || refBook.hierarchic" data-ng-click="showNextRecord()">
+                    <span data-translate-once="button.next"></span>
+                </button>
+            </div>
+            <div class="span6">
+                <button type="submit" class="btn btn-default" id="openButton" ng-show="isEditMode" data-ng-disabled="refBookRecordForm.$invalid">
+                    <span data-translate-once="button.save"></span>
+                </button>
+                <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
+                    <span data-translate-once="button.cancel"></span>
+                    <span class="btn-icon-noneBg-close"></span>
+                </button>
+            </div>
+        </div>
     </div>
 </form>

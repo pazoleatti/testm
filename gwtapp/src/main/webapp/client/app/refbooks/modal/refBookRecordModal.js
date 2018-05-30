@@ -13,9 +13,31 @@
             '$http', '$logPanel', 'LogEntryResource', '$dialogs',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.refBook = $shareData.refBook;
-                $scope.record = $shareData.mode === 'CREATE' ? {} : $shareData.record;
+                $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
                 $scope.mode = $shareData.mode;
+
+                if ($shareData.gridData) {
+                    // Добавляем функционал для пролистывания записей справочника в режиме просмотра
+                    $scope.recordIndexes = new Map();
+                    $shareData.gridData.forEach(function (record, index) {
+                        $scope.recordIndexes.set(record.id.value, index);
+                    });
+                    $scope.gridIterator = {
+                        getNext: function (record) {
+                            var index = $scope.recordIndexes.get(record.id.value);
+                            if (index + 1 < $shareData.gridData.length) {
+                                return $shareData.gridData[index + 1]
+                            } else return record;
+                        },
+                        getPrevious: function (record) {
+                            var index = $scope.recordIndexes.get(record.id.value);
+                            if (index - 1 >= 0) {
+                                return $shareData.gridData[index - 1]
+                            } else return record;
+                        }
+                    };
+                }
 
                 if ($scope.mode === 'CREATE' && $shareData.recordId) {
                     // Добавляем id группы версий записи справочника для создания новой версии
@@ -34,7 +56,9 @@
                     } else {
                         if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
                             // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
-                            $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
+                            if ($scope.record[attribute.alias].value && typeof $scope.record[attribute.alias].value !== 'undefined') {
+                                $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
+                            }
                         }
                     }
                     if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
@@ -59,7 +83,7 @@
                                 value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
                                 break;
                             case 'DATE':
-                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' && !isNaN(refBookValue.value) ? $filter('dateFormatter')(refBookValue.value) : "";
+                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' && (!$scope.isEditMode || !isNaN(refBookValue.value)) ? $filter('dateFormatter')(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
                                 value = refBookValue && refBookValue.referenceObject && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
@@ -106,6 +130,24 @@
                     }).then(function () {
                         $modalInstance.close(true);
                     });
+                };
+
+                /**
+                 * @description переход к предыдущей записи в таблице
+                 */
+                $scope.showPreviousRecord = function () {
+                    if ($scope.gridIterator) {
+                        $scope.record = $.extend(true, {}, $scope.gridIterator.getPrevious($scope.record));
+                    }
+                };
+
+                /**
+                 * @description переход к следующей записи в таблице
+                 */
+                $scope.showNextRecord = function () {
+                    if ($scope.gridIterator) {
+                        $scope.record = $.extend(true, {}, $scope.gridIterator.getNext($scope.record));
+                    }
                 };
 
                 /**

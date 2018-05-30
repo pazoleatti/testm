@@ -227,7 +227,8 @@
                                 return {
                                     mode: "VIEW",
                                     refBook: $scope.refBook,
-                                    record: record ? record : $scope.refBookGrid.value[0]
+                                    record: record ? record : $scope.refBookGrid.value[0],
+                                    gridData: $scope.refBookGrid.ctrl.getRawData()
                                 };
                             }
                         }

@@ -255,6 +255,10 @@
                  */
                 $scope.showRecord = function (record) {
                     var transformedRecord = $scope.transformRecord(record ? record : $scope.personGrid.value[0]);
+                    var transformedGridData = [];
+                    $scope.personGrid.ctrl.getRawData().forEach(function (person) {
+                        transformedGridData.push($scope.transformRecord(person))
+                    });
                     $aplanaModal.open({
                         title: $filter('translate')('refBooks.showRecord'),
                         templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
@@ -265,7 +269,8 @@
                                 return {
                                     mode: "VIEW",
                                     refBook: $scope.refBook,
-                                    record: transformedRecord
+                                    record: transformedRecord,
+                                    gridData: transformedGridData
                                 };
                             }
                         }
