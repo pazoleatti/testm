@@ -177,7 +177,7 @@ public class RefBookController {
     }
 
     /**
-     * Формирование отчета в XLSX
+     * Формирование отчета в XLSX с отбором записей учитывая версию, фильтрацию и сортировку
      *
      * @param refBookId     идентификатор справочника
      * @param version       версия, на которую строится отчет (для версионируемых справочников)
@@ -187,7 +187,7 @@ public class RefBookController {
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportXlsx")
-    public ActionResult createDeclarationReportXlsx(@PathVariable long refBookId,
+    public ActionResult exportRefBookToXlsx(@PathVariable long refBookId,
                                                     @RequestParam(required = false) Date version,
                                                     @RequestParam(required = false) PagingParams pagingParams,
                                                     @RequestParam(required = false) String searchPattern,
@@ -197,7 +197,7 @@ public class RefBookController {
     }
 
     /**
-     * Формирование отчета в CSV
+     * Формирование отчета в CSV с отбором записей учитывая версию, фильтрацию и сортировку
      *
      * @param refBookId     идентификатор справочника
      * @param version       версия, на которую строится отчет (для версионируемых справочников)
@@ -207,7 +207,7 @@ public class RefBookController {
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportCsv")
-    public ActionResult createDeclarationReportCsv(@PathVariable long refBookId,
+    public ActionResult exportRefBookToCsv(@PathVariable long refBookId,
                                                    @RequestParam(required = false) Date version,
                                                    @RequestParam(required = false) PagingParams pagingParams,
                                                    @RequestParam(required = false) String searchPattern,
