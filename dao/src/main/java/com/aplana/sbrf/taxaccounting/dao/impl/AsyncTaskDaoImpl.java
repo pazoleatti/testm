@@ -165,12 +165,14 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             // Отбираем следующую задачу для выполнения на узле и блокируем эту строку на уровне БД, чтобы другой узел не успел ее перехватить
             // skip locked используем для того, чтобы не выбрасывались исключения в случае, если подходящая запись уже заблокирована другим запросом
             Long lockedAsyncId = getNamedParameterJdbcTemplate().queryForObject(sql, params, Long.class);
+            LOG.info("AsyncTaskDaoImpl.lockTask. lockedAsyncId: " + lockedAsyncId);
             params.addValue("lockedAsyncId", lockedAsyncId);
             // Привязываем задачу к узлу
             return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp " +
                             "where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = :lockedAsyncId",
                     params);
         } catch (EmptyResultDataAccessException e) {
+            LOG.info(String.format("AsyncTaskDaoImpl.lockTask. no tasks for node: %s, priorityNode: %s, timeout: %s, queue: %s, maxTasksPerNode: %s", node, priorityNode, timeout, queue, maxTasksPerNode));
             return 0;
         }
     }
