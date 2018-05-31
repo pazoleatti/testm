@@ -76,15 +76,6 @@ public interface CommonRefBookService {
     ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds);
 
     /**
-     * Получение количества версий для записи справочника
-     *
-     * @param refBookId идентификатор справочника
-     * @param recordId  идентификатор записи
-     * @return значение записи справочника
-     */
-    int getRecordVersionCount(Long refBookId, Long recordId);
-
-    /**
      * Формирование отчета по записям справочника в формате XLSX/CSV
      *
      * @param refBookId     идентификатор справочника

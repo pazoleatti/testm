@@ -51,7 +51,7 @@
                                 <input type="text"
                                        data-ng-model="record[attribute.alias].value"
                                        title="{{record[attribute.alias].value}}"
-                                       aplana-input-outer-width="80%"
+                                       aplana-input-outer-width="400"
                                        maxlength="{{attribute.maxLength}}"
                                        data-ng-required="{{attribute.required}}"/>
                                 <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
@@ -62,7 +62,7 @@
                                 <input type='text'
                                        data-ng-model="record[attribute.alias].value"
                                        title="{{attribute.name}}"
-                                       aplana-input-outer-width="80%"
+                                       aplana-input-outer-width="400"
                                        data-ng-pattern="patterns.number"
                                        data-ng-required="{{attribute.required}}">
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' | translate}}</div>
@@ -83,10 +83,10 @@
                             <!-- TODO: почему то для выпадашки не работает нормально валидация - сообщение появляется для другого поля, сходу решить проблему не удалось -->
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
                                 <div data-ui-select2="select.options"
+                                     aplana-input-outer-width="400"
                                      data-ng-init="initSelect(attribute.refBookId, attribute.alias)"
                                      data-ng-model="record[attribute.alias].value"
-                                     data-ng-required="{{attribute.required}}"
-                                     class="span8"></div>
+                                     data-ng-required="{{attribute.required}}"></div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             </div>
                         </div>

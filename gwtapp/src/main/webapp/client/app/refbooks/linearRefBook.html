@@ -44,7 +44,7 @@
                     </button>
                     <!-- Версии -->
                     <button type="button" class="btn btn-default"
-                            data-ng-hide="!refBook.versioned"
+                            data-ng-hide="!refBook.versioned || versionMode"
                             data-ng-disabled="refBookGrid.value.length != 1"
                             data-ng-click="showVersions()">
                         <span data-translate-once="refBooks.button.versions"></span>

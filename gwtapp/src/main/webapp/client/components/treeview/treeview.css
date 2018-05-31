@@ -20,7 +20,6 @@ ul.aplanaTreeview li i{
 }
 
 div[data-tree-data] li .selected {
-    background-color: #aaddff;
+    background-color: #dee8f8;
     font-weight: bold;
-    padding: 1px;
 }
