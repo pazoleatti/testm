@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.VerticalAlignment
 import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.DataFormat
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
@@ -1620,6 +1621,7 @@ class RequisitesSheetFiller implements SheetFiller {
         int index = 3;
         Styler styler = new Styler(wb)
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPerson np : context.getNdflPersonList()) {
             ScriptUtils.checkInterrupted();
@@ -1663,7 +1665,7 @@ class RequisitesSheetFiller implements SheetFiller {
             cell12.setCellStyle(centeredStyle)
             cell12.setCellValue(np.getStatus() != null ? np.getStatus() : "");
             Cell cell13 = row.createCell(13);
-            cell13.setCellStyle(centeredStyle)
+            cell13.setCellStyle(textCenteredStyle)
             cell13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "");
             Cell cell14 = row.createCell(14);
             cell14.setCellStyle(centeredStyle)
@@ -1710,6 +1712,7 @@ class IncomesSheetFiller implements SheetFiller {
         Styler styler = new Styler(wb)
         CellStyle borderStyle = styler.createBorderStyle()
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonIncome npi : ndflPersonIncomeList) {
             ScriptUtils.checkInterrupted();
@@ -1729,7 +1732,7 @@ class IncomesSheetFiller implements SheetFiller {
             cell4.setCellStyle(centeredStyle)
             cell4.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "");
             Cell cell5 = row.createCell(5);
-            cell5.setCellStyle(centeredStyle)
+            cell5.setCellStyle(textCenteredStyle)
             cell5.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "");
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
@@ -1742,10 +1745,10 @@ class IncomesSheetFiller implements SheetFiller {
                 cell7.setCellValue(npi.incomePayoutDate);
             }
             Cell cell8 = row.createCell(8);
-            cell8.setCellStyle(centeredStyle)
+            cell8.setCellStyle(textCenteredStyle)
             cell8.setCellValue(npi.getKpp() != null ? npi.getKpp() : "");
             Cell cell9 = row.createCell(9);
-            cell9.setCellStyle(centeredStyle)
+            cell9.setCellStyle(textCenteredStyle)
             cell9.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "");
             Cell cell10 = row.createCell(10);
             cell10.setCellStyle(borderStyle)
@@ -1846,6 +1849,7 @@ class DeductionsSheetFiller implements SheetFiller {
         Styler styler = new Styler(wb)
         CellStyle borderStyle = styler.createBorderStyle()
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonDeduction npd : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted();
@@ -1934,6 +1938,7 @@ class PrepaymentSheetFiller implements SheetFiller {
         Styler styler = new Styler(wb)
         CellStyle borderStyle = styler.createBorderStyle()
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
             ScriptUtils.checkInterrupted();
@@ -2391,6 +2396,15 @@ class Styler {
     CellStyle createVerticalByTopHorizontalByCenterDate() {
         CellStyle style = createVerticalByTopHorizontalByCenter()
         return addDateFormat(style)
+    }
+
+    CellStyle createBorderStyleCenterAlignedTypeText(){
+        CellStyle style = workbook.createCellStyle()
+        style.setAlignment(CellStyle.ALIGN_CENTER)
+        addThinBorderStyle(style)
+        DataFormat format = workbook.createDataFormat()
+        style.setDataFormat(format.getFormat("text"))
+        return style
     }
 }
 
