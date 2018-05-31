@@ -144,9 +144,11 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         LOG.info("SchedulerServiceImpl.updateAllTask started");
         Set<Method> methods = AnnotationUtil.findAllAnnotatedMethods(AplanaScheduled.class);
         for (final Method method : methods) {
+            LOG.info("Fetch scheduler task method: " + method);
             //Планируем задачи с расписанием из БД на момент старта приложения
             String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
             SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.valueOf(settingCode));
+            LOG.info("schedulerTask: " + schedulerTask);
             if (schedulerTask == null) {
                 LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION_SCHEDULER'");
             } else if (schedulerTask.isActive()) {
