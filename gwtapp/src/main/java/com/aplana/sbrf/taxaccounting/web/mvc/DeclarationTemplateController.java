@@ -143,8 +143,8 @@ public class DeclarationTemplateController {
      * @throws IOException IOException
      */
     @GetMapping(value = "/actions/declarationTemplate/downloadAll")
-    public void exportDeclarationTemplate(HttpServletResponse resp) throws IOException {
-        String fileName = String.format("Templates(%s).zip", new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+    public void exportAllDeclarationTemplates(HttpServletResponse resp) throws IOException {
+        String fileName = String.format("Templates_%s.zip", new SimpleDateFormat("yyyy_MM_dd").format(new Date()));
         resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         resp.setCharacterEncoding(UTF_8);
