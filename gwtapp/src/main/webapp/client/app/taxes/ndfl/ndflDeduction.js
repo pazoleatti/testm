@@ -74,8 +74,8 @@
                             $filter('translate')('ndflDeduction.title.modifiedBy')],
                         colModel: [
                             {name: 'rowNum', index: 'rowNum', width: 60, key: true},
-                            {name: 'inp', index: 'inp', width: 170},
-                            {name: 'typeCode', index: 'typeCode', width: 200},
+                            {name: 'inp', index: 'inp', width: 100},
+                            {name: 'typeCode', index: 'typeCode', width: 95},
                             {name: 'notifType', index: 'notifType', width: 220},
                             {
                                 name: 'notifDate',
@@ -84,16 +84,16 @@
                                 formatter: $filter('dateFormatter')
                             },
                             {name: 'notifNum', index: 'notifNum', width: 240},
-                            {name: 'notifSource', index: 'notifSource', width: 275},
+                            {name: 'notifSource', index: 'notifSource', width: 280},
                             {name: 'notifSumm', index: 'notifSumm', width: 235},
-                            {name: 'operationId', index: 'operationId', width: 185},
+                            {name: 'operationId', index: 'operationId', width: 245},
                             {
                                 name: 'incomeAccrued',
                                 index: 'incomeAccrued',
                                 width: 95,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'incomeCode', index: 'incomeCode', width: 195},
+                            {name: 'incomeCode', index: 'incomeCode', width: 130},
                             {name: 'incomeSumm', index: 'incomeSumm', width: 105},
                             {
                                 name: 'periodPrevDate',
@@ -109,8 +109,8 @@
                                 formatter: $filter('dateFormatter')
                             },
                             {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 210},
-                            {name: 'id', index: 'id', width: 200},
-                            {name: 'modifiedDate', index: 'modifiedDate', width: 230, formatter: $filter('dateTimeFormatter')},
+                            {name: 'id', index: 'id', width: 160},
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 200, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 300}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
