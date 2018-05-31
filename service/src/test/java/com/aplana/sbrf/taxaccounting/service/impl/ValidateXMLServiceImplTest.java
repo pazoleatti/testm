@@ -32,8 +32,8 @@ import java.util.UUID;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("ValidateServiceImplTest.xml")
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration("ValidateServiceImplTest.xml")
 public class ValidateXMLServiceImplTest implements Runnable {
 
     private static final String XSD_1 = "NO_NDS.12_1_003_07_05_04_01.xsd";
@@ -53,7 +53,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     private String uuidXsd1;
 
-    @Before
+    //@Before
     public void init() throws IOException {
         uuidXsd1 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
@@ -78,7 +78,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
     }
 
-    @Test
+    //@Test
     public void validateTestSampleSuccess() {
         if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
@@ -113,7 +113,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, null));
     }
 
-    @Test
+    //@Test
     public void validateTestFail() {
         String uuidXsd2 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
@@ -148,7 +148,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, null));
     }
 
-    @Test
+    //@Test
     public void validateDiffThreads() {
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             return;
@@ -212,7 +212,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, uuidXsd1));
     }
 
-    @Test
+    //@Test
     public void fileInfoTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
         if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
