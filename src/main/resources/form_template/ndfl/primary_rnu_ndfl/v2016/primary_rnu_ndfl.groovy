@@ -2398,6 +2398,11 @@ class Styler {
         return addDateFormat(style)
     }
 
+    /**
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+     * тип поля Текстовый
+     * @return
+     */
     CellStyle createBorderStyleCenterAlignedTypeText(){
         CellStyle style = workbook.createCellStyle()
         style.setAlignment(CellStyle.ALIGN_CENTER)
