@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -36,7 +38,6 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Andrey Drunk
@@ -1042,9 +1043,63 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFetchRefBookPersons() {
-        List<NdflPerson> result = ndflPersonDao.fetchRefBookPersonsAsNdflPerson(1L);
+        List<NdflPerson> resultByDeclarationData = ndflPersonDao.fetchRefBookPersonsAsNdflPerson(1L);
+        Assert.assertEquals(1, resultByDeclarationData.size());
+        Assert.assertEquals("Федор", resultByDeclarationData.get(0).getFirstName());
+    }
+
+    @Test
+    public void testFetchIncomeSourcesConsolidation() {
+        ConsolidationSourceDataSearchFilter.Builder filterBuilder = new ConsolidationSourceDataSearchFilter.Builder();
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.set(2018, 4, 25);
+        Calendar startDate = Calendar.getInstance();
+        startDate.set(2018, 0, 1);
+        Calendar endDate = Calendar.getInstance();
+        endDate.set(2018, 2, 31);
+        filterBuilder.currentDate(currentDate.getTime())
+                .periodStartDate(startDate.getTime())
+                .periodEndDate(endDate.getTime())
+                .consolidateDeclarationDataYear(2018)
+                .dataSelectionDepth(2)
+                .declarationType(100)
+                .departmentId(7);
+        ConsolidationSourceDataSearchFilter filter = filterBuilder.createConsolidationSourceDataSearchFilter();
+        List<ConsolidationIncome> incomes = ndflPersonDao.fetchIncomeSourcesConsolidation(filter);
+        System.out.println(incomes);
+        Assert.assertEquals(8, incomes.size());
+        List<Long> incomesIds = new ArrayList<>();
+        for(ConsolidationIncome income : incomes) {
+            incomesIds.add(income.getId());
+        }
+        Collections.sort(incomes, new Comparator<ConsolidationIncome>() {
+            @Override
+            public int compare(ConsolidationIncome o1, ConsolidationIncome o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
+        Assert.assertTrue(incomesIds.contains(3080L));
+        Assert.assertTrue(incomesIds.contains(3130L));
+        Assert.assertTrue(incomesIds.contains(3220L));
+        Assert.assertTrue(incomesIds.contains(3230L));
+        Assert.assertTrue(incomesIds.contains(3240L));
+        Assert.assertTrue(incomesIds.contains(3250L));
+        Assert.assertTrue(incomesIds.contains(3260L));
+        Assert.assertTrue(incomesIds.contains(3270L));
+    }
+
+    @Test
+    public void testFetchDeductionsForConsolidation() {
+        List<NdflPersonDeduction> result = ndflPersonDao.fetchDeductionsForConsolidation(Collections.singletonList(1036L));
         Assert.assertEquals(1, result.size());
-        Assert.assertEquals("Федор", result.get(0).getFirstName());
+        Assert.assertEquals(Long.valueOf("1"), result.get(0).getId());
+    }
+
+    @Test
+    public void testFetchPrepaymentsForConsolidation() {
+        List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentsForConsolidation((Collections.singletonList(1036L)));
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(Long.valueOf("1"), result.get(0).getId());
     }
 
     public static Date toDate(String dateStr) {

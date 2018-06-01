@@ -46,7 +46,8 @@ public enum ConfigurationParam {
     NO_CODE("Код НО (пром.)", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
     SHOW_TIMING("Отображать сообщения о времени выполнения", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
     LIMIT_IDENT("Порог схожести ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
-    ENABLE_IMPORT_PERSON("Загружать справочник ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2);
+    ENABLE_IMPORT_PERSON("Загружать справочник ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
+    CONSOLIDATION_DATA_SELECTION_DEPTH("Горизонт отбора данных консолидации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
 
     private String caption;
     private ConfigurationParamGroup group;

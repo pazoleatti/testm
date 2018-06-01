@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.script.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -362,5 +364,25 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
         return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(declarationDataId);
+    }
+
+    @Override
+    public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
+        return ndflPersonDao.fetchIncomeSourcesConsolidation(searchData);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> fetchDeductionsForConsolidation(List<Long> incomeIds) {
+        return ndflPersonDao.fetchDeductionsForConsolidation(incomeIds);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> fetchPrepaymentsForConsolidation(List<Long> incomeIds) {
+        return ndflPersonDao.fetchPrepaymentsForConsolidation(incomeIds);
+    }
+
+    @Override
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> ndflPersonIdList, Date actualDate) {
+        return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(ndflPersonIdList, actualDate);
     }
 }

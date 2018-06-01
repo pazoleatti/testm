@@ -878,10 +878,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
-    private List<Long> getSubList(List<Long> list, int i) {
-        return list.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, list.size()));
-    }
-
     /**
      * Проверяет существование версий записи справочника
      * @param refBook справочник

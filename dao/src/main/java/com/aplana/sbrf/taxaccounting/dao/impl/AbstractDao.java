@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.util.List;
+
 /**
  * Абстрактный класс, позволяющий делать автовайринг с DataSource'ом
  * и содержащий вспомогательные методы, востребованные наследниками
@@ -14,6 +16,9 @@ public abstract class AbstractDao {
      * Указатель на строку в результерующем наборе данных
      */
     public static final int CURSOR = -10;
+
+    protected static final int IN_CLAUSE_LIMIT = 1000;
+
 
     @Autowired
     private DBInfo dbInfo;
@@ -61,5 +66,9 @@ public abstract class AbstractDao {
 
     protected boolean isDateDiffNumber() {
         return dbInfo.isDateDiffNumber();
+    }
+
+    protected List<Long> getSubList(List<Long> list, int i) {
+        return list.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, list.size()));
     }
 }

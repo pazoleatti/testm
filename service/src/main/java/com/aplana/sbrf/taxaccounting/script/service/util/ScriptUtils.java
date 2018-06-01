@@ -2,11 +2,8 @@ package com.aplana.sbrf.taxaccounting.script.service.util;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -42,23 +39,16 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
+import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
@@ -2900,5 +2890,166 @@ public final class ScriptUtils {
             return word.substring(0, word.length() - 1) + "ы";
         }
         return word;
+    }
+
+    public static String getConsolidationIncomeUUID(ConsolidationIncome income) {
+        int size = 0;
+        byte[] inp = stringToByteArray(income.getInp());
+        size += inp.length;
+        byte[] incomeCode = stringToByteArray(income.getIncomeCode());
+        size += incomeCode.length;
+        byte[] incomeType = stringToByteArray(income.getIncomeType());
+        size += incomeType.length;
+        byte[] incomeAccruedDate = dateToByteArray(income.getIncomeAccruedDate());
+        size += incomeAccruedDate.length;
+        byte[] incomePayoutDate = dateToByteArray(income.getIncomePayoutDate());
+        size += incomePayoutDate.length;
+        byte[] kpp = stringToByteArray(income.getKpp());
+        size += kpp.length;
+        byte[] oktmo = stringToByteArray(income.getOktmo());
+        size += oktmo.length;
+        byte[] incomeAccruedSumm = bigDecimalToByteArray(income.getIncomeAccruedSumm());
+        size += incomeAccruedSumm.length;
+        byte[] incomePayoutSumm = bigDecimalToByteArray(income.getIncomePayoutSumm());
+        size += incomePayoutSumm.length;
+        byte[] totalDeductionsSumm = bigDecimalToByteArray(income.getTotalDeductionsSumm());
+        size += totalDeductionsSumm.length;
+        byte[] taxBase = bigDecimalToByteArray(income.getTaxBase());
+        size += taxBase.length;
+        byte[] taxRate = intToByteArray(income.getTaxRate());
+        size += taxRate.length;
+        byte[] taxDate = dateToByteArray(income.getTaxDate());
+        size += taxDate.length;
+        byte[] calculatedTax = bigDecimalToByteArray(income.getCalculatedTax());
+        size += calculatedTax.length;
+        byte[] withHoldingTax = bigDecimalToByteArray(income.getWithholdingTax());
+        size += withHoldingTax.length;
+        byte[] notHoldingTax = bigDecimalToByteArray(income.getNotHoldingTax());
+        size += notHoldingTax.length;
+        byte[] overholdingTax  = bigDecimalToByteArray(income.getOverholdingTax());
+        size += overholdingTax.length;
+        byte[] refoundTax = longToByteArray(income.getRefoundTax());
+        size += refoundTax.length;
+        byte[] taxTransferDate = dateToByteArray(income.getTaxTransferDate());
+        size += taxTransferDate.length;
+        byte[] paymentDate = dateToByteArray(income.getPaymentDate());
+        size += paymentDate.length;
+        byte[] paymentNumber = stringToByteArray(income.getPaymentNumber());
+        size += paymentNumber.length;
+        byte[] taxSumm = longToByteArray(income.getTaxSumm());
+        size += taxSumm.length;
+
+        int offset = 0;
+        byte[] resultArray = new byte[size];
+        mergeByteArrays(inp, resultArray, offset);
+        offset += inp.length;
+        mergeByteArrays(incomeCode, resultArray, offset);
+        offset += incomeCode.length;
+        mergeByteArrays(incomeType, resultArray, offset);
+        offset += incomeType.length;
+        mergeByteArrays(incomeAccruedDate, resultArray, offset);
+        offset += incomeAccruedDate.length;
+        mergeByteArrays(incomePayoutDate, resultArray, offset);
+        offset += incomePayoutDate.length;
+        mergeByteArrays(kpp, resultArray, offset);
+        offset += kpp.length;
+        mergeByteArrays(oktmo, resultArray, offset);
+        offset += oktmo.length;
+        mergeByteArrays(incomeAccruedSumm, resultArray, offset);
+        offset += incomeAccruedSumm.length;
+        mergeByteArrays(incomePayoutSumm, resultArray, offset);
+        offset += incomePayoutSumm.length;
+        mergeByteArrays(totalDeductionsSumm, resultArray, offset);
+        offset += totalDeductionsSumm.length;
+        mergeByteArrays(taxBase, resultArray, offset);
+        offset += taxBase.length;
+        mergeByteArrays(taxRate, resultArray, offset);
+        offset += taxRate.length;
+        mergeByteArrays(taxDate, resultArray, offset);
+        offset += taxDate.length;
+        mergeByteArrays(calculatedTax, resultArray, offset);
+        offset += calculatedTax.length;
+        mergeByteArrays(withHoldingTax, resultArray, offset);
+        offset += withHoldingTax.length;
+        mergeByteArrays(notHoldingTax, resultArray, offset);
+        offset += notHoldingTax.length;
+        mergeByteArrays(overholdingTax, resultArray, offset);
+        offset += overholdingTax.length;
+        mergeByteArrays(refoundTax, resultArray, offset);
+        offset += refoundTax.length;
+        mergeByteArrays(taxTransferDate, resultArray, offset);
+        offset += taxTransferDate.length;
+        mergeByteArrays(paymentDate, resultArray, offset);
+        offset += paymentDate.length;
+        mergeByteArrays(paymentNumber, resultArray, offset);
+        offset += paymentNumber.length;
+        mergeByteArrays(taxSumm, resultArray, offset);
+
+        return UUID.nameUUIDFromBytes(resultArray).toString();
+    }
+
+    private static byte[] dateToByteArray(Date d) {
+        if (d != null) {
+            return longToByteArray(d.getTime());
+        }
+        return new byte[]{(byte)0xFF};
+    }
+
+    private static byte[] bigDecimalToByteArray(BigDecimal d) {
+        if (d != null) {
+            return stringToByteArray(d.toString());
+        }
+        return new byte[]{(byte)0xFF};
+    }
+
+    private static byte[] stringToByteArray(String s) {
+        if (s != null) {
+            return s.toLowerCase().getBytes(Charset.forName("UTF-8"));
+        }
+        return new byte[]{(byte)0xFF};
+    }
+
+    private static byte[] longToByteArray(Long l) {
+        if (l != null) {
+            byte[] toReturn = new byte[8];
+            long primitiveL = l.longValue();
+            toReturn[7] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[6] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[5] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[4] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[3] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[2] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[1] = (byte) primitiveL;
+            l >>>= 8;
+            toReturn[0] = (byte) primitiveL;
+            return toReturn;
+        }
+        return new byte[]{(byte)0xFF};
+    }
+
+    private static byte[] intToByteArray(Integer i) {
+        if (i != null) {
+            byte[] toReturn = new byte[4];
+            int primitiveI = i.intValue();
+            toReturn[3] = (byte) primitiveI;
+            i >>>= 8;
+            toReturn[2] = (byte) primitiveI;
+            i >>>= 8;
+            toReturn[1] = (byte) primitiveI;
+            i >>>= 8;
+            toReturn[0] = (byte) primitiveI;
+            return toReturn;
+        }
+        return new byte[]{(byte)0xFF};
+    }
+
+    public static void mergeByteArrays(byte[] slave, byte[] master, int offset) {
+        System.arraycopy(slave, 0, master, offset, slave.length);
     }
 }

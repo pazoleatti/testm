@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
@@ -12,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -1319,6 +1322,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> fetchNdflPersonByIdList(List<Long> ndflPersonIdList) {
+        if (ndflPersonIdList.size() > IN_CLAUSE_LIMIT) {
+            List<NdflPerson> result = new ArrayList<>();
+            int n = (ndflPersonIdList.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(ndflPersonIdList, i);
+                List<NdflPerson> subResult = fetchNdflPersonByIdList(subList);
+                if (subResult != null) {
+                    result.addAll(subResult);
+                }
+            }
+            if (result.isEmpty()) {
+                return null;
+            } else {
+                return result;
+            }
+        }
         String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " FROM NDFL_PERSON np" +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
                 " WHERE NP.ID IN (:ndflPersonIdList)";
@@ -2062,52 +2081,200 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String sql = "select distinct rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
                 "rbp.inn, rbp.inn_foreign, rbts.code as status, rbp.snils, rbdt.code as id_doc_type, rbid.doc_number, rba.region_code, " +
                 "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc2.code as country_code, rba.address " +
+                "rba.appartment, rbc.code as country_code, rba.address " +
                 "from ref_book_person rbp " +
                 "left join ndfl_person np on rbp.id = np.person_id " +
                 "left join declaration_data dd on np.declaration_data_id = dd.id " +
-                "left join ref_book_country rbc on rbp.citizenship = rbc.id " +
-                "left join ref_book_taxpayer_state rbts on rbp.taxpayer_state = rbts.id " +
-                "left join ref_book_address rba on rbp.address = rba.id " +
-                "left join ref_book_id_tax_payer ritp on ritp.person_id = rbp.id " +
-                "left join ref_book_id_doc rbid on rbid.person_id = rbp.id and rbid.inc_rep = 1 " +
-                "left join ref_book_doc_type rbdt on rbid.doc_id = rbdt.id " +
-                "left join ref_book_country rbc2 on rba.country_id = rbc2.id " +
+                "left join ref_book_country rbc on rbp.citizenship = rbc.id and rbc.status = 0 " +
+                "left join ref_book_taxpayer_state rbts on rbp.taxpayer_state = rbts.id and rbts.status = 0 " +
+                "left join ref_book_address rba on rbp.address = rba.id and rba.status = 0 " +
+                "left join ref_book_id_tax_payer ritp on ritp.person_id = rbp.id and ritp.status = 0 " +
+                "left join ref_book_id_doc rbid on rbid.person_id = rbp.id and rbid.inc_rep = 1 and rbid.status = 0 " +
+                "left join ref_book_doc_type rbdt on rbid.doc_id = rbdt.id and rbdt.status = 0 " +
                 "where dd.id = ?";
         return getJdbcTemplate().query(sql,
                 new Object[]{declarationDataId},
-                new RowMapper<NdflPerson>() {
-                    @Override
-                    public NdflPerson mapRow(ResultSet rs, int i) throws SQLException {
-                        NdflPerson person = new NdflPerson();
+                new NdflPersonRefBookRowMapper());
+    }
 
-                        person.setPersonId(SqlUtils.getLong(rs, "id"));
-                        person.setInp(String.valueOf(SqlUtils.getLong(rs, "inp")));
-                        person.setLastName(rs.getString("last_name"));
-                        person.setFirstName(rs.getString("first_name"));
-                        person.setMiddleName(rs.getString("middle_name"));
-                        person.setBirthDay(rs.getDate("birth_date"));
-                        person.setCitizenship(rs.getString("citizenship"));
-                        person.setInnNp(rs.getString("inn"));
-                        person.setInnForeign(rs.getString("inn_foreign"));
-                        person.setStatus(rs.getString("status"));
-                        person.setSnils(rs.getString("snils"));
-                        person.setIdDocType(rs.getString("id_doc_type"));
-                        person.setIdDocNumber(rs.getString("doc_number"));
-                        person.setRegionCode(rs.getString("region_code"));
-                        person.setPostIndex(rs.getString("postal_code"));
-                        person.setArea(rs.getString("district"));
-                        person.setCity(rs.getString("city"));
-                        person.setLocality(rs.getString("locality"));
-                        person.setStreet(rs.getString("street"));
-                        person.setHouse(rs.getString("house"));
-                        person.setBuilding(rs.getString("build"));
-                        person.setFlat(rs.getString("appartment"));
-                        person.setCountryCode(rs.getString("country_code"));
-                        person.setAddress(rs.getString("address"));
+    @Override
+    public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
+        String sql = "with temp as (select max(version) version, record_id from ref_book_ndfl_detail r where status = 0 and version <= :currentDate  and\n" +
+                "not exists (select 1 from ref_book_ndfl_detail r2 where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate)\n" +
+                "group by record_id),\n" +
+                "kpp_oktmo as (select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
+                "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId)\n" +
+                "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date from ndfl_person_income npi\n" +
+                "left join kpp_oktmo on kpp_oktmo.kpp = npi.kpp\n" +
+                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "left join declaration_template dt on dd.declaration_template_id = dt.id\n" +
+                "left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                "left join report_period rp on rp.id = drp.report_period_id\n" +
+                "left join tax_period tp on rp.tax_period_id = tp.id\n" +
+                "left join report_period_type rpt on rp.dict_tax_period_id = rpt.id\n" +
+                "where kpp_oktmo.kpp = npi.kpp \n" +
+                "and kpp_oktmo.oktmo = npi.oktmo \n" +
+                "and (npi.income_accrued_date between :periodStartDate and :periodEndDate or npi.income_payout_date between :periodStartDate and :periodEndDate or npi.tax_date between :periodStartDate and :periodEndDate or npi.tax_transfer_date between :periodStartDate and :periodEndDate)\n" +
+                "and dt.declaration_type_id = :declarationType\n" +
+                "and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("currentDate", searchData.getCurrentDate())
+                .addValue("periodStartDate", searchData.getPeriodStartDate())
+                .addValue("periodEndDate", searchData.getPeriodEndDate())
+                .addValue("declarationType", searchData.getDeclarationType())
+                .addValue("dataSelectionDepth", searchData.getDataSelectionDepth())
+                .addValue("consolidateDeclarationDataYear", searchData.getConsolidateDeclarationDataYear())
+                .addValue("departmentId", searchData.getDepartmentId());
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new ConsolidationIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
 
-                        return person;
-                    }
-                });
+    private static class ConsolidationIncomeRowMapper implements RowMapper<ConsolidationIncome> {
+        @Override
+        public ConsolidationIncome mapRow(ResultSet rs, int index) throws SQLException {
+            ConsolidationIncome income = new ConsolidationIncome(new NdflPersonIncomeRowMapper().mapRow(rs, index));
+            income.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
+            income.setAccepted(rs.getInt("state") == 3);
+            income.setDeclarationDataId(SqlUtils.getLong(rs, "dd_id"));
+            income.setInp(rs.getString("inp"));
+            income.setYear(rs.getInt("year"));
+            income.setPeriodCode(rs.getString("period_code"));
+            income.setCorrectionDate(rs.getDate("correction_date"));
+            return income;
+        }
+    }
+
+    @Override
+    public List<NdflPersonDeduction> fetchDeductionsForConsolidation(List<Long> incomeIds) {
+        if (incomeIds.size() > IN_CLAUSE_LIMIT) {
+            List<NdflPersonDeduction> result = new ArrayList<>();
+            int n = (incomeIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(incomeIds, i);
+                List<NdflPersonDeduction> subResult = fetchDeductionsForConsolidation(subList);
+                if (subResult != null) {
+                    result.addAll(subResult);
+                }
+            }
+            if (result.isEmpty()) {
+                return null;
+            } else {
+                return result;
+            }
+        }
+        String sql = "with person_operation as \n" +
+                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
+                "select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " \n" +
+                "from ndfl_person_deduction npd \n" +
+                "left join person_operation po on npd.operation_id = po.operation_id \n" +
+                "where npd.operation_id = po.operation_id and npd.ndfl_person_id = po.ndfl_person_id";
+        MapSqlParameterSource params = new MapSqlParameterSource("incomeIds", incomeIds);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDeductionRowMapper());
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> fetchPrepaymentsForConsolidation(List<Long> incomeIds) {
+        if (incomeIds.size() > IN_CLAUSE_LIMIT) {
+            List<NdflPersonPrepayment> result = new ArrayList<>();
+            int n = (incomeIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(incomeIds, i);
+                List<NdflPersonPrepayment> subResult = fetchPrepaymentsForConsolidation(subList);
+                if (subResult != null) {
+                    result.addAll(subResult);
+                }
+            }
+            if (result.isEmpty()) {
+                return null;
+            } else {
+                return result;
+            }
+        }
+        String sql = "with person_operation as \n" +
+                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
+                "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " \n" +
+                "from ndfl_person_prepayment npp \n" +
+                "left join person_operation po on npp.operation_id = po.operation_id \n" +
+                "where npp.operation_id = po.operation_id and npp.ndfl_person_id = po.ndfl_person_id";
+        MapSqlParameterSource params = new MapSqlParameterSource("incomeIds", incomeIds);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonPrepaymentRowMapper());
+    }
+
+    @Override
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList, Date actualDate) {
+        if (personIdList.size() > IN_CLAUSE_LIMIT) {
+            List<NdflPerson> result = new ArrayList<>();
+            int n = (personIdList.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(personIdList, i);
+                List<NdflPerson> subResult = fetchRefBookPersonsAsNdflPerson(subList, actualDate);
+                if (subResult != null) {
+                    result.addAll(subResult);
+                }
+            }
+            if (result.isEmpty()) {
+                return null;
+            } else {
+                return result;
+            }
+        }
+        String sql = "with temp as (select max(version) version, record_id from ref_book_person r where status = 0 and version <= :currentDate  and\n" +
+                "not exists (select 1 from ref_book_person r2 where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate)\n" +
+                "group by record_id) " +
+                "select distinct rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
+                "rbp.inn, rbp.inn_foreign, rbts.code as status, rbp.snils, rbdt.code as id_doc_type, rbid.doc_number, rba.region_code, " +
+                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
+                "rba.appartment, rbc.code as country_code, rba.address " +
+                "from temp, ref_book_person rbp " +
+                "left join ref_book_country rbc on rbp.citizenship = rbc.id and rbc.status = 0 " +
+                "left join ref_book_taxpayer_state rbts on rbp.taxpayer_state = rbts.id and rbts.status = 0 " +
+                "left join ref_book_address rba on rbp.address = rba.id and rba.status = 0 " +
+                "left join ref_book_id_tax_payer ritp on ritp.person_id = rbp.id and ritp.status = 0 " +
+                "left join ref_book_id_doc rbid on rbid.person_id = rbp.id and rbid.inc_rep = 1 and rbid.status = 0 " +
+                "left join ref_book_doc_type rbdt on rbid.doc_id = rbdt.id and rbdt.status = 0 " +
+                "where rbp.id in (:personIdList) and rbp.version = temp.version and rbp.record_id = temp.record_id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
+        params.addValue("currentDate", actualDate);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRefBookRowMapper());
+    }
+
+    private static final class NdflPersonRefBookRowMapper implements RowMapper<NdflPerson> {
+        @Override
+        public NdflPerson mapRow(ResultSet rs, int i) throws SQLException {
+            NdflPerson person = new NdflPerson();
+
+            person.setPersonId(SqlUtils.getLong(rs, "id"));
+            person.setInp(String.valueOf(SqlUtils.getLong(rs, "inp")));
+            person.setLastName(rs.getString("last_name"));
+            person.setFirstName(rs.getString("first_name"));
+            person.setMiddleName(rs.getString("middle_name"));
+            person.setBirthDay(rs.getDate("birth_date"));
+            person.setCitizenship(rs.getString("citizenship"));
+            person.setInnNp(rs.getString("inn"));
+            person.setInnForeign(rs.getString("inn_foreign"));
+            person.setStatus(rs.getString("status"));
+            person.setSnils(rs.getString("snils"));
+            person.setIdDocType(rs.getString("id_doc_type"));
+            person.setIdDocNumber(rs.getString("doc_number"));
+            person.setRegionCode(rs.getString("region_code"));
+            person.setPostIndex(rs.getString("postal_code"));
+            person.setArea(rs.getString("district"));
+            person.setCity(rs.getString("city"));
+            person.setLocality(rs.getString("locality"));
+            person.setStreet(rs.getString("street"));
+            person.setHouse(rs.getString("house"));
+            person.setBuilding(rs.getString("build"));
+            person.setFlat(rs.getString("appartment"));
+            person.setCountryCode(rs.getString("country_code"));
+            person.setAddress(rs.getString("address"));
+
+            return person;
+        }
     }
 }
+

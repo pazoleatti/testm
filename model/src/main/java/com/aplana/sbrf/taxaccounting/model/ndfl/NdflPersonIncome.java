@@ -11,73 +11,73 @@ import java.util.Date;
 public class NdflPersonIncome extends NdflPersonOperation {
 
     // Доход.Вид.Код (Графа 4) (КодДох)
-    private String incomeCode;
+    protected String incomeCode;
 
     // Доход.Вид.Признак (Графа 5)
-    private String incomeType;
+    protected String incomeType;
 
     // Доход.Дата.Начисление (Графа 6)
-    private Date incomeAccruedDate;
+    protected Date incomeAccruedDate;
 
     // Доход.Дата.Выплата (Графа 7)
-    private Date incomePayoutDate;
+    protected Date incomePayoutDate;
 
     // Доход.Источник выплаты.ОКТМО (Графа 8)
-    private String oktmo;
+    protected String oktmo;
 
     // Доход.Источник выплаты.КПП (Графа 9)
-    private String kpp;
+    protected String kpp;
 
     // Доход.Сумма.Начисление (Графа 10)
-    private BigDecimal incomeAccruedSumm;
+    protected BigDecimal incomeAccruedSumm;
 
     // Доход.Сумма.Выплата (Графа 11)
-    private BigDecimal incomePayoutSumm;
+    protected BigDecimal incomePayoutSumm;
 
     // Сумма вычета (Графа 12)
-    private BigDecimal totalDeductionsSumm;
+    protected BigDecimal totalDeductionsSumm;
 
     // Налоговая база (Графа 13)
-    private BigDecimal taxBase;
+    protected BigDecimal taxBase;
 
     // НДФЛ.Процентная ставка (Графа 14)
-    private Integer taxRate;
+    protected Integer taxRate;
 
     // НДФЛ.Расчет.Дата (Графа 15)
-    private Date taxDate;
+    protected Date taxDate;
 
     // НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
-    private BigDecimal calculatedTax;
+    protected BigDecimal calculatedTax;
 
     // НДФЛ.Расчет.Сумма.Удержанный (Графа 17) (НУ)
-    private BigDecimal withholdingTax;
+    protected BigDecimal withholdingTax;
 
     // НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
-    private BigDecimal notHoldingTax;
+    protected BigDecimal notHoldingTax;
 
     // НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)
-    private BigDecimal overholdingTax;
+    protected BigDecimal overholdingTax;
 
     // НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)
-    private Long refoundTax;
+    protected Long refoundTax;
 
     // НДФЛ.Перечисление в бюджет.Срок (Графа 21)
-    private Date taxTransferDate;
+    protected Date taxTransferDate;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)
-    private Date paymentDate;
+    protected Date paymentDate;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)
-    private String paymentNumber;
+    protected String paymentNumber;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-    private Long taxSumm;
+    protected Long taxSumm;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private Date modifiedDate;
+    protected Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private String modifiedBy;
+    protected String modifiedBy;
 
     public static final String TABLE_NAME = "ndfl_person_income";
     public static final String SEQ = "seq_ndfl_person_income";

@@ -526,4 +526,6 @@ public interface DeclarationService {
      * @return ошибка фатальна?
      */
     boolean isCheckFatal(DeclarationCheckCode code, int templateId);
+
+    Date getDeclarationDataCreationDate(Long declarationDataId);
 }

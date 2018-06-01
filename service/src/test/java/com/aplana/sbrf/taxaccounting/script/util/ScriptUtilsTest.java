@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.script.util;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -19,8 +22,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * Тесты для ScriptUtils
@@ -488,4 +489,104 @@ public class ScriptUtilsTest {
         Assert.assertEquals("ББ 9999999", ScriptUtils.formatDocNumber("24","ББ9999999"));
         Assert.assertEquals("SSSSSSSSSSSSSSSSSSSSSSSSS", ScriptUtils.formatDocNumber("00","SSSSSSSSSSSSSSSSSSSSSSSSS"));
     }
+
+    @Test
+    public void testGetConsolidationIncomeUUID() {
+        ConsolidationIncome income11 = new ConsolidationIncome();
+        income11.setInp("1445019531");
+        income11.setIncomeCode("2000");
+        income11.setIncomeType("05");
+        income11.setIncomeAccruedDate(new Date(1000000000000L));
+        income11.setIncomePayoutDate(new Date(1000000000001L));
+        income11.setKpp("773643001");
+        income11.setOktmo("45381000");
+        income11.setIncomeAccruedSumm(new BigDecimal("10000.01"));
+        income11.setIncomePayoutSumm(new BigDecimal("10000.01"));
+        income11.setTotalDeductionsSumm(new BigDecimal("500"));
+        income11.setTaxBase(new BigDecimal("9000"));
+        income11.setTaxRate(13);
+        income11.setTaxDate(new Date(1000000000002L));
+        income11.setCalculatedTax(new BigDecimal("1000"));
+        income11.setWithholdingTax(new BigDecimal("1000"));
+        income11.setNotHoldingTax(new BigDecimal("0"));
+        income11.setOverholdingTax(new BigDecimal("0"));
+        income11.setRefoundTax(0L);
+        income11.setTaxTransferDate(new Date(1000000000003L));
+        income11.setPaymentDate(new Date(1000000000004L));
+        income11.setPaymentNumber("1200");
+        income11.setTaxSumm(1000L);
+        ConsolidationIncome income12 = new ConsolidationIncome();
+        income12.setInp("1445019531");
+        income12.setIncomeCode("2000");
+        income12.setIncomeType("05");
+        income12.setIncomeAccruedDate(new Date(1000000000000L));
+        income12.setIncomePayoutDate(new Date(1000000000001L));
+        income12.setKpp("773643001");
+        income12.setOktmo("45381000");
+        income12.setIncomeAccruedSumm(new BigDecimal("10000.01"));
+        income12.setIncomePayoutSumm(new BigDecimal("10000.01"));
+        income12.setTotalDeductionsSumm(new BigDecimal("500"));
+        income12.setTaxBase(new BigDecimal("9000"));
+        income12.setTaxRate(13);
+        income12.setTaxDate(new Date(1000000000002L));
+        income12.setCalculatedTax(new BigDecimal("1000"));
+        income12.setWithholdingTax(new BigDecimal("1000"));
+        income12.setNotHoldingTax(new BigDecimal("0"));
+        income12.setOverholdingTax(new BigDecimal("0"));
+        income12.setRefoundTax(0L);
+        income12.setTaxTransferDate(new Date(1000000000003L));
+        income12.setPaymentDate(new Date(1000000000004L));
+        income12.setPaymentNumber("1200");
+        income12.setTaxSumm(1000L);
+        ConsolidationIncome income21 = new ConsolidationIncome();
+        income21.setInp("1445019531");
+        income21.setIncomeCode("2000");
+        income21.setIncomeType("05");
+        income21.setIncomeAccruedDate(new Date(1000000000000L));
+        income21.setIncomePayoutDate(new Date(1000000000001L));
+        income21.setKpp("773643001");
+        income21.setOktmo("45381000");
+        income21.setIncomeAccruedSumm(new BigDecimal("10000.01"));
+        income21.setIncomePayoutSumm(new BigDecimal("10000.01"));
+        income21.setTotalDeductionsSumm(new BigDecimal("500"));
+        income21.setTaxDate(new Date(1000000000002L));
+        income21.setCalculatedTax(new BigDecimal("1000"));
+        income21.setWithholdingTax(new BigDecimal("1000"));
+        income21.setNotHoldingTax(new BigDecimal("0"));
+        income21.setOverholdingTax(new BigDecimal("0"));
+        income21.setTaxTransferDate(new Date(1000000000003L));
+        income21.setPaymentDate(new Date(1000000000004L));
+        income21.setPaymentNumber("1200");
+        income21.setTaxSumm(1000L);
+        ConsolidationIncome income22 = new ConsolidationIncome();
+        income22.setInp("1445019531");
+        income22.setIncomeCode("2000");
+        income22.setIncomeType("05");
+        income22.setIncomeAccruedDate(new Date(1000000000000L));
+        income22.setIncomePayoutDate(new Date(1000000000001L));
+        income22.setKpp("773643001");
+        income22.setOktmo("45381000");
+        income22.setIncomeAccruedSumm(new BigDecimal("10000.01"));
+        income22.setIncomePayoutSumm(new BigDecimal("10000.01"));
+        income22.setTotalDeductionsSumm(new BigDecimal("500"));
+        income22.setTaxDate(new Date(1000000000002L));
+        income22.setCalculatedTax(new BigDecimal("1000"));
+        income22.setWithholdingTax(new BigDecimal("1000"));
+        income22.setNotHoldingTax(new BigDecimal("0"));
+        income22.setOverholdingTax(new BigDecimal("0"));
+        income22.setTaxTransferDate(new Date(1000000000003L));
+        income22.setPaymentDate(new Date(1000000000004L));
+        income22.setPaymentNumber("1200");
+        income22.setTaxSumm(1000L);
+
+        String uuid11 = ScriptUtils.getConsolidationIncomeUUID(income11);
+        String uuid12 = ScriptUtils.getConsolidationIncomeUUID(income12);
+        String uuid21 = ScriptUtils.getConsolidationIncomeUUID(income21);
+        String uuid22 = ScriptUtils.getConsolidationIncomeUUID(income22);
+
+        Assert.assertEquals(uuid11, uuid12);
+        Assert.assertEquals(uuid21, uuid22);
+        Assert.assertNotEquals(uuid11, uuid21);
+    }
+
 }

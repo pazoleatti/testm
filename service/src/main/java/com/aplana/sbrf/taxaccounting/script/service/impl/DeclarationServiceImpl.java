@@ -86,6 +86,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private ConfigurationService configurationService;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private LogBusinessService logBusinessService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -546,5 +548,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public boolean isCheckFatal(DeclarationCheckCode code, int templateId) {
         return declarationTemplateDao.isCheckFatal(code, templateId);
+    }
+
+    @Override
+    public Date getDeclarationDataCreationDate(Long declarationDataId) {
+        return logBusinessService.getFormCreationDate(declarationDataId);
     }
 }

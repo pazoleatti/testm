@@ -85,4 +85,12 @@ public interface DepartmentService {
      * @return
      */
     String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
+
+    /**
+     * Получение родительского территориального банка
+     *
+     * @param departmentId идентификатор подразделения
+     * @return родительский территориальный банк
+     */
+    Department getParentTB(int departmentId);
 }

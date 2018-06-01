@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.ndfl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -642,4 +644,33 @@ public interface NdflPersonDao {
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
     List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId);
+
+    /**
+     * Определяет список операций которые нужно включить в КНФ
+     * @param searchData данные для поиска
+     * @return  список объектов доходов
+     */
+    List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData);
+
+    /**
+     * Получает список вычетов которые нужно включить в КНФ. Поиск происходит по доходам включенных в КНФ.
+     * @param incomeIds идентификаторы операций доходов
+     * @return список объектов вычетов
+     */
+    List<NdflPersonDeduction> fetchDeductionsForConsolidation(List<Long> incomeIds);
+
+    /**
+     * Получает список авансов которые нужно включить в КНФ. Поиск происходит по доходам включенных в КНФ.
+     * @param incomeIds идентификаторы операций доходов
+     * @return список объектов авансов
+     */
+    List<NdflPersonPrepayment> fetchPrepaymentsForConsolidation(List<Long> incomeIds);
+
+    /**
+     * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.
+     * @param personIdList список идентификаторов физических лиц из справочника
+     * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
+     */
+    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList, Date actualDate);
+
 }
