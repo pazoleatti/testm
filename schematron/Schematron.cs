@@ -7,19 +7,8 @@ using System.Xml.Schema;
 using VSAX3; //Версия 3.3.147.101
 
 class Schematron {
-
-	// параметры командной строки
-	private static string[] args;
-
-	static void Main(string[] appArgs) {
-		args = appArgs;
-    	Thread t = new Thread(check);
-		t.CurrentCulture = new CultureInfo("ru-RU");
-		t.Start();
-		t.Join();
-	}
-
-	static void check() {
+	static void Main(string[] args) {
+        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
 		Stopwatch pSw = new Stopwatch();
 		pSw.Start();
 		try {
