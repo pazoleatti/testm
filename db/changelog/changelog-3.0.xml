@@ -175,4 +175,22 @@
         </update>
     </changeSet>
 
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4659 Добавить в БД патч изменение имен xsd файлов для макетов -->
+	<changeSet id="3.0-rnurgaleev-2" author="rnurgaleev">
+        <sql>
+            update blob_data set name='РНУ_НДФЛ_new6.3.xsd' where id in (select xsd from declaration_template where id=100);
+			update blob_data set name='NO_NDFL2_1_399_00_05_04_02.xsd' where id in (select xsd from declaration_template where id in (102,104));
+			update blob_data set name='NO_NDFL6_1_152_00_05_02_02.xsd' where id in (select xsd from declaration_template where id=103);
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4759 -->
+    <changeSet id="3.0-apronin-2" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

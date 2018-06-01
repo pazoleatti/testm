@@ -75,8 +75,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public final static String XSD = "main.xsd";
 
     private static final String DEC_TEMPLATES_FOLDER = "declaration";
-    private static final String TEMPLATE_OF_FOLDER_NAME =
-            "%s" + File.separator + "%s-%s" + File.separator + "%s";
     private static final int MAX_NAME_OF_DIR = 50;
     private static final String REG_EXP = "[^\\d\\sA-Za-z'-]";
     private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_YEAR = new ThreadLocal<SimpleDateFormat>() {
@@ -671,27 +669,21 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
-    public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
+    public void exportDeclarationTemplate(TAUserInfo userInfo, Integer declarationTemplateId, OutputStream os) {
         try {
             ZipOutputStream zos = new ZipOutputStream(os);
-            DeclarationTemplate dt = get(id);
-            dt.setCreateScript(getDeclarationTemplateScript(id));
+            DeclarationTemplate dt = get(declarationTemplateId);
+            dt.setCreateScript(getDeclarationTemplateScript(declarationTemplateId));
             doExportDeclarationTemplate("", dt, zos);
             zos.finish();
         } catch (Exception e) {
-            throw new ServiceException("Не удалось экспортировать шаблон", e);
+            throw new ServiceException("Не удалось экспортировать макет декларации с id = " + declarationTemplateId, e);
         }
     }
 
     private void doExportDeclarationTemplate(String path, DeclarationTemplate dt, ZipOutputStream zos) throws IOException, JAXBException {
-        // Version
-        ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
-            /*zos.putNextEntry(ze);
-			zos.write("1.0".getBytes());
-			zos.closeEntry();*/
-
         // Структура формы
-        ze = new ZipEntry(path + CONTENT_FILE);
+        ZipEntry ze = new ZipEntry(path + CONTENT_FILE);
         zos.putNextEntry(ze);
         DeclarationTemplateContent dtc = new DeclarationTemplateContent();
         dtc.fillDeclarationTemplateContent(dt);
@@ -745,22 +737,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             List<DeclarationTemplate> allTemplates = listAll();
             for (DeclarationTemplate dt : allTemplates) {
                 dt.setCreateScript(getDeclarationTemplateScript(dt.getId()));
-                String translatedName = Translator.transliterate(dt.getType().getName());
-                String folderTemplateName =
-                        Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
-                                TaxType.NDFL.name().toLowerCase(),
-                                dt.getType().getId(),
-                                (translatedName.length() > MAX_NAME_OF_DIR
-                                        ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP, "")
-                                        : translatedName.trim().replaceAll(REG_EXP, "")).trim(),
-                                SIMPLE_DATE_FORMAT_YEAR.get().format(dt.getVersion()))) + System.getProperty("file.separator");
+                String folderTemplateName = String.format("%s" + File.separator + "%s" + File.separator,
+                                "declarationType_" + dt.getType().getId(),
+                                SIMPLE_DATE_FORMAT_YEAR.get().format(dt.getVersion()));
                 ZipArchiveEntry ze = new ZipArchiveEntry(folderTemplateName);
                 zos.putNextEntry(ze);
                 doExportDeclarationTemplate(folderTemplateName, dt, zos);
                 zos.closeEntry();
             }
         } catch (Exception e) {
-            throw new ServiceException("Не удалось экспортировать шаблоны", e);
+            throw new ServiceException("Не удалось экспортировать макеты деклараций", e);
         } finally {
             IOUtils.closeQuietly(zos);
         }

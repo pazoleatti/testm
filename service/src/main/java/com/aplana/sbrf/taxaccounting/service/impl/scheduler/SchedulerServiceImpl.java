@@ -132,7 +132,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     @Override
     public void shutdownAllTasks() {
         for (String settingCode : tasks.keySet()) {
-            LOG.debug("Shutdown task with code: " + settingCode);
+            LOG.info("Shutdown task with code: " + settingCode);
             tasks.get(settingCode).cancel();
             crons.remove(settingCode);
             cronTasks.remove(settingCode);
@@ -141,11 +141,14 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
 
     @Override
     public void updateAllTask() {
+        LOG.info("SchedulerServiceImpl.updateAllTask started");
         Set<Method> methods = AnnotationUtil.findAllAnnotatedMethods(AplanaScheduled.class);
         for (final Method method : methods) {
+            LOG.info("Fetch scheduler task method: " + method);
             //Планируем задачи с расписанием из БД на момент старта приложения
             String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
             SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.valueOf(settingCode));
+            LOG.info("schedulerTask: " + schedulerTask);
             if (schedulerTask == null) {
                 LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION_SCHEDULER'");
             } else if (schedulerTask.isActive()) {
@@ -165,6 +168,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      * @param cron   расписание задачи
      */
     public void scheduleTask(final Method method, final String cron) {
+        LOG.info(String.format("SchedulerServiceImpl.scheduleTask. method: %s, cron: %s", method, cron));
         final SchedulerServiceImpl scheduler = this;
         String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
         if (crons.containsKey(settingCode)) {
@@ -176,12 +180,12 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         }
         //Удаляем существующую задачу
         if (tasks.containsKey(settingCode)) {
-            LOG.debug("Cancel scheduled method with code: " + settingCode);
+            LOG.info("Cancel scheduled method with code: " + settingCode);
             tasks.get(settingCode).cancel();
             crons.remove(settingCode);
             cronTasks.remove(settingCode);
         }
-        LOG.debug("Scheduled method: " + method + ", with cron: " + cron);
+        LOG.info("Scheduled method: " + method + ", with cron: " + cron);
         if (cron != null) {
             //Добавляем задачу в список, для того, чтобы потом ее можно было при необходимости удалить из планировщика
             CronTask cronTask = new CronTask(
@@ -191,7 +195,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                             try {
                                 method.invoke(scheduler);
                             } catch (Exception e) {
-                                throw new ServiceException(String.format("Cannot call method: \"%s\"", method.getName()), e);
+                                LOG.error(String.format("Cannot call method: \"%s\"", method.getName()), e);
                             }
                         }
                     }, new CronTrigger(cron, TimeZone.getDefault())
