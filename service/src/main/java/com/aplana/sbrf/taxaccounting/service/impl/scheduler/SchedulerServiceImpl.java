@@ -2,9 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
-import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
-import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -12,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,15 +30,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
  * Класс для запуска периодических задач по расписанию
  * Является бином, чтобы не надо было создавать его экземпляр каждый раз при вызове методов и обеспечить его существование в единственном экземпляре
- * Обрабатываются методы ТОЛЬКО ЭТОГО класса помеченные {@link AplanaScheduled}, причем методы должны быть без параметров.
+ * Обрабатываются методы указанные как executor в списке executors.
  * Планируется, что нужные сервисы будут вызываться уже из этого класса, это необходимо, т.к при получении методов через рефлексию нельзя получить экземпляр этого класса в спринговом конфиге,
  * а класс Scheduler уже является бином и соответственно ему доступны все остальные бины.
  *
@@ -57,6 +57,38 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private static final Map<String, ScheduledTask> tasks = new HashMap<String, ScheduledTask>();
     private static final Map<String, CronTask> cronTasks = new HashMap<String, CronTask>();
     private static final Map<String, String> crons = new HashMap<String, String>();
+    private final Map<String, SchedulerTaskExecutor> executors = ImmutableMap.<String, SchedulerTaskExecutor>builder()
+            .put("CLEAR_TEMP_DIR", new SchedulerTaskExecutor() {
+                @Override
+                public void execute() {
+                    clearTempDirectory();
+                }
+            })
+            .put("CLEAR_BLOB_DATA", new SchedulerTaskExecutor() {
+                @Override
+                public void execute() {
+                    clearBlobData();
+                }
+            })
+            .put("CLEAR_LOCK_DATA", new SchedulerTaskExecutor() {
+                @Override
+                public void execute() {
+                    clearLockData();
+                }
+            })
+            .put("LOG_TABLE_CHANGE_MONITORING", new SchedulerTaskExecutor() {
+                @Override
+                public void execute() {
+                    taxEventsMonitoring();
+                }
+            })
+            .put("ASYNC_TASK_MONITORING", new SchedulerTaskExecutor() {
+                @Override
+                public void execute() {
+                    asyncTasksMonitoring();
+                }
+            })
+            .build();
 
     //Реестр запланированных задач в Spring
     private ScheduledTaskRegistrar taskRegistrar;
@@ -141,19 +173,15 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
 
     @Override
     public void updateAllTask() {
-        LOG.info("SchedulerServiceImpl.updateAllTask started");
-        Set<Method> methods = AnnotationUtil.findAllAnnotatedMethods(AplanaScheduled.class);
-        for (final Method method : methods) {
-            LOG.info("Fetch scheduler task method: " + method);
+        for (final Map.Entry<String, SchedulerTaskExecutor> executor : executors.entrySet()) {
             //Планируем задачи с расписанием из БД на момент старта приложения
-            String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
+            String settingCode = executor.getKey();
             SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.valueOf(settingCode));
-            LOG.info("schedulerTask: " + schedulerTask);
             if (schedulerTask == null) {
                 LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION_SCHEDULER'");
             } else if (schedulerTask.isActive()) {
                 try {
-                    scheduleTask(method, schedulerTask.getSchedule());
+                    scheduleTask(executor.getValue(), settingCode, schedulerTask.getSchedule());
                 } catch (Exception e) {
                     LOG.error("Cannot set schedule for task with setting code = " + settingCode + ", cron format is incorrect! Check database table 'CONFIGURATION_SCHEDULER'");
                 }
@@ -164,13 +192,11 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Добавляет задачу в планировщик
      *
-     * @param method метод, который планировщик должен вызвать
-     * @param cron   расписание задачи
+     * @param executor    метод, который планировщик должен вызвать
+     * @param settingCode код строки с настройками задачи в БД
+     * @param cron        расписание задачи
      */
-    public void scheduleTask(final Method method, final String cron) {
-        LOG.info(String.format("SchedulerServiceImpl.scheduleTask. method: %s, cron: %s", method, cron));
-        final SchedulerServiceImpl scheduler = this;
-        String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
+    public void scheduleTask(final SchedulerTaskExecutor executor, final String settingCode, final String cron) {
         if (crons.containsKey(settingCode)) {
             String oldCron = crons.get(settingCode);
             if (oldCron == null && cron == null || oldCron != null && oldCron.equals(cron)) {
@@ -180,12 +206,11 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         }
         //Удаляем существующую задачу
         if (tasks.containsKey(settingCode)) {
-            LOG.info("Cancel scheduled method with code: " + settingCode);
+            LOG.info("Cancel scheduled task with code: " + settingCode);
             tasks.get(settingCode).cancel();
             crons.remove(settingCode);
             cronTasks.remove(settingCode);
         }
-        LOG.info("Scheduled method: " + method + ", with cron: " + cron);
         if (cron != null) {
             //Добавляем задачу в список, для того, чтобы потом ее можно было при необходимости удалить из планировщика
             CronTask cronTask = new CronTask(
@@ -193,15 +218,16 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                         @Override
                         public void run() {
                             try {
-                                method.invoke(scheduler);
+                                executor.execute();
                             } catch (Exception e) {
-                                LOG.error(String.format("Cannot call method: \"%s\"", method.getName()), e);
+                                LOG.error(String.format("Cannot call executor for task with code: \"%s\"", settingCode), e);
                             }
                         }
                     }, new CronTrigger(cron, TimeZone.getDefault())
             );
             tasks.put(settingCode, taskRegistrar.scheduleCronTask(cronTask));
             cronTasks.put(settingCode, cronTask);
+            LOG.info(String.format("Scheduled task. settingCode: %s, cron: %s", settingCode, cron));
         }
         crons.put(settingCode, cron);
     }
@@ -217,8 +243,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Удаление загруженных архивов из папки с временными файлами
      */
-    @AplanaScheduled(settingCode = "CLEAR_TEMP_DIR")
-    public void clearTempDirectory() {
+    private void clearTempDirectory() {
         SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.CLEAR_TEMP_DIR);
         if (schedulerTask.isActive()) {
             LOG.info("Temp directory cleaning started by scheduler");
@@ -246,9 +271,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Задача для очистки BLOB_DATA, DECLARATION_REPORT, LOG по расписанию
      */
-    @AplanaScheduled(settingCode = "CLEAR_BLOB_DATA")
     @Transactional
-    public void clearBlobData() {
+    private void clearBlobData() {
         SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.CLEAR_BLOB_DATA);
         if (schedulerTask.isActive()) {
             LOG.info("BLOB_DATA cleaning started by scheduler");
@@ -261,8 +285,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Задача для удаления блокировок, которые старше заданого времени
      */
-    @AplanaScheduled(settingCode = "CLEAR_LOCK_DATA")
-    public void clearLockData() {
+    private void clearLockData() {
         SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.CLEAR_LOCK_DATA);
         if (schedulerTask.isActive()) {
             LOG.info("LOCK_DATA cleaning started by scheduler");
@@ -277,8 +300,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Задача для мониторинга появление новых событий в УН, которые требуют обработки на стороне НДФЛ
      */
-    @AplanaScheduled(settingCode = "LOG_TABLE_CHANGE_MONITORING")
-    public void taxEventsMonitoring() {
+    private void taxEventsMonitoring() {
         if (applicationInfo.isProductionMode()) {
             SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
             if (schedulerTask.isActive()) {
@@ -291,8 +313,17 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Задача для мониторинга появление новых асинхронных задач и их запуска
      */
-    @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
-    public void asyncTasksMonitoring() {
+    private void asyncTasksMonitoring() {
         asyncTaskThreadContainer.processQueues();
+    }
+
+    /**
+     * Обработчик задачи планировщика
+     */
+    private interface SchedulerTaskExecutor {
+        /**
+         * Метод который будет вызван по расписанию указанному для задачи планировщика
+         */
+        void execute();
     }
 }

@@ -8,8 +8,7 @@ SET TARGET_NAME=VSAX3.exe
 ECHO ----------------------
 ECHO Compile:
 ECHO ----------------------
-REM "%BIN%\csc.exe" /out:%TARGET_NAME% /reference:VSAX3.dll Schematron.cs
-"%bin%\csc.exe" /out:%TARGET_NAME% *.cs VSAX3\*.cs VSAX3\Properties\*.cs VSAX3\Schematron\*.cs VSAX3\SnpLibrary\*.cs /res:VSAX3.Schematron.xsl1.xsl /res:VSAX3.Schematron.xsl2.xsl /res:VSAX3.Schematron.xsl3.xsl /res:VSAX3.Schematron.xsl4.xsl
+"%BIN%\csc.exe" /out:%TARGET_NAME% /reference:VSAX3.dll Schematron.cs
 
 REM goto :end
 IF %errorlevel% EQU 0 (

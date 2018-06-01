@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
+import com.google.common.io.Files;
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -26,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ClassUtils;
 
 import java.io.*;
 import java.util.Arrays;
@@ -39,8 +39,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     private static final Log LOG = LogFactory.getLog(ValidateXMLServiceImpl.class);
 
-    private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
-	private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60L; //таймаут работы утилиты для валидации XML по XSD
+    private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60L; //таймаут работы утилиты для валидации XML по XSD
 
     private static final String SUCCESS_FLAG = "SUCCESS";
     public static final String NOT_DELETE_WARN = "Файл %s не был удален";
@@ -125,11 +124,11 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         // Создаём локальный логгер на случай,
         // если в пришедшем логгере есть нефатальные ошибки или предупреждения с предыдущего этапа
         Logger localLogger = new Logger();
-		boolean result = validate(data, userInfo, localLogger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
+        boolean result = validate(data, userInfo, localLogger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
 
-		// Переносим записи из локального логгера
-		logger.getEntries().addAll(localLogger.getEntries());
-		return result;
+        // Переносим записи из локального логгера
+        logger.getEntries().addAll(localLogger.getEntries());
+        return result;
     }
 
     @Override
@@ -151,31 +150,19 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private boolean isValid(Logger logger, boolean isErrorFatal, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream, long timeout) {
         String[] params = new String[StringUtils.isNotBlank(xmlFileName)?4:3];
 
-        FileOutputStream outputStream;
-        InputStream inputStream;
-        File xsdFile = null, vsax3File = null;
+        File xsdFile = null, vsax3TempDir = null, vsax3ExeFile, vsax3DllFile;
         try {
-            vsax3File = File.createTempFile("VSAX3",".exe");
-            outputStream = new FileOutputStream(vsax3File);
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-            try {
-                LOG.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-            } finally {
-                inputStream.close();
-                outputStream.close();
-            }
-            params[0] = vsax3File.getAbsolutePath();
+            vsax3TempDir = Files.createTempDir();
+            vsax3ExeFile = new File(vsax3TempDir, "VSAX3.exe");
+            vsax3DllFile = new File(vsax3TempDir, "VSAX3.dll");
+            copyToFile(this.getClass().getResourceAsStream("/vsax3/VSAX3.exe"), vsax3ExeFile);
+            copyToFile(this.getClass().getResourceAsStream("/vsax3/VSAX3.dll"), vsax3DllFile);
+
+            params[0] = vsax3ExeFile.getAbsolutePath();
             //Получаем xml
             params[1] = xmlFile.getAbsolutePath();
             //Получаем xsd файл
-            xsdFile = File.createTempFile("validation_file",".xsd");
-            outputStream = new FileOutputStream(xsdFile);
-            try {
-                LOG.info("Xsd copy, total number of bytes " + IOUtils.copy(xsdStream, outputStream));
-            } finally {
-                xsdStream.close();
-                outputStream.close();
-            }
+            xsdFile = createTempFile(xsdStream, "validation_file",".xsd");
             params[2] = xsdFile.getAbsolutePath();
 
             if (StringUtils.isNotBlank(xmlFileName)) {
@@ -214,7 +201,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     }
                 }
                 logger.info("Проверка выполнена по файлу xsd: \"%s\"", xsdFileName);
-                fileInfo(logger, vsax3File);
+                fileInfo(logger, vsax3ExeFile);
             }
         } catch (IOException e) {
             LOG.error("", e);
@@ -225,9 +212,27 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             if (xsdFile != null && !xsdFile.delete()){
                 LOG.warn(String.format(NOT_DELETE_WARN, xsdFile.getName()));
             }
-            if (vsax3File != null && !vsax3File.delete()){
-                LOG.warn(String.format(NOT_DELETE_WARN, vsax3File.getName()));
+            if (vsax3TempDir != null && !vsax3TempDir.delete()){
+                LOG.warn(String.format(NOT_DELETE_WARN, vsax3TempDir.getName()));
             }
+        }
+    }
+
+    private File createTempFile(InputStream inputStream, String prefix, String suffix) {
+        File file;
+        try {
+            file = File.createTempFile(prefix, suffix);
+            copyToFile(inputStream, file);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return file;
+    }
+
+    private void copyToFile(InputStream inputStream, File fileDest) throws IOException {
+        try (InputStream in = inputStream;
+             OutputStream out = new BufferedOutputStream(new FileOutputStream(fileDest))) {
+            IOUtils.copy(in, out);
         }
     }
 
@@ -279,7 +284,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          * @return true If the function succeeds
          */
         boolean GetFileVersionInfoW(String lptstrFilename, int dwHandle,
-                                           int dwLen, Pointer lpData);
+                                    int dwLen, Pointer lpData);
 
         /**
          * Retrieves specified version information from the specified version-information resource.
@@ -298,7 +303,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          * @return the return value is nonzero - If the specified version-information structure exists, and version information is available
          */
         int VerQueryValueW(Pointer pBlock, String lpSubBlock,
-                                  PointerByReference lplpBuffer, IntByReference puLen);
+                           PointerByReference lplpBuffer, IntByReference puLen);
 
     }
 
@@ -376,14 +381,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     private void unzip(FileOutputStream outFile, InputStream zipXml) throws IOException {
         ZipInputStream zis = new ZipInputStream(zipXml);
-		try {
-			while (zis.getNextEntry() != null){
-				LOG.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
-			}
-		} finally {
-			IOUtils.closeQuietly(zis);
-			IOUtils.closeQuietly(outFile);
-			IOUtils.closeQuietly(zipXml);
-		}
+        try {
+            while (zis.getNextEntry() != null){
+                LOG.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
+            }
+        } finally {
+            IOUtils.closeQuietly(zis);
+            IOUtils.closeQuietly(outFile);
+            IOUtils.closeQuietly(zipXml);
+        }
     }
 }

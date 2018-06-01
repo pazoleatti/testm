@@ -172,7 +172,6 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                             "where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = :lockedAsyncId",
                     params);
         } catch (EmptyResultDataAccessException e) {
-            LOG.info(String.format("AsyncTaskDaoImpl.lockTask. no tasks for node: %s, priorityNode: %s, timeout: %s, queue: %s, maxTasksPerNode: %s", node, priorityNode, timeout, queue, maxTasksPerNode));
             return 0;
         }
     }

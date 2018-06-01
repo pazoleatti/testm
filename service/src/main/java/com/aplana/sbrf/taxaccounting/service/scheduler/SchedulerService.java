@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.scheduler;
 
-import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
-
 import java.util.Date;
 
 /**
@@ -15,7 +13,7 @@ public interface SchedulerService {
     void shutdownAllTasks();
 
     /**
-     * Добавляет/обновляет выполнение методов помеченных {@link AplanaScheduled} в планировщик
+     * Добавляет/обновляет выполнение методов этого сервиса в планировщик
      */
     void updateAllTask();
 
