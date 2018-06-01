@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -29,8 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("ValidateServiceImplTest.xml")
@@ -42,6 +37,9 @@ public class ValidateXMLServiceImplTest implements Runnable {
     private static final String ZIP_XML_1 = "NO_NDS.12_1_1_0212345678020012345_20140331_1.zip";
     private static final String ZIP_XML_2 = "NO_NDS.8_1_1_0212345678020012345_20140331_1.zip";
 
+    private static final String TEMPLATE = ClassUtils
+            .classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
+
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
@@ -52,7 +50,6 @@ public class ValidateXMLServiceImplTest implements Runnable {
     private ValidateXMLService validateService;
 
     private String uuidXsd1;
-
     @Before
     public void init() throws IOException {
         uuidXsd1 = UUID.randomUUID().toString();
@@ -79,7 +76,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
     }
 
     @Test
-    public void validateTestSampleSuccess() {
+    public void validateTestSampleSuccess(){
         if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
 
@@ -114,7 +111,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
     }
 
     @Test
-    public void validateTestFail() {
+    public void validateTestFail(){
         String uuidXsd2 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
         declarationTemplate2.setXsdId(uuidXsd2);
@@ -149,12 +146,12 @@ public class ValidateXMLServiceImplTest implements Runnable {
     }
 
     @Test
-    public void validateDiffThreads() {
+    public void validateDiffThreads(){
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             return;
         }
 
-        for (int i = 1; i <= 3; i++) {
+        for (int i=1; i<=3; i++){
             new Thread(this).run();
         }
     }
@@ -192,8 +189,8 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setDeclarationTemplateId(3);
         data.setId(5l);
         // Приводим интерфейс к текущей реализации
-        // при маленьком таймауте проверка не должна пройти
-        Assert.assertFalse(((ValidateXMLServiceImpl) validateService).validate(data, userInfo, logger, true, null, null, null, 1000L));
+		// при маленьком таймауте проверка не должна пройти
+		Assert.assertFalse(((ValidateXMLServiceImpl)validateService).validate(data, userInfo, logger, true, null, null, null, 1000L));
         Assert.assertEquals(4, logger.getEntries().size());
     }
 
@@ -217,17 +214,16 @@ public class ValidateXMLServiceImplTest implements Runnable {
         if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
 
-        File fileVSAX = File.createTempFile("VSAX3", ".exe");
+        File fileVSAX = File.createTempFile("VSAX3",".exe");
         try {
             FileOutputStream outputStream = new FileOutputStream(fileVSAX);
-            InputStream inputStream = this.getClass().getResourceAsStream("/vsax3/VSAX3.exe");
-            ;
-            try {
-                IOUtils.copy(inputStream, outputStream);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-                IOUtils.closeQuietly(outputStream);
-            }
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
+			try {
+            	IOUtils.copy(inputStream, outputStream);
+			} finally {
+				IOUtils.closeQuietly(inputStream);
+				IOUtils.closeQuietly(outputStream);
+			}
 
             Method method = validateService.getClass().getDeclaredMethod("fileInfo", Logger.class, File.class);
             method.setAccessible(true);
@@ -237,7 +233,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
             Assert.assertTrue(!logger.containsLevel(LogLevel.ERROR));
             Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
             System.out.println(logger.getEntries().get(0).getMessage());
-        } finally {
+        }finally {
             fileVSAX.delete();
         }
 

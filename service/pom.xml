@@ -234,7 +234,9 @@
                     <include>**/script-support.xml</include>
                     <include>**/permissions.xml</include>
                     <include>**/acctax.xlsm</include>
-                    <include>vsax3/*</include>
+                    <include>template/**</include>
+                    <include>xsd/**</include>
+                    <include>**/VSAX3.exe</include>
                 </includes>
             </resource>
             <resource>

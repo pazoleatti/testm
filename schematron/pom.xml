@@ -27,8 +27,8 @@
                         <configuration>
                             <tasks>
                                 <echo>Using env.test.properties</echo>
-                                <copy file="VSAX3.exe" tofile="${basedir}\..\service\src\main\resources\vsax3\VSAX3.exe"/>
-                                <copy file="VSAX3.dll" tofile="${basedir}\..\service\src\main\resources\vsax3\VSAX3.dll"/>
+                                <copy file="VSAX3.exe"
+                                      tofile="${basedir}\..\service\src\main\resources\com\aplana\sbrf\taxaccounting\service\impl\VSAX3.exe"/>
                             </tasks>
                         </configuration>
                     </execution>
