@@ -347,7 +347,7 @@ class Calculate extends AbstractScriptClass {
         logForDebug("Сортировка данных раздела 1, " + ScriptUtils.calcTimeMillis(time))
         time = System.currentTimeMillis();
 
-        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date(2000000000000L))
+        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date())
 
         logForDebug("Получение данных справочника ФЛ, " + ScriptUtils.calcTimeMillis(time))
         time = System.currentTimeMillis();

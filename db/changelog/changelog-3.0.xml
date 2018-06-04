@@ -222,4 +222,11 @@
             <where name="id" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
         </update>
     </changeSet>
+
+    <changeSet id="3.0-ytrofimov-12" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
