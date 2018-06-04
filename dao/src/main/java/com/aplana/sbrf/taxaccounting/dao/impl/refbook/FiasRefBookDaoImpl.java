@@ -144,7 +144,6 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
 
     }
 
-
     @Override
     public Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationId) {
         Map<Long, FiasCheckInfo> result = new HashMap<Long, FiasCheckInfo>();
@@ -155,7 +154,6 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
         call.execute(params);
         return result;
     }
-
 
     /**
      * [ID, POST_INDEX, REGION_CODE, AREA, CITY, LOCALITY, STREET, NDFL_FULL_ADDR, AREA_TYPE, AREA_FNAME, CITY_TYPE, CITY_FNAME, LOC_TYPE, LOC_FNAME, STREET_TYPE, STREET_FNAME, FIAS_ID, FIAS_INDEX, FIAS_STREET, FIAS_STREET_TYPE, FIAS_CITY_ID, FIAS_CITY_NAME]

@@ -255,11 +255,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 return departmentIds.size();
             }
         });
-
-
     }
-
-
 
     @Override
     @Transactional

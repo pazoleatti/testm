@@ -131,12 +131,6 @@ public interface DepartmentDao extends PermissionDao {
     List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly);
 
     /**
-     * Получение обособленного подразделения по значению
-     * «Наименование подразделения»»
-     */
-    Department getDepartmentByName(String name);
-
-    /**
      * Получение подразделений по типу
      *
      * @param type тип подразделения

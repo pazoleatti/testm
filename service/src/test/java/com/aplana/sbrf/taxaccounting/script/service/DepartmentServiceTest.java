@@ -50,9 +50,6 @@ public class DepartmentServiceTest {
         tempIds.add(validTB.getId());
         when(departmentDao.fetchAllIds()).thenReturn(tempIds);
 
-        when(departmentDao.getDepartmentByName("Банк1")).thenReturn(new Department());
-        when(departmentDao.getDepartmentByName("")).thenReturn(null);
-
         when(departmentDao.getDepartmentBySbrfCode("123", true)).thenReturn(new Department());
         when(departmentDao.getDepartmentBySbrfCode("321", true)).thenReturn(null);
 

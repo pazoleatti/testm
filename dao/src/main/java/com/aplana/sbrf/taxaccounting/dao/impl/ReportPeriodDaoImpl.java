@@ -133,7 +133,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public Integer create(ReportPeriod reportPeriod) {
         JdbcTemplate jt = getJdbcTemplate();
 

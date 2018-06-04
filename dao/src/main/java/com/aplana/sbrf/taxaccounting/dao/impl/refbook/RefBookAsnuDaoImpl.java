@@ -62,8 +62,8 @@ public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
         try {
             return getNamedParameterJdbcTemplate().queryForObject(
                     "select id, code, name, type, priority from ref_book_asnu " +
-                            "where name = :name",
-                    new MapSqlParameterSource("name", name),
+                            "where lower(name) = :name",
+                    new MapSqlParameterSource("name", name.toLowerCase()),
                     new RefBookAsnuRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;

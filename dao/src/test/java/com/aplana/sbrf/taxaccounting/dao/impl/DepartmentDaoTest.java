@@ -66,14 +66,6 @@ public class DepartmentDaoTest {
     }
 
     @Test
-    public void getName() {
-        Department department;
-        department = departmentDao.getDepartmentByName("ТБ2");
-        Assert.assertNotNull(department);
-        Assert.assertEquals(3, department.getId());
-    }
-
-    @Test
     public void getDepartmentsByType() {
         List<Integer> result = departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode());
         Assert.assertEquals(1, result.size());
