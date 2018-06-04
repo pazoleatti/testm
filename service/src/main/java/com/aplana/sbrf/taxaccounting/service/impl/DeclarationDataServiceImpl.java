@@ -3044,9 +3044,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setDeclarationDataId(action.getDeclarationId());
         } else {
             String uuidXml = reportService.getDec(action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null || !isXmlRequired(userInfo, action.getDeclarationId())) {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
-            } else {
+            if (uuidXml != null || !isXmlRequired(userInfo, action.getDeclarationId())) {
                 DeclarationData declarationData = get(action.getDeclarationId(), userInfo);
                 if (declarationData.getState().equals(State.ACCEPTED)) {
                     result.setStatus(CreateAsyncTaskStatus.EXIST);
@@ -3087,6 +3085,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                     result.setUuid(logEntryService.save(logger.getEntries()));
                 }
+            } else {
+                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             }
         }
         return result;
