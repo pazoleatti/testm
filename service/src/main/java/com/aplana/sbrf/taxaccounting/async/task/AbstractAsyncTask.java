@@ -17,10 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Абстрактная реализация асинхронной задачи.
@@ -130,7 +127,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Override
     public void execute(final AsyncTaskData taskData) {
         final Logger logger = new Logger();
-        final Date startDate = new Date();
+        final Date startDate = Calendar.getInstance(TimeZone.getTimeZone("GMT-3")).getTime();
 
         Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
         final boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());
@@ -145,7 +142,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     LOG.info(String.format("Business logic execution has been started for task with id %s", taskData.getId()));
                     BusinessLogicResult taskStatus = executeBusinessLogic(taskData, logger);
                     LOG.debug("Business logic execution is complete");
-                    Date endDate = new Date();
+                    Date endDate = Calendar.getInstance(TimeZone.getTimeZone("GMT-3")).getTime();
                     if (isShowTiming) {
                         logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
                     }
