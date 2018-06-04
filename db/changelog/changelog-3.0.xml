@@ -236,4 +236,13 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
+
+    <changeSet id="3.0-ytrofimov-14" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/report_kpp_oktmo.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 101)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
