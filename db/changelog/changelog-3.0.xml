@@ -214,4 +214,12 @@
             <where>id=100</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4749 -->
+    <changeSet id="3.0-apronin-4" author="apronin">
+        <update tableName="blob_data">
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
+            <where name="id" value="3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe"/>
+        </update>
+    </changeSet>
 </databaseChangeLog>
