@@ -366,7 +366,8 @@ create table declaration_data (
   file_name                   varchar2(255 char),
   doc_state_id                number(18),
   manually_created            number(1) default 0 not null,
-  last_data_modified          date
+  last_data_modified          date,
+  adjust_negative_values      number(1) default 0 not null
 );
 
 

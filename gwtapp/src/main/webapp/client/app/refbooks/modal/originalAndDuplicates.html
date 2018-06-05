@@ -51,15 +51,17 @@
             </div>
 
             <!-- Таблица с дубликатами -->
-            <div class="flex-grid" data-aplana-grid
-                 data-grid-fill-space="true"
-                 data-grid-fill-space-container-selector=".modal-body"
-                 data-grid-fill-space-container-selector-top=".top-block"
-                 data-grid-options="duplicatesGrid.options"
-                 data-grid-ctrl="duplicatesGrid.ctrl"
-                 data-ng-model="duplicatesGrid.value"
-                 data-init-grid="fetchDuplicates(ctrl)"
-                 id="duplicatesGrid">
+            <div style="height: 250px;">
+                <div class="flex-grid" data-aplana-grid style="height: 100%;"
+                     data-grid-fill-space="true"
+                     data-grid-fill-space-container-selector=".modal-body"
+                     data-grid-fill-space-container-selector-top=".top-block"
+                     data-grid-options="duplicatesGrid.options"
+                     data-grid-ctrl="duplicatesGrid.ctrl"
+                     data-ng-model="duplicatesGrid.value"
+                     data-init-grid="fetchDuplicates(ctrl)"
+                     id="duplicatesGrid">
+                </div>
             </div>
         </div>
     </div>

@@ -1138,7 +1138,7 @@ class DeclarationType extends AbstractScriptClass {
                 return
             }
             // Создание экземпляра декларации
-            declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
+            declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, false, null, true);
 
             inputStream = new FileInputStream(dataFile)
             try {

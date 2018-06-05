@@ -282,4 +282,41 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.0-dnovikov-1" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 102</where>
+        </update>
+    </changeSet>
+    <changeSet id="3.0-dnovikov-2" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 104</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-3" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-4" author="dnovikov">
+        <addColumn tableName="DECLARATION_DATA">
+            <column name="adjust_negative_values" type="number(1)"
+                    remarks="Признак, показывающий необходимость корректировки отрицательных значений"
+                    defaultValueComputed="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-5" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id=(select script_id from ref_book where id = 207)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -16,7 +16,7 @@
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
                 $scope.latestReportPeriod = {};
-                $scope.reportData = {};
+                $scope.reportData = {negativeValuesAdjustment: APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT};
 
                 $scope.userTBDepartment = {
                     id: $rootScope.user.department.parentId
@@ -69,7 +69,8 @@
                         params: {
                             declarationTypeId: $scope.reportData.declarationType.id,
                             departmentId: $scope.reportData.department.id,
-                            periodId: $scope.reportData.period.id
+                            periodId: $scope.reportData.period.id,
+                            isAdjustNegativeValues: $scope.reportData.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT
                         }
                     }).then(function (response) {
                         $modalInstance.close(response);

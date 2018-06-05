@@ -315,8 +315,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
-        return declarationDataService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit);
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit) {
+        return declarationDataService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, isAdjustNegativeValues, note, writeAudit);
     }
 
     @Override

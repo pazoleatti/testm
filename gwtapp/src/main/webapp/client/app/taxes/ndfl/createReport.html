@@ -1,7 +1,10 @@
 <form class="form-horizontal" name="createReportForm" data-aplana-submit-valid="save()">
     <div class="modal-body" style="min-height: 155px">
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
-               style="height: 100px;">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
+            <colgroup>
+                <col style="width:35%">
+                <col style="width:65%">
+            </colgroup>
             <tbody>
             <tr>
                 <td>
@@ -15,6 +18,44 @@
                              data-ng-model="reportData.period"
                              data-required>
                         </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'ndflreportJournal.validation.required' | translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-ng-if="reportData.period">
+                <td>
+                    <label class="control-label">{{::'createReport.department' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
+                             data-ui-select2="departmentsSelect.options"
+                             data-ng-init="initActiveAvailableTBSelect('reportData.period',userTBDepartment)"
+                             data-ng-model="reportData.department"
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'ndflreportJournal.validation.required' | translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-ng-if="reportData.department && reportData.period">
+                <td>
+                    <label class="control-label">{{::'createReport.reportType' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
+                             data-ui-select2="declarationTypeSelect.options"
+                             data-ng-model="reportData.declarationType"
+                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
+                             data-required>
+                        </div>
                         <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
                             translate}}
                         </div>
@@ -22,44 +63,16 @@
                 </td>
             </tr>
 
-            <tr>
+            <tr data-ng-if="reportData.declarationType && reportData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
                 <td>
-                    <label class="control-label">{{::'createReport.department' | translate}}:</label>
+                    <label class="control-label" style="white-space: normal">{{::'createReport.section2Negative' | translate}}</label>
                 </td>
                 <td>
-                    <div data-ng-if="reportData.period">
-                        <div data-aplana-field>
-                            <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
-                                 data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initActiveAvailableTBSelect('reportData.period',userTBDepartment)"
-                                 data-ng-model="reportData.department"
-                                 data-required>
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
-                                translate}}
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    <label class="control-label">{{::'createReport.reportType' |
-                        translate}}:</label>
-                </td>
-                <td>
-                    <div data-ng-if="reportData.department && reportData.period">
-                        <div data-aplana-field>
-                            <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
-                                 data-ui-select2="declarationTypeSelect.options"
-                                 data-ng-model="reportData.declarationType"
-                                 data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                                 data-required>
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
-                                translate}}
-                            </div>
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectFromArrayCtrl"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="reportData.negativeValuesAdjustment"
+                             data-ng-init="init([APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT, APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT])">
                         </div>
                     </div>
                 </td>
@@ -67,8 +80,9 @@
             </tbody>
         </table>
 
-        <label class="control-label correction-message" data-ng-show="correctionPeriod">{{::'createReport.correctionMessage' | translate}} {{correctionDate |
-            dateFormatter}}</label>
+        <label class="control-label correction-message" data-ng-show="correctionPeriod">
+            {{::'createReport.correctionMessage' | translate}} {{correctionDate | dateFormatter}}
+        </label>
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-default iconed-btn">

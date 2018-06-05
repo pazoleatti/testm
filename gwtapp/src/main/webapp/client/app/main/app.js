@@ -359,6 +359,9 @@
         "title.prepayment.notifDateFrom": "Дата выдачи уведомления c",
         "title.prepayment.notifSource": "Код налогового органа, выдавшего уведомление",
         "title.prepayment.filter.notifSource": "Код НО, выдавшего уведомление",
+        "title.adjustNegativeValues": "Корректировать отрицательные значения",
+        "negativeValuesAdjustment.true": "Корректировать",
+        "negativeValuesAdjustment.false": "Не корректировать",
 
         "logBusiness.title": "История изменений формы",
         "logBusiness.title.event": "Событие",
@@ -671,6 +674,7 @@
         "createReport.period": "Период",
         "createReport.department": "Подразделение",
         "createReport.reportType": "Вид отчетности",
+        "createReport.section2Negative": "Отрицательные значения Раздела 2:",
         "createReport.correctionMessage": "Отчетности будут созданы в корректирующем периоде, дата сдачи корректировки: ",
 
         "createDeclaration.title": "Создание налоговой формы",
