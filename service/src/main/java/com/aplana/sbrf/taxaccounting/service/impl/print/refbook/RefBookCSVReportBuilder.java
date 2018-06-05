@@ -200,7 +200,7 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
                         break;
                     case STRING:
                         if (value.getStringValue() == null) tableCell = "";
-                        else tableCell = value.getStringValue();
+                        else tableCell = "\t" + value.getStringValue();
                         break;
                     case REFERENCE:
                         if (value.getReferenceValue() == null) tableCell = "";
