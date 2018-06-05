@@ -260,4 +260,26 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         }
         return parents;
     }
+
+    public PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records) {
+        // Собираем атрибуты, которые ссылаются на другие справочники
+        Map<String, RefBookDataProvider> referenceAttributes = new HashMap<>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                referenceAttributes.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+            }
+        }
+
+        if (!referenceAttributes.isEmpty()) {
+            // Разыменовываем справочные атрибуты
+            for (Map<String, RefBookValue> record : records) {
+                for (Map.Entry<String, RefBookDataProvider> reference : referenceAttributes.entrySet()) {
+                    String referenceAlias = reference.getKey();
+                    Map<String, RefBookValue> referenceObject = reference.getValue().getRecordData(record.get(referenceAlias).getReferenceValue());
+                    record.put(referenceAlias, new RefBookValue(RefBookAttributeType.REFERENCE, referenceObject));
+                }
+            }
+        }
+        return records;
+    }
 }

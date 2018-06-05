@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -43,6 +44,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Autowired
     private LockDataService lockService;
     @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
     private LogEntryService logEntryService;
     @Autowired
     private RefBookSimpleDao dao;
@@ -58,27 +61,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PagingResult<Map<String, RefBookValue>> records = dao.getRecordsWithVersionInfo(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
-
-        // Собираем атрибуты, которые ссылаются на другие справочники
-        Map<String, RefBookDataProvider> referenceAttributes = new HashMap<>();
-        for (RefBookAttribute attribute : getRefBook().getAttributes()) {
-            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                referenceAttributes.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-            }
-        }
-
-        if (!referenceAttributes.isEmpty()) {
-            // Разыменовываем справочные атрибуты
-            for (Map<String, RefBookValue> record : records) {
-                for (Map.Entry<String, RefBookDataProvider> reference : referenceAttributes.entrySet()) {
-                    String referenceAlias = reference.getKey();
-                    Map<String, RefBookValue> referenceObject = reference.getValue().getRecordData(record.get(referenceAlias).getReferenceValue());
-                    record.put(referenceAlias, new RefBookValue(RefBookAttributeType.REFERENCE, referenceObject));
-                }
-            }
-        }
-
-        return records;
+        return commonRefBookService.dereference(getRefBook(), records);
     }
 
     @Override

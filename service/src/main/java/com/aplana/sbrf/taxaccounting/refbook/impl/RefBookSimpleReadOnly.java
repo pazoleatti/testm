@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -22,12 +24,16 @@ import java.util.Map;
 @Transactional
 public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
+    @Autowired
+    private CommonRefBookService commonRefBookService;
+
 	/** Дополнительная фильтрация выборки */
 	private String whereClause;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+        PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+        return commonRefBookService.dereference(getRefBook(), records);
     }
 
     @Override

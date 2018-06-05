@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -113,4 +114,11 @@ public interface CommonRefBookService {
      */
     PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version,
                                                             String searchPattern, boolean exactSearch, PagingParams pagingParams);
+
+    /**
+     * Разыменовывает справочные атрибуты записей, т.е те, которые ссылаются на другие записи справочников. Получает полный объект вместо id-ссылки
+     * @param refBook справочник, для которого выполняется разыменование
+     * @param records список записей, для которых выполняется разыменование
+     */
+    PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records);
 }
