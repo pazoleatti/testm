@@ -64,6 +64,13 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         }
     };
 
+    private static final ThreadLocal<String> TIME_ZONE_MOSCOW = new ThreadLocal<String>() {
+        @Override
+        protected String initialValue() {
+            return "Europe/Moscow";
+        }
+    };
+
     /**
      * Выполнение бизнес логики задачи
      *
@@ -127,7 +134,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Override
     public void execute(final AsyncTaskData taskData) {
         final Logger logger = new Logger();
-        final Date startDate = Calendar.getInstance(TimeZone.getTimeZone("GMT-3")).getTime();
+        final Date startDate = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get())).getTime();
 
         Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
         final boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());
@@ -142,7 +149,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     LOG.info(String.format("Business logic execution has been started for task with id %s", taskData.getId()));
                     BusinessLogicResult taskStatus = executeBusinessLogic(taskData, logger);
                     LOG.debug("Business logic execution is complete");
-                    Date endDate = Calendar.getInstance(TimeZone.getTimeZone("GMT-3")).getTime();
+                    Date endDate = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get())).getTime();
                     if (isShowTiming) {
                         logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
                     }
