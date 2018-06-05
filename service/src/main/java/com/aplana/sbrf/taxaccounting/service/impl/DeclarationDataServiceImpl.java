@@ -252,7 +252,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (departmentReportPeriod != null) {
             int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(action.getDeclarationTypeId().intValue(), action.getPeriodId());
             try {
-                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, action.getAsnuId(), null, null, true, action.getManuallyCreated());
+                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, action.getAsnuId(), null, false, null, true, action.getManuallyCreated());
                 result.setEntityId(declarationId);
             } catch (DaoException e) {
                 throw new ServiceException(e.getMessage());
@@ -271,7 +271,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      */
     private Long doCreate(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                           DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
-                          String oktmo, Long asunId, String fileName, String note, boolean writeAudit, boolean manuallyCreated) {
+                          String oktmo, Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit, boolean manuallyCreated) {
         LOG.info(String.format("DeclarationDataServiceImpl.doCreate by %s. declarationTemplateId: %s; departmentReportPeriod: %s; taxOrganCode: %s; taxOrganKpp: %s; oktmo: %s; asunId: %s; fileName: %s; note: %s; writeAudit: %s; manuallyCreated: %s",
                 userInfo, declarationTemplateId, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit, manuallyCreated));
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
@@ -332,6 +332,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setFileName(fileName);
                 newDeclaration.setNote(note);
                 newDeclaration.setManuallyCreated(manuallyCreated);
+                newDeclaration.setAdjustNegativeValues(isAdjustNegativeValues);
 
                 if (manuallyCreated && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
@@ -505,8 +506,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
-        return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit, false);
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit) {
+        return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, isAdjustNegativeValues, note, writeAudit, false);
     }
 
     @Transactional
@@ -771,6 +772,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         result.setManuallyCreated(declaration.getManuallyCreated());
         result.setLastDataModifiedDate(declaration.getLastDataModifiedDate());
         result.setActualDataDate(new Date());
+        result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {
@@ -2844,7 +2846,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
+    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger) {
         LOG.info(String.format("DeclarationDataServiceImpl.createForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
                 userInfo, departmentReportPeriod, declarationTypeId));
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
@@ -2864,10 +2866,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Logger scriptLogger = new Logger();
             boolean createForm = true;
             try {
-                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
+                Map<String, Object> exchangeParams = entry.getValue();
+                exchangeParams.put("isAdjustNegativeValues", isAdjustNegativeValues);
+                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), exchangeParams, stateLogger);
             } catch (Exception e) {
                 createForm = false;
-                if (e.getMessage() != null) {
+                if (e.getMessage() != null && !e.getMessage().isEmpty()) {
                     scriptLogger.warn(e.getMessage());
                 }
             } finally {
@@ -2994,7 +2998,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId) {
+    public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId, boolean isAdjustNegativeValues) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. declarationTypeId: %s; departmentId: %s; periodId: %s",
                 userInfo, declarationTypeId, departmentId, periodId));
         // логика взята из CreateFormsDeclarationHandler
@@ -3010,6 +3014,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationTypeId", declarationTypeId);
         params.put("departmentReportPeriodId", departmentReportPeriod.getId());
+        params.put("isAdjustNegativeValues", isAdjustNegativeValues);
 
         String keyTask = generateAsyncTaskKey(declarationTypeId, periodId, departmentId);
         Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);

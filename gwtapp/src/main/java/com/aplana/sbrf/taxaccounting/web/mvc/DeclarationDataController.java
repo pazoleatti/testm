@@ -330,14 +330,15 @@ public class DeclarationDataController {
     /**
      * Создание отчётности
      *
-     * @param declarationTypeId идентификатор типа отчётности
-     * @param departmentId      идентификатор подразделения
-     * @param periodId          идентификатор периода
+     * @param declarationTypeId      идентификатор типа отчётности
+     * @param departmentId           идентификатор подразделения
+     * @param periodId               идентификатор периода
+     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
     @PostMapping(value = "/actions/declarationData/createReport")
-    public CreateDeclarationReportResult createReport(Integer declarationTypeId, Integer departmentId, Integer periodId) {
-        return declarationService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
+    public CreateDeclarationReportResult createReport(Integer declarationTypeId, Integer departmentId, Integer periodId, boolean isAdjustNegativeValues) {
+        return declarationService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId, isAdjustNegativeValues);
     }
 
     /**
@@ -591,12 +592,13 @@ public class DeclarationDataController {
             for (DeclarationDataJournalItem item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
                 if (declaration != null) {//noinspection unchecked
-                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
-                        DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                         DeclarationDataPermission.CREATE,
-                        DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
-                item.setPermissions(declaration.getPermissions());}
+                    declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
+                            DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                            DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                            DeclarationDataPermission.CREATE,
+                            DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
+                    item.setPermissions(declaration.getPermissions());
+                }
             }
         }
     }
@@ -750,7 +752,7 @@ public class DeclarationDataController {
      * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param personIncome измененные данные строки
+     * @param personIncome      измененные данные строки
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflIncomesAndTax", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editNdflIncomesAndTax(@PathVariable Long declarationDataId, @RequestBody NdflPersonIncomeDTO personIncome) {
@@ -761,7 +763,7 @@ public class DeclarationDataController {
      * Обновляет данные строки для раздела 3 (Сведения о вычетах)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param personDeduction измененные данные строки
+     * @param personDeduction   измененные данные строки
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflDeduction", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editNdflDeduction(@PathVariable Long declarationDataId, @RequestBody NdflPersonDeductionDTO personDeduction) {
@@ -772,7 +774,7 @@ public class DeclarationDataController {
      * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param personPrepayment измененные данные строки
+     * @param personPrepayment  измененные данные строки
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflPrepayment", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editNdflPrepayment(@PathVariable Long declarationDataId, @RequestBody NdflPersonPrepaymentDTO personPrepayment) {
@@ -781,6 +783,7 @@ public class DeclarationDataController {
 
     /**
      * Обновляет данные ФЛ КНФ
+     *
      * @param declarationDataId иднтификатор формы данные которые обновляются
      * @return строка с uuid уведомлений об обновлении данных ФЛ КНФ
      */

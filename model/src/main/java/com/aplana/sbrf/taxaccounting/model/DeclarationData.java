@@ -62,6 +62,11 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
     private Date lastDataModifiedDate;
 
     /**
+     * Признак, показывающий необходимость корректировки отрицательных значений
+     */
+    private boolean isAdjustNegativeValues;
+
+    /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
 	 * @return идентификатор шаблона декларации
 	 */
@@ -210,6 +215,14 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
 
     public void setLastDataModifiedDate(Date lastDataModifiedDate) {
         this.lastDataModifiedDate = lastDataModifiedDate;
+    }
+
+    public boolean isAdjustNegativeValues() {
+        return isAdjustNegativeValues;
+    }
+
+    public void setAdjustNegativeValues(boolean adjustNegativeValues) {
+        isAdjustNegativeValues = adjustNegativeValues;
     }
 
     @Override

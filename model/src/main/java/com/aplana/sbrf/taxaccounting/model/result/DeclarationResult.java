@@ -93,6 +93,11 @@ public class DeclarationResult {
      */
     private Boolean manuallyCreated = false;
 
+    /**
+     * Признак, показывающий необходимость корректировки отрицательных значений
+     */
+    private boolean isAdjustNegativeValues;
+
     public String getDepartment() {
         return department;
     }
@@ -243,5 +248,13 @@ public class DeclarationResult {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public boolean isAdjustNegativeValues() {
+        return isAdjustNegativeValues;
+    }
+
+    public void setAdjustNegativeValues(boolean adjustNegativeValues) {
+        isAdjustNegativeValues = adjustNegativeValues;
     }
 }

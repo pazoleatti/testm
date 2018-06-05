@@ -704,5 +704,19 @@
                     });
                 };
             }
+        ])
+
+        /**
+         * Bыборка значений из заданого массива объектов
+         */
+        .controller('SelectFromArrayCtrl', ['$scope', 'GetSelectOption', 'RefBookValuesResource',
+            function ($scope, GetSelectOption) {
+                $scope.selectFromArray = {};
+
+                $scope.init = function (values) {
+                    $scope.selectFromArray = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.selectFromArray.options.data.results = values;
+                };
+            }
         ]);
 }());

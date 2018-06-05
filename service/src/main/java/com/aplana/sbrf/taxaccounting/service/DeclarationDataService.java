@@ -49,31 +49,32 @@ public interface DeclarationDataService {
      * @param taxOrganCode           налоговый орган (для налога на имущество)
      * @param taxOrganKpp            КПП (для налога на имущество)
      * @param oktmo                  ОКТМО, для НДФЛ
-     * @param fileName
-     * @param note
+     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
+     * @param fileName               наименование ТФ файла
+     * @param note                   Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"
      * @return идентификатор созданной декларации
      */
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
-                Long asunId, String fileName, String note, boolean writeAudit);
+                Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit);
 
     /**
      * Идентифицировать ФЛ
      *
-     * @param targetIdAndLogger   объект журнала
-     * @param userInfo                          информация о пользователе, выполняющего операцию
-     * @param docDate                           дата обновления декларации
-     * @param stateLogger                       логгер для обновления статуса асинхронной задачи
+     * @param targetIdAndLogger объект журнала
+     * @param userInfo          информация о пользователе, выполняющего операцию
+     * @param docDate           дата обновления декларации
+     * @param stateLogger       логгер для обновления статуса асинхронной задачи
      */
     void identify(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Консолидировать НФ
      *
-     * @param targetIdAndLogger   объект журнала
-     * @param userInfo                          информация о пользователе, выполняющего операцию
-     * @param docDate                           дата обновления декларации
-     * @param stateLogger                       логгер для обновления статуса асинхронной задачи
+     * @param targetIdAndLogger объект журнала
+     * @param userInfo          информация о пользователе, выполняющего операцию
+     * @param docDate           дата обновления декларации
+     * @param stateLogger       логгер для обновления статуса асинхронной задачи
      */
     void consolidate(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
@@ -678,8 +679,9 @@ public interface DeclarationDataService {
      *
      * @param departmentReportPeriod отчетный период
      * @param declarationTypeId      идентификатор типа декларации
+     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
      */
-    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
+    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger);
 
     /**
      * Создание отчетности для выгрузки
@@ -727,13 +729,14 @@ public interface DeclarationDataService {
     /**
      * Создание отчётности
      *
-     * @param userInfo          информация о пользователе
-     * @param declarationTypeId идентификатор типа отчётности
-     * @param departmentId      идентификатор подразделения
-     * @param periodId          идентификатор периода
-     * @return
+     * @param userInfo               информация о пользователе
+     * @param declarationTypeId      идентификатор типа отчётности
+     * @param departmentId           идентификатор подразделения
+     * @param periodId               идентификатор периода
+     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
+     * @return результат создания отчетности
      */
-    CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId);
+    CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId, boolean isAdjustNegativeValues);
 
     /**
      * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
@@ -815,8 +818,8 @@ public interface DeclarationDataService {
      * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param taUserInfo пользователь, выполняющий изменения
-     * @param personIncome данные строки раздела 2
+     * @param taUserInfo        пользователь, выполняющий изменения
+     * @param personIncome      данные строки раздела 2
      */
     void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome);
 
@@ -824,8 +827,8 @@ public interface DeclarationDataService {
      * Обновляет данные строки для раздела 3 (Сведения о вычетах)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param taUserInfo пользователь, выполняющий изменения
-     * @param personDeduction данные строки раздела 3
+     * @param taUserInfo        пользователь, выполняющий изменения
+     * @param personDeduction   данные строки раздела 3
      */
     void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction);
 
@@ -833,29 +836,32 @@ public interface DeclarationDataService {
      * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param taUserInfo пользователь, выполняющий изменения
-     * @param personPrepayment данные строки раздела 4
+     * @param taUserInfo        пользователь, выполняющий изменения
+     * @param personPrepayment  данные строки раздела 4
      */
     void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment);
 
     /**
      * Создать имя Pdf отчета
-     * @param declarationDataId   идентификатор налоговой формы
-     * @param userInfo            информация о пользователе
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @param userInfo          информация о пользователе
      * @return имя Pdf отчета
      */
     String createPdfFileName(Long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Создает задачу на обновление данных ФЛ в КНФ
+     *
      * @param declarationDataId идентификатор налоговой формы
      * @param userInfo          информация о пользователе
-     * @return                  uuid уведомлений
+     * @return uuid уведомлений
      */
     String createUpdatePersonsDataTask(Long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Запускает бизнес-логику по обновлению данных ФЛ в КНФ
+     *
      * @param declarationDataId идентификатор налоговой формы
      * @param logger            объект для логирования информации
      * @param userInfo          информация о пользователе

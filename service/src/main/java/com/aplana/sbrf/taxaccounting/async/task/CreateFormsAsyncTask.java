@@ -51,6 +51,7 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         Integer declarationTypeId = (Integer) params.get("declarationTypeId");
         Integer departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
+        boolean isAdjustNegativeValues = (Boolean) params.get("isAdjustNegativeValues");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
@@ -60,7 +61,7 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
             throw new ServiceException("Не удалось определить налоговый период.");
         }
 
-        declarationDataService.createForms(logger, userInfo, departmentReportPeriod, declarationTypeId, new LockStateLogger() {
+        declarationDataService.createForms(logger, userInfo, departmentReportPeriod, declarationTypeId, isAdjustNegativeValues, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 asyncManager.updateState(taskData.getId(), state);

@@ -56,7 +56,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.last_data_modified, " +
-                            "drp.report_period_id, drp.department_id " +
+                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and dd.id = ?",
                     new Object[]{declarationDataId},
@@ -73,7 +73,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getJdbcTemplate().query(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.last_data_modified, " +
-                            "drp.report_period_id, drp.department_id " +
+                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and (" +
                             SqlUtils.transformToSqlInStatement("dd.id", declarationDataIds) + ")",
@@ -106,7 +106,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getNamedParameterJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "drp.report_period_id, drp.department_id " +
+                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and drp.id = :departmentReportPeriodId " +
                             "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
@@ -133,7 +133,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return getNamedParameterJdbcTemplate().query(
                 "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                         "dd.department_report_periodd, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_cr_ieated, " +
-                        "drp.report_period_id, drp.department_id " +
+                        "dd.adjust_negative_values, drp.report_period_id, drp.department_id " +
                         "from declaration_data dd, department_report_period drp " +
                         "where drp.id = dd.department_report_period_id and lower(file_name) = :fileName",
                 params, new DeclarationDataRowMapper()
@@ -146,7 +146,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getJdbcTemplate().query(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "drp.report_period_id, drp.department_id " +
+                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and drp.id = ?" +
                             "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
@@ -356,7 +356,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         id = generateId("seq_declaration_data", Long.class);
         jt.update(
-                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, oktmo, asnu_id, note, file_name, doc_state_id, manually_created, last_data_modified) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, oktmo, asnu_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 declarationData.getDeclarationTemplateId(),
                 declarationData.getDepartmentReportPeriodId(),
@@ -369,7 +369,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 declarationData.getFileName(),
                 declarationData.getDocState(),
                 declarationData.getManuallyCreated(),
-                declarationData.getManuallyCreated() ? null : new Date()
+                declarationData.getManuallyCreated() ? null : new Date(),
+                declarationData.isAdjustNegativeValues()
         );
         declarationData.setId(id);
         return id.longValue();
@@ -678,7 +679,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "select * from " +
                             "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "drp.report_period_id, drp.department_id, rownum " +
+                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id, rownum " +
                             "from declaration_data dd, department_report_period drp, declaration_template dt " +
                             "where dd.department_report_period_id = drp.id " +
                             "and dt.id = dd.declaration_template_id " +
@@ -734,7 +735,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, drp.report_period_id, drp.department_id, rownum \n");
+            sb.append("SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.adjust_negative_values, drp.report_period_id, drp.department_id, rownum \n");
             sb.append("FROM declaration_data dd, department_report_period drp, declaration_template dt \n");
             sb.append("WHERE dd.department_report_period_id = drp.id \n");
             sb.append("AND dt.id                            = dd.declaration_template_id \n");
@@ -760,7 +761,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return getNamedParameterJdbcTemplate().query(
                 "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state,\n" +
                         " dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id,\n" +
-                        " dd.manually_created, drp.report_period_id, drp.department_id\n" +
+                        " dd.manually_created, dd.adjust_negative_values, drp.report_period_id, drp.department_id\n" +
                         "from DECLARATION_DATA dd\n" +
                         "inner join DECLARATION_TEMPLATE dt on dd.declaration_template_id = dt.id\n" +
                         "inner join DEPARTMENT_REPORT_PERIOD drp on dd.department_report_period_id = drp.id\n" +
@@ -774,7 +775,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
         String sql = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, drp.report_period_id, drp.department_id " +
+                "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.adjust_negative_values, drp.report_period_id, drp.department_id " +
                 "from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
                 "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
                 "and drp.id = dd.DEPARTMENT_REPORT_PERIOD_ID " +
@@ -803,7 +804,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "select " +
                         "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                         "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                        "drp.report_period_id, drp.department_id, dd.note " +
+                        "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note " +
                         "from " +
                         "DECLARATION_DATA dd " +
                         "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
@@ -870,7 +871,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         String sql = "select " +
                 "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                "drp.report_period_id, drp.department_id, dd.note " +
+                "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note " +
                 "from declaration_data dd join department_report_period drp on drp.ID = dd.department_report_period_id " +
                 "where dd.declaration_template_id = :declarationTypeId " +
                 "and drp.report_period_id = :reportPeriodId " +
@@ -890,7 +891,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         StringBuilder query = new StringBuilder("select ")
                 .append("dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, ")
                 .append("dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, ")
-                .append("drp.report_period_id, drp.department_id, dd.note ")
+                .append("dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note ")
                 .append("from declaration_data dd join declaration_template dt on dt.id = dd.declaration_template_id ")
                 .append("join department_report_period drp on drp.ID = dd.department_report_period_id ")
                 .append("where lower(dd.kpp) = :kpp and lower(dd.oktmo) = :oktmo and dt.id = :declarationTemplate ")
@@ -1001,6 +1002,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
             d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
             d.setManuallyCreated(SqlUtils.getInteger(rs, "manually_created") == 1);
+            d.setAdjustNegativeValues(SqlUtils.getInteger(rs, "adjust_negative_values") == 1);
             if (SqlUtils.isExistColumn(rs, "last_data_modified") && rs.getTimestamp("last_data_modified") != null) {
                 d.setLastDataModifiedDate(new Date(rs.getTimestamp("last_data_modified").getTime()));
             }

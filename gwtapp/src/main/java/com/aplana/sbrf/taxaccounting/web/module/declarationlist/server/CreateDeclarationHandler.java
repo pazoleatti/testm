@@ -60,7 +60,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         try {
             declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
                     securityService.currentUserInfo(), departmentReportPeriod, null,
-                    null, null, null, null, null, true);
+                    null, null, null, null, false, null, true);
         } catch (DaoException e) {
             DeclarationTemplate dt = declarationTemplateService.get(activeDeclarationTemplateId);
             if (dt.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()
