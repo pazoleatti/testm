@@ -60,6 +60,7 @@
                 INCOME_CODE: 922,
                 PERSON_ADDRESS: 901,
                 TAXPAYER_STATUS: 903,
+                PERIOD_CODE: 8
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

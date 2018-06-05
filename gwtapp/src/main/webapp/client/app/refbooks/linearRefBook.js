@@ -115,7 +115,9 @@
                             value = record && typeof record.value !== 'undefined' ? record.value : "";
                             break;
                         case 'DATE':
-                            value = record && typeof record.value !== 'undefined' ? $filter('dateFormatter')(record.value) : "";
+                            // Особенность для справочника "Коды, определяющие налоговый (отчётный) период" - год отображать не надо
+                            var formatter = $scope.refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE ? $filter('dateWithoutYearFormatter') : $filter('dateFormatter');
+                            value = record && typeof record.value !== 'undefined' ? formatter(record.value) : "";
                             break;
                         case 'REFERENCE':
                             value = record && typeof record.referenceObject !== 'undefined' ? record.referenceObject[colModel.referenceAttribute.alias].value : "";

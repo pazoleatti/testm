@@ -30,6 +30,7 @@
                     AplanaUtils.copyAttributes(element, dateTimeElement, 'data-max-date');
                     AplanaUtils.copyAttributes(element, dateTimeElement, 'data-focus-date');
                     AplanaUtils.copyAttributes(element, dateTimeElement, 'data-enable-weekends');
+                    AplanaUtils.copyAttributes(element, dateTimeElement, 'data-date-format');
                     AplanaUtils.copyAttributes(element, buttonElement, ['data-placement', 'data-container', 'data-ng-disabled']);
 
                     element[0].removeAttribute('data-placement');
@@ -70,7 +71,7 @@
                         scope.options = {
                             lang: 'ru',
                             dateType: 'string',
-                            dateFormat: 'dd.MM.yyyy',
+                            dateFormat: angular.isDefined(attr.dateFormat) ? attr.dateFormat : 'dd.MM.yyyy',
                             modelDateFormat: 'yyyy-MM-dd',
                             minDate: -Infinity,
                             maxDate: +Infinity

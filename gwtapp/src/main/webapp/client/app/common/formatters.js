@@ -25,6 +25,25 @@
                 }
             };
         }])
+    /**
+     * @description Фильтр даты без года
+     *
+     * @param value - значение, которое необходимо отформатировать
+     * @return Дата в формате 'dd.MM'
+     */
+        .filter('dateWithoutYearFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (!value) {
+                    return '';
+                }
+                if (!value.millis) {
+                    return $filter('date')(value, 'dd.MM');
+                }
+                else {
+                    return $filter('date')(value.millis, 'dd.MM');
+                }
+            };
+        }])
 
         /**
          * @description Фильтр даты и времени

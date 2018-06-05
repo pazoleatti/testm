@@ -83,7 +83,9 @@
                                 value = refBookValue && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
                                 break;
                             case 'DATE':
-                                value = refBookValue && typeof refBookValue.value !== 'undefined' && (!$scope.isEditMode || !isNaN(refBookValue.value)) ? $filter('dateFormatter')(refBookValue.value) : "";
+                                // Особенность для справочника "Коды, определяющие налоговый (отчётный) период" - год отображать не надо
+                                var formatter = $scope.refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE ? $filter('dateWithoutYearFormatter') : $filter('dateFormatter');
+                                value = refBookValue && typeof refBookValue.value !== 'undefined' && (!$scope.isEditMode || !isNaN(refBookValue.value)) ? formatter(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
                                 value = refBookValue && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
