@@ -40,6 +40,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String SHOW_TIMING_DEFAULT = "0";
     private static final String LIMIT_IDENT_DEFAULT = "0.65";
     private static final String ENABLE_IMPORT_PERSON_DEFAULT = "1";
+    private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT = "3";
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
@@ -66,6 +67,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String SEARCH_WITOUT_ERROR_MESSAGE = "Проверка выполнена, ошибок не найдено";
     private static final String EDIT_ASYNC_PARAM_MESSAGE = "%s. Изменён параметр \"%s\" для задания \"%s\": %s.";
     private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
+    private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE = "Для параметра \"Горизонт отбора данных для консолидации, годы\" должно быть указано целое количество лет от 1 до 99";
 
 
     @Autowired
@@ -89,6 +91,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(), COMMON_PARAM_DEPARTMENT_ID, SHOW_TIMING_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, LIMIT_IDENT_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.ENABLE_IMPORT_PERSON.getCaption(), COMMON_PARAM_DEPARTMENT_ID, ENABLE_IMPORT_PERSON_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.getCaption(), COMMON_PARAM_DEPARTMENT_ID, CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT));
         return defaultCommonConfig;
     }
 
@@ -705,6 +708,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else if (config.getCode().equals(ConfigurationParam.SHOW_TIMING.name()) ||
                 config.getCode().equals(ConfigurationParam.ENABLE_IMPORT_PERSON.name())) {
             checkDiscreteValue(config.getValue(), logger);
+        } else if (config.getCode().equals(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.name())) {
+            checkConsolidationDataSelectionDepth(config.getValue(), logger);
         }
     }
 
@@ -735,6 +740,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         } catch (NumberFormatException e) {
             logger.error(LIMIT_IDENT_ERROR);
+        }
+    }
+
+    private void checkConsolidationDataSelectionDepth(String value, Logger logger) {
+        try {
+            Integer intValue = Integer.valueOf(value);
+            if (intValue < 1 || intValue > 99) {
+                logger.error(CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e){
+            logger.error(CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE);
         }
     }
 

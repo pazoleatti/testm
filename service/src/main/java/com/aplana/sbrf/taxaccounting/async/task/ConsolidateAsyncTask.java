@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Консолидация налоговой формы
@@ -78,4 +79,32 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
                 department.getShortName());
     }
 
+    @Override
+    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        Long declarationDataId = (Long) params.get("declarationDataId");
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+        Department department = departmentService.getDepartment(declarationData.getDepartmentId());
+        return String.format("\"Консолидация\" для формы №:%d, Период: \"%s, %s\", Подразделение: \"%s\"",
+                declarationDataId,
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getReportPeriod().getName(),
+                department.getName());
+    }
+
+    @Override
+    protected void sendNotifications(AsyncTaskData taskData, String msg, String uuid, NotificationType notificationType, String reportId) {
+        Long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+        Department department = departmentService.getDepartment(declarationData.getDepartmentId());
+        msg = String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s, %s\", Подразделение: \"%s\"",
+                declarationDataId,
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getReportPeriod().getName(),
+                department.getName());
+        super.sendNotifications(taskData, msg, uuid, notificationType, reportId);
+    }
 }

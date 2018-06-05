@@ -8,10 +8,12 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -543,31 +545,61 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
             DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+
+            boolean granted = true;
+            List<String> causes = new ArrayList<>();
+
             if (!declarationKind.equals(DeclarationFormKind.CONSOLIDATED)) {
-                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationKind, logger);
-                return false;
+                causes.add(String.format("консолидация не допустима для форм типа \"%s\".",
+                        declarationKind.getName()));
+                if (logger != null) {
+                    granted = false;
+                } else {
+                    return false;
+                }
             }
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (!departmentReportPeriod.isActive()) {
-                logPeriodError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
-                return false;
+                causes.add("период формы закрыт");
+                if (logger != null) {
+                    granted = false;
+                } else {
+                    return false;
+                }
             }
             if (!(targetDomainObject.getState().equals(State.CREATED) || targetDomainObject.getState().equals(State.PREPARED))) {
-                logStateError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
-                return false;
+                causes.add("форма находится в состоянии \"Принята\"");
+                if (logger != null) {
+                    granted = false;
+                } else {
+                    return false;
+                }
             }
+
             TAUser taUser = taUserService.getUser(user.getUsername());
-
             boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
-
             boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
-
             if (!canView || !hasRoles) {
-                logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
-                return false;
+                causes.add("недостаточно прав (обратитесь к администратору)");
+                if (logger != null) {
+                    granted = false;
+                } else {
+                    return false;
+                }
+            }
+            if (logger != null && !granted) {
+                Department department = departmentService.getDepartment(targetDomainObject.getDepartmentId());
+                String errorCommonPart = String.format("Операция \"%s\" не выполнена для формы № %d, Период: \"%s, %s\", " +
+                                "Подразделение \"%s\".",
+                        OPERATION_NAME,
+                        targetDomainObject.getId(),
+                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        departmentReportPeriod.getReportPeriod().getName(),
+                        department.getName());
+                logger.error("%s Причина: " + StringUtils.join(causes, ", "), errorCommonPart);
             }
 
-            return true;
+            return granted;
         }
     }
 

@@ -360,6 +360,10 @@ class Calculate extends AbstractScriptClass {
 
         Map<Long, NdflPerson> ndflPersonsToPersist = [:]
 
+        List<NdflPerson> withoutDulPersonList = []
+
+
+
         for (NdflPerson declarationDataPerson : ndflPersonList) {
             NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
 
@@ -369,7 +373,11 @@ class Calculate extends AbstractScriptClass {
                         ", ИНП: ${declarationDataPerson.inp}, строка: ${declarationDataPerson.rowNum} не установлена " +
                         "ссылка на запись справочника \"Физические лица\". Выполните операцию идентификации формы " +
                         "${declarationDataPerson.declarationDataId}")
-                break
+                continue
+            }
+
+            if (refBookPerson.idDocType == null) {
+                withoutDulPersonList << refBookPerson
             }
 
             NdflPerson persistingPerson = ndflPersonsToPersist.get(0)
@@ -451,6 +459,24 @@ class Calculate extends AbstractScriptClass {
             }
 
             ndflPersonsToPersist.put(declarationDataPerson.personId, declarationDataPerson)
+        }
+
+        if (logger.containsLevel(LogLevel.ERROR)) return
+
+        if (!withoutDulPersonList.isEmpty()) {
+            for (NdflPerson person : withoutDulPersonList) {
+                RefBookDataProvider provider = getProvider(RefBook.Id.ID_DOC.id)
+                int count = provider.getRecordsCount(new Date(), "PERSON_ID = ${person.personId}")
+                if (count == 0) {
+                    logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность",
+                            "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
+                            person.inp)
+                } else {
+                    logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1",
+                            "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
+                            person.inp)
+                }
+            }
         }
 
         logForDebug("Консолидация данных, " + ScriptUtils.calcTimeMillis(time))
@@ -625,7 +651,7 @@ class Calculate extends AbstractScriptClass {
             }
 
             for (Department department : notAcceptedTbDepartments.keySet()) {
-                logger.info("ПНФ из ТБ: \"%s\" не использованы в консолидации, так не находятся в состоянии \"Принято\" (всего %d): %s",
+                logger.info("ПНФ из ТБ: \"%s\" не использованы в консолидации, так как не находятся в состоянии \"Принята\" (всего %d): %s",
                         department.shortName,
                         notAcceptedTbDepartments.get(department),
                         notAcceptedSourcesByTb.get(department).join(", "))

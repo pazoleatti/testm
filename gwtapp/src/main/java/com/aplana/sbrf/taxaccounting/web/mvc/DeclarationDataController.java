@@ -394,14 +394,12 @@ public class DeclarationDataController {
      * Консолидировать
      *
      * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @param cancelTask        признак для отмены задачи
      * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/consolidate")
-    public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
+    public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.consolidateDeclarationData(userInfo, declarationDataId, force, cancelTask);
+        return declarationService.createConsolidateDeclarationTask(userInfo, declarationDataId);
     }
 
     /**
@@ -425,7 +423,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/consolidate")
     public ActionResult recalculateDeclarationList(@RequestBody Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.consolidateDeclarationDataList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.createConsolidateDeclarationListTask(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**

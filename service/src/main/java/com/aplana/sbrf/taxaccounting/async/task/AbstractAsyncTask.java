@@ -174,7 +174,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             if (isShowTiming) {
                                 logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
                             }
-                            sendNotifications(taskData.getId(), msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+                            sendNotifications(taskData, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                             return null;
                         }
                     });
@@ -198,7 +198,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     logger.getEntries().add(0, new LogEntry(taskStatus.isSuccess() ? LogLevel.INFO : LogLevel.ERROR, msg));
                     String uuid = logEntryService.save(logger.getEntries());
                     asyncManager.updateState(taskData.getId(), AsyncTaskState.SENDING_MSGS);
-                    sendNotifications(taskData.getId(), msg, uuid, taskStatus.getNotificationType(), taskStatus.getReportId());
+                    sendNotifications(taskData, msg, uuid, taskStatus.getNotificationType(), taskStatus.getReportId());
                     asyncManager.finishTask(taskData.getId());
                 } catch (Exception e) {
                     LOG.error("Error occurred during sending notifications", e);
@@ -225,11 +225,11 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     /**
      * Отправка уведомлений подписчикам на указанную задачу
      */
-    private void sendNotifications(long taskId, String msg, String uuid, NotificationType notificationType, String reportId) {
-        LOG.info(String.format("Sending notification for async task with id %s", taskId));
+    protected void sendNotifications(AsyncTaskData taskData, String msg, String uuid, NotificationType notificationType, String reportId) {
+        LOG.info(String.format("Sending notification for async task with id %s", taskData.getId()));
         if (msg != null && !msg.isEmpty()) {
             //Получаем список пользователей-подписчиков, для которых надо сформировать оповещение
-            List<Integer> waitingUsers = asyncManager.getUsersWaitingForTask(taskId);
+            List<Integer> waitingUsers = asyncManager.getUsersWaitingForTask(taskData.getId());
             if (!waitingUsers.isEmpty()) {
                 List<Notification> notifications = new ArrayList<Notification>();
                 for (Integer userId : waitingUsers) {
@@ -246,7 +246,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 notificationService.create(notifications);
             }
         }
-        LOG.info(String.format("Sending notification for async task with id %s completed", taskId));
+        LOG.info(String.format("Sending notification for async task with id %s completed", taskData.getId()));
     }
 
     /**

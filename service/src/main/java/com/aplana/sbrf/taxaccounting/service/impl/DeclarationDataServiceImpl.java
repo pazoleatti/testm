@@ -604,11 +604,68 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return recalculateDeclaration(userInfo, declarationDataId, force, cancelTask, DeclarationDataReportType.IDENTIFY_PERSON);
     }
 
+    @Transactional
     @Override
-    public RecalculateDeclarationResult consolidateDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask) {
-        return recalculateDeclaration(userInfo, declarationDataId, force, cancelTask, DeclarationDataReportType.CONSOLIDATE);
+    public RecalculateDeclarationResult createConsolidateDeclarationTask(TAUserInfo userInfo, final long declarationDataId) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createConsolidateDeclarationTask by %s. declarationDataId: %s; ddReportType: %s",
+                userInfo, declarationDataId, DeclarationDataReportType.CONSOLIDATE));
+        final RecalculateDeclarationResult result = new RecalculateDeclarationResult();
+        if (!existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+        } else {
+            Logger logger = new Logger();
+            String keyTask = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CONSOLIDATE);
+            LockData lockData = lockDataService.getLock(keyTask);
+            try {
+                if (lockData == null) {
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+                    params.put("docDate", new Date());
+                    asyncManager.executeTask(keyTask, DeclarationDataReportType.CONSOLIDATE.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    getDeclarationFullName(declarationDataId, DeclarationDataReportType.CONSOLIDATE));
+                        }
+
+                        @Override
+                        public void postCheckProcessing() {
+                            result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
+                        }
+
+                        @Override
+                        public boolean checkExistTasks(AsyncTaskType reportType, TAUserInfo userInfo, Logger logger) {
+                            return checkExistAsyncTask(declarationDataId, reportType, logger);
+                        }
+
+                        @Override
+                        public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
+                            interruptAsyncTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
+                        }
+                    });
+                } else {
+                    DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+                    Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                    logger.error("Форма №: %d, Период: \"%s, %s\", Подразделение: \"%s\" заблокирована пользователем %s (%s)",
+                            declarationDataId,
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            departmentReportPeriod.getReportPeriod().getName(),
+                            department.getName(),
+                            userInfo.getUser().getName(),
+                            userInfo.getUser().getLogin());
+                }
+            } catch (Exception e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+        return result;
     }
 
+    @Transactional
     private RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, final long declarationDataId,
                                                                 final boolean force, final boolean cancelTask,
                                                                 final DeclarationDataReportType ddReportType) {
@@ -684,13 +741,65 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return recalculateDeclarationList(userInfo, DeclarationDataReportType.IDENTIFY_PERSON, declarationDataIds, DeclarationDataPermission.IDENTIFY);
     }
 
-    @Override
-    public ActionResult consolidateDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds) {
-        return recalculateDeclarationList(userInfo, DeclarationDataReportType.CONSOLIDATE, declarationDataIds, DeclarationDataPermission.CONSOLIDATE);
+    @Transactional
+    public ActionResult createConsolidateDeclarationListTask(final TAUserInfo userInfo, List<Long> declarationDataIds) {
+        LOG.info(String.format("DeclarationDataServiceImpl.recalculateDeclarationList by %s. ddReportType: %s; declarationDataIds: %s; permission: %s",
+                userInfo, DeclarationDataReportType.CONSOLIDATE, declarationDataIds, DeclarationDataPermission.CONSOLIDATE));
+        final ActionResult result = new ActionResult();
+        final Logger logger = new Logger();
+
+        for (final Long declarationDataId : declarationDataIds) {
+            if (existDeclarationData(declarationDataId)) {
+                if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                        new TargetIdAndLogger(declarationDataId, logger),
+                        "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.CONSOLIDATE)) {
+                    String keyTask = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CONSOLIDATE);
+                    LockData lockData = lockDataService.getLock(keyTask);
+                    if (lockData == null) {
+                        Map<String, Object> params = new HashMap<String, Object>();
+                        params.put("declarationDataId", declarationDataId);
+                        params.put("docDate", new Date());
+                        asyncManager.executeTask(keyTask, DeclarationDataReportType.CONSOLIDATE.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                            @Override
+                            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                        getDeclarationFullName(declarationDataId, DeclarationDataReportType.CONSOLIDATE));
+                            }
+
+                            @Override
+                            public boolean checkExistTasks(AsyncTaskType reportType, TAUserInfo userInfo, Logger logger) {
+                                return checkExistAsyncTask(declarationDataId, reportType, logger);
+                            }
+
+                            @Override
+                            public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
+                                interruptAsyncTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
+                            }
+                        });
+                    } else {
+                        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+                        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                        logger.error("Форма №: %d, Период: \"%s, %s\", Подразделение: \"%s\" заблокирована пользователем %s (%s)",
+                                declarationDataId,
+                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                                departmentReportPeriod.getReportPeriod().getName(),
+                                department.getName(),
+                                userInfo.getUser().getName(),
+                                userInfo.getUser().getLogin());
+                    }
+                }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
+            }
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     @Transactional
-    protected ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds, Permission permission) {
+    protected ActionResult recalculateDeclarationList(final TAUserInfo userInfo,
+                                                      final DeclarationDataReportType ddReportType, List<Long> declarationDataIds, Permission permission) {
         LOG.info(String.format("DeclarationDataServiceImpl.recalculateDeclarationList by %s. ddReportType: %s; declarationDataIds: %s; permission: %s",
                 userInfo, ddReportType, declarationDataIds, permission));
         final ActionResult result = new ActionResult();
@@ -806,7 +915,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, final long declarationDataId, final boolean force) {
+    public CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, final long declarationDataId,
+                                                   final boolean force) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
         final CheckDeclarationResult result = new CheckDeclarationResult();
 
@@ -949,7 +1059,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#dataFileComment.declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
-    public DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment) {
+    public DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment
+            dataFileComment) {
         long declarationDataId = dataFileComment.getDeclarationDataId();
 
         DeclarationDataFileComment result = new DeclarationDataFileComment();
@@ -997,7 +1108,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams) {
+    public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter
+            filter, PagingParams pagingParams) {
         TAUser currentUser = userInfo.getUser();
 
         PagingResult<DeclarationDataJournalItem> page = new PagingResult<>();
@@ -1055,7 +1167,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     //Формирование рну ндфл для физ лица
     @Override
-    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long ndflPersonId, final NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId,
+                                                         long ndflPersonId, final NdflPersonFilter ndflPersonFilter) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportRnu by %s. declarationDataId: %s; ndflPersonId: %s; ndflPersonFilter: %s",
                 userInfo, declarationDataId, ndflPersonId, ndflPersonFilter));
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
@@ -1121,7 +1234,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReportAllRnu(final TAUserInfo userInfo, final long declarationDataId, boolean force) {
+    public CreateDeclarationReportResult createReportAllRnu(final TAUserInfo userInfo,
+                                                            final long declarationDataId, boolean force) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportAllRnu by %s. declarationDataId: %s; force: %s",
                 userInfo, declarationDataId, force));
         DeclarationData declaration = get(declarationDataId, userInfo);
@@ -1168,7 +1282,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId, boolean force) {
+    public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId,
+                                                                  boolean force) {
         LOG.info(String.format("DeclarationDataServiceImpl.createPairKppOktmoReport by %s. declarationDataId: %s; force: %s",
                 userInfo, declarationDataId, force));
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
@@ -3676,9 +3791,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     /**
      * Проверяет необходимо ли использовать xml формы для проведения операций с ней.
+     *
      * @param userInfo          информация о пользователе
      * @param declarationDataId идентификатор налоговой формы
-     * @return  true если данные формы для операции берутся из xml
+     * @return true если данные формы для операции берутся из xml
      */
     private boolean isXmlRequired(TAUserInfo userInfo, long declarationDataId) {
         DeclarationData declarationData = get(declarationDataId, userInfo);

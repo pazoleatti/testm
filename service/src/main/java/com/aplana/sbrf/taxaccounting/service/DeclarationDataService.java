@@ -202,15 +202,12 @@ public interface DeclarationDataService {
     RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
 
     /**
-     * Консолидировать НФ
-     *
+     * Создает задачу по постановке операции "Консолидировать НФ" в очередь
      * @param userInfo          информация о пользователе, выполняющего действие
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @param cancelTask        признак для отмены задачи
-     * @return модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
+     * @param declarationDataId идентификатор НФ
+     * @return  модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
      */
-    RecalculateDeclarationResult consolidateDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
+    RecalculateDeclarationResult createConsolidateDeclarationTask(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Идентифицировать ФЛ в списке налоговых форм
@@ -228,7 +225,7 @@ public interface DeclarationDataService {
      * @param declarationDataIds список идентификаторов налоговых форм
      * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult consolidateDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult createConsolidateDeclarationListTask(final TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Формирует DeclarationResult
