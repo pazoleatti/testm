@@ -454,21 +454,21 @@ class Check extends AbstractScriptClass {
                             "Не удалось установить связь со справочником \"$R_PERSON\"")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
-                    if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
+                    if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.get(RF_LAST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Фамилия", ndflPerson.lastName ?: "", R_PERSON))
                     }
 
                     // Спр11 Имя (Обязательное поле)
-                    if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
+                    if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.toLowerCase().equals(personRecord.get(RF_FIRST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Имя", ndflPerson.firstName ?: "", R_PERSON))
                     }
 
                     // Спр11 Отчество (Необязательное поле)
-                    if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
+                    if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.toLowerCase().equals(personRecord.get(RF_MIDDLE_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Отчество", ndflPerson.middleName ?: "", R_PERSON))
