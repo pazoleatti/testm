@@ -471,21 +471,21 @@ class Check extends AbstractScriptClass {
                             "Не удалось установить связь со справочником \"$R_PERSON\"")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
-                    if (ndflPerson.lastName != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
+                    if (ndflPerson.lastName != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.get(RF_LAST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Фамилия", ndflPerson.lastName ?: "", R_PERSON))
                     }
 
                     // Спр11 Имя (Обязательное поле)
-                    if (ndflPerson.firstName != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
+                    if (ndflPerson.firstName != null && !ndflPerson.firstName.toLowerCase().equals(personRecord.get(RF_FIRST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Имя", ndflPerson.firstName ?: "", R_PERSON))
                     }
 
                     // Спр11 Отчество (Необязательное поле)
-                    if (ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
+                    if (ndflPerson.middleName != null && !ndflPerson.middleName.toLowerCase().equals(personRecord.get(RF_MIDDLE_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Отчество", ndflPerson.middleName ?: "", R_PERSON))
@@ -631,22 +631,22 @@ class Check extends AbstractScriptClass {
                     }
 
                     // Адрес регистрации в Российской Федерации.Район
-                    if (ndflPerson.area != null && !ndflPerson.area.equals(area)) {
+                    if (ndflPerson.area != null && !ndflPerson.area.toLowerCase().equals(area.toLowerCase())) {
                         ndflPersonAddress.add("Район=" + ndflPerson.area ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Город
-                    if (ndflPerson.city != null && !ndflPerson.city.equals(city)) {
+                    if (ndflPerson.city != null && !ndflPerson.city.toLowerCase().equals(city.toLowerCase())) {
                         ndflPersonAddress.add("Город=" + ndflPerson.city ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Населенный пункт
-                    if (ndflPerson.locality != null && !ndflPerson.locality.equals(locality)) {
+                    if (ndflPerson.locality != null && !ndflPerson.locality.toLowerCase().equals(locality.toLowerCase())) {
                         ndflPersonAddress.add("Населенный пункт=" + ndflPerson.locality ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Улица
-                    if (ndflPerson.street != null && !ndflPerson.street.equals(street)) {
+                    if (ndflPerson.street != null && !ndflPerson.street.toLowerCase().equals(street.toLowerCase())) {
                         ndflPersonAddress.add("Улица=" + ndflPerson.street ?: "")
                     }
 

@@ -613,22 +613,22 @@ class Check extends AbstractScriptClass {
                     }
 
                     // Адрес регистрации в Российской Федерации.Район
-                    if (ndflPerson.area != null && !ndflPerson.area.toLowerCase().equals(area.toLowerCase())) {
+                    if (ndflPerson.area != null && !ndflPerson.area.equals(area)) {
                         ndflPersonAddress.add("Район=" + ndflPerson.area ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Город
-                    if (ndflPerson.city != null && !ndflPerson.city.toLowerCase().equals(city.toLowerCase())) {
+                    if (ndflPerson.city != null && !ndflPerson.city.equals(city)) {
                         ndflPersonAddress.add("Город=" + ndflPerson.city ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Населенный пункт
-                    if (ndflPerson.locality != null && !ndflPerson.locality.toLowerCase().equals(locality.toLowerCase())) {
+                    if (ndflPerson.locality != null && !ndflPerson.locality.equals(locality)) {
                         ndflPersonAddress.add("Населенный пункт=" + ndflPerson.locality ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Улица
-                    if (ndflPerson.street != null && !ndflPerson.street.toLowerCase().equals(street.toLowerCase())) {
+                    if (ndflPerson.street != null && !ndflPerson.street.equals(street)) {
                         ndflPersonAddress.add("Улица=" + ndflPerson.street ?: "")
                     }
 
