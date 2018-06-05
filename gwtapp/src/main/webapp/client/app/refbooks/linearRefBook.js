@@ -112,13 +112,13 @@
                     switch (colModel.type) {
                         case 'STRING':
                         case 'NUMBER':
-                            value = record && record.value && typeof record.value !== 'undefined' ? record.value : "";
+                            value = record && typeof record.value !== 'undefined' ? record.value : "";
                             break;
                         case 'DATE':
-                            value = record && record.value && typeof record.value !== 'undefined' ? $filter('dateFormatter')(record.value) : "";
+                            value = record && typeof record.value !== 'undefined' ? $filter('dateFormatter')(record.value) : "";
                             break;
                         case 'REFERENCE':
-                            value = record && record.referenceObject && typeof record.referenceObject !== 'undefined' ? record.referenceObject[colModel.referenceAttribute.alias].value : "";
+                            value = record && typeof record.referenceObject !== 'undefined' ? record.referenceObject[colModel.referenceAttribute.alias].value : "";
                             break;
                     }
                     return value;

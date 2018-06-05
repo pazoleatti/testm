@@ -80,13 +80,13 @@
                         switch (attribute.attributeType) {
                             case 'STRING':
                             case 'NUMBER':
-                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
+                                value = refBookValue && typeof refBookValue.value !== 'undefined' ? refBookValue.value : "";
                                 break;
                             case 'DATE':
-                                value = refBookValue && refBookValue.value && typeof refBookValue.value !== 'undefined' && (!$scope.isEditMode || !isNaN(refBookValue.value)) ? $filter('dateFormatter')(refBookValue.value) : "";
+                                value = refBookValue && typeof refBookValue.value !== 'undefined' && (!$scope.isEditMode || !isNaN(refBookValue.value)) ? $filter('dateFormatter')(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
-                                value = refBookValue && refBookValue.referenceObject && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
+                                value = refBookValue && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
                                 break;
                         }
                         return value;
