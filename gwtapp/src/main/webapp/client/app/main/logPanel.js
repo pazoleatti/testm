@@ -39,6 +39,7 @@
                         "    <div id='log-entry-list' class='flex-fill flex-column'>" +
                         "        <div class='flex-grid flex-fill' data-aplana-grid" +
                         "             data-grid-fill-space='true' " +
+                        "             data-grid-refresh-button='false'  " +
                         "             data-grid-options='logEntryGrid.options' " +
                         "             data-grid-fill-space-container-selector='#log-entry-list' " +
                         "             data-grid-fill-space-container-selector-top='#log-panel-header' " +

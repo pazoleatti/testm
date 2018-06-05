@@ -295,6 +295,7 @@
                         gridDisableAdjustWidth: '=',
                         gridEnableAdjustWidthByColumns: '=',
                         gridParentAdjustWidthCssSelector: '@',
+                        gridRefreshButton: '=',
                         gridFillSpace: '=',
                         gridFillSpaceContainerSelector: '@',
                         gridFillSpaceContainerSelectorTop: '@',
@@ -1688,6 +1689,12 @@
                         // инициализиуем грид в контроллере
                         scope.initGrid({ctrl: scope.gridCtrl});
                         scope.gridCtrl.applyGrouping();
+
+                        // если указан параметр data-grid-refresh-button='fasle', то скрываем кнопку обновления грида
+                        if (angular.isDefined(scope.gridRefreshButton) && !scope.gridRefreshButton) {
+                            scope.grid.refreshButton = angular.element(element.find('td#refresh_tbl_' + element[0].attributes.id.value)[0]);
+                            scope.grid.refreshButton.attr("hidden", "true");
+                        }
                     }
                 };
             }])
