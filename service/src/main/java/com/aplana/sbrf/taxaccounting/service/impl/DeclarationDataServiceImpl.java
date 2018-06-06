@@ -2969,6 +2969,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         additionalParameters.put("formMap", formMap);
         Map<String, Object> scriptParams = new HashMap<String, Object>();
         additionalParameters.put("scriptParams", scriptParams);
+        additionalParameters.put("isAdjustNegativeValues", isAdjustNegativeValues);
         DeclarationData declarationDataTemp = new DeclarationData();
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
