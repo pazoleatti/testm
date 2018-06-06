@@ -13,9 +13,9 @@
             });
         }])
         .controller('linearRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
-            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', '$window', "$http", "$logPanel",
+            "RefBookResource", "RefBookRecordResource", "$aplanaModal", '$filter', '$window', "$http", "$logPanel", "$dialogs",
             function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookRecordResource,
-                      $aplanaModal, $filter, $window, $http, $logPanel) {
+                      $aplanaModal, $filter, $window, $http, $logPanel, $dialogs) {
                 $scope.columnNames = [];
                 $scope.columnModel = [];
                 $scope.data = {};
@@ -206,12 +206,15 @@
                                 return {
                                     mode: "CREATE",
                                     refBook: $scope.refBook,
-                                    recordId: $stateParams.recordId
+                                    recordId: $stateParams.recordId,
+                                    record: $scope.refBookGrid.value.length === 1 ? $scope.refBookGrid.value[0] : null
                                 };
                             }
                         }
-                    }).result.then(function () {
-                        $scope.refBookGrid.ctrl.refreshGrid(1);
+                    }).result.then(function (needToRefresh) {
+                        if (needToRefresh) {
+                            $scope.refBookGrid.ctrl.refreshGrid(1);
+                        }
                     });
                 };
 
@@ -264,22 +267,32 @@
 
                 /**
                  * Удаляет записи справочника, выбранные в таблице
+                 * Если форма в режиме версий - удаляются выбранные версии, иначе удаляются все версии выбранных записей
                  */
                 $scope.deleteRecords = function () {
-                    var ids = [];
-                    $scope.refBookGrid.value.forEach(function (record) {
-                        ids.push(record.id.value)
-                    });
+                    $dialogs.confirmDialog({
+                        content: $scope.versionMode ?
+                            $filter('translate')('refBook.confirm.versions.delete') :
+                            $filter('translate')('refBook.confirm.delete'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            var ids = [];
+                            $scope.refBookGrid.value.forEach(function (record) {
+                                ids.push(record.id.value)
+                            });
 
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/refBook/" + $scope.refBook.id + "/deleteRecords",
-                        data: ids
-                    }).then(function (response) {
-                        if (response.data && response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                        } else {
-                            $scope.refBookGrid.ctrl.refreshGrid(1);
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/refBook/" + $scope.refBook.id + ($scope.versionMode ? "/deleteVersions" : "/deleteRecords"),
+                                data: ids
+                            }).then(function (response) {
+                                if (response.data && response.uuid && response.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.uuid);
+                                } else {
+                                    $scope.refBookGrid.ctrl.refreshGrid(1);
+                                }
+                            });
                         }
                     });
                 };

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -97,6 +98,14 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         Date versionFrom = record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS) ? record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue() : null;
         Date versionTo = record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS) ? record.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue() : null;
         Long recordId = record.containsKey(RefBook.BUSINESS_ID_ALIAS) ? record.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue().longValue() : null;
+
+        if (versionFrom == null) {
+            throw new ServiceException("Дата начала актуальности записи не может быть пустой!");
+        }
+        if (versionTo != null && versionTo.before(versionFrom)) {
+            throw new ServiceException("Дата начала актуальности записи не может быть больше даты окончания актуальности!");
+        }
+
         RefBookRecord refBookRecord = new RefBookRecord();
         refBookRecord.setValues(record);
         refBookRecord.setRecordId(recordId);
@@ -114,6 +123,15 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     @Override
     @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
     public ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
+        Logger logger = new Logger();
+        logger.setTaUserInfo(userInfo);
+        refBookFactory.getDataProvider(refBookId).deleteAllRecords(logger, recordIds);
+        return new ActionResult(logEntryService.save(logger.getEntries()));
+    }
+
+    @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
+    public ActionResult deleteVersions(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
         refBookFactory.getDataProvider(refBookId).deleteRecordVersions(logger, recordIds);

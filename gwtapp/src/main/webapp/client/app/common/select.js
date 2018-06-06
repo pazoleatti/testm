@@ -662,7 +662,7 @@
                             if (newValue) {
                                 $http({
                                     method: "GET",
-                                    url: "controller//rest/refBook/" + refBookId + "/record/" + newValue.id.value
+                                    url: "controller/rest/refBook/" + refBookId + "/record/" + newValue.id.value
                                 }).success(function (record) {
                                     $scope.record[attributeAlias].value = record
                                 });

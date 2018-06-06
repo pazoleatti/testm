@@ -13,9 +13,11 @@
             '$http', '$logPanel', 'LogEntryResource', '$dialogs',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.refBook = $shareData.refBook;
-                $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
+                $scope.isVersionMode = $shareData.recordId && $shareData.recordId !== 'undefined';
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
+                $scope.record = ($shareData.mode === 'CREATE' && !$scope.isVersionMode) ? {} : $.extend(true, {}, $shareData.record);
                 $scope.mode = $shareData.mode;
+                $scope.temp = {};
 
                 if ($shareData.gridData) {
                     // Добавляем функционал для пролистывания записей справочника в режиме просмотра
@@ -39,7 +41,7 @@
                     };
                 }
 
-                if ($scope.mode === 'CREATE' && $shareData.recordId) {
+                if ($scope.mode === 'CREATE' && $scope.isVersionMode) {
                     // Добавляем id группы версий записи справочника для создания новой версии
                     $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.BUSINESS_ID_ALIAS] = {
                         value: $shareData.recordId,
@@ -48,17 +50,20 @@
                 }
 
                 $scope.refBook.attributes.forEach(function (attribute) {
-                    if ($scope.mode === 'CREATE' || !$scope.record[attribute.alias]) {
-                        // При создании (и просто для пустых значений) надо указать тип атрибутов для корректной десериализации
-                        $scope.record[attribute.alias] = {
-                            attributeType: attribute.attributeType
-                        }
-                    } else {
-                        if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
-                            // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
-                            if ($scope.record[attribute.alias].value && typeof $scope.record[attribute.alias].value !== 'undefined') {
-                                $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
+                    if (!$scope.record[attribute.alias] || $scope.record[attribute.alias].attributeType === 'undefined') {
+                        // Для пустых значений надо указать тип атрибутов для корректной отрисовки компонентов и десериализации при сохранении
+                        if (!$scope.record[attribute.alias]) {
+                            $scope.record[attribute.alias] = {
+                                attributeType: attribute.attributeType
                             }
+                        } else {
+                            scope.record[attribute.alias].attributeType = attribute.attributeType;
+                        }
+                    }
+                    if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
+                        // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
+                        if ($scope.record[attribute.alias].value && typeof $scope.record[attribute.alias].value !== 'undefined') {
+                            $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
                         }
                     }
                     if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {
@@ -68,6 +73,41 @@
                         $scope.versionToAttribute = attribute
                     }
                 });
+
+                if ($scope.mode === 'EDIT') {
+                    // Для режима редактирования перекладываем даты периода во временные переменные, чтобы корректно работала валидация
+                    $scope.temp.versionFrom = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value;
+                    $scope.temp.versionTo = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value;
+                }
+
+                $scope.$watchGroup(['temp.versionFrom', 'temp.versionTo'], function () {
+                    $scope.validateVersionDates();
+                });
+
+                /**
+                 * Валидация периода актуальности записи.
+                 * Нужна так как стандартная валидация min-date, max-date не умеет работать с динамическими ограничениями, но они все равно используются для блокировки дат в самом календаре
+                 */
+                $scope.validateVersionDates = function() {
+                    var generatedVersionFromId = 'temp_versionfrom';
+                    var generatedVersionToId = 'temp_versionto';
+
+                    if ($scope.refBookRecordForm && $scope.refBookRecordForm[generatedVersionFromId] && $scope.refBookRecordForm[generatedVersionToId]) {
+                        var versionFrom = $scope.temp.versionFrom;
+                        var versionTo = $scope.temp.versionTo;
+
+                        if (versionFrom != null && versionTo != null && versionTo < versionFrom) {
+                            $scope.refBookRecordForm[generatedVersionFromId].$setValidity('versionDate', false);
+                            $scope.refBookRecordForm[generatedVersionToId].$setValidity('versionDate', false);
+                        } else {
+                            $scope.refBookRecordForm[generatedVersionFromId].$setValidity('versionDate', true);
+                            $scope.refBookRecordForm[generatedVersionToId].$setValidity('versionDate', true);
+                            // Обновляем валидные даты внутри записи из темповых переменных
+                            $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value = versionFrom;
+                            $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value = versionTo;
+                        }
+                    }
+                };
 
                 /**
                  * Получает разыменованное значение атрибута
@@ -111,24 +151,25 @@
                  * Сохранение
                  */
                 $scope.save = function () {
+                    var tempRecord = $.extend(true, {}, $scope.record);
                     $scope.refBook.attributes.forEach(function (attribute) {
-                        if (attribute.attributeType === 'REFERENCE' && $scope.record[attribute.alias] && $scope.record[attribute.alias].value) {
+                        if (attribute.attributeType === 'REFERENCE' && tempRecord[attribute.alias] && tempRecord[attribute.alias].value) {
                             // Преобразуем ссылочные поля записи в подходящие для сервера
-                            $scope.record[attribute.alias].value = $scope.record[attribute.alias].value.id;
+                            tempRecord[attribute.alias].value = tempRecord[attribute.alias].value.id;
                         }
-                        $scope.record[attribute.alias].attributeType = attribute.attributeType;
+                        tempRecord[attribute.alias].attributeType = attribute.attributeType;
                     });
                     var url;
                     if ($scope.mode === 'EDIT') {
-                        $scope.record.id.attributeType = 'NUMBER';
-                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.value
+                        tempRecord.id.attributeType = 'NUMBER';
+                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + tempRecord.id.value
                     } else {
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"
                     }
                     $http({
                         method: "POST",
                         url: url,
-                        data: $scope.record
+                        data: tempRecord
                     }).then(function () {
                         $modalInstance.close(true);
                     });
@@ -156,7 +197,7 @@
                  * @description закрытие модального окна
                  */
                 $scope.close = function () {
-                    if ($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') {
+                    if (($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') && $scope.refBookRecordForm.$dirty) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('title.confirm'),
                             content: $filter('translate')('refBook.confirm.cancelEdit'),

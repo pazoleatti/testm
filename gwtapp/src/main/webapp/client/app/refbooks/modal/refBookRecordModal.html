@@ -16,9 +16,11 @@
                     <div class="span2">
                         <span data-aplana-field>
                             <span data-aplana-datepicker
-                                  data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value"
+                                  data-max-date="temp.versionTo"
+                                  data-ng-model="temp.versionFrom"
                                   data-ng-required="true"></span>
                             <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                            <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>
                         </span>
                     </div>
                     <div class="span1">
@@ -27,7 +29,9 @@
                     <div class="span2">
                         <span data-aplana-field>
                             <span data-aplana-datepicker
-                                  data-ng-model="record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value"></span>
+                                  data-min-date="temp.versionFrom"
+                                  data-ng-model="temp.versionTo"></span>
+                            <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>
                         </span>
                     </div>
                 </div>
@@ -44,7 +48,7 @@
                 <div class="span8">
                     <!-- Режим просмотра -->
                     <label data-ng-if="mode === 'VIEW'" class="inline-value">{{getAttributeFineValue(attribute)}}</label>
-                    <!-- Режим редактирования и создания -->
+                    <!-- Режим создания и редактирования -->
                     <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" data-ng-switch="attribute.attributeType">
                         <div data-ng-switch-when="STRING">
                             <div data-aplana-field data-model-id="{{attribute.alias}}">

@@ -854,6 +854,9 @@
         "refBook.versionTo": "Дата окончания актуальности",
         "refBook.versionFromShort": "Действует с",
         "refBook.versionToShort": "по",
+        "refBook.versionDates.validates": "Дата начала актуальности записи не может быть больше даты окончания актуальности!",
+        "refBook.confirm.delete": "Вы подтверждаете удаление всех версий записи справочника?",
+        "refBook.confirm.versions.delete": "Вы подтверждаете удаление версии записи справочника?",
 
         "refBook.confirm.cancelEdit": "Вы уверены, что хотите отменить редактирование записи?",
         "refBrefBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",

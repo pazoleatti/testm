@@ -165,7 +165,7 @@ public class RefBookController {
     }
 
     /**
-     * Удаляет указанные записи правочника
+     * Удаляет все версии указанных записей справочника
      *
      * @param refBookId идентификатор справочника
      * @param recordIds идентификаторы записей для удаления
@@ -174,6 +174,18 @@ public class RefBookController {
     @PostMapping(value = "/actions/refBook/{refBookId}/deleteRecords", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ActionResult deleteRecords(@PathVariable Long refBookId, @RequestBody List<Long> recordIds) {
         return commonRefBookService.deleteRecords(securityService.currentUserInfo(), refBookId, recordIds);
+    }
+
+    /**
+     * Удаляет указанные записи (версии) справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordIds идентификаторы записей для удаления
+     * @return результат удаления
+     */
+    @PostMapping(value = "/actions/refBook/{refBookId}/deleteVersions", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ActionResult deleteVersions(@PathVariable Long refBookId, @RequestBody List<Long> recordIds) {
+        return commonRefBookService.deleteVersions(securityService.currentUserInfo(), refBookId, recordIds);
     }
 
     /**

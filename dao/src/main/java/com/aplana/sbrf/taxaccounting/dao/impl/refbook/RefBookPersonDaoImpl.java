@@ -95,9 +95,9 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
             RefBookAddress address = new RefBookAddress();
             // Заполняем только id, т.к все остальное получим как конкатенацию строк прямо из БД
-            address.setId(SqlUtils.getLong(rs, "SOURCE_ID_ID"));
+            address.setId(SqlUtils.getLong(rs, "A_ID"));
             result.setAddress(address);
-            result.setAddressAsText(rs.getString("addressAsText"));
+            result.setAddressAsText(rs.getString("ADDRESS_ADDRESS_FULL"));
 
             RefBookAsnu asnu = new RefBookAsnu();
             asnu.setId(SqlUtils.getLong(rs, "SOURCE_ID_ID"));
@@ -257,6 +257,18 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return new PagingResult<>(list, totalCount);
     }
 
+    private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status = 0 and record_id = p.record_id and version > p.version) as versionEnd from (\n" +
+            "  select frb.*, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
+            "  c.id as CITIZENSHIP_ID, c.code as CITIZENSHIP_CODE, c.name as CITIZENSHIP_NAME, \n" +
+            "  asnu.id as SOURCE_ID_ID, asnu.name as SOURCE_ID_NAME, asnu.code as SOURCE_ID_CODE, asnu.priority as SOURCE_ID_PRIORITY, asnu.type as SOURCE_ID_TYPE,\n" +
+            "  a.id as A_ID, a.REGION_CODE || ',' || a.POSTAL_CODE || ',' || a.DISTRICT || ',' || a.CITY || ',' || a.LOCALITY || ',' || a.STREET || ',' || a.HOUSE || ',' || a.BUILD || ',' || a.APPARTMENT as ADDRESS_ADDRESS_FULL\n" +
+            "  from REF_BOOK_PERSON frb \n" +
+            "  left join REF_BOOK_TAXPAYER_STATE s on s.id = frb.TAXPAYER_STATE\n" +
+            "  left join REF_BOOK_COUNTRY c on c.id = frb.CITIZENSHIP\n" +
+            "  left join REF_BOOK_ADDRESS a on a.id = frb.ADDRESS \n" +
+            "  left join REF_BOOK_ASNU asnu on asnu.id = frb.SOURCE_ID \n" +
+            "  where frb.status = 0%s) p";
+
     @Override
     public PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -268,17 +280,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
         }
 
-        String baseSql = "select p.*, (select min(version) - interval '1' day from ref_book_person where status = 0 and record_id = p.record_id and version > p.version) as versionEnd from (\n" +
-                "  select frb.*, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
-                "  c.id as CITIZENSHIP_ID, c.code as CITIZENSHIP_CODE, c.name as CITIZENSHIP_NAME, \n" +
-                "  asnu.id as SOURCE_ID_ID, asnu.name as SOURCE_ID_NAME, asnu.code as SOURCE_ID_CODE, asnu.priority as SOURCE_ID_PRIORITY, asnu.type as SOURCE_ID_TYPE,\n" +
-                "  a.id as a_id, a.REGION_CODE || ',' || a.POSTAL_CODE || ',' || a.DISTRICT || ',' || a.CITY || ',' || a.LOCALITY || ',' || a.STREET || ',' || a.HOUSE || ',' || a.BUILD || ',' || a.APPARTMENT as addressAsText\n" +
-                "  from REF_BOOK_PERSON frb \n" +
-                "  left join REF_BOOK_TAXPAYER_STATE s on s.id = frb.TAXPAYER_STATE\n" +
-                "  left join REF_BOOK_COUNTRY c on c.id = frb.CITIZENSHIP\n" +
-                "  left join REF_BOOK_ADDRESS a on a.id = frb.ADDRESS \n" +
-                "  left join REF_BOOK_ASNU asnu on asnu.id = frb.SOURCE_ID \n" +
-                "  where frb.status = 0" + (version != null ? " and frb.version <= :version" : "") + ") p \n" +
+        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version <= :version" : "") +
                 (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
 
         String sortColumnName = "id";
@@ -310,18 +312,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         params.addValue("start", pagingParams.getStartIndex() + 1);
         params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
 
-        String baseSql = "select p.*, (select min(version) - interval '1' day from ref_book_person where status = 0 and record_id = p.record_id and version > p.version) as versionEnd from (\n" +
-                "  select frb.*, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
-                "  c.id as CITIZENSHIP_ID, c.code as CITIZENSHIP_CODE, c.name as CITIZENSHIP_NAME, \n" +
-                "  asnu.id as SOURCE_ID_ID, asnu.name as SOURCE_ID_NAME, asnu.code as SOURCE_ID_CODE, asnu.priority as SOURCE_ID_PRIORITY, asnu.type as SOURCE_ID_TYPE,\n" +
-                "  a.id as a_id, a.REGION_CODE || ',' || a.POSTAL_CODE || ',' || a.DISTRICT || ',' || a.CITY || ',' || a.LOCALITY || ',' || a.STREET || ',' || a.HOUSE || ',' || a.BUILD || ',' || a.APPARTMENT as addressAsText\n" +
-                "  from REF_BOOK_PERSON frb \n" +
-                "  left join REF_BOOK_TAXPAYER_STATE s on s.id = frb.TAXPAYER_STATE\n" +
-                "  left join REF_BOOK_COUNTRY c on c.id = frb.CITIZENSHIP\n" +
-                "  left join REF_BOOK_ADDRESS a on a.id = frb.ADDRESS \n" +
-                "  left join REF_BOOK_ASNU asnu on asnu.id = frb.SOURCE_ID \n" +
-                "  where frb.status = 0 and frb.record_id = :recordId) p";
-
+        String baseSql = String.format(PERSON_SQL, " and frb.record_id = :recordId");
         List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(
                 "select * from (select r.*, row_number() over (order by version) as rn from (\n" + baseSql + ") r)\n where rn between :start and :end",
                 params, mapper);

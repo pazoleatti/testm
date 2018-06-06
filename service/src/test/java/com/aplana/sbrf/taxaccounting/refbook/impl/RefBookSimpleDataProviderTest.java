@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,6 +33,7 @@ public class RefBookSimpleDataProviderTest {
     private RefBookSimpleDaoImpl daoMock;
     private RefBookDao refBookDaoMock;
     private RefBookSimpleReadOnly SimpleReadOnlyMock;
+    private CommonRefBookService сommonRefBookServiceMock;
 
     @Before
     public void setUp() throws Exception {
@@ -40,12 +42,14 @@ public class RefBookSimpleDataProviderTest {
         daoMock = mock(RefBookSimpleDaoImpl.class);
         refBookDaoMock = mock(RefBookDao.class);
         SimpleReadOnlyMock = mock(RefBookSimpleReadOnly.class);
+        сommonRefBookServiceMock = mock(CommonRefBookService.class);
         when(refBookDaoMock.get(anyLong())).thenReturn(getRefBookStub());
         when(refBookDaoMock.get(RFB_NOT_VERSIONED_ID)).thenReturn(getRefBookNotVersionedStub());
 
         ReflectionTestUtils.setField(provider, "dao", daoMock);
         ReflectionTestUtils.setField(provider, "refBookDao", refBookDaoMock);
         ReflectionTestUtils.setField(provider, "readOnlyProvider", SimpleReadOnlyMock);
+        ReflectionTestUtils.setField(provider, "commonRefBookService", сommonRefBookServiceMock);
 
         provider.setRefBookId(RefBook.Id.ASNU);
     }
