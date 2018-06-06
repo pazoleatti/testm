@@ -2,6 +2,11 @@ package com.aplana.sbrf.taxaccounting.model.util;
 
 import java.util.Comparator;
 
+/**
+ * Компаратор для сравнивания строк в таком порядке, что сначала идут непечатаемые символы, затем символы и цифры из ASCII и символ №,
+ * затем буквы латинского алфавита в алфавитном, затем кириллические буквы в алфавитном порядке. Причем прописные и строчные буквы объединены вместе.
+ * Например, AaBbCc etc.
+ */
 public class DeclarationStringComparator implements Comparator<String> {
 
     public static final DeclarationStringComparator INSTANCE = new DeclarationStringComparator();

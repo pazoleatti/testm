@@ -527,5 +527,10 @@ public interface DeclarationService {
      */
     boolean isCheckFatal(DeclarationCheckCode code, int templateId);
 
+    /**
+     * Получить дату создания налоговой формы
+     * @param declarationDataId иденитфикатор налоговой формы
+     * @return  дата
+     */
     Date getDeclarationDataCreationDate(Long declarationDataId);
 }

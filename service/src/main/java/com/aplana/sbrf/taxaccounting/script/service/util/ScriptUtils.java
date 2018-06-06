@@ -2892,6 +2892,11 @@ public final class ScriptUtils {
         return word;
     }
 
+    /**
+     * Рассчитывает UUID для объекта дохода на основе состояния полей объекта операции дохода
+     * @param income объект операции дохода
+     * @return  строковое представление UUID объекта дохода
+     */
     public static String getConsolidationIncomeUUID(ConsolidationIncome income) {
         int size = 0;
         byte[] inp = stringToByteArray(income.getInp());
@@ -2988,6 +2993,11 @@ public final class ScriptUtils {
         return UUID.nameUUIDFromBytes(resultArray).toString();
     }
 
+    /**
+     * Преобразует дату в массив байтов на основе её long значения
+     * @param d дата
+     * @return  массив байтов
+     */
     private static byte[] dateToByteArray(Date d) {
         if (d != null) {
             return longToByteArray(d.getTime());
@@ -2995,6 +3005,11 @@ public final class ScriptUtils {
         return new byte[]{(byte)0xFF};
     }
 
+    /**
+     * Преобразует число {@code BigDecimal} в массив байтов на основе его String представления
+     * @param d число
+     * @return массив байтов
+     */
     private static byte[] bigDecimalToByteArray(BigDecimal d) {
         if (d != null) {
             return stringToByteArray(d.toString());
@@ -3002,6 +3017,11 @@ public final class ScriptUtils {
         return new byte[]{(byte)0xFF};
     }
 
+    /**
+     * Преобразует строку в массив байтов
+     * @param s строка
+     * @return  массив байтов
+     */
     private static byte[] stringToByteArray(String s) {
         if (s != null) {
             return s.toLowerCase().getBytes(Charset.forName("UTF-8"));
@@ -3009,47 +3029,63 @@ public final class ScriptUtils {
         return new byte[]{(byte)0xFF};
     }
 
+    /**
+     * Преобразует число long в массив байтов, для каждый из 8 байтов числа помещается в массив
+     * @param l число
+     * @return массив байтов
+     */
     private static byte[] longToByteArray(Long l) {
         if (l != null) {
             byte[] toReturn = new byte[8];
             long primitiveL = l.longValue();
             toReturn[7] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[6] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[5] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[4] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[3] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[2] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[1] = (byte) primitiveL;
-            l >>>= 8;
+            primitiveL >>>= 8;
             toReturn[0] = (byte) primitiveL;
             return toReturn;
         }
         return new byte[]{(byte)0xFF};
     }
 
+    /**
+     * Преобразует число int в массив байтов, для каждый из 4 байтов числа помещается в массив
+     * @param l число
+     * @return массив байтов
+     */
     private static byte[] intToByteArray(Integer i) {
         if (i != null) {
             byte[] toReturn = new byte[4];
             int primitiveI = i.intValue();
             toReturn[3] = (byte) primitiveI;
-            i >>>= 8;
+            primitiveI >>>= 8;
             toReturn[2] = (byte) primitiveI;
-            i >>>= 8;
+            primitiveI >>>= 8;
             toReturn[1] = (byte) primitiveI;
-            i >>>= 8;
+            primitiveI >>>= 8;
             toReturn[0] = (byte) primitiveI;
             return toReturn;
         }
         return new byte[]{(byte)0xFF};
     }
 
-    public static void mergeByteArrays(byte[] slave, byte[] master, int offset) {
+    /**
+     * Сливает массивы байтов, таким образом, чтобы slave прицеплялся к хвосту master
+     * @param slave     массив источник
+     * @param master    массив к которому прицепляют источник
+     * @param offset    позиция массива master к которой прицепляют источник
+     */
+    private static void mergeByteArrays(byte[] slave, byte[] master, int offset) {
         System.arraycopy(slave, 0, master, offset, slave.length);
     }
 }

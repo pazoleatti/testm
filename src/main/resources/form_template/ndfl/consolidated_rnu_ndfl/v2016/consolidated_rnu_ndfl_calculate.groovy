@@ -127,13 +127,15 @@ class Calculate extends AbstractScriptClass {
                 .declarationType(DeclarationType.NDFL_PRIMARY)
                 .consolidateDeclarationDataYear(reportPeriod.taxPeriod.year)
 
-        logForDebug("Инициализация данных для поиска источников, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Инициализация данных для поиска источников, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
 
         time = System.currentTimeMillis();
 
         List<ConsolidationIncome> operationsForConsolidationList = ndflPersonService.fetchIncomeSourcesConsolidation(filterBuilder.createConsolidationSourceDataSearchFilter())
 
-        logForDebug("Определение списка операций, которые нужно включить в КНФ, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Определение списка операций, которые нужно включить в КНФ. Отобрано ${operationsForConsolidationList.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
 
         time = System.currentTimeMillis();
 
@@ -148,16 +150,18 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
-        logForDebug("Группировка строк по идОперации и АСНУ, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Группировка строк по идОперации и АСНУ, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
 
         time = System.currentTimeMillis();
 
-        // Избавляемся от фиктивных строк. Чтобы не перепроверять все строки берем выбираем только те, у которых идОперации = 0
+        // Избавляемся от фиктивных строк. Чтобы не перепроверять все строки выбираем только те, у которых идОперации = 0
         List<ConsolidationIncome> dummyRowsCandidates = []
         for (Long asnuId : getAsnuCache()) {
             dummyRowsCandidates.addAll(incomesGroupedByOperationIdAndAsnu[new Pair("0", asnuId)])
         }
 
+        // Проверяем и удаляем фиктивные строки
         for (ConsolidationIncome dummyRowCandidate : dummyRowsCandidates) {
             if (dummyRowCandidate.taxBase == new BigDecimal("0") && dummyRowCandidate.taxRate == 0) {
                 if ((dummyRowCandidate.incomeAccruedSumm == new BigDecimal("0") && dummyRowCandidate.calculatedTax == new BigDecimal("0"))
@@ -167,51 +171,72 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
+        // Группруем идентификаторы источников по состоянию: Принята/Не принята. Далее они понадобятся при формировании уведомлений
         Map<Boolean, Set<Long>> acceptedSources = [:]
         acceptedSources[Boolean.TRUE] = [].toSet()
         acceptedSources[Boolean.FALSE] = [].toSet()
 
+        // Строки отобранные для включения в КНФ
         List<ConsolidationIncome> pickedRows = []
 
+        // В одном цикле делаем сразу несколько действий: 1. Отбираем источники с сотсоянием принята. 2. Находим дубли, сортируем и избавляемся от них
         for (List<ConsolidationIncome> incomes : incomesGroupedByOperationIdAndAsnu.values()) {
+            ScriptUtils.checkInterrupted()
             // Группируем все отобранные строки по отпечатку ConsolidationIncome
             // Мы не сравниваем по идОперации и АСНУ поскольку мы внутри группы по идОперации и АСНУ
             Map<String, List<ConsolidationIncome>> transitionalRows = [:]
             Iterator<ConsolidationIncome> incomesIterator = incomes.iterator()
             while (incomesIterator.hasNext()) {
-                ConsolidationIncome income = incomesIterator.next()
-                if (income.accepted) {
+                ConsolidationIncome candidate = incomesIterator.next()
+                if (candidate.accepted) {
 
-                    acceptedSources[Boolean.TRUE] << income.declarationDataId
+                    acceptedSources[Boolean.TRUE] << candidate.declarationDataId
 
-                    String uuid = ScriptUtils.getConsolidationIncomeUUID(income)
-                    List<ConsolidationIncome> candidates = transitionalRows.get(uuid)
-                    if (candidates == null) {
-                        transitionalRows.put(uuid, [income])
+                    String uuid = ScriptUtils.getConsolidationIncomeUUID(candidate)
+
+                    /* список с кандидатами на попаданием в КНФ. Чаще всего в этом списке будет одна строка, чтобы туда попасть нужно иметь уникальный отпечаток.
+                    Список создан из-за того, что дубликатами признаются строки из разных источников
+                     */
+                    List<ConsolidationIncome> pickedCandidates = transitionalRows.get(uuid)
+                    if (pickedCandidates == null) {
+                        // Если кандитатов в КНФ нет добавляем нового кандидата
+                        transitionalRows.put(uuid, [candidate])
                     } else {
-                        if (candidates.get(0).declarationDataId == income.declarationDataId) {
-                            candidates.add(income)
+                        // Если кандидат есть
+                        if (pickedCandidates.get(0).declarationDataId == candidate.declarationDataId) {
+                            // Добавлем еще строку если кандидат из той же КНФ
+                            pickedCandidates.add(candidate)
                         } else {
-                            if (candidates.get(0).correctionDate == null) {
-                                candidates.get(0).correctionDate = new Date(Long.MIN_VALUE)
+                            if (pickedCandidates.get(0).correctionDate == null) {
+                                /* Проверяем если строка не из корректировочного периода, тогда устанавливаем минимальное значение
+                                 даты корректировке, чтобы при сортировке эта строка была первой в списке
+                                  */
+                                pickedCandidates.get(0).correctionDate = new Date(Long.MIN_VALUE)
                             }
-                            if (income.correctionDate == null) {
-                                income.correctionDate = new Date(Long.MIN_VALUE);
+                            if (candidate.correctionDate == null) {
+                                // Проверяем что кандидат не из корректировочного периода
+                                candidate.correctionDate = new Date(Long.MIN_VALUE);
                             }
-                            if (candidates.get(0).year < income.year
-                                    || candidates.get(0).periodCode.compareTo(income.periodCode) < 0
-                                    || candidates.get(0).correctionDate.compareTo(income.correctionDate) < 0
-                                    || getDeclarationDataCreationDate(candidates.get(0).declarationDataId).compareTo(getDeclarationDataCreationDate(income.declarationDataId)) < 0) {
-                                candidates.clear()
-                                candidates.add(income)
+                            // ЧТобы новый кандидат стал отобранным кандидатом он должен иметь более поздний год
+                            // Если года равны тогда новый кандидадт должен иметь больший код отчетного периода
+                            // Если периоды равны тогда новый кандидат должен иметь более позднюю дату корректировки
+                            // Если даты корректировки одинаковы, тогда новый кандидат должен иметь более позднюю дату создания
+                            if (pickedCandidates.get(0).year < candidate.year
+                                    || pickedCandidates.get(0).periodCode.compareTo(candidate.periodCode) < 0
+                                    || pickedCandidates.get(0).correctionDate.compareTo(candidate.correctionDate) < 0
+                                    || getDeclarationDataCreationDate(pickedCandidates.get(0).declarationDataId).compareTo(getDeclarationDataCreationDate(candidate.declarationDataId)) < 0) {
+                                // Если новый кандидат выбран. Очищаем список отобранных кандидатов и добавляем нового кандидата.
+                                pickedCandidates.clear()
+                                pickedCandidates.add(candidate)
                             }
                         }
                     }
                 } else {
-                    acceptedSources[Boolean.FALSE] << income.declarationDataId
+                    acceptedSources[Boolean.FALSE] << candidate.declarationDataId
                     incomesIterator.remove()
                 }
             }
+
             for (List<ConsolidationIncome> passedIncomes : transitionalRows.values()) {
                 pickedRows.addAll(passedIncomes)
             }
@@ -222,13 +247,18 @@ class Calculate extends AbstractScriptClass {
             return
         }
 
-        logForDebug("Избавление от дублирующих и фиктивных строк, определение списка операций для включения в КНФ," + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Избавление от дублирующих и фиктивных строк, определение списка операций для включения в КНФ. Включено в КНФ ${pickedRows.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
+        // Доходы сгруппированные по идОперации и ИНП. Будут использоваться для вычисления доп полей сортировки
         Map<Pair<String, String>, List<ConsolidationIncome>> incomesGroupedByOperationAndInp = [:]
+        // Доходы сгруппированные по физлицам
         Map<Long, List<? extends NdflPersonIncome>> incomesGroupedByPerson = [:]
+        // Доходы сгруппированные по идОперации и физлицу. Используются для нахождения вычетов и авансов
         Map<Pair<String, Long>, List<ConsolidationIncome>> incomesGroupedByOperationAndPerson = [:]
 
+        // Заполняем сгруппированные доходы
         for (ConsolidationIncome income : pickedRows) {
             Pair<String, String> operationAndInpKey = new Pair(income.operationId, income.inp)
             Pair<String, Long> operationAndPersonKey = new Pair(income.operationId, income.ndflPersonId)
@@ -252,6 +282,7 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
+        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
         Map<Pair<String, String>, Date> operationDates = [:]
 
         for (List<ConsolidationIncome> group : incomesGroupedByOperationAndInp.values()) {
@@ -285,26 +316,31 @@ class Calculate extends AbstractScriptClass {
 
         List<Long> incomeIdsForFetchingDeductionsAndPrepayments = []
 
+        // Идентификаторы доходов для получения вычетов и авансов
         for (List<NdflPersonIncome> incomes : incomesGroupedByOperationAndPerson.values()) {
             incomeIdsForFetchingDeductionsAndPrepayments << incomes.get(0).id
         }
 
-        logForDebug("Подготовка аргументов для получения данных разделов 1, 3, 4, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Подготовка аргументов для получения данных разделов 1, 3, 4, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         List<NdflPerson> ndflPersonList = ndflPersonService.findByIdList(new ArrayList<>(incomesGroupedByPerson.keySet()))
 
-        logForDebug("Получение данных раздела 1, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Получение данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         List<NdflPersonDeduction> deductions = ndflPersonService.fetchDeductionsForConsolidation(incomeIdsForFetchingDeductionsAndPrepayments)
 
-        logForDebug("Получение данных раздела 3, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Получение данных раздела 3, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         List<NdflPersonPrepayment> prepayments = ndflPersonService.fetchPrepaymentsForConsolidation(incomeIdsForFetchingDeductionsAndPrepayments)
 
-        logForDebug("Получение данных раздела 4, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Получение данных раздела 4, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
@@ -344,12 +380,14 @@ class Calculate extends AbstractScriptClass {
             }
         })
 
-        logForDebug("Сортировка данных раздела 1, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date())
 
-        logForDebug("Получение данных справочника ФЛ, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Получение данных справочника ФЛ, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
@@ -363,7 +401,7 @@ class Calculate extends AbstractScriptClass {
         List<NdflPerson> withoutDulPersonList = []
 
 
-
+        // Данные для заполнения раздела 1
         for (NdflPerson declarationDataPerson : ndflPersonList) {
             NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
 
@@ -463,6 +501,12 @@ class Calculate extends AbstractScriptClass {
 
         if (logger.containsLevel(LogLevel.ERROR)) return
 
+        /**
+         * Получение данных из справочника физлиц сделан одним запросом. Мы не загружаем связанные со справочником ФЛ справочники ИНП, ДУЛ, и Адресов отдельными запросами.
+         * Побочный эффект этого то что ДУЛ будет = null, в случае когда нет в справочнике ДУЛ с признаком включения в отчетность =1 и когда вообще нет ДУЛ у физлицаю
+         * Поэтому здесь проверяется причина почему ДУЛ = null и выводится предупреждение
+         */
+
         if (!withoutDulPersonList.isEmpty()) {
             for (NdflPerson person : withoutDulPersonList) {
                 RefBookDataProvider provider = getProvider(RefBook.Id.ID_DOC.id)
@@ -479,12 +523,14 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
-        logForDebug("Консолидация данных, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Консолидация данных, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         Map<Long, List<NdflPersonDeduction>> deductionsGroupedByPerson = [:]
         Map<Long, List<NdflPersonPrepayment>> prepaymentsGroupedByPerson = [:]
 
+        // Сортируем разделы 2, 3, 4
         for (NdflPersonDeduction deduction : deductions) {
             List<NdflPersonDeduction> group = deductionsGroupedByPerson.get(deduction.ndflPersonId)
             if (group == null) {
@@ -593,19 +639,26 @@ class Calculate extends AbstractScriptClass {
             ndflPerson.modifiedBy = null
         }
 
-        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis();
 
         ndflPersonService.save(ndflPersonsToPersist.values());
 
-        logForDebug("Сохранение данных в БД, " + ScriptUtils.calcTimeMillis(time))
+        logForDebug("Сохранение данных в БД, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
 
+        // Формируем уведомления
+
+        // Тербанки в состоянии "Принята"
         Map<Department, Integer> acceptedTbDepartments = [:]
+        // Источники сгруппированные по тербанкам
         Map<Department, List<Long>> acceptedSourcesByTb = [:]
 
         acceptedTbDepartments.put(parentTB, 0)
 
         for (Long sourceId : acceptedSources.get(Boolean.TRUE)) {
+            ScriptUtils.checkInterrupted()
             DeclarationData source = declarationService.getDeclarationData(sourceId)
             Department tbOfSource = departmentService.getParentTB(source.departmentId)
             Integer count = acceptedTbDepartments.get(tbOfSource)
@@ -634,6 +687,7 @@ class Calculate extends AbstractScriptClass {
             Map<Department, List<Long>> notAcceptedSourcesByTb = [:]
 
             for (Long sourceId : acceptedSources.get(Boolean.FALSE)) {
+                ScriptUtils.checkInterrupted()
                 DeclarationData source = declarationService.getDeclarationData(sourceId)
                 Department tbOfSource = departmentService.getParentTB(source.departmentId)
                 Integer count = notAcceptedTbDepartments.get(tbOfSource)

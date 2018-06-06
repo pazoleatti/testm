@@ -2,13 +2,37 @@ package com.aplana.sbrf.taxaccounting.model.consolidation;
 
 import java.util.Date;
 
+/**
+ * Инкапсулирует аргументы для поиска источников для консолидации
+ */
 public class ConsolidationSourceDataSearchFilter {
+    /**
+     * Текущая дата
+     */
     private Date currentDate;
+    /**
+     * Дата начала периода
+     */
     private Date periodStartDate;
+    /**
+     * Дата окончания периода
+     */
     private Date periodEndDate;
+    /**
+     * Глубина выборки даннных в годах
+     */
     private Integer dataSelectionDepth;
+    /**
+     * Идентификатор подразделения
+     */
     private Integer departmentId;
+    /**
+     * Вид налоговой формы
+     */
     private Integer declarationType;
+    /**
+     * Год консолидированной налоговой формы
+     */
     private Integer consolidateDeclarationDataYear;
 
     private ConsolidationSourceDataSearchFilter(Date currentDate, Date periodStartDate, Date periodEndDate, Integer dataSelectionDepth, Integer departmentId, Integer declarationType, Integer consolidateDeclarationDataYear) {
