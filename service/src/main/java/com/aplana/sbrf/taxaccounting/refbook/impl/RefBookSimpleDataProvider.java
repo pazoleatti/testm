@@ -188,7 +188,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return dao.getRecordVersionsByRecordId(getRefBook(), recordId, pagingParams, filter, sortAttribute);
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecordVersionsByRecordId(getRefBook(), recordId, pagingParams, filter, sortAttribute);
+        return commonRefBookService.dereference(getRefBook(), records);
     }
 
     @Override
