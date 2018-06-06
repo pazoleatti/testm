@@ -147,24 +147,25 @@
                  * Сохранение
                  */
                 $scope.save = function () {
+                    var tempRecord = $.extend(true, {}, $scope.record);
                     $scope.refBook.attributes.forEach(function (attribute) {
-                        if (attribute.attributeType === 'REFERENCE' && $scope.record[attribute.alias] && $scope.record[attribute.alias].value) {
+                        if (attribute.attributeType === 'REFERENCE' && tempRecord[attribute.alias] && tempRecord[attribute.alias].value) {
                             // Преобразуем ссылочные поля записи в подходящие для сервера
-                            $scope.record[attribute.alias].value = $scope.record[attribute.alias].value.id;
+                            tempRecord[attribute.alias].value = tempRecord[attribute.alias].value.id;
                         }
-                        $scope.record[attribute.alias].attributeType = attribute.attributeType;
+                        tempRecord[attribute.alias].attributeType = attribute.attributeType;
                     });
                     var url;
                     if ($scope.mode === 'EDIT') {
-                        $scope.record.id.attributeType = 'NUMBER';
-                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + $scope.record.id.value
+                        tempRecord.id.attributeType = 'NUMBER';
+                        url = "controller/actions/refBook/" + $scope.refBook.id + "/editRecord/" + tempRecord.id.value
                     } else {
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"
                     }
                     $http({
                         method: "POST",
                         url: url,
-                        data: $scope.record
+                        data: tempRecord
                     }).then(function () {
                         $modalInstance.close(true);
                     });
