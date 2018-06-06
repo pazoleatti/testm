@@ -197,7 +197,7 @@
                  * @description закрытие модального окна
                  */
                 $scope.close = function () {
-                    if ($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') {
+                    if (($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') && $scope.refBookRecordForm.$dirty) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('title.confirm'),
                             content: $filter('translate')('refBook.confirm.cancelEdit'),
