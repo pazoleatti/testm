@@ -99,7 +99,9 @@
                             angular.isDefined(attr[key]) && attr.$observe(key, function (newValue) {
                                 newValue = scope.$eval(newValue);
                                 //console.warn('attr.$observe(%s)=%o', key, newValue);
-                                if (newValue === 'today') {
+                                if (!angular.isDefined(newValue)) {
+                                    scope.options[key] = key === 'maxDate' ? scope.options.maxDate : scope.options.minDate;
+                                } else if (newValue === 'today') {
                                     var today = new Date();
                                     scope.options[key] = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (key === 'maxDate' ? 1 : 0), 0, 0, 0, key === 'minDate' ? 0 : -1);
                                 } else if (angular.isString(newValue) && newValue.match(/^".+"$/)) {

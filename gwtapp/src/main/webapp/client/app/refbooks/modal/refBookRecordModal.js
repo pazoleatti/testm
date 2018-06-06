@@ -16,6 +16,7 @@
                 $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
                 $scope.mode = $shareData.mode;
+                $scope.temp = {};
 
                 if ($shareData.gridData) {
                     // Добавляем функционал для пролистывания записей справочника в режиме просмотра
@@ -68,6 +69,41 @@
                         $scope.versionToAttribute = attribute
                     }
                 });
+
+                if ($scope.mode === 'EDIT') {
+                    // Для режима редактирования перекладываем даты периода во временные переменные, чтобы корректно работала валидация
+                    $scope.temp.versionFrom = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value;
+                    $scope.temp.versionTo = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value;
+                }
+
+                $scope.$watchGroup(['temp.versionFrom', 'temp.versionTo'], function () {
+                    $scope.validateVersionDates();
+                });
+
+                /**
+                 * Валидация периода актуальности записи.
+                 * Нужна так как стандартная валидация min-date, max-date не умеет работать с динамическими ограничениями, но они все равно используются для блокировки дат в самом календаре
+                 */
+                $scope.validateVersionDates = function() {
+                    var generatedVersionFromId = 'temp_versionfrom';
+                    var generatedVersionToId = 'temp_versionto';
+
+                    if ($scope.refBookRecordForm && $scope.refBookRecordForm[generatedVersionFromId] && $scope.refBookRecordForm[generatedVersionToId]) {
+                        var versionFrom = $scope.temp.versionFrom;
+                        var versionTo = $scope.temp.versionTo;
+
+                        if (versionFrom != null && versionTo != null && versionTo < versionFrom) {
+                            $scope.refBookRecordForm[generatedVersionFromId].$setValidity('versionDate', false);
+                            $scope.refBookRecordForm[generatedVersionToId].$setValidity('versionDate', false);
+                        } else {
+                            $scope.refBookRecordForm[generatedVersionFromId].$setValidity('versionDate', true);
+                            $scope.refBookRecordForm[generatedVersionToId].$setValidity('versionDate', true);
+                            // Обновляем валидные даты внутри записи из темповых переменных
+                            $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value = versionFrom;
+                            $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value = versionTo;
+                        }
+                    }
+                };
 
                 /**
                  * Получает разыменованное значение атрибута
