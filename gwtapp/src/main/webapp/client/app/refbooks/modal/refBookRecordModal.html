@@ -48,7 +48,7 @@
                 <div class="span8">
                     <!-- Режим просмотра -->
                     <label data-ng-if="mode === 'VIEW'" class="inline-value">{{getAttributeFineValue(attribute)}}</label>
-                    <!-- Режим редактирования и создания -->
+                    <!-- Режим создания и редактирования -->
                     <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" data-ng-switch="attribute.attributeType">
                         <div data-ng-switch-when="STRING">
                             <div data-aplana-field data-model-id="{{attribute.alias}}">

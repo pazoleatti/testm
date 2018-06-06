@@ -241,7 +241,8 @@
                                 return {
                                     mode: "CREATE",
                                     refBook: $scope.refBook,
-                                    recordId: $stateParams.recordId
+                                    recordId: $stateParams.recordId,
+                                    record: $scope.personGrid.value.length === 1 ? $scope.transformRecord($scope.personGrid.value[0]) : null
                                 };
                             }
                         }

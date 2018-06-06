@@ -13,8 +13,9 @@
             '$http', '$logPanel', 'LogEntryResource', '$dialogs',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.refBook = $shareData.refBook;
-                $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
+                $scope.isVersionMode = $shareData.recordId && $shareData.recordId !== 'undefined';
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
+                $scope.record = ($shareData.mode === 'CREATE' && !$scope.isVersionMode) ? {} : $.extend(true, {}, $shareData.record);
                 $scope.mode = $shareData.mode;
                 $scope.temp = {};
 
@@ -40,7 +41,7 @@
                     };
                 }
 
-                if ($scope.mode === 'CREATE' && $shareData.recordId) {
+                if ($scope.mode === 'CREATE' && $scope.isVersionMode) {
                     // Добавляем id группы версий записи справочника для создания новой версии
                     $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.BUSINESS_ID_ALIAS] = {
                         value: $shareData.recordId,
@@ -49,17 +50,20 @@
                 }
 
                 $scope.refBook.attributes.forEach(function (attribute) {
-                    if ($scope.mode === 'CREATE' || !$scope.record[attribute.alias]) {
-                        // При создании (и просто для пустых значений) надо указать тип атрибутов для корректной десериализации
-                        $scope.record[attribute.alias] = {
-                            attributeType: attribute.attributeType
-                        }
-                    } else {
-                        if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
-                            // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
-                            if ($scope.record[attribute.alias].value && typeof $scope.record[attribute.alias].value !== 'undefined') {
-                                $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
+                    if (!$scope.record[attribute.alias] || $scope.record[attribute.alias].attributeType === 'undefined') {
+                        // Для пустых значений надо указать тип атрибутов для корректной отрисовки компонентов и десериализации при сохранении
+                        if (!$scope.record[attribute.alias]) {
+                            $scope.record[attribute.alias] = {
+                                attributeType: attribute.attributeType
                             }
+                        } else {
+                            scope.record[attribute.alias].attributeType = attribute.attributeType;
+                        }
+                    }
+                    if (attribute.attributeType === 'DATE' && $scope.record[attribute.alias]) {
+                        // Преобразуем дату с сервера в js Date, чтобы календари корректно ее обрабатывали
+                        if ($scope.record[attribute.alias].value && typeof $scope.record[attribute.alias].value !== 'undefined') {
+                            $scope.record[attribute.alias].value = new Date($scope.record[attribute.alias].value);
                         }
                     }
                     if (attribute.alias === APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS) {

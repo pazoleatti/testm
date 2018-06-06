@@ -206,12 +206,15 @@
                                 return {
                                     mode: "CREATE",
                                     refBook: $scope.refBook,
-                                    recordId: $stateParams.recordId
+                                    recordId: $stateParams.recordId,
+                                    record: $scope.refBookGrid.value.length === 1 ? $scope.refBookGrid.value[0] : null
                                 };
                             }
                         }
-                    }).result.then(function () {
-                        $scope.refBookGrid.ctrl.refreshGrid(1);
+                    }).result.then(function (needToRefresh) {
+                        if (needToRefresh) {
+                            $scope.refBookGrid.ctrl.refreshGrid(1);
+                        }
                     });
                 };
 
