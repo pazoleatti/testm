@@ -125,6 +125,15 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     public ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
+        refBookFactory.getDataProvider(refBookId).deleteAllRecords(logger, recordIds);
+        return new ActionResult(logEntryService.save(logger.getEntries()));
+    }
+
+    @Override
+    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
+    public ActionResult deleteVersions(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
+        Logger logger = new Logger();
+        logger.setTaUserInfo(userInfo);
         refBookFactory.getDataProvider(refBookId).deleteRecordVersions(logger, recordIds);
         return new ActionResult(logEntryService.save(logger.getEntries()));
     }

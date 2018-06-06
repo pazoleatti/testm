@@ -68,13 +68,22 @@ public interface CommonRefBookService {
     ActionResult createRecord(TAUserInfo userInfo, Long refBookId, Map<String, RefBookValue> record);
 
     /**
-     * Удаляет указанные записи правочника
+     * Удаляет все версии указанных записей справочника
      *
      * @param refBookId идентификатор справочника
      * @param recordIds идентификаторы записей для удаления
      * @return результат удаления
      */
     ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds);
+
+    /**
+     * Удаляет указанные записи (версии) правочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param recordIds идентификаторы записей для удаления
+     * @return результат удаления
+     */
+    ActionResult deleteVersions(TAUserInfo userInfo, Long refBookId, List<Long> recordIds);
 
     /**
      * Формирование отчета по записям справочника в формате XLSX/CSV
