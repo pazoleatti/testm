@@ -252,8 +252,10 @@
                                 };
                             }
                         }
-                    }).result.then(function () {
-                        $scope.personGrid.ctrl.refreshGrid(1);
+                    }).result.then(function (needToRefresh) {
+                        if (needToRefresh) {
+                            $scope.personGrid.ctrl.refreshGrid(1);
+                        }
                     });
                 };
 
