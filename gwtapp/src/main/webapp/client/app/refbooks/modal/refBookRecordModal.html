@@ -104,12 +104,22 @@
     <div class="modal-footer">
         <div class="row-fluid">
             <div class="span6">
-                <button type="button" class="btn btn-default" ng-hide="isEditMode || refBook.hierarchic" data-ng-click="showPreviousRecord()">
-                    <span data-translate-once="button.prev"></span>
-                </button>
-                <button type="button" class="btn btn-default" ng-hide="isEditMode || refBook.hierarchic" data-ng-click="showNextRecord()">
-                    <span data-translate-once="button.next"></span>
-                </button>
+                <div class="pull-right" style="margin-top: 9px">
+                    <table cellpadding="0" cellspacing="0">
+                        <tbody>
+                        <tr>
+                            <td ng-class="{'ui-state-disabled' : !gridIterator.hasPrev()}">
+                                <span class="ui-icon ui-icon-seek-prev" title="Предыдущая запись" style="cursor: pointer; margin-right: 10px"
+                                      ng-hide="isEditMode || refBook.hierarchic"  data-ng-click="showPreviousRecord()"></span>
+                            </td>
+                            <td ng-class="{'ui-state-disabled' : !gridIterator.hasNext()}">
+                                <span class="ui-icon ui-icon-seek-next pager-btn-state-disabled" title="Следующая запись" style="cursor: pointer; margin-left: 10px"
+                                      ng-hide="isEditMode || refBook.hierarchic"  data-ng-click="showNextRecord()"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="span6">
                 <button type="submit" class="btn btn-default" id="openButton" ng-show="isEditMode" data-ng-disabled="refBookRecordForm.$invalid">

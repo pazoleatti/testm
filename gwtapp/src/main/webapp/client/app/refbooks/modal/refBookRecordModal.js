@@ -26,17 +26,27 @@
                         $scope.recordIndexes.set(record.id.value, index);
                     });
                     $scope.gridIterator = {
-                        getNext: function (record) {
-                            var index = $scope.recordIndexes.get(record.id.value);
-                            if (index + 1 < $shareData.gridData.length) {
-                                return $shareData.gridData[index + 1]
-                            } else return record;
+                        currentIndex: $scope.recordIndexes.get($scope.record.id.value),
+                        currentRecord: $shareData.gridData[this.currentIndex],
+                        getNext: function () {
+                            if (this.currentIndex + 1 < $shareData.gridData.length) {
+                                this.currentIndex += 1;
+                                this.currentRecord = $shareData.gridData[this.currentIndex]
+                            }
+                            return this.currentRecord;
                         },
-                        getPrevious: function (record) {
-                            var index = $scope.recordIndexes.get(record.id.value);
-                            if (index - 1 >= 0) {
-                                return $shareData.gridData[index - 1]
-                            } else return record;
+                        getPrevious: function () {
+                            if (this.currentIndex - 1 >= 0) {
+                                this.currentIndex -= 1;
+                                this.currentRecord = $shareData.gridData[this.currentIndex]
+                            }
+                            return this.currentRecord;
+                        },
+                        hasNext: function () {
+                            return this.currentIndex + 1 < $shareData.gridData.length
+                        },
+                        hasPrev: function () {
+                            return this.currentIndex - 1 >= 0
                         }
                     };
                 }
@@ -183,8 +193,8 @@
                  * @description переход к предыдущей записи в таблице
                  */
                 $scope.showPreviousRecord = function () {
-                    if ($scope.gridIterator) {
-                        $scope.record = $.extend(true, {}, $scope.gridIterator.getPrevious($scope.record));
+                    if ($scope.gridIterator && $scope.gridIterator.hasPrev()) {
+                        $scope.record = $.extend(true, {}, $scope.gridIterator.getPrevious());
                     }
                 };
 
@@ -192,8 +202,8 @@
                  * @description переход к следующей записи в таблице
                  */
                 $scope.showNextRecord = function () {
-                    if ($scope.gridIterator) {
-                        $scope.record = $.extend(true, {}, $scope.gridIterator.getNext($scope.record));
+                    if ($scope.gridIterator && $scope.gridIterator.hasNext()) {
+                        $scope.record = $.extend(true, {}, $scope.gridIterator.getNext());
                     }
                 };
 
