@@ -95,7 +95,7 @@
                                     type: attribute.attributeType,
                                     referenceAttribute: attribute.refBookAttribute,
                                     formatter: refBookValueFormatter,
-                                    sortable: attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS
+                                    sortable: !$scope.versionMode && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS
                                 }
                             );
                         }
