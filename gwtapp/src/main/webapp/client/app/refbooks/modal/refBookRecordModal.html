@@ -1,7 +1,7 @@
 <form id="refBookRecordForm" name="refBookRecordForm" class="form-horizontal" data-aplana-submit-valid="save()" novalidate>
     <div id="refBookRecordFieldsContainer" class="modal-body">
         <!-- Данные о периоде актуальности записи -->
-        <div class="row-fluid" style="margin-bottom: 20px;" data-ng-show="refBook.versioned">
+        <div class="row-fluid" style="margin-bottom: 20px;" data-ng-if="refBook.versioned">
             <div data-ng-if="mode === 'VIEW'" >
                 <label class="inline-label">{{::'refBook.versionFromShort' | translate}}:</label>
                 <label class="inline-value">{{getAttributeFineValue(versionFromAttribute)}}</label>
