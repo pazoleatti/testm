@@ -404,17 +404,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     // Форма.Состояние = "Принята", "Подготовлена"
                     if (targetDomainObject.getState() == State.PREPARED || targetDomainObject.getState() == State.ACCEPTED) {
 
-                        // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролёр УНП (Сборы)"
-                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
-                            return true;
-                        } else if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
-                            //Форма назначена подразделению пользователя или его дочернему подразделению
-                            TAUser taUser = taUserService.getUser(currentUser.getUsername());
-                            List<Integer> childrenWithParent = departmentService.getAllChildrenIds(taUser.getDepartmentId());
-                            if (childrenWithParent.contains(targetDomainObject.getDepartmentId())) {
-                                return true;
-                            }
-                        }
+                        // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)"
+                        return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
                     }
                 }
             }

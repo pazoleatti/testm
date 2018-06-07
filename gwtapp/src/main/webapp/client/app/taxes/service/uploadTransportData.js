@@ -10,7 +10,13 @@
             $stateProvider.state('uploadTransportData', {
                 url: '/taxes/service/uploadTransportData',
                 templateUrl: 'client/app/taxes/service/uploadTransportData.html?v=${buildUuid}',
-                controller: 'uploadTransportDataController'
+                controller: 'uploadTransportDataController',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_SERVICE)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

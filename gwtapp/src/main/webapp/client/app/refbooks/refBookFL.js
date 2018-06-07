@@ -9,7 +9,13 @@
             $stateProvider.state('refBookFL', {
                 url: '/refBooks/linearRefBook/904?recordId',
                 templateUrl: 'client/app/refbooks/refBookFL.html?v=${buildUuid}',
-                controller: 'refBookFLCtrl'
+                controller: 'refBookFLCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
         .controller('refBookFLCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",

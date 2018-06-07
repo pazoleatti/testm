@@ -9,7 +9,13 @@
             $stateProvider.state('hierRefBook', {
                 url: '/refBooks/hierRefBook/{refBookId}?uuid',
                 templateUrl: 'client/app/refbooks/hierRefBook.html?v=${buildUuid}',
-                controller: 'hierRefBookCtrl'
+                controller: 'hierRefBookCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

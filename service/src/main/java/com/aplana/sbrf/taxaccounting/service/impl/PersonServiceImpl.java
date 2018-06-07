@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.logging.Log;
@@ -71,6 +72,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public PagingResult<RefBookPerson> getPersons(Long recordId, Date version, PagingParams pagingParams, String firstName, String lastName, String searchPattern, boolean exactSearch) {
         Long refBookId = RefBook.Id.PERSON.getId();
         RefBookAttribute sortAttribute = pagingParams != null && StringUtils.isNotEmpty(pagingParams.getProperty()) ?
@@ -129,16 +131,19 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return refBookPersonDao.getPersons(version, pagingParams, filter, sortAttribute);
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public PagingResult<RefBookPerson> getPersonVersions(Long recordId, PagingParams pagingParams) {
         return refBookPersonDao.getPersonVersions(recordId, pagingParams);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, RefBookPerson currentPerson, RefBookPerson original, List<RefBookPerson> newDuplicates, List<RefBookPerson> deletedDuplicates) {
         // TODO: вся эта дичь ниже взята из старой реализации, ее надо переписать, но аналитики не нашли время чтобы сделать правки в постановке и синхронизировать ее с реализацией
         ActionResult result = new ActionResult();
@@ -264,18 +269,21 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public void setOriginal(List<Long> recordIds) {
         LOG.info(String.format("PersonServiceImpl.setOriginal. recordIds: %s", recordIds));
         refBookPersonDao.setOriginal(recordIds);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public void setDuplicate(List<Long> recordIds, Long originalId) {
         LOG.info(String.format("PersonServiceImpl.setDuplicate. recordIds: %s; originalId: %s", recordIds, originalId));
         refBookPersonDao.setDuplicate(recordIds, originalId);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public void changeRecordId(List<Long> recordIds, Long originalId) {
         LOG.info(String.format("PersonServiceImpl.changeRecordId. recordIds: %s; originalId: %s", recordIds, originalId));
         refBookPersonDao.changeRecordId(recordIds, originalId);

@@ -43,7 +43,7 @@ public class UserDataController {
                 UserPermission.CREATE_DECLARATION_REPORT, UserPermission.CREATE_DECLARATION_PRIMARY, UserPermission.CREATE_DECLARATION_CONSOLIDATED,
                 UserPermission.CREATE_UPLOAD_REPORT, UserPermission.HANDLING_FILE, UserPermission.UPLOAD_FILE, UserPermission.EDIT_GENERAL_PARAMS,
                 UserPermission.VIEW_REF_BOOK, UserPermission.EDIT_REF_BOOK, UserPermission.VIEW_ADMINISTRATION_USERS, UserPermission.EDIT_DECLARATION_TYPES_ASSIGNMENT,
-                UserPermission.OPEN_DEPARTMENT_REPORT_PERIOD);
+                UserPermission.OPEN_DEPARTMENT_REPORT_PERIOD, UserPermission.VIEW_TAXES_SERVICE);
 
         return new UserDataModel(userInfo, department);
     }

@@ -9,7 +9,13 @@
             $stateProvider.state('lockDataList', {
                 url: '/administration/locks',
                 templateUrl: 'client/app/administration/locks.html?v=${buildUuid}',
-                controller: 'locksCtrl'
+                controller: 'locksCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

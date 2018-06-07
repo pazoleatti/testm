@@ -9,7 +9,13 @@
             $stateProvider.state('linearRefBook', {
                 url: '/refBooks/linearRefBook/{refBookId}?recordId',
                 templateUrl: 'client/app/refbooks/linearRefBook.html?v=${buildUuid}',
-                controller: 'linearRefBookCtrl'
+                controller: 'linearRefBookCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
         .controller('linearRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",

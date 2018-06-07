@@ -62,17 +62,19 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String filter, PagingParams pagingParams) {
         return refBookDao.getRecords(refBookFactory.get(refBookId), pagingParams, columns, filter);
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public <T extends RefBookSimple> T fetchRecord(Long refBookId, Long recordId) {
         return refBookDao.getRecord(refBookFactory.get(refBookId), recordId);
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public ActionResult editRecord(TAUserInfo userInfo, long refBookId, long recordId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -91,7 +93,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public ActionResult createRecord(TAUserInfo userInfo, Long refBookId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -121,7 +123,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -130,7 +132,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public ActionResult deleteVersions(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -139,6 +141,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, String searchPattern, boolean exactSearch, AsyncTaskType reportType) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
@@ -190,6 +193,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @SuppressWarnings("unchecked")
     public Collection<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
@@ -234,6 +238,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version, String searchPattern, boolean exactSearch, PagingParams pagingParams) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?

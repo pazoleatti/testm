@@ -63,6 +63,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private static final String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_SERVICE)")
     public ActionResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream) {
         LOG.info(String.format("UploadTransportDataServiceImpl.uploadFile. fileName: %s", fileName));
         Logger logger = new Logger();
@@ -247,7 +248,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_SERVICE)")
     public ActionResult uploadAll(TAUserInfo userInfo, Logger logger) {
         LOG.info(String.format("UploadTransportDataServiceImpl.uploadAll. userInfo: %s", userInfo));
         int userId = userInfo.getUser().getId();

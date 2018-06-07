@@ -9,7 +9,13 @@
             $stateProvider.state('refBookList', {
                 url: '/refbooks/refBookList',
                 templateUrl: 'client/app/refbooks/refBookList.html?v=${buildUuid}',
-                controller: 'refBookListCtrl'
+                controller: 'refBookListCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

@@ -10,7 +10,13 @@
                 url: '/taxes/ndflReportJournal',
                 templateUrl: 'client/app/taxes/ndfl/ndflReportJournal.html?v=${buildUuid}',
                 controller: 'ndflReportJournalCtrl',
-                params: {uuid: null}
+                params: {uuid: null},
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

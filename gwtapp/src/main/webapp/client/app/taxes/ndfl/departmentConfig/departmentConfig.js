@@ -8,7 +8,13 @@
             $stateProvider.state('departmentConfig', {
                 url: '/taxes/departmentConfig',
                 templateUrl: 'client/app/taxes/ndfl/departmentConfig/departmentConfig.html',
-                controller: 'departmentConfigCtrl'
+                controller: 'departmentConfigCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

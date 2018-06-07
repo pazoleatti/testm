@@ -9,7 +9,13 @@
             $stateProvider.state('declarationTypeJournal', {
                 url: '/administration/declarationTypeJournal',
                 templateUrl: 'client/app/administration/declarationTemplate/declarationTypeJournal.html?v=${buildUuid}',
-                controller: 'DeclarationTypeJournalCtrl'
+                controller: 'DeclarationTypeJournalCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_SETTINGS)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

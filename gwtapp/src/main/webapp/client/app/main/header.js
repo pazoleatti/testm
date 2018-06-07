@@ -88,14 +88,16 @@
                                 subtree: subtree
                             });
                         }
-                        $scope.treeTaxes.push({
-                            name: $filter('translate')('menu.taxes.service'),
-                            href: "",
-                            subtree: [{
-                                name: $filter('translate')('menu.taxes.service.loadFiles'),
-                                href: $state.href('uploadTransportData')
-                            }]
-                        });
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_SERVICE)) {
+                            $scope.treeTaxes.push({
+                                name: $filter('translate')('menu.taxes.service'),
+                                href: "",
+                                subtree: [{
+                                    name: $filter('translate')('menu.taxes.service.loadFiles'),
+                                    href: $state.href('uploadTransportData')
+                                }]
+                            });
+                        }
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
                             $scope.treeTaxes.push({
                                 name: $filter('translate')('menu.taxes.commonParameters'),
@@ -103,10 +105,12 @@
                             });
                         }
 
-                        $scope.treeNsi = [{
-                            name: $filter('translate')('menu.nsi.refbooks'),
-                            href: $state.href('refBookList')
-                        }];
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                            $scope.treeNsi = [{
+                                name: $filter('translate')('menu.nsi.refbooks'),
+                                href: $state.href('refBookList')
+                            }];
+                        }
 
                         $scope.treeAdministration = [];
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {

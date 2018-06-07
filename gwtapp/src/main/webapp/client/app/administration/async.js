@@ -9,7 +9,13 @@
             $stateProvider.state('asyncTaskList', {
                 url: '/administration/async',
                 templateUrl: 'client/app/administration/async.html?v=${buildUuid}',
-                controller: 'asyncCtrl'
+                controller: 'asyncCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

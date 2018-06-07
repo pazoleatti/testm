@@ -35,7 +35,8 @@
                 VIEW_TAXES: 1 << 20,
                 VIEW_ADMINISTRATION_USERS: 1 << 21,
                 EDIT_DECLARATION_TYPES_ASSIGNMENT: 1 << 22,
-                OPEN_DEPARTMENT_REPORT_PERIOD: 1 << 23
+                OPEN_DEPARTMENT_REPORT_PERIOD: 1 << 23,
+                VIEW_TAXES_SERVICE: 1 << 25
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

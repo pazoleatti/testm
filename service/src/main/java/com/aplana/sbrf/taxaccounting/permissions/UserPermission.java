@@ -132,6 +132,11 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> EDIT_ADMINISTRATION_CONFIG = new EditAdministrationConfigPermission(1 << 24);
 
+    /**
+     * Право "Налоги > Сервис"
+     */
+    public static final Permission<TAUser> VIEW_TAXES_SERVICE = new ViewTaxesServicePermission(1 << 25);
+
     public UserPermission(long mask) {
         super(mask);
     }
@@ -470,7 +475,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
-            return PermissionUtils.isAuthentificated();
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 
@@ -485,7 +490,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
-            return PermissionUtils.isAuthentificated();
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN);
         }
     }
 
@@ -517,6 +522,21 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN);
+        }
+    }
+
+    /**
+     * Право "Налоги > Сервис"
+     */
+    public static final class ViewTaxesServicePermission extends UserPermission {
+
+        public ViewTaxesServicePermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN);
         }
     }
 }

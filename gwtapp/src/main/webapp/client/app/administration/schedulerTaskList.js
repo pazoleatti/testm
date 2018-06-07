@@ -6,10 +6,16 @@
      */
     angular.module('app.schedulerTaskList', ['app.rest', 'app.updateSchedulerTask'])
         .config(['$stateProvider', function ($stateProvider) {
-           $stateProvider.state('schedulerTaskList', {
+            $stateProvider.state('schedulerTaskList', {
                 url: '/administration/schedulerTaskList',
                 templateUrl: 'client/app/administration/schedulerTaskList.html?v=${buildUuid}',
-                controller: 'schedulerTaskListCtrl'
+                controller: 'schedulerTaskListCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 
@@ -44,7 +50,7 @@
                             $filter('translate')('taskList.title.nextStartDate')],
                         colModel: [
                             {name: 'id', index: 'id', width: 60, key: true},
-                            {name: 'name', index: 'task_name', width: 260,  formatter: linkFileFormatter},
+                            {name: 'name', index: 'task_name', width: 260, formatter: linkFileFormatter},
                             {name: 'state', index: 'active', width: 200},
                             {name: 'schedule', index: 'schedule', width: 175},
                             {
@@ -98,8 +104,8 @@
                  * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-                    return "<a target='_self' href='index.html#/administration/schedulerTaskList/updateSchedulerTask/"+
-                        row.id+"'>" + cellValue + "</a>";
+                    return "<a target='_self' href='index.html#/administration/schedulerTaskList/updateSchedulerTask/" +
+                        row.id + "'>" + cellValue + "</a>";
 
                 }
 

@@ -11,7 +11,13 @@
             $stateProvider.state('commonParams', {
                 url: '/taxes/commonParams/editCommonParams',
                 templateUrl: 'client/app/taxes/commonParams/commonParams.html?v=${buildUuid}',
-                controller: 'commonParamsCtrl'
+                controller: 'commonParamsCtrl',
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
+                    function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
+                        if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
+                            $state.go("/");
+                        }
+                    }]
             });
         }])
 

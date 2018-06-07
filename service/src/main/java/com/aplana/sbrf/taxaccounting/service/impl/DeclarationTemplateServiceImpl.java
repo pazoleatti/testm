@@ -731,6 +731,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
+    @PreAuthorize("hasRole('N_ROLE_CONF')")
     public void exportAllDeclarationTemplates(TAUserInfo userInfo, OutputStream os) {
         ZipOutputStream zos = new ZipOutputStream(os);
         try {
