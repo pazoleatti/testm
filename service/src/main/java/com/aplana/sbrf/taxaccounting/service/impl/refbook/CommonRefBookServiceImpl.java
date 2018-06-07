@@ -298,8 +298,10 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             for (Map<String, RefBookValue> record : records) {
                 for (Map.Entry<String, RefBookDataProvider> reference : referenceAttributes.entrySet()) {
                     String referenceAlias = reference.getKey();
-                    Map<String, RefBookValue> referenceObject = reference.getValue().getRecordData(record.get(referenceAlias).getReferenceValue());
-                    record.put(referenceAlias, new RefBookValue(RefBookAttributeType.REFERENCE, referenceObject));
+                    if (record.get(referenceAlias).getReferenceValue() != null) {
+                        Map<String, RefBookValue> referenceObject = reference.getValue().getRecordData(record.get(referenceAlias).getReferenceValue());
+                        record.put(referenceAlias, new RefBookValue(RefBookAttributeType.REFERENCE, referenceObject));
+                    }
                 }
             }
         }

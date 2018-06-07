@@ -75,14 +75,18 @@
                 });
 
                 if ($scope.mode === 'EDIT') {
-                    // Для режима редактирования перекладываем даты периода во временные переменные, чтобы корректно работала валидация
-                    $scope.temp.versionFrom = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value;
-                    $scope.temp.versionTo = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value;
+                    if ($scope.isVersionMode) {
+                        // Для режима редактирования перекладываем даты периода во временные переменные, чтобы корректно работала валидация
+                        $scope.temp.versionFrom = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS].value;
+                        $scope.temp.versionTo = $scope.record[APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS].value;
+                    }
                 }
 
-                $scope.$watchGroup(['temp.versionFrom', 'temp.versionTo'], function () {
-                    $scope.validateVersionDates();
-                });
+                if ($scope.isVersionMode) {
+                    $scope.$watchGroup(['temp.versionFrom', 'temp.versionTo'], function () {
+                        $scope.validateVersionDates();
+                    });
+                }
 
                 /**
                  * Валидация периода актуальности записи.
