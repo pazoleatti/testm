@@ -118,7 +118,7 @@ public class PersonServiceImpl implements PersonService {
                         "LOWER(SOURCE_ID_CODE) :searchPattern or " +
                         "TO_CHAR(OLD_ID) :searchPattern or " +
                         (birthDate != null ? "to_char(BIRTH_DATE, 'DD.MM.YYYY') = '" + prepared + "' or " : "") +
-                        "LOWER(addressAsText) :searchPattern)")
+                        "LOWER(ADDRESS_ADDRESS_FULL) :searchPattern)")
                         .replaceAll(":searchPattern", (exactSearch ? "= '" + prepared + "'" : "like '%" + prepared + "%'"));
             }
             // Отбираем все записи справочника

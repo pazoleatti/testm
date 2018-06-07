@@ -267,7 +267,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             "  left join REF_BOOK_COUNTRY c on c.id = frb.CITIZENSHIP\n" +
             "  left join REF_BOOK_ADDRESS a on a.id = frb.ADDRESS \n" +
             "  left join REF_BOOK_ASNU asnu on asnu.id = frb.SOURCE_ID \n" +
-            "  where frb.status = 0%s) p";
+            "  where frb.status = 0%s) p ";
 
     @Override
     public PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
