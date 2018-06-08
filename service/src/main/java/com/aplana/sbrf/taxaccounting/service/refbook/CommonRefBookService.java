@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 
 import java.util.Collection;
 import java.util.Date;
@@ -21,11 +18,121 @@ import java.util.Map;
 public interface CommonRefBookService {
 
     /**
-     * Получить все справочники
+     * Загружает метаданные справочника
      *
-     * @return список объектов содержащих данные о справочниках
+     * @param refBookId идентификатор справочника
+     * @return метаданные справочника
      */
-    PagingResult<RefBookListResult> fetchAllRefBooks();
+    RefBook get(Long refBookId);
+
+    /**
+     * Получает описание действия над справочников в текстовом виде. Используется для формирования текста об ошибках
+     *
+     * @param descriptionTemplate шаблон описания
+     * @param refBookId           идентификатор справочника
+     */
+    String getRefBookActionDescription(DescriptionTemplate descriptionTemplate, Long refBookId);
+
+    /**
+     * Проверяет целесообразность запуска скрипта для указанного справочника. Если скрипт пустой или не содержит
+     * обработчика указанного события, то он выполняться не будет.
+     *
+     * @param refBookId идентификатор справочника
+     * @param event     событие, которе обрабатывается в скрипте
+     * @return можно выполнить скрипт?
+     */
+    boolean getEventScriptStatus(long refBookId, FormDataEvent event);
+
+    /**
+     * Проверяет целесообразность запуска скрипта для всех событий указанного справочника. Если скрипт пустой или не содержит
+     * обработчика указанного события, то он выполняться не будет.
+     *
+     * @param refBookId идентификатор справочника
+     * @return список пар событие - можно выполнить скрипт по событию?
+     */
+    Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId);
+
+    /**
+     * Формирует ключ блокировки для справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @return строка-ключ для блокировки
+     */
+    String generateTaskKey(long refBookId);
+
+    /**
+     * Возвращает описание блокировки для справочника
+     *
+     * @param lockData  данные блокировки
+     * @param refBookId идентификатор справочника
+     * @return информация о блокировке с деталями
+     */
+    String getRefBookLockDescription(LockData lockData, long refBookId);
+
+    /**
+     * Возвращает данные атрибута справочника по его алиасу
+     *
+     * @param refBookId      идентификатор справочника
+     * @param attributeAlias алиас аттрибута
+     * @return данные аттрибута
+     */
+    RefBookAttribute getAttributeByAlias(long refBookId, String attributeAlias);
+
+    /**
+     * Возвращает метаданные справочника по идентификатору атрибута
+     *
+     * @param attributeId код атрибута, входящего в справочник
+     * @return метаданные справочника
+     */
+    RefBook getByAttribute(Long attributeId);
+
+    /**
+     * Получает список справочников
+     *
+     * @param visible признак того, что нужно получить только видимые справочники
+     *                true - только видимые
+     *                false - только невидимые
+     *                null - все
+     * @return список справочников
+     */
+    List<RefBook> fetchAll(Boolean visible);
+
+    /**
+     * Возвращает все видимые справочники
+     * @return все видимые справочники
+     */
+    List<RefBook> fetchAll();
+
+    /**
+     * Метод возвращает строку для фильтрации справочника по
+     * определенному строковому ключу
+     *
+     * @param query       - ключ для поиска
+     * @param refBookId   - справочник
+     * @param exactSearch - точное соответствие
+     * @return строку фильтрации для поиска по справочнику
+     */
+    String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch);
+
+    /**
+     * Метод возвращает строку для фильтрации справочника с неточным соответствием по определенному строковому ключу
+     *
+     * @param query     - ключ для поиска
+     * @param refBookId - справочник
+     * @return строку фильтрации для поиска по справочнику
+     */
+    String getSearchQueryStatement(String query, Long refBookId);
+
+    /**
+     * Метод возвращает строку для фильтрации справочника по
+     * определенному строковому ключу и дополнительным строковым параметрам присоединенным с условием "И"
+     *
+     * @param parameters  - дополнительные строковые параметры, ключ - имя поля в таблице, значение поля в таблице
+     * @param refBookId   - справочник
+     * @param exactSearch - точное соответствие
+     * @return строку фильтрации для поиска по справочнику
+     */
+    String getSearchQueryStatementWithAdditionalStringParameters(Map<String, String> parameters, String searchPattern, Long refBookId, boolean exactSearch);
 
     /**
      * Получение всех значений указанного справочника
@@ -126,6 +233,7 @@ public interface CommonRefBookService {
 
     /**
      * Разыменовывает справочные атрибуты записей, т.е те, которые ссылаются на другие записи справочников. Получает полный объект вместо id-ссылки
+     *
      * @param refBook справочник, для которого выполняется разыменование
      * @param records список записей, для которых выполняется разыменование
      */

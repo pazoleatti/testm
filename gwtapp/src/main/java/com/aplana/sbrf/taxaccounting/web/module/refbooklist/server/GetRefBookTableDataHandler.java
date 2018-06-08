@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
@@ -25,7 +26,7 @@ import java.util.*;
 public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
 
     @Autowired
-    RefBookFactory refBookFactory;
+    CommonRefBookService commonRefBookService;
 
     public GetRefBookTableDataHandler() {
         super(GetTableDataAction.class);
@@ -35,7 +36,7 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
         GetTableDataResult result = new GetTableDataResult();
 
-        List<RefBook> list = refBookFactory.getAll(action.isOnlyVisible());
+        List<RefBook> list = commonRefBookService.fetchAll(action.isOnlyVisible());
 
         List<TableModel> returnList = new ArrayList<TableModel>();
         boolean isFiltered = action.getFilter() != null && !action.getFilter().isEmpty();

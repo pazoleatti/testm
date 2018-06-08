@@ -29,7 +29,6 @@ public enum FormDataEvent implements Serializable {
 	PRE_CALCULATION_CHECK(16, "Расчетные проверки"),
 	PRE_CREATE_REPORTS(18, "Проверки перед формировнием отчетности"), // Вызывается не для экземпляра формы
 	CREATE_SPECIFIC_REPORT(19, "Сформировать специфичный отчет"),
-    GET_SPECIFIC_REPORT_TYPES(20, "Получить список специфичных отчетов"),
     CALCULATE_TASK_COMPLEXITY(21, "Рассчитать сложность задачи формирования специфичных отчетов"),
     CHECK_VISIBILITY_PDF(22, "Проверка видимости формы предварительного просмотра для налоговой формы"),
 

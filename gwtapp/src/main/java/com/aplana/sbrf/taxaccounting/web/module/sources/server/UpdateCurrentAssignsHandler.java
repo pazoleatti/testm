@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsResult;
@@ -44,7 +45,10 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
     private LogEntryService logEntryService;
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
+
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Autowired
     private SecurityService securityService;
@@ -105,8 +109,8 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
             sourceClientData.setPeriodEndName(period.getPeriodTo() != null ? period.getPeriodEndName() : null);
 
             /** Получение информации по периодам из справочника Коды, определяющие налоговый (отчётный) период*/
-            RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
-            RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
+            RefBook refBook = commonRefBookService.get(PERIOD_CODE_REFBOOK);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
 
             String filter = action.getTaxType().getCode() + " = 1";
             PagingResult<Map<String, RefBookValue>> records = provider.getRecords(new Date(), null, filter ,null);

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,6 +105,7 @@ public class RegionSecurityServiceImplTest {
         versionsBad.add(versionBad);
 
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        CommonRefBookService commonRefBookService = mock(CommonRefBookService.class);
         ReflectionTestUtils.setField(regionSecurityService, "refBookFactory", refBookFactory);
         DepartmentService departmentService = mock(DepartmentService.class);
         ReflectionTestUtils.setField(regionSecurityService, "departmentService", departmentService);
@@ -114,8 +116,8 @@ public class RegionSecurityServiceImplTest {
         departments.add(nsDepartment);
         when(departmentService.getBADepartments(nsUser, TaxType.NDFL)).thenReturn(departments);
 
-        when(refBookFactory.get(NOT_REGION_REF_BOOK_ID)).thenReturn(notRegionRefBook);
-        when(refBookFactory.get(REGION_REF_BOOK_ID)).thenReturn(refBook);
+        when(commonRefBookService.get(NOT_REGION_REF_BOOK_ID)).thenReturn(notRegionRefBook);
+        when(commonRefBookService.get(REGION_REF_BOOK_ID)).thenReturn(refBook);
 
         when(refBookFactory.getDataProvider(RefBook.Id.DEPARTMENT.getId())).thenReturn(departmentProvider);
         when(departmentProvider.getRecordData(DEPARTAMENT_ID)).thenReturn(department);

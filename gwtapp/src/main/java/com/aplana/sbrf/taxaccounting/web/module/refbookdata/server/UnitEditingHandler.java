@@ -13,10 +13,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingAction;
@@ -56,7 +56,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private DepartmentService departmentService;
 
@@ -71,7 +71,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
         List<String> lockedObjects = new ArrayList<String>();
         Logger logger = new Logger();
         int userId = securityService.currentUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID);
+        String lockKey = commonRefBookService.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID);
         RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -83,7 +83,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
                                     String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName()));

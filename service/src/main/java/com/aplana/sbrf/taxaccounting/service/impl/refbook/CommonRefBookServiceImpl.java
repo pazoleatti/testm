@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -10,19 +12,24 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_ID_ALIAS;
 
 @Service
 public class CommonRefBookServiceImpl implements CommonRefBookService {
@@ -30,13 +37,19 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
-    private RefBookSimpleDao refBookDao;
+    private RefBookDao refBookDao;
+    @Autowired
+    private RefBookSimpleDao refBookSimpleDao;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
     private LockDataService lockDataService;
     @Autowired
     private AsyncManager asyncManager;
+    @Autowired
+    private RefBookScriptingService refBookScriptingService;
+    @Autowired
+    private TAUserService userService;
 
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -46,31 +59,279 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     };
 
     @Override
-    @PreAuthorize("isAuthenticated()")
-    public PagingResult<RefBookListResult> fetchAllRefBooks() {
-        List<RefBook> refBookList = refBookFactory.getAll(true);
-        PagingResult<RefBookListResult> toRet = new PagingResult<>();
-        for (RefBook refBook : refBookList) {
-            RefBookListResult res = new RefBookListResult();
-            res.setRefBookName(refBook.getName());
-            res.setRefBookType(refBook.getType());
-            res.setRefBookId(refBook.getId());
-            res.setReadOnly(refBook.isReadOnly());
-            toRet.add(res);
+    public RefBook get(Long refBookId) {
+        return refBookDao.get(refBookId);
+    }
+
+    @Override
+    public RefBook getByAttribute(Long attributeId) {
+        return refBookDao.getByAttribute(attributeId);
+    }
+
+    @Override
+    public List<RefBook> fetchAll(Boolean visible) {
+        return refBookDao.fetchAll(visible);
+    }
+
+    @Override
+    public List<RefBook> fetchAll() {
+        return fetchAll(true);
+    }
+
+    @Override
+    public String getSearchQueryStatement(String query, Long refBookId) {
+        return getSearchQueryStatement(query, refBookId, false);
+    }
+
+    @Override
+    public String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch) {
+        return getSearchQueryStatementWithAdditionalStringParameters(null, query, refBookId, exactSearch);
+    }
+
+    @Override
+    public String getSearchQueryStatementWithAdditionalStringParameters(Map<String, String> parameters, String query, Long refBookId, boolean exactSearch) {
+        if (query != null && !query.isEmpty()) {
+            String q = com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(query);
+            q = q.toLowerCase().replaceAll("\'", "\\\\\'");
+            StringBuilder resultSearch = new StringBuilder();
+            RefBook refBook = get(refBookId);
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                if (attribute.getAlias().equals(RECORD_PARENT_ID_ALIAS) || attribute.getAlias().equals("IS_ACTIVE") || (!CollectionUtils.isEmpty(parameters) && parameters.containsKey(attribute.getAlias()))) {
+                    continue;
+                }
+
+                if (resultSearch.length() > 0) {
+                    resultSearch.append(" or ");
+                }
+
+                switch (attribute.getAttributeType()) {
+                    case STRING:
+                        resultSearch
+                                .append("LOWER(")
+                                .append(attribute.getAlias())
+                                .append(")");
+                        break;
+                    case NUMBER:
+                        resultSearch
+                                .append("TO_CHAR(")
+                                .append(attribute.getAlias())
+                                .append(")");
+                        break;
+                    case DATE:
+                        resultSearch
+                                .append("TRUNC(")
+                                .append(attribute.getAlias())
+                                .append(") = TO_DATE('")
+                                .append(q)
+                                .append("')");
+                        break;
+                    case REFERENCE:
+                        String fullAlias = getStackAlias(attribute);
+                        switch (getLastAttribute(attribute).getAttributeType()) {
+                            case STRING:
+                                resultSearch
+                                        .append("LOWER(")
+                                        .append(fullAlias)
+                                        .append(")");
+                                break;
+                            case NUMBER:
+                                resultSearch
+                                        .append("TO_CHAR(")
+                                        .append(fullAlias)
+                                        .append(")");
+                                break;
+                            case DATE:
+                                resultSearch.append(fullAlias);
+                                break;
+                            default:
+                                throw new RuntimeException("Unknown RefBookAttributeType");
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown RefBookAttributeType");
+
+                }
+
+                if (attribute.getAttributeType() != RefBookAttributeType.DATE) {
+                    if (exactSearch) {
+                        resultSearch
+                                .append(" like ")
+                                .append("'")
+                                .append(q)
+                                .append("'");
+                    } else {
+                        resultSearch
+                                .append(" like ")
+                                .append("'%")
+                                .append(q)
+                                .append("%'");
+                    }
+                }
+                if (!CollectionUtils.isEmpty(parameters)) {
+                    resultSearch.append(" and ")
+                            .append(buildQueryFromParams(parameters, exactSearch));
+                }
+            }
+            return resultSearch.toString();
+        } else {
+            if (CollectionUtils.isEmpty(parameters)) {
+                return null;
+            } else {
+                return buildQueryFromParams(parameters, exactSearch).toString();
+            }
         }
-        return toRet;
+    }
+
+    private StringBuilder buildQueryFromParams(Map<String, String> parameters, boolean exactSearch) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        for (Map.Entry<String, String> param : parameters.entrySet()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" and ");
+            }
+            String q = com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(param.getValue());
+            q = q.toLowerCase().replaceAll("\'", "\\\\\'");
+            queryBuilder.append("LOWER(")
+                    .append(param.getKey())
+                    .append(")");
+            if (exactSearch) {
+                queryBuilder
+                        .append(" like ")
+                        .append("'")
+                        .append(q)
+                        .append("'");
+            } else {
+                queryBuilder
+                        .append(" like ")
+                        .append("'%")
+                        .append(q)
+                        .append("%'");
+            }
+        }
+        return queryBuilder;
+    }
+
+    /**
+     * Метод возврадет полный алиас для ссылочного атрибута вида
+     * user.city.name
+     *
+     * @param attribute
+     * @return
+     */
+    private String getStackAlias(RefBookAttribute attribute) {
+        switch (attribute.getAttributeType()) {
+            case STRING:
+            case DATE:
+            case NUMBER:
+                return attribute.getAlias();
+            case REFERENCE:
+                RefBook rb = get(attribute.getRefBookId());
+                RefBookAttribute nextAttribute = rb.getAttribute(attribute.getRefBookAttributeId());
+                return attribute.getAlias() + "." + getStackAlias(nextAttribute);
+            default:
+                throw new RuntimeException("Unknown RefBookAttributeType");
+        }
+    }
+
+    /**
+     * Метод возвращает последний не ссылочный атрибут по цепочке
+     * ссылок
+     *
+     * @param attribute ссылочный атрибут для которого нужно получить последний не ссылочный атрибут
+     * @return
+     */
+    private RefBookAttribute getLastAttribute(RefBookAttribute attribute) {
+        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+            RefBook rb = getByAttribute(attribute.getRefBookAttributeId());
+            RefBookAttribute nextAttribute = rb.getAttribute(attribute.getRefBookAttributeId());
+
+            return getLastAttribute(nextAttribute);
+        } else {
+            return attribute;
+        }
+    }
+
+    @Override
+    public String getRefBookActionDescription(DescriptionTemplate descriptionTemplate, Long refBookId) {
+        RefBook refBook = get(refBookId);
+        switch (descriptionTemplate) {
+            case REF_BOOK_EDIT:
+                return String.format(descriptionTemplate.getText(), refBook.getName());
+            default:
+                throw new ServiceException("Неверный тип шаблона(%s)", descriptionTemplate);
+        }
+    }
+
+    @Override
+    public String generateTaskKey(long refBookId) {
+        return LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
+    }
+
+    @Override
+    public String getRefBookLockDescription(LockData lockData, long refBookId) {
+        if (lockData.getTaskId() != null) {
+            //Заблокировано асинхроннной задачей
+            AsyncTaskData lockTaskData = asyncManager.getLightTaskData(lockData.getTaskId());
+            return String.format(AsyncTask.LOCK_CURRENT,
+                    SDF_DD_MM_YYYY.get().format(lockData.getDateLock()),
+                    userService.getUser(lockData.getUserId()).getName(),
+                    lockTaskData.getDescription());
+        } else {
+            //Заблокировано редактированием
+            return String.format(AsyncTask.LOCK_CURRENT,
+                    SDF_DD_MM_YYYY.get().format(lockData.getDateLock()),
+                    userService.getUser(lockData.getUserId()).getName(),
+                    getRefBookActionDescription(DescriptionTemplate.REF_BOOK_EDIT, refBookId));
+        }
+    }
+
+    @Override
+    public RefBookAttribute getAttributeByAlias(long refBookId, String attributeAlias) {
+        for (RefBookAttribute attribute : refBookDao.getAttributes(refBookId)) {
+            if (attribute.getAlias().equals(attributeAlias)) {
+                return attribute;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean getEventScriptStatus(long refBookId, FormDataEvent event) {
+        String script = refBookScriptingService.getScript(refBookId);
+        if (script != null && !script.isEmpty()) {
+            return TAAbstractScriptingServiceImpl.canExecuteScript(script, event);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId) {
+        List<FormDataEvent> formDataEventList = Arrays.asList(FormDataEvent.ADD_ROW, FormDataEvent.IMPORT);
+        Map<FormDataEvent, Boolean> eventScriptStatus = new HashMap<FormDataEvent, Boolean>();
+        String script = refBookScriptingService.getScript(refBookId);
+        if (script != null && !script.isEmpty()) {
+            for (FormDataEvent event : formDataEventList) {
+                eventScriptStatus.put(event, TAAbstractScriptingServiceImpl.canExecuteScript(script, event));
+            }
+        } else {
+            for (FormDataEvent event : formDataEventList) {
+                eventScriptStatus.put(event, false);
+            }
+        }
+        return eventScriptStatus;
     }
 
     @Override
     @PreAuthorize("isAuthenticated()")
     public <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String filter, PagingParams pagingParams) {
-        return refBookDao.getRecords(refBookFactory.get(refBookId), pagingParams, columns, filter);
+        return refBookSimpleDao.getRecords(get(refBookId), pagingParams, columns, filter);
     }
 
     @Override
     @PreAuthorize("isAuthenticated()")
     public <T extends RefBookSimple> T fetchRecord(Long refBookId, Long recordId) {
-        return refBookDao.getRecord(refBookFactory.get(refBookId), recordId);
+        return refBookSimpleDao.getRecord(get(refBookId), recordId);
     }
 
     @Override
@@ -145,14 +406,14 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     public ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams, String searchPattern, boolean exactSearch, AsyncTaskType reportType) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = get(refBookId);
 
-        LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
+        LockData lockData = lockDataService.getLock(generateTaskKey(refBook.getId()));
         if (lockData == null) {
             String filter = "";
             if (StringUtils.isNotEmpty(searchPattern)) {
                 // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
+                filter = getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
             }
             RefBookAttribute sortAttribute;
             boolean isAscSorting;
@@ -187,7 +448,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             result.setUuid(logEntryService.save(logger.getEntries()));
             return result;
         } else {
-            logger.info(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
+            logger.info(getRefBookLockDescription(lockData, refBook.getId()));
             throw new ServiceLoggerException("Для текущего справочника запущена операция, при которой формирование отчета невозможно", logEntryService.save(logger.getEntries()));
         }
     }
@@ -200,7 +461,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         String filter = null;
         if (StringUtils.isNotEmpty(searchPattern)) {
             // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-            filter = refBookFactory.getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+            filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
         }
         List<Map<String, RefBookValue>> records = provider.getRecords(null, null, filter, null, true);
         Map<Number, Map<String, RefBookValue>> recordsById = new HashMap<>();
@@ -221,16 +482,18 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
         // Собираем дочерние подразделения внутри родительских
         for (Map<String, RefBookValue> record : recordsById.values()) {
-            Number parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-            if (parentId != null) {
-                Map<String, RefBookValue> parent = recordsById.get(parentId);
-                if (!parent.containsKey(RefBook.RECORD_CHILDREN_ALIAS)) {
-                    parent.put(RefBook.RECORD_CHILDREN_ALIAS, new RefBookValue(RefBookAttributeType.COLLECTION, new ArrayList()));
-                }
-                parent.get(RefBook.RECORD_CHILDREN_ALIAS).getCollectionValue().add(record);
-                if (parentId.intValue() == Department.ROOT_DEPARTMENT_ID) {
-                    // Отбираем только ТБ - все остальные подразделения будут уже как дочерние
-                    result.add(record);
+            if (record.get(RefBook.RECORD_PARENT_ID_ALIAS) != null) {
+                Number parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+                if (parentId != null) {
+                    Map<String, RefBookValue> parent = recordsById.get(parentId);
+                    if (!parent.containsKey(RefBook.RECORD_CHILDREN_ALIAS)) {
+                        parent.put(RefBook.RECORD_CHILDREN_ALIAS, new RefBookValue(RefBookAttributeType.COLLECTION, new ArrayList()));
+                    }
+                    parent.get(RefBook.RECORD_CHILDREN_ALIAS).getCollectionValue().add(record);
+                    if (parentId.intValue() == Department.ROOT_DEPARTMENT_ID) {
+                        // Отбираем только ТБ - все остальные подразделения будут уже как дочерние
+                        result.add(record);
+                    }
                 }
             }
         }
@@ -242,13 +505,13 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     public PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version, String searchPattern, boolean exactSearch, PagingParams pagingParams) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
-                refBookFactory.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
+                getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         PagingResult<Map<String, RefBookValue>> records;
         if (recordId == null) {
             String filter = null;
             if (StringUtils.isNotEmpty(searchPattern)) {
                 // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+                filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
             }
             // Отбираем все записи справочника
             records = provider.getRecordsWithVersionInfo(version,

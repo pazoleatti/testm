@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookScriptAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookScriptResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -23,7 +24,7 @@ public class GetRefBookScriptHandler extends AbstractActionHandler<GetRefBookScr
     private RefBookScriptingService refBookScriptingService;
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     public GetRefBookScriptHandler() {
         super(GetRefBookScriptAction.class);
@@ -34,7 +35,7 @@ public class GetRefBookScriptHandler extends AbstractActionHandler<GetRefBookScr
 
         GetRefBookScriptResult refBookScriptResult = new GetRefBookScriptResult();
 
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
 
         String script = refBookScriptingService.getScript(action.getRefBookId());
         refBookScriptResult.setScript(script);

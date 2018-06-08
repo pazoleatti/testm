@@ -1,17 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.InitRefBookMultiAction;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.InitRefBookMultiResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
-
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
 
 /**
  * @author sgoryachkin
@@ -21,7 +20,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMultiAction, InitRefBookMultiResult> {
 
     @Autowired
-    RefBookFactory refBookFactory;
+    CommonRefBookService commonRefBookService;
 
     public InitRefBookMultiHandler() {
         super(InitRefBookMultiAction.class);
@@ -30,7 +29,7 @@ public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMu
     @Override
     public InitRefBookMultiResult execute(InitRefBookMultiAction action, ExecutionContext context) throws ActionException {
         InitRefBookMultiResult result = new InitRefBookMultiResult();
-        RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        RefBook refBook = commonRefBookService.getByAttribute(action.getRefBookAttrId());
         result.setRefBookId(refBook.getId());
         result.setAttributes(refBook.getAttributes());
         //Признак настроек подразделений

@@ -4,13 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigFetchingAction;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.DepartmentConfigFetchingResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,8 @@ import java.util.Map;
 public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
     private PeriodService periodService;
@@ -32,7 +34,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Override
     public List<DepartmentConfigFetchingResult> fetchDepartmentConfigs(DepartmentConfigFetchingAction action) {
-        RefBook departmentConfigDetailRefBook = refBookFactory.get(RefBook.Id.NDFL_DETAIL.getId());
+        RefBook departmentConfigDetailRefBook = commonRefBookService.get(RefBook.Id.NDFL_DETAIL.getId());
         // Отбираются те настройки подразделений, которые ссылаются на тербанк, id которого берется из фильтра
         String departmentConfigFilter = DEPARTMENT_ID_FILTER + action.getDepartmentId();
 

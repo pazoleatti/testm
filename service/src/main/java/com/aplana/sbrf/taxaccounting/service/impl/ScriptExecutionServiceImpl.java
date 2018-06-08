@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -9,9 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -26,7 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -40,8 +41,7 @@ import java.util.zip.ZipInputStream;
 @Transactional
 public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl implements ApplicationContextAware, ScriptExecutionService {
 
-	private static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
-
+    private static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
 
     final static String LOCK_MESSAGE = "%s \"%s\" заблокирован пользователем с логином \"%s\". Макет пропущен.";
     final static String ZIP_ENCODING = "cp866";
@@ -61,7 +61,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     @Autowired
     private TAUserService userService;
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     @Override
     @PreAuthorize("hasRole('N_ROLE_CONF')")
@@ -69,15 +69,15 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
 
-		if (canExecuteScript(script, null)) {
+        if (canExecuteScript(script, null)) {
             // Биндим параметры для выполнения скрипта
             Bindings b = getScriptEngine().createBindings();
-            Map<String, ?> scriptComponents =  getScriptExposedBeans();
+            Map<String, ?> scriptComponents = getScriptExposedBeans();
             for (Object component : scriptComponents.values()) {
                 ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
                 scriptComponentContext.setUserInfo(userInfo);
-                if (component instanceof ScriptComponentContextHolder){
-                    ((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
+                if (component instanceof ScriptComponentContextHolder) {
+                    ((ScriptComponentContextHolder) component).setScriptComponentContext(scriptComponentContext);
                 }
             }
             b.putAll(scriptComponents);
@@ -94,7 +94,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
             result.setSuccess(true);
             result.setUuid(logEntryService.save(logger.getEntries()));
             return result;
-		} else {
+        } else {
             throw new ServiceException("Скрипт не может быть выполнен, так как он не содержит кода");
         }
     }
@@ -125,7 +125,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
             logScriptException(e, logger);
         } catch (Exception e) {
             logger.error(e.getMessage());
-			LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -136,7 +136,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
         Map<String, Object> beans = new HashMap<String, Object>();
 
         // http://jira.aplana.com/browse/SBRFACCTAX-10954 Передаем в скрипты все спринговые бины
-        for(String name: applicationContext.getBeanDefinitionNames()) {
+        for (String name : applicationContext.getBeanDefinitionNames()) {
             beans.put(name, applicationContext.getBean(name));
         }
 
@@ -145,10 +145,11 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
     /**
      * Проверяе, возможен ли импорт в указаннный макет (нет ли на нем блокировки)
+     *
      * @param lockKey ключ блокировки макета
      * @return если блокировка существует, то возвращается логин пользователя (тевущий пользователь не учитывается)
      */
-    private String canImportScript(String lockKey, TAUser user){
+    private String canImportScript(String lockKey, TAUser user) {
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null && lockData.getUserId() != user.getId()) {
             return userService.getUser(lockData.getUserId()).getLogin();
@@ -165,7 +166,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
         try {
             zis = new ZipArchiveInputStream(new BufferedInputStream(zipFile), ZIP_ENCODING);
             ArchiveEntry entry;
-            while((entry = zis.getNextZipEntry()) != null) {
+            while ((entry = zis.getNextZipEntry()) != null) {
                 if (!entry.isDirectory()) {
                     if (!entry.getName().contains("/")) {
                         logger.error("Структура архива некорректна! Импорт файла отменен.");
@@ -244,7 +245,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
                         //Проверяем не заблокирован ли справочник
                         RefBook refBook = SerializationUtils.clone(refBookDao.get(refBookId));
-                        String lockUser = canImportScript(refBookFactory.generateTaskKey(refBookId), userInfo.getUser());
+                        String lockUser = canImportScript(commonRefBookService.generateTaskKey(refBookId), userInfo.getUser());
                         if (lockUser == null) {
                             Logger localLogger = new Logger();
                             refBookScriptingService.importScript(refBookId, script, localLogger, userInfo);
@@ -260,7 +261,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             logger.error("При импорте скриптов произошла ошибка. Подробности записаны в журнал сервера. Все изменения отменены.");
             hasFatalError = true;
@@ -274,7 +275,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                     .append(fileName).append("\". ");
             for (Map.Entry<String, List<String>> file : files.entrySet()) {
                 auditMsg.append(file.getKey()).append(": ");
-                for (Iterator<String> it = file.getValue().iterator(); it.hasNext();) {
+                for (Iterator<String> it = file.getValue().iterator(); it.hasNext(); ) {
                     auditMsg.append(it.next());
                     if (it.hasNext()) {
                         auditMsg.append(",");
@@ -287,12 +288,15 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
             if (zis != null) {
                 try {
                     zis.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
         }
     }
 
-    private enum FOLDERS {declaration_template, form_template, ref_book;
+    private enum FOLDERS {
+        declaration_template, form_template, ref_book;
+
         public static boolean contains(String fileName) {
             for (FOLDERS folder : values()) {
                 if (folder.name().equals(fileName)) {
@@ -300,5 +304,6 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                 }
             }
             return false;
-        }}
+        }
+    }
 }

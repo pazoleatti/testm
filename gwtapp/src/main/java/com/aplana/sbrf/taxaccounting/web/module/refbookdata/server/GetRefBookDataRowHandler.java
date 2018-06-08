@@ -10,8 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
@@ -31,6 +30,8 @@ import java.util.*;
 public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTableDataAction, GetRefBookTableDataResult> {
 
     @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
     private RefBookHelper refBookHelper;
@@ -47,7 +48,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
         GetRefBookTableDataResult result = new GetRefBookTableDataResult();
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
         result.setTableHeaders(refBook.getAttributes());
         result.setDesc(refBook.getName());
         result.setTotalCount(0);
@@ -70,9 +71,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 
         if (searchPattern != null && !searchPattern.isEmpty() && (!isPerson || (firstNamePattern == null && lastNamePattern == null))) {
             if (filter != null && !filter.isEmpty()) {
-                filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch()) + ")";
+                filter += " and (" + commonRefBookService.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch()) + ")";
             } else {
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
+                filter = commonRefBookService.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
             }
         } else if (isPerson && (firstNamePattern != null || lastNamePattern != null)) {
             Map<String, String> params = new HashMap<String, String>();
@@ -83,9 +84,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 params.put("FIRST_NAME", firstNamePattern);
             }
             if (filter != null && !filter.isEmpty()) {
-                filter = " and (" + refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch()) + ")";
+                filter = " and (" + commonRefBookService.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch()) + ")";
             } else {
-                filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
+                filter = commonRefBookService.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
             }
         }
 
@@ -125,7 +126,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 action.isAscSorting());
         List<RefBookDataRow> rows = new LinkedList<RefBookDataRow>();
 
-        dereference(refBook, action.isPerson(), refBookFactory, refBookPage, rows, refBookHelper, columnMap);
+        dereference(refBook, action.isPerson(), commonRefBookService, refBookFactory, refBookPage, rows, refBookHelper, columnMap);
 
         result.setTotalCount(refBookPage.getTotalCount());
         result.setDataRows(rows);
@@ -139,13 +140,13 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
      * @param refBookPage исходные данные для разыменовывания
      * @param rows        пустой список, в который должен быть записан результат
      */
-    public static void dereference(RefBook refBook, boolean isPerson, RefBookFactory refBookFactory, List<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows, RefBookHelper refBookHelper, Map<RefBookAttribute, Column> columnMap) {
+    public static void dereference(RefBook refBook, boolean isPerson, CommonRefBookService commonRefBookService, RefBookFactory refBookFactory, List<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows, RefBookHelper refBookHelper, Map<RefBookAttribute, Column> columnMap) {
         if (refBookPage.isEmpty()) {
             return;
         }
         if (isPerson) {
             refBook = SerializationUtils.clone(refBook);
-            RefBook idDocRefBook = refBookFactory.get(RefBook.Id.ID_DOC.getId());
+            RefBook idDocRefBook = commonRefBookService.get(RefBook.Id.ID_DOC.getId());
             refBook.getAttributes().add(idDocRefBook.getAttribute("DOC_NUMBER"));
 
             RefBookDataProvider idDocProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.getId());

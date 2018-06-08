@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import net.sf.jasperreports.web.actions.ActionException;
 import org.apache.commons.logging.Log;
@@ -49,7 +50,10 @@ public class PeriodServiceImpl implements PeriodService {
     private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
+
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Autowired
     private DepartmentService departmentService;
@@ -615,9 +619,9 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriod periodInDb = departmentReportPeriodDao.fetchOne(period.getId());
         period.setCorrectionDate(SimpleDateUtils.toStartOfDay(period.getCorrectionDate()));
 
-        if (checkPeriodStatusBeforeOpen(period.getReportPeriod(), period.getDepartmentId(), period.getCorrectionDate()).equals(PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN)){
-            logs.add(new LogEntry(LogLevel.ERROR, "Корректирующий период с датой корректировки "  + new SimpleDateFormat("dd.MM.yyyy").format(period.getCorrectionDate())
-                    +"  не может быть открыт, т.к. открыт более ранний корректирующий период!"));
+        if (checkPeriodStatusBeforeOpen(period.getReportPeriod(), period.getDepartmentId(), period.getCorrectionDate()).equals(PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN)) {
+            logs.add(new LogEntry(LogLevel.ERROR, "Корректирующий период с датой корректировки " + new SimpleDateFormat("dd.MM.yyyy").format(period.getCorrectionDate())
+                    + "  не может быть открыт, т.к. открыт более ранний корректирующий период!"));
             return logEntryService.save(logs);
         }
 
@@ -625,7 +629,7 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriod lastDrp = departmentReportPeriodService.fetchLast(periodInDb.getDepartmentId(), periodInDb.getReportPeriod().getId());
 
         // Открываемый корректирующий период должен быть самым поздним
-        if(lastDrp.getCorrectionDate() == null || lastDrp.getCorrectionDate().before(period.getCorrectionDate())) {
+        if (lastDrp.getCorrectionDate() == null || lastDrp.getCorrectionDate().before(period.getCorrectionDate())) {
             if (periodInDb.getCorrectionDate() == null) {
                 for (Integer depId : getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN)) {
                     period.setIsActive(true);
@@ -635,9 +639,9 @@ public class PeriodServiceImpl implements PeriodService {
             }
         } else {
             // если открываемый период существует, последний и закрыт - переоткрываем его
-            if (lastDrp.getCorrectionDate() != null && lastDrp.getCorrectionDate().equals(period.getCorrectionDate())){
+            if (lastDrp.getCorrectionDate() != null && lastDrp.getCorrectionDate().equals(period.getCorrectionDate())) {
                 saveOrOpen(period, getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN), logs);
-            }else {
+            } else {
                 throw new ServiceException("Корректирующий период с датой корректировки " + sdf.get().format(period.getCorrectionDate()) + " не может быть открыт, т.к. существует более поздний корректирующий период!");
             }
         }
@@ -733,8 +737,8 @@ public class PeriodServiceImpl implements PeriodService {
                      int departmentId, List<LogEntry> logs) {
         LOG.info(String.format("PeriodServiceImpl.edit. user: %s, reportPeriodId: %s; oldDepartmentId: %s; newYear: %s; departmentId: %s", user, reportPeriodId, oldDepartmentId, newYear, departmentId));
         ReportPeriod rp = fetchReportPeriod(reportPeriodId);
-        RefBook refBook = rbFactory.get(PERIOD_CODE_REF_BOOK);
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
+        RefBook refBook = commonRefBookService.get(PERIOD_CODE_REF_BOOK);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
         Map<String, RefBookValue> dictTaxPeriod;
         try {
             dictTaxPeriod = provider.getRecordData(newDictTaxPeriodId);

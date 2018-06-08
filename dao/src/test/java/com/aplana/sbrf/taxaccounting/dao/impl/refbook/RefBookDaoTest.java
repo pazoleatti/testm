@@ -174,19 +174,13 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetAll() {
-		List<RefBook> refBooks = refBookDao.getAll(RefBookType.LINEAR.getId());
-		assertEquals(5, refBooks.size());
-		refBooks = refBookDao.getAll(RefBookType.HIERARCHICAL.getId());
-		assertEquals(1, refBooks.size());
-		refBooks = refBookDao.getAll(null);
+        List<RefBook> refBooks = refBookDao.fetchAll(null);
 		assertEquals(6, refBooks.size());
 	}
 
 	@Test
 	public void testGetAllVisible() {
-		assertEquals(4, refBookDao.getAllVisible(RefBookType.LINEAR.getId()).size());
-		assertEquals(1, refBookDao.getAllVisible(RefBookType.HIERARCHICAL.getId()).size());
-		assertEquals(5, refBookDao.getAllVisible(null).size());
+		assertEquals(5, refBookDao.fetchAll(true).size());
 	}
 
 	@Test

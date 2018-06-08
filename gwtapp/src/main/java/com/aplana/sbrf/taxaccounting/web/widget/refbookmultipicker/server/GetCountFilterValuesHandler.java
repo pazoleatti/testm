@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetCountFilterValuesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetCountFilterValuesResult;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Component;
 @PreAuthorize("isAuthenticated()")
 public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountFilterValuesAction, GetCountFilterValuesResult> {
 
+    @Autowired
+    CommonRefBookService commonRefBookService;
     @Autowired
     RefBookFactory refBookFactory;
 
@@ -52,7 +55,7 @@ public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountF
             throws ActionException {
         GetCountFilterValuesResult result = new GetCountFilterValuesResult();
 
-        RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        RefBook refBook = commonRefBookService.getByAttribute(action.getRefBookAttrId());
 
         String filter;
         if (action.isHierarchy()) {

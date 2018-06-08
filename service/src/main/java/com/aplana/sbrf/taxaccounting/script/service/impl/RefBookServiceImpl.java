@@ -32,6 +32,7 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -53,7 +54,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +64,9 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 @Service("refBookService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookServiceImpl implements RefBookService {
+
+    @Autowired
+    private CommonRefBookService commonRefBookService;
 
     @Autowired
     private RefBookFactory refBookFactory;
@@ -238,7 +241,7 @@ public class RefBookServiceImpl implements RefBookService {
             try (OutputStream outputStream = new FileOutputStream(file);
                  ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)
             ) {
-                List<RefBook> refBooks = refBookFactory.fetchAll();
+                List<RefBook> refBooks = commonRefBookService.fetchAll();
                 for (RefBook refBook : refBooks) {
                     addFileToZip(refBook.getScriptId(), zos, refBook.getId() + "\\script.groovy");
                     addFileToZip(refBook.getXsdId(), zos, refBook.getId() + "\\schema.xsd");
@@ -298,7 +301,7 @@ public class RefBookServiceImpl implements RefBookService {
         if (dirName != null && new File(dirName).getParent() == null) {
             try {
                 Long refBookId = Long.valueOf(dirName);
-                RefBook refBook = refBookFactory.get(refBookId);
+                RefBook refBook = commonRefBookService.get(refBookId);
                 if ("groovy".equals(getExtension(fileName))) {
                     String oldUuid = refBook.getScriptId();
                     if (inputStream.available() == 0) { // пустой файл, значит удаляем

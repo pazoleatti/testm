@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentParamAliases;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetRefBookValuesAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetRefBookValuesResult;
@@ -38,13 +39,13 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
     }
 
     @Autowired
-    RefBookFactory rbFactory;
+    CommonRefBookService commonRefBookService;
+    @Autowired
+    RefBookFactory refBookFactory;
     @Autowired
     PeriodService periodService;
     @Autowired
     RefBookHelper refBookHelper;
-    @Autowired
-    RefBookFactory refBookFactory;
     @Autowired
     LogEntryService logEntryService;
 
@@ -55,18 +56,18 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
         Map<String, String> refAliases = new HashMap<String, String>();
-        RefBook refBook = rbFactory.get(action.getSlaveRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getSlaveRefBookId());
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
-                refProviders.put(attribute.getAlias(), rbFactory.getDataProvider(attribute.getRefBookId()));
-                RefBook refRefBook = rbFactory.get(attribute.getRefBookId());
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+                RefBook refRefBook = commonRefBookService.get(attribute.getRefBookId());
                 RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
                 refAliases.put(attribute.getAlias(), refAttribute.getAlias());
             }
         }
 
         GetRefBookValuesResult result = new GetRefBookValuesResult();
-        RefBookDataProvider providerMaster = rbFactory.getDataProvider(action.getRefBookId());
+        RefBookDataProvider providerMaster = refBookFactory.getDataProvider(action.getRefBookId());
 
 
         String filterMaster = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
@@ -83,12 +84,12 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
             result.setRecordId(paramsMaster.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
         }
 
-        RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
+        RefBookDataProvider providerSlave = refBookFactory.getDataProvider(action.getSlaveRefBookId());
         String filterSlave = "LINK  = " + result.getRecordId();
         if (action.getTaxType() == TaxType.NDFL) {
             filterSlave = "REF_BOOK_NDFL_ID = " + result.getRecordId();
         }
-        RefBookAttribute sortAttr = rbFactory.get(action.getSlaveRefBookId()).getAttribute("ROW_ORD");
+        RefBookAttribute sortAttr = commonRefBookService.get(action.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(
                 null, null, filterSlave, sortAttr);
         result.setTableValues(convert(paramsSlave, action.getSlaveRefBookId(), true, refProviders, refAliases));
@@ -135,7 +136,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
                         && !e.getKey().equals("DEPARTMENT_ID")) { //Подразделения не версионируются и их нет смысла проверять
                     if (cell.getRefValue() != null) {
                         //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
-                        RefBookDataProvider linkProvider = rbFactory.getDataProvider(refBook.getAttribute(e.getKey()).getRefBookId());
+                        RefBookDataProvider linkProvider = refBookFactory.getDataProvider(refBook.getAttribute(e.getKey()).getRefBookId());
                         if (!references.containsKey(linkProvider)) {
                             references.put(linkProvider, new ArrayList<RefBookLinkModel>());
                         }
@@ -153,7 +154,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
 
     private List<Map<String, TableCell>> convert(List<Map<String, RefBookValue>> data, Long refBookId, boolean needDeref, Map<String, RefBookDataProvider> refProviders, Map<String, String> refAliases) {
         List<Map<String, TableCell>> converted = new ArrayList<Map<String, TableCell>>();
-        RefBook refBookClone = SerializationUtils.clone(refBookFactory.get(refBookId));
+        RefBook refBookClone = SerializationUtils.clone(commonRefBookService.get(refBookId));
         List<RefBookAttribute> refBookAttributeList = new ArrayList<RefBookAttribute>();
         // не разименовываем скрытые атрибуты
         for(RefBookAttribute refBookAttribute: refBookClone.getAttributes()) {

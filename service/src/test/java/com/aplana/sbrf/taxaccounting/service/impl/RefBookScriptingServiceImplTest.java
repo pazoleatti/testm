@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -53,12 +54,12 @@ public class RefBookScriptingServiceImplTest {
         when(blobDataService.get("test-test")).thenReturn(bd);
         ReflectionTestUtils.setField(rbScriptingService, "blobDataService", blobDataService);
         // RefBookFactory
-        RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        CommonRefBookService commonRefBookService = mock(CommonRefBookService.class);
         RefBook refBook = new RefBook();
         refBook.setScriptId("test-test");
         refBook.setName("test");
-        when(refBookFactory.get(0L)).thenReturn(refBook);
-        ReflectionTestUtils.setField(rbScriptingService, "refBookFactory", refBookFactory);
+        when(commonRefBookService.get(0L)).thenReturn(refBook);
+        ReflectionTestUtils.setField(rbScriptingService, "commonRefBookService", commonRefBookService);
 
         ApplicationContext ctx = mock(ApplicationContext.class);
         when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,7 @@ public class ScriptExecutionServiceTest {
     private ScriptExecutionService scriptExecutionService;
     private DeclarationTemplateService declarationTemplateService;
     private LockDataService lockDataService;
+    private CommonRefBookService commonRefBookService;
     private RefBookDao refBookDao;
     private RefBookScriptingService refBookScriptingService;
 
@@ -45,8 +47,6 @@ public class ScriptExecutionServiceTest {
     @Before
 	public void init(){
         scriptExecutionService = new ScriptExecutionServiceImpl();
-        RefBookFactory refBookFactory = mock(RefBookFactoryImpl.class);
-        ReflectionTestUtils.setField(scriptExecutionService, "refBookFactory", refBookFactory);
 
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(scriptExecutionService, "logEntryService", logEntryService);
@@ -100,6 +100,9 @@ public class ScriptExecutionServiceTest {
 
         lockDataService = mock(LockDataService.class);
         ReflectionTestUtils.setField(scriptExecutionService, "lockDataService", lockDataService);
+
+        commonRefBookService = mock(CommonRefBookService.class);
+        ReflectionTestUtils.setField(scriptExecutionService, "commonRefBookService", commonRefBookService);
     }
 
 

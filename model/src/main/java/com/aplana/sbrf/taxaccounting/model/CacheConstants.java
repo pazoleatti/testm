@@ -33,6 +33,14 @@ public final class CacheConstants {
      * Подразделение
      */
     public static final String DEPARTMENT = "Department";
+    /**
+     * Справочник
+     */
+    public static final String REF_BOOK = "RefBook";
+    /**
+     * Атрибут справочника
+     */
+    public static final String REF_BOOK_ATTRIBUTE = "RefBookAttribute";
 
     private CacheConstants() {
     }

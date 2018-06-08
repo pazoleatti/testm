@@ -6,20 +6,17 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +42,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private BlobDataService blobDataService;
     @Autowired
@@ -116,6 +113,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     /**
      * Определяет тип ТФ в зависимости от его имени
+     *
      * @param fileName имя файла
      * @return тип ТФ
      */
@@ -177,12 +175,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         Configuration isImportEnabledConfiguration = configurationDao.fetchByEnum(ConfigurationParam.ENABLE_IMPORT_PERSON);
         if (isImportEnabledConfiguration != null && "1".equals(isImportEnabledConfiguration.getValue())) {
             final TAUser user = userInfo.getUser();
-            RefBook refBook = rbFactory.get(refBookId);
+            RefBook refBook = commonRefBookService.get(refBookId);
 
-            String refBookLockKey = rbFactory.generateTaskKey(refBookId);
+            String refBookLockKey = commonRefBookService.generateTaskKey(refBookId);
             LockData refBookLockData = lockDataService.getLock(refBookLockKey);
             if (refBookLockData != null && refBookLockData.getUserId() != user.getId()) {
-                logger.error(rbFactory.getRefBookLockDescription(refBookLockData, refBook.getId()));
+                logger.error(commonRefBookService.getRefBookLockDescription(refBookLockData, refBook.getId()));
                 logger.error("Загрузка файла \"%s\" не может быть выполнена.", fileName);
             } else {
                 String asyncLockKey = LockData.LockObjects.IMPORT_REF_BOOK_XML.name() + "_" + refBookId + "_" + fileName;

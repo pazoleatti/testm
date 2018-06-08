@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedResult;
@@ -44,7 +45,10 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private PeriodService periodService;
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
+
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -78,12 +82,12 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         switch (action.getTaxType()) {
             case NDFL:
                 parentRefBookId = RefBook.Id.NDFL.getId();
-                provider = rbFactory.getDataProvider(parentRefBookId);
+                provider = refBookFactory.getDataProvider(parentRefBookId);
                 break;
         }
 
         if (parentRefBookId != null) {
-            provider = rbFactory.getDataProvider(parentRefBookId);
+            provider = refBookFactory.getDataProvider(parentRefBookId);
         }
 
 
@@ -201,7 +205,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         if (paramsMap != null && action.getOldUUID() == null) {
             //Проверяем справочные значения
-            checkReferenceValues(provider, rbFactory.get(parentRefBookId), paramsMap, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+            checkReferenceValues(provider, commonRefBookService.get(parentRefBookId), paramsMap, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
             if (logger.getMainMsg() != null) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 result.setErrorMsg(logger.getMainMsg());
@@ -234,7 +238,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Date versionFrom, Date versionTo, Logger logger) {
         Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
 
-        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(RefBook.Id.OKTMO.getId());
+        RefBookDataProvider oktmoProvider = refBookFactory.getDataProvider(RefBook.Id.OKTMO.getId());
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
             if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE
                     && !e.getKey().equals("DEPARTMENT_ID")) { //Подразделения не версионируются и их нет смысла проверять
@@ -265,7 +269,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
      * @param logger          Логгер для передачи клиенту
      */
     private void getValueIgnoreEmptyResult(Map<Long, String> map, long refBookId, long attributeId, long recordId, Logger logger) {
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         if (provider.isRecordsExist(Collections.singletonList(recordId)).isEmpty()){
             RefBookValue value = provider.getValue(recordId, attributeId);
             map.put(attributeId, getNumberValue(value));            

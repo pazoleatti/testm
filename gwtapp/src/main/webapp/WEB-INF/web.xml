@@ -179,6 +179,22 @@
 		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
 
+	<resource-ref>
+		<description>TaxAccounting RefBook Dynacache Reference</description>
+		<res-ref-name>services/cache/aplana/taxaccounting/RefBook</res-ref-name>
+		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
+
+	<resource-ref>
+		<description>TaxAccounting RefBookAttribute Dynacache Reference</description>
+		<res-ref-name>services/cache/aplana/taxaccounting/RefBookAttribute</res-ref-name>
+		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
+
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	
 		<role-name>taxaccountingUsers</role-name>

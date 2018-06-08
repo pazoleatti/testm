@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookCache;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -29,6 +30,8 @@ public class RefBookHelperImplTest {
 
 	private RefBookFactory refBookFactory;
 
+	private CommonRefBookService commonRefBookService;
+
 	private RefBookHelperImpl refBookHelper;
 
 	private static final Log LOG = LogFactory.getLog(RefBookHelperImplTest.class);
@@ -49,6 +52,7 @@ public class RefBookHelperImplTest {
 	@Before
 	public void init() throws NoSuchFieldException {
 		refBookFactory = mock(RefBookFactory.class);
+		commonRefBookService = mock(CommonRefBookService.class);
 		RefBookDataProvider provider1 = mock(RefBookDataProvider.class);
 		RefBookDataProvider provider2 = mock(RefBookDataProvider.class);
 
@@ -61,7 +65,7 @@ public class RefBookHelperImplTest {
 		attribute1.setAttributeType(RefBookAttributeType.STRING);
 		attributes.add(attribute1);
 		refBook1.setAttributes(attributes);
-		when(refBookFactory.getByAttribute(1L)).thenReturn(refBook1);
+		when(commonRefBookService.getByAttribute(1L)).thenReturn(refBook1);
 
 		RefBook refBook2 = new RefBook();
         refBook2.setId(2L);
@@ -92,10 +96,10 @@ public class RefBookHelperImplTest {
 		attributes.add(attribute4);
 		refBook2.setAttributes(attributes);
 
-		when(refBookFactory.get(2L)).thenReturn(refBook2);
-		when(refBookFactory.getByAttribute(2L)).thenReturn(refBook2);
-        when(refBookFactory.getByAttribute(3L)).thenReturn(refBook2);
-		when(refBookFactory.getByAttribute(4L)).thenReturn(refBook2);
+		when(commonRefBookService.get(2L)).thenReturn(refBook2);
+		when(commonRefBookService.getByAttribute(2L)).thenReturn(refBook2);
+        when(commonRefBookService.getByAttribute(3L)).thenReturn(refBook2);
+		when(commonRefBookService.getByAttribute(4L)).thenReturn(refBook2);
 
 		Map<Long, RefBookValue> result1 = new HashMap<Long, RefBookValue>();
 		result1.put(1L, new RefBookValue(RefBookAttributeType.STRING, "Россия"));
@@ -127,13 +131,17 @@ public class RefBookHelperImplTest {
 		RefBookCacheImpl rbCache = new RefBookCacheImpl();
 		Field field = RefBookCacheImpl.class.getDeclaredField("refBookFactory");
 		field.setAccessible(true);
+		Field field2 = RefBookCacheImpl.class.getDeclaredField("commonRefBookService");
+		field2.setAccessible(true);
 		ReflectionUtils.setField(field, rbCache, refBookFactory);
+		ReflectionUtils.setField(field2, rbCache, commonRefBookService);
 
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
 		when(applicationContext.getBean(RefBookCache.class)).thenReturn(rbCache);
 
 		refBookHelper = new RefBookHelperImpl();
 		ReflectionTestUtils.setField(refBookHelper, "refBookFactory", refBookFactory);
+		ReflectionTestUtils.setField(refBookHelper, "commonRefBookService", commonRefBookService);
 		ReflectionTestUtils.setField(refBookHelper, "applicationContext", applicationContext);
 	}
 
@@ -147,14 +155,14 @@ public class RefBookHelperImplTest {
 		record.setUniqueRecordId(9L);
 		record.setRecordId(5L);
 		record.setValues(values);
-		String s = refBookHelper.refBookRecordToString(refBookFactory.get(2L), record);
+		String s = refBookHelper.refBookRecordToString(commonRefBookService.get(2L), record);
 		LOG.info(s);
 		assertEquals("[id:9; recordId:5; Ставка:\"4.3\"; Страна:\"Россия\"; Дата:\"\"]", s);
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2013, Calendar.JANUARY, 1);
 		values.put("date", new RefBookValue(RefBookAttributeType.DATE, calendar.getTime()));
-		s = refBookHelper.refBookRecordToString(refBookFactory.get(2L), record);
+		s = refBookHelper.refBookRecordToString(commonRefBookService.get(2L), record);
 		LOG.info(s);
 		assertEquals("[id:9; recordId:5; Ставка:\"4.3\"; Страна:\"Россия\"; Дата:\"01.01.2013\"]", s);
 	}

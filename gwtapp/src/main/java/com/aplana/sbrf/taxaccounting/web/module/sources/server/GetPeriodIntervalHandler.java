@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetPeriodIntervalAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetPeriodIntervalResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
@@ -25,7 +26,9 @@ import java.util.*;
 public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodIntervalAction, GetPeriodIntervalResult> {
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     private static final Long PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
@@ -38,8 +41,8 @@ public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodInt
         GetPeriodIntervalResult result = new GetPeriodIntervalResult();
 
         /** Получение информации по периодам из справочника Коды, определяющие налоговый (отчётный) период*/
-        RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
+        RefBook refBook = commonRefBookService.get(PERIOD_CODE_REFBOOK);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
         String filter = action.getTaxType().getCode() + " = 1";
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(new Date(), null, filter ,null);
         if (records.isEmpty()) {

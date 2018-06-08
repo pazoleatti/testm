@@ -7,11 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PersonService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -20,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -29,11 +24,11 @@ import java.util.*;
 public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicatePersonAction, GetDuplicatePersonResult> {
 
     @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
     private RefBookHelper refBookHelper;
-    @Autowired
-    private PersonService personService;
 
     public GetDuplicatePersonHandler() {
         super(GetDuplicatePersonAction.class);
@@ -46,9 +41,9 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
         GetDuplicatePersonResult result = new GetDuplicatePersonResult();
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERSON.getId());
-        RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId());
+        RefBook refBook = commonRefBookService.get(RefBook.Id.PERSON.getId());
         refBook = SerializationUtils.clone(refBook);
-        RefBook idDocRefBook = refBookFactory.get(RefBook.Id.ID_DOC.getId());
+        RefBook idDocRefBook = commonRefBookService.get(RefBook.Id.ID_DOC.getId());
         refBook.getAttributes().add(idDocRefBook.getAttribute("DOC_NUMBER"));
         result.setTableHeaders(refBook.getAttributes());
 
@@ -61,7 +56,7 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
 
         // Получаем исходную запись
         List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
-        GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, Arrays.asList(rowRecord), rows, refBookHelper, columnMap);
+        GetRefBookDataRowHandler.dereference(refBook, true, commonRefBookService, refBookFactory, Arrays.asList(rowRecord), rows, refBookHelper, columnMap);
         result.setDataRow(rows.get(0));
 
         // Получаем оригиал, если запись не является оригиналом
@@ -76,7 +71,7 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
                 Map<Long, Map<String, RefBookValue>> originalMapRecords = refBookDataProvider.getRecordDataWhere(RefBook.BUSINESS_ID_ALIAS + "=" + recordId);
                 originalRecord = (Map<String, RefBookValue>)originalMapRecords.values().toArray()[0];
             }
-            GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, Arrays.asList(originalRecord), rows, refBookHelper, columnMap);
+            GetRefBookDataRowHandler.dereference(refBook, true, commonRefBookService, refBookFactory, Arrays.asList(originalRecord), rows, refBookHelper, columnMap);
             result.setOriginalRow(rows.get(0));
         }
 
@@ -89,7 +84,7 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
             refBookPage.addAll(recordData.values());
         }*/
         rows = new ArrayList<RefBookDataRow>();
-        GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, refBookPage, rows, refBookHelper, columnMap);
+        GetRefBookDataRowHandler.dereference(refBook, true, commonRefBookService, refBookFactory, refBookPage, rows, refBookHelper, columnMap);
         result.setDuplicateRows(rows);
         return result;
     }

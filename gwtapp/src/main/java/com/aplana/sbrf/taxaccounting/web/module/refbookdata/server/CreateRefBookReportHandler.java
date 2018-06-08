@@ -7,9 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CreateReportResult;
@@ -32,7 +32,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
     private static final Log LOG = LogFactory.getLog(CreateRefBookReportHandler.class);
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     @Autowired
     private SecurityService securityService;
@@ -82,9 +82,9 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
 
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
 
-        LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
+        LockData lockData = lockDataService.getLock(commonRefBookService.generateTaskKey(refBook.getId()));
         if (lockData == null) {
             String filter = null;
             String lastNamePattern = action.getLastNamePattern();
@@ -92,7 +92,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
             String searchPattern = action.getSearchPattern();
             boolean isPerson = action.getRefBookId() == RefBook.Id.PERSON.getId();
             if (searchPattern != null && !searchPattern.isEmpty() && (!isPerson || (firstNamePattern == null && lastNamePattern == null))) {
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
+                filter = commonRefBookService.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
                 searchPattern = "Фильтр: \"" + searchPattern + "\"";
             } else if (isPerson && (firstNamePattern != null && !firstNamePattern.isEmpty() || lastNamePattern != null && !lastNamePattern.isEmpty())) {
                 Map<String, String> params = new HashMap<String, String>();
@@ -110,7 +110,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
                     sb.append(sb.length() != 0 ? ", " : "");
                     sb.append("Фильтр по всем полям: \"").append(searchPattern).append("\"");
                 }
-                filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
+                filter = commonRefBookService.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
                 searchPattern = sb.toString();
             }
 
@@ -153,7 +153,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
                 }
             });
         } else {
-            logger.info(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
+            logger.info(commonRefBookService.getRefBookLockDescription(lockData, refBook.getId()));
             result.setErrorMsg("Для текущего справочника запущена операция, при которой формирование отчета невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

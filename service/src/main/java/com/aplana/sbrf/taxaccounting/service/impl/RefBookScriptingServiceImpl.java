@@ -13,10 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.ScriptComponentContextHolder;
-import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -52,6 +49,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
     private RefBookDao refBookDao;
     @Autowired
     private LogEntryService logEntryService;
@@ -68,7 +67,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     @Override
     public boolean executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = commonRefBookService.get(refBookId);
         if (refBook == null || refBook.getScriptId() == null) {
             return false;
         }
@@ -76,7 +75,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         if (bd == null) {
             return false;
         }
-		// извлекаем скрипт
+        // извлекаем скрипт
         StringWriter writer = new StringWriter();
         try {
             IOUtils.copy(bd.getInputStream(), writer, "UTF-8");
@@ -172,6 +171,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("logger", scriptLogger);
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
+        bindings.put("commonRefBookService", commonRefBookService);
 
         String applicationVersion = "ФП «НДФЛ»";
         applicationVersion += " " + applicationInfo.getVersion();
@@ -206,7 +206,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Override
     public String getScript(Long refBookId) {
         StringWriter writer = new StringWriter();
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = commonRefBookService.get(refBookId);
         if (refBook.getScriptId() != null) {
             BlobData blobData = blobDataService.get(refBook.getScriptId());
             try {
@@ -222,7 +222,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     public void saveScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
         saveScript(refBookId, script, FormDataEvent.TEMPLATE_MODIFIED, log, userInfo);
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null, null,
-                null, null, null, "Обнорвлен скрипт справочника \""+refBookFactory.get(refBookId).getName()+"\"", null);
+                null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
     }
 
     @Override
@@ -234,11 +234,11 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
         auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, null, null,
-                null, null, null, "Обнорвлен скрипт справочника \""+refBookFactory.get(refBookId).getName()+"\"", null);
+                null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
     }
 
     private void saveScript(long refBookId, String script, FormDataEvent formDataEvent, Logger log, TAUserInfo userInfo) {
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = commonRefBookService.get(refBookId);
         if (script != null && !script.trim().isEmpty()) {
             InputStream inputStream;
             try {
@@ -283,7 +283,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         } catch (ScriptException e) {
             int i = ExceptionUtils.indexOfThrowable(e, ScriptServiceException.class);
             if (i != -1) {
-                throw (ScriptServiceException)ExceptionUtils.getThrowableList(e).get(i);
+                throw (ScriptServiceException) ExceptionUtils.getThrowableList(e).get(i);
             }
             logScriptException(e, logger);
             return false;

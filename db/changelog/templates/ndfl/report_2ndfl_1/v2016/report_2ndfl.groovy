@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.TAUser
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
@@ -74,6 +75,7 @@ class Report2Ndfl extends AbstractScriptClass {
     TAUserInfo userInfo
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
+    CommonRefBookService commonRefBookService
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
     Boolean needSources
@@ -471,7 +473,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                     if (!references.isEmpty()) {
                                         nomSpr = references.get(0).NUM.value
                                     } else {
-                                        references = getProvider(RefBook.Id.NDFL_REFERENCES.id).getRecords(new Date(), new PagingParams(0, 1), filter, refBookFactory.get(NDFL_REFERENCES).getAttribute("NUM"), false)
+                                        references = getProvider(RefBook.Id.NDFL_REFERENCES.id).getRecords(new Date(), new PagingParams(0, 1), filter, commonRefBookService.get(NDFL_REFERENCES).getAttribute("NUM"), false)
                                         if (!references.isEmpty()) {
                                             nomSpr = references.get(0).NUM.value + 1
                                         } else {

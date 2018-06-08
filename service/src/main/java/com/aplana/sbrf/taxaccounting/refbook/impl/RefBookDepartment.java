@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
@@ -15,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
     private static final String ERROR_MESSAGE = "Подразделение не может быть отредактировано, так как были обнаружены фатальные ошибки!";
-    private static final String ERROR_MESSAGE_CREATE =  "Подразделение не может быть создано, обнаружены фатальные ошибки!";
+    private static final String ERROR_MESSAGE_CREATE = "Подразделение не может быть создано, обнаружены фатальные ошибки!";
     private static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
     private static final String DEPARTMENT_TYPE_ATTRIBUTE = "TYPE";
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
@@ -80,8 +79,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Autowired
     AuditService auditService;
     @Autowired
-    private RefBookFactory rbFactory;
-    @Autowired
     private ConfigurationService configurationService;
     @Autowired
     private LockDataService lockService;
@@ -89,6 +86,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private CommonRefBookService commonRefBookService;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -105,10 +104,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
-	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
-		return getRecords(versionTo, pagingParams, filter, null);
-	}
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+        return getRecords(versionTo, pagingParams, filter, null);
+    }
 
     @Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
@@ -184,13 +183,15 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // версионирования нет, только одна версия
-		return Arrays.asList(new Date(0));
-	}
+        return Arrays.asList(new Date(0));
+    }
 
     @SuppressWarnings("unchecked")
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(recordId));}}, 1);
+        return new PagingResult(new ArrayList<Map<String, RefBookValue>>() {{
+            add(getRecordData(recordId));
+        }}, 1);
     }
 
     @Override
@@ -256,7 +257,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID);
+        String lockKey = commonRefBookService.generateTaskKey(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName()));
         if (lockData == null) {
             try {
@@ -267,7 +268,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -301,7 +302,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         String.format("Создано подразделение %s, значения атрибутов: %s",
                                 departmentService.getParentsHierarchy(depId),
                                 assembleMessage(refBookValueMap)), null);
-                return Arrays.asList((long)depId);
+                return Arrays.asList((long) depId);
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
@@ -343,7 +344,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
 
-        if (lockService.getLock(refBookFactory.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID)) == null) {
+        if (lockService.getLock(commonRefBookService.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID)) == null) {
             List<RefBookAttribute> attributes = refBook.getAttributes();
             final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
             // проверка использования подразделения в модуле гарантий
@@ -379,7 +380,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }*/
 
             //9 шаг. Проверка зацикливания
-            if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
+            if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)) {
                 checkCycle(dep, parentDep, logger);
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
@@ -446,7 +447,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID);
+        String lockKey = commonRefBookService.generateTaskKey(REF_BOOK_ID);
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -458,7 +459,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -505,30 +506,30 @@ public class RefBookDepartment implements RefBookDataProvider {
                             "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
                             logEntryService.save(logger.getEntries())
                     );
-                else if (logger.containsLevel(LogLevel.WARNING) && !force){
+                else if (logger.containsLevel(LogLevel.WARNING) && !force) {
                     return;
                 }
 
                 //удаление настроек подразделений
                 RefBookDataProvider provider;
                 List<Long> uniqueIds;
-                for(RefBook.WithTable withTable: RefBook.WithTable.values()) {
-                    provider = rbFactory.getDataProvider(withTable.getRefBookId());
+                for (RefBook.WithTable withTable : RefBook.WithTable.values()) {
+                    provider = refBookFactory.getDataProvider(withTable.getRefBookId());
                     uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                     if (!uniqueIds.isEmpty()) {
                         provider.deleteRecordVersions(logger, uniqueIds, false);
                     }
-                    provider = rbFactory.getDataProvider(withTable.getTableRefBookId());
+                    provider = refBookFactory.getDataProvider(withTable.getTableRefBookId());
                     uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                     if (!uniqueIds.isEmpty()) {
                         provider.deleteRecordVersions(logger, uniqueIds, false);
                     }
                 }
                 //удаление ссылок
-                if (deleteReference(new RefBookAttribute(){{
-						setRefBookId(RefBook.Id.DEPARTMENT.getId());
-						setId(160L);
-					}}, uniqueRecordIds.get(0), logger)) {
+                if (deleteReference(new RefBookAttribute() {{
+                    setRefBookId(RefBook.Id.DEPARTMENT.getId());
+                    setId(160L);
+                }}, uniqueRecordIds.get(0), logger)) {
                     throw new ServiceLoggerException(
                             "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
                             logEntryService.save(logger.getEntries())
@@ -559,7 +560,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         RefBook refBook = refBookDao.getByAttribute(refBookAttribute.getId());
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
         List<RefBookAttribute> attributeList = refBookDao.getAttributesByReferenceId(refBookAttribute.getRefBookId());
-        for(RefBookAttribute referenceRefBookAttribute: attributeList) {
+        for (RefBookAttribute referenceRefBookAttribute : attributeList) {
             RefBook refBookReference = refBookDao.getByAttribute(referenceRefBookAttribute.getId());
             if (refBookReference.getTableName() == null || refBookReference.getTableName().isEmpty()) {
                 List<Long> recordIds = refBookDao.getDeletedRecords(refBookReference.getId(), referenceRefBookAttribute.getAlias() + "=" + referenceId);
@@ -581,7 +582,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public Long getRecordId(Long uniqueRecordId) {
-       return uniqueRecordId;
+        return uniqueRecordId;
     }
 
     @Override
@@ -596,8 +597,9 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     /**
      * Проверка корректности
+     *
      * @param attributes атрибуты справочника
-     * @param records значения справочника
+     * @param records    значения справочника
      */
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         /*Map<String, RefBookValue> values = records.get(0).getValues();
@@ -610,7 +612,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         //Проверка корректности значений атрибутов
         List<String> errors = RefBookUtils.checkRefBookAtributeValues(attributes, records);
-        if (!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             for (String error : errors) {
                 logger.error(error);
             }
@@ -618,20 +620,20 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881
-    private void createPeriods(int depId, DepartmentType newDepartmentType, int terrBankId){
+    private void createPeriods(int depId, DepartmentType newDepartmentType, int terrBankId) {
         //1
-        if (newDepartmentType != DepartmentType.TERR_BANK){
-            if (departmentService.getParentTB(depId) != null){
+        if (newDepartmentType != DepartmentType.TERR_BANK) {
+            if (departmentService.getParentTB(depId) != null) {
                 //1А.1.1
                 List<DepartmentReportPeriod> listDRP =
                         periodService.getDRPByDepartmentIds(Arrays.asList(terrBankId));
-                if (!listDRP.isEmpty()){
+                if (!listDRP.isEmpty()) {
                     for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
                         if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
                             return;
                     //1А.1.1.1А
-                    for (DepartmentReportPeriod drp : listDRP){
+                    for (DepartmentReportPeriod drp : listDRP) {
                         DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
                         drpCopy.setReportPeriod(drp.getReportPeriod());
                         drpCopy.setDepartmentId(depId);
@@ -647,12 +649,12 @@ public class RefBookDepartment implements RefBookDataProvider {
         //2
         List<DepartmentReportPeriod> listDRP =
                 periodService.getDRPByDepartmentIds(Arrays.asList(0));
-        if (!listDRP.isEmpty()){
+        if (!listDRP.isEmpty()) {
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
                 if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
                     return;
-            for (DepartmentReportPeriod drp : listDRP){
+            for (DepartmentReportPeriod drp : listDRP) {
                 DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
                 drpCopy.setReportPeriod(drp.getReportPeriod());
                 drpCopy.setDepartmentId(depId);
@@ -664,12 +666,14 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //Проверка использования
-    private void isInUsed(final Department department, Logger logger){
+    private void isInUsed(final Department department, Logger logger) {
         //2 точка запроса
         List<DeclarationData> declarationDatas =
-                declarationDataSearchService.getDeclarationData(new DeclarationDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));}},
-                DeclarationDataSearchOrdering.ID, true);
-        for (DeclarationData decData : declarationDatas){
+                declarationDataSearchService.getDeclarationData(new DeclarationDataFilter() {{
+                                                                    setDepartmentIds(Arrays.asList(department.getId()));
+                                                                }},
+                        DeclarationDataSearchOrdering.ID, true);
+        for (DeclarationData decData : declarationDatas) {
             logger.error(String.format("Существует экземпляр налоговой формы \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
                     department.getName(),
@@ -684,7 +688,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         //5 точка запроса
         List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null);
-        for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
+        for (DepartmentDeclarationType ddt : departmentDeclarationTypes) {
             DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
             logger.warn(String.format("Существует назначение налоговой формы \"%s\" подразделению \"%s\"!",
                     declarationType.getName(), department.getName()));
@@ -700,7 +704,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         //9 точка запроса Источники-приёмники
         List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, null, null);
 
-        for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypesDest){
+        for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypesDest) {
             logger.warn(String.format("назначение является источником для %s - %s приемника",
                     department.getName(),
                     declarationTypeService.get(departmentDeclarationType.getDeclarationTypeId()).getName()));
@@ -717,9 +721,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                         Arrays.asList(RefBook.Id.NDFL.getId()),
                         Arrays.asList((long) department.getId())
                 );
-        for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()){
-			TaxType taxType = TaxType.NDFL;
-            Date startDate = (Date)entry.getValue().get(RefBookDepartmentDao.VERSION_START_ALIAS);
+        for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()) {
+            TaxType taxType = TaxType.NDFL;
+            Date startDate = (Date) entry.getValue().get(RefBookDepartmentDao.VERSION_START_ALIAS);
             String rpName =
                     refBookDepartmentDao.getReportPeriodNameByDate(taxType, startDate);
             logger.error(
@@ -731,7 +735,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
     }
 
-    private void deleteDRPs(int depId){
+    private void deleteDRPs(int depId) {
         DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
         drpFilter.setIsCorrection(null);
         drpFilter.setDepartmentIdList(Arrays.asList(depId));
@@ -739,7 +743,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         departmentReportPeriodService.delete(corrIds);
     }
 
-    private void checkCycle(Department department, Department parentDep, Logger logger){
+    private void checkCycle(Department department, Department parentDep, Logger logger) {
         List<Integer> childIds = departmentService.getAllChildrenIds(department.getId());
         //>1 т.к. запрос всегда как минимум возвращает переданный id
         boolean isChild = !childIds.isEmpty() && childIds.size() > 1 && childIds.contains(parentDep.getId());
@@ -749,9 +753,9 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
     }
 
-    private String assembleMessage(Map<String, RefBookValue> records){
+    private String assembleMessage(Map<String, RefBookValue> records) {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, RefBookValue> record : records.entrySet()){
+        for (Map.Entry<String, RefBookValue> record : records.entrySet()) {
             if (!record.getKey().equals(DEPARTMENT_NAME_ATTRIBUTE))
                 sb.append(String.format(" %s- %s ", record.getKey(), record.getValue().toString()));
         }
@@ -759,10 +763,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         return sb.toString();
     }
 
-	@Override
-	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
-		return refBookDao.dereferenceValues(DEPARTMENT_TABLE_NAME, attributeId, recordIds);
-	}
+    @Override
+    public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+        return refBookDao.dereferenceValues(DEPARTMENT_TABLE_NAME, attributeId, recordIds);
+    }
 
     @Override
     public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {

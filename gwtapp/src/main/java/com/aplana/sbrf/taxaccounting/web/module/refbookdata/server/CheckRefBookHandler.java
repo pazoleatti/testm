@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookDaoImpl;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CheckRefBookAction;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookAction, CheckRefBookResult> {
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     @Autowired
     private SecurityService securityService;
@@ -33,7 +32,7 @@ public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookActio
 
     @Override
     public CheckRefBookResult execute(CheckRefBookAction action, ExecutionContext context) throws ActionException {
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
         CheckRefBookResult result = new CheckRefBookResult();
         if (RefBookType.LINEAR.equals(action.getTypeForCheck())) {
             if (RefBookDaoImpl.checkHierarchical(refBook)) {
@@ -47,7 +46,7 @@ public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookActio
         result.setAvailable(refBook.isVisible());
         result.setVersioned(refBook.isVersioned());
         result.setUploadAvailable(securityService.currentUserInfo().getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
-        result.setEventScriptStatus(refBookFactory.getEventScriptStatus(action.getRefBookId()));
+        result.setEventScriptStatus(commonRefBookService.getEventScriptStatus(action.getRefBookId()));
         return result;
     }
 

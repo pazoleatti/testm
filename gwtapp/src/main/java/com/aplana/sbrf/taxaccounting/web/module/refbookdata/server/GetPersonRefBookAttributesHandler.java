@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -19,7 +19,7 @@ import java.util.*;
 public class GetPersonRefBookAttributesHandler extends AbstractActionHandler<GetPersonRefBookAttributesAction, GetPersonRefBookAttributesResult> {
 
 	@Autowired
-	RefBookFactory refBookFactory;
+	CommonRefBookService commonRefBookService;
 
     @Autowired
     SecurityService securityService;
@@ -32,8 +32,8 @@ public class GetPersonRefBookAttributesHandler extends AbstractActionHandler<Get
 
 	@Override
 	public GetPersonRefBookAttributesResult execute(GetPersonRefBookAttributesAction action, ExecutionContext executionContext) throws ActionException {
-        RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId());
-        RefBook idDocRefBook = refBookFactory.get(RefBook.Id.ID_DOC.getId());
+        RefBook refBook = commonRefBookService.get(RefBook.Id.PERSON.getId());
+        RefBook idDocRefBook = commonRefBookService.get(RefBook.Id.ID_DOC.getId());
 
 		Map<String, RefBookAttribute> attributeMap = new HashMap<String, RefBookAttribute>();
 		for(RefBookAttribute refBookAttribute: refBook.getAttributes()) {
@@ -52,7 +52,7 @@ public class GetPersonRefBookAttributesHandler extends AbstractActionHandler<Get
 			RefBookColumn col = new RefBookColumn();
             RefBook attributeRefBook = null;
             if (attribute.getRefBookId() != null){
-                attributeRefBook = refBookFactory.get(attribute.getRefBookId());
+                attributeRefBook = commonRefBookService.get(attribute.getRefBookId());
             }
 			col.setId(attribute.getId());
 			col.setAlias(attribute.getAlias());
@@ -88,7 +88,7 @@ public class GetPersonRefBookAttributesHandler extends AbstractActionHandler<Get
 				alignment = HorizontalAlignment.ALIGN_CENTER;
 				break;
 			case REFERENCE:
-				RefBook refBook = refBookFactory.get(attribute.getRefBookId());
+				RefBook refBook = commonRefBookService.get(attribute.getRefBookId());
 				RefBookAttribute refAttr = refBook.getAttribute(attribute.getRefBookAttributeId());
 				alignment = getHorizontalAlignment(refAttr);
 				break;

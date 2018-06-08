@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,10 @@ import static java.util.Collections.singletonList;
 @Transactional
 public class RefBookHelperImpl implements RefBookHelper {
 
-	@Autowired
-	private RefBookFactory refBookFactory;
+    @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
+    private RefBookFactory refBookFactory;
     @Autowired
     private PeriodService periodService;
     @Autowired
@@ -232,11 +235,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 
 
     private void checkFormDataReferenceValues(Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
-                                              ReferenceColumn referenceColumn, Object value){
+                                              ReferenceColumn referenceColumn, Object value) {
         Long refAttributeId = referenceColumn.getRefBookAttributeId();
         Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
         if (pair == null) {
-            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBook refBook = commonRefBookService.getByAttribute(refAttributeId);
             RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
             RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
             pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
@@ -245,9 +248,9 @@ public class RefBookHelperImpl implements RefBookHelper {
         Map<String, RefBookValue> record = pair.getFirst().getRecordData((Long) value);
         RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
         // Если найденое значение ссылка, то делаем разыменование для 2 уровня
-        if ((refBookValue.getReferenceValue()!=null)&&(refBookValue.getAttributeType()==RefBookAttributeType.REFERENCE)&&(referenceColumn.getRefBookAttributeId2()!=null)){
+        if ((refBookValue.getReferenceValue() != null) && (refBookValue.getAttributeType() == RefBookAttributeType.REFERENCE) && (referenceColumn.getRefBookAttributeId2() != null)) {
             refAttributeId = referenceColumn.getRefBookAttributeId2();
-            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBook refBook = commonRefBookService.getByAttribute(refAttributeId);
             RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
             RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
             pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
@@ -258,10 +261,10 @@ public class RefBookHelperImpl implements RefBookHelper {
 
 
     private void checkRefBookValue(Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
-                                         Long refAttributeId, Object value) {
+                                   Long refAttributeId, Object value) {
         Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
         if (pair == null) {
-            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBook refBook = commonRefBookService.getByAttribute(refAttributeId);
             RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
             RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
             pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
@@ -270,58 +273,59 @@ public class RefBookHelperImpl implements RefBookHelper {
         pair.getFirst().getRecordData((Long) value);
     }
 
-	/**
-	 * Ищет в списке графу по идентификатору
-	 * @param columnId идентификатор графы
-	 * @param columns список граф
-	 * @return
-	 */
-	private Column getColumnById(int columnId, List<Column> columns) {
-		for (Column column : columns) {
-			if (column.getId().equals(columnId)) {
-				return column;
-			}
-		}
-		throw new IllegalArgumentException("Attribute not found");
-	}
+    /**
+     * Ищет в списке графу по идентификатору
+     *
+     * @param columnId идентификатор графы
+     * @param columns  список граф
+     * @return
+     */
+    private Column getColumnById(int columnId, List<Column> columns) {
+        for (Column column : columns) {
+            if (column.getId().equals(columnId)) {
+                return column;
+            }
+        }
+        throw new IllegalArgumentException("Attribute not found");
+    }
 
-	/**
-	 * Групповое разыменование ссылок
-	 *
-	 * @param column графа для установки разыменованных значений
-	 * @param parentColumn родительская графа, актуальна для зависимых граф для первого уровня разыменовывания
-	 * @param attributeId атрибут справочника по которому хотим разыменовать ссылки
-	 * @param dataRows куда будем записывать итоговый результат
-	 * @param recordIds список ссылок для разыменования
-	 * @param isLevel2 признак разименования второго уровня (справочной или зависимой ячейки)
-	 */
-	private void dereference(Column column, Column parentColumn, Long attributeId, Collection<DataRow<Cell>> dataRows,
+    /**
+     * Групповое разыменование ссылок
+     *
+     * @param column       графа для установки разыменованных значений
+     * @param parentColumn родительская графа, актуальна для зависимых граф для первого уровня разыменовывания
+     * @param attributeId  атрибут справочника по которому хотим разыменовать ссылки
+     * @param dataRows     куда будем записывать итоговый результат
+     * @param recordIds    список ссылок для разыменования
+     * @param isLevel2     признак разименования второго уровня (справочной или зависимой ячейки)
+     */
+    private void dereference(Column column, Column parentColumn, Long attributeId, Collection<DataRow<Cell>> dataRows,
                              Set<Long> recordIds, boolean isLevel2) {
-		if (recordIds.isEmpty()) {
-			return;
-		}
-		// получение данных по ссылкам
-        RefBook refBook = refBookFactory.getByAttribute(attributeId);
+        if (recordIds.isEmpty()) {
+            return;
+        }
+        // получение данных по ссылкам
+        RefBook refBook = commonRefBookService.getByAttribute(attributeId);
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
-		Map<Long, RefBookValue> values = provider.dereferenceValues(attributeId, recordIds);
-		// псевдоним для получения значений ссылки
-		String valueAlias = parentColumn == null ? column.getAlias() : parentColumn.getAlias();
-		// установка разыменованных значений
-		for (DataRow<Cell> dataRow : dataRows) {
-			Cell cell = dataRow.getCell(column.getAlias());
-			Cell valueCell = dataRow.getCell(valueAlias);
-			RefBookValue refBookValue = null;
-			if (!isLevel2) {
-				BigDecimal reference = valueCell.getNumericValue();
-				if (reference != null) {
-					refBookValue = values.get(reference.longValue());
-				}
-			} else { // случай для разыменования второго уровня
-				String reference = valueCell.getRefBookDereference();
-				if (reference != null && !reference.isEmpty()) {
-					refBookValue = values.get(Long.valueOf(reference));
-				}
-			}
+        Map<Long, RefBookValue> values = provider.dereferenceValues(attributeId, recordIds);
+        // псевдоним для получения значений ссылки
+        String valueAlias = parentColumn == null ? column.getAlias() : parentColumn.getAlias();
+        // установка разыменованных значений
+        for (DataRow<Cell> dataRow : dataRows) {
+            Cell cell = dataRow.getCell(column.getAlias());
+            Cell valueCell = dataRow.getCell(valueAlias);
+            RefBookValue refBookValue = null;
+            if (!isLevel2) {
+                BigDecimal reference = valueCell.getNumericValue();
+                if (reference != null) {
+                    refBookValue = values.get(reference.longValue());
+                }
+            } else { // случай для разыменования второго уровня
+                String reference = valueCell.getRefBookDereference();
+                if (reference != null && !reference.isEmpty()) {
+                    refBookValue = values.get(Long.valueOf(reference));
+                }
+            }
             if (refBookValue != null && RefBookAttributeType.DATE.equals(refBookValue.getAttributeType()) && refBookValue.getDateValue() != null) {
                 RefBookAttribute attribute = refBook.getAttribute(attributeId);
                 cell.setRefBookDereference(attribute.getFormat() != null ?
@@ -332,43 +336,43 @@ public class RefBookHelperImpl implements RefBookHelper {
                 cell.setRefBookDereference(refBookValue == null ? "" : String.valueOf(refBookValue));
                 cell.setRefBookValue(refBookValue);
             }
-		}
-	}
+        }
+    }
 
-	@Override
+    @Override
     public void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns) {
-		if (dataRows.isEmpty() || columns.isEmpty()) {
-			return;
-		}
-		for (Column column : columns) {
-			if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-				Column parentColumn = null;
-				// псевдоним для получения значений ссылки
-				String valueAlias;
-				if (ColumnType.REFBOOK.equals(column.getColumnType())) {
-					valueAlias = column.getAlias();
-				} else {
-					ReferenceColumn refColumn = ((ReferenceColumn) column);
-					parentColumn = getColumnById(refColumn.getParentId(), columns);
-					valueAlias = parentColumn.getAlias();
-				}
-				// сбор всех ссылок
-				Set<Long> recordIds = new HashSet<Long>();
-				for (DataRow<Cell> dataRow : dataRows) {
-					Object value = dataRow.get(valueAlias);
-					if (value != null) {
-						recordIds.add((Long) value);
-					}
-				}
-				if (!recordIds.isEmpty()) {
-					// установка значений
-					Long attributeId = ColumnType.REFBOOK.equals(column.getColumnType()) ?
-						((RefBookColumn) column).getRefBookAttributeId() :
-						((ReferenceColumn) column).getRefBookAttributeId();
-					dereference(column, parentColumn, attributeId, dataRows, recordIds, false);
-				}
-			}
-		}
+        if (dataRows.isEmpty() || columns.isEmpty()) {
+            return;
+        }
+        for (Column column : columns) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                Column parentColumn = null;
+                // псевдоним для получения значений ссылки
+                String valueAlias;
+                if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                    valueAlias = column.getAlias();
+                } else {
+                    ReferenceColumn refColumn = ((ReferenceColumn) column);
+                    parentColumn = getColumnById(refColumn.getParentId(), columns);
+                    valueAlias = parentColumn.getAlias();
+                }
+                // сбор всех ссылок
+                Set<Long> recordIds = new HashSet<Long>();
+                for (DataRow<Cell> dataRow : dataRows) {
+                    Object value = dataRow.get(valueAlias);
+                    if (value != null) {
+                        recordIds.add((Long) value);
+                    }
+                }
+                if (!recordIds.isEmpty()) {
+                    // установка значений
+                    Long attributeId = ColumnType.REFBOOK.equals(column.getColumnType()) ?
+                            ((RefBookColumn) column).getRefBookAttributeId() :
+                            ((ReferenceColumn) column).getRefBookAttributeId();
+                    dereference(column, parentColumn, attributeId, dataRows, recordIds, false);
+                }
+            }
+        }
 
         // разыменовывание ссылок второго уровня
         for (Column column : columns) {
@@ -393,10 +397,10 @@ public class RefBookHelperImpl implements RefBookHelper {
                 }
             }
         }
-	}
+    }
 
     @Override
-    public Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes){
+    public Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes) {
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<Long, RefBookDataProvider> refProviders = new HashMap<Long, RefBookDataProvider>();
         for (RefBookAttribute attribute : attributes) {
@@ -411,11 +415,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 
     @Override
     public RefBookRecordVersion saveOrUpdateDepartmentConfig(Long uniqueRecordId, long refBookId, long slaveRefBookId,
-                                                      int reportPeriodId, String departmentAlias, long departmentId,
-                                                      Map<String, RefBookValue> mainConfig,
-                                                      List<Map<String, RefBookValue>> tablePart,
-                                                      Logger logger) {
-        RefBook slaveRefBook = refBookFactory.get(slaveRefBookId);
+                                                             int reportPeriodId, String departmentAlias, long departmentId,
+                                                             Map<String, RefBookValue> mainConfig,
+                                                             List<Map<String, RefBookValue>> tablePart,
+                                                             Logger logger) {
+        RefBook slaveRefBook = commonRefBookService.get(slaveRefBookId);
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookDataProvider providerSlave = refBookFactory.getDataProvider(slaveRefBookId);
         ReportPeriod rp = periodService.fetchReportPeriod(reportPeriodId);
@@ -472,10 +476,10 @@ public class RefBookHelperImpl implements RefBookHelper {
         String filterSlave = linkAlias + " = " + uniqueRecordId;
         RefBookAttribute sortAttr = slaveRefBook.getAttribute("ROW_ORD");
 
-        for (int i = 0; i<tablePart.size(); i++) {
+        for (int i = 0; i < tablePart.size(); i++) {
             Map<String, RefBookValue> rowFromClient = tablePart.get(i);
             int count = 0;
-            for (Map<String, RefBookValue> rowFromClient2: tablePart) {
+            for (Map<String, RefBookValue> rowFromClient2 : tablePart) {
                 if (rowFromClient != rowFromClient2) {
                     if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromClient2.get("TAX_ORGAN_CODE").getStringValue())
                             && rowFromClient.get("KPP").getStringValue().equals(rowFromClient2.get("KPP").getStringValue())) {
@@ -484,7 +488,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                 }
             }
             if (count > 0) {
-                throw new ServiceException(String.format(UNIQ_ERROR_MSG, i+1, count, rowFromClient.get("TAX_ORGAN_CODE").getStringValue(), rowFromClient.get("KPP").getStringValue()));
+                throw new ServiceException(String.format(UNIQ_ERROR_MSG, i + 1, count, rowFromClient.get("TAX_ORGAN_CODE").getStringValue(), rowFromClient.get("KPP").getStringValue()));
             }
         }
 
@@ -501,9 +505,9 @@ public class RefBookHelperImpl implements RefBookHelper {
                 if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
                         && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
                     contains = true;
-                    rowFromClient.put(linkAlias,new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
-                    rowFromClient.put("ROW_ORD",rowFromServer.get("ROW_ORD"));
-                    rowFromClient.put(RefBook.RECORD_ID_ALIAS,rowFromServer.get(RefBook.RECORD_ID_ALIAS));
+                    rowFromClient.put(linkAlias, new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
+                    rowFromClient.put("ROW_ORD", rowFromServer.get("ROW_ORD"));
+                    rowFromClient.put(RefBook.RECORD_ID_ALIAS, rowFromServer.get(RefBook.RECORD_ID_ALIAS));
                     rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
                     toUpdate.add(rowFromClient);
                     break;
@@ -579,52 +583,52 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         // разыменовывание ссылок
         for (RefBookAttribute attribute : attributes) {
-			// сбор всех ссылок
-			Long id = attribute.getId();
-			String alias = attribute.getAlias();
-			Set<Long> recordIds = new HashSet<Long>();
-			for (Map<String, RefBookValue> record : refBookPage) {
-				RefBookValue value = record.get(alias);
-				if (value != null && !value.isEmpty()) {
-					recordIds.add(value.getReferenceValue());
-				}
-			}
-			// групповое разыменование, если есть что разыменовывать
-			if (!recordIds.isEmpty()) {
-				RefBookDataProvider provider = refBookCacher.getDataProvider(attribute.getRefBookId());
-				Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
-				if (values != null && !values.isEmpty()) {
-					Map<Long, String> stringValues = new HashMap<Long, String>();
-					for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
-						stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
-					}
-					dereferenceValues.put(attribute.getId(), stringValues);
-				}
-			}
-			if (includeAttrId2) {
-				for (Map.Entry<Long, Map<Long, Set<Long>>> entry : attributesMap.entrySet()) {
-					RefBookDataProvider provider = refBookCacher.getDataProvider(entry.getKey());
-					for (Map.Entry<Long, Set<Long>> entryAttr : entry.getValue().entrySet()) {
-						if (entryAttr.getValue() != null && !entryAttr.getValue().isEmpty()) {
-							Map<Long, RefBookValue> values = provider.dereferenceValues(entryAttr.getKey(), entryAttr.getValue());
-							if (values != null && !values.isEmpty()) {
-								Map<Long, String> stringValues = new HashMap<Long, String>();
-								for (Map.Entry<Long, RefBookValue> entry2 : values.entrySet()) {
-									stringValues.put(entry2.getKey(), String.valueOf(entry2.getValue()));
-								}
-								dereferenceValues.put(entryAttr.getKey(), stringValues);
-							}
-						}
-					}
-				}
-			}
+            // сбор всех ссылок
+            Long id = attribute.getId();
+            String alias = attribute.getAlias();
+            Set<Long> recordIds = new HashSet<Long>();
+            for (Map<String, RefBookValue> record : refBookPage) {
+                RefBookValue value = record.get(alias);
+                if (value != null && !value.isEmpty()) {
+                    recordIds.add(value.getReferenceValue());
+                }
+            }
+            // групповое разыменование, если есть что разыменовывать
+            if (!recordIds.isEmpty()) {
+                RefBookDataProvider provider = refBookCacher.getDataProvider(attribute.getRefBookId());
+                Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
+                if (values != null && !values.isEmpty()) {
+                    Map<Long, String> stringValues = new HashMap<Long, String>();
+                    for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
+                        stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                    dereferenceValues.put(attribute.getId(), stringValues);
+                }
+            }
+            if (includeAttrId2) {
+                for (Map.Entry<Long, Map<Long, Set<Long>>> entry : attributesMap.entrySet()) {
+                    RefBookDataProvider provider = refBookCacher.getDataProvider(entry.getKey());
+                    for (Map.Entry<Long, Set<Long>> entryAttr : entry.getValue().entrySet()) {
+                        if (entryAttr.getValue() != null && !entryAttr.getValue().isEmpty()) {
+                            Map<Long, RefBookValue> values = provider.dereferenceValues(entryAttr.getKey(), entryAttr.getValue());
+                            if (values != null && !values.isEmpty()) {
+                                Map<Long, String> stringValues = new HashMap<Long, String>();
+                                for (Map.Entry<Long, RefBookValue> entry2 : values.entrySet()) {
+                                    stringValues.put(entry2.getKey(), String.valueOf(entry2.getValue()));
+                                }
+                                dereferenceValues.put(entryAttr.getKey(), stringValues);
+                            }
+                        }
+                    }
+                }
+            }
         }
         return dereferenceValues;
     }
 
     @Override
     public Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValuesAttributes(RefBook refBook, List<Map<String, RefBookValue>> refBookPage) {
-        Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = new HashMap<Long, Pair<RefBookAttribute,Map<Long, RefBookValue>>>(); // Map<attrId, Map<referenceId, value>>
+        Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = new HashMap<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>>(); // Map<attrId, Map<referenceId, value>>
         if (refBookPage.isEmpty()) {
             return dereferenceValues;
         }
@@ -646,7 +650,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                     RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
                     Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
                     Map<Long, RefBookValue> refBookValues = new HashMap<Long, RefBookValue>();
-                    RefBookAttribute referenceAttribute = refBookFactory.get(attribute.getRefBookId()).getAttribute(attribute.getRefBookAttributeId());
+                    RefBookAttribute referenceAttribute = commonRefBookService.get(attribute.getRefBookId()).getAttribute(attribute.getRefBookAttributeId());
                     if (values != null && !values.isEmpty()) {
                         for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
                             refBookValues.put(entry.getKey(), entry.getValue());
@@ -654,7 +658,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                     }
                     dereferenceValues.put(attribute.getId(), new Pair<RefBookAttribute, Map<Long, RefBookValue>>(referenceAttribute, refBookValues));
                 } else {
-                    RefBookAttribute referenceAttribute = refBookFactory.get(attribute.getRefBookId()).getAttribute(attribute.getRefBookAttributeId());
+                    RefBookAttribute referenceAttribute = commonRefBookService.get(attribute.getRefBookId()).getAttribute(attribute.getRefBookAttributeId());
                     dereferenceValues.put(attribute.getId(), new Pair<RefBookAttribute, Map<Long, RefBookValue>>(referenceAttribute, new HashMap<Long, RefBookValue>()));
                 }
             }
@@ -663,11 +667,11 @@ public class RefBookHelperImpl implements RefBookHelper {
     }
 
     public String dereferenceValue(long recordId, Long attributeId) {
-        RefBook refBook = refBookFactory.getByAttribute(attributeId);
+        RefBook refBook = commonRefBookService.getByAttribute(attributeId);
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
         Map<String, RefBookValue> refBookValueMap = refBookDataProvider.getRecordData(recordId);
-		// [attrId : [refId : strValue]]
+        // [attrId : [refId : strValue]]
         Map<Long, Map<Long, String>> dereferenceValues = null;
         if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
             dereferenceValues = dereferenceValues(refBook, Arrays.asList(refBookValueMap), true);
@@ -675,31 +679,31 @@ public class RefBookHelperImpl implements RefBookHelper {
         return dereferenceValue(refBookValueMap, dereferenceValues, attribute);
     }
 
-	@Override
-	public String refBookRecordToString(RefBook refBook, RefBookRecord record) {
-		Map<String, RefBookValue> refBookValueMap = record.getValues();
-		// [attrId : [refId : strValue]]
-		Map<Long, Map<Long, String>> dereferenceValues = dereferenceValues(refBook, Arrays.asList(refBookValueMap), true);
-		Map<String, String> strValues = new HashMap<String, String>();
-		for (RefBookAttribute attribute : refBook.getAttributes()) {
-			strValues.put(attribute.getAlias(), dereferenceValue(refBookValueMap, dereferenceValues, attribute));
-		}
-		StringBuilder sb = new StringBuilder("[id:");
-			sb
-				.append(record.getUniqueRecordId())
-				.append("; ")
-				.append("recordId:")
-				.append(record.getRecordId());
-		for (RefBookAttribute attribute : refBook.getAttributes()) {
-			sb
-				.append("; ")
-				.append(attribute.getName())
-				.append(":\"")
-				.append(strValues.get(attribute.getAlias()))
-				.append('"');
-		}
-		return sb.append(']').toString();
-	}
+    @Override
+    public String refBookRecordToString(RefBook refBook, RefBookRecord record) {
+        Map<String, RefBookValue> refBookValueMap = record.getValues();
+        // [attrId : [refId : strValue]]
+        Map<Long, Map<Long, String>> dereferenceValues = dereferenceValues(refBook, Arrays.asList(refBookValueMap), true);
+        Map<String, String> strValues = new HashMap<String, String>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            strValues.put(attribute.getAlias(), dereferenceValue(refBookValueMap, dereferenceValues, attribute));
+        }
+        StringBuilder sb = new StringBuilder("[id:");
+        sb
+                .append(record.getUniqueRecordId())
+                .append("; ")
+                .append("recordId:")
+                .append(record.getRecordId());
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            sb
+                    .append("; ")
+                    .append(attribute.getName())
+                    .append(":\"")
+                    .append(strValues.get(attribute.getAlias()))
+                    .append('"');
+        }
+        return sb.append(']').toString();
+    }
 
     private String dereferenceValue(Map<String, RefBookValue> record, Map<Long, Map<Long, String>> dereferenceValues, RefBookAttribute attribute) {
         RefBookValue value = record.get(attribute.getAlias());

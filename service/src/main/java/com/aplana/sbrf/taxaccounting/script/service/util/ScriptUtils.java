@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.script.service.ImportService;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
 import groovy.util.XmlSlurper;
@@ -727,7 +725,7 @@ public final class ScriptUtils {
                         return -1;
                     }
                     if (v1 instanceof String) {
-                        int result = russianCollator.compare((String) v1,(String) v2);
+                        int result = russianCollator.compare((String) v1, (String) v2);
                         if (result != 0) {
                             return result;
                         } else {
@@ -794,7 +792,7 @@ public final class ScriptUtils {
                 DataRow<Cell> testItogRow = testItogRows.get(i);
                 DataRow<Cell> realItogRow = itogRows.get(i);
                 String str = testItogRow.getAlias().split("#")[0];
-                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll(str+'#', ""));
+                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll(str + '#', ""));
                 if (dataRows.get(itg).getAlias() != null) {
                     logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                 } else {
@@ -928,7 +926,7 @@ public final class ScriptUtils {
     /**
      * Проверка заголовка импортируемого файла на его (заголовка) существование и соответствие размерности
      *
-     * @param headerRows   - список значений в шапке
+     * @param headerRows       - список значений в шапке
      * @param referenceColSize - количество ожидаемых столбцов
      * @param referenceRowSize - количество ожидаемых строк
      */
@@ -1078,16 +1076,16 @@ public final class ScriptUtils {
      */
     @SuppressWarnings("unused")
     public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns) {
-		if (dataRows == null || dataRows.isEmpty()) {
-			return; // нечего вычислять
-		}
-		Integer totalRowIndex = totalRow.getIndex(); // totalRowIndex необходим для вывода сообщений в Cell.setValue
-		if (totalRowIndex == null) {
-			DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
-			if(lastRow != null) {
-				totalRowIndex = lastRow.getIndex() == null ? 1 : lastRow.getIndex() + 1;
-			}
-		}
+        if (dataRows == null || dataRows.isEmpty()) {
+            return; // нечего вычислять
+        }
+        Integer totalRowIndex = totalRow.getIndex(); // totalRowIndex необходим для вывода сообщений в Cell.setValue
+        if (totalRowIndex == null) {
+            DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
+            if (lastRow != null) {
+                totalRowIndex = lastRow.getIndex() == null ? 1 : lastRow.getIndex() + 1;
+            }
+        }
 
         for (String alias : columns) {
             BigDecimal sum = BigDecimal.valueOf(0);
@@ -1291,63 +1289,61 @@ public final class ScriptUtils {
         }
 /**
  * TODO SAX почему-то менее производителен чем DOM - лучше перепроверить
-        DefaultHandler handler = new DefaultHandler() {
-            // в файле rnu по умолчанию пропускаются первые две строки
-            int rowIndex = 2;
-            boolean isBeginTotalRows = false;
-            int rowTotalCount = 0;
+ DefaultHandler handler = new DefaultHandler() {
+ // в файле rnu по умолчанию пропускаются первые две строки
+ int rowIndex = 2;
+ boolean isBeginTotalRows = false;
+ int rowTotalCount = 0;
 
-            @Override
-            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                if (qName.equalsIgnoreCase("row")) {
-                    rowIndex++;
-                    if (attributes.getIndex("count") != -1) {
-                        Integer count = Integer.valueOf(attributes.getValue("count"));
-                        if (count != columnCount + 2) {
-                            throw new ServiceException(ROW_FILE_WRONG, rowIndex);
-                        }
-                    }
-                    return;
-                } else if (!isBeginTotalRows) {
-                    isBeginTotalRows = true;
-                    // после строк с данными через одну пустую должны быть итоги
-                    rowIndex += 2;
-                }
-                // проверка на итоги идет только если они ожидаются
-                if (totalCount != 0) {
-                    if (qName.equalsIgnoreCase("rowTotal")) {
-                        rowTotalCount++;
-                        rowIndex++;
-                        if (attributes.getIndex("count") != -1) {
-                            Integer count = Integer.valueOf(attributes.getValue("count"));
-                            if (count != columnCount + 2) {
-                                throw new ServiceException(ROW_FILE_WRONG, rowIndex);
-                            }
-                        }
-                    }
-                }
-            }
+ @Override public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+ if (qName.equalsIgnoreCase("row")) {
+ rowIndex++;
+ if (attributes.getIndex("count") != -1) {
+ Integer count = Integer.valueOf(attributes.getValue("count"));
+ if (count != columnCount + 2) {
+ throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+ }
+ }
+ return;
+ } else if (!isBeginTotalRows) {
+ isBeginTotalRows = true;
+ // после строк с данными через одну пустую должны быть итоги
+ rowIndex += 2;
+ }
+ // проверка на итоги идет только если они ожидаются
+ if (totalCount != 0) {
+ if (qName.equalsIgnoreCase("rowTotal")) {
+ rowTotalCount++;
+ rowIndex++;
+ if (attributes.getIndex("count") != -1) {
+ Integer count = Integer.valueOf(attributes.getValue("count"));
+ if (count != columnCount + 2) {
+ throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+ }
+ }
+ }
+ }
+ }
 
-            @Override
-            public void endDocument() throws SAXException {
-                // сверяем кол-во строк итогов
-                if (totalCount != 0 && rowTotalCount != totalCount) {
-                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
-                }
-            }
-        };
+ @Override public void endDocument() throws SAXException {
+ // сверяем кол-во строк итогов
+ if (totalCount != 0 && rowTotalCount != totalCount) {
+ throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+ }
+ }
+ };
 
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            InputSource inputSource = new InputSource();
-            inputSource.setCharacterStream(new StringReader(xmlString));
-            // парсим xml
-            saxParser.parse(inputSource, handler);
-        } catch (Exception e) {
-            throw new ServiceException(e.getMessage());
-        }
-*/
+ try {
+ SAXParserFactory factory = SAXParserFactory.newInstance();
+ SAXParser saxParser = factory.newSAXParser();
+ InputSource inputSource = new InputSource();
+ inputSource.setCharacterStream(new StringReader(xmlString));
+ // парсим xml
+ saxParser.parse(inputSource, handler);
+ } catch (Exception e) {
+ throw new ServiceException(e.getMessage());
+ }
+ */
         // в файле rnu по умолчанию пропускаются первые две строки
         int rowIndex = 2;
         try {
@@ -1493,14 +1489,15 @@ public final class ScriptUtils {
 
     /**
      * Вывод в логгер сообщений об ошибках, хранящихся в ячейках строк
-     * @param rows интересующие строки с сообщениями в ячейках
+     *
+     * @param rows   интересующие строки с сообщениями в ячейках
      * @param logger логгер для вывода сообщений
      */
     public static void showMessages(List<DataRow<Cell>> rows, Logger logger) {
         for (DataRow<Cell> row : rows) {
-            for (String cellAlias : row.keySet()){
+            for (String cellAlias : row.keySet()) {
                 String msg = row.getCell(cellAlias).getMessage();
-                if (msg != null && !msg.isEmpty()){
+                if (msg != null && !msg.isEmpty()) {
                     rowError(logger, row, msg);
                 }
             }
@@ -1589,6 +1586,7 @@ public final class ScriptUtils {
      * cellStyle.setDataFormat(createXlsDateFormat(workbook));
      * cell.setCellValue(new Date());
      * cell.setCellStyle(cellStyle);
+     *
      * @param workbook объект книги xlsx
      * @return код формата по спецификации OpenXML
      */
@@ -1639,19 +1637,19 @@ public final class ScriptUtils {
     /**
      * Для обработки xlsx файла: проверка потока данных, имени файла, расширения, чтение файла, сбор данных.
      *
-     * @param inputStream потом данных
-     * @param uploadFileName имя файла
-     * @param allValues список для хранения списков значении каждой строки данных
-     * @param headerValues список для хранения списков значении каждой строки шапки таблицы
+     * @param inputStream     потом данных
+     * @param uploadFileName  имя файла
+     * @param allValues       список для хранения списков значении каждой строки данных
+     * @param headerValues    список для хранения списков значении каждой строки шапки таблицы
      * @param tableStartValue начальное значение, с которого начинается сбор данных
-     * @param tableEndValue конечное значение, с которого прекращается сбор данных
-     * @param headerRowCount количество строк в шапке таблицы
-     * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+     * @param tableEndValue   конечное значение, с которого прекращается сбор данных
+     * @param headerRowCount  количество строк в шапке таблицы
+     * @param paramsMap       мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
      */
     public static void checkAndReadFile(InputStream inputStream, String uploadFileName,
-                            List<List<String>> allValues, List<List<String>>headerValues,
-                            String tableStartValue, String tableEndValue, int headerRowCount,
-                            Map<String, Object> paramsMap) throws IOException, OpenXML4JException, SAXException {
+                                        List<List<String>> allValues, List<List<String>> headerValues,
+                                        String tableStartValue, String tableEndValue, int headerRowCount,
+                                        Map<String, Object> paramsMap) throws IOException, OpenXML4JException, SAXException {
         // проверка потока данных, имени файла, расширения
         if (inputStream == null) {
             throw new ServiceException(EMPTY_INPUT_STREAM);
@@ -1710,20 +1708,21 @@ public final class ScriptUtils {
     /**
      * Работает аналогично {@link ScriptUtils#checkAndReadFile(InputStream, String, List, List, String, String, int, Map)}
      * Однако читает данные не с первого листа, а с диапазона листов.
-     * @param file              файл xlsx
-     * @param allValues         список для хранения списков значении каждой строки данных
-     * @param headerValues      список для хранения списков значении каждой строки шапки таблицы
-     * @param headerStartValue  значение с которого начинается заголовок
-     * @param headerRowCount    количество строк в шапке таблицы
-     * @param paramsMap         мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
-     * @param startSheetIndex   индекс начального листа, не должен быть null
-     * @param endSheetIndex     индекс последнего листа включительно. Может быть равен null, тогда будут обрабатываться
-     *                          все листы с индексом больше начального
+     *
+     * @param file             файл xlsx
+     * @param allValues        список для хранения списков значении каждой строки данных
+     * @param headerValues     список для хранения списков значении каждой строки шапки таблицы
+     * @param headerStartValue значение с которого начинается заголовок
+     * @param headerRowCount   количество строк в шапке таблицы
+     * @param paramsMap        мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+     * @param startSheetIndex  индекс начального листа, не должен быть null
+     * @param endSheetIndex    индекс последнего листа включительно. Может быть равен null, тогда будут обрабатываться
+     *                         все листы с индексом больше начального
      * @throws IOException
      * @throws OpenXML4JException
      * @throws SAXException
      */
-    public static void readSheetsRange(File file, List<List<String>> allValues, List<List<String>>headerValues,
+    public static void readSheetsRange(File file, List<List<String>> allValues, List<List<String>> headerValues,
                                        String headerStartValue, int headerRowCount,
                                        Map<String, Object> paramsMap, Integer startSheetIndex, Integer endSheetIndex) throws IOException, OpenXML4JException, SAXException {
         if (startSheetIndex == null) {
@@ -1739,7 +1738,7 @@ public final class ScriptUtils {
         parser.setContentHandler(handler);
         Iterator<InputStream> sheets = r.getSheetsData();
         int i = 0;
-        while(sheets.hasNext()) {
+        while (sheets.hasNext()) {
             if (i >= startSheetIndex) {
                 if (endSheetIndex == null || endSheetIndex <= i) {
                     InputStream sheet = sheets.next();
@@ -1761,26 +1760,27 @@ public final class ScriptUtils {
     @SuppressWarnings("unused")
     public static void updateIndexes(List<DataRow<Cell>> dataRows) {
         int index = 1;
-        for(DataRow<Cell> row: dataRows) {
+        for (DataRow<Cell> row : dataRows) {
             row.setIndex(index++);
         }
     }
 
     /**
      * Проверка контрольной суммы ИНН
+     *
      * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param value значение ИНН
-     * @param fatal фатально ли сообщение
+     * @param row    строка НФ
+     * @param alias  псевдоним столбца
+     * @param value  значение ИНН
+     * @param fatal  фатально ли сообщение
      * @return
      */
     public static boolean checkControlSumInn(Logger logger, DataRow<Cell> row, String alias, String value, boolean fatal) {
         if (value == null || value.isEmpty()) {
             return false;
         }
-        if (!RefBookUtils.checkControlSumInn(value)){
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        if (!RefBookUtils.checkControlSumInn(value)) {
+            rowLog(logger, row, (row != null ? ("Строка " + row.getIndex() + ": ") : "") + String.format("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
             return false;
         }
         return true;
@@ -1788,6 +1788,7 @@ public final class ScriptUtils {
 
     /**
      * Проверка контрольной суммы ИНН
+     *
      * @param value значение ИНН
      * @return
      */
@@ -1795,7 +1796,7 @@ public final class ScriptUtils {
         if (value == null || value.isEmpty()) {
             return false;
         }
-        if (!RefBookUtils.checkControlSumInn(value)){
+        if (!RefBookUtils.checkControlSumInn(value)) {
             return false;
         }
         return true;
@@ -1803,10 +1804,11 @@ public final class ScriptUtils {
 
     /**
      * Проверка диапазона даты (от 1991 до 2099)
+     *
      * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param value проверяемое значение (строка или дата)
+     * @param row    строка НФ
+     * @param alias  псевдоним столбца
+     * @param value  проверяемое значение (строка или дата)
      * @param fatal
      */
     public static boolean checkDateValid(Logger logger, DataRow<Cell> row, String alias, Object value, boolean fatal) {
@@ -1815,7 +1817,7 @@ public final class ScriptUtils {
         }
         Integer year = null;
         Date date = null;
-        if (value instanceof Date){
+        if (value instanceof Date) {
             date = (Date) value;
         }
         try {
@@ -1827,10 +1829,10 @@ public final class ScriptUtils {
                 year = Integer.valueOf(yearString);
             }
         } catch (ParseException e) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            rowLog(logger, row, (row != null ? ("Строка " + row.getIndex() + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
         if (year == null || year < 1991 || year > 2099) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            rowLog(logger, row, (row != null ? ("Строка " + row.getIndex() + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
             return false;
         }
         return true;
@@ -1842,10 +1844,11 @@ public final class ScriptUtils {
 
     /**
      * Проверка текста на паттерны
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param value проверяемое значение (строка или дата)
+     *
+     * @param logger   логер для записи сообщения
+     * @param row      строка НФ
+     * @param alias    псевдоним столбца
+     * @param value    проверяемое значение (строка или дата)
      * @param patterns regExp для проверки
      * @param fatal
      */
@@ -1855,8 +1858,8 @@ public final class ScriptUtils {
         }
         StringBuilder sb = new StringBuilder();
         boolean result = false;
-        for(String pattern : patterns){
-            if (!result){
+        for (String pattern : patterns) {
+            if (!result) {
                 result = checkFormat(value, pattern);
             }
             if (patterns.indexOf(pattern) != 0) {
@@ -1865,13 +1868,13 @@ public final class ScriptUtils {
             sb.append(pattern);
         }
         if (!result) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            rowLog(logger, row, (row != null ? ("Строка " + row.getIndex() + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
             if (meanings != null) {
                 for (String meaning : meanings) {
                     if (meaning != null && !meaning.isEmpty()) {
                         int index = meanings.indexOf(meaning);
                         if (patterns.size() > index) {
-                            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Расшифровка паттерна \"%s\": %s", patterns.get(index), meaning), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+                            rowLog(logger, row, (row != null ? ("Строка " + row.getIndex() + ": ") : "") + String.format("Расшифровка паттерна \"%s\": %s", patterns.get(index), meaning), fatal ? LogLevel.ERROR : LogLevel.WARNING);
                         }
                     }
                 }
@@ -1887,12 +1890,12 @@ public final class ScriptUtils {
     /**
      * Сравнить значения итоговых строк.
      *
-     * @param totalRow итоговая строка нф
+     * @param totalRow    итоговая строка нф
      * @param totalRowTmp итоговая строка с посчитанными значениям
-     * @param columns список алиасов итоговых графов
-     * @param logger для вывода сообщении
-     * @param precision точность значении (для BigDecimal есть различия в точности после запятой, например 1.0 не равно 1.00)
-     * @param required фатальность
+     * @param columns     список алиасов итоговых графов
+     * @param logger      для вывода сообщении
+     * @param precision   точность значении (для BigDecimal есть различия в точности после запятой, например 1.0 не равно 1.00)
+     * @param required    фатальность
      */
     public static void compareTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowTmp, List<String> columns,
                                           Logger logger, int precision, boolean required) {
@@ -1936,108 +1939,19 @@ public final class ScriptUtils {
         return (new BigDecimal(value.toString())).setScale(precision, BigDecimal.ROUND_HALF_UP);
     }
 
-
-    /** Получение Id записи из справочника 520 с использованием кэширования
-     * @param nameFromFile наименование лица (юр или вз)
-     * @param iksr значение графы ИКСР
-     * @param iksrName название графы ИКСР
-     * @param fileRowIndex номер строки в файле
-     * @param colIndex индекс колонки
-     * @param endDate дата окончания периода
-     * @param isVzl флаг (true для РНУ, false для приложений 6-...)
-     * @param logger логгер
-     * @param refBookFactory фабрика справочников
-     * @param recordCache кэш записей
-     * @return
-     */
-    public static Long getTcoRecordId(String nameFromFile, String iksr, String iksrName, int fileRowIndex, int colIndex, Date endDate, boolean isVzl, Logger logger, RefBookFactory refBookFactory, Map<Long, Map<String, Object>> recordCache) {
-        colIndex = colIndex + 1;
-        if (iksr == null || iksr.isEmpty()) {
-            logger.warn("Строка %s, столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
-                    fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице",  iksrName);
-            return null;
-        }
-        long ref_id = 520;
-        RefBook refBook = refBookFactory.get(ref_id);
-
-        Long recordId = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        String dateStr = simpleDateFormat.format(endDate);
-        String filter = String.format("(LOWER(INN) = LOWER('%1$s') or " +
-                "LOWER(REG_NUM) = LOWER('%1$s') or " +
-                "LOWER(TAX_CODE_INCORPORATION) = LOWER('%1$s') or " +
-                "LOWER(SWIFT) = LOWER('%1$s') or " +
-                "LOWER(KIO) = LOWER('%1$s'))", iksr);
-        String keyString = dateStr + filter;
-        if (recordCache.get(ref_id) != null) {
-            if (recordCache.get(ref_id).get(keyString) != null) {
-                recordId = (Long) recordCache.get(ref_id).get(keyString);
-            }
-        } else {
-            recordCache.put(ref_id, new HashMap<String, Object>());
-        }
-
-        Map<String, RefBookValue> record = null;
-        RefBookDataProvider provider = refBookFactory.getDataProvider(ref_id);
-        List<String> aliases = Arrays.asList("INN", "REG_NUM", "TAX_CODE_INCORPORATION", "SWIFT", "KIO");
-        if (recordId == null) {
-            PagingResult<Map<String, RefBookValue>> records = provider.getRecords(endDate, null, filter, null);
-            if (records.size() == 1) {
-                // 5
-                record = records.get(0);
-            } else {
-                if (records.isEmpty()) {
-                    // 6
-                    if (nameFromFile == null || nameFromFile.isEmpty()) {
-                        nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
-                    }
-                    // сообщение 1
-                    logger.warn("Строка %s, столбец %s: На форме не заполнены графы с общей информацией о %s, так как в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
-                            fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksr, nameFromFile, simpleDateFormat.format(endDate));
-                }
-                return null;
-            }
-        } else {
-            record = provider.getRecordData(recordId);
-        }
-
-        if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equalsIgnoreCase(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
-            // сообщение 4
-            String msg;
-            if (nameFromFile != null && !nameFromFile.isEmpty()) {
-                msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
-            } else {
-                msg = String.format("Наименование %s в файле не заполнено!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
-            }
-            String refBookAttributeName = "Не задано";
-            for (String alias : aliases) {
-                if (iksr.equals(record.get(alias).getStringValue())) {
-                    refBookAttributeName = refBook.getAttribute(alias).getName();
-                    break;
-                }
-            }
-            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
-                            "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
-                    fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
-        }
-        recordCache.get(ref_id).put(keyString, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
-        return (Long) recordCache.get(ref_id).get(keyString);
-    }
-
     /**
-     *
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
+     * @param logger                логер для записи сообщения
+     * @param row                   строка НФ
+     * @param alias                 псевдоним столбца
      * @param reportPeriodStartDate дата начала периода текущей формы
-     * @param reportPeriodEndDate дата окончания периода текущей формы
-     * @param fatal фатально ли сообщение
+     * @param reportPeriodEndDate   дата окончания периода текущей формы
+     * @param fatal                 фатально ли сообщение
      */
     public static void checkDealDoneDate(Logger logger, DataRow<Cell> row, String alias, Date reportPeriodStartDate,
                                          Date reportPeriodEndDate, boolean fatal) {
         Date dealDoneDate = row.getCell(alias).getDateValue();
         if (dealDoneDate != null && (dealDoneDate.before(reportPeriodStartDate) || dealDoneDate.after(reportPeriodEndDate))) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") +
+            rowLog(logger, row, (row != null ? ("Строка " + row.getIndex() + ": ") : "") +
                     String.format("Дата, указанная в графе «%s» (%s), должна относиться к отчетному периоду текущей формы (%s - %s)!",
                             getColumnName(row, alias), formatDate(dealDoneDate, "dd.MM.yyyy"),
                             formatDate(reportPeriodStartDate, "dd.MM.yyyy"),
@@ -2048,12 +1962,13 @@ public final class ScriptUtils {
 
     /**
      * Проверка нахождения даты в диапазоне (вариант 1, с датами)
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
+     *
+     * @param logger    логер для записи сообщения
+     * @param row       строка НФ
+     * @param alias     псевдоним столбца
      * @param startDate дата окончания периода текущей формы
-     * @param endDate дата окончания периода текущей формы
-     * @param fatal фатально ли сообщение
+     * @param endDate   дата окончания периода текущей формы
+     * @param fatal     фатально ли сообщение
      */
     public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, Date startDate, Date endDate, boolean fatal) {
         Date docDate = row.getCell(alias).getDateValue();
@@ -2069,34 +1984,36 @@ public final class ScriptUtils {
 
     /**
      * Проверка нахождения даты в диапазоне (вариант 2, с названиями граф)
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
+     *
+     * @param logger     логер для записи сообщения
+     * @param row        строка НФ
+     * @param alias      псевдоним столбца
      * @param startAlias псевдоним графы даты начала периода
-     * @param endDate дата окончания периода текущей формы
-     * @param fatal фатально ли сообщение
+     * @param endDate    дата окончания периода текущей формы
+     * @param fatal      фатально ли сообщение
      */
     public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, String startAlias, Date endDate, boolean fatal) {
         Date docDate = row.getCell(alias).getDateValue();
         Date startDate = row.getCell(startAlias).getDateValue();
         if (docDate != null && startDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
             rowLog(logger, row, String.format("Строка %d: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше %s!",
-                            row.getIndex(),
-                            getColumnName(row, alias),
-                            getColumnName(row, startAlias),
-                            formatDate(endDate, "dd.MM.yyyy")
-                    ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+                    row.getIndex(),
+                    getColumnName(row, alias),
+                    getColumnName(row, startAlias),
+                    formatDate(endDate, "dd.MM.yyyy")
+            ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
     }
 
     /**
      * Проверка нахождения даты в диапазоне и сравнение с другой графой
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
+     *
+     * @param logger     логер для записи сообщения
+     * @param row        строка НФ
+     * @param alias      псевдоним столбца
      * @param startAlias псевдоним графы даты начала периода
-     * @param endDate дата окончания периода текущей формы
-     * @param fatal фатально ли сообщение
+     * @param endDate    дата окончания периода текущей формы
+     * @param fatal      фатально ли сообщение
      */
     public static void checkDatePeriodExt(Logger logger, DataRow<Cell> row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
         // дата проверяемой графы
@@ -2118,12 +2035,12 @@ public final class ScriptUtils {
     /**
      * Сравнить суммы из транспортного файла с посчитанными суммами и задать значения из строки тф в строку нф.
      *
-     * @param totalRow строка с посчитанными суммами
+     * @param totalRow   строка с посчитанными суммами
      * @param totalRowTF строка с суммами из транспортного файла
-     * @param columns список алиасов столбцов
-     * @param rowIndex номер строки файла
-     * @param logger логгер
-     * @param isFatal фатальность - ошибка / предупреждение
+     * @param columns    список алиасов столбцов
+     * @param rowIndex   номер строки файла
+     * @param logger     логгер
+     * @param isFatal    фатальность - ошибка / предупреждение
      */
     public static void checkAndSetTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, Integer rowIndex, Logger logger, boolean isFatal) {
         if (!logger.containsLevel(LogLevel.ERROR) && totalRowTF != null) {
@@ -2147,12 +2064,12 @@ public final class ScriptUtils {
     /**
      * Сравнить суммы из транспортного файла с посчитанными суммами.
      *
-     * @param totalRow строка с посчитанными суммами
+     * @param totalRow   строка с посчитанными суммами
      * @param totalRowTF строка с суммами из транспортного файла
-     * @param columns список алиасов столбцов
-     * @param rowIndex номер строки файла
-     * @param logger логгер
-     * @param isFatal фатальность - ошибка / предупреждение
+     * @param columns    список алиасов столбцов
+     * @param rowIndex   номер строки файла
+     * @param logger     логгер
+     * @param isFatal    фатальность - ошибка / предупреждение
      */
     public static void checkTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, Integer rowIndex, Logger logger, boolean isFatal) {
         for (String alias : columns) {
@@ -2204,7 +2121,9 @@ public final class ScriptUtils {
      * Интерфейс для сравнения принадлежности двух строк к одной группе
      */
     public interface CheckDiffGroup {
-        /** Нужно сравнить 1) две нефиксированные и 2) фиксированную и нефиксированную */
+        /**
+         * Нужно сравнить 1) две нефиксированные и 2) фиксированную и нефиксированную
+         */
         Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns);
     }
 
@@ -2243,14 +2162,14 @@ public final class ScriptUtils {
         /**
          * Для обработки листа экселя.
          *
-         * @param sst таблица со строковыми значениями (Shared Strings Table)
-         * @param stylesTable таблица со стилями ячеек
-         * @param allValues список для хранения списков значении каждой строки данных
-         * @param headerValues список для хранения списков значении каждой строки шапки таблицы
+         * @param sst             таблица со строковыми значениями (Shared Strings Table)
+         * @param stylesTable     таблица со стилями ячеек
+         * @param allValues       список для хранения списков значении каждой строки данных
+         * @param headerValues    список для хранения списков значении каждой строки шапки таблицы
          * @param tableStartValue начальное значение, с которого начинается сбор данных
-         * @param tableEndValue конечное значение, с которого прекращается сбор данных
-         * @param headerRowCount количество строк в шапке таблицы
-         * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+         * @param tableEndValue   конечное значение, с которого прекращается сбор данных
+         * @param headerRowCount  количество строк в шапке таблицы
+         * @param paramsMap       мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
          */
         private SheetHandler(SharedStringsTable sst, StylesTable stylesTable,
                              List<List<String>> allValues, List<List<String>> headerValues,
@@ -2419,13 +2338,17 @@ public final class ScriptUtils {
             lastValue.append(ch, start, length);
         }
 
-        /** Получить номер столбца по значению позиции (A1, B1 ... AB12). */
+        /**
+         * Получить номер столбца по значению позиции (A1, B1 ... AB12).
+         */
         int getColumnIndex(String position) {
             String onlyColumnName = position.replaceAll("[\\d]+", "");
             return CellReference.convertColStringToIndex(onlyColumnName);
         }
 
-        /** Получить номер строки по значению позиции (A1, B1 ... AB12). */
+        /**
+         * Получить номер строки по значению позиции (A1, B1 ... AB12).
+         */
         int getRowIndex(String position) {
             return Integer.parseInt(position.replaceAll("[^\\d]+", ""));
         }
@@ -2446,8 +2369,10 @@ public final class ScriptUtils {
             return lastValuesMap.get(value);
         }
 
-        /** Получить значение в виде строки. */
-         String getValue() {
+        /**
+         * Получить значение в виде строки.
+         */
+        String getValue() {
             String value;
 
             switch (dataType) {
@@ -2549,7 +2474,7 @@ public final class ScriptUtils {
                     }
                 } else {
                     isData = false;
-                    if (rowValues != null &&  !rowValues.isEmpty() && rowValues.get(0).startsWith(headerStartValue)) {
+                    if (rowValues != null && !rowValues.isEmpty() && rowValues.get(0).startsWith(headerStartValue)) {
                         colOffset = 0;
                         isHeader = true;
                     }
@@ -2571,7 +2496,9 @@ public final class ScriptUtils {
         }
     }
 
-    /** Проверка заголовка и второй пустой строки тф. */
+    /**
+     * Проверка заголовка и второй пустой строки тф.
+     */
     public static void checkFirstRowsTF(CSVReader reader, Logger logger) throws IOException {
         // заголовок
         String[] rowCells = reader.readNext();
@@ -2618,15 +2545,15 @@ public final class ScriptUtils {
         }
 
         Integer controlSumm =
-                  9*Integer.valueOf(number.substring(0, 1))
-                + 8*Integer.valueOf(number.substring(1, 2))
-                + 7*Integer.valueOf(number.substring(2, 3))
-                + 6*Integer.valueOf(number.substring(3, 4))
-                + 5*Integer.valueOf(number.substring(4, 5))
-                + 4*Integer.valueOf(number.substring(5, 6))
-                + 3*Integer.valueOf(number.substring(6, 7))
-                + 2*Integer.valueOf(number.substring(7, 8))
-                +   Integer.valueOf(number.substring(8, 9));
+                9 * Integer.valueOf(number.substring(0, 1))
+                        + 8 * Integer.valueOf(number.substring(1, 2))
+                        + 7 * Integer.valueOf(number.substring(2, 3))
+                        + 6 * Integer.valueOf(number.substring(3, 4))
+                        + 5 * Integer.valueOf(number.substring(4, 5))
+                        + 4 * Integer.valueOf(number.substring(5, 6))
+                        + 3 * Integer.valueOf(number.substring(6, 7))
+                        + 2 * Integer.valueOf(number.substring(7, 8))
+                        + Integer.valueOf(number.substring(8, 9));
 
         Integer controlModSum = controlSumm % 101;
 
@@ -2655,6 +2582,7 @@ public final class ScriptUtils {
     /**
      * Сравнение двух значений справочника, производится преобразование числовых значений a к типу сравниваемого значения b (Integer или Long) , так как в RefBookValue все числа хранятся как BigDecimal
      * Ограничение: в текущей реализации нереализовано сравнение чисел с плавающей точкой
+     *
      * @return
      */
     public static boolean equalsNullSafe(Object a, Object b) {
@@ -2669,7 +2597,7 @@ public final class ScriptUtils {
                 } else if (b instanceof Long) {
                     return isEquals(anum.longValue(), b);
                 } else {
-                    throw new UnsupportedOperationException("The method 'equalsNullSafe' is not supported for arguments type "+a.getClass()+" and "+b.getClass());
+                    throw new UnsupportedOperationException("The method 'equalsNullSafe' is not supported for arguments type " + a.getClass() + " and " + b.getClass());
                 }
             } else {
                 result = a.equals(b);
@@ -2687,16 +2615,17 @@ public final class ScriptUtils {
 
     /**
      * Проверка заполнения графы, значение считаться незаполненным в том числе, если в ней указан "0"
+     *
      * @param value
      * @return
      */
     public static boolean isEmpty(Object value) {
 
-        if (value == null){
+        if (value == null) {
             return true;
         }
 
-        if (value instanceof BigDecimal){
+        if (value instanceof BigDecimal) {
             BigDecimal bigDecimal = (BigDecimal) value;
             return bigDecimal.compareTo(BigDecimal.ZERO) == 0;
         } else if (value instanceof Integer) {
@@ -2705,11 +2634,12 @@ public final class ScriptUtils {
         } else if (value instanceof Long) {
             Number number = (Number) value;
             return number.intValue() == 0;
-        } if (value instanceof String) {
+        }
+        if (value instanceof String) {
             String string = (String) value;
             return string.isEmpty();
         } else {
-            throw new UnsupportedOperationException("The method 'isEmpty' is not supported for arguments type "+value.getClass());
+            throw new UnsupportedOperationException("The method 'isEmpty' is not supported for arguments type " + value.getClass());
         }
     }
 
@@ -2722,6 +2652,7 @@ public final class ScriptUtils {
 
     /**
      * Проверка ИНН физического лица
+     *
      * @param innValue
      * @return
      * @see <a href="https://conf.aplana.com/pages/viewpage.action?pageId=27182953>Проверка ИНН физического лица</a>
@@ -2734,7 +2665,7 @@ public final class ScriptUtils {
             if (!checkFormat(innValue, "[0-9]{12}")) {
                 return "Значение гр. \"ИНН в РФ\" (\"" + innValue + "\") должно содержать только цифры";
             }
-            if (Arrays.asList("00","90","93","94","95","96","98").contains(innValue.substring(0, 2))) {
+            if (Arrays.asList("00", "90", "93", "94", "95", "96", "98").contains(innValue.substring(0, 2))) {
                 return "Значение гр. \"ИНН в РФ\" (\"" + innValue + "\") некорректно. Первые два разряда ИНН не могут быть равны одному из значений: \"00\",\"90\",\"93\",\"94\",\"95\",\"96\",\"98\", может быть отказано в приеме";
             }
             if (!RefBookUtils.checkControlSumInn(innValue)) {
@@ -2746,12 +2677,12 @@ public final class ScriptUtils {
 
     public static String checkName(String value, String attrName) {
         if (value != null && !value.isEmpty()) {
-            if (Arrays.asList(" ","ь","ъ","-",".","'").contains(value.substring(0, 1).toLowerCase())) {
-                return "Значение гр. \"" + attrName + "\" (\"" + value +"\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме";
+            if (Arrays.asList(" ", "ь", "ъ", "-", ".", "'").contains(value.substring(0, 1).toLowerCase())) {
+                return "Значение гр. \"" + attrName + "\" (\"" + value + "\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме";
             }
             if (!checkFormat(value, "^[а-яА-ЯёЁ -]+")) {
-                return "Значение гр. \"" + attrName + "\" (\"" + value +"\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы";
-           }
+                return "Значение гр. \"" + attrName + "\" (\"" + value + "\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы";
+            }
         }
         return null;
     }
@@ -2819,20 +2750,26 @@ public final class ScriptUtils {
             case "21": {
                 return formattedValue.insert(2, " ")
                         .insert(5, " ").toString();
-            } case "07": {
+            }
+            case "07": {
                 return formattedValue.insert(2, " ").toString();
-            } case "18": {
+            }
+            case "18": {
                 return formattedValue.insert(2, "-")
                         .insert(6, " ").toString();
-            }case "24": {
+            }
+            case "24": {
                 return formattedValue.insert(2, " ").toString();
             }
         }
         return value;
-    };
+    }
+
+    ;
 
     /**
      * Проверяет соответствие ДУЛ формату с удаленными разделителями.
+     *
      * @param code
      * @param value
      * @return
@@ -2870,7 +2807,8 @@ public final class ScriptUtils {
 
     /**
      * Получить форму слова первого склонения в зависимости от стоящего рядом со словом числительным.
-     * @param word Слово первого склонения в именительном падеже
+     *
+     * @param word    Слово первого склонения в именительном падеже
      * @param numeric Числительное
      * @return Слово в полученное в аргументе в нужном падеже в зависимости от числительного. Работает не со всеми
      * словами данной категории. А только заканчивающимися в иминительном падеже множественного числа на ы.
@@ -2878,15 +2816,15 @@ public final class ScriptUtils {
     public static String getFirstDeclensionByNumeric(String word, int numeric) {
         int res = numeric % 10;
         String numberAsString = String.valueOf(numeric);
-        for (String teenNumber: Arrays.asList("11", "12", "13", "14")) {
+        for (String teenNumber : Arrays.asList("11", "12", "13", "14")) {
             if (numberAsString.endsWith(teenNumber)) {
-                return word.substring(0, word.length()-1);
+                return word.substring(0, word.length() - 1);
             }
         }
         if (Arrays.asList(5, 6, 7, 8, 9, 0).contains(res)) {
-            return word.substring(0, word.length()-1);
+            return word.substring(0, word.length() - 1);
         }
-        if (Arrays.asList(2, 3, 4).contains(res)){
+        if (Arrays.asList(2, 3, 4).contains(res)) {
             return word.substring(0, word.length() - 1) + "ы";
         }
         return word;
@@ -2894,8 +2832,9 @@ public final class ScriptUtils {
 
     /**
      * Рассчитывает UUID для объекта дохода на основе состояния полей объекта операции дохода
+     *
      * @param income объект операции дохода
-     * @return  строковое представление UUID объекта дохода
+     * @return строковое представление UUID объекта дохода
      */
     public static String getConsolidationIncomeUUID(ConsolidationIncome income) {
         int size = 0;
@@ -2931,7 +2870,7 @@ public final class ScriptUtils {
         size += withHoldingTax.length;
         byte[] notHoldingTax = bigDecimalToByteArray(income.getNotHoldingTax());
         size += notHoldingTax.length;
-        byte[] overholdingTax  = bigDecimalToByteArray(income.getOverholdingTax());
+        byte[] overholdingTax = bigDecimalToByteArray(income.getOverholdingTax());
         size += overholdingTax.length;
         byte[] refoundTax = longToByteArray(income.getRefoundTax());
         size += refoundTax.length;
@@ -2995,18 +2934,20 @@ public final class ScriptUtils {
 
     /**
      * Преобразует дату в массив байтов на основе её long значения
+     *
      * @param d дата
-     * @return  массив байтов
+     * @return массив байтов
      */
     private static byte[] dateToByteArray(Date d) {
         if (d != null) {
             return longToByteArray(d.getTime());
         }
-        return new byte[]{(byte)0xFF};
+        return new byte[]{(byte) 0xFF};
     }
 
     /**
      * Преобразует число {@code BigDecimal} в массив байтов на основе его String представления
+     *
      * @param d число
      * @return массив байтов
      */
@@ -3014,23 +2955,25 @@ public final class ScriptUtils {
         if (d != null) {
             return stringToByteArray(d.toString());
         }
-        return new byte[]{(byte)0xFF};
+        return new byte[]{(byte) 0xFF};
     }
 
     /**
      * Преобразует строку в массив байтов
+     *
      * @param s строка
-     * @return  массив байтов
+     * @return массив байтов
      */
     private static byte[] stringToByteArray(String s) {
         if (s != null) {
             return s.toLowerCase().getBytes(Charset.forName("UTF-8"));
         }
-        return new byte[]{(byte)0xFF};
+        return new byte[]{(byte) 0xFF};
     }
 
     /**
      * Преобразует число long в массив байтов, для каждый из 8 байтов числа помещается в массив
+     *
      * @param l число
      * @return массив байтов
      */
@@ -3055,12 +2998,12 @@ public final class ScriptUtils {
             toReturn[0] = (byte) primitiveL;
             return toReturn;
         }
-        return new byte[]{(byte)0xFF};
+        return new byte[]{(byte) 0xFF};
     }
 
     /**
      * Преобразует число int в массив байтов, для каждый из 4 байтов числа помещается в массив
-     * @param l число
+     *
      * @return массив байтов
      */
     private static byte[] intToByteArray(Integer i) {
@@ -3076,14 +3019,15 @@ public final class ScriptUtils {
             toReturn[0] = (byte) primitiveI;
             return toReturn;
         }
-        return new byte[]{(byte)0xFF};
+        return new byte[]{(byte) 0xFF};
     }
 
     /**
      * Сливает массивы байтов, таким образом, чтобы slave прицеплялся к хвосту master
-     * @param slave     массив источник
-     * @param master    массив к которому прицепляют источник
-     * @param offset    позиция массива master к которой прицепляют источник
+     *
+     * @param slave  массив источник
+     * @param master массив к которому прицепляют источник
+     * @param offset позиция массива master к которой прицепляют источник
      */
     private static void mergeByteArrays(byte[] slave, byte[] master, int offset) {
         System.arraycopy(slave, 0, master, offset, slave.length);

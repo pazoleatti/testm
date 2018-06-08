@@ -42,8 +42,6 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	@Autowired
 	private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
     @Autowired
-    private LogEntryService logEntryService;
-    @Autowired
     private ApplicationInfo applicationInfo;
     @Autowired
     private TransactionHelper tx;

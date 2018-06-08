@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +29,14 @@ public class RefBookConfigurationParam extends AbstractPermanentRefBook {
     public static final String ATTRIBUTE_CODE = "CODE";
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     private RefBook refBook;
 
     @PostConstruct
     @SuppressWarnings("unused") // https://jira.codehaus.org/browse/SONARJAVA-117
     private void init() {
-        refBook = refBookFactory.get(REF_BOOK_ID);
+        refBook = commonRefBookService.get(REF_BOOK_ID);
     }
 
     @Override

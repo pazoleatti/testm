@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -24,6 +25,8 @@ import java.util.*;
 @Transactional
 public class SaveDuplicatePersonHandler extends AbstractActionHandler<SaveDuplicatePersonAction, SaveDuplicatePersonResult> {
 
+    @Autowired
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
@@ -47,7 +50,7 @@ public class SaveDuplicatePersonHandler extends AbstractActionHandler<SaveDuplic
         logger.setTaUserInfo(securityService.currentUserInfo());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERSON.getId());
         RefBookDataProvider dulDataProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.getId());
-        RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId());
+        RefBook refBook = commonRefBookService.get(RefBook.Id.PERSON.getId());
 
         //TODO: (dloshkarev) ниже начинается какой то ужас, надо это переписать
 

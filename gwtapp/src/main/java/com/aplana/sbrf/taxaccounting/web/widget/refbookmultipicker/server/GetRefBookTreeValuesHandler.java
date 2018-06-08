@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookTreeValuesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookTreeValuesResult;
@@ -40,6 +41,9 @@ import java.util.Map;
 public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBookTreeValuesAction, GetRefBookTreeValuesResult> {
 
     @Autowired
+    CommonRefBookService commonRefBookService;
+
+    @Autowired
     RefBookFactory refBookFactory;
 
     @Autowired
@@ -62,7 +66,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
 
         GetRefBookTreeValuesResult result = new GetRefBookTreeValuesResult();
         Logger logger = new Logger();
-        RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        RefBook refBook = commonRefBookService.getByAttribute(action.getRefBookAttrId());
         result.setRefBookId(refBook.getId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 

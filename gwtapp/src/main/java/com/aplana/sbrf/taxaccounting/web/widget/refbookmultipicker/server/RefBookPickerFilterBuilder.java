@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
@@ -21,7 +21,7 @@ import java.util.*;
 public class RefBookPickerFilterBuilder {
 
     @Autowired
-    RefBookFactory refBookFactory;
+    CommonRefBookService commonRefBookService;
 
     @Autowired
     DepartmentService departmentService;
@@ -75,7 +75,7 @@ public class RefBookPickerFilterBuilder {
 
         }
 
-        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
+        String resultSearch = commonRefBookService.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
 
         if (resultFilter.length() > 0 && resultSearch != null && !resultSearch.isEmpty()) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
@@ -116,7 +116,7 @@ public class RefBookPickerFilterBuilder {
             resultFilter.append("(" + regionFilter + ")");
         }
 
-        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
+        String resultSearch = commonRefBookService.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
         if (resultFilter.length() > 0 && resultSearch != null && !resultSearch.isEmpty()) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
         } else if (resultFilter.length() > 0 && resultSearch != null && resultSearch.isEmpty()) {

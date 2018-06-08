@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.EditRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.EditRefBookResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -24,13 +22,7 @@ import java.text.SimpleDateFormat;
 public class EditRefBookHandler extends AbstractActionHandler<EditRefBookAction, EditRefBookResult> {
 
     @Autowired
-    private RefBookFactory refBookFactory;
-
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private TAUserService userService;
+    private CommonRefBookService commonRefBookService;
 
     @Autowired
     private LockDataService lockDataService;
@@ -52,13 +44,13 @@ public class EditRefBookHandler extends AbstractActionHandler<EditRefBookAction,
     @Override
     public EditRefBookResult execute(EditRefBookAction action, ExecutionContext context) throws ActionException {
         EditRefBookResult result = new EditRefBookResult();
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
         Logger logger = new Logger();
 
-        LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
+        LockData lockData = lockDataService.getLock(commonRefBookService.generateTaskKey(refBook.getId()));
         if (lockData != null) {
             result.setLock(true);
-            logger.info(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
+            logger.info(commonRefBookService.getRefBookLockDescription(lockData, refBook.getId()));
             result.setLockMsg("Для текущего справочника запущена операция, при которой редактирование невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

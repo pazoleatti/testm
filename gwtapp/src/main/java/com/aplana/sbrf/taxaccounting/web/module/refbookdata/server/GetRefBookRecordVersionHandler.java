@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookRecordVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookRecordVersionResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
@@ -22,6 +23,8 @@ import java.util.*;
 public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRefBookRecordVersionAction, GetRefBookRecordVersionResult> {
 
     @Autowired
+    CommonRefBookService commonRefBookService;
+    @Autowired
     RefBookFactory refBookFactory;
 
     public GetRefBookRecordVersionHandler() {
@@ -33,7 +36,7 @@ public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRef
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
         GetRefBookRecordVersionResult result = new GetRefBookRecordVersionResult();
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
         if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
             //TODO: recordId надо передавать с клиента!!
             Long recordId;
@@ -48,7 +51,7 @@ public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRef
             for (RefBookAttribute attribute : refBook.getAttributes()) {
                 if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                     refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-                    RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                    RefBook refRefBook = commonRefBookService.get(attribute.getRefBookId());
                     RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
                     refAliases.put(attribute.getAlias(), refAttribute.getAlias());
                 }

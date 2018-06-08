@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private ConfigurationDao configurationDao;
     @Autowired
     private DepartmentDao departmentDao;
+    @Autowired
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
@@ -493,7 +496,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" + config.get("NAME") + "\":" + check, null);
             }
         }
-        RefBook refBookAsyncConfig = refBookFactory.get(RefBook.Id.ASYNC_CONFIG.getId());
+        RefBook refBookAsyncConfig = commonRefBookService.get(RefBook.Id.ASYNC_CONFIG.getId());
         for (Map<String, String> config : asyncConfigs) {
             Map<String, String> oldConfig = oldAsyncConfigMap.get(config.get("ID"));
             for (String key : Arrays.asList("SHORT_QUEUE_LIMIT", "TASK_LIMIT")) {
@@ -749,7 +752,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             if (intValue < 1 || intValue > 99) {
                 logger.error(CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE);
             }
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             logger.error(CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE);
         }
     }

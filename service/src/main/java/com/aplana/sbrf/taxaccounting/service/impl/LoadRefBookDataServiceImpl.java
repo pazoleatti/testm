@@ -15,8 +15,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import net.sf.sevenzipjbinding.ArchiveFormat;
@@ -61,7 +61,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     @Autowired
     private AsyncManager asyncManager;
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private BlobDataService blobDataService;
     @Autowired
@@ -312,7 +312,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
                             //Устанавливаем блокировку на справочник
                             List<String> lockedObjects = new ArrayList<String>();
-                            String lockKey = refBookFactory.generateTaskKey(refBookId);
+                            String lockKey = commonRefBookService.generateTaskKey(refBookId);
                             int userId = userInfo.getUser().getId();
 
                             RefBook refBook = refBookDao.get(refBookId);
@@ -327,7 +327,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     for (RefBookAttribute attribute : attributes) {
                                         if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                                             RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                                            String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                                            String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                                             if (!lockedObjects.contains(referenceLockKey)) {
                                                 if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                                     //Блокировка установлена
@@ -587,7 +587,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         File xmlFile = createTempFile(blobData.getInputStream());
         String fileName = blobData.getName();
         try {
-            RefBook refBook = refBookFactory.get(refBookId);
+            RefBook refBook = commonRefBookService.get(refBookId);
             validate(xmlFile, refBook, logger, userInfo);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
@@ -627,9 +627,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     private void lockAndImportXml(long refBookId, File xmlFile, String fileName, TAUserInfo userInfo, Logger logger) {
         TAUser user = userInfo.getUser();
-        String refBookLockKey = refBookFactory.generateTaskKey(refBookId);
+        String refBookLockKey = commonRefBookService.generateTaskKey(refBookId);
         LockData refBookLockData = lockService.lock(refBookLockKey, user.getId(),
-                refBookFactory.getRefBookDescription(DescriptionTemplate.REF_BOOK_EDIT, refBookId));
+                commonRefBookService.getRefBookActionDescription(DescriptionTemplate.REF_BOOK_EDIT, refBookId));
         if (refBookLockData == null || refBookLockData.getUserId() == user.getId()) {
             try (InputStream xml = new BufferedInputStream(new FileInputStream(xmlFile))) {
                 doImportXml(refBookId, xml, fileName, userInfo, logger);
@@ -639,7 +639,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 lockService.unlock(refBookLockKey, user.getId());
             }
         } else {
-            logger.error(refBookFactory.getRefBookLockDescription(refBookLockData, refBookId));
+            logger.error(commonRefBookService.getRefBookLockDescription(refBookLockData, refBookId));
         }
     }
 

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -28,6 +29,8 @@ import java.util.List;
 public class GetHierarchyPathHandler extends AbstractActionHandler<GetHierarchyPathAction, GetHierarchyPathResult> {
 
     @Autowired
+    CommonRefBookService commonRefBookService;
+    @Autowired
     RefBookFactory refBookFactory;
 
     @Autowired
@@ -46,7 +49,7 @@ public class GetHierarchyPathHandler extends AbstractActionHandler<GetHierarchyP
 
         GetHierarchyPathResult result = new GetHierarchyPathResult();
         Logger logger = new Logger();
-        RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        RefBook refBook = commonRefBookService.getByAttribute(action.getRefBookAttrId());
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 

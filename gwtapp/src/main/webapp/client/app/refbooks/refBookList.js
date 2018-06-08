@@ -24,10 +24,10 @@
 
             function linkFormatter(cellValue, options, row) {
                 var url;
-                if (row.refBookType === APP_CONSTANTS.REFBOOK_TYPE.LINEAR) {
-                    url = $state.href('linearRefBook', {refBookId: row.refBookId});
+                if (row.hierarchic) {
+                    url = $state.href('hierRefBook', {refBookId: row.id});
                 } else {
-                    url = $state.href('hierRefBook', {refBookId: row.refBookId});
+                    url = $state.href('linearRefBook', {refBookId: row.id});
                 }
                 return '<a href="' + url + '">' + cellValue + '</a>';
             }
@@ -52,21 +52,19 @@
                     ],
                     colModel: [
                         {
-                            name: 'refBookName',
-                            index: 'refBookName',
+                            name: 'name',
+                            index: 'name',
                             width: 600,
                             formatter: linkFormatter
                         },
                         {
-                            name: 'isReadOnly',
-                            index: 'isReadOnly',
+                            name: 'readOnly',
+                            index: 'readOnly',
                             width: 250,
                             formatter: typeFormatter
                         }
                     ],
                     sortname: 'refBoookName',
-                    viewrecords: true,
-                    sortorder: "asc",
                     hidegrid: false
                 }
             };

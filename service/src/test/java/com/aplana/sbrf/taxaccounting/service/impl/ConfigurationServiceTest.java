@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -75,6 +76,7 @@ public class ConfigurationServiceTest {
         ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
 
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        CommonRefBookService commonRefBookService = mock(CommonRefBookService.class);
         RefBookDataProvider providerEmail = mock(RefBookDataProvider.class);
         PagingResult<Map<String, RefBookValue>> emailValues = new PagingResult<Map<String, RefBookValue>>();
         Map<String, RefBookValue> config1 = new HashMap<String, RefBookValue>();
@@ -116,8 +118,9 @@ public class ConfigurationServiceTest {
             setName("TASK_LIMIT");
         }});
         refBookAsyncConfig.setAttributes(attributes);
-        when(refBookFactory.get(RefBook.Id.ASYNC_CONFIG.getId())).thenReturn(refBookAsyncConfig);
+        when(commonRefBookService.get(RefBook.Id.ASYNC_CONFIG.getId())).thenReturn(refBookAsyncConfig);
         ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
+        ReflectionTestUtils.setField(service, "commonRefBookService", commonRefBookService);
 
         ReflectionTestUtils.setField(service, "auditService", auditService);
 

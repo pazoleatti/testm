@@ -12,13 +12,14 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +35,8 @@ public class PersonServiceImpl implements PersonService {
 
     @Autowired
     private RefBookPersonDao refBookPersonDao;
+    @Autowired
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
@@ -76,7 +79,7 @@ public class PersonServiceImpl implements PersonService {
     public PagingResult<RefBookPerson> getPersons(Long recordId, Date version, PagingParams pagingParams, String firstName, String lastName, String searchPattern, boolean exactSearch) {
         Long refBookId = RefBook.Id.PERSON.getId();
         RefBookAttribute sortAttribute = pagingParams != null && StringUtils.isNotEmpty(pagingParams.getProperty()) ?
-                refBookFactory.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
+                commonRefBookService.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         PagingResult<RefBookPerson> records;
         if (recordId == null) {
             String filter = "";

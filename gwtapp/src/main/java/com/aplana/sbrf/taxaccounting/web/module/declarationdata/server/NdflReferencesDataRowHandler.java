@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetNdflReferencesResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetNdflReferencesTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.NdflReferenceDTO;
@@ -25,6 +26,8 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class NdflReferencesDataRowHandler extends AbstractActionHandler<GetNdflReferencesTableDataAction, GetNdflReferencesResult> {
 
+    @Autowired
+    private CommonRefBookService commonRefBookService;
     @Autowired
     private RefBookFactory refBookFactory;
 
@@ -49,7 +52,7 @@ public class NdflReferencesDataRowHandler extends AbstractActionHandler<GetNdflR
 
         GetNdflReferencesResult result = new GetNdflReferencesResult();
 
-        RefBook refBook = refBookFactory.get(NDFL_REFERENCES_REF_BOOK_ID);
+        RefBook refBook = commonRefBookService.get(NDFL_REFERENCES_REF_BOOK_ID);
 
         String refNumber = action.getRefNumber();
         Long declarationDataId = action.getDeclarationDataId();

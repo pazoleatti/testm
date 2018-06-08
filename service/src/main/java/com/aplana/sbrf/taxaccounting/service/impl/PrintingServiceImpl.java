@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -20,33 +13,20 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -56,24 +36,17 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String POSTFIX = ".xlsm";
 
     @Autowired
-    private ReportPeriodDao reportPeriodDao;
-    @Autowired
-    private LogBusinessDao logBusinessDao;
-    @Autowired
     private RefBookHelper refBookHelper;
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
-    private BlobDataService blobDataService;
+    private CommonRefBookService commonRefBookService;
     @Autowired
-    private DepartmentReportPeriodService departmentReportPeriodService;
+    private BlobDataService blobDataService;
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private LogEntryService logEntryService;
-
-    private static final long REF_BOOK_ID = RefBook.Id.PERIOD_CODE.getId();
-    private static final String REF_BOOK_VALUE_NAME = "CODE";
 
     @Override
     public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
@@ -160,7 +133,7 @@ public class PrintingServiceImpl implements PrintingService {
         String reportPath = null;
         try {
             RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
-            RefBook refBook = refBookFactory.get(refBookId);
+            RefBook refBook = commonRefBookService.get(refBookId);
             PagingParams pagingParams = new PagingParams();
             pagingParams.setStartIndex(1);
             pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));
@@ -215,7 +188,7 @@ public class PrintingServiceImpl implements PrintingService {
         String reportPath = null;
         try {
             RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
-            RefBook refBook = refBookFactory.get(refBookId);
+            RefBook refBook = commonRefBookService.get(refBookId);
             PagingParams pagingParams = new PagingParams();
             pagingParams.setStartIndex(1);
             pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));

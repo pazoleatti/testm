@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookRecordAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookRecordResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
@@ -28,6 +29,8 @@ import java.util.*;
 public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRecordAction, GetRefBookRecordResult> {
 
 	@Autowired
+	CommonRefBookService commonRefBookService;
+	@Autowired
 	RefBookFactory refBookFactory;
 
 	public GetRefBookRecordHandler() {
@@ -37,7 +40,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 	@Override
 	public GetRefBookRecordResult execute(GetRefBookRecordAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
-        RefBook refBookTemp = refBookFactory.get(action.getRefBookId());
+        RefBook refBookTemp = commonRefBookService.get(action.getRefBookId());
         RefBook refBook = SerializationUtils.clone(refBookTemp);
         refBook.setAttributes(new ArrayList<RefBookAttribute>());
         refBook.getAttributes().addAll(refBookTemp.getAttributes());
@@ -67,7 +70,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
         Map<String, RefBookValue> record = refBookDataProvider.getRecordData(recordId);
 
 		if (record != null) {
-			recordData = convert(refBook, record, refBookFactory);
+			recordData = convert(refBook, record, commonRefBookService, refBookFactory);
 
 			//Получаем версию выбранной записи
 			recordVersion = refBookDataProvider.getRecordVersionInfo(recordId);
@@ -95,7 +98,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 		return result;
 	}
 
-	static public Map<String, RefBookValueSerializable> convert(RefBook refBook, Map<String, RefBookValue> record, RefBookFactory refBookFactory) {
+	static public Map<String, RefBookValueSerializable> convert(RefBook refBook, Map<String, RefBookValue> record, CommonRefBookService commonRefBookService, RefBookFactory refBookFactory) {
 		Map<String, RefBookValueSerializable> convertedRecord = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<String, RefBookValue> recordValue : record.entrySet()) {
 			RefBookValueSerializable serializedValue = new RefBookValueSerializable();
@@ -119,7 +122,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 						// получаем текущий атрибут
 						RefBookAttribute attribute = refBook.getAttribute(recordValue.getKey());
 						// получаем сам справочник, на который ссылаемся, и его провайдер данных
-						RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+						RefBook refRefBook = commonRefBookService.get(attribute.getRefBookId());
 						RefBookDataProvider refDataProvider = refBookFactory.getDataProvider(refRefBook.getId());
 						// запрашиваем строку, на которую у нас установлена ссылка
 						Map<String, RefBookValue> refValue = refDataProvider.getRecordData(recordValue.getValue().getReferenceValue());

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookAttributesAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookAttributesResult;
@@ -27,7 +28,7 @@ import java.util.List;
 public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBookAttributesAction, GetRefBookAttributesResult> {
 
 	@Autowired
-	RefBookFactory refBookFactory;
+	CommonRefBookService commonRefBookService;
 
     @Autowired
     SecurityService securityService;
@@ -43,7 +44,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 
 	@Override
 	public GetRefBookAttributesResult execute(GetRefBookAttributesAction action, ExecutionContext executionContext) throws ActionException {
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
 		List<RefBookAttribute> attributes = refBook.getAttributes();
         GetRefBookAttributesResult result = new GetRefBookAttributesResult();
 		result.setRefBookName(refBook.getName());
@@ -55,7 +56,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 			RefBookColumn col = new RefBookColumn();
             RefBook attributeRefBook = null;
             if(attribute.getRefBookId()!=null){
-                attributeRefBook = refBookFactory.get(attribute.getRefBookId());
+                attributeRefBook = commonRefBookService.get(attribute.getRefBookId());
             }
 			col.setId(attribute.getId());
 			col.setAlias(attribute.getAlias());
@@ -95,7 +96,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 
 		result.setColumns(columns);
 
-        result.setSpecificReportTypes(refBookFactory.getSpecificReportTypes(refBook.getId(), securityService.currentUserInfo(), new Logger()));
+        //result.setSpecificReportTypes(commonRefBookService.getSpecificReportTypes(refBook.getId(), securityService.currentUserInfo(), new Logger()));
         return result;
 	}
 
@@ -112,7 +113,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 				alignment = HorizontalAlignment.ALIGN_CENTER;
 				break;
 			case REFERENCE:
-				RefBook refBook = refBookFactory.get(attribute.getRefBookId());
+				RefBook refBook = commonRefBookService.get(attribute.getRefBookId());
 				RefBookAttribute refAttr = refBook.getAttribute(attribute.getRefBookAttributeId());
 				alignment = getHorizontalAlignment(refAttr);
 				break;

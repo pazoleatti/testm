@@ -3,39 +3,26 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookLinkModel;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Transactional
@@ -51,7 +38,9 @@ public class RefBookSimpleDataProviderHelper {
     };
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
+    @Autowired
+    private RefBookFactory refBookFactory;
     @Autowired
     private RefBookHelper refBookHelper;
     @Autowired
@@ -90,13 +79,13 @@ public class RefBookSimpleDataProviderHelper {
             if (refBook.isHierarchic() && refBook.isVersioned()) {
                 checkParentConflict(refBook, logger, versionFrom, records);
             }
-			// Проверяем каждую запись по-отдельности на уникальность значений
+            // Проверяем каждую запись по-отдельности на уникальность значений
             for (RefBookRecord record : records) {
-				// Найденные совпадения [uniqRecordId-атрибут(ы), ...]
+                // Найденные совпадения [uniqRecordId-атрибут(ы), ...]
                 List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record);
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
                     List<Long> conflictedIds = dao.checkConflictValuesVersions(refBook, matchedRecords, versionFrom, record.getVersionTo());
-					// Если значения совпадают и перересекаются сроки действия записей, то выбрасываем ошибку
+                    // Если значения совпадают и перересекаются сроки действия записей, то выбрасываем ошибку
                     if (!conflictedIds.isEmpty()) {
                         throw new ServiceException(makeAttrNames(refBook, record, matchedRecords, conflictedIds));
                     }
@@ -141,16 +130,17 @@ public class RefBookSimpleDataProviderHelper {
         throw new ServiceException("Не найдена запись с заданным родительским элементом");
     }
 
-	/**
-	 * Формирует строку с информацией о конфликтующих значениях
-	 * @param refBook
-	 * @param record
-	 * @param matchedRecords
-	 * @param conflictedIds
-	 * @return
-	 */
+    /**
+     * Формирует строку с информацией о конфликтующих значениях
+     *
+     * @param refBook
+     * @param record
+     * @param matchedRecords
+     * @param conflictedIds
+     * @return
+     */
     private String makeAttrNames(RefBook refBook, RefBookRecord record, List<Pair<Long, String>> matchedRecords, List<Long> conflictedIds) {
-		// [алиас атрибута : количество дублей] дублей может быть > 1, так как текущая запись может пересекать несколько интервалов времени
+        // [алиас атрибута : количество дублей] дублей может быть > 1, так как текущая запись может пересекать несколько интервалов времени
         Map<String, Integer> map = new HashMap<String, Integer>();
         if (conflictedIds != null) {
             //Если было ограничение по периоду, то отбираем нужные
@@ -174,7 +164,7 @@ public class RefBookSimpleDataProviderHelper {
             }
         }
 
-		StringBuilder attrNames = new StringBuilder();
+        StringBuilder attrNames = new StringBuilder();
         Iterator<Map.Entry<String, Integer>> iterator = map.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, Integer> pair = iterator.next();
@@ -189,9 +179,9 @@ public class RefBookSimpleDataProviderHelper {
             }
         }
 
-		// Строка с информацией о проверяемой строке - значения атрибутов в виде строки
-		String strRecord = refBookHelper.refBookRecordToString(refBook, record);
-		return String.format(UNIQ_ERROR_MSG, attrNames.toString(), strRecord);
+        // Строка с информацией о проверяемой строке - значения атрибутов в виде строки
+        String strRecord = refBookHelper.refBookRecordToString(refBook, record);
+        return String.format(UNIQ_ERROR_MSG, attrNames.toString(), strRecord);
     }
 
     private void checkReferences(RefBook refBook, List<RefBookAttribute> attributes, List<RefBookRecord> records, Date versionFrom, Logger logger) {
@@ -220,10 +210,10 @@ public class RefBookSimpleDataProviderHelper {
                             !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
                         Long id = values.get(attribute.getAlias()).getReferenceValue();
 
-                        RefBook attributeRefBook = rbFactory.getByAttribute(attribute.getRefBookAttributeId());
+                        RefBook attributeRefBook = commonRefBookService.getByAttribute(attribute.getRefBookAttributeId());
                         RefBookDataProvider provider;
                         if (!providers.containsKey(attributeRefBook.getTableName())) {
-                            provider = rbFactory.getDataProvider(attributeRefBook.getId());
+                            provider = refBookFactory.getDataProvider(attributeRefBook.getId());
                             providers.put(attributeRefBook.getTableName(), provider);
                         } else {
                             provider = providers.get(attributeRefBook.getTableName());
@@ -261,7 +251,7 @@ public class RefBookSimpleDataProviderHelper {
                 if (isDepartmentConfigTable) i++;
             }
             if (Arrays.asList(
-					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
+                    RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
@@ -321,7 +311,8 @@ public class RefBookSimpleDataProviderHelper {
         }
     }
 
-	@Deprecated // пока нет ни иерархичных справочников, ни использования универсальной структуры
+    @Deprecated
+        // пока нет ни иерархичных справочников, ни использования универсальной структуры
     void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
         //Проверка использования
         /*if (refBook.isHierarchic()) {
@@ -346,8 +337,8 @@ public class RefBookSimpleDataProviderHelper {
 
         //boolean used = false;
 
-		// 2017-03-17 неактуально, так как проверяются только справочники в универсальной структуре хранения
-		//Проверка использования в справочниках
+        // 2017-03-17 неактуально, так как проверяются только справочники в универсальной структуре хранения
+        //Проверка использования в справочниках
 		/*List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
                 RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
                         Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
@@ -356,7 +347,7 @@ public class RefBookSimpleDataProviderHelper {
             used = true;
         }*/
 
-		// 2017-03-17 неактуально, так как таблица FORM_DATA у нас не используется
+        // 2017-03-17 неактуально, так как таблица FORM_DATA у нас не используется
         //Проверка использования в нф
         /*List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
@@ -388,7 +379,7 @@ public class RefBookSimpleDataProviderHelper {
             //}
         }*/
 
-		// 2017-03-17 неактуально, запрос обращается к универсальной структуре
+        // 2017-03-17 неактуально, запрос обращается к универсальной структуре
         //Проверка использования в настройках подразделений
         /*List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
                 RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?

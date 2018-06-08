@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -25,6 +26,8 @@ import java.util.Map;
 public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetNameResult> {
 
     @Autowired
+    CommonRefBookService commonRefBookService;
+    @Autowired
     RefBookFactory refBookFactory;
 
     public GetNameHandler() {
@@ -35,7 +38,7 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
     public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
         GetNameResult result = new GetNameResult();
 
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
         result.setName(refBook.getName());
         result.setRefBookType(refBook.getType());
 
@@ -46,7 +49,7 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                 refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBook refRefBook = commonRefBookService.get(attribute.getRefBookId());
                 RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
                 refAliases.put(attribute.getAlias(), refAttribute.getAlias());
             }

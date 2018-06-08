@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.RefBookListResult;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -27,12 +25,10 @@ import java.util.*;
  */
 @RestController
 public class RefBookController {
-    private final RefBookFactory refBookFactory;
     private final CommonRefBookService commonRefBookService;
     private final SecurityService securityService;
 
-    public RefBookController(RefBookFactory refBookFactory, CommonRefBookService commonRefBookService, SecurityService securityService) {
-        this.refBookFactory = refBookFactory;
+    public RefBookController(CommonRefBookService commonRefBookService, SecurityService securityService) {
         this.commonRefBookService = commonRefBookService;
         this.securityService = securityService;
     }
@@ -58,7 +54,7 @@ public class RefBookController {
      */
     @GetMapping(value = "/rest/refBook/{refBookId}")
     public RefBook fetchRefBook(@PathVariable Long refBookId) {
-        return refBookFactory.get(refBookId);
+        return commonRefBookService.get(refBookId);
     }
 
     /**
@@ -106,8 +102,8 @@ public class RefBookController {
      * @return список объектов содержащих данные о справочниках
      */
     @GetMapping(value = "rest/refBook")
-    public PagingResult<RefBookListResult> fetchAllRefBooks() {
-        return commonRefBookService.fetchAllRefBooks();
+    public List<RefBook> fetchAllRefBooks() {
+        return commonRefBookService.fetchAll();
     }
 
     /**
@@ -200,10 +196,10 @@ public class RefBookController {
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportXlsx")
     public ActionResult exportRefBookToXlsx(@PathVariable long refBookId,
-                                                    @RequestParam(required = false) Date version,
-                                                    @RequestParam(required = false) PagingParams pagingParams,
-                                                    @RequestParam(required = false) String searchPattern,
-                                                    @RequestParam(required = false) boolean exactSearch) {
+                                            @RequestParam(required = false) Date version,
+                                            @RequestParam(required = false) PagingParams pagingParams,
+                                            @RequestParam(required = false) String searchPattern,
+                                            @RequestParam(required = false) boolean exactSearch) {
         return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
                 searchPattern, exactSearch, AsyncTaskType.EXCEL_REF_BOOK);
     }
@@ -220,10 +216,10 @@ public class RefBookController {
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportCsv")
     public ActionResult exportRefBookToCsv(@PathVariable long refBookId,
-                                                   @RequestParam(required = false) Date version,
-                                                   @RequestParam(required = false) PagingParams pagingParams,
-                                                   @RequestParam(required = false) String searchPattern,
-                                                   @RequestParam(required = false) boolean exactSearch) {
+                                           @RequestParam(required = false) Date version,
+                                           @RequestParam(required = false) PagingParams pagingParams,
+                                           @RequestParam(required = false) String searchPattern,
+                                           @RequestParam(required = false) boolean exactSearch) {
         return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
                 searchPattern, exactSearch, AsyncTaskType.CSV_REF_BOOK);
     }

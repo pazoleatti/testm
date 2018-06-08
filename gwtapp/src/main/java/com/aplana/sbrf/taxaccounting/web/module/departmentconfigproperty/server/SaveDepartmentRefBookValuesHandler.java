@@ -4,12 +4,12 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentParamAliases;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.SaveDepartmentRefBookValuesAction;
@@ -43,7 +43,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     };
 
     @Autowired
-    RefBookFactory rbFactory;
+    CommonRefBookService commonRefBookService;
     @Autowired
     DepartmentReportPeriodService reportPeriodService;
     @Autowired
@@ -62,7 +62,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
-        RefBook slaveRefBook = rbFactory.get(action.getSlaveRefBookId());
+        RefBook slaveRefBook = commonRefBookService.get(action.getSlaveRefBookId());
 
         /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);

@@ -487,4 +487,24 @@
         </sql>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4435 -->
+    <changeSet id="3.0-dloshkarev-10" author="dloshkarev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/department.groovy"/>
+            <where>id='4e387483-0330-4e05-ad46-e9b03a3b025d'</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 102</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_2/v2016/report_2ndfl_2.groovy"/>
+            <where>declaration_type_id = 104</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

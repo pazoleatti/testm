@@ -6,10 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParam;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParamType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -42,7 +42,7 @@ public class GetSubreportHandler extends AbstractActionHandler<GetSubreportActio
     private PeriodService periodService;
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
 
     public GetSubreportHandler() {
         super(GetSubreportAction.class);
@@ -64,7 +64,7 @@ public class GetSubreportHandler extends AbstractActionHandler<GetSubreportActio
                 result.setSelectRecord(subreport.isSelectRecord());
                 for (DeclarationSubreportParam declarationSubreportParam : subreport.getDeclarationSubreportParams()) {
                     if (declarationSubreportParam.getType().equals(DeclarationSubreportParamType.REFBOOK)) {
-                        RefBook refBook = rbFactory.getByAttribute(declarationSubreportParam.getRefBookAttributeId());
+                        RefBook refBook = commonRefBookService.getByAttribute(declarationSubreportParam.getRefBookAttributeId());
                         refBookParamInfoMap.put(declarationSubreportParam.getRefBookAttributeId(), new RefBookParamInfo(refBook.getName(), refBook.isVersioned(), refBook.isHierarchic()));
                     }
                 }

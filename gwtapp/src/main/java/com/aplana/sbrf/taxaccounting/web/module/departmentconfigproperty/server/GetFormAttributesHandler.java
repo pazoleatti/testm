@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetFormAttributesAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetFormAttributesResult;
@@ -22,7 +22,7 @@ import java.util.List;
 public class GetFormAttributesHandler extends AbstractActionHandler<GetFormAttributesAction, GetFormAttributesResult> {
 
     @Autowired
-    RefBookFactory rbFactory;
+    CommonRefBookService commonRefBookService;
     @Autowired
     SecurityService securityService;
 
@@ -43,10 +43,10 @@ public class GetFormAttributesHandler extends AbstractActionHandler<GetFormAttri
             res.setCanEdit(false);
         }
 
-        List<RefBookAttribute> attributes = rbFactory.get(action.getRefBookId()).getAttributes();
+        List<RefBookAttribute> attributes = commonRefBookService.get(action.getRefBookId()).getAttributes();
         res.setAttributes(attributes);
 
-        List<RefBookAttribute> tableAttributes = rbFactory.get(action.getTableRefBookId()).getAttributes();
+        List<RefBookAttribute> tableAttributes = commonRefBookService.get(action.getTableRefBookId()).getAttributes();
         List<Column> tableColumns = new ArrayList<Column>();
         for (RefBookAttribute attribute : tableAttributes) {
             switch (attribute.getAttributeType()) {
@@ -60,7 +60,7 @@ public class GetFormAttributesHandler extends AbstractActionHandler<GetFormAttri
                     tableColumns.add(textColumn);
                     break;
                 case REFERENCE:
-                    RefBook refBook = rbFactory.get(attribute.getRefBookId());
+                    RefBook refBook = commonRefBookService.get(attribute.getRefBookId());
                     RefBookColumn refColumn = new RefBookColumn();
                     refColumn.setId(attribute.getId().intValue());
                     refColumn.setRefBookAttributeId(attribute.getRefBookAttributeId());

@@ -9,9 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class ImportRefBookXmlAsyncTask extends AbstractAsyncTask {
     private LoadRefBookDataService loadRefBookDataService;
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
@@ -61,7 +61,7 @@ public class ImportRefBookXmlAsyncTask extends AbstractAsyncTask {
         String fileName = blobData.getName();
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
-        return String.format("Загрузка файла \"%s\" в справочник \"%s\" завершена", fileName, refBookFactory.get(refBookId).getName());
+        return String.format("Загрузка файла \"%s\" в справочник \"%s\" завершена", fileName, commonRefBookService.get(refBookId).getName());
     }
 
     @Override

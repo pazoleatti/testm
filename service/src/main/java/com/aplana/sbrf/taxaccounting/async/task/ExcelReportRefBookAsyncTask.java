@@ -2,15 +2,16 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,9 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
+
+    @Autowired
+    private CommonRefBookService commonRefBookService;
 
     @Autowired
     private RefBookFactory refBookFactory;
@@ -48,7 +52,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
         if (filter.isEmpty())
             filter = null;
-        Long value = (long) refBookDataProvider.getRecordsCount(version, filter) * refBookFactory.get(refBookId).getAttributes().size();
+        Long value = (long) refBookDataProvider.getRecordsCount(version, filter) * commonRefBookService.get(refBookId).getAttributes().size();
         String msg = String.format("количество выгружаемых ячеек(%s) превышает максимально допустимое(%s)!", value, "%s");
         return checkTask(value, taskDescription, msg);
     }
@@ -62,7 +66,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
         Date version = (Date) params.get("version");
         RefBookAttribute sortAttribute = null;
         if (params.containsKey("sortAttribute"))
-            sortAttribute = refBookFactory.get(refBookId).getAttribute((Long) params.get("sortAttribute"));
+            sortAttribute = commonRefBookService.get(refBookId).getAttribute((Long) params.get("sortAttribute"));
         Boolean isSortAscending = (Boolean) params.get("isSortAscending");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
@@ -83,7 +87,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
         Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : new Date();
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = commonRefBookService.get(refBookId);
 
         return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, Параметр поиска: %s",
                 getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
@@ -95,7 +99,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
         Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : new Date();
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = commonRefBookService.get(refBookId);
 
         return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, Параметр поиска: %s",
                 getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
@@ -105,7 +109,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long refBookId = (Long) params.get("refBookId");
-        RefBook refBook = refBookFactory.get(refBookId);
+        RefBook refBook = commonRefBookService.get(refBookId);
         return String.format(getAsyncTaskType().getDescription(), refBook.getName());
     }
 }

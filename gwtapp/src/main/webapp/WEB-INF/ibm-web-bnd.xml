@@ -15,5 +15,7 @@
 	<resource-ref name="services/cache/aplana/taxaccounting/TaxPeriod" binding-name="services/cache/aplana/taxaccounting/TaxPeriod${releasePostfix}"/>
 	<resource-ref name="services/cache/aplana/taxaccounting/User" binding-name="services/cache/aplana/taxaccounting/User${releasePostfix}"/>
 	<resource-ref name="services/cache/aplana/taxaccounting/Department" binding-name="services/cache/aplana/taxaccounting/Department${releasePostfix}"/>
+	<resource-ref name="services/cache/aplana/taxaccounting/RefBook" binding-name="services/cache/aplana/taxaccounting/RefBook{releasePostfix}"/>
+	<resource-ref name="services/cache/aplana/taxaccounting/RefBookAttribute" binding-name="services/cache/aplana/taxaccounting/RefBookAttribute{releasePostfix}"/>
 
 </web-bnd>

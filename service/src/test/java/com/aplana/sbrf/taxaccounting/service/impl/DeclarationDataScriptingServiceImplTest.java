@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
@@ -83,9 +82,6 @@ public class DeclarationDataScriptingServiceImplTest {
 		when(declarationTemplateEventScriptDao.findScript(eq(REPORT_TEMPLATE_ID1), any(Integer.class))).thenReturn(createScript1);
         when(declarationTemplateEventScriptDao.findScript(eq(REPORT_TEMPLATE_ID2), any(Integer.class))).thenReturn(createScript2);
 		ReflectionTestUtils.setField(service, "declarationTemplateEventScriptDao", declarationTemplateEventScriptDao, DeclarationTemplateEventScriptDao.class);
-
-        LogEntryService logEntryService = mock(LogEntryService.class);
-        ReflectionTestUtils.setField(service, "logEntryService", logEntryService);
 
         TransactionHelper tx = new TransactionHelper() {
             @Override

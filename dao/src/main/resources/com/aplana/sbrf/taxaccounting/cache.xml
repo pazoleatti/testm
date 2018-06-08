@@ -30,6 +30,12 @@
     <jee:jndi-lookup id="declarationTemplateEventScriptCacheStore"
                      jndi-name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript"/>
 
+    <jee:jndi-lookup id="refBookCacheStore"
+                     jndi-name="services/cache/aplana/taxaccounting/RefBook"/>
+
+    <jee:jndi-lookup id="refBookAttributeCacheStore"
+                     jndi-name="services/cache/aplana/taxaccounting/RefBookAttribute"/>
+
     <bean id="cacheManager" class="com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager">
         <property name="caches">
             <set>
@@ -60,6 +66,14 @@
                 <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
                     <constructor-arg value="DeclarationTemplateEventScript"/>
                     <constructor-arg ref="declarationTemplateEventScriptCacheStore"/>
+                </bean>
+                <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+                    <constructor-arg value="RefBook"/>
+                    <constructor-arg ref="refBookCacheStore"/>
+                </bean>
+                <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+                    <constructor-arg value="RefBookAttribute"/>
+                    <constructor-arg ref="refBookAttributeCacheStore"/>
                 </bean>
             </set>
         </property>

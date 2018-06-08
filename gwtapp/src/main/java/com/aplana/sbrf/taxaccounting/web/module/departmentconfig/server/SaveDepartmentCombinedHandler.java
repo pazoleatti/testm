@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
@@ -44,7 +45,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     @Autowired
     private PeriodService periodService;
     @Autowired
-    private RefBookFactory rbFactory;
+    private CommonRefBookService commonRefBookService;
+    @Autowired
+    private RefBookFactory refBookFactory;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -85,8 +88,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                     refBookId = RefBook.Id.NDFL.getId();
                     break;
             }
-            RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
-            RefBook refBook = rbFactory.get(refBookId);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+            RefBook refBook = commonRefBookService.get(refBookId);
 
             ReportPeriod period = periodService.fetchReportPeriod(action.getReportPeriodId());
 

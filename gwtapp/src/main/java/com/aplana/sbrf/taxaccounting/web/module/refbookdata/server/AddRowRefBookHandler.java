@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -10,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRowRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRowRefBookResult;
@@ -28,6 +28,8 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class AddRowRefBookHandler extends AbstractActionHandler<AddRowRefBookAction, AddRowRefBookResult> {
     @Autowired
+    private CommonRefBookService commonRefBookService;
+    @Autowired
     private RefBookFactory refBookFactory;
 
     @Autowired
@@ -43,7 +45,7 @@ public class AddRowRefBookHandler extends AbstractActionHandler<AddRowRefBookAct
     @Override
     public AddRowRefBookResult execute(AddRowRefBookAction action, ExecutionContext executionContext) throws ActionException {
         AddRowRefBookResult result = new AddRowRefBookResult();
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = commonRefBookService.get(action.getRefBookId());
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
 
@@ -54,7 +56,7 @@ public class AddRowRefBookHandler extends AbstractActionHandler<AddRowRefBookAct
         additionalParameters.put("scriptStatusHolder", new ScriptStatusHolder()); // Статус пока не обрабатывается
         refBookScriptingService.executeScript(userInfo, action.getRefBookId(), FormDataEvent.ADD_ROW, logger, additionalParameters);
 
-        result.setRecord(GetRefBookRecordHandler.convert(refBook, record, refBookFactory));
+        result.setRecord(GetRefBookRecordHandler.convert(refBook, record, commonRefBookService, refBookFactory));
         return result;
     }
 

@@ -1,31 +1,22 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookLinkModel;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -51,10 +42,10 @@ import static java.util.Collections.singletonList;
 @Transactional
 public class RefBookUniversal implements RefBookDataProvider {
 
-	@Autowired
-	protected RefBookDao refBookDao;
-	@Autowired
-	protected RefBookFactory refBookFactory;
+    @Autowired
+    protected RefBookDao refBookDao;
+    @Autowired
+    protected CommonRefBookService commonRefBookService;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -64,11 +55,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Autowired
     private RefBookHelper refBookHelper;
     @Autowired
-    private RefBookFactory rbFactory;
+    private RefBookFactory refBookFactory;
 
-	protected Long refBookId;
+    protected Long refBookId;
 
-    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>(){
+    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd.MM.yyyy");
@@ -78,9 +69,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     private static final String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
     private static final String UNIQ_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде!";
 
-	public void setRefBookId(Long refBookId) {
-		this.refBookId = refBookId;
-	}
+    public void setRefBookId(Long refBookId) {
+        this.refBookId = refBookId;
+    }
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
@@ -98,10 +89,10 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
-			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-		return refBookDao.getChildrenRecords(refBookId, parentRecordId, version, pagingParams, filter, sortAttribute);
-	}
+    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
+                                                                      PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return refBookDao.getChildrenRecords(refBookId, parentRecordId, version, pagingParams, filter, sortAttribute);
+    }
 
     @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
@@ -110,7 +101,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public Long getRowNum(Date version, Long recordId,
-                   String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         return refBookDao.getRowNum(refBookId, version, recordId, filter, sortAttribute, isSortAscending);
     }
 
@@ -120,10 +111,10 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-	public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute, isSortAscending, false, null);
-	}
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute, isSortAscending, false, null);
+    }
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
@@ -131,10 +122,10 @@ public class RefBookUniversal implements RefBookDataProvider {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
-	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
-		return getRecords(versionTo, pagingParams, filter, null);
-	}
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+        return getRecords(versionTo, pagingParams, filter, null);
+    }
 
     @Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
@@ -146,7 +137,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         //TODO: возможно нужно точное совпадение версии
         List<Pair<Long, Long>> pairs = refBookDao.getRecordIdPairs(refBookId, version, false, filter);
         List<Long> uniqueRecordIds = new ArrayList<Long>(pairs.size());
-        for (Pair<Long, Long> pair : pairs){
+        for (Pair<Long, Long> pair : pairs) {
             uniqueRecordIds.add(pair.getFirst());
         }
         return uniqueRecordIds;
@@ -169,9 +160,9 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     @Transactional(noRollbackFor = DaoException.class)
-	public Map<String, RefBookValue> getRecordData(Long recordId) {
-		return refBookDao.getRecordData(refBookId, recordId);
-	}
+    public Map<String, RefBookValue> getRecordData(Long recordId) {
+        return refBookDao.getRecordData(refBookId, recordId);
+    }
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
@@ -219,7 +210,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         //Устанавливаем блокировку на тевущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -231,7 +222,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -323,13 +314,13 @@ public class RefBookUniversal implements RefBookDataProvider {
     void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
         List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
-        if (!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
         }
 
         //Проверка корректности значений атрибутов
         errors = RefBookUtils.checkRefBookAtributeValues(attributes, records);
-        if (!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             for (String error : errors) {
                 logger.error(error);
             }
@@ -347,7 +338,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             for (RefBookRecord record : records) {
                 //Получаем записи у которых совпали значения уникальных атрибутов
-                List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
+                List<Pair<Long, String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
                     //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
                     List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
@@ -365,7 +356,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     }
 
-    private void checkReferences(RefBook refBook, List<RefBookAttribute> attributes, List<RefBookRecord> records, Date versionFrom, Logger logger){
+    private void checkReferences(RefBook refBook, List<RefBookAttribute> attributes, List<RefBookRecord> records, Date versionFrom, Logger logger) {
         if (!attributes.isEmpty()) {
             Map<String, RefBookDataProvider> providers = new HashMap<String, RefBookDataProvider>();
             Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
@@ -391,10 +382,10 @@ public class RefBookUniversal implements RefBookDataProvider {
                             !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
                         Long id = values.get(attribute.getAlias()).getReferenceValue();
 
-                        RefBook attributeRefBook = rbFactory.getByAttribute(attribute.getRefBookAttributeId());
+                        RefBook attributeRefBook = commonRefBookService.getByAttribute(attribute.getRefBookAttributeId());
                         RefBookDataProvider provider;
                         if (!providers.containsKey(attributeRefBook.getTableName())) {
-                            provider = rbFactory.getDataProvider(attributeRefBook.getId());
+                            provider = refBookFactory.getDataProvider(attributeRefBook.getId());
                             providers.put(attributeRefBook.getTableName(), provider);
                         } else {
                             provider = providers.get(attributeRefBook.getTableName());
@@ -407,7 +398,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                             //Если обрабатывается несколько записей, то просто названия поля не хватит. Формируем имя записи из уникальных аттрибутов, а если их нет, то из строковых
                             specialId = new StringBuilder();
                             if (uniqueAliases.size() > 0) {
-                                for (Iterator<String> it = uniqueAliases.iterator(); it.hasNext();) {
+                                for (Iterator<String> it = uniqueAliases.iterator(); it.hasNext(); ) {
                                     String uniqueAlias = it.next();
                                     specialId.append(values.get(uniqueAlias));
                                     if (it.hasNext()) {
@@ -415,7 +406,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                                     }
                                 }
                             } else {
-                                for (Iterator<Map.Entry<String, RefBookValue>> it = values.entrySet().iterator(); it.hasNext();) {
+                                for (Iterator<Map.Entry<String, RefBookValue>> it = values.entrySet().iterator(); it.hasNext(); ) {
                                     Map.Entry<String, RefBookValue> value = it.next();
                                     if (value.getValue().getAttributeType() == RefBookAttributeType.STRING) {
                                         specialId.append(values.get(value.getValue().getStringValue()));
@@ -432,7 +423,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (isDepartmentConfigTable) i++;
             }
             if (Arrays.asList(
-					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
+                    RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
@@ -440,13 +431,13 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     }
 
-    private String makeAttrNames(List<Pair<Long,String>> matchedRecords, List<Long> conflictedIds) {
+    private String makeAttrNames(List<Pair<Long, String>> matchedRecords, List<Long> conflictedIds) {
         StringBuilder attrNames = new StringBuilder();
         Map<String, Integer> map = new HashMap<String, Integer>();
         if (conflictedIds != null) {
             //Если было ограничение по периоду то отираем нужные
             for (Long id : conflictedIds) {
-                for (Pair<Long,String> pair : matchedRecords) {
+                for (Pair<Long, String> pair : matchedRecords) {
                     if (pair.getFirst().equals(id)) {
                         Integer count = map.get(pair.getSecond());
                         if (count == null) count = 0;
@@ -457,7 +448,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
         } else {
             //Иначе просто все совпадения
-            for (Pair<Long,String> pair : matchedRecords) {
+            for (Pair<Long, String> pair : matchedRecords) {
                 Integer count = map.get(pair.getSecond());
                 if (count == null) count = 0;
                 count++;
@@ -490,12 +481,12 @@ public class RefBookUniversal implements RefBookDataProvider {
             for (Pair<Long, Integer> conflict : checkResult) {
                 //Дата окончания периода актуальности проверяемой версии больше даты окончания периода актуальности родительской записи для проверяемой версии
                 if (conflict.getSecond() == 1) {
-                    logger.error("Запись "+findNameByParent(records, conflict.getFirst())+
+                    logger.error("Запись " + findNameByParent(records, conflict.getFirst()) +
                             ": Дата окончания периода актуальности версии должна быть не больше даты окончания периода актуальности записи, которая является родительской в иерархии!");
                 }
                 //Дата начала периода актуальности проверяемой версии меньше даты начала периода актуальности родительской записи для проверяемой версии
                 if (conflict.getSecond() == -1) {
-                    logger.error("Запись "+findNameByParent(records, conflict.getFirst())+
+                    logger.error("Запись " + findNameByParent(records, conflict.getFirst()) +
                             ": Дата начала периода актуальности версии должна быть не меньше даты начала периода актуальности записи, которая является родительской в иерархии!");
                 }
             }
@@ -530,7 +521,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
                 if (versionTo == null) {
                     if (nextVersion != null && logger != null) {
-                        logger.infoIfNotExist("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+                        logger.infoIfNotExist("Установлена дата окончания актуальности версии " + formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1)) + " в связи с наличием следующей версии");
                     }
                 } else {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {
@@ -560,6 +551,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     /**
      * Обработка пересечений версий
+     *
      * @return нужна ли дальнейшая обработка даты окончания (фиктивной версии)? Она могла быть выполнена в процессе проверки пересечения
      */
     private boolean crossVersionsProcessing(List<CheckCrossVersionsResult> results, RefBook refBook, Date versionFrom, Date versionTo, Logger logger) {
@@ -588,7 +580,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 //Ищем все ссылки на запись справочника в новом периоде
                 checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
                 if (logger != null) {
-                    logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
+                    logger.info("Установлена дата окончания актуальности версии " + formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1)) + " для предыдущей версии");
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
@@ -623,7 +615,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         //Устанавливаем блокировку на текущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -635,7 +627,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -726,8 +718,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                     previousVersion = refBookDao.getPreviousVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
                     if (previousVersion != null &&
                             (versionFrom.equals(previousVersion.getVersionEnd())
-                            || versionFrom.before(previousVersion.getVersionEnd())
-                            || versionFrom.before(previousVersion.getVersionStart()))) {
+                                    || versionFrom.before(previousVersion.getVersionEnd())
+                                    || versionFrom.before(previousVersion.getVersionStart()))) {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                 }
@@ -735,7 +727,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             /** Проверяем изменились ли значения атрибутов */
             boolean isValuesChanged = checkValuesChanged(uniqueRecordId, records);
-            
+
             if (isValuesChanged) {
                 //Если значения атрибутов изменились, то проверяем все использования записи, без учета периода
                 checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, null, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
@@ -815,7 +807,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
         }
     }
-    
+
     private void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
         //Проверка использования
         if (refBook.isHierarchic()) {
@@ -864,8 +856,8 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     // TODO использую в скрипте
-    boolean checkValuesChanged(Long uniqueRecordId, Map<String,RefBookValue> records) {
-        Map<String,RefBookValue> oldValues = refBookDao.getRecordData(refBookId, uniqueRecordId);
+    boolean checkValuesChanged(Long uniqueRecordId, Map<String, RefBookValue> records) {
+        Map<String, RefBookValue> oldValues = refBookDao.getRecordData(refBookId, uniqueRecordId);
         for (Map.Entry<String, RefBookValue> newValue : records.entrySet()) {
             RefBookValue oldValue = oldValues.get(newValue.getKey());
             if (!newValue.getValue().equals(oldValue)) {
@@ -886,7 +878,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         //Устанавливаем блокировку на тевущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -898,7 +890,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -958,13 +950,13 @@ public class RefBookUniversal implements RefBookDataProvider {
         List<Date> parentVersions = refBookDao.hasChildren(refBookId, uniqueRecordIds);
         if (parentVersions != null && !parentVersions.isEmpty()) {
             StringBuilder versions = new StringBuilder();
-            for (int i=0; i<parentVersions.size(); i++) {
+            for (int i = 0; i < parentVersions.size(); i++) {
                 versions.append(formatter.get().format(parentVersions.get(i)));
                 if (i < parentVersions.size() - 1) {
                     versions.append(", ");
                 }
             }
-            throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
+            throw new ServiceException("Удаление версии от " + versions + " невозможно, существует дочерние элементы!");
         }
     }
 
@@ -979,7 +971,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         //Устанавливаем блокировку на тевущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -991,7 +983,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -1053,7 +1045,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, userId,
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -1144,9 +1136,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-	public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+    public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         List<String> lockedObjects = new ArrayList<String>();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, taUserInfo.getUser().getId(),
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -1158,7 +1150,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, taUserInfo.getUser().getId(), String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -1178,7 +1170,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } else {
             throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
         }
-	}
+    }
 
     @Override
     public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
@@ -1187,9 +1179,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-	public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+    public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         List<String> lockedObjects = new ArrayList<String>();
-        String lockKey = refBookFactory.generateTaskKey(refBookId);
+        String lockKey = commonRefBookService.generateTaskKey(refBookId);
         RefBook refBook = refBookDao.get(refBookId);
         if (lockService.lock(lockKey, taUserInfo.getUser().getId(),
                 String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
@@ -1201,7 +1193,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
+                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             if (lockService.lock(referenceLockKey, taUserInfo.getUser().getId(), String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
@@ -1221,7 +1213,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } else {
             throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
         }
-	}
+    }
 
     @Override
     public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
@@ -1230,9 +1222,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
-		return refBookDao.dereferenceValues(attributeId, recordIds);
-	}
+    public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+        return refBookDao.dereferenceValues(attributeId, recordIds);
+    }
 
     @Override
     public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
@@ -1261,8 +1253,8 @@ public class RefBookUniversal implements RefBookDataProvider {
     /**
      * Формирует имя для записи справочника, основанное на уникальных атрибутах
      *
-     * @param refBook справочник
-     * @param groupValues  список значений уникальных атрибутов
+     * @param refBook     справочник
+     * @param groupValues список значений уникальных атрибутов
      * @return
      */
     private String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupValues) {
@@ -1272,7 +1264,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                 refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBook refRefBook = commonRefBookService.get(attribute.getRefBookId());
                 RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
                 refAliases.put(attribute.getAlias(), refAttribute.getAlias());
             }

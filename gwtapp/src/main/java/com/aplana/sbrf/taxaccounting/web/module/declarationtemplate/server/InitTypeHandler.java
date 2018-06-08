@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.InitTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.InitTypeResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class InitTypeHandler extends AbstractActionHandler<InitTypeAction, InitTypeResult> {
     @Autowired
-    private RefBookFactory refBookFactory;
+    private CommonRefBookService commonRefBookService;
 
     public InitTypeHandler() {
         super(InitTypeAction.class);
@@ -26,7 +26,7 @@ public class InitTypeHandler extends AbstractActionHandler<InitTypeAction, InitT
     @Override
     public InitTypeResult execute(InitTypeAction action, ExecutionContext executionContext) throws ActionException {
         InitTypeResult result = new InitTypeResult();
-        result.setRefBookList(refBookFactory.getAll(false));
+        result.setRefBookList(commonRefBookService.fetchAll(null));
         return result;
     }
 

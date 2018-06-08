@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,8 @@ public class PeriodServiceImplTest {
     RefBookDataProvider provider;
     @Autowired
     RefBookFactory rbFactory;
+    @Autowired
+    CommonRefBookService commonRefBookService;
     @Autowired
     DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
@@ -207,7 +210,7 @@ public class PeriodServiceImplTest {
             setId(PERIOD_CODE_REFBOOK);
             setName("REFBOOK_NAME");
         }};
-        when(rbFactory.get(PERIOD_CODE_REFBOOK)).thenReturn(refBook);
+        when(commonRefBookService.get(PERIOD_CODE_REFBOOK)).thenReturn(refBook);
 
         when(rbFactory.getDataProvider(PERIOD_CODE_REFBOOK)).thenReturn(provider);
         Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
