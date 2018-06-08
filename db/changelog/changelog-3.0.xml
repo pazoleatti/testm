@@ -423,4 +423,68 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4796 -->
+    <changeSet id="3.0-dloshkarev-9" author="dloshkarev">
+        <sql>
+            update ref_book_attribute set width = 3 where ref_book_id = 901 and alias = 'ADDRESS_TYPE';
+            update ref_book_attribute set width = 5 where ref_book_id = 901 and alias = 'COUNTRY_ID';
+            update ref_book_attribute set width = 4 where ref_book_id = 901 and alias = 'REGION_CODE';
+            update ref_book_attribute set width = 3 where ref_book_id = 901 and alias = 'POSTAL_CODE';
+            update ref_book_attribute set width = 10 where ref_book_id = 901 and alias = 'DISTRICT';
+            update ref_book_attribute set width = 7 where ref_book_id = 901 and alias = 'CITY';
+            update ref_book_attribute set width = 10 where ref_book_id = 901 and alias = 'LOCALITY';
+            update ref_book_attribute set width = 10 where ref_book_id = 901 and alias = 'STREET';
+            update ref_book_attribute set width = 6 where ref_book_id = 901 and alias = 'HOUSE';
+            update ref_book_attribute set width = 4 where ref_book_id = 901 and alias = 'BUILD';
+            update ref_book_attribute set width = 4 where ref_book_id = 901 and alias = 'APPARTMENT';
+
+            update ref_book_attribute set width = 4 where ref_book_id = 900 and alias = 'CODE';
+            update ref_book_attribute set width = 15 where ref_book_id = 900 and alias = 'NAME';
+            update ref_book_attribute set width = 4 where ref_book_id = 900 and alias = 'PRIORITY';
+            update ref_book_attribute set width = 7 where ref_book_id = 900 and alias = 'ROLE_ALIAS';
+            update ref_book_attribute set width = 20 where ref_book_id = 900 and alias = 'ROLE_NAME';
+            update ref_book_attribute set width = 40 where ref_book_id = 900 and alias = 'TYPE';
+
+            update ref_book_attribute set ord = 4 where ref_book_id = 921 and alias = 'DEDUCTION_MARK';
+            update ref_book_attribute set ord = 3 where ref_book_id = 921 and alias = 'NAME';
+            update ref_book_attribute set ord = 2 where ref_book_id = 921 and alias = 'DEDUCTION_MARK';
+            update ref_book_attribute set width = 4 where ref_book_id = 921 and alias = 'CODE';
+            update ref_book_attribute set width = 4 where ref_book_id = 921 and alias = 'DEDUCTION_MARK';
+
+            update ref_book_attribute set width = 4 where ref_book_id = 922 and alias = 'CODE';
+
+            update ref_book_attribute set ord = 4 where ref_book_id = 360 and alias = 'NAME';
+            update ref_book_attribute set ord = 2 where ref_book_id = 360 and alias = 'PRIORITY';
+            update ref_book_attribute set ord = 3 where ref_book_id = 360 and alias = 'NAME';
+            update ref_book_attribute set width = 3 where ref_book_id = 360 and alias = 'CODE';
+            update ref_book_attribute set width = 4 where ref_book_id = 360 and alias = 'PRIORITY';
+
+            update ref_book_attribute set ord = 7 where ref_book_id = 8 and alias = 'NAME';
+            update ref_book_attribute set ord = 1 where ref_book_id = 8 and alias = 'START_DATE';
+            update ref_book_attribute set ord = 2 where ref_book_id = 8 and alias = 'END_DATE';
+            update ref_book_attribute set ord = 3 where ref_book_id = 8 and alias = 'CALENDAR_START_DATE';
+            update ref_book_attribute set ord = 4 where ref_book_id = 8 and alias = 'NAME';
+            update ref_book_attribute set width = 3 where ref_book_id = 8 and alias = 'CODE';
+            update ref_book_attribute set width = 4 where ref_book_id = 8 and alias = 'START_DATE';
+            update ref_book_attribute set width = 5 where ref_book_id = 8 and alias = 'END_DATE';
+            update ref_book_attribute set width = 5 where ref_book_id = 8 and alias = 'CALENDAR_START_DATE';
+
+            update ref_book_attribute set ord = 7 where ref_book_id = 923 and alias = 'NAME';
+            update ref_book_attribute set ord = 1 where ref_book_id = 923 and alias = 'OKATO_DEFINITION';
+            update ref_book_attribute set ord = 2 where ref_book_id = 923 and alias = 'OKTMO';
+            update ref_book_attribute set ord = 3 where ref_book_id = 923 and alias = 'OKTMO_DEFINITION';
+            update ref_book_attribute set ord = 4 where ref_book_id = 923 and alias = 'NAME';
+            update ref_book_attribute set width = 3 where ref_book_id = 923 and alias = 'CODE';
+            update ref_book_attribute set width = 6 where ref_book_id = 923 and alias = 'OKATO_DEFINITION';
+            update ref_book_attribute set width = 5 where ref_book_id = 923 and alias = 'OKTMO';
+            update ref_book_attribute set width = 6 where ref_book_id = 923 and alias = 'OKTMO_DEFINITION';
+
+            update ref_book_attribute set width = 3 where ref_book_id = 928 and alias = 'CODE';
+
+            update ref_book_attribute set width = 6 where ref_book_id = 35 and alias = 'CODE';
+            
+            update ref_book_attribute set width = 3 where ref_book_id = 903 and alias = 'CODE';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
