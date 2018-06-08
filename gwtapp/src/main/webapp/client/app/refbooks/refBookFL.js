@@ -64,112 +64,133 @@
                         visible: true,
                         width: 5
                     });
+                    $scope.constructGrid();
                 });
 
-                $scope.personGrid = {
-                    ctrl: {},
-                    value: [],
-                    options: {
-                        datatype: "angularResource",
-                        angularResource: RefBookFLResource,
-                        requestParameters: function () {
-                            return {
-                                recordId: $stateParams.recordId,
-                                version: $scope.data.recordVersion,
-                                firstName: $scope.search.firstName,
-                                lastName: $scope.search.lastName,
-                                searchPattern: $scope.search.text,
-                                exactSearch: $scope.search.precise
-                            };
-                        },
+                /**
+                 * Динамически добавляет грид на страницу и заполняет его данными
+                 */
+                $scope.constructGrid = function () {
+                    // Добавляем грид на страницу
+                    $injector.invoke(function ($compile) {
+                        var parent = angular.element(document.querySelector("#refBookFLGridContainer"));
+                        var refBookGrid = $compile("<div class=\"flex-grid flex-fill\"\n" +
+                            "             data-aplana-grid\n" +
+                            "             data-grid-fill-space=\"true\"\n" +
+                            "             data-grid-fill-space-container-selector=\"#refBookFLGridContainer\"\n" +
+                            "             data-grid-fill-space-container-selector-top=\"#refBookFLRecordsGridTop\"\n" +
+                            "             data-grid-options=\"personGrid.options\"\n" +
+                            "             data-grid-ctrl=\"personGrid.ctrl\"\n" +
+                            "             data-ng-model=\"personGrid.value\"\n" +
+                            "             id=\"personTable\"></div>")(parent.scope());
+                        parent.append(refBookGrid);
+                    });
+
+                    $scope.personGrid = {
+                        ctrl: {},
                         value: [],
-                        colNames: [
-                            '',
-                            $filter('translate')('refBook.versionFrom'),
-                            $filter('translate')('refBook.versionTo'),
-                            $filter('translate')('refBook.fl.title.id'),
-                            $filter('translate')('title.lastName'),
-                            $filter('translate')('title.firstName'),
-                            $filter('translate')('title.middleName'),
-                            $filter('translate')('refBook.fl.title.inn'),
-                            $filter('translate')('refBook.fl.title.innForeign'),
-                            $filter('translate')('title.snils'),
-                            $filter('translate')('title.status.taxpayer'),
-                            $filter('translate')('title.dateOfBirth'),
-                            $filter('translate')('refBook.fl.title.birthPlace'),
-                            $filter('translate')('refBook.fl.title.citizenship'),
-                            $filter('translate')('refBook.fl.title.address'),
-                            $filter('translate')('refBook.fl.title.employee'),
-                            $filter('translate')('refBook.fl.title.sourceId'),
-                            $filter('translate')('refBook.fl.title.oldId')
-                        ],
-                        colModel: [
-                            {name: 'id', index: 'id', width: 10, key: true, hidden: true},
-                            {
-                                name: 'version',
-                                index: 'version',
-                                width: 120,
-                                formatter: $filter('dateFormatter'),
-                                sortable: false
+                        options: {
+                            datatype: "angularResource",
+                            angularResource: RefBookFLResource,
+                            requestParameters: function () {
+                                return {
+                                    recordId: $stateParams.recordId,
+                                    version: $scope.data.recordVersion,
+                                    firstName: $scope.search.firstName,
+                                    lastName: $scope.search.lastName,
+                                    searchPattern: $scope.search.text,
+                                    exactSearch: $scope.search.precise
+                                };
                             },
-                            {
-                                name: 'versionEnd',
-                                index: 'versionEnd',
-                                width: 120,
-                                formatter: $filter('dateFormatter'),
-                                sortable: false
-                            },
-                            {name: 'recordId', index: 'RECORD_ID', width: 120, sortable: !$scope.versionMode},
-                            {name: 'lastName', index: 'LAST_NAME', width: 150, sortable: !$scope.versionMode},
-                            {name: 'firstName', index: 'FIRST_NAME', width: 150, sortable: !$scope.versionMode},
-                            {name: 'middleName', index: 'MIDDLE_NAME', width: 150, sortable: !$scope.versionMode},
-                            {name: 'inn', index: 'INN', width: 100, sortable: !$scope.versionMode},
-                            {name: 'innForeign', index: 'INN_FOREIGN', width: 100, sortable: !$scope.versionMode},
-                            {name: 'snils', index: 'SNILS', width: 100, sortable: !$scope.versionMode},
-                            {
-                                name: 'taxpayerState',
-                                index: 'TAXPAYER_STATE',
-                                width: 135,
-                                formatter: $filter('codeFormatter'),
-                                sortable: !$scope.versionMode
-                            },
-                            {
-                                name: 'birthDate',
-                                index: 'BIRTH_DATE',
-                                width: 100,
-                                formatter: $filter('dateFormatter'),
-                                sortable: !$scope.versionMode
-                            },
-                            {name: 'birthPlace', index: 'BIRTH_PLACE', width: 150},
-                            {
-                                name: 'citizenship',
-                                index: 'CITIZENSHIP',
-                                width: 100,
-                                formatter: $filter('codeFormatter'),
-                                sortable: !$scope.versionMode
-                            },
-                            {name: 'addressAsText', index: 'ADDRESS', width: 400, sortable: !$scope.versionMode},
-                            {name: 'employee', index: 'EMPLOYEE', width: 100, sortable: !$scope.versionMode},
-                            {
-                                name: 'source',
-                                index: 'SOURCE_ID',
-                                width: 100,
-                                formatter: $filter('codeFormatter'),
-                                sortable: !$scope.versionMode
-                            },
-                            {name: 'oldId', index: 'OLD_ID', width: 100, sortable: !$scope.versionMode}
-                        ],
-                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
-                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
-                        sortname: $scope.sortAttribute,
-                        sortorder: "asc",
-                        viewrecords: true,
-                        hidegrid: false,
-                        multiselect: true,
-                        ondblClickRow: function (rowId) {
-                            $scope.showRecord($scope.personGrid.ctrl.getRawData(rowId))
+                            value: [],
+                            colNames: [
+                                '',
+                                $filter('translate')('refBook.versionFrom'),
+                                $filter('translate')('refBook.versionTo'),
+                                $filter('translate')('refBook.fl.title.id'),
+                                $filter('translate')('title.lastName'),
+                                $filter('translate')('title.firstName'),
+                                $filter('translate')('title.middleName'),
+                                $filter('translate')('refBook.fl.title.inn'),
+                                $filter('translate')('refBook.fl.title.innForeign'),
+                                $filter('translate')('title.snils'),
+                                $filter('translate')('title.status.taxpayer'),
+                                $filter('translate')('title.dateOfBirth'),
+                                $filter('translate')('refBook.fl.title.birthPlace'),
+                                $filter('translate')('refBook.fl.title.citizenship'),
+                                $filter('translate')('refBook.fl.title.address'),
+                                $filter('translate')('refBook.fl.title.employee'),
+                                $filter('translate')('refBook.fl.title.sourceId'),
+                                $filter('translate')('refBook.fl.title.oldId')
+                            ],
+                            colModel: [
+                                {name: 'id', index: 'id', width: 10, key: true, hidden: true},
+                                {
+                                    name: 'version',
+                                    index: 'version',
+                                    width: 120,
+                                    formatter: $filter('dateFormatter'),
+                                    sortable: false
+                                },
+                                {
+                                    name: 'versionEnd',
+                                    index: 'versionEnd',
+                                    width: 120,
+                                    formatter: $filter('dateFormatter'),
+                                    sortable: false
+                                },
+                                {name: 'recordId', index: 'RECORD_ID', width: 120, sortable: !$scope.versionMode},
+                                {name: 'lastName', index: 'LAST_NAME', width: 150, sortable: !$scope.versionMode},
+                                {name: 'firstName', index: 'FIRST_NAME', width: 150, sortable: !$scope.versionMode},
+                                {name: 'middleName', index: 'MIDDLE_NAME', width: 150, sortable: !$scope.versionMode},
+                                {name: 'inn', index: 'INN', width: 100, sortable: !$scope.versionMode},
+                                {name: 'innForeign', index: 'INN_FOREIGN', width: 100, sortable: !$scope.versionMode},
+                                {name: 'snils', index: 'SNILS', width: 100, sortable: !$scope.versionMode},
+                                {
+                                    name: 'taxpayerState',
+                                    index: 'TAXPAYER_STATE',
+                                    width: 135,
+                                    formatter: $filter('codeFormatter'),
+                                    sortable: !$scope.versionMode
+                                },
+                                {
+                                    name: 'birthDate',
+                                    index: 'BIRTH_DATE',
+                                    width: 100,
+                                    formatter: $filter('dateFormatter'),
+                                    sortable: !$scope.versionMode
+                                },
+                                {name: 'birthPlace', index: 'BIRTH_PLACE', width: 150},
+                                {
+                                    name: 'citizenship',
+                                    index: 'CITIZENSHIP',
+                                    width: 100,
+                                    formatter: $filter('codeFormatter'),
+                                    sortable: !$scope.versionMode
+                                },
+                                {name: 'addressAsText', index: 'ADDRESS', width: 400, sortable: !$scope.versionMode},
+                                {name: 'employee', index: 'EMPLOYEE', width: 100, sortable: !$scope.versionMode},
+                                {
+                                    name: 'source',
+                                    index: 'SOURCE_ID',
+                                    width: 100,
+                                    formatter: $filter('codeFormatter'),
+                                    sortable: !$scope.versionMode
+                                },
+                                {name: 'oldId', index: 'OLD_ID', width: 100, sortable: !$scope.versionMode}
+                            ],
+                            rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                            rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                            sortname: $scope.sortAttribute,
+                            sortorder: "asc",
+                            viewrecords: true,
+                            hidegrid: false,
+                            multiselect: true,
+                            ondblClickRow: function (rowId) {
+                                $scope.showRecord($scope.personGrid.ctrl.getRawData(rowId))
+                            }
                         }
-                    }
+                    };
                 };
 
                 /**

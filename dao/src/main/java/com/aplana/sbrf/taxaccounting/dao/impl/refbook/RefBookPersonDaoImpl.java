@@ -280,7 +280,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
         }
 
-        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version <= :version" : "") +
+        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id)" : "") +
                 (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
 
         String sortColumnName = "id";
