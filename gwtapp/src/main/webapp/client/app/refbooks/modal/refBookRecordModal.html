@@ -57,6 +57,7 @@
                                        title="{{record[attribute.alias].value}}"
                                        aplana-input-outer-width="400"
                                        maxlength="{{attribute.maxLength}}"
+                                       data-ng-disabled="attribute.readOnly"
                                        data-ng-required="{{attribute.required}}"/>
                                 <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
                             </div>
@@ -68,6 +69,7 @@
                                        title="{{attribute.name}}"
                                        aplana-input-outer-width="400"
                                        data-ng-pattern="patterns.number"
+                                       data-ng-disabled="attribute.readOnly"
                                        data-ng-required="{{attribute.required}}">
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' | translate}}</div>
                                 <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
@@ -81,6 +83,7 @@
                                      data-ng-model="record[attribute.alias].value"
                                      data-date-format="{{refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE ? 'dd.MM' : 'dd.MM.yyyy'}}"
                                      title="{{attribute.name}}"
+                                     data-ng-disabled="attribute.readOnly"
                                      data-ng-required="{{attribute.required}}"></div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             </div>
@@ -92,6 +95,7 @@
                                      aplana-input-outer-width="400"
                                      data-ng-init="initSelect(attribute.refBookId, attribute.alias)"
                                      data-ng-model="record[attribute.alias].value"
+                                     data-ng-disabled="attribute.readOnly"
                                      data-ng-required="{{attribute.required}}"></div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             </div>

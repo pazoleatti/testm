@@ -415,4 +415,12 @@
 		</sql>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-4854 -->
+    <changeSet id="3.0-dloshkarev-8" author="dloshkarev">
+        <update tableName="REF_BOOK_ATTRIBUTE">
+            <column name="required" value="1"/>
+            <where>ref_book_id = 904 and alias = 'EMPLOYEE'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
