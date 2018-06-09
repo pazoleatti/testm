@@ -297,7 +297,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             direction = pagingParams.getDirection();
         }
         String finalQuery = pagingParams != null ?
-                "select * from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
+                "select /*+ FIRST_ROWS */* from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
                 : baseSql;
         List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(finalQuery, params, mapper);
 
