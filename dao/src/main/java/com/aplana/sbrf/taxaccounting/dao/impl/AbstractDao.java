@@ -17,6 +17,9 @@ public abstract class AbstractDao {
      */
     public static final int CURSOR = -10;
 
+    /**
+     * Ограничение элементов у оператора in в sql выражении.
+     */
     protected static final int IN_CLAUSE_LIMIT = 1000;
 
 
@@ -68,6 +71,12 @@ public abstract class AbstractDao {
         return dbInfo.isDateDiffNumber();
     }
 
+    /**
+     * Получить часть листа размер которого ограничен значением {@code IN_CLAUSE_LIMIT}.
+     * @param list  основной лист
+     * @param i     порядковый номер части
+     * @return  часть основного листа размером не более 1000, начало которого является элементом лежащего по индексу {@code i} * {@code IN_CLAUSE_LIMIT} основного листа
+     */
     protected List<Long> getSubList(List<Long> list, int i) {
         return list.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, list.size()));
     }

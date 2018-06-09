@@ -1,8 +1,12 @@
 <div class="flex-column">
     <!--Заголовок-->
-    <div class="content-header pull-left">
+    <div class="content-header pull-left" data-ng-hide="versionMode">
         <a href="index.html#/refbooks/refBookList">{{::'refBooks.title' | translate}}</a>
         <h1>— {{refBook.name}}</h1>
+    </div>
+    <div class="content-header pull-left" data-ng-show="versionMode">
+        <a href="index.html#/refBooks/linearRefBook/{{refBook.id}}">{{::'refBook.title' | translate}} "{{refBook.name}}"</a>
+        <h1>— {{::'refBook.version.title' | translate}}</h1>
     </div>
     <div id="refBookFLGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
         <div id="refBookFLRecordsGridTop">

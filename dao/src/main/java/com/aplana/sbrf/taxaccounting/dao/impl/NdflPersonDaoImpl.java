@@ -7,21 +7,19 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.*;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -1328,15 +1326,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             for (int i = 0; i < n; i++) {
                 List<Long> subList = getSubList(ndflPersonIdList, i);
                 List<NdflPerson> subResult = fetchNdflPersonByIdList(subList);
-                if (subResult != null) {
-                    result.addAll(subResult);
-                }
+                result.addAll(subResult);
             }
-            if (result.isEmpty()) {
-                return null;
-            } else {
-                return result;
-            }
+            return result;
         }
         String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " FROM NDFL_PERSON np" +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +

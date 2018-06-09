@@ -9,7 +9,7 @@
     /**
      * @description Директива для выбора записи из выпадашки
      */
-        .directive('refBookPicker', ['$aplanaModal', 'RefBookResource', '$filter', function ($aplanaModal, RefBookResource, $filter) {
+        .directive('refBookPicker', ['$aplanaModal', '$filter', function ($aplanaModal, $filter) {
             return {
                 restrict: "E",
                 require: 'ngModel',
@@ -26,23 +26,15 @@
                         scope.buttonTitle = $filter('translate')('button.select');
                     }
 
-                    RefBookResource.query({
-                        id: scope.refBookId,
-                        projection: 'light'
-                    }, function (data) {
-                        scope.refBook = data;
-                    });
-
                     scope.openSelectDialog = function () {
                         $aplanaModal.open({
-                            title: scope.refBook.name,
                             templateUrl: 'client/app/common/directives/refBookPicker/modalSelectPicker.html?v=${buildUuid}',
                             controller: 'refBookPickerModalCtrl',
                             windowClass: 'modal800',
                             resolve: {
                                 $shareData: function () {
                                     return {
-                                        refBook: scope.refBook
+                                        refBookId: scope.refBookId
                                     };
                                 }
                             }

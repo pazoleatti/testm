@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class DeclarationStringComparatorTest {
+public class RnuNdflStringComparatorTest {
     @Test
     public void testComparing() {
         List<String> tested = new ArrayList<>();
@@ -24,7 +24,7 @@ public class DeclarationStringComparatorTest {
 
         Collections.shuffle(tested, new Random(0L));
 
-        Comparator<String> comparator = DeclarationStringComparator.INSTANCE;
+        Comparator<String> comparator = RnuNdflStringComparator.INSTANCE;
         Collections.sort(tested, comparator);
 
         List<String> reference = new ArrayList<>();
@@ -168,6 +168,6 @@ public class DeclarationStringComparatorTest {
         reference.add("Я");
         reference.add("я");
 
-        Assert.assertEquals(tested, reference);
+        Assert.assertEquals(reference, tested);
     }
 }
