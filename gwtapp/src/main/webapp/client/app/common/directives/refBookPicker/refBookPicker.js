@@ -27,7 +27,8 @@
                     }
 
                     RefBookResource.query({
-                        id: scope.refBookId
+                        id: scope.refBookId,
+                        projection: 'light'
                     }, function (data) {
                         scope.refBook = data;
                     });

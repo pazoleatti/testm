@@ -46,6 +46,11 @@
                 options: {
                     datatype: "angularResource",
                     angularResource: RefBookListResource,
+                    requestParameters: function () {
+                        return {
+                            projection: 'light'
+                        };
+                    },
                     colNames: [
                         $filter('translate')('refBooks.refBooksList.columnHeader.refBookName'),
                         $filter('translate')('refBooks.refBooksList.columnHeader.refBookType')

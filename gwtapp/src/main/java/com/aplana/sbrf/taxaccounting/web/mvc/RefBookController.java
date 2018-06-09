@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import com.aplana.sbrf.taxaccounting.web.spring.json.JsonMixins;
+import com.aplana.sbrf.taxaccounting.web.spring.json.JsonPredefinedMixins;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
@@ -54,6 +56,20 @@ public class RefBookController {
      */
     @GetMapping(value = "/rest/refBook/{refBookId}")
     public RefBook fetchRefBook(@PathVariable Long refBookId) {
+        return commonRefBookService.get(refBookId);
+    }
+
+    /**
+     * Получение урезанных данных о справочнике. Возвращается только имя, тип и признак редактируемости
+     *
+     * @param refBookId Идентификатор справочника
+     * @return Страница списка значений справочника
+     */
+    @GetMapping(value = "/rest/refBook/{refBookId}", params = "projection=light")
+    @JsonMixins({
+            @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter .class)
+    })
+    public RefBook fetchRefBookLight(@PathVariable Long refBookId) {
         return commonRefBookService.get(refBookId);
     }
 
@@ -102,6 +118,9 @@ public class RefBookController {
      * @return список объектов содержащих данные о справочниках
      */
     @GetMapping(value = "rest/refBook")
+    @JsonMixins({
+            @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter .class)
+    })
     public List<RefBook> fetchAllRefBooks() {
         return commonRefBookService.fetchAll();
     }

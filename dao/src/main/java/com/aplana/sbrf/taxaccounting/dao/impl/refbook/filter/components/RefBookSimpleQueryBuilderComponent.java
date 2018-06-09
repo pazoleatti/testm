@@ -323,7 +323,7 @@ public class RefBookSimpleQueryBuilderComponent {
 
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute, List<String> columns,
                                                    String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersion) {
-        ps.appendQuery("SELECT * FROM (");
+        ps.appendQuery("SELECT /*+ FIRST_ROWS */* FROM (");
         if (onlyId) {
             ps.appendQuery("SELECT ")
                     .appendQuery(RefBook.RECORD_ID_ALIAS)
