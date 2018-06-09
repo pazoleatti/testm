@@ -109,10 +109,10 @@
 
                 select.options.ajax = {
                     url: url,
-                    quietMillis: 200,
+                    quietMillis: 100,
                     data: function (term, page) {
                         var pagingParams = {
-                            count: 50,
+                            count: 10,
                             page: page,
                             property: sortParams.property,
                             direction: sortParams.direction
@@ -128,7 +128,7 @@
                         return dataObject;
                     },
                     results: function (data, page) {
-                        var more = (page * 50) < data.records;
+                        var more = (page * 10) < data.records;
                         return {results: data.rows, more: more};
                     }
                 };
