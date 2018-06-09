@@ -534,8 +534,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void consolidate(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         LOG.info(String.format("DeclarationDataServiceImpl.consolidate by %s. docDate: %s; exchangeParams: %s",
                 userInfo, docDate, exchangeParams));
-        calculate(targetIdAndLogger.getLogger(), targetIdAndLogger.getId(),
-                userInfo, docDate, exchangeParams, stateLogger);
+        DeclarationData declarationData = declarationDataDao.get(targetIdAndLogger.getId());
+
+        if (exchangeParams == null) {
+            exchangeParams = new HashMap<>();
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationData", declarationData);
+        exchangeParams.put("calculateParams", params);
+
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, targetIdAndLogger.getLogger(), exchangeParams);
+
+        logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
+        auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
+
     }
 
     private boolean calculateDeclaration(Logger logger, Long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {

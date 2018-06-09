@@ -1,23 +1,33 @@
 package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DeclarationType
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.util.DeclarationStringComparator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
+import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.SourceService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import groovy.xml.MarkupBuilder
 
 new Calculate(this).run()
 
@@ -29,14 +39,7 @@ class Calculate extends AbstractScriptClass {
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
-
-    FileWriter xml
-
-    final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
-
-    final String R_PERSON = "Физические лица"
-
-    final String RF_RECORD_ID = "RECORD_ID"
+    SourceService sourceService
 
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -45,37 +48,30 @@ class Calculate extends AbstractScriptClass {
     // Даты создания налоговой формы
     Map<Long, Date> creationDateCache = [:]
 
-    // Дата окончания отчетного периода
-    Date periodStartDate = null
-    // Дата окончания отчетного периода
-    Date periodEndDate = null
-
-    private Calculate() {
-    }
-
     @TypeChecked(TypeCheckingMode.SKIP)
-    public Calculate(scriptClass) {
+    Calculate(scriptClass) {
+        //noinspection GroovyAssignabilityCheck
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
-            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
         }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
-            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("xml")) {
-            this.xml = (FileWriter) scriptClass.getProperty("xml");
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
         }
         if (scriptClass.getBinding().hasVariable("departmentService")) {
-            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
+        }
+        if (scriptClass.getBinding().hasVariable("sourceService")) {
+            this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
         }
     }
 
@@ -87,8 +83,6 @@ class Calculate extends AbstractScriptClass {
                 case FormDataEvent.CALCULATE:
                     clearData()
                     consolidation()
-                    if (logger.containsLevel(LogLevel.ERROR)) return
-                    generateXml()
             }
         } catch (Throwable e) {
             logger.error(e.toString())
@@ -111,11 +105,11 @@ class Calculate extends AbstractScriptClass {
      */
     void consolidation() {
 
-        long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis()
 
         Department parentTB = departmentService.getParentTB(declarationData.departmentId)
-        ConfigurationParamModel configurationParamModel = configurationService.getCommonConfig(userInfo);
-        Integer dataSelectionDepth = Integer.valueOf(configurationParamModel?.get(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH).get(0).get(0))
+        ConfigurationParamModel configurationParamModel = configurationService.getCommonConfig(userInfo)
+        Integer dataSelectionDepth = Integer.valueOf(configurationParamModel?.get(ConfigurationParam?.CONSOLIDATION_DATA_SELECTION_DEPTH)?.get(0)?.get(0))
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
         ConsolidationSourceDataSearchFilter.Builder filterBuilder = new ConsolidationSourceDataSearchFilter.Builder()
@@ -127,38 +121,40 @@ class Calculate extends AbstractScriptClass {
                 .declarationType(DeclarationType.NDFL_PRIMARY)
                 .consolidateDeclarationDataYear(reportPeriod.taxPeriod.year)
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Инициализация данных для поиска источников, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         List<ConsolidationIncome> operationsForConsolidationList = ndflPersonService.fetchIncomeSourcesConsolidation(filterBuilder.createConsolidationSourceDataSearchFilter())
 
         logForDebug("Определение списка операций, которые нужно включить в КНФ. Отобрано ${operationsForConsolidationList.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         Map<Pair<String, Long>, List<ConsolidationIncome>> incomesGroupedByOperationIdAndAsnu = [:]
         for (ConsolidationIncome income : operationsForConsolidationList) {
             Pair<String, Long> operationAsnu = new Pair(income.operationId, income.asnuId)
             List<ConsolidationIncome> group = incomesGroupedByOperationIdAndAsnu.get(operationAsnu)
             if (group == null) {
-                incomesGroupedByOperationIdAndAsnu[operationAsnu] = [income]
+                incomesGroupedByOperationIdAndAsnu.put(operationAsnu, [income])
             } else {
                 group << income
             }
         }
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Группировка строк по идОперации и АСНУ, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         // Избавляемся от фиктивных строк. Чтобы не перепроверять все строки выбираем только те, у которых идОперации = 0
         List<ConsolidationIncome> dummyRowsCandidates = []
         for (Long asnuId : getAsnuCache()) {
-            dummyRowsCandidates.addAll(incomesGroupedByOperationIdAndAsnu[new Pair("0", asnuId)])
+            dummyRowsCandidates.addAll(incomesGroupedByOperationIdAndAsnu.get(new Pair("0", asnuId)))
         }
 
         // Проверяем и удаляем фиктивные строки
@@ -166,20 +162,20 @@ class Calculate extends AbstractScriptClass {
             if (dummyRowCandidate.taxBase == new BigDecimal("0") && dummyRowCandidate.taxRate == 0) {
                 if ((dummyRowCandidate.incomeAccruedSumm == new BigDecimal("0") && dummyRowCandidate.calculatedTax == new BigDecimal("0"))
                         || (dummyRowCandidate.incomePayoutSumm == new BigDecimal("0") && dummyRowCandidate.withholdingTax == new BigDecimal("0"))) {
-                    incomesGroupedByOperationIdAndAsnu[new Pair("0", dummyRowCandidate.asnuId)].remove(dummyRowCandidate)
+                    incomesGroupedByOperationIdAndAsnu.get(new Pair("0", dummyRowCandidate.asnuId)).remove(dummyRowCandidate)
                 }
             }
         }
 
         // Группруем идентификаторы источников по состоянию: Принята/Не принята. Далее они понадобятся при формировании уведомлений
         Map<Boolean, Set<Long>> acceptedSources = [:]
-        acceptedSources[Boolean.TRUE] = [].toSet()
-        acceptedSources[Boolean.FALSE] = [].toSet()
+        acceptedSources.put(Boolean.TRUE, new HashSet<Long>())
+        acceptedSources.put(Boolean.FALSE, new HashSet<Long>())
 
         // Строки отобранные для включения в КНФ
         List<ConsolidationIncome> pickedRows = []
 
-        // В одном цикле делаем сразу несколько действий: 1. Отбираем источники с сотсоянием принята. 2. Находим дубли, сортируем и избавляемся от них
+        // В одном цикле делаем сразу несколько действий: 1. Отбираем источники в состояниии "Принята". 2. Находим дубли, сортируем и избавляемся от них
         for (List<ConsolidationIncome> incomes : incomesGroupedByOperationIdAndAsnu.values()) {
             ScriptUtils.checkInterrupted()
             // Группируем все отобранные строки по отпечатку ConsolidationIncome
@@ -187,10 +183,11 @@ class Calculate extends AbstractScriptClass {
             Map<String, List<ConsolidationIncome>> transitionalRows = [:]
             Iterator<ConsolidationIncome> incomesIterator = incomes.iterator()
             while (incomesIterator.hasNext()) {
+                //noinspection GroovyAssignabilityCheck
                 ConsolidationIncome candidate = incomesIterator.next()
                 if (candidate.accepted) {
 
-                    acceptedSources[Boolean.TRUE] << candidate.declarationDataId
+                    acceptedSources.get(Boolean.TRUE) << candidate.declarationDataId
 
                     String uuid = ScriptUtils.getConsolidationIncomeUUID(candidate)
 
@@ -204,7 +201,7 @@ class Calculate extends AbstractScriptClass {
                     } else {
                         // Если кандидат есть
                         if (pickedCandidates.get(0).declarationDataId == candidate.declarationDataId) {
-                            // Добавлем еще строку если кандидат из той же КНФ
+                            // Добавлем еще строку если кандидат из той же ПНФ
                             pickedCandidates.add(candidate)
                         } else {
                             if (pickedCandidates.get(0).correctionDate == null) {
@@ -215,16 +212,16 @@ class Calculate extends AbstractScriptClass {
                             }
                             if (candidate.correctionDate == null) {
                                 // Проверяем что кандидат не из корректировочного периода
-                                candidate.correctionDate = new Date(Long.MIN_VALUE);
+                                candidate.correctionDate = new Date(Long.MIN_VALUE)
                             }
                             // ЧТобы новый кандидат стал отобранным кандидатом он должен иметь более поздний год
                             // Если года равны тогда новый кандидадт должен иметь больший код отчетного периода
                             // Если периоды равны тогда новый кандидат должен иметь более позднюю дату корректировки
                             // Если даты корректировки одинаковы, тогда новый кандидат должен иметь более позднюю дату создания
                             if (pickedCandidates.get(0).year < candidate.year
-                                    || pickedCandidates.get(0).periodCode.compareTo(candidate.periodCode) < 0
-                                    || pickedCandidates.get(0).correctionDate.compareTo(candidate.correctionDate) < 0
-                                    || getDeclarationDataCreationDate(pickedCandidates.get(0).declarationDataId).compareTo(getDeclarationDataCreationDate(candidate.declarationDataId)) < 0) {
+                                    || pickedCandidates.get(0).periodCode < candidate.periodCode
+                                    || pickedCandidates.get(0).correctionDate < candidate.correctionDate
+                                    || getDeclarationDataCreationDate(pickedCandidates.get(0).declarationDataId) < getDeclarationDataCreationDate(candidate.declarationDataId)) {
                                 // Если новый кандидат выбран. Очищаем список отобранных кандидатов и добавляем нового кандидата.
                                 pickedCandidates.clear()
                                 pickedCandidates.add(candidate)
@@ -232,7 +229,7 @@ class Calculate extends AbstractScriptClass {
                         }
                     }
                 } else {
-                    acceptedSources[Boolean.FALSE] << candidate.declarationDataId
+                    acceptedSources.get(Boolean.FALSE) << candidate.declarationDataId
                     incomesIterator.remove()
                 }
             }
@@ -249,7 +246,7 @@ class Calculate extends AbstractScriptClass {
 
         logForDebug("Избавление от дублирующих и фиктивных строк, определение списка операций для включения в КНФ. Включено в КНФ ${pickedRows.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         // Доходы сгруппированные по идОперации и ИНП. Будут использоваться для вычисления доп полей сортировки
         Map<Pair<String, String>, List<ConsolidationIncome>> incomesGroupedByOperationAndInp = [:]
@@ -321,52 +318,62 @@ class Calculate extends AbstractScriptClass {
             incomeIdsForFetchingDeductionsAndPrepayments << incomes.get(0).id
         }
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Подготовка аргументов для получения данных разделов 1, 3, 4, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         List<NdflPerson> ndflPersonList = ndflPersonService.findByIdList(new ArrayList<>(incomesGroupedByPerson.keySet()))
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Получение данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         List<NdflPersonDeduction> deductions = ndflPersonService.fetchDeductionsForConsolidation(incomeIdsForFetchingDeductionsAndPrepayments)
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Получение данных раздела 3, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         List<NdflPersonPrepayment> prepayments = ndflPersonService.fetchPrepaymentsForConsolidation(incomeIdsForFetchingDeductionsAndPrepayments)
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Получение данных раздела 4, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
+
+        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date())
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Получение данных справочника ФЛ, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
 
         Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
             @Override
             int compare(NdflPerson o1, NdflPerson o2) {
-                int lastNameComp = compareValues(o1.lastName, o2.lastName, DeclarationStringComparator.INSTANCE);
+                int lastNameComp = compareValues(o1.lastName, o2.lastName, RnuNdflStringComparator.INSTANCE)
                 if (lastNameComp != 0) {
                     return lastNameComp
                 }
 
-                int firstNameComp = compareValues(o1.firstName, o2.firstName, DeclarationStringComparator.INSTANCE);
+                int firstNameComp = compareValues(o1.firstName, o2.firstName, RnuNdflStringComparator.INSTANCE)
                 if (firstNameComp != 0) {
-                    return firstNameComp;
+                    return firstNameComp
                 }
 
-                int middleNameComp = compareValues(o1.middleName, o2.middleName, DeclarationStringComparator.INSTANCE);
+                int middleNameComp = compareValues(o1.middleName, o2.middleName, RnuNdflStringComparator.INSTANCE)
                 if (middleNameComp != 0) {
                     return middleNameComp
                 }
 
-                int innComp = compareValues(o1.innNp, o2.innNp, DeclarationStringComparator.INSTANCE);
+                int innComp = compareValues(o1.innNp, o2.innNp, RnuNdflStringComparator.INSTANCE)
                 if (innComp != 0) {
                     return innComp
                 }
 
-                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, DeclarationStringComparator.INSTANCE);
+                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, RnuNdflStringComparator.INSTANCE)
                 if (innForeignComp != 0) {
                     return innForeignComp
                 }
@@ -376,32 +383,144 @@ class Calculate extends AbstractScriptClass {
                     return birthDayComp
                 }
 
-                return compareValues(o1.idDocNumber, o2.idDocNumber, DeclarationStringComparator.INSTANCE)
+                return compareValues(o1.idDocNumber, o2.idDocNumber, RnuNdflStringComparator.INSTANCE)
             }
         })
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
-
-        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date())
-
-        logForDebug("Получение данных справочника ФЛ, (" + ScriptUtils.calcTimeMillis(time))
-        ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
-
+        time = System.currentTimeMillis()
         Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
 
         for (NdflPerson refBookPerson : refBookPersonList) {
             refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
         }
 
-        Map<Long, NdflPerson> ndflPersonsToPersist = [:]
+        Map<Long, List<NdflPersonDeduction>> deductionsGroupedByRefBookPerson = [:]
+        Map<Long, List<NdflPersonPrepayment>> prepaymentsGroupedByPerson = [:]
+
+        // Сортируем разделы 2, 3, 4
+        for (NdflPersonDeduction deduction : deductions) {
+            List<NdflPersonDeduction> group = deductionsGroupedByRefBookPerson.get(deduction.ndflPersonId)
+            if (group == null) {
+                deductionsGroupedByRefBookPerson.put(deduction.ndflPersonId, [deduction])
+            } else {
+                group << deduction
+            }
+        }
+
+        for (NdflPersonPrepayment prepayment : prepayments) {
+            List<NdflPersonPrepayment> group = prepaymentsGroupedByPerson.get(prepayment.ndflPersonId)
+            if (group == null) {
+                prepaymentsGroupedByPerson.put(prepayment.ndflPersonId, [prepayment])
+            } else {
+                group << prepayment
+            }
+        }
+
+        BigDecimal incomeRowNum = new BigDecimal("0")
+        BigDecimal deductionRowNum = new BigDecimal("0")
+        BigDecimal prepaymentRowNum = new BigDecimal("0")
+
+        for (NdflPerson ndflPerson : ndflPersonList) {
+            ndflPerson.incomes = incomesGroupedByPerson.get(ndflPerson.id)
+            ndflPerson.deductions = deductionsGroupedByRefBookPerson.get(ndflPerson.id)
+            ndflPerson.prepayments = prepaymentsGroupedByPerson.get(ndflPerson.id)
+
+            Collections.sort(ndflPerson.incomes, new Comparator<NdflPersonIncome>() {
+                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                    int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.inp)), operationDates.get(new Pair(o2.operationId, ndflPerson.inp)), null)
+                    if (operationDateComp != 0) {
+                        return operationDateComp
+                    }
+
+                    int operationIdComp = compareValues(o1.operationId, o2.operationId, RnuNdflStringComparator.INSTANCE)
+                    if (operationIdComp != 0) {
+                        return operationIdComp
+                    }
+
+                    int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null)
+                    if (actionDateComp != 0) {
+                        return actionDateComp
+                    }
+
+                    return compareValues(getRowType(o1), getRowType(o2), null)
+                }
+
+            })
+
+            List<String> operationIdOrderList = ndflPerson.incomes.operationId
+
+            Collections.sort(ndflPerson.deductions, new Comparator<NdflPersonDeduction>() {
+                @Override
+                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                    int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null)
+                    if (incomeAccruedComp != 0) {
+                        return incomeAccruedComp
+                    }
+
+                    int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                        @Override
+                        int compare(String s1, String s2) {
+                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
+                        }
+                    })
+                    if (operationIdComp != 0) {
+                        return operationIdComp
+                    }
+
+                    return compareValues(o1.periodCurrDate, o2.periodCurrDate, null)
+                }
+            })
+
+            Collections.sort(ndflPerson.prepayments, new Comparator<NdflPersonPrepayment>() {
+                @Override
+                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                    return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                        @Override
+                        int compare(String s1, String s2) {
+                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
+                        }
+                    })
+                }
+            })
+
+            for (NdflPersonIncome income : ndflPerson.incomes) {
+                incomeRowNum = incomeRowNum.add(new BigDecimal("1"))
+                income.rowNum = incomeRowNum
+            }
+
+            for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                deductionRowNum = deductionRowNum.add(new BigDecimal("1"))
+                deduction.rowNum = deductionRowNum
+            }
+
+            for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
+                prepayment.rowNum = prepaymentRowNum
+            }
+
+            ndflPerson.id = null
+            ndflPerson.declarationDataId = declarationData.id
+            ndflPerson.modifiedDate = null
+            ndflPerson.modifiedBy = null
+        }
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        // Физлица для сохранения сгуппированные по идентификатору физлица в справочнике
+        Map<Long, NdflPerson> ndflPersonsToPersistGroupedByRefBookPersonId = [:]
 
         List<NdflPerson> withoutDulPersonList = []
 
 
         // Данные для заполнения раздела 1
+
+        long personRowNum = 0L
         for (NdflPerson declarationDataPerson : ndflPersonList) {
             NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
 
@@ -418,7 +537,7 @@ class Calculate extends AbstractScriptClass {
                 withoutDulPersonList << refBookPerson
             }
 
-            NdflPerson persistingPerson = ndflPersonsToPersist.get(0)
+            NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.personId)
             if (persistingPerson != null) {
                 persistingPerson.incomes.addAll(declarationDataPerson.incomes)
                 persistingPerson.deductions.addAll(declarationDataPerson.deductions)
@@ -496,14 +615,16 @@ class Calculate extends AbstractScriptClass {
                 declarationDataPerson.address = refBookPerson.address
             }
 
-            ndflPersonsToPersist.put(declarationDataPerson.personId, declarationDataPerson)
+            declarationDataPerson.rowNum = ++personRowNum
+
+            ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.personId, declarationDataPerson)
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) return
 
         /**
          * Получение данных из справочника физлиц сделан одним запросом. Мы не загружаем связанные со справочником ФЛ справочники ИНП, ДУЛ, и Адресов отдельными запросами.
-         * Побочный эффект этого то что ДУЛ будет = null, в случае когда нет в справочнике ДУЛ с признаком включения в отчетность =1 и когда вообще нет ДУЛ у физлицаю
+         * Побочный эффект этого то что ДУЛ будет = null, в случае когда нет в справочнике ДУЛ с признаком включения в отчетность =1 и когда вообще нет ДУЛ у физлица.
          * Поэтому здесь проверяется причина почему ДУЛ = null и выводится предупреждение
          */
 
@@ -523,128 +644,14 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Консолидация данных, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
-        Map<Long, List<NdflPersonDeduction>> deductionsGroupedByPerson = [:]
-        Map<Long, List<NdflPersonPrepayment>> prepaymentsGroupedByPerson = [:]
+        ndflPersonService.save(ndflPersonsToPersistGroupedByRefBookPersonId.values())
 
-        // Сортируем разделы 2, 3, 4
-        for (NdflPersonDeduction deduction : deductions) {
-            List<NdflPersonDeduction> group = deductionsGroupedByPerson.get(deduction.ndflPersonId)
-            if (group == null) {
-                deductionsGroupedByPerson.put(deduction.ndflPersonId, [deduction])
-            } else {
-                group << deduction
-            }
-        }
-
-        for (NdflPersonPrepayment prepayment : prepayments) {
-            List<NdflPersonPrepayment> group = prepaymentsGroupedByPerson.get(prepayment.ndflPersonId)
-            if (group == null) {
-                prepaymentsGroupedByPerson.put(prepayment.ndflPersonId, [prepayment])
-            } else {
-                group << prepayment
-            }
-        }
-
-        long personRowNum = 0L
-        BigDecimal incomeRowNum = new BigDecimal("0")
-        BigDecimal deductionRowNum = new BigDecimal("0")
-        BigDecimal prepaymentRowNum = new BigDecimal("0")
-
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            ndflPerson.incomes = incomesGroupedByPerson.get(ndflPerson.id)
-            ndflPerson.deductions = deductionsGroupedByPerson.get(ndflPerson.id)
-            ndflPerson.prepayments = prepaymentsGroupedByPerson.get(ndflPerson.id)
-
-            Collections.sort(ndflPerson.incomes, new Comparator<NdflPersonIncome>() {
-                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
-                    int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.inp)), operationDates.get(new Pair(o2.operationId, ndflPerson.inp)), null)
-                    if (operationDateComp != 0) {
-                        return operationDateComp
-                    }
-
-                    int operationIdComp = compareValues(o1.operationId, o2.operationId, DeclarationStringComparator.INSTANCE)
-                    if (operationIdComp != 0) {
-                        return operationIdComp
-                    }
-
-                    int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null)
-                    if (actionDateComp != 0) {
-                        return actionDateComp
-                    }
-
-                    return compareValues(getRowType(o1), getRowType(o2), null)
-                }
-
-            })
-
-            List<String> operationIdOrderList = ndflPerson.incomes.operationId
-
-            Collections.sort(ndflPerson.deductions, new Comparator<NdflPersonDeduction>() {
-                @Override
-                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
-                    int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null)
-                    if (incomeAccruedComp != 0) {
-                        return incomeAccruedComp
-                    }
-
-                    int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
-                        @Override
-                        int compare(String s1, String s2) {
-                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
-                        }
-                    })
-                    if (operationIdComp != 0) {
-                        return operationIdComp
-                    }
-
-                    return compareValues(o1.periodCurrDate, o2.periodCurrDate, null)
-                }
-            })
-
-            Collections.sort(ndflPerson.prepayments, new Comparator<NdflPersonPrepayment>() {
-                @Override
-                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
-                    return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
-                        @Override
-                        int compare(String s1, String s2) {
-                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
-                        }
-                    })
-                }
-            })
-
-            for (NdflPersonIncome income : ndflPerson.incomes) {
-                incomeRowNum = incomeRowNum.add(new BigDecimal("1"))
-                income.rowNum = incomeRowNum
-            }
-
-            for (NdflPersonDeduction deduction : ndflPerson.deductions) {
-                deductionRowNum = deductionRowNum.add(new BigDecimal("1"))
-                deduction.rowNum = deductionRowNum
-            }
-
-            for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
-                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
-                prepayment.rowNum = prepaymentRowNum
-            }
-
-            ndflPerson.rowNum = ++personRowNum
-            ndflPerson.id = null
-            ndflPerson.declarationDataId = declarationData.id
-            ndflPerson.modifiedDate = null
-            ndflPerson.modifiedBy = null
-        }
-
-        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, (" + ScriptUtils.calcTimeMillis(time))
-        ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis();
-
-        ndflPersonService.save(ndflPersonsToPersist.values());
-
+        //noinspection GroovyAssignabilityCheck
         logForDebug("Сохранение данных в БД, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
 
@@ -656,6 +663,14 @@ class Calculate extends AbstractScriptClass {
         Map<Department, List<Long>> acceptedSourcesByTb = [:]
 
         acceptedTbDepartments.put(parentTB, 0)
+
+        List<Long> allSourcesIdList = []
+
+        allSourcesIdList.addAll(acceptedSources.get(Boolean.TRUE))
+        allSourcesIdList.addAll(acceptedSources.get(Boolean.FALSE))
+
+        sourceService.deleteDeclarationConsolidateInfo(declarationData.id)
+        sourceService.addDeclarationConsolidationInfo(declarationData.id, allSourcesIdList)
 
         for (Long sourceId : acceptedSources.get(Boolean.TRUE)) {
             ScriptUtils.checkInterrupted()
@@ -719,64 +734,11 @@ class Calculate extends AbstractScriptClass {
      * @param providerId
      * @return
      */
-    RefBookDataProvider getProvider(def long providerId) {
+    RefBookDataProvider getProvider(long providerId) {
         if (!providerCache.containsKey(providerId)) {
             providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
         }
         return providerCache.get(providerId)
-    }
-
-    /**
-     * Получить дату начала отчетного периода
-     * @return
-     */
-    Date getReportPeriodStartDate() {
-        if (periodStartDate == null) {
-            periodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
-        }
-        return periodStartDate
-    }
-
-    /**
-     * Получить дату окончания отчетного периода
-     * @return
-     */
-    Date getReportPeriodEndDate() {
-        if (periodEndDate == null) {
-            periodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-        }
-        return periodEndDate
-    }
-
-    /**
-     * Создание фиктивной xml для привязки к экземпляру
-     * declarationDataId
-     * @return
-     */
-    def generateXml() {
-        MarkupBuilder builder = new MarkupBuilder((FileWriter) xml)
-        createXmlNode(builder, "Файл", ["имя": declarationData.id])
-    }
-
-    @TypeChecked(TypeCheckingMode.SKIP)
-    def createXmlNode(builder, name, attributes) {
-        builder.name(attributes)
-    }
-
-/**
- * Получить список всех идентификаторов "АСНУ" из справочника
- * @return  список идентификаторов АСНУ
- */
-    List<Long> getRefAsnuList() {
-        if (asnuCache.isEmpty()) {
-            RefBookDataProvider provider = getProvider(RefBook.Id.ASNU.id)
-            PagingResult<Map<String, RefBookValue>> refBookMap = provider.getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
-            refBookMap.each { Map<String, RefBookValue> refBook ->
-                Long asnuId = (Long) refBook?.id?.numberValue
-                asnuCache.add(asnuId)
-            }
-        }
-        return asnuCache;
     }
 
     /**
@@ -802,7 +764,7 @@ class Calculate extends AbstractScriptClass {
      * больше параметра v2, 0 если параметры v1 и v2 равны
      */
     @TypeChecked(TypeCheckingMode.SKIP)
-    int compareValues(def v1, def v2, def comparator) {
+    static int compareValues(v1, v2, comparator) {
         int result = 0
         if (v1 != null && v2 != null) {
             if (comparator != null) {
@@ -823,14 +785,12 @@ class Calculate extends AbstractScriptClass {
      * @param income объект строки дохода
      * @return  вычисленная дата действия
      */
-    Date getActionDate(NdflPersonIncome income) {
-        Date toReturn = null
+    static Date getActionDate(NdflPersonIncome income) {
         if (income.taxDate != null) {
-            toReturn = income.taxDate
+            return income.taxDate
         } else {
-            toReturn = income.paymentDate
+            return income.paymentDate
         }
-        return toReturn
     }
 
     /**
@@ -838,7 +798,7 @@ class Calculate extends AbstractScriptClass {
      * @param income объект строки дохода
      * @return  значение типа
      */
-    Integer getRowType(NdflPersonIncome income) {
+    static Integer getRowType(NdflPersonIncome income) {
         if (income.incomeAccruedDate != null) {
             return 100
         } else if (income.incomePayoutDate != null) {
