@@ -1,5 +1,12 @@
 <div class="modal-body">
-    <div style="width: 100%" data-ui-select2="select.options" data-ng-controller="SelectRefBookCtrl"
-         data-ng-init="initSelect(refBook.id)"
-         data-ng-model="temp.selectedRecord"></div>
+    <div id="selectContainer"></div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="save()">
+        <span data-translate-once="button.save"></span>
+    </button>
+    <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
+        <span data-translate-once="button.cancel"></span>
+        <span class="btn-icon-noneBg-close"></span>
+    </button>
 </div>
