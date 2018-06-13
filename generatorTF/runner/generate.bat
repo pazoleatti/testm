@@ -1,7 +1,7 @@
  rem путь к java
 SET jre="C:\Program Files\Java\jdk1.7.0_71\bin"
  rem jar-файл
-SET jar=generatorTF-1.1-jar-with-dependencies.jar
+SET jar=generators-1.1-jar-with-dependencies.jar
  rem входной файл
 SET in=in.xlsx
  rem тип генерируемого файла (xlsx или xml)

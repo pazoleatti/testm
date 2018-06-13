@@ -29,7 +29,7 @@ import static com.aplana.generatorTF.Utils.*;
 /**
  * Класс для генерации ТФ (Excel) РНУ
  */
-public class GeneratorXlsx {
+public class GeneratorRnuNdflXlsx {
 
     //Номера столбцов в таблице
     private static final int COL_N = 1;

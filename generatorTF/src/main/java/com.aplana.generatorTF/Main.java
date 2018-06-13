@@ -1,6 +1,5 @@
 package com.aplana.generatorTF;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -31,7 +30,7 @@ public class Main {
                     if (!"xlsx".equals(FilenameUtils.getExtension(sourceFile.getAbsolutePath()))) {
                         printStream.println("расширение файла не верное, должен быть xlsx");
                     }
-                    new GeneratorXlsx().generateXlsx(sourceFile, Integer.parseInt(args[2]));
+                    new GeneratorRnuNdflXlsx().generateXlsx(sourceFile, Integer.parseInt(args[2]));
                 } else if (args[1].equalsIgnoreCase("xml")) {
                     if (!"xml".equals(FilenameUtils.getExtension(sourceFile.getAbsolutePath()))) {
                         printStream.println("расширение файла не верное, должен быть xml");
@@ -42,7 +41,7 @@ public class Main {
                                 Integer.toString(i + 1).length() == 1 ?
                                         RandomStringUtils.randomAlphanumeric(30) + "-" + Integer.toString(i + 1)
                                         : RandomStringUtils.randomAlphanumeric(29) + "-" + Integer.toString(i + 1));
-                        new GeneratorXml().generateXML(sourceFile, tmpPath, Integer.parseInt(args[2]));
+                        new GeneratorRnuNdflXml().generateXML(sourceFile, tmpPath, Integer.parseInt(args[2]));
                     }
                 } else {
                     printStream.println("Тип формируемого файла не указан (xml или xlsx)");

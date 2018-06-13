@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.aplana.generatorTF</groupId>
-    <artifactId>generatorTF</artifactId>
-    <description>Генератор ТФ</description>
+    <artifactId>generators</artifactId>
+    <description>Генераторы</description>
     <version>1.1</version>
     <packaging>jar</packaging>
 
