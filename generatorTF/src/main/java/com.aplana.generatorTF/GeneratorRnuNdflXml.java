@@ -375,7 +375,7 @@ class GeneratorRnuNdflXml {
      * @param random        генератор случайных чисел
      */
     private void generateOperationInfo(Map<String, String> attributes, Random random) {
-        attributes.put(ATTR_ID_OPER, UUID.randomUUID().toString());
+        attributes.put(ATTR_ID_OPER, String.valueOf(random.nextLong()));
         List<KppOktmo> departmentDetails = null;
         if ((random.nextInt(5) + 1) % 5 == 0 ) {
             departmentDetails = DEPARTMENT_DETAIL_CACHE.get(OTHER_SBRF_CODES.get(random.nextInt(OTHER_SBRF_CODES.size())));
