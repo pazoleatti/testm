@@ -5,7 +5,14 @@ set termout off;
 set linesize 200;
 set trimspool on;
 set NEWP NONE;
-spool &1
+
+column filename new_val filename
+column outpath new_val outpath
+
+select 'C:\temp\logs' outpath from dual;
+select 'checks_' || user || '_' || to_char(sysdate, 'yyyymmdd')||'.csv' filename from dual;
+
+spool &outpath\&filename;
 
 select '"table_name";"column_name";"tax_table_name";"tax_id";"id"' from dual;
 
