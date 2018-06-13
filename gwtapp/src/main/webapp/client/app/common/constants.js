@@ -235,6 +235,11 @@
             NEGATIVE_VALUE_ADJUSTMENT: {
                 NOT_CORRECT: {id: 0, name: "Не корректировать"},
                 CORRECT: {id: 1, name: "Корректировать"}
+            },
+            URM: {
+                CURRENT_TB: {id: 1, name: "Данные текущего ТБ", enumName: "CURRENT_TB"},
+                OTHERS_TB: {id: 2, name: "Данные других ТБ", enumName: "OTHERS_TB"},
+                NONE_TB: {id: 3, name: "Данные, не указанные ни для одного ТБ", enumName: "NONE_TB"}
             }
         });
 }());

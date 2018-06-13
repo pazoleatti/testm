@@ -417,7 +417,7 @@ public class NdflPersonDaoTest {
     public void testFindPersonDeductionByParametersOperationId() {
         NdflFilter filter = new NdflFilter();
         filter.setDeclarationDataId(1);
-        filter.getDeduction().setOperationId("1");
+        filter.getIncome().setOperationId("1");
 
         PagingParams pagingParams = pagingParams(1, 100, "asc", "operationId");
         List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
@@ -431,39 +431,6 @@ public class NdflPersonDaoTest {
         filter.getDeduction().setDeductionCode("100");
 
         PagingParams pagingParams = pagingParams(1, 100, "asc", "typeCode");
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testFindPersonDeductionByParametersIncomeCode() {
-        NdflFilter filter = new NdflFilter();
-        filter.setDeclarationDataId(1);
-        filter.getDeduction().setDeductionIncomeCode("0000");
-
-        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeCode");
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testFindPersonDeductionByParametersCalculationDateFrom() {
-        NdflFilter filter = new NdflFilter();
-        filter.setDeclarationDataId(1);
-        filter.getDeduction().setIncomeAccruedDateFrom(new Date(1L));
-
-        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeAccrued");
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testFindPersonDeductionByParametersCalculationDateTo() {
-        NdflFilter filter = new NdflFilter();
-        filter.setDeclarationDataId(1);
-        filter.getDeduction().setIncomeAccruedDateTo(new Date(30000000000000L));
-
-        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeAccrued");
         List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
@@ -575,7 +542,7 @@ public class NdflPersonDaoTest {
     public void testFindpersonPrepaymentByParametersOperationId() {
         NdflFilter filter = new NdflFilter();
         filter.setDeclarationDataId(1);
-        filter.getPrepayment().setOperationId("1");
+        filter.getIncome().setOperationId("1");
 
         PagingParams pagingParams = pagingParams(1, 100, "asc", "operationId");
         List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);

@@ -1,11 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
+import com.aplana.sbrf.taxaccounting.model.URM;
+
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Модель для параметров Фильтра вкладки "Сведения о доходах и НДФЛ" страницу РНУ НДФЛ
  */
 public class NdflPersonIncomeFilter {
+    /**
+     * Общий фильтр
+     */
+    private NdflFilter ndflFilter;
     /**
      * id операции
      */
@@ -19,6 +27,10 @@ public class NdflPersonIncomeFilter {
      */
     private String oktmo;
     /**
+     * Процентная ставка
+     */
+    private String taxRate;
+    /**
      * Код дохода
      */
     private String incomeCode;
@@ -26,22 +38,23 @@ public class NdflPersonIncomeFilter {
      * Признак дохода
      */
     private String incomeAttr;
+
     /**
-     * Процентная ставка
+     * Дата начисления с
      */
-    private String taxRate;
+    private Date accruedDateFrom;
     /**
-     * Номер платежного поручения
+     * Дата начисления по
      */
-    private String numberPaymentOrder;
+    private Date accruedDateTo;
     /**
-     * Срок перечисления в бюджет с
+     * Дата выплаты с
      */
-    private Date transferDateFrom;
+    private Date payoutDateFrom;
     /**
-     * Срок перечисления в бюджет по
+     * Дата выплаты по
      */
-    private Date transferDateTo;
+    private Date payoutDateTo;
     /**
      * Дата расчета НДФЛ с
      */
@@ -51,6 +64,14 @@ public class NdflPersonIncomeFilter {
      */
     private Date calculationDateTo;
     /**
+     * Срок перечисления в бюджет с
+     */
+    private Date transferDateFrom;
+    /**
+     * Срок перечисления в бюджет по
+     */
+    private Date transferDateTo;
+    /**
      * Дата платежного поручения с
      */
     private Date paymentDateFrom;
@@ -58,6 +79,45 @@ public class NdflPersonIncomeFilter {
      * Дата платежного поручения по
      */
     private Date paymentDateTo;
+    /**
+     * Номер платежного поручения
+     */
+    private String numberPaymentOrder;
+
+    /**
+     * Данные УРМ
+     */
+    private List<URM> urmList = Collections.emptyList();
+
+    /**
+     * Номер строки
+     */
+    private String rowNum;
+    /**
+     * Идентификатор строки
+     */
+    private String id;
+    /**
+     * Дата редактирования с
+     */
+    private Date modifiedDateFrom;
+    /**
+     * Дата редактирования по
+     */
+    private Date modifiedDateTo;
+    /**
+     * Обновил
+     */
+    private String modifiedBy;
+
+
+    public NdflFilter getNdflFilter() {
+        return ndflFilter;
+    }
+
+    public void setNdflFilter(NdflFilter ndflFilter) {
+        this.ndflFilter = ndflFilter;
+    }
 
     public String getOperationId() {
         return operationId;
@@ -161,5 +221,85 @@ public class NdflPersonIncomeFilter {
 
     public void setPaymentDateTo(Date paymentDateTo) {
         this.paymentDateTo = paymentDateTo;
+    }
+
+    public Date getAccruedDateFrom() {
+        return accruedDateFrom;
+    }
+
+    public void setAccruedDateFrom(Date accruedDateFrom) {
+        this.accruedDateFrom = accruedDateFrom;
+    }
+
+    public Date getAccruedDateTo() {
+        return accruedDateTo;
+    }
+
+    public void setAccruedDateTo(Date accruedDateTo) {
+        this.accruedDateTo = accruedDateTo;
+    }
+
+    public Date getPayoutDateFrom() {
+        return payoutDateFrom;
+    }
+
+    public void setPayoutDateFrom(Date payoutDateFrom) {
+        this.payoutDateFrom = payoutDateFrom;
+    }
+
+    public Date getPayoutDateTo() {
+        return payoutDateTo;
+    }
+
+    public void setPayoutDateTo(Date payoutDateTo) {
+        this.payoutDateTo = payoutDateTo;
+    }
+
+    public List<URM> getUrmList() {
+        return urmList;
+    }
+
+    public void setUrmList(List<URM> urmList) {
+        this.urmList = urmList;
+    }
+
+    public String getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(String rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Date getModifiedDateFrom() {
+        return modifiedDateFrom;
+    }
+
+    public void setModifiedDateFrom(Date modifiedDateFrom) {
+        this.modifiedDateFrom = modifiedDateFrom;
+    }
+
+    public Date getModifiedDateTo() {
+        return modifiedDateTo;
+    }
+
+    public void setModifiedDateTo(Date modifiedDateTo) {
+        this.modifiedDateTo = modifiedDateTo;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

@@ -494,7 +494,7 @@
                                 departmentId: $rootScope.user.department.id,
                                 projection: 'fetchParentTB'
                             }, function (userTB) {
-                            // находим в списке тербанков тербанк пользователя и инициируем событие для выделения этого тербанка в выпадающем списке
+                                // находим в списке тербанков тербанк пользователя и инициируем событие для выделения этого тербанка в выпадающем списке
                                 angular.forEach(availableTBs, function (department) {
                                     if (userTB.id === department.id) {
                                         $scope.$emit(APP_CONSTANTS.EVENTS.USER_TB_SELECT, department);
@@ -715,6 +715,20 @@
 
                 $scope.init = function (values) {
                     $scope.selectFromArray = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.selectFromArray.options.data.results = values;
+                };
+            }
+        ])
+
+        /**
+         * Bыборка множественного значения из заданого массива объектов
+         */
+        .controller('SelectMultipleFromArrayCtrl', ['$scope', 'GetSelectOption', 'RefBookValuesResource',
+            function ($scope, GetSelectOption) {
+                $scope.selectFromArray = {};
+
+                $scope.init = function (values, allowClear) {
+                    $scope.selectFromArray = GetSelectOption.getBasicMultipleSelectOptions(allowClear);
                     $scope.selectFromArray.options.data.results = values;
                 };
             }

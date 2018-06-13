@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -150,8 +151,8 @@ public final class SqlUtils extends AbstractDao {
 	}
 
 	/**
-	 * Сохраняет коллекцию во временную таблицу, а затем формирует sql-условие in с этой таблицей
-	 * Используется если в одном запросе несколько таких условий
+	 * Формирует in () sql-выражение для коллекции чисел.
+	 * Значения коллекции не будут лежать в самом тексте запроса, а будут добавлены и затем запрошены из временной таблицы
 	 *
 	 * @param prefix       значение, которое будет соединяться со значениями из коллекции
 	 * @param collection   коллекция чисел
@@ -194,6 +195,51 @@ public final class SqlUtils extends AbstractDao {
 				return collection.size();
 			}
 		});
+	}
+
+	/**
+	 * Формирует in () sql-выражение для коллекции пар строк.
+	 * Значения коллекции не будут лежать в самом тексте запроса, а будут добавлены и затем запрошены из временной таблицы
+	 *
+	 * @param prefix       значение, которое будет соединяться со значениями из коллекции
+	 * @param collection   коллекция пар строк
+	 * @return sql-условие вида "prefix in (...)"
+	 */
+	public static String pairInStatement(String prefix, Collection<Pair<String, String>> collection) {
+		String collectionTable = saveCollectionAsTable(collection);
+		return String.format("%s in (select string1, string2 from %s)", prefix, collectionTable);
+	}
+
+	/**
+	 * Сохраняет коллекцию пар строк в определенную временную таблицу и возвращяет название этой таблицы
+	 *
+	 * @param collection коллекция чисел
+	 * @return название таблицы, в которую были сохранена коллекция
+	 */
+	private static String saveCollectionAsTable(final Collection<Pair<String, String>> collection) {
+		String tableName = "TMP_STRING_PAIRS";// - global temporary table on commit delete rows
+		truncateTable(tableName); // нужно т.к. в одной транзакции могут быть несколько запросов
+		savePairCollectionAsTable(collection, tableName);
+		return tableName;
+	}
+
+	private static void savePairCollectionAsTable(final Collection<Pair<String, String>> collection, String tableName) {
+		if (collection != null && !collection.isEmpty()) {
+			final Iterator<Pair<String, String>> iterator = collection.iterator();
+			repository.getJdbcTemplate().batchUpdate("insert into " + tableName + "(string1, string2) VALUES(?, ?)", new BatchPreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					Pair<String, String> pair = iterator.next();
+					ps.setString(1, pair.getFirst());
+					ps.setString(2, pair.getSecond());
+				}
+
+				@Override
+				public int getBatchSize() {
+					return collection.size();
+				}
+			});
+		}
 	}
 
 	/**
