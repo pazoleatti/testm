@@ -123,43 +123,38 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
      * @return Страница списка значений справочника
      */
     private PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, boolean activeOnly, PagingParams pagingParams) {
-        String sql = "select * from ( " +
-                " select a.*, rownum rn from ( " +
-                "select  dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
-                "dep.region_id, dep.is_active, dep.code, df.shortname as full_name " +
-                "from department dep " +
-                "inner join department_fullpath df " +
-                "on dep.id = df.id " +
-                "where %s ";
-
-        StringBuilder queryBuilder = new StringBuilder(String.format(sql, SqlUtils.transformToSqlInStatement("dep.id", ids)));
+        String baseSql = String.format("select  dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
+                "dep.region_id, dep.is_active, dep.code, df.shortname as full_name \n" +
+                "from department dep \n" +
+                "join department_fullpath df on dep.id = df.id \n" +
+                "where %s ", SqlUtils.transformToSqlInStatement("dep.id", ids));
 
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         if (!StringUtils.isBlank(name)) {
-            queryBuilder.append("and (lower(dep.name) like :name or lower(df.shortname) like :name) ");
+            baseSql += " and (lower(dep.name) like :name or lower(df.shortname) like :name) ";
             params.addValue("name", "%" + name.toLowerCase() + "%");
         }
         if (activeOnly) {
-            queryBuilder.append("and dep.is_active = 1 ");
+            baseSql += " and dep.is_active = 1 ";
         }
 
         if (StringUtils.isNotBlank(pagingParams.getProperty()) && StringUtils.isNotBlank(pagingParams.getDirection())) {
-            queryBuilder.append(new Formatter().format(" order by %s %s ",
+            baseSql += new Formatter().format(" order by %s %s ",
                     FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),
-                    pagingParams.getDirection()).toString());
+                    pagingParams.getDirection()).toString();
         }
-
-        queryBuilder.append(") a) where rn > :startIndex and rowNum <= :count");
 
         params.addValue("startIndex", pagingParams.getStartIndex());
         params.addValue("count", pagingParams.getCount());
 
-        List<RefBookDepartment> departments = getNamedParameterJdbcTemplate().query(queryBuilder.toString(),
+        List<RefBookDepartment> departments = getNamedParameterJdbcTemplate().query(
+                "select * from ( select a.*, rownum rn from (\n" + baseSql + ") a \n) where rn > :startIndex and rowNum <= :count",
                 params,
                 new RefBookDepartmentRowMapper());
 
-        return new PagingResult<>(departments, departments.size());
+        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", Integer.class);
+        return new PagingResult<>(departments, totalCount);
     }
 
     private static final class RefBookDepartmentRowMapper implements RowMapper<RefBookDepartment> {
