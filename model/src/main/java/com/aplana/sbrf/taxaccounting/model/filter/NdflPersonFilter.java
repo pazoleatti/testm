@@ -12,22 +12,6 @@ public class NdflPersonFilter {
      */
     private String inp;
     /**
-     * ИНН РФ
-     */
-    private  String innNp;
-    /**
-     * ИНН Ино
-     */
-    private  String innForeign;
-    /**
-     * СНИЛС
-     */
-    private  String snils;
-    /**
-     * № ДУЛ
-     */
-    private  String idDocNumber;
-    /**
      * Фамилия
      */
     private  String lastName;
@@ -47,6 +31,94 @@ public class NdflPersonFilter {
      * Дата рождения по
      */
     private  Date dateTo;
+    /**
+     * Код ДУЛ
+     */
+    private  String idDocType;
+    /**
+     * № ДУЛ
+     */
+    private  String idDocNumber;
+    /**
+     * Гражданство (код страны)
+     */
+    private String citizenship;
+    /**
+     * Статус (Код)
+     */
+    private String status;
+
+    /**
+     * Код региона
+     */
+    private String regionCode;
+    /**
+     * Индекс
+     */
+    private String postIndex;
+    /**
+     * Район
+     */
+    private String area;
+    /**
+     * Город
+     */
+    private String city;
+    /**
+     * Населенный пункт
+     */
+    private String locality;
+    /**
+     * Улица
+     */
+    private String street;
+    /**
+     * Дом
+     */
+    private String house;
+    /**
+     * Корпус
+     */
+    private String building;
+    /**
+     * Квартира
+     */
+    private String flat;
+
+    /**
+     * СНИЛС
+     */
+    private  String snils;
+    /**
+     * ИНН РФ
+     */
+    private  String innNp;
+    /**
+     * ИНН Ино
+     */
+    private  String innForeign;
+
+    /**
+     * Номер строки
+     */
+    private String rowNum;
+    /**
+     * Идентификатор строки
+     */
+    private String id;
+    /**
+     * Дата редактирования с
+     */
+    private Date modifiedDateFrom;
+    /**
+     * Дата редактирования по
+     */
+    private Date modifiedDateTo;
+    /**
+     * Обновил
+     */
+    private String modifiedBy;
+
 
     public String getInp() {
         return inp;
@@ -128,19 +200,172 @@ public class NdflPersonFilter {
         this.dateTo = dateTo;
     }
 
+    public String getIdDocType() {
+        return idDocType;
+    }
+
+    public void setIdDocType(String idDocType) {
+        this.idDocType = idDocType;
+    }
+
+    public String getCitizenship() {
+        return citizenship;
+    }
+
+    public void setCitizenship(String citizenship) {
+        this.citizenship = citizenship;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
+    public String getPostIndex() {
+        return postIndex;
+    }
+
+    public void setPostIndex(String postIndex) {
+        this.postIndex = postIndex;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getLocality() {
+        return locality;
+    }
+
+    public void setLocality(String locality) {
+        this.locality = locality;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getHouse() {
+        return house;
+    }
+
+    public void setHouse(String house) {
+        this.house = house;
+    }
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
+    }
+
+    public String getFlat() {
+        return flat;
+    }
+
+    public void setFlat(String flat) {
+        this.flat = flat;
+    }
+
+    public String getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(String rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Date getModifiedDateFrom() {
+        return modifiedDateFrom;
+    }
+
+    public void setModifiedDateFrom(Date modifiedDateFrom) {
+        this.modifiedDateFrom = modifiedDateFrom;
+    }
+
+    public Date getModifiedDateTo() {
+        return modifiedDateTo;
+    }
+
+    public void setModifiedDateTo(Date modifiedDateTo) {
+        this.modifiedDateTo = modifiedDateTo;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
     @Override
     public String toString() {
         return "NdflPersonFilter{" +
                 "inp='" + inp + '\'' +
-                ", innNp='" + innNp + '\'' +
-                ", innForeign='" + innForeign + '\'' +
-                ", snils='" + snils + '\'' +
-                ", idDocNumber='" + idDocNumber + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", middleName='" + middleName + '\'' +
                 ", dateFrom=" + dateFrom +
                 ", dateTo=" + dateTo +
+                ", idDocType='" + idDocType + '\'' +
+                ", idDocNumber='" + idDocNumber + '\'' +
+                ", citizenship='" + citizenship + '\'' +
+                ", status='" + status + '\'' +
+                ", regionCode='" + regionCode + '\'' +
+                ", postIndex='" + postIndex + '\'' +
+                ", area='" + area + '\'' +
+                ", city='" + city + '\'' +
+                ", locality='" + locality + '\'' +
+                ", street='" + street + '\'' +
+                ", house='" + house + '\'' +
+                ", building='" + building + '\'' +
+                ", flat='" + flat + '\'' +
+                ", snils='" + snils + '\'' +
+                ", innNp='" + innNp + '\'' +
+                ", innForeign='" + innForeign + '\'' +
+                ", rowNum='" + rowNum + '\'' +
+                ", id='" + id + '\'' +
+                ", modifiedDateFrom=" + modifiedDateFrom +
+                ", modifiedDateTo=" + modifiedDateTo +
+                ", modifiedBy='" + modifiedBy + '\'' +
                 '}';
     }
 }

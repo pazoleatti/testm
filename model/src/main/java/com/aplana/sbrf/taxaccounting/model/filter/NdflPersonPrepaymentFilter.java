@@ -27,6 +27,27 @@ public class NdflPersonPrepaymentFilter {
      */
     private Date notifDateTo;
 
+    /**
+     * Номер строки
+     */
+    private String rowNum;
+    /**
+     * Идентификатор строки
+     */
+    private String id;
+    /**
+     * Дата редактирования с
+     */
+    private Date modifiedDateFrom;
+    /**
+     * Дата редактирования по
+     */
+    private Date modifiedDateTo;
+    /**
+     * Обновил
+     */
+    private String modifiedBy;
+
     public String getOperationId() {
         return operationId;
     }
@@ -65,5 +86,45 @@ public class NdflPersonPrepaymentFilter {
 
     public void setNotifDateTo(Date notifDateTo) {
         this.notifDateTo = notifDateTo;
+    }
+
+    public String getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(String rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Date getModifiedDateFrom() {
+        return modifiedDateFrom;
+    }
+
+    public void setModifiedDateFrom(Date modifiedDateFrom) {
+        this.modifiedDateFrom = modifiedDateFrom;
+    }
+
+    public Date getModifiedDateTo() {
+        return modifiedDateTo;
+    }
+
+    public void setModifiedDateTo(Date modifiedDateTo) {
+        this.modifiedDateTo = modifiedDateTo;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

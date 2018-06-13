@@ -177,13 +177,13 @@
                 $scope.ndflTabsCtrl = {};
                 $scope.ndfFLTab = {
                     title: $filter('translate')('tab.ndfl.requisites'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/ndfFLTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/personsTab.html?v=${buildUuid}',
                     fetchTab: true,
                     active: true
                 };
                 $scope.incomesAndTaxTab = {
                     title: $filter('translate')('tab.ndfl.informationOnIncomesAndNdfl'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/incomesAndTaxTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/incomesTab.html?v=${buildUuid}',
                     fetchTab: true
                 };
                 $scope.deductionsTab = {
@@ -193,299 +193,56 @@
                 };
                 $scope.prepaymentTab = {
                     title: $filter('translate')('tab.ndfl.informationOnAdvancePayments'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/prepaymentTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/prepaymentsTab.html?v=${buildUuid}',
                     fetchTab: true
                 };
                 $scope.ndflTabs = [$scope.ndfFLTab, $scope.incomesAndTaxTab, $scope.deductionsTab, $scope.prepaymentTab];
 
                 $scope.refreshGrid = function (page) {
+                    $scope.ndflTabs.forEach(function (tab) {
+                        tab.isDataLoaded = false;
+                    });
+                    $scope.ndflFilter = getNdflFilter();
                     $scope.ndflTabsCtrl.getActiveTab().refreshGrid(page);
                 };
 
                 $scope.searchFilter = {
                     ajaxFilter: [],
-                    params: {},
+                    params: {person: {}, income: {}, deduction: {}, prepayment: {}},
                     filterName: 'ndflFilterForDec' + $stateParams.declarationDataId
                 };
+
+                $scope.ndflFilter = getNdflFilter();
 
                 /**
                  * @description Поиск по фильтру
                  */
                 $scope.submitSearch = function () {
-                    $scope.searchFilter.ajaxFilter = [];
-                    $scope.searchFilter.fillFilterParams();
                     $scope.refreshGrid(1);
                 };
 
                 /**
                  * @description сброс фильтра
                  */
-                $scope.resetFilter = function () {
+                $scope.searchFilter.resetFilterParams = function () {
                     /* очистка всех инпутов на форме */
-                    $scope.searchFilter.params = {};
-
-                    $scope.submitSearch();
+                    $scope.searchFilter.params = {person: {}, income: {}, deduction: {}, prepayment: {}};
                 };
 
                 /**
                  * @description возвращяет фильтр, который будет отправлен на сервер для составления запросов
                  */
-                $scope.getNdflFilter = function () {
-                    return {
+                function getNdflFilter() {
+                    var filter = {
                         declarationDataId: $stateParams.declarationDataId,
-                        person: {
-                            inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
-                            innNp: $filter('requestParamsFormatter')($scope.searchFilter.params.innNp),
-                            innForeign: $filter('requestParamsFormatter')($scope.searchFilter.params.innForeign),
-                            snils: $filter('requestParamsFormatter')($scope.searchFilter.params.snils),
-                            idDocNumber: $filter('requestParamsFormatter')($scope.searchFilter.params.idDocNumber),
-                            lastName: $filter('requestParamsFormatter')($scope.searchFilter.params.lastName),
-                            firstName: $filter('requestParamsFormatter')($scope.searchFilter.params.firstName),
-                            middleName: $filter('requestParamsFormatter')($scope.searchFilter.params.middleName),
-                            dateFrom: $scope.searchFilter.params.dateFrom,
-                            dateTo: $scope.searchFilter.params.dateTo
-                        },
-                        income: {
-                            operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
-                            kpp: $filter('requestParamsFormatter')($scope.searchFilter.params.kpp),
-                            oktmo: $filter('requestParamsFormatter')($scope.searchFilter.params.oktmo),
-                            incomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeCode),
-                            incomeAttr: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeAttr),
-                            taxRate: $filter('requestParamsFormatter')($scope.searchFilter.params.taxRate),
-                            numberPaymentOrder: $filter('requestParamsFormatter')($scope.searchFilter.params.numberPaymentOrder),
-                            transferDateFrom: $scope.searchFilter.params.transferDateFrom,
-                            transferDateTo: $scope.searchFilter.params.transferDateTo,
-                            calculationDateFrom: $scope.searchFilter.params.calculationDateFrom,
-                            calculationDateTo: $scope.searchFilter.params.calculationDateTo,
-                            paymentDateFrom: $scope.searchFilter.params.paymentDateFrom,
-                            paymentDateTo: $scope.searchFilter.params.paymentDateTo
-                        },
-                        deduction: {
-                            operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
-                            deductionCode: $filter('requestParamsFormatter')($scope.searchFilter.params.deductionCode),
-                            deductionIncomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.deductionIncomeCode),
-                            incomeAccruedDateFrom: $scope.searchFilter.params.incomeAccruedDateFrom,
-                            incomeAccruedDateTo: $scope.searchFilter.params.incomeAccruedDateTo,
-                            deductionDateFrom: $scope.searchFilter.params.deductionDateFrom,
-                            deductionDateTo: $scope.searchFilter.params.deductionDateTo
-                        },
-                        prepayment: {
-                            operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
-                            notifNum: $filter('requestParamsFormatter')($scope.searchFilter.params.notifNum),
-                            notifSource: $filter('requestParamsFormatter')($scope.searchFilter.params.notifSource),
-                            notifDateFrom: $scope.searchFilter.params.notifDateFrom,
-                            notifDateTo: $scope.searchFilter.params.notifDateTo
-                        }
-                    }
-                };
-
-                /**
-                 * @description Заполнение ajaxFilter
-                 */
-                $scope.searchFilter.fillFilterParams = function () {
-                    if ($scope.searchFilter.params.inp) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "inp",
-                            value: $scope.searchFilter.params.inp
-                        });
-                    }
-                    if ($scope.searchFilter.params.operationId) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "operationId",
-                            value: $scope.searchFilter.params.operationId
-                        });
-                    }
-                    // По реквизитам физического лица
-                    if ($scope.searchFilter.params.snils) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "snils",
-                            value: $scope.searchFilter.params.snils
-                        });
-                    }
-                    if ($scope.searchFilter.params.innNp) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "innNp",
-                            value: $scope.searchFilter.params.innNp
-                        });
-                    }
-                    if ($scope.searchFilter.params.innForeign) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "innForeign",
-                            value: $scope.searchFilter.params.innForeign
-                        });
-                    }
-                    if ($scope.searchFilter.params.idDocNumber) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "idDocNumber",
-                            value: $scope.searchFilter.params.idDocNumber
-                        });
-                    }
-                    if ($scope.searchFilter.params.lastName) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "lastName",
-                            value: $scope.searchFilter.params.lastName
-                        });
-                    }
-                    if ($scope.searchFilter.params.firstName) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "firstName",
-                            value: $scope.searchFilter.params.firstName
-                        });
-                    }
-                    if ($scope.searchFilter.params.middleName) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "middleName",
-                            value: $scope.searchFilter.params.middleName
-                        });
-                    }
-                    if ($scope.searchFilter.params.dateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "birthDay",
-                            value: $scope.searchFilter.params.dateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.dateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "birthDay",
-                            value: $scope.searchFilter.params.dateTo
-                        });
-                    }
-                    // По сведениям о доходах и НДФЛ
-                    if ($scope.searchFilter.params.kpp) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "kpp",
-                            value: $scope.searchFilter.params.kpp
-                        });
-                    }
-                    if ($scope.searchFilter.params.oktmo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "oktmo",
-                            value: $scope.searchFilter.params.oktmo
-                        });
-                    }
-                    if ($scope.searchFilter.params.incomeCode) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "incomeCode",
-                            value: $scope.searchFilter.params.incomeCode
-                        });
-                    }
-                    if ($scope.searchFilter.params.incomeAttr) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "incomeType",
-                            value: $scope.searchFilter.params.incomeAttr
-                        });
-                    }
-                    if ($scope.searchFilter.params.taxRate) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "taxRate",
-                            value: $scope.searchFilter.params.taxRate
-                        });
-                    }
-                    if ($scope.searchFilter.params.numberPaymentOrder) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "paymentNumber",
-                            value: $scope.searchFilter.params.numberPaymentOrder
-                        });
-                    }
-                    if ($scope.searchFilter.params.transferDateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "taxTransferDate",
-                            value: $scope.searchFilter.params.transferDateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.transferDateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "taxTransferDate",
-                            value: $scope.searchFilter.params.transferDateTo
-                        });
-                    }
-                    if ($scope.searchFilter.params.calculationDateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "taxDate",
-                            value: $scope.searchFilter.params.calculationDateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.calculationDateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "taxDate",
-                            value: $scope.searchFilter.params.calculationDateTo
-                        });
-                    }
-                    if ($scope.searchFilter.params.paymentDateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "paymentDate",
-                            value: $scope.searchFilter.params.paymentDateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.paymentDateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "paymentDate",
-                            value: $scope.searchFilter.params.paymentDateTo
-                        });
-                    }
-                    // По сведениям о вычетах
-                    if ($scope.searchFilter.params.deductionCode) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "typeCode",
-                            value: $scope.searchFilter.params.deductionCode
-                        });
-                    }
-                    if ($scope.searchFilter.params.deductionIncomeCode) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "deductionIncomeCode",
-                            value: $scope.searchFilter.params.deductionIncomeCode
-                        });
-                    }
-                    if ($scope.searchFilter.params.calculationDateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "incomeAccrued",
-                            value: $scope.searchFilter.params.incomeAccruedDateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.calculationDateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "incomeAccrued",
-                            value: $scope.searchFilter.params.incomeAccruedDateTo
-                        });
-                    }
-                    if ($scope.searchFilter.params.deductionDateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "periodCurrDate",
-                            value: $scope.searchFilter.params.deductionDateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.deductionDateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "periodCurrDate",
-                            value: $scope.searchFilter.params.deductionDateTo
-                        });
-                    }
-                    // По сведениям о доходах в виде авансовых платежей
-                    if ($scope.searchFilter.params.notifNum) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "notifNum",
-                            value: $scope.searchFilter.params.notifNum
-                        });
-                    }
-                    if ($scope.searchFilter.params.notifSource) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "notifSource",
-                            value: $scope.searchFilter.params.notifSource
-                        });
-                    }
-                    if ($scope.searchFilter.params.notifDateFrom) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "notifDate",
-                            value: $scope.searchFilter.params.notifDateFrom
-                        });
-                    }
-                    if ($scope.searchFilter.params.notifDateTo) {
-                        $scope.searchFilter.ajaxFilter.push({
-                            property: "notifDate",
-                            value: $scope.searchFilter.params.notifDateTo
-                        });
-                    }
-                };
+                        person: $scope.searchFilter.params.person,
+                        income: angular.copy($scope.searchFilter.params.income),
+                        deduction: $scope.searchFilter.params.deduction,
+                        prepayment: $scope.searchFilter.params.prepayment
+                    };
+                    filter.income.urmList = filter.income.urmList ? filter.income.urmList.map(function(urm) { return urm.enumName; }) : undefined;
+                    return filter;
+                }
 
                 $scope.openHistoryOfChange = function () {
                     $aplanaModal.open({

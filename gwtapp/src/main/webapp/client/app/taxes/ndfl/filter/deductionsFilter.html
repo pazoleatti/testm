@@ -1,0 +1,137 @@
+<div data-aplana-collapse data-label="'ndfl.filter.deductions' | translate">
+    <div class="ndfl-subfilter row-fluid pull-control-label-right">
+        <div class="span4">
+            <!--Код вычета-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.deductionCode' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.deductionCode"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.deduction.deductionCode}}"/>
+                </div>
+            </div>
+            <!--Дата применения вычета-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.deduction"
+                        ng-from-param="periodPrevDateFrom"
+                        ng-to-param="periodPrevDateTo"
+                        ng-label="title.periodPrevDateFrom"></date-from-to-filter>
+            </div>
+            <!--Дата текущего вычета-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.deduction"
+                        ng-from-param="deductionDateFrom"
+                        ng-to-param="deductionDateTo"
+                        ng-label="title.currentDeductionDateFrom"></date-from-to-filter>
+            </div>
+        </div>
+        <div class="span4">
+            <!--Тип подтв. документа-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.deduction.notifType' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.notifType"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.deduction.notifType}}"/>
+                </div>
+            </div>
+            <!--Номер подтв. документа-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.deduction.notifNum' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.notifNum"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.deduction.notifNum}}"/>
+                </div>
+            </div>
+            <!--Код источника подтв. документа-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.deduction.notifSource' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.notifSource"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.deduction.notifSource}}"/>
+                </div>
+            </div>
+            <!--Дата подтв. документа-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.deduction"
+                        ng-from-param="notifDateFrom"
+                        ng-to-param="notifDateTo"
+                        ng-label="title.deduction.notifDateFrom"></date-from-to-filter>
+            </div>
+        </div>
+        <div class="span4">
+            <!--Номер строки-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.rowNum' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.rowNum"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.deduction.rowNum}}"/>
+                </div>
+            </div>
+            <!--Идентификатор строки-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.id' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.id"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.deduction.id}}"/>
+                </div>
+            </div>
+            <!--Дата редактирования-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.deduction"
+                        ng-from-param="modifiedDateFrom"
+                        ng-to-param="modifiedDateTo"
+                        ng-label="title.modifiedDateFrom"></date-from-to-filter>
+            </div>
+            <!--Обновил-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.modifiedBy' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.deduction.modifiedBy"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.deduction.modifiedBy}}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

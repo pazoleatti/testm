@@ -1,0 +1,211 @@
+<div data-aplana-collapse data-label="'ndfl.filter.incomes' | translate">
+    <div class="ndfl-subfilter row-fluid pull-control-label-right">
+        <div class="span4">
+            <!--ID операции-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.idOperation' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.operationId"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.operationId}}"/>
+                </div>
+            </div>
+            <!--КПП-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.kpp' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.kpp"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.kpp}}"/>
+                </div>
+            </div>
+            <!--ОКТМО-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.oktmo' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.oktmo"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.oktmo}}"/>
+                </div>
+            </div>
+            <!--Процентная ставка-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label small-label">{{::'title.taxRate' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.taxRate"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.taxRate}}"/>
+                </div>
+            </div>
+            <!--Код дохода-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.incomeCode' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.incomeCode"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.incomeCode}}"/>
+                </div>
+            </div>
+            <!--Признак дохода-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.incomeAttr' | translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.incomeAttr"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.incomeAttr}}"/>
+                </div>
+            </div>
+        </div>
+        <div class="span4">
+            <!--Дата начисления-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.income"
+                        ng-from-param="accruedDateFrom"
+                        ng-to-param="accruedDateTo"
+                        ng-label="title.accruedDateFrom"></date-from-to-filter>
+            </div>
+            <!--Дата выплаты-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.income"
+                        ng-from-param="payoutDateFrom"
+                        ng-to-param="payoutDateTo"
+                        ng-label="title.payoutDateFrom"></date-from-to-filter>
+            </div>
+            <!--Дата расчёта НДФЛ-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.income"
+                        ng-from-param="calculationDateFrom"
+                        ng-to-param="calculationDateTo"
+                        ng-label="title.calculationDateFrom"></date-from-to-filter>
+            </div>
+            <!--Срок перечисления в бюджет-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.income"
+                        ng-from-param="transferDateFrom"
+                        ng-to-param="transferDateTo"
+                        ng-label="title.transferDateFrom"></date-from-to-filter>
+            </div>
+            <!--Дата платёжного поручения-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.income"
+                        ng-from-param="paymentOrderDateFrom"
+                        ng-to-param="paymentOrderDateTo"
+                        ng-label="title.paymentOrderDateFrom"></date-from-to-filter>
+            </div>
+            <!--Номер платёжного поручения-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label small-label" style="min-width: 113px;">{{::'title.numberPaymentOrder' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.numberPaymentOrder"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.numberPaymentOrder}}"/>
+                </div>
+            </div>
+        </div>
+        <div class="span4">
+            <!--Данные УРМ-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.URMData' | translate}}:</label>
+                </div>
+                <div class="span8">
+                    <div data-aplana-field>
+                        <div data-ng-controller="SelectMultipleFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.urmList"
+                             data-ng-init="init([APP_CONSTANTS.URM.CURRENT_TB, APP_CONSTANTS.URM.OTHERS_TB, APP_CONSTANTS.URM.NONE_TB])">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Пустая строка-->
+            <div class="row-fluid form-group" style="height: 30px;">
+            </div>
+            <!--Номер строки-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.rowNum' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.rowNum"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.income.rowNum}}"/>
+                </div>
+            </div>
+            <!--Идентификатор строки-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.id' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.id"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.income.id}}"/>
+                </div>
+            </div>
+            <!--Дата редактирования-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.income"
+                        ng-from-param="modifiedDateFrom"
+                        ng-to-param="modifiedDateTo"
+                        ng-label="title.modifiedDateFrom"></date-from-to-filter>
+            </div>
+            <!--Обновил-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.modifiedBy' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.modifiedBy"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.income.modifiedBy}}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

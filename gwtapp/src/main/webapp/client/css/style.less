@@ -22,6 +22,7 @@ body {
   min-width: 1200px;
   font-family: 'Open Sans', sans-serif;
   font-size: @basic-font-size;
+  line-height: @basic-line-height;
   background-color: @grayMoreLighter;
 }
 
@@ -262,12 +263,6 @@ h6,
 
 .ui-select-toggle .btn i:before {
   content: "\e020" !important;
-}
-
-/*Удалаяем кнопку очистки поля. Появляется в IE 10 версии и выше*/
-input::-ms-clear {
-  width: 0;
-  height: 0;
 }
 
 .nav-tabs {
@@ -605,7 +600,7 @@ input[type="checkbox"] {
 }
 
 ::-ms-clear {
-  display: none;
+  height: 17px;
 }
 
 .form-control-clear {
@@ -1517,14 +1512,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
       }
       .row-fluid [class*="span"] {
         margin-left: 7px;
-      }
-    }
-    .long-label {
-      .date-from-label {
-        width: 202px;
-      }
-      .date-to-block {
-        margin-right: -49px !important;
       }
     }
     .button-block {

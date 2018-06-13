@@ -1,18 +1,39 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.URM;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.filter.*;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -20,7 +41,11 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -34,6 +59,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+
 /**
  * @author Andrey Drunk
  */
@@ -43,6 +71,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Autowired
     DBUtilsImpl dbUtils;
+
+    @Autowired
+    DepartmentDao departmentDao;
+    @Autowired
+    DepartmentConfigDao departmentConfigDao;
+    @Autowired
+    DeclarationDataDao declarationDataDao;
+    @Autowired
+    DepartmentReportPeriodDao departmentReportPeriodDao;
 
     private static final String DUPLICATE_ERORR_MSG = "Попытка перезаписать уже сохранённые данные!";
 
@@ -98,37 +135,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(NdflFilter filter, PagingParams pagingParams) {
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
+                "select np.inp, " + createColumns(NdflPersonIncome.COLUMNS, "outer_npi") +
                         " from NDFL_PERSON np " +
-                        " inner join NDFL_PERSON_INCOME npi on npi.ndfl_person_id = np.id " +
+                        " inner join NDFL_PERSON_INCOME outer_npi on outer_npi.ndfl_person_id = np.id " +
                         " where np.declaration_data_id = :declarationDataId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(getWhereByFilter(params, filter.getIncome()));
-
-        filter.getDeduction().setOperationId(null);
+        appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+        String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
-        filter.getPrepayment().setOperationId(null);
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        if (!deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
-            queryBuilder.append(" and (");
+        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+            queryBuilder.append(" and (ndfl_person_id, operation_id) in (");
+            if (!incomeFilter.isEmpty()) {
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.id = outer_npi.id and npi.ndfl_person_id = np.id ")
+                        .append(incomeFilter);
+            }
             if (!deductionFilter.isEmpty()) {
-                queryBuilder.append("exists(select * from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
-                        .append(deductionFilter)
-                        .append(")");
+                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
+                        .append(deductionFilter);
             }
             if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!deductionFilter.isEmpty() ? " or " : "");
-                queryBuilder.append("exists(select * from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
-                        .append(prepaymentFilter)
-                        .append(")");
+                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
+                        .append(prepaymentFilter);
             }
             queryBuilder.append(")");
         }
 
-        String alias = pagingParams.getProperty().equals("inp") ? "np." : "npi.";
+        String alias = pagingParams.getProperty().equals("inp") ? "np." : "outer_npi.";
 
         String query = queryBuilder.toString();
 
@@ -206,37 +244,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public PagingResult<NdflPersonDeductionDTO> fetchPersonDeductionByParameters(NdflFilter filter, PagingParams pagingParams) {
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") +
+                "select np.inp, " + createColumns(NdflPersonDeduction.COLUMNS, "outer_npd") +
                         " from ndfl_person np " +
-                        " inner join ndfl_person_deduction npd on npd.ndfl_person_id = np.id " +
+                        " inner join ndfl_person_deduction outer_npd on outer_npd.ndfl_person_id = np.id " +
                         " where np.declaration_data_id = :declarationDataId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(getWhereByFilter(params, filter.getDeduction()));
-
-        filter.getIncome().setOperationId(null);
+        appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
-        filter.getPrepayment().setOperationId(null);
+        String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        if (!incomeFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
-            queryBuilder.append(" and (");
+        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+            queryBuilder.append(" and (ndfl_person_id, operation_id) in (");
             if (!incomeFilter.isEmpty()) {
-                queryBuilder.append("exists(select * from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
-                        .append(incomeFilter)
-                        .append(")");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
+                        .append(incomeFilter);
+            }
+            if (!deductionFilter.isEmpty()) {
+                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.id = outer_npd.id and npd.ndfl_person_id = np.id ")
+                        .append(deductionFilter);
             }
             if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() ? " or " : "");
-                queryBuilder.append("exists(select * from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
-                        .append(prepaymentFilter)
-                        .append(")");
+                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
+                        .append(prepaymentFilter);
             }
             queryBuilder.append(")");
         }
 
-        String alias = pagingParams.getProperty().equals("inp") ? "np." : "npd.";
+        String alias = pagingParams.getProperty().equals("inp") ? "np." : "outer_npd.";
 
         String query = queryBuilder.toString();
 
@@ -307,37 +346,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public PagingResult<NdflPersonPrepaymentDTO> fetchPersonPrepaymentByParameters(NdflFilter filter, PagingParams pagingParams) {
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") +
+                "select np.inp, " + createColumns(NdflPersonPrepayment.COLUMNS, "outer_npp") +
                         " from ndfl_person np" +
-                        " inner join ndfl_person_prepayment npp on npp.ndfl_person_id = np.id " +
+                        " inner join ndfl_person_prepayment outer_npp on outer_npp.ndfl_person_id = np.id " +
                         " where np.declaration_data_id = :declarationDataId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(getWhereByFilter(params, filter.getPrepayment()));
-
-        filter.getIncome().setOperationId(null);
+        appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
-        filter.getDeduction().setOperationId(null);
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
-        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty()) {
-            queryBuilder.append(" and (");
+        String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
+        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+            queryBuilder.append(" and (ndfl_person_id, operation_id) in (");
             if (!incomeFilter.isEmpty()) {
-                queryBuilder.append("exists(select * from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
-                        .append(incomeFilter)
-                        .append(")");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
+                        .append(incomeFilter);
             }
             if (!deductionFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() ? " or " : "");
-                queryBuilder.append("exists(select * from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
-                        .append(deductionFilter)
-                        .append(")");
+                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
+                        .append(deductionFilter);
+            }
+            if (!prepaymentFilter.isEmpty()) {
+                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.id = outer_npp.id and npp.ndfl_person_id = np.id ")
+                        .append(prepaymentFilter);
             }
             queryBuilder.append(")");
         }
 
-        String alias = pagingParams.getProperty().equals("inp") ? "np." : "npp.";
+        String alias = pagingParams.getProperty().equals("inp") ? "np." : "outer_npp.";
 
         String query = queryBuilder.toString();
 
@@ -642,23 +682,23 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
         if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
-            queryBuilder.append(" and (");
+            queryBuilder.append(" and exists (");
             if (!incomeFilter.isEmpty()) {
-                queryBuilder.append("exists(select * from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
-                        .append(incomeFilter)
-                        .append(")");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
+                        .append(incomeFilter);
+                appendSqlLikeCondition("npi.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
             if (!deductionFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() ? " or " : "");
-                queryBuilder.append("exists(select * from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
-                        .append(deductionFilter)
-                        .append(")");
+                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
+                        .append(deductionFilter);
+                appendSqlLikeCondition("npd.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
             if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " or " : "");
-                queryBuilder.append("exists(select * from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
-                        .append(prepaymentFilter)
-                        .append(")");
+                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
+                        .append(prepaymentFilter);
+                appendSqlLikeCondition("npp.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
             queryBuilder.append(")");
         }
@@ -684,167 +724,154 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return new PagingResult<>(ndflPersonList, totalCount);
     }
 
-    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonFilter ndflPersonFilter) {
-        StringBuilder queryBuilder = new StringBuilder();
-        if (ndflPersonFilter.getInp() != null) {
-            queryBuilder.append("and lower(np.inp) like concat(concat('%', :inp), '%') ");
-            params.addValue("inp", ndflPersonFilter.getInp().toLowerCase());
+    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonFilter filter) {
+        StringBuilder filterBuilder = new StringBuilder();
+        appendSqlLikeCondition("np.inp", filter.getInp(), filterBuilder, params);
+        appendSqlLikeCondition("np.last_name", filter.getLastName(), filterBuilder, params);
+        appendSqlLikeCondition("np.first_name", filter.getFirstName(), filterBuilder, params);
+        appendSqlLikeCondition("np.middle_name", filter.getMiddleName(), filterBuilder, params);
+        appendSqlDateBetweenCondition("np.birth_day", filter.getDateFrom(), filter.getDateTo(), filterBuilder, params);
+        appendSqlLikeCondition("np.id_doc_type", filter.getIdDocType(), filterBuilder, params);
+        if (filter.getIdDocNumber() != null) {
+            filterBuilder.append("and REGEXP_REPLACE(lower(np.id_doc_number), '[^0-9A-Za-zА-Яа-яЁё]', '') like concat(concat('%', REGEXP_REPLACE(lower(:idDocNumber), '[^0-9A-Za-zА-Яа-яЁё]', '')), '%') ");
+            params.addValue("idDocNumber", filter.getIdDocNumber().toLowerCase());
         }
-        if (ndflPersonFilter.getInnNp() != null) {
-            queryBuilder.append("and lower(np.inn_np) like concat(concat('%', :innNp), '%') ");
-            params.addValue("innNp", ndflPersonFilter.getInnNp().toLowerCase());
-        }
-        if (ndflPersonFilter.getInnForeign() != null) {
-            queryBuilder.append("and lower(np.inn_foreign) like concat(concat('%', :innForeign), '%') ");
-            params.addValue("innForeign", ndflPersonFilter.getInnForeign().toLowerCase());
-        }
-        if (ndflPersonFilter.getSnils() != null) {
-            queryBuilder.append("and lower(np.snils) like concat(concat('%', :snils), '%') ");
-            params.addValue("snils", ndflPersonFilter.getSnils().toLowerCase());
-        }
-        if (ndflPersonFilter.getIdDocNumber() != null) {
-            queryBuilder.append("and REGEXP_REPLACE(lower(np.id_doc_number), '[^0-9A-Za-zА-Яа-яЁё]', '') like concat(concat('%', REGEXP_REPLACE(lower(:idDocNumber), '[^0-9A-Za-zА-Яа-яЁё]', '')), '%') ");
-            params.addValue("idDocNumber", ndflPersonFilter.getIdDocNumber().toLowerCase());
-        }
-        if (ndflPersonFilter.getLastName() != null) {
-            queryBuilder.append("and lower(np.last_name) like concat(concat('%', :lastName), '%') ");
-            params.addValue("lastName", ndflPersonFilter.getLastName().toLowerCase());
-        }
-        if (ndflPersonFilter.getFirstName() != null) {
-            queryBuilder.append("and lower(np.first_name) like concat(concat('%', :firstName), '%') ");
-            params.addValue("firstName", ndflPersonFilter.getFirstName().toLowerCase());
-        }
-        if (ndflPersonFilter.getMiddleName() != null) {
-            queryBuilder.append("and lower(np.middle_name) like concat(concat('%', :middleName), '%') ");
-            params.addValue("middleName", ndflPersonFilter.getMiddleName().toLowerCase());
-        }
-        if (ndflPersonFilter.getDateFrom() != null) {
-            queryBuilder.append("and np.birth_day >= trunc(:birthDayFrom) ");
-            params.addValue("birthDayFrom", ndflPersonFilter.getDateFrom());
-        }
-        if (ndflPersonFilter.getDateTo() != null) {
-            queryBuilder.append("and np.birth_day <= trunc(:birthDayTo) ");
-            params.addValue("birthDayTo", ndflPersonFilter.getDateTo());
-        }
-        return queryBuilder.toString();
+        appendSqlLikeCondition("np.citizenship", filter.getCitizenship(), filterBuilder, params);
+        appendSqlLikeCondition("np.status", filter.getStatus(), filterBuilder, params);
+
+        appendSqlLikeCondition("np.region_code", filter.getRegionCode(), filterBuilder, params);
+        appendSqlLikeCondition("np.post_index", filter.getPostIndex(), filterBuilder, params);
+        appendSqlLikeCondition("np.area", filter.getArea(), filterBuilder, params);
+        appendSqlLikeCondition("np.city", filter.getCity(), filterBuilder, params);
+        appendSqlLikeCondition("np.locality", filter.getLocality(), filterBuilder, params);
+        appendSqlLikeCondition("np.street", filter.getStreet(), filterBuilder, params);
+        appendSqlLikeCondition("np.house", filter.getHouse(), filterBuilder, params);
+        appendSqlLikeCondition("np.building", filter.getBuilding(), filterBuilder, params);
+        appendSqlLikeCondition("np.flat", filter.getFlat(), filterBuilder, params);
+
+        appendSqlLikeCondition("np.snils", filter.getSnils(), filterBuilder, params);
+        appendSqlLikeCondition("np.inn_np", filter.getInnNp(), filterBuilder, params);
+        appendSqlLikeCondition("np.inn_foreign", filter.getInnForeign(), filterBuilder, params);
+        appendSqlLikeCondition("np.row_num", filter.getRowNum(), filterBuilder, params);
+        appendSqlLikeCondition("np.id", filter.getId(), filterBuilder, params);
+        appendSqlDateBetweenCondition("np.modified_date", filter.getModifiedDateFrom(), filter.getModifiedDateTo(), filterBuilder, params);
+        appendSqlLikeCondition("np.modified_by", filter.getModifiedBy(), filterBuilder, params);
+        return filterBuilder.toString();
     }
 
-    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonIncomeFilter ndflPersonIncomeFilter) {
-        StringBuilder queryBuilder = new StringBuilder();
-        if (ndflPersonIncomeFilter.getOperationId() != null) {
-            queryBuilder.append("and lower(npi.operation_id) like concat(concat('%', :operationId), '%') ");
-            params.addValue("operationId", ndflPersonIncomeFilter.getOperationId().toLowerCase());
+    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonIncomeFilter filter) {
+        StringBuilder filterBuilder = new StringBuilder();
+        appendSqlLikeCondition("npi.kpp", filter.getKpp(), filterBuilder, params);
+        appendSqlLikeCondition("npi.oktmo", filter.getOktmo(), filterBuilder, params);
+        appendSqlEqualsCondition("npi.tax_rate", filter.getTaxRate(), filterBuilder, params);
+        appendSqlLikeCondition("npi.income_code", filter.getIncomeCode(), filterBuilder, params);
+        appendSqlLikeCondition("npi.income_type", filter.getIncomeAttr(), filterBuilder, params);
+
+        appendSqlDateBetweenCondition("npi.income_accrued_date", filter.getAccruedDateFrom(), filter.getAccruedDateTo(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npi.income_payout_date", filter.getPayoutDateFrom(), filter.getPayoutDateTo(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npi.tax_date", filter.getCalculationDateFrom(), filter.getCalculationDateTo(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npi.tax_transfer_date", filter.getTransferDateFrom(), filter.getTransferDateTo(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npi.payment_date", filter.getPaymentDateFrom(), filter.getPaymentDateTo(), filterBuilder, params);
+        appendSqlLikeCondition("npi.payment_number", filter.getNumberPaymentOrder(), filterBuilder, params);
+
+
+        if (!filter.getUrmList().isEmpty() && !filter.getUrmList().containsAll(asList(URM.values()))) {
+            List<URM> urmList = filter.getUrmList();
+            List<Pair<String, String>> kppOktmoPairs = getKppOktmoPairsByURM(filter.getNdflFilter().getDeclarationDataId(), urmList);
+            if (!filter.getUrmList().contains(URM.NONE_TB)) {
+                filterBuilder.append(SqlUtils.pairInStatement("and (npi.kpp, npi.oktmo)", kppOktmoPairs));
+            } else {
+                filterBuilder.append(SqlUtils.pairInStatement("and not (npi.kpp, npi.oktmo)", kppOktmoPairs));
+            }
         }
-        if (ndflPersonIncomeFilter.getKpp() != null) {
-            queryBuilder.append("and lower(npi.kpp) like concat(concat('%', :kpp), '%') ");
-            params.addValue("kpp", ndflPersonIncomeFilter.getKpp().toLowerCase());
-        }
-        if (ndflPersonIncomeFilter.getOktmo() != null) {
-            queryBuilder.append("and lower(npi.oktmo) like concat(concat('%', :oktmo), '%') ");
-            params.addValue("oktmo", ndflPersonIncomeFilter.getOktmo().toLowerCase());
-        }
-        if (ndflPersonIncomeFilter.getIncomeCode() != null) {
-            queryBuilder.append("and lower(npi.income_code) like concat(concat('%', :incomeCode), '%') ");
-            params.addValue("incomeCode", ndflPersonIncomeFilter.getIncomeCode().toLowerCase());
-        }
-        if (ndflPersonIncomeFilter.getIncomeAttr() != null) {
-            queryBuilder.append("and lower(npi.income_type) like concat(concat('%', :incomeType), '%') ");
-            params.addValue("incomeType", ndflPersonIncomeFilter.getIncomeAttr().toLowerCase());
-        }
-        if (ndflPersonIncomeFilter.getTaxRate() != null) {
-            queryBuilder.append("and npi.tax_rate = :taxRate ");
-            params.addValue("taxRate", Integer.valueOf(ndflPersonIncomeFilter.getTaxRate()));
-        }
-        if (ndflPersonIncomeFilter.getNumberPaymentOrder() != null) {
-            queryBuilder.append("and lower(npi.payment_number) like concat(concat('%', :paymentNumber), '%') ");
-            params.addValue("paymentNumber", ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase());
-        }
-        if (ndflPersonIncomeFilter.getTransferDateFrom() != null) {
-            queryBuilder.append("and npi.tax_transfer_date >= trunc(:taxTransferDateFrom) ");
-            params.addValue("taxTransferDateFrom", ndflPersonIncomeFilter.getTransferDateFrom());
-        }
-        if (ndflPersonIncomeFilter.getTransferDateTo() != null) {
-            queryBuilder.append("and npi.tax_transfer_date <= trunc(:taxTransferDateTo) ");
-            params.addValue("taxTransferDateTo", ndflPersonIncomeFilter.getTransferDateTo());
-        }
-        if (ndflPersonIncomeFilter.getCalculationDateFrom() != null) {
-            queryBuilder.append("and npi.tax_date >= trunc(:taxDateFrom) ");
-            params.addValue("taxDateFrom", ndflPersonIncomeFilter.getCalculationDateFrom());
-        }
-        if (ndflPersonIncomeFilter.getCalculationDateTo() != null) {
-            queryBuilder.append("and npi.tax_date <= trunc(:taxDateTo) ");
-            params.addValue("taxDateTo", ndflPersonIncomeFilter.getCalculationDateTo());
-        }
-        if (ndflPersonIncomeFilter.getPaymentDateFrom() != null) {
-            queryBuilder.append("and npi.payment_date >= trunc(:paymentDateFrom) ");
-            params.addValue("paymentDateFrom", ndflPersonIncomeFilter.getPaymentDateFrom());
-        }
-        if (ndflPersonIncomeFilter.getPaymentDateTo() != null) {
-            queryBuilder.append("and npi.payment_date <= trunc(:paymentDateTo) ");
-            params.addValue("paymentDateTo", ndflPersonIncomeFilter.getPaymentDateTo());
-        }
-        return queryBuilder.toString();
+        appendSqlLikeCondition("npi.row_num", filter.getRowNum(), filterBuilder, params);
+        appendSqlLikeCondition("npi.id", filter.getId(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npi.modified_date", filter.getModifiedDateFrom(), filter.getModifiedDateTo(), filterBuilder, params);
+        appendSqlLikeCondition("npi.modified_by", filter.getModifiedBy(), filterBuilder, params);
+        return filterBuilder.toString();
+    }
+
+    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonDeductionFilter filter) {
+        StringBuilder filterBuilder = new StringBuilder();
+        appendSqlLikeCondition("npd.type_code", filter.getDeductionCode(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npd.period_prev_date", filter.getPeriodPrevDateFrom(), filter.getPeriodPrevDateTo(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npd.period_curr_date", filter.getDeductionDateFrom(), filter.getDeductionDateTo(), filterBuilder, params);
+
+        appendSqlLikeCondition("npd.notif_type", filter.getNotifType(), filterBuilder, params);
+        appendSqlLikeCondition("npd.notif_num", filter.getNotifNum(), filterBuilder, params);
+        appendSqlLikeCondition("npd.notif_source", filter.getNotifSource(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npd.notif_date", filter.getNotifDateFrom(), filter.getNotifDateTo(), filterBuilder, params);
+
+        appendSqlLikeCondition("npd.row_num", filter.getRowNum(), filterBuilder, params);
+        appendSqlLikeCondition("npd.id", filter.getId(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npd.modified_date", filter.getModifiedDateFrom(), filter.getModifiedDateTo(), filterBuilder, params);
+        appendSqlLikeCondition("npd.modified_by", filter.getModifiedBy(), filterBuilder, params);
+        return filterBuilder.toString();
     }
 
 
-    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonDeductionFilter ndflPersonDeductionFilter) {
-        StringBuilder queryBuilder = new StringBuilder();
-        if (ndflPersonDeductionFilter.getOperationId() != null) {
-            queryBuilder.append("and lower(npd.operation_id) like concat(concat('%', :operationId), '%') ");
-            params.addValue("operationId", ndflPersonDeductionFilter.getOperationId().toLowerCase());
-        }
-        if (ndflPersonDeductionFilter.getDeductionCode() != null) {
-            queryBuilder.append("and lower(npd.type_code) like concat(concat('%', :typeCode), '%') ");
-            params.addValue("typeCode", ndflPersonDeductionFilter.getDeductionCode().toLowerCase());
-        }
-        if (ndflPersonDeductionFilter.getDeductionIncomeCode() != null) {
-            queryBuilder.append("and lower(npd.income_code) like concat(concat('%', :incomeCode), '%') ");
-            params.addValue("incomeCode", ndflPersonDeductionFilter.getDeductionIncomeCode().toLowerCase());
-        }
-        if (ndflPersonDeductionFilter.getIncomeAccruedDateFrom() != null) {
-            queryBuilder.append("and npd.income_accrued >= trunc(:incomeAccruedDateFrom) ");
-            params.addValue("incomeAccruedDateFrom", ndflPersonDeductionFilter.getIncomeAccruedDateFrom());
-        }
-        if (ndflPersonDeductionFilter.getIncomeAccruedDateTo() != null) {
-            queryBuilder.append("and npd.income_accrued <= trunc(:incomeAccruedDateTo) ");
-            params.addValue("incomeAccruedDateTo", ndflPersonDeductionFilter.getIncomeAccruedDateTo());
-        }
-        if (ndflPersonDeductionFilter.getDeductionDateFrom() != null) {
-            queryBuilder.append("and npd.period_curr_date >= trunc(:deductionDateFrom) ");
-            params.addValue("deductionDateFrom", ndflPersonDeductionFilter.getDeductionDateFrom());
-        }
+    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonPrepaymentFilter filter) {
+        StringBuilder filterBuilder = new StringBuilder();
+        appendSqlLikeCondition("npp.notif_num", filter.getNotifNum(), filterBuilder, params);
+        appendSqlLikeCondition("npp.notif_source", filter.getNotifSource(), filterBuilder, params);
 
-        if (ndflPersonDeductionFilter.getDeductionDateTo() != null) {
-            queryBuilder.append("and npd.period_curr_date <= trunc(:deductionDateTo) ");
-            params.addValue("deductionDateTo", ndflPersonDeductionFilter.getDeductionDateTo());
-        }
-        return queryBuilder.toString();
+        appendSqlDateBetweenCondition("npp.notif_date", filter.getNotifDateFrom(), filter.getNotifDateTo(), filterBuilder, params);
+
+        appendSqlLikeCondition("npp.row_num", filter.getRowNum(), filterBuilder, params);
+        appendSqlLikeCondition("npp.id", filter.getId(), filterBuilder, params);
+        appendSqlDateBetweenCondition("npp.modified_date", filter.getModifiedDateFrom(), filter.getModifiedDateTo(), filterBuilder, params);
+        appendSqlLikeCondition("npp.modified_by", filter.getModifiedBy(), filterBuilder, params);
+        return filterBuilder.toString();
     }
 
+    private void appendSqlDateBetweenCondition(String column, Date dateFrom, Date dateTo, StringBuilder queryBuilder, MapSqlParameterSource params) {
+        if (dateFrom != null) {
+            String dateFromParam = column.replace('.', '_') + "From";
+            queryBuilder.append("and ").append(column).append(" >= trunc(:").append(dateFromParam).append(") ");
+            params.addValue(dateFromParam, dateFrom);
+        }
+        if (dateTo != null) {
+            String dateToParam = column.replace('.', '_') + "To";
+            queryBuilder.append("and ").append(column).append(" <= trunc(:").append(dateToParam).append(") ");
+            params.addValue(dateToParam, dateTo);
+        }
+    }
 
-    private String getWhereByFilter(MapSqlParameterSource params, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter) {
-        StringBuilder queryBuilder = new StringBuilder();
-        if (ndflPersonPrepaymentFilter.getOperationId() != null) {
-            queryBuilder.append("and lower(npp.operation_id) like concat(concat('%', :operationId), '%') ");
-            params.addValue("operationId", ndflPersonPrepaymentFilter.getOperationId().toLowerCase());
+    private void appendSqlLikeCondition(String column, String value, StringBuilder queryBuilder, MapSqlParameterSource params) {
+        if (value != null && !value.isEmpty()) {
+            String paramName = column.replace('.', '_');
+            queryBuilder.append("and lower(").append(column).append(") like '%' || :").append(paramName).append(" || '%' ");
+            params.addValue(paramName, value.toLowerCase());
         }
-        if (ndflPersonPrepaymentFilter.getNotifNum() != null) {
-            queryBuilder.append("and lower(npp.notif_num) like concat(concat('%', :notifNum), '%') ");
-            params.addValue("notifNum", ndflPersonPrepaymentFilter.getNotifNum().toLowerCase());
+    }
+
+    private void appendSqlEqualsCondition(String column, String value, StringBuilder queryBuilder, MapSqlParameterSource params) {
+        if (value != null && !value.isEmpty()) {
+            String paramName = column.replace('.', '_');
+            queryBuilder.append("and ").append(column).append(" = :").append(paramName).append(" ");
+            params.addValue(paramName, Integer.valueOf(value));
         }
-        if (ndflPersonPrepaymentFilter.getNotifSource() != null) {
-            queryBuilder.append("and lower(npp.notif_source) like concat(concat('%', :notifSource), '%') ");
-            params.addValue("notifSource", ndflPersonPrepaymentFilter.getNotifSource().toLowerCase());
+    }
+
+    private List<Pair<String, String>> getKppOktmoPairsByURM(Long declarationDataId, List<URM> urmList) {
+        if (!urmList.isEmpty() && !urmList.containsAll(asList(URM.values()))) {
+            DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declarationData.getDepartmentReportPeriodId());
+            Integer currentTB = departmentDao.getParentTBId(departmentReportPeriod.getDepartmentId());
+            List<Integer> allTB = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
+
+            if (urmList.size() == 1 && urmList.contains(URM.CURRENT_TB) ||
+                    urmList.size() == 2 && urmList.containsAll(asList(URM.OTHERS_TB, URM.NONE_TB))) {
+                return departmentConfigDao.fetchKppOktmoPairs(singletonList(currentTB), new Date());
+            } else if (urmList.size() == 1 && urmList.contains(URM.OTHERS_TB) ||
+                    urmList.size() == 2 && urmList.containsAll(asList(URM.CURRENT_TB, URM.NONE_TB))) {
+                allTB.remove(currentTB);
+                return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
+            } else {
+                return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
+            }
         }
-        if (ndflPersonPrepaymentFilter.getNotifDateFrom() != null) {
-            queryBuilder.append("and npp.notif_date >= trunc(:notifDateFrom) ");
-            params.addValue("notifDateFrom", ndflPersonPrepaymentFilter.getNotifDateFrom());
-        }
-        if (ndflPersonPrepaymentFilter.getNotifDateTo() != null) {
-            queryBuilder.append("and npp.notif_date <= trunc(:notifDateTo) ");
-            params.addValue("notifDateTo", ndflPersonPrepaymentFilter.getNotifDateTo());
-        }
-        return queryBuilder.toString();
+        return Collections.emptyList();
     }
 
     @Override
@@ -1199,7 +1226,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void delete(Long id) {
-        int count = getJdbcTemplate().update("delete from ndfl_person where id = ?", id);
+        int count = getJdbcTemplate().update("DELETE FROM ndfl_person WHERE id = ?", id);
         if (count == 0) {
             throw new DaoException("Не удалось удалить сущность класса NdflPerson с id = %d, так как она не существует", id);
         }
@@ -1207,7 +1234,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public long deleteByDeclarationId(Long declarationDataId) {
-        return getJdbcTemplate().update("delete from NDFL_PERSON where NDFL_PERSON.DECLARATION_DATA_ID = ?", declarationDataId);
+        return getJdbcTemplate().update("DELETE FROM NDFL_PERSON WHERE NDFL_PERSON.DECLARATION_DATA_ID = ?", declarationDataId);
     }
 
     @Override
@@ -1465,7 +1492,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<String> fetchIncomeOperationIdRange(String startOperationId, String endOperationId) {
-        String query = "select distinct operation_id from ndfl_person_income where operation_id between :startOperationId and :endOperationId";
+        String query = "SELECT DISTINCT operation_id FROM ndfl_person_income WHERE operation_id BETWEEN :startOperationId AND :endOperationId";
         MapSqlParameterSource params = new MapSqlParameterSource("startOperationId", startOperationId);
         params.addValue("endOperationId", endOperationId);
         return getNamedParameterJdbcTemplate().queryForList(query, params, String.class);
@@ -1473,7 +1500,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<String> findIncomeOperationId(List<String> operationIdList) {
-        return getNamedParameterJdbcTemplate().queryForList("select distinct operation_id from ndfl_person_income where operation_id in (:operationIdList)",
+        return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT operation_id FROM ndfl_person_income WHERE operation_id IN (:operationIdList)",
                 new MapSqlParameterSource("operationIdList", operationIdList),
                 String.class);
     }
@@ -1481,8 +1508,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<Long> fetchIncomeIdByNdflPerson(long ndflPersonId) {
         try {
-            return getJdbcTemplate().queryForList("select id from ndfl_person_income " +
-                            "where ndfl_person_id = ?",
+            return getJdbcTemplate().queryForList("SELECT id FROM ndfl_person_income " +
+                            "WHERE ndfl_person_id = ?",
                     new Object[]{ndflPersonId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
@@ -1492,8 +1519,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<Long> fetchDeductionIdByNdflPerson(long ndflPersonId) {
         try {
-            return getJdbcTemplate().queryForList("select id from ndfl_person_deduction " +
-                            "where ndfl_person_id = ?",
+            return getJdbcTemplate().queryForList("SELECT id FROM ndfl_person_deduction " +
+                            "WHERE ndfl_person_id = ?",
                     new Object[]{ndflPersonId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
@@ -1503,8 +1530,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<Long> fetchPrepaymentIdByNdflPerson(long ndflPersonId) {
         try {
-            return getJdbcTemplate().queryForList("select id from ndfl_person_prepayment " +
-                            "where ndfl_person_id = ?",
+            return getJdbcTemplate().queryForList("SELECT id FROM ndfl_person_prepayment " +
+                            "WHERE ndfl_person_id = ?",
                     new Object[]{ndflPersonId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
@@ -1513,7 +1540,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void deleteNdflPersonIncomeBatch(final List<Long> ids) {
-        getJdbcTemplate().batchUpdate("delete from ndfl_person_income where id = ?",
+        getJdbcTemplate().batchUpdate("DELETE FROM ndfl_person_income WHERE id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
@@ -1529,7 +1556,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void deleteNdflPersonDeductionBatch(final List<Long> ids) {
-        getJdbcTemplate().batchUpdate("delete from ndfl_person_deduction where id = ?",
+        getJdbcTemplate().batchUpdate("DELETE FROM ndfl_person_deduction WHERE id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
@@ -1545,7 +1572,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void deleteNdflPersonPrepaymentBatch(final List<Long> ids) {
-        getJdbcTemplate().batchUpdate("delete from ndfl_person_prepayment where id = ?",
+        getJdbcTemplate().batchUpdate("DELETE FROM ndfl_person_prepayment WHERE id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
@@ -1561,7 +1588,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void deleteNdflPersonBatch(final List<Long> ids) {
-        getJdbcTemplate().batchUpdate("delete from ndfl_person where id = ?",
+        getJdbcTemplate().batchUpdate("DELETE FROM ndfl_person WHERE id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
@@ -1577,10 +1604,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public boolean checkIncomeExists(long ndflPersonIncomeId, long declarationDataId) {
-        String query = "select count(1) from ndfl_person_income npi " +
-                "join ndfl_person np on npi.ndfl_person_id = np.id " +
-                "join declaration_data dd on np.declaration_data_id = dd.id " +
-                "where npi.id = :ndflPersonIncomeId and dd.id = :declarationDataId";
+        String query = "SELECT count(1) FROM ndfl_person_income npi " +
+                "JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
+                "JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
+                "WHERE npi.id = :ndflPersonIncomeId AND dd.id = :declarationDataId";
         MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIncomeId", ndflPersonIncomeId);
         params.addValue("declarationDataId", declarationDataId);
         return getNamedParameterJdbcTemplate().queryForObject(query, params, new RowMapper<Boolean>() {
@@ -1593,10 +1620,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public boolean checkDeductionExists(long ndflPersonDeductionId, long declarationDataId) {
-        String query = "select count(1) from ndfl_person_deduction npd " +
-                "join ndfl_person np on npd.ndfl_person_id = np.id " +
-                "join declaration_data dd on np.declaration_data_id = dd.id " +
-                "where npd.id = :ndflPersonDeductionId and dd.id = :declarationDataId";
+        String query = "SELECT count(1) FROM ndfl_person_deduction npd " +
+                "JOIN ndfl_person np ON npd.ndfl_person_id = np.id " +
+                "JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
+                "WHERE npd.id = :ndflPersonDeductionId AND dd.id = :declarationDataId";
         MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonDeductionId", ndflPersonDeductionId);
         params.addValue("declarationDataId", declarationDataId);
         return getNamedParameterJdbcTemplate().queryForObject(query, params, new RowMapper<Boolean>() {
@@ -1610,10 +1637,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public boolean checkPrepaymentExists(long ndflPersonPrepaymentId, long declarationDataId) {
 
-        String query = "select count(1) from ndfl_person_prepayment npp " +
-                "join ndfl_person np on npp.ndfl_person_id = np.id " +
-                "join declaration_data dd on np.declaration_data_id = dd.id " +
-                "where npp.id = :ndflPersonPrepaymentId and dd.id = :declarationDataId";
+        String query = "SELECT count(1) FROM ndfl_person_prepayment npp " +
+                "JOIN ndfl_person np ON npp.ndfl_person_id = np.id " +
+                "JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
+                "WHERE npp.id = :ndflPersonPrepaymentId AND dd.id = :declarationDataId";
         MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonPrepaymentId", ndflPersonPrepaymentId);
         params.addValue("declarationDataId", declarationDataId);
         return getNamedParameterJdbcTemplate().queryForObject(query, params, new RowMapper<Boolean>() {
@@ -1641,12 +1668,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateNdflPersons(List<NdflPerson> persons) {
-        String sql = "update " + NdflPerson.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPerson.TABLE_NAME + " SET " +
                 "row_num = :rowNum, inp = :inp, last_name = :lastName, first_name = :firstName, middle_name = :middleName, birth_day = :birthDay, " +
                 "citizenship = :citizenship, inn_np = :innNp, inn_foreign = :innForeign, id_doc_type = :idDocType, id_doc_number = :idDocNumber, " +
                 "status = :status, region_code = :regionCode, post_index = :postIndex, area = :area, city = :city, locality = :locality, street = :street, " +
                 "house = :house, building = :building, flat = :flat, snils = :snils, modified_date = :modifiedDate, modified_by = :modifiedBy " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(persons.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1654,12 +1681,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateIncomes(List<NdflPersonIncome> incomes) {
-        String sql = "update " + NdflPersonIncome.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPersonIncome.TABLE_NAME + " SET " +
                 "row_num = :rowNum, operation_id = :operationId, oktmo = :oktmo, kpp = :kpp, income_code = :incomeCode, income_type = :incomeType, " +
                 "income_accrued_date = :incomeAccruedDate, income_payout_date = :incomePayoutDate, income_accrued_summ = :incomeAccruedSumm, income_payout_summ = :incomePayoutSumm, total_deductions_summ = :totalDeductionsSumm, " +
                 "tax_base = :taxBase, tax_rate = :taxRate, tax_date = :taxDate, calculated_tax = :calculatedTax, withholding_tax = :withholdingTax, not_holding_tax = :notHoldingTax, overholding_tax = :overholdingTax, " +
                 "refound_tax = :refoundTax, tax_transfer_date = :taxTransferDate, payment_date = :paymentDate, payment_number = :paymentNumber, tax_summ = :taxSumm, modified_date = :modifiedDate, modified_by = :modifiedBy " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(incomes.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1667,12 +1694,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateDeductions(List<NdflPersonDeduction> deductions) {
-        String sql = "update " + NdflPersonDeduction.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPersonDeduction.TABLE_NAME + " SET " +
                 "row_num = :rowNum, type_code = :typeCode, notif_type = :notifType, notif_date = :notifDate, notif_num = :notifNum, notif_source = :notifSource, " +
                 "notif_summ = :notifSumm, operation_id = :operationId, income_accrued = :incomeAccrued, income_code = :incomeCode, income_summ = :incomeSumm, " +
                 "period_prev_date = :periodPrevDate, period_prev_summ = :periodPrevSumm, period_curr_date = :periodCurrDate, " +
                 "period_curr_summ = :periodCurrSumm, modified_date = :modifiedDate, modified_by = :modifiedBy " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(deductions.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1680,9 +1707,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updatePrepayments(List<NdflPersonPrepayment> prepayments) {
-        String sql = "update " + NdflPersonPrepayment.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPersonPrepayment.TABLE_NAME + " SET " +
                 "row_num = :rowNum, operation_id = :operationId, summ = :summ, notif_num = :notifNum, notif_date = :notifDate, notif_source = :notifSource, modified_date = :modifiedDate, modified_by = :modifiedBy " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(prepayments.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1690,18 +1717,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateNdflPersonsRowNum(List<NdflPerson> persons) {
-        String sql = "update " + NdflPerson.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPerson.TABLE_NAME + " SET " +
                 "row_num = :rowNum " +
-                "where id = :id";
+                "WHERE id = :id";
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(persons.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
     }
 
     @Override
     public void updateIncomesRowNum(List<NdflPersonIncome> incomes) {
-        String sql = "update " + NdflPersonIncome.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPersonIncome.TABLE_NAME + " SET " +
                 "row_num = :rowNum " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(incomes.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1709,9 +1736,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateDeductionsRowNum(List<NdflPersonDeduction> deductions) {
-        String sql = "update " + NdflPersonDeduction.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPersonDeduction.TABLE_NAME + " SET " +
                 "row_num = :rowNum " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(deductions.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1719,9 +1746,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments) {
-        String sql = "update " + NdflPersonPrepayment.TABLE_NAME + " set " +
+        String sql = "UPDATE " + NdflPersonPrepayment.TABLE_NAME + " SET " +
                 "row_num = :rowNum " +
-                "where id = :id";
+                "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(prepayments.toArray());
         getNamedParameterJdbcTemplate().batchUpdate(sql, batch);
@@ -1963,11 +1990,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateOneNdflIncome(NdflPersonIncomeDTO personIncome, TAUserInfo taUserInfo) {
-        String sql = "update ndfl_person_income set KPP = :kpp, OKTMO = :oktmo, INCOME_CODE = :incomeCode, INCOME_ACCRUED_DATE = :incomeAccruedDate, " +
+        String sql = "UPDATE ndfl_person_income SET KPP = :kpp, OKTMO = :oktmo, INCOME_CODE = :incomeCode, INCOME_ACCRUED_DATE = :incomeAccruedDate, " +
                 "INCOME_ACCRUED_SUMM = :incomeAccruedSumm, INCOME_TYPE = :incomeType, INCOME_PAYOUT_DATE = :incomePayoutDate, INCOME_PAYOUT_SUMM = :incomePayoutSumm, " +
                 "TAX_BASE = :taxBase, TOTAL_DEDUCTIONS_SUMM = :totalDeductionsSumm, TAX_RATE = :taxRate, CALCULATED_TAX = :calculatedTax, WITHHOLDING_TAX = :withholdingTax, " +
                 "TAX_DATE = :taxDate, NOT_HOLDING_TAX = :notHoldingTax, OVERHOLDING_TAX = :overholdingTax, REFOUND_TAX = :refoundTax, TAX_TRANSFER_DATE = :taxTransferDate," +
-                "TAX_SUMM = :taxSumm, PAYMENT_DATE = :paymentDate, PAYMENT_NUMBER = :paymentNumber, MODIFIED_DATE = sysdate, MODIFIED_BY = :user where id = :id";
+                "TAX_SUMM = :taxSumm, PAYMENT_DATE = :paymentDate, PAYMENT_NUMBER = :paymentNumber, MODIFIED_DATE = sysdate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("kpp", personIncome.getKpp());
         params.addValue("oktmo", personIncome.getOktmo());
@@ -1998,10 +2025,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateOneNdflDeduction(NdflPersonDeductionDTO personDeduction, TAUserInfo taUserInfo) {
-        String sql = "update ndfl_person_deduction set TYPE_CODE = :typeCode, NOTIF_TYPE = :notifType, NOTIF_NUM = :notifNum, NOTIF_SUMM = :notifSumm, " +
+        String sql = "UPDATE ndfl_person_deduction SET TYPE_CODE = :typeCode, NOTIF_TYPE = :notifType, NOTIF_NUM = :notifNum, NOTIF_SUMM = :notifSumm, " +
                 "NOTIF_SOURCE = :notifSource, NOTIF_DATE = :notifDate, INCOME_CODE = :incomeCode, INCOME_SUMM = :incomeSumm, INCOME_ACCRUED = :incomeAccrued, " +
                 "PERIOD_PREV_DATE = :periodPrevDate, PERIOD_PREV_SUMM = :periodPrevSumm, PERIOD_CURR_DATE = :periodCurrDate, PERIOD_CURR_SUMM = :periodCurrSumm, " +
-                "MODIFIED_DATE = sysdate, MODIFIED_BY = :user where id = :id";
+                "MODIFIED_DATE = sysdate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("typeCode", personDeduction.getTypeCode());
         params.addValue("notifType", personDeduction.getNotifType());
@@ -2024,8 +2051,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public void updateOneNdflPrepayment(NdflPersonPrepaymentDTO personPrepayment, TAUserInfo taUserInfo) {
-        String sql = "update ndfl_person_prepayment set SUMM = :summ, NOTIF_NUM = :notifNum, NOTIF_SOURCE = :notifSource, " +
-                "NOTIF_DATE = :notifDate, MODIFIED_DATE = sysdate, MODIFIED_BY = :user where id = :id";
+        String sql = "UPDATE ndfl_person_prepayment SET SUMM = :summ, NOTIF_NUM = :notifNum, NOTIF_SOURCE = :notifSource, " +
+                "NOTIF_DATE = :notifDate, MODIFIED_DATE = sysdate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("summ", personPrepayment.getSumm());
         params.addValue("notifNum", personPrepayment.getNotifNum());
@@ -2070,20 +2097,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
-        String sql = "select distinct rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code as status, rbp.snils, rbdt.code as id_doc_type, rbid.doc_number, rba.region_code, " +
+        String sql = "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
                 "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc.code as country_code, rba.address " +
-                "from ref_book_person rbp " +
-                "left join ndfl_person np on rbp.id = np.person_id " +
-                "left join declaration_data dd on np.declaration_data_id = dd.id " +
-                "left join ref_book_country rbc on rbp.citizenship = rbc.id and rbc.status = 0 " +
-                "left join ref_book_taxpayer_state rbts on rbp.taxpayer_state = rbts.id and rbts.status = 0 " +
-                "left join ref_book_address rba on rbp.address = rba.id and rba.status = 0 " +
-                "left join ref_book_id_tax_payer ritp on ritp.person_id = rbp.id and ritp.status = 0 " +
-                "left join ref_book_id_doc rbid on rbid.person_id = rbp.id and rbid.inc_rep = 1 and rbid.status = 0 " +
-                "left join ref_book_doc_type rbdt on rbid.doc_id = rbdt.id and rbdt.status = 0 " +
-                "where dd.id = ?";
+                "rba.appartment, rbc.code AS country_code, rba.address " +
+                "FROM ref_book_person rbp " +
+                "LEFT JOIN ndfl_person np ON rbp.id = np.person_id " +
+                "LEFT JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
+                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
+                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
+                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
+                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
+                "WHERE dd.id = ?";
         return getJdbcTemplate().query(sql,
                 new Object[]{declarationDataId},
                 new NdflPersonRefBookRowMapper());
@@ -2214,21 +2241,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 return result;
             }
         }
-        String sql = "with temp as (select max(version) version, record_id from ref_book_person r where status = 0 and version <= :currentDate  and\n" +
-                "not exists (select 1 from ref_book_person r2 where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate)\n" +
-                "group by record_id) " +
-                "select distinct rbp.id, rbp.record_id as inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code as citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code as status, rbp.snils, rbdt.code as id_doc_type, rbid.doc_number, rba.region_code, " +
+        String sql = "WITH temp AS (SELECT max(version) version, record_id FROM ref_book_person r WHERE status = 0 AND version <= :currentDate  AND\n" +
+                "NOT exists (SELECT 1 FROM ref_book_person r2 WHERE r2.record_id=r.record_id AND r2.status = 2 AND r2.version BETWEEN r.version + interval '1' day AND :currentDate)\n" +
+                "GROUP BY record_id) " +
+                "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
                 "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc.code as country_code, rba.address " +
-                "from temp, ref_book_person rbp " +
-                "left join ref_book_country rbc on rbp.citizenship = rbc.id and rbc.status = 0 " +
-                "left join ref_book_taxpayer_state rbts on rbp.taxpayer_state = rbts.id and rbts.status = 0 " +
-                "left join ref_book_address rba on rbp.address = rba.id and rba.status = 0 " +
-                "left join ref_book_id_tax_payer ritp on ritp.person_id = rbp.id and ritp.status = 0 " +
-                "left join ref_book_id_doc rbid on rbid.person_id = rbp.id and rbid.inc_rep = 1 and rbid.status = 0 " +
-                "left join ref_book_doc_type rbdt on rbid.doc_id = rbdt.id and rbdt.status = 0 " +
-                "where rbp.id in (:personIdList) and rbp.version = temp.version and rbp.record_id = temp.record_id";
+                "rba.appartment, rbc.code AS country_code, rba.address " +
+                "FROM temp, ref_book_person rbp " +
+                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
+                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
+                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
+                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
+                "WHERE rbp.id IN (:personIdList) AND rbp.version = temp.version AND rbp.record_id = temp.record_id";
 
         MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
         params.addValue("currentDate", actualDate);

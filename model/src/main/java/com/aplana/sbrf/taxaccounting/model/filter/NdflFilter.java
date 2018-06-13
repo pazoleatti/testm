@@ -56,6 +56,7 @@ public class NdflFilter {
     }
 
     public void setIncome(NdflPersonIncomeFilter income) {
+        income.setNdflFilter(this);
         this.income = income;
     }
 

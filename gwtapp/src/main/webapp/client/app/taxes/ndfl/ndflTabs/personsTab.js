@@ -23,9 +23,11 @@
 
                 // Обработчик на активацию таба
                 $scope.$watch("ndfFLTab.active", function (newValue, oldValue) {
-                    $rootScope.$emit("selectedRowCountChanged", 0);
-                    if (newValue && !oldValue) {
-                        $scope.submitSearch();
+                    if (!tab.isDataLoaded) {
+                        $rootScope.$emit("selectedRowCountChanged", 0);
+                        if (newValue && !oldValue) {
+                            tab.refreshGrid(1);
+                        }
                     }
                 });
 
@@ -35,6 +37,11 @@
                 };
 
                 $scope.ndflPersonGrid = {
+                    init: function (ctrl) {
+                        ctrl.loadComplete = function () {
+                            tab.isDataLoaded = true;
+                        };
+                    },
                     ctrl: {},
                     value: [],
                     options: {
@@ -43,7 +50,7 @@
                         requestParameters: function () {
                             return {
                                 projection: "ndflPersons",
-                                ndflFilter: JSON.stringify($scope.getNdflFilter())
+                                ndflFilter: JSON.stringify($scope.ndflFilter)
                             };
                         },
                         height: 250,

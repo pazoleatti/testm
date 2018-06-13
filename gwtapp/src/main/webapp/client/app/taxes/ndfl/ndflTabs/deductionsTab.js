@@ -23,9 +23,11 @@
 
                 // Обработчик на активацию таба
                 $scope.$watch("deductionsTab.active", function (newValue, oldValue) {
-                    $rootScope.$emit("selectedRowCountChanged", 0);
-                    if (newValue && !oldValue) {
-                        $scope.submitSearch();
+                    if (!tab.isDataLoaded) {
+                        $rootScope.$emit("selectedRowCountChanged", 0);
+                        if (newValue && !oldValue) {
+                            tab.refreshGrid(1);
+                        }
                     }
                 });
 
@@ -40,6 +42,11 @@
                 };
 
                 $scope.deductionGrid = {
+                    init: function (ctrl) {
+                        ctrl.loadComplete = function () {
+                            tab.isDataLoaded = true;
+                        };
+                    },
                     ctrl: {},
                     value: [],
                     options: {
@@ -48,7 +55,7 @@
                         requestParameters: function () {
                             return {
                                 projection: "personsDeduction",
-                                ndflFilter: JSON.stringify($scope.getNdflFilter())
+                                ndflFilter: JSON.stringify($scope.ndflFilter)
                             };
                         },
                         height: 250,
