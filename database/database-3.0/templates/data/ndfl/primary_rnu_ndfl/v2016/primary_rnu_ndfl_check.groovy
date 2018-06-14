@@ -454,21 +454,21 @@ class Check extends AbstractScriptClass {
                             "Не удалось установить связь со справочником \"$R_PERSON\"")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
-                    if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
+                    if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.get(RF_LAST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Фамилия", ndflPerson.lastName ?: "", R_PERSON))
                     }
 
                     // Спр11 Имя (Обязательное поле)
-                    if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
+                    if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.toLowerCase().equals(personRecord.get(RF_FIRST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Имя", ndflPerson.firstName ?: "", R_PERSON))
                     }
 
                     // Спр11 Отчество (Необязательное поле)
-                    if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
+                    if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.toLowerCase().equals(personRecord.get(RF_MIDDLE_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Отчество", ndflPerson.middleName ?: "", R_PERSON))
@@ -1152,8 +1152,8 @@ class Check extends AbstractScriptClass {
             ndflPersonPrepaymentCache.put(ndflPersonPrepayment.ndflPersonId, ndflPersonPrepaymentListByPersonIdList)
         }
 
-        List<DateConditionData> dateConditionDataList = []
-        List<DateConditionData> dateConditionDataListForBudget = []
+        List<DateConditionData<IncomeAccruedDateConditionChecker>> dateConditionDataList = []
+        List<DateConditionData<TaxTransferDateConditionChecker>> dateConditionDataListForBudget = []
 
         dateConditionWorkDay = new DateConditionWorkDay(calendarService)
 
@@ -1298,7 +1298,7 @@ class Check extends AbstractScriptClass {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format(dateConditionData.conditionMessage,
                                         C_INCOME_ACCRUED_DATE, formatDate(ndflPersonIncome.incomeAccruedDate),
-                                        C_INCOME_PAYOUT_DATE, formatDate(ndflPersonIncome.incomePayoutDate),
+                                        C_INCOME_PAYOUT_DATE, formatDate(dateConditionData.checker.getIncomePayoutDateCompared(ndflPersonIncome)),
                                         C_INCOME_CODE, ndflPersonIncome.incomeCode,
                                         C_INCOME_TYPE, ndflPersonIncome.incomeType
                                 )
@@ -2398,23 +2398,6 @@ class Check extends AbstractScriptClass {
     }
 
     /**
-     * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
-     */
-    class DateConditionData {
-        List<String> incomeCodes
-        List<String> incomeTypes
-        DateConditionChecker checker
-        String conditionMessage
-
-        DateConditionData(List<String> incomeCodes, List<String> incomeTypes, DateConditionChecker checker, String conditionMessage) {
-            this.incomeCodes = incomeCodes
-            this.incomeTypes = incomeTypes
-            this.checker = checker
-            this.conditionMessage = conditionMessage
-        }
-    }
-
-    /**
      * Класс для получения рабочих дней
      */
     class DateConditionWorkDay {
@@ -2464,7 +2447,49 @@ class Check extends AbstractScriptClass {
         }
     }
 
+    /**
+     * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
+     */
+    class DateConditionData<T extends DateConditionChecker> {
+        List<String> incomeCodes
+        List<String> incomeTypes
+        T checker
+        String conditionMessage
+
+        DateConditionData(List<String> incomeCodes, List<String> incomeTypes, T checker, String conditionMessage) {
+            this.incomeCodes = incomeCodes
+            this.incomeTypes = incomeTypes
+            this.checker = checker
+            this.conditionMessage = conditionMessage
+        }
+    }
+
+    /**
+     * Используется для проверки Доход.Дата.Начисление (Графа 6)
+     */
+    abstract class IncomeAccruedDateConditionChecker implements DateConditionChecker {
+        /**
+         * Дата выплаты может находится не в проверяемой строке, в таком случае checker выдаёт ту дату с которой сравнивал
+         */
+        Date getIncomePayoutDateCompared(NdflPersonIncome checkedIncome) {
+            return checkedIncome.incomePayoutDate
+        }
+    }
+
+    /**
+     * Используется для проверки НДФЛ.Перечисление в бюджет.Срок (Графа 21)
+     */
+    abstract class TaxTransferDateConditionChecker implements DateConditionChecker {
+    }
+
     interface DateConditionChecker {
+        /**
+         * Выполняет проверку в строке раздела 2
+         *
+         * @param checkedIncome проверяемая строка раздела 2
+         * @param allIncomesOf  группа строк, относящиеся к проверяемой каким-то условием (например, по ид операции)
+         * @return пройдена ли проверка
+         */
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOf)
     }
 
@@ -2477,23 +2502,33 @@ class Check extends AbstractScriptClass {
      * 5) "Графа 5" = "Графа 5" проверяемой строки
      * то "Графе 6" проверяемой строки = "Графа 7" найденной строки
      */
-    class Column6EqualsColumn7 implements DateConditionChecker {
+    class Column6EqualsColumn7 extends IncomeAccruedDateConditionChecker {
+        Date incomePayoutDate
+
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
+            incomePayoutDate = null
+
             List<NdflPersonIncome> foundIncomes = allIncomesOfOperation.findAll {
                 it.incomePayoutDate && it.incomeCode == checkedIncome.incomeCode && it.incomeType == checkedIncome.incomeType
             }
             if (1 == foundIncomes.size()) {
+                incomePayoutDate = foundIncomes.get(0).incomePayoutDate
                 return checkedIncome.incomeAccruedDate == foundIncomes.get(0).incomePayoutDate
             }
             return true
+        }
+
+        @Override
+        Date getIncomePayoutDateCompared(NdflPersonIncome checkedIncome) {
+            return incomePayoutDate
         }
     }
 
     /**
      * Проверка: Соответствия маске
      */
-    class MatchMask implements DateConditionChecker {
+    class MatchMask extends IncomeAccruedDateConditionChecker {
         String maskRegex
 
         MatchMask(String maskRegex) {
@@ -2518,7 +2553,7 @@ class Check extends AbstractScriptClass {
     /**
      * Проверка "Последний календарный день месяца"
      */
-    class LastMonthCalendarDay implements DateConditionChecker {
+    class LastMonthCalendarDay extends IncomeAccruedDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             if (checkedIncome.incomeAccruedDate == null) {
@@ -2534,72 +2569,9 @@ class Check extends AbstractScriptClass {
     }
 
     /**
-     * Проверка: Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7»
-     */
-    class Column7LastDayOfYear1 implements DateConditionChecker {
-        @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
-            if (checkedIncome.incomePayoutDate == null) {
-                return false
-            }
-            Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(checkedIncome.incomePayoutDate)
-            int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
-            int month = calendarPayout.get(Calendar.MONTH)
-            if (dayOfMonth != 31 || month != 11) {
-                return new Column6EqualsColumn7().check(checkedIncome, allIncomesOfOperation)
-            } else {
-                return true
-            }
-        }
-    }
-
-    /**
-     * Проверка: Если «графа 7» < 31.12.20**, то «графа 6» = 31.12.20**
-     */
-    class Column7LastDayOfYear2 implements DateConditionChecker {
-        @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
-            if (checkedIncome.incomePayoutDate == null) {
-                return false
-            }
-            Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(checkedIncome.incomePayoutDate)
-            int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
-            int month = calendarPayout.get(Calendar.MONTH)
-            if (dayOfMonth != 31 || month != 11) {
-                return true
-            } else {
-                return new MatchMask("31.12.20\\d{2}").check(checkedIncome, allIncomesOfOperation)
-            }
-        }
-    }
-
-    /**
-     * Проверка: Доход.Дата.Начисление (Графа 6) последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
-     */
-    class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
-        @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
-            if (checkedIncome.incomeAccruedDate == null) {
-                return false
-            }
-            Calendar calendar = Calendar.getInstance()
-            calendar.setTime(checkedIncome.incomeAccruedDate)
-            // находим последний день месяца
-            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-            Date workDay = calendar.getTime()
-            // если последний день месяца приходится на выходной, то следующий первый рабочий день
-            int offset = 0
-            workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            return workDay.getTime() == checkedIncome.incomeAccruedDate.getTime()
-        }
-    }
-
-    /**
      * Проверка: "Графа 21" = "Графа 7" + "1 рабочий день"
      */
-    class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
+    class Column21EqualsColumn7Plus1WorkingDay extends TaxTransferDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             Calendar calendar21 = Calendar.getInstance();
@@ -2618,7 +2590,7 @@ class Check extends AbstractScriptClass {
     /**
      * "Графа 21" <= "Графа 7" + "30 дней"
      */
-    class Column21LEColumn7Plus30WorkingDays implements DateConditionChecker {
+    class Column21LEColumn7Plus30WorkingDays extends TaxTransferDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
@@ -2632,7 +2604,7 @@ class Check extends AbstractScriptClass {
     /**
      * "Графа 21" == "Графа 7" + "30 дней"
      */
-    class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
+    class Column21EqualsColumn7Plus30WorkingDays extends TaxTransferDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
@@ -2646,7 +2618,7 @@ class Check extends AbstractScriptClass {
     /**
      * "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
      */
-    class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
+    class Column21EqualsColumn7LastDayOfMonth extends TaxTransferDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             if (checkedIncome.taxTransferDate == null || checkedIncome.incomePayoutDate == null) {
@@ -2673,7 +2645,7 @@ class Check extends AbstractScriptClass {
     /**
      * "Графа 21" ≤ ("31.12.20**" + "1 день"), где 31.12.20** - последний день налогового периода
      */
-    class Column21LEFirstWorkingDayOfNextYear implements DateConditionChecker {
+    class Column21LEFirstWorkingDayOfNextYear extends TaxTransferDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             return checkedIncome.taxTransferDate <= getFirstWorkingDayOfNextYear()

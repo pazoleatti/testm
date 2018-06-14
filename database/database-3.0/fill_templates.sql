@@ -22,6 +22,14 @@ begin
 		update blob_id_tmp set updated=1, blob_data_id_old=rec.blob_data_id_old where blob_data_id=rec.blob_data_id;
 	end loop;
 	
+	for rec in (select bnt.blob_data_id, bdt.name, bdt.data, bdt.creation_date, bdt.id blob_data_id_old 
+	from BLOB_DATA_TMP bdt join BLOB_NAMES_TMP bnt on bdt.declaration_template_id=bnt.id
+	and bnt.blob_data_id in (select jrxml from declaration_template) and bdt.name like '%.jrxml')
+	loop
+		update blob_data set name=rec.name, data=rec.data where id=rec.blob_data_id;
+		update blob_id_tmp set updated=1, blob_data_id_old=rec.blob_data_id_old where blob_data_id=rec.blob_data_id;
+	end loop;
+	
 	delete from BLOB_DATA_TMP where id in (select blob_data_id_old from blob_id_tmp);
 	delete from BLOB_NAMES_TMP where blob_data_id in (select blob_data_id from blob_id_tmp where updated=1);
 	
