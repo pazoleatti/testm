@@ -52,6 +52,7 @@ insert into declaration_data(id, declaration_template_id, department_report_peri
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (20181, 100, 1000, 3);
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (20182, 100, 1010, 3);
 
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (50000, 100, 1010, 3);
 
 insert into NDFL_PERSON (id, declaration_data_id, inp, FIRST_NAME, LAST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS, PERSON_ID) values
 (101, 1, '100500', 'Ivan', 'Ivanov', TO_DATE('01-01-1980', 'DD-MM-YYYY'), '001', '11', '0000', '1', 1),
@@ -177,3 +178,48 @@ insert into ndfl_person_income(ID,NDFL_PERSON_ID,SOURCE_ID,ROW_NUM,OPERATION_ID,
   (3290, 309, null, 2, '2018_4', '2000', '05', '1', '000000001', null, TO_DATE('03-02-2018', 'DD-MM-YYYY'), null, 11000, null, null, 13, TO_DATE('03-02-2018', 'DD-MM-YYYY'), null, 1200, null, null, null, null, null, null, null);
 insert into ndfl_person_income(ID,NDFL_PERSON_ID,SOURCE_ID,ROW_NUM,OPERATION_ID,INCOME_CODE,INCOME_TYPE,OKTMO,KPP,INCOME_ACCRUED_DATE,INCOME_PAYOUT_DATE,INCOME_ACCRUED_SUMM,INCOME_PAYOUT_SUMM,TOTAL_DEDUCTIONS_SUMM,TAX_BASE,TAX_RATE,TAX_DATE,CALCULATED_TAX,WITHHOLDING_TAX,NOT_HOLDING_TAX,OVERHOLDING_TAX,REFOUND_TAX,TAX_TRANSFER_DATE,PAYMENT_DATE,PAYMENT_NUMBER,TAX_SUMM) VALUES
   (3330, 309, null, 3, '2018_4', '2000', '05', '1', '000000001', TO_DATE('03-02-2018', 'DD-MM-YYYY'), null, 11000, null, 1000, 10000, 13, TO_DATE('03-02-2018', 'DD-MM-YYYY'), 1300, null, null, null, null, null, null, null, null);
+
+/* Проверка общего фильтра */
+insert into NDFL_PERSON (id, declaration_data_id, inp, FIRST_NAME, LAST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS, PERSON_ID) values
+(50001, 50000, 1111111111, 'Фам1', 'Имя1', TO_DATE('01-01-1980', 'DD-MM-YYYY'), '050', '11', '0000', '1', 2),
+(50002, 50000, 2222222222, 'Фам2', 'Имя2', TO_DATE('01-01-1980', 'DD-MM-YYYY'), '050', '11', '0000', '1', 3),
+(50003, 50000, 3333333333, 'Фам3', 'Имя3', TO_DATE('01-01-1980', 'DD-MM-YYYY'), '050', '11', '0000', '1', 4);
+
+Insert into NDFL_PERSON_INCOME (ID,NDFL_PERSON_ID,SOURCE_ID,ROW_NUM,OPERATION_ID,INCOME_CODE,INCOME_TYPE,OKTMO,KPP,INCOME_ACCRUED_DATE,INCOME_PAYOUT_DATE,INCOME_ACCRUED_SUMM,INCOME_PAYOUT_SUMM,TOTAL_DEDUCTIONS_SUMM,TAX_BASE,TAX_RATE,TAX_DATE,CALCULATED_TAX,WITHHOLDING_TAX,NOT_HOLDING_TAX,OVERHOLDING_TAX,REFOUND_TAX,TAX_TRANSFER_DATE,PAYMENT_DATE,PAYMENT_NUMBER,TAX_SUMM) values
+(50001,50001,null,1,'1','1111','11','1','1111',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0'),
+(50002,50001,null,2,'1','2222','11','1','2222',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0'),
+(50003,50001,null,3,'1','3333','11','1','3333',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2011','DD-MM-YYYY'),'0','0'),
+
+(50004,50002,null,4,'2','1111','22','1','4444',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0'),
+(50005,50002,null,5,'2','2222','22','1','5555',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0'),
+(50006,50002,null,6,'2','3333','22','1','6666',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2011','DD-MM-YYYY'),'0','0'),
+
+(50007,50003,null,7,'3','1111','33','2','7777',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0'),
+(50008,50003,null,8,'3','2222','33','2','8888',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0'),
+(50009,50003,null,9,'3','3333','33','2','9999',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2011','DD-MM-YYYY'),'0','0');
+
+insert INTO ndfl_person_deduction (id, ndfl_person_id, source_id, row_num, operation_id, type_code, notif_type, notif_date, notif_num, notif_source, notif_summ, income_accrued, income_code, income_summ, period_prev_date, period_prev_summ, period_curr_date, period_curr_summ) VALUES
+(50001, 50001, NULL, 1, '1', '111', '11', to_date('30-10-2005','DD-MM-YYYY'), '11111', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+(50002, 50001, NULL, 2, '1', '222', '11', to_date('30-10-2005','DD-MM-YYYY'), '22222', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+(50003, 50001, NULL, 3, '1', '333', '11', to_date('30-10-2005','DD-MM-YYYY'), '33333', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+
+(50004, 50002, NULL, 4, '2', '111', '22', to_date('30-10-2005','DD-MM-YYYY'), '44444', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+(50005, 50002, NULL, 5, '2', '222', '22', to_date('30-10-2005','DD-MM-YYYY'), '55555', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+(50006, 50002, NULL, 6, '2', '333', '22', to_date('30-10-2005','DD-MM-YYYY'), '66666', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+
+(50007, 50003, NULL, 7, '3', '111', '33', to_date('30-10-2005','DD-MM-YYYY'), '77777', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+(50008, 50003, NULL, 8, '3', '222', '33', to_date('30-10-2005','DD-MM-YYYY'), '88888', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null),
+(50009, 50003, NULL, 9, '3', '333', '33', to_date('30-10-2005','DD-MM-YYYY'), '99999', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null);
+
+insert into ndfl_person_prepayment (id, ndfl_person_id, source_id, row_num, operation_id, summ, notif_num, notif_date, notif_source) VALUES
+(50001, 50001, null, 1, '1', 100, '1', to_date('01-10-2005','DD-MM-YYYY'), '11'),
+(50002, 50001, null, 2, '1', 100, '2', to_date('02-10-2005','DD-MM-YYYY'), '22'),
+(50003, 50001, null, 3, '1', 100, '3', to_date('03-10-2005','DD-MM-YYYY'), '33'),
+
+(50004, 50002, null, 4, '2', 100, '1', to_date('04-10-2005','DD-MM-YYYY'), '11'),
+(50005, 50002, null, 5, '2', 100, '2', to_date('05-10-2005','DD-MM-YYYY'), '22'),
+(50006, 50002, null, 6, '2', 100, '3', to_date('06-10-2005','DD-MM-YYYY'), '33'),
+
+(50007, 50003, null, 7, '3', 100, '1', to_date('07-10-2005','DD-MM-YYYY'), '99'),
+(50008, 50003, null, 8, '3', 100, '2', to_date('08-10-2005','DD-MM-YYYY'), '22'),
+(50009, 50003, null, 9, '3', 100, '3', to_date('09-10-2005','DD-MM-YYYY'), '33');

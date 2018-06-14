@@ -521,6 +521,78 @@
         </update>
     </changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4926 "Дата начала актуальности" для "Кода вида дохода"=2003 не соответствует постановке -->
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4927 "Дата начала актуальности" для "Кода вида дохода"=2013, 2014, 2301, 2611, 3023 не соответствует постановке -->
+	<changeSet id="3.0-rnurgaleev-4" author="rnurgaleev">
+        <sql>
+            update ref_book_income_kind set ref_book_income_kind.VERSION=(select ref_book_income_type.version from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
+            where exists(select 1 from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
+        </sql>
+    </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4924 Дата актуальности для "Кода дохода" 3010 не соответствует постановке -->
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4925 Кол-во версий записи "Кода видов дохода" = 3010 не соответствует постановке -->
+	<changeSet id="3.0-rnurgaleev-5" author="rnurgaleev">
+        <sql>
+			delete from ref_book_income_type where code='3010' and name='Выигрыши, выплачиваемые организаторами лотерей, тотализаторов и других основанных на риске игр (в том числе с использованием игровых автоматов)';
+
+			update ref_book_income_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='3010';
+		</sql>
+    </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4928 "Код вида дохода" = 2780 с признаком 00 присутствует в справочнике "Виды дохода" -->
+	<changeSet id="3.0-rnurgaleev-6" author="rnurgaleev">
+        <sql>
+			delete from ref_book_income_kind where income_type_id in (select id from ref_book_income_type where code='2780');
+		</sql>
+    </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4929 "Дата окончания актуальности" для "Кодов вычета" не соответствует постановке -->
+	<changeSet id="3.0-rnurgaleev-7" author="rnurgaleev">
+        <sql>
+			update ref_book_deduction_type set version=to_date('26.12.16','DD.MM.YY')
+			where code in ('114', '115', '116', '117', '118', '119', '120', '121', '122', '123', '124', '125', '617')
+			and version=to_date('25.12.16','DD.MM.YY');
+		</sql>
+    </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4930 "Дата начала актуальности" для "Кода видов вычета" = 205, 206, 207, 209, 210, 220 не соответствует постановке -->
+	<changeSet id="3.0-rnurgaleev-8" author="rnurgaleev">
+        <sql>
+			delete from ref_book_deduction_type where code='205' and name='Сумма убытка по операциям с ценными бумагами, обращающимися на организованном рынке ценных бумаг, уменьшающая налоговую базу по операциям с финансовыми инструментами срочных сделок, которые обращаются на организованном рынке и базисным активом которых являются ценные бумаги, фондовые индексы или иные финансовые инструменты срочных сделок, базисным активом которых являются ценные бумаги или фондовые индексы';
+
+			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='205';
+
+			delete from ref_book_deduction_type where code='206' and name='Расходы по операциям с финансовыми инструментами срочных сделок, которые обращаются на организованном рынке ценных бумаг и базисным активом которых являются ценные бумаги, фондовые индексы или иные финансовые инструменты срочных сделок, базисным активом которых являются ценные бумаги или фондовые индексы';
+
+			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='206';
+
+			delete from ref_book_deduction_type where code='207' and name='Расходы по операциям с финансовыми инструментами срочных сделок, которые обращаются на организованном рынке ценных бумаг и базисным активом которых не являются ценные бумаги, фондовые индексы или иные финансовые инструменты срочных сделок, базисным активом которых являются ценные бумаги или фондовые индексы';
+
+			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='207';
+
+			delete from ref_book_deduction_type where code='209' and name='Сумма убытка по операциям с финансовыми инструментами срочных сделок, которые обращаются на организованном рынке и базисным активом которых не являются ценные бумаги, фондовые индексы или иные финансовые инструменты срочных сделок, базисным активом которых являются ценные бумаги или фондовые индексы, уменьшающая налоговую базу по операциям с финансовыми инструментами срочных сделок, которые обращаются на организованном рынке';
+
+			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='209';
+
+			delete from ref_book_deduction_type where code='210' and name='Сумма убытка по операциям с финансовыми инструментами срочных сделок, обращающимися на организованном рынке ценных бумаг и базисным активом которых являются ценные бумаги, фондовые индексы или иные финансовые инструменты срочных сделок, базисным активом которых являются ценные бумаги или фондовые индексы, уменьшающая налоговую базу по операциям с финансовыми инструментами срочных сделок, которые обращаются на организованном рынке ценных бумаг';
+
+			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='210';
+
+			delete from ref_book_deduction_type where code='220' and name='Суммы расходов по операциям с финансовыми инструментами срочных сделок, не обращающимися на организованном рынке ценных бумаг';
+
+			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='220';
+		</sql>
+    </changeSet>
+    <changeSet id="3.0-dnovikov-7" author="dnovikov">
+        <sql>
+            CREATE GLOBAL TEMPORARY TABLE TMP_STRING_PAIRS(
+                STRING1 VARCHAR2(4000 BYTE),
+                STRING2 VARCHAR2(4000 BYTE)
+            ) ON COMMIT DELETE ROWS;
+        </sql>
+    </changeSet>
+
     <changeSet id="3.0-ytrofimov-20" author="ytrofimov">
         <update tableName="BLOB_DATA">
             <column name="data" valueBlobFile="templates/refbook/department.groovy"/>

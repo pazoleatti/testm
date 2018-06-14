@@ -186,21 +186,21 @@ declare
 	v_count number;
 begin
 	select count(1) into v_count from user_tables where table_name='BLOB_NAMES_TMP';
-	dbms_output.put_line('Create table BLOB_NAMES_TMP...');
+	dbms_output.put_line('Drop table BLOB_NAMES_TMP...');
 	if v_count > 0 then 
 		execute immediate 'drop table BLOB_NAMES_TMP';
 		dbms_output.put_line('Table BLOB_NAMES_TMP was dropped.');	
 	end if;	
 	
 	select count(1) into v_count from user_tables where table_name='BLOB_ID_TMP';
-	dbms_output.put_line('Create table BLOB_ID_TMP...');
+	dbms_output.put_line('Drop table BLOB_ID_TMP...');
 	if v_count > 0 then 
 		execute immediate 'drop table BLOB_ID_TMP';
 		dbms_output.put_line('Table BLOB_ID_TMP was dropped.');	
 	end if;	
 
 	select count(1) into v_count from user_tables where table_name='BLOB_DATA_TMP';
-	dbms_output.put_line('Create table BLOB_DATA_TMP...');
+	dbms_output.put_line('Drop table BLOB_DATA_TMP...');
 	if v_count > 0 then 
 		execute immediate 'drop table BLOB_DATA_TMP';
 		dbms_output.put_line('Table BLOB_DATA_TMP was dropped.');	

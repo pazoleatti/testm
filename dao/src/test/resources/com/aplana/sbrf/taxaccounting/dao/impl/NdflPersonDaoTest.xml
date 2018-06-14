@@ -17,5 +17,6 @@
         <jdbc:script location="classpath:data/NdflPerson.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/RefBookSimpleDaoPerson.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/RefBookDao.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/NdflPersonDepartmentConfigs.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

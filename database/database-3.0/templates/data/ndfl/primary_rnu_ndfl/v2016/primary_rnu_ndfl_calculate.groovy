@@ -31,6 +31,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import groovy.transform.TypeChecked
@@ -65,6 +66,7 @@ class Calculate extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
+    CommonRefBookService commonRefBookService
     RefBookService refBookService
     PersonService personService
 
@@ -1320,7 +1322,7 @@ class Calculate extends AbstractScriptClass {
         if (refBook != null) {
             return refBook;
         } else {
-            refBook = refBookFactory.get(id);
+            refBook = commonRefBookService.get(id);
             mapRefBookToIdCache.put(id, refBook);
             return refBook;
         }

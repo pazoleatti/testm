@@ -58,13 +58,7 @@
                              data-ng-controller="SelectDepartmentCtrl"
                              data-ui-select2="departmentsSelect.options"
                              data-ng-init="initSelectWithDestinationDepartments()"
-                             data-ng-model="assignmentData.performers"
-                             class="required"
-                             data-ui-validate="{requiredMultiple : 'assignmentData.performers.length>0'}"
-                             data-ui-validate-watch="['assignmentData.performers']">
-                        </div>
-                        <div data-aplana-validator data-key='requiredMultiple'>{{::'common.validation.required' |
-                            translate}}
+                             data-ng-model="assignmentData.performers">
                         </div>
                     </div>
                 </td>

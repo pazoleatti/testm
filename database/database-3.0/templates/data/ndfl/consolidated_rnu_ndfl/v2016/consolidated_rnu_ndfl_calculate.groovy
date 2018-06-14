@@ -1,19 +1,33 @@
 package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DeclarationType
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.Pair
+import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.SourceService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import groovy.xml.MarkupBuilder
 
 new Calculate(this).run()
 
@@ -24,60 +38,54 @@ class Calculate extends AbstractScriptClass {
     DeclarationData declarationData
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
-    FileWriter xml
-
-    final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
-
-    final String R_PERSON = "Физические лица"
-
-    final String RF_RECORD_ID = "RECORD_ID"
+    DepartmentService departmentService
+    SourceService sourceService
 
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
-    //Коды стран из справочника
-    Map<Long, String> countryCodeCache = [:]
-    //Виды документов, удостоверяющих личность
-    Map<Long, Map<String, RefBookValue>> documentTypeCache = [:]
-    //Коды статуса налогоплательщика
-    Map<Long, String> taxpayerStatusCodeCache = [:]
-
-    // Дата окончания отчетного периода
-    Date periodEndDate = null
-
-    private Calculate() {
-    }
+    //Коды Асну
+    List<Long> asnuCache = []
+    // Даты создания налоговой формы
+    Map<Long, Date> creationDateCache = [:]
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    public Calculate(scriptClass) {
+    Calculate(scriptClass) {
+        //noinspection GroovyAssignabilityCheck
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
-            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
         }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
-            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("xml")) {
-            this.xml = (FileWriter) scriptClass.getProperty("xml");
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
+        }
+        if (scriptClass.getBinding().hasVariable("sourceService")) {
+            this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
         }
     }
 
     @Override
     void run() {
-        initConfiguration()
-        switch (formDataEvent) {
-            case FormDataEvent.CALCULATE:
-                clearData()
-                consolidation()
-                generateXml()
+        try {
+            initConfiguration()
+            switch (formDataEvent) {
+                case FormDataEvent.CALCULATE:
+                    clearData()
+                    consolidation()
+            }
+        } catch (Throwable e) {
+            logger.error(e.toString())
         }
     }
 
@@ -93,491 +101,632 @@ class Calculate extends AbstractScriptClass {
     }
 
     /**
-     * Консолидировать РНУ-НДФЛ, для получения источников используется метод getDeclarationSourcesInfo
-     * Данный метод выполняет вызов скрипта (GET-SOURCES) и
-     *
+     * Консолидация данных
      */
     void consolidation() {
 
-        long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis()
 
-        def declarationDataId = declarationData.id
+        Department parentTB = departmentService.getParentTB(declarationData.departmentId)
+        ConfigurationParamModel configurationParamModel = configurationService.getCommonConfig(userInfo)
+        Integer dataSelectionDepth = Integer.valueOf(configurationParamModel?.get(ConfigurationParam?.CONSOLIDATION_DATA_SELECTION_DEPTH)?.get(0)?.get(0))
+        ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
-        //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
-        List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+        ConsolidationSourceDataSearchFilter.Builder filterBuilder = new ConsolidationSourceDataSearchFilter.Builder()
+        filterBuilder.currentDate(new Date())
+                .periodStartDate(reportPeriod.startDate)
+                .periodEndDate(reportPeriod.endDate)
+                .dataSelectionDepth(reportPeriod.taxPeriod.year - dataSelectionDepth)
+                .departmentId(parentTB.id)
+                .declarationType(DeclarationType.NDFL_PRIMARY)
+                .consolidateDeclarationDataYear(reportPeriod.taxPeriod.year)
 
-        if (sourcesInfo.isEmpty()) {
-            throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Инициализация данных для поиска источников, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+
+        time = System.currentTimeMillis()
+
+        List<ConsolidationIncome> operationsForConsolidationList = ndflPersonService.fetchIncomeSourcesConsolidation(filterBuilder.createConsolidationSourceDataSearchFilter())
+
+        logForDebug("Определение списка операций, которые нужно включить в КНФ. Отобрано ${operationsForConsolidationList.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+
+        time = System.currentTimeMillis()
+
+        Map<Pair<String, Long>, List<ConsolidationIncome>> incomesGroupedByOperationIdAndAsnu = [:]
+        for (ConsolidationIncome income : operationsForConsolidationList) {
+            Pair<String, Long> operationAsnu = new Pair(income.operationId, income.asnuId)
+            List<ConsolidationIncome> group = incomesGroupedByOperationIdAndAsnu.get(operationAsnu)
+            if (group == null) {
+                incomesGroupedByOperationIdAndAsnu.put(operationAsnu, [income])
+            } else {
+                group << income
+            }
         }
 
-        //сохранить только источники в состоянии "принята"
-        sourcesInfo = retainAcceptedSourceDeclarations(sourcesInfo);
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Группировка строк по идОперации и АСНУ, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
 
-        List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
+        time = System.currentTimeMillis()
 
-        logForDebug("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
-
-        List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
-
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ невозможна.");
+        // Избавляемся от фиктивных строк. Чтобы не перепроверять все строки выбираем только те, у которых идОперации = 0
+        List<ConsolidationIncome> dummyRowsCandidates = []
+        for (Long asnuId : getAsnuCache()) {
+            dummyRowsCandidates.addAll(incomesGroupedByOperationIdAndAsnu.get(new Pair("0", asnuId)))
         }
 
+        // Проверяем и удаляем фиктивные строки
+        for (ConsolidationIncome dummyRowCandidate : dummyRowsCandidates) {
+            if (dummyRowCandidate.taxBase == new BigDecimal("0") && dummyRowCandidate.taxRate == 0) {
+                if ((dummyRowCandidate.incomeAccruedSumm == new BigDecimal("0") && dummyRowCandidate.calculatedTax == new BigDecimal("0"))
+                        || (dummyRowCandidate.incomePayoutSumm == new BigDecimal("0") && dummyRowCandidate.withholdingTax == new BigDecimal("0"))) {
+                    incomesGroupedByOperationIdAndAsnu.get(new Pair("0", dummyRowCandidate.asnuId)).remove(dummyRowCandidate)
+                }
+            }
+        }
 
-        time = System.currentTimeMillis();
+        // Группруем идентификаторы источников по состоянию: Принята/Не принята. Далее они понадобятся при формировании уведомлений
+        Map<Boolean, Set<Long>> acceptedSources = [:]
+        acceptedSources.put(Boolean.TRUE, new HashSet<Long>())
+        acceptedSources.put(Boolean.FALSE, new HashSet<Long>())
 
-        Map<Long, List<Long>> deletedPersonMap = getDeletedPersonMap(declarationDataIdList)
+        // Строки отобранные для включения в КНФ
+        List<ConsolidationIncome> pickedRows = []
 
-        //record_id, Map<String, RefBookValue>
-        Map<Long, Map<String, RefBookValue>> refBookPersonMap = getActualRefPersonsByDeclarationDataIdList(declarationDataIdList);
-        logForDebug("Выгрузка справочника Физические лица (" + refBookPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
-
-        //id, Map<String, RefBookValue>
-        Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPersonMap);
-        logForDebug("Выгрузка справочника Адреса физических лиц (" + addressMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
-
-        //id, List<Map<String, RefBookValue>>
-        Map<Long, List<Map<String, RefBookValue>>> personDocMap = getActualRefDulByDeclarationDataIdList(declarationDataIdList)
-        logForDebug("Выгрузка справочника Документы физических лиц (" + personDocMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
-
-        logForDebug("Инициализация кэша справочников (" + ScriptUtils.calcTimeMillis(time));
-
-        //Карта в которой хранится актуальный record_id и NdflPerson в котором объединяются данные о даходах
-        Map<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList, declarationDataIdList);
-
-        logForDebug(String.format("Количество физических лиц, загруженных из первичных НФ-источников: %d", ndflPersonList.size()));
-        logForDebug(String.format("Количество уникальных физических лиц в формах-источниках по справочнику ФЛ: %d", ndflPersonMap.size()));
-
-
-        time = System.currentTimeMillis();
-
-        //разделы в которых идет сплошная нумерация
-        def ndflPersonNum = 1L;
-        BigDecimal incomesRowNum = new BigDecimal(1);
-        BigDecimal deductionRowNum = new BigDecimal(1);
-        BigDecimal prepaymentRowNum = new BigDecimal(1);
-
-        for (Map.Entry<Long, NdflPerson> entry : ndflPersonMap.entrySet()) {
+        // В одном цикле делаем сразу несколько действий: 1. Отбираем источники в состояниии "Принята". 2. Находим дубли, сортируем и избавляемся от них
+        for (List<ConsolidationIncome> incomes : incomesGroupedByOperationIdAndAsnu.values()) {
             ScriptUtils.checkInterrupted()
+            // Группируем все отобранные строки по отпечатку ConsolidationIncome
+            // Мы не сравниваем по идОперации и АСНУ поскольку мы внутри группы по идОперации и АСНУ
+            Map<String, List<ConsolidationIncome>> transitionalRows = [:]
+            Iterator<ConsolidationIncome> incomesIterator = incomes.iterator()
+            while (incomesIterator.hasNext()) {
+                //noinspection GroovyAssignabilityCheck
+                ConsolidationIncome candidate = incomesIterator.next()
+                if (candidate.accepted) {
 
-            Long refBookPersonRecordId = entry.getKey();
+                    acceptedSources.get(Boolean.TRUE) << candidate.declarationDataId
 
-            Map<String, RefBookValue> refBookPersonRecord = refBookPersonMap.get(refBookPersonRecordId);
+                    String uuid = ScriptUtils.getConsolidationIncomeUUID(candidate)
 
-            Long refBookPersonId = refBookPersonRecord?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
-            NdflPerson ndflPerson = entry.getValue();
-
-            if (refBookPersonId == null) {
-                String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                String fioAndInp = String.format(TEMPLATE_PERSON_FL, fio, ndflPerson.inp)
-                deletedPersonMap.get(refBookPersonRecordId).each { def personDeclarationDataId ->
-                    logger.errorExp("%s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp,
-                            "В налоговой форме № ${personDeclarationDataId} не удалось установить связь со справочником \"$R_PERSON\"")
-                }
-                continue
-            }
-
-            def incomes = ndflPerson.incomes;
-            def deductions = ndflPerson.deductions;
-            def prepayments = ndflPerson.prepayments;
-
-            //Сортируем сначала по дате начисления, затем по дате выплаты
-            incomes.sort { a, b -> (a.incomeAccruedDate <=> b.incomeAccruedDate) ?: a.incomePayoutDate <=> b.incomePayoutDate }
-            deductions.sort { a, b -> a.incomeAccrued <=> b.incomeAccrued }
-            prepayments.sort { a, b -> a.notifDate <=> b.notifDate }
-
-
-            List<Map<String, RefBookValue>> personDocumentsList = personDocMap.get(refBookPersonId)
-
-            //Выбираем ДУЛ с признаком включения в отчетность 1
-            Map<String, RefBookValue> personDocumentRecord = personDocumentsList?.find {
-                it.get("INC_REP")?.getNumberValue() == 1
-            };
-
-            Long addressId = refBookPersonRecord.get("ADDRESS")?.getReferenceValue();
-            Map<String, RefBookValue> addressRecord = addressMap.get(addressId);
-
-            if (personDocumentsList == null || personDocumentsList.isEmpty()) {
-                logger.warn("Физическое лицо: " + buildRefBookPersonFio(refBookPersonRecord) + ", Идентификатор ФЛ: " + buildRefBookPersonId(refBookPersonRecord) + ", включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'")
-            } else if (personDocumentRecord == null || personDocumentRecord.isEmpty()) {
-                logger.warn("Физическое лицо: " + buildRefBookPersonFio(refBookPersonRecord) + ", Идентификатор ФЛ: " + buildRefBookPersonId(refBookPersonRecord) + ", включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1")
-            }
-
-            if (addressId != null && addressRecord == null) {
-                logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) + ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
-                continue;
-            }
-
-            //Создание консолидированной записи NdflPerson
-            NdflPerson consolidatePerson = buildNdflPerson(refBookPersonRecord, personDocumentRecord, addressRecord);
-
-            consolidatePerson.rowNum = ndflPersonNum;
-            consolidatePerson.declarationDataId = declarationDataId
-
-            //Доходы
-            List<NdflPersonIncome> consolidatedIncomesList = new ArrayList<NdflPersonIncome>();
-            for (NdflPersonIncome income : incomes) {
-                NdflPersonIncome consolidatedIncome = consolidateDetail(income, incomesRowNum);
-                consolidatedIncomesList.add(consolidatedIncome);
-                incomesRowNum = incomesRowNum.add(new BigDecimal(1));
-            }
-            consolidatePerson.setIncomes(consolidatedIncomesList);
-
-            //Вычеты
-            List<NdflPersonDeduction> consolidatedDeductionsList = new ArrayList<NdflPersonDeduction>();
-            for (NdflPersonDeduction deduction : deductions) {
-                NdflPersonDeduction consolidatedDeduction = consolidateDetail(deduction, deductionRowNum);
-                consolidatedDeductionsList.add(consolidatedDeduction);
-                deductionRowNum = deductionRowNum.add(new BigDecimal(1));
-            }
-            consolidatePerson.setDeductions(consolidatedDeductionsList);
-
-            //Авансы
-            List<NdflPersonPrepayment> consolidatedPrepaymentsList = new ArrayList<NdflPersonPrepayment>();
-            for (NdflPersonPrepayment prepayment : prepayments) {
-                NdflPersonPrepayment consolidatedPrepayment = consolidateDetail(prepayment, prepaymentRowNum);
-                consolidatedPrepaymentsList.add(consolidatedPrepayment);
-                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal(1));
-            }
-            consolidatePerson.setPrepayments(consolidatedPrepaymentsList);
-
-            ndflPersonService.save(consolidatePerson)
-            ndflPersonNum++
-
-        }
-
-        logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + ScriptUtils.calcTimeMillis(time));
-        logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " " + ScriptUtils.getFirstDeclensionByNumeric("форма", declarationDataIdList.size()) + ")")
-    }
-
-
-    /**
-     * Получаем список идентификаторов деклараций которые попадут в консолидированную форму
-     * @param sourcesInfo
-     * @return
-     */
-    List<Long> collectDeclarationDataIdList(List<Relation> sourcesInfo) {
-        def result = []
-        for (Relation relation : sourcesInfo) {
-            if (!result.contains(relation.declarationDataId)) {
-                result.add(relation.declarationDataId)
-            }
-        }
-
-        return result.sort()
-    }
-
-    /**
-     * Получить список форм-источников в состоянии "Принята"
-     * @param sourcesInfo Список налоговых форм-источников
-     * @return Список форм-источников в состоянии "Принята"
-     */
-    List<Relation> retainAcceptedSourceDeclarations(List<Relation> sourcesInfo) {
-        List<Relation> result = new ArrayList<Relation>();
-        for (Relation relation : sourcesInfo) {
-            Long declarationDataId = relation.declarationDataId;
-            if (!relation.declarationState.equals(State.ACCEPTED)) {
-                logger.warn(String.format("Налоговая форма-источник существует, но не может быть использована в консолидации, так как еще не принята. Вид формы: \"%s\", Подразделение: \"%s\", Номер=\"%s\", Состояние=\"%s\"",
-                        relation.getDeclarationTypeName(), relation.getFullDepartmentName(), declarationDataId, relation.declarationState.title))
-                continue
-            }
-            result.add(relation);
-        }
-        return result;
-    }
-
-    /**
-     * Получаем список NdflPerson которые попадут в консолидированную форму
-     * @param sourcesInfo
-     * @return
-     */
-    List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
-
-        long time = System.currentTimeMillis();
-
-        List<NdflPerson> result = new ArrayList<NdflPerson>();
-        // собираем данные из источников
-        int i = 0;
-        for (Relation relation : sourcesInfo) {
-            Long declarationDataId = relation.declarationDataId;
-            if (!relation.declarationState.equals(State.ACCEPTED)) {
-                logger.warn(String.format("Налоговая форма-источник существует, но не может быть использована в консолидации, так как еще не принята. Вид формы: \"%s\", Подразделение: \"%s\", Номер=\"%s\", Состояние=\"%s\"",
-                        relation.getDeclarationTypeName(), relation.getFullDepartmentName(), declarationDataId, relation.declarationState.title))
-                continue
-            }
-            List<NdflPerson> ndflPersonList = findNdflPersonWithData(declarationDataId);
-
-            //logger.info("Физических лиц в НФ "+declarationDataId+ ": " + ndflPersonList.size());
-
-            result.addAll(ndflPersonList);
-            i++;
-        }
-
-        return result;
-    }
-
-    /**
-     * Получение списка удаленных ФЛ в виде мапы personId: List<declarationDataId>
-     * @param declarationDataIdList
-     */
-    Map<Long, List<Long>> getDeletedPersonMap(List<Long> declarationDataIdList) {
-        Map<Long, List<Long>> result = [:]
-        declarationDataIdList.each { Long it ->
-            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_person.id = np.person_id)"
-            Map<Long, Map<String, RefBookValue>> refPersonMap = getProvider(RefBook.Id.PERSON.id).getRecordDataWhere(whereClause)
-            refPersonMap.each { Long k, Map<String, RefBookValue> v ->
-                Long personId = v.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue().longValue()
-                if (!result.containsKey(personId)) {
-                    result.put(personId, new ArrayList<Long>())
-                }
-                result.get(personId).add(it)
-            }
-        }
-        return result
-    }
-
-    /**
-     * Получить список актуальных записей о физлицах, в нф
-     * @param declarationDataIdList список id нф
-     * @return
-     */
-    Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataIdList(List<Long> declarationDataIdList) {
-        //Если исходных форм достаточно много то можно переделать запрос на получение списка declarationDataIdList
-        def result = new HashMap<Long, Map<String, RefBookValue>>()
-        declarationDataIdList.each {
-            Map<Long, Map<String, RefBookValue>> mapPersons = getActualRefPersonsByDeclarationDataId(it)
-            mapPersons.each { recordId, refBookValue ->
-                result.put(recordId, refBookValue)
-            }
-        }
-        return result
-    }
-
-    /**
-     * Получить Записи справочника адреса физлиц, по записям из справочника физлиц
-     * @param personMap
-     * @return
-     */
-    Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
-        Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>()
-        def addressIds = []
-        def count = 0
-        personMap.each { recordId, person ->
-            if (person.get("ADDRESS").value != null) {
-                Long addressId = person.get("ADDRESS")?.getReferenceValue()
-                // Адрес может быть не задан
-                if (addressId != null) {
-                    addressIds.add(addressId)
-                    count++
-                    if (count >= 1000) {
-                        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).getRecordData(addressIds)
-                        refBookMap.each { id, address ->
-                            result.put(id, address)
+                    /* список с кандидатами на попаданием в КНФ. Чаще всего в этом списке будет одна строка, чтобы туда попасть нужно иметь уникальный отпечаток.
+                    Список создан из-за того, что дубликатами признаются строки из разных источников
+                     */
+                    List<ConsolidationIncome> pickedCandidates = transitionalRows.get(uuid)
+                    if (pickedCandidates == null) {
+                        // Если кандитатов в КНФ нет добавляем нового кандидата
+                        transitionalRows.put(uuid, [candidate])
+                    } else {
+                        // Если кандидат есть
+                        if (pickedCandidates.get(0).declarationDataId == candidate.declarationDataId) {
+                            // Добавлем еще строку если кандидат из той же ПНФ
+                            pickedCandidates.add(candidate)
+                        } else {
+                            if (pickedCandidates.get(0).correctionDate == null) {
+                                /* Проверяем если строка не из корректировочного периода, тогда устанавливаем минимальное значение
+                                 даты корректировке, чтобы при сортировке эта строка была первой в списке
+                                  */
+                                pickedCandidates.get(0).correctionDate = new Date(Long.MIN_VALUE)
+                            }
+                            if (candidate.correctionDate == null) {
+                                // Проверяем что кандидат не из корректировочного периода
+                                candidate.correctionDate = new Date(Long.MIN_VALUE)
+                            }
+                            // ЧТобы новый кандидат стал отобранным кандидатом он должен иметь более поздний год
+                            // Если года равны тогда новый кандидадт должен иметь больший код отчетного периода
+                            // Если периоды равны тогда новый кандидат должен иметь более позднюю дату корректировки
+                            // Если даты корректировки одинаковы, тогда новый кандидат должен иметь более позднюю дату создания
+                            if (pickedCandidates.get(0).year < candidate.year
+                                    || pickedCandidates.get(0).periodCode < candidate.periodCode
+                                    || pickedCandidates.get(0).correctionDate < candidate.correctionDate
+                                    || getDeclarationDataCreationDate(pickedCandidates.get(0).declarationDataId) < getDeclarationDataCreationDate(candidate.declarationDataId)) {
+                                // Если новый кандидат выбран. Очищаем список отобранных кандидатов и добавляем нового кандидата.
+                                pickedCandidates.clear()
+                                pickedCandidates.add(candidate)
+                            }
                         }
-                        addressIds.clear()
-                        count = 0
                     }
+                } else {
+                    acceptedSources.get(Boolean.FALSE) << candidate.declarationDataId
+                    incomesIterator.remove()
+                }
+            }
+
+            for (List<ConsolidationIncome> passedIncomes : transitionalRows.values()) {
+                pickedRows.addAll(passedIncomes)
+            }
+        }
+
+        if (pickedRows.isEmpty()) {
+            logger.error("Не найдено ни одной ПНФ в состоянии \"Принята\", содержащей данные для включения в КНФ")
+            return
+        }
+
+        logForDebug("Избавление от дублирующих и фиктивных строк, определение списка операций для включения в КНФ. Включено в КНФ ${pickedRows.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        // Доходы сгруппированные по идОперации и ИНП. Будут использоваться для вычисления доп полей сортировки
+        Map<Pair<String, String>, List<ConsolidationIncome>> incomesGroupedByOperationAndInp = [:]
+        // Доходы сгруппированные по физлицам
+        Map<Long, List<? extends NdflPersonIncome>> incomesGroupedByPerson = [:]
+        // Доходы сгруппированные по идОперации и физлицу. Используются для нахождения вычетов и авансов
+        Map<Pair<String, Long>, List<ConsolidationIncome>> incomesGroupedByOperationAndPerson = [:]
+
+        // Заполняем сгруппированные доходы
+        for (ConsolidationIncome income : pickedRows) {
+            Pair<String, String> operationAndInpKey = new Pair(income.operationId, income.inp)
+            Pair<String, Long> operationAndPersonKey = new Pair(income.operationId, income.ndflPersonId)
+            List<? extends NdflPersonIncome> personGroup = incomesGroupedByPerson.get(income.ndflPersonId)
+            List<ConsolidationIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey)
+            List<ConsolidationIncome> operationAndPersonGroup = incomesGroupedByOperationAndPerson.get(operationAndPersonKey)
+            if (operationAndInpGroup == null) {
+                incomesGroupedByOperationAndInp.put(operationAndInpKey, [income])
+            } else {
+                operationAndInpGroup << income
+            }
+            if (personGroup == null) {
+                incomesGroupedByPerson.put(income.ndflPersonId, [income])
+            } else {
+                personGroup << income
+            }
+            if (operationAndPersonGroup == null) {
+                incomesGroupedByOperationAndPerson.put(operationAndPersonKey, [income])
+            } else {
+                operationAndPersonGroup << income
+            }
+        }
+
+        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
+        Map<Pair<String, String>, Date> operationDates = [:]
+
+        for (List<ConsolidationIncome> group : incomesGroupedByOperationAndInp.values()) {
+            Pair<String, String> key = new Pair(group.get(0).operationId, group.get(0).inp)
+            List<Date> incomeAccruedDates = group.incomeAccruedDate
+            incomeAccruedDates.removeAll([null])
+            if (!incomeAccruedDates.isEmpty()) {
+                Collections.sort(incomeAccruedDates)
+                operationDates.put(key, incomeAccruedDates.get(0))
+                continue
+            }
+
+            List<Date> incomePayoutDates = group.incomePayoutDate
+            incomePayoutDates.removeAll([null])
+            if (!incomePayoutDates.isEmpty()) {
+                Collections.sort(incomePayoutDates)
+                operationDates.put(key, incomePayoutDates.get(0))
+                continue
+            }
+
+            List<Date> paymentDates = group.paymentDate
+            paymentDates.removeAll([null])
+            if (!paymentDates.isEmpty()) {
+                Collections.sort(paymentDates)
+                operationDates.put(key, paymentDates.get(0))
+                continue
+            }
+
+            operationDates.put(key, null)
+        }
+
+        List<Long> incomeIdsForFetchingDeductionsAndPrepayments = []
+
+        // Идентификаторы доходов для получения вычетов и авансов
+        for (List<NdflPersonIncome> incomes : incomesGroupedByOperationAndPerson.values()) {
+            incomeIdsForFetchingDeductionsAndPrepayments << incomes.get(0).id
+        }
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Подготовка аргументов для получения данных разделов 1, 3, 4, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        List<NdflPerson> ndflPersonList = ndflPersonService.findByIdList(new ArrayList<>(incomesGroupedByPerson.keySet()))
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Получение данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        List<NdflPersonDeduction> deductions = ndflPersonService.fetchDeductionsForConsolidation(incomeIdsForFetchingDeductionsAndPrepayments)
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Получение данных раздела 3, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        List<NdflPersonPrepayment> prepayments = ndflPersonService.fetchPrepaymentsForConsolidation(incomeIdsForFetchingDeductionsAndPrepayments)
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Получение данных раздела 4, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date())
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Получение данных справочника ФЛ, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
+            @Override
+            int compare(NdflPerson o1, NdflPerson o2) {
+                int lastNameComp = compareValues(o1.lastName, o2.lastName, RnuNdflStringComparator.INSTANCE)
+                if (lastNameComp != 0) {
+                    return lastNameComp
+                }
+
+                int firstNameComp = compareValues(o1.firstName, o2.firstName, RnuNdflStringComparator.INSTANCE)
+                if (firstNameComp != 0) {
+                    return firstNameComp
+                }
+
+                int middleNameComp = compareValues(o1.middleName, o2.middleName, RnuNdflStringComparator.INSTANCE)
+                if (middleNameComp != 0) {
+                    return middleNameComp
+                }
+
+                int innComp = compareValues(o1.innNp, o2.innNp, RnuNdflStringComparator.INSTANCE)
+                if (innComp != 0) {
+                    return innComp
+                }
+
+                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, RnuNdflStringComparator.INSTANCE)
+                if (innForeignComp != 0) {
+                    return innForeignComp
+                }
+
+                int birthDayComp = compareValues(o1.birthDay, o2.birthDay, null)
+                if (birthDayComp != 0) {
+                    return birthDayComp
+                }
+
+                return compareValues(o1.idDocNumber, o2.idDocNumber, RnuNdflStringComparator.INSTANCE)
+            }
+        })
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+        Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
+
+        for (NdflPerson refBookPerson : refBookPersonList) {
+            refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
+        }
+
+        Map<Long, List<NdflPersonDeduction>> deductionsGroupedByRefBookPerson = [:]
+        Map<Long, List<NdflPersonPrepayment>> prepaymentsGroupedByPerson = [:]
+
+        // Сортируем разделы 2, 3, 4
+        for (NdflPersonDeduction deduction : deductions) {
+            List<NdflPersonDeduction> group = deductionsGroupedByRefBookPerson.get(deduction.ndflPersonId)
+            if (group == null) {
+                deductionsGroupedByRefBookPerson.put(deduction.ndflPersonId, [deduction])
+            } else {
+                group << deduction
+            }
+        }
+
+        for (NdflPersonPrepayment prepayment : prepayments) {
+            List<NdflPersonPrepayment> group = prepaymentsGroupedByPerson.get(prepayment.ndflPersonId)
+            if (group == null) {
+                prepaymentsGroupedByPerson.put(prepayment.ndflPersonId, [prepayment])
+            } else {
+                group << prepayment
+            }
+        }
+
+        BigDecimal incomeRowNum = new BigDecimal("0")
+        BigDecimal deductionRowNum = new BigDecimal("0")
+        BigDecimal prepaymentRowNum = new BigDecimal("0")
+
+        for (NdflPerson ndflPerson : ndflPersonList) {
+            ndflPerson.incomes = incomesGroupedByPerson.get(ndflPerson.id)
+            ndflPerson.deductions = deductionsGroupedByRefBookPerson.get(ndflPerson.id)
+            ndflPerson.prepayments = prepaymentsGroupedByPerson.get(ndflPerson.id)
+
+            Collections.sort(ndflPerson.incomes, new Comparator<NdflPersonIncome>() {
+                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                    int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.inp)), operationDates.get(new Pair(o2.operationId, ndflPerson.inp)), null)
+                    if (operationDateComp != 0) {
+                        return operationDateComp
+                    }
+
+                    int operationIdComp = compareValues(o1.operationId, o2.operationId, RnuNdflStringComparator.INSTANCE)
+                    if (operationIdComp != 0) {
+                        return operationIdComp
+                    }
+
+                    int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null)
+                    if (actionDateComp != 0) {
+                        return actionDateComp
+                    }
+
+                    return compareValues(getRowType(o1), getRowType(o2), null)
+                }
+
+            })
+
+            List<String> operationIdOrderList = ndflPerson.incomes.operationId
+
+            Collections.sort(ndflPerson.deductions, new Comparator<NdflPersonDeduction>() {
+                @Override
+                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                    int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null)
+                    if (incomeAccruedComp != 0) {
+                        return incomeAccruedComp
+                    }
+
+                    int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                        @Override
+                        int compare(String s1, String s2) {
+                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
+                        }
+                    })
+                    if (operationIdComp != 0) {
+                        return operationIdComp
+                    }
+
+                    return compareValues(o1.periodCurrDate, o2.periodCurrDate, null)
+                }
+            })
+
+            Collections.sort(ndflPerson.prepayments, new Comparator<NdflPersonPrepayment>() {
+                @Override
+                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                    return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                        @Override
+                        int compare(String s1, String s2) {
+                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
+                        }
+                    })
+                }
+            })
+
+            for (NdflPersonIncome income : ndflPerson.incomes) {
+                incomeRowNum = incomeRowNum.add(new BigDecimal("1"))
+                income.rowNum = incomeRowNum
+            }
+
+            for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                deductionRowNum = deductionRowNum.add(new BigDecimal("1"))
+                deduction.rowNum = deductionRowNum
+            }
+
+            for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
+                prepayment.rowNum = prepaymentRowNum
+            }
+
+            ndflPerson.id = null
+            ndflPerson.declarationDataId = declarationData.id
+            ndflPerson.modifiedDate = null
+            ndflPerson.modifiedBy = null
+        }
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        // Физлица для сохранения сгуппированные по идентификатору физлица в справочнике
+        Map<Long, NdflPerson> ndflPersonsToPersistGroupedByRefBookPersonId = [:]
+
+        List<NdflPerson> withoutDulPersonList = []
+
+
+        // Данные для заполнения раздела 1
+
+        long personRowNum = 0L
+        for (NdflPerson declarationDataPerson : ndflPersonList) {
+            NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
+
+            if (refBookPerson == null) {
+                logger.error("В Разделе 1 первичной формы ${declarationDataPerson.declarationDataId} для ФЛ:" +
+                        "${declarationDataPerson.lastName + " " + declarationDataPerson.firstName + " " + (declarationDataPerson.middleName ?: "")}" +
+                        ", ИНП: ${declarationDataPerson.inp}, строка: ${declarationDataPerson.rowNum} не установлена " +
+                        "ссылка на запись справочника \"Физические лица\". Выполните операцию идентификации формы " +
+                        "${declarationDataPerson.declarationDataId}")
+                continue
+            }
+
+            if (refBookPerson.idDocType == null) {
+                withoutDulPersonList << refBookPerson
+            }
+
+            NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.personId)
+            if (persistingPerson != null) {
+                persistingPerson.incomes.addAll(declarationDataPerson.incomes)
+                persistingPerson.deductions.addAll(declarationDataPerson.deductions)
+                persistingPerson.prepayments.addAll(declarationDataPerson.prepayments)
+                continue
+            }
+
+            if (refBookPerson.inp != declarationDataPerson.inp) {
+                declarationDataPerson.inp = refBookPerson.inp
+            }
+            if (refBookPerson.lastName != declarationDataPerson.lastName) {
+                declarationDataPerson.lastName = refBookPerson.lastName
+            }
+            if (refBookPerson.firstName != declarationDataPerson.firstName) {
+                declarationDataPerson.firstName = refBookPerson.firstName
+            }
+            if (refBookPerson.middleName != declarationDataPerson.middleName) {
+                declarationDataPerson.middleName = refBookPerson.middleName
+            }
+            if (refBookPerson.birthDay != declarationDataPerson.birthDay) {
+                declarationDataPerson.birthDay = refBookPerson.birthDay
+            }
+            if (refBookPerson.citizenship != declarationDataPerson.citizenship) {
+                declarationDataPerson.citizenship = refBookPerson.citizenship
+            }
+            if (refBookPerson.innNp != declarationDataPerson.innNp) {
+                declarationDataPerson.innNp = refBookPerson.innNp
+            }
+            if (refBookPerson.innForeign != declarationDataPerson.innForeign) {
+                declarationDataPerson.innForeign = refBookPerson.innForeign
+            }
+            if (refBookPerson.idDocType != declarationDataPerson.idDocType) {
+                declarationDataPerson.idDocType = refBookPerson.idDocType
+            }
+            if (refBookPerson.idDocNumber != declarationDataPerson.idDocNumber) {
+                declarationDataPerson.idDocNumber = refBookPerson.idDocNumber
+            }
+            if (refBookPerson.status != declarationDataPerson.status) {
+                declarationDataPerson.status = refBookPerson.status
+            }
+            if (refBookPerson.regionCode != declarationDataPerson.regionCode) {
+                declarationDataPerson.regionCode = refBookPerson.regionCode
+            }
+            if (refBookPerson.postIndex != declarationDataPerson.postIndex) {
+                declarationDataPerson.postIndex = refBookPerson.postIndex
+            }
+            if (refBookPerson.area != declarationDataPerson.area) {
+                declarationDataPerson.area = refBookPerson.area
+            }
+            if (refBookPerson.city != declarationDataPerson.city) {
+                declarationDataPerson.city = refBookPerson.city
+            }
+            if (refBookPerson.locality != declarationDataPerson.locality) {
+                declarationDataPerson.locality = refBookPerson.locality
+            }
+            if (refBookPerson.street != declarationDataPerson.street) {
+                declarationDataPerson.street = refBookPerson.street
+            }
+            if (refBookPerson.house != declarationDataPerson.house) {
+                declarationDataPerson.house = refBookPerson.house
+            }
+            if (refBookPerson.building != declarationDataPerson.building) {
+                declarationDataPerson.building = refBookPerson.building
+            }
+            if (refBookPerson.flat != declarationDataPerson.flat) {
+                declarationDataPerson.flat = refBookPerson.flat
+            }
+            if (refBookPerson.snils != declarationDataPerson.snils) {
+                declarationDataPerson.snils = refBookPerson.snils
+            }
+            if (refBookPerson.countryCode != declarationDataPerson.countryCode) {
+                declarationDataPerson.countryCode = refBookPerson.countryCode
+            }
+            if (refBookPerson.address != declarationDataPerson.address) {
+                declarationDataPerson.address = refBookPerson.address
+            }
+
+            declarationDataPerson.rowNum = ++personRowNum
+
+            ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.personId, declarationDataPerson)
+        }
+
+        if (logger.containsLevel(LogLevel.ERROR)) return
+
+        /**
+         * Получение данных из справочника физлиц сделан одним запросом. Мы не загружаем связанные со справочником ФЛ справочники ИНП, ДУЛ, и Адресов отдельными запросами.
+         * Побочный эффект этого то что ДУЛ будет = null, в случае когда нет в справочнике ДУЛ с признаком включения в отчетность =1 и когда вообще нет ДУЛ у физлица.
+         * Поэтому здесь проверяется причина почему ДУЛ = null и выводится предупреждение
+         */
+
+        if (!withoutDulPersonList.isEmpty()) {
+            for (NdflPerson person : withoutDulPersonList) {
+                RefBookDataProvider provider = getProvider(RefBook.Id.ID_DOC.id)
+                int count = provider.getRecordsCount(new Date(), "PERSON_ID = ${person.personId}")
+                if (count == 0) {
+                    logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность",
+                            "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
+                            person.inp)
+                } else {
+                    logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1",
+                            "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
+                            person.inp)
                 }
             }
         }
 
-        if (addressIds.size() > 0) {
-            Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).getRecordData(addressIds)
-            refBookMap.each { addressId, address ->
-                result.put(addressId, address)
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Консолидация данных, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        ndflPersonService.save(ndflPersonsToPersistGroupedByRefBookPersonId.values())
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Сохранение данных в БД, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+
+        // Формируем уведомления
+
+        // Тербанки в состоянии "Принята"
+        Map<Department, Integer> acceptedTbDepartments = [:]
+        // Источники сгруппированные по тербанкам
+        Map<Department, List<Long>> acceptedSourcesByTb = [:]
+
+        acceptedTbDepartments.put(parentTB, 0)
+
+        List<Long> allSourcesIdList = []
+
+        allSourcesIdList.addAll(acceptedSources.get(Boolean.TRUE))
+        allSourcesIdList.addAll(acceptedSources.get(Boolean.FALSE))
+
+        sourceService.deleteDeclarationConsolidateInfo(declarationData.id)
+        sourceService.addDeclarationConsolidationInfo(declarationData.id, allSourcesIdList)
+
+        for (Long sourceId : acceptedSources.get(Boolean.TRUE)) {
+            ScriptUtils.checkInterrupted()
+            DeclarationData source = declarationService.getDeclarationData(sourceId)
+            Department tbOfSource = departmentService.getParentTB(source.departmentId)
+            Integer count = acceptedTbDepartments.get(tbOfSource)
+            List<Long> sources = acceptedSourcesByTb.get(tbOfSource)
+            if (count == null) {
+                acceptedTbDepartments.put(tbOfSource, 1)
+            } else {
+                acceptedTbDepartments.put(tbOfSource, ++count)
+            }
+            if (sources == null) {
+                acceptedSourcesByTb.put(tbOfSource, [sourceId])
+            } else {
+                sources << sourceId
             }
         }
 
-        return result
-    }
+        for (Department department : acceptedTbDepartments.keySet()) {
+            logger.info("Консолидация выполнена из ПНФ ТБ: \"%s\" (всего %d): %s",
+            department.shortName,
+            acceptedTbDepartments.get(department),
+            acceptedSourcesByTb.get(department).join(", "))
+        }
 
-    /**
-     * Получить "ДУЛ" по всем физлицам указвнных в НФ
-     * @return
-     */
-    Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
-        Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
-        declarationDataIdList.each {
-            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.status = 0"
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_DOC.id, whereClause)
+        if(!(acceptedSources.get(Boolean.FALSE).isEmpty())) {
+            Map<Department, Integer> notAcceptedTbDepartments = [:]
+            Map<Department, List<Long>> notAcceptedSourcesByTb = [:]
 
-            refBookMap.each { personId, refBookValues ->
-                Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
-                List<Map<String, RefBookValue>> dulList = result.get(refBookPersonId);
-                if (dulList == null) {
-                    dulList = new ArrayList<Map<String, RefBookValue>>();
-                    result.put(refBookPersonId, dulList);
+            for (Long sourceId : acceptedSources.get(Boolean.FALSE)) {
+                ScriptUtils.checkInterrupted()
+                DeclarationData source = declarationService.getDeclarationData(sourceId)
+                Department tbOfSource = departmentService.getParentTB(source.departmentId)
+                Integer count = notAcceptedTbDepartments.get(tbOfSource)
+                List<Long> sources = notAcceptedSourcesByTb.get(tbOfSource)
+                if (count == null) {
+                    notAcceptedTbDepartments.put(tbOfSource, 1)
+                } else {
+                    notAcceptedTbDepartments.put(tbOfSource, ++count)
                 }
-                dulList.add(refBookValues);
-            }
-        }
-        return result
-    }
-
-    /**
-     * Объединение ndfl-person по record_id, в данном методе происходит объединение ФЛ по record id из одной или нескольких НФ
-     * @param refBookPerson
-     * @return
-     */
-    Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, List<Long> declarationDataIdList) {
-
-        Map<Long, NdflPerson> result = new TreeMap<Long, NdflPerson>();
-
-        for (NdflPerson ndflPerson : ndflPersonList) {
-
-            if (ndflPerson.personId == null || ndflPerson.recordId == null) {
-                throw new ServiceException("Ошибка при консолидации данных. Необходимо повторно выполнить расчет формы " + ndflPerson.declarationDataId);
+                if (sources == null) {
+                    notAcceptedSourcesByTb.put(tbOfSource, [sourceId])
+                } else {
+                    sources << sourceId
+                }
             }
 
-            Long personRecordId = ndflPerson.recordId;
-
-            NdflPerson consNdflPerson = result.get(personRecordId)
-
-            //Консолидируем данные о доходах ФЛ, должны быть в одном разделе
-            if (consNdflPerson == null) {
-                consNdflPerson = new NdflPerson()
-                consNdflPerson.recordId = personRecordId;
-                consNdflPerson.inp = ndflPerson.inp
-                consNdflPerson.lastName = ndflPerson.lastName
-                consNdflPerson.firstName = ndflPerson.firstName
-                consNdflPerson.middleName = ndflPerson.middleName
-                result.put(personRecordId, consNdflPerson)
+            for (Department department : notAcceptedTbDepartments.keySet()) {
+                logger.info("ПНФ из ТБ: \"%s\" не использованы в консолидации, так как не находятся в состоянии \"Принята\" (всего %d): %s",
+                        department.shortName,
+                        notAcceptedTbDepartments.get(department),
+                        notAcceptedSourcesByTb.get(department).join(", "))
             }
-            consNdflPerson.incomes.addAll(ndflPerson.incomes);
-            consNdflPerson.deductions.addAll(ndflPerson.deductions);
-            consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
         }
 
-        return result;
-    }
-
-    /**
-     * @param refBookPersonRecord
-     * @return
-     */
-    String buildRefBookPersonId(Map<String, RefBookValue> refBookPersonRecord) {
-        return getVal(refBookPersonRecord, "RECORD_ID");
-    }
-
-    /**
-     * TODO Использовать метод com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils#buildRefBookNotice(java.util.Map)
-     * @param refBookPersonRecord
-     * @return
-     */
-    String buildRefBookPersonFio(Map<String, RefBookValue> refBookPersonRecord) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getVal(refBookPersonRecord, "LAST_NAME")).append(" ");
-        sb.append(getVal(refBookPersonRecord, "FIRST_NAME")).append(" ");
-        sb.append(getVal(refBookPersonRecord, "MIDDLE_NAME"));
-        return sb.toString();
-    }
-
-    /**
-     * TODO Использовать метод com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils#buildRefBookNotice(java.util.Map)
-     * @param refBookPersonRecord
-     * @return
-     */
-    String buildRefBookNotice(Map<String, RefBookValue> refBookPersonRecord) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Номер '").append(getVal(refBookPersonRecord, "RECORD_ID")).append("': ");
-        sb.append(getVal(refBookPersonRecord, "LAST_NAME")).append(" ");
-        sb.append(getVal(refBookPersonRecord, "FIRST_NAME")).append(" ");
-        sb.append(getVal(refBookPersonRecord, "MIDDLE_NAME")).append(" ");
-        sb.append(" [id=").append(getVal(refBookPersonRecord, RefBook.RECORD_ID_ALIAS)).append("]");
-        return sb.toString();
-    }
-
-    /**
-     * Создает объект NdlPerson заполненный данными из справочника
-     */
-    NdflPerson buildNdflPerson(Map<String, RefBookValue> personRecord, Map<String, RefBookValue> identityDocumentRecord, Map<String, RefBookValue> addressRecord) {
-
-        Map<Long, String> countryCodes = getRefCountryCode();
-        Map<Long, Map<String, RefBookValue>> documentTypeRefBook = getRefDocumentType();
-        Map<Long, String> taxpayerStatusCodes = getRefTaxpayerStatusCode();
-
-        NdflPerson ndflPerson = new NdflPerson()
-
-        //Данные о физлице - заполняется на основе справочника физлиц
-        ndflPerson.personId = (Long) personRecord.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue() //Идентификатор ФЛ
-        ndflPerson.inp = personRecord.get("RECORD_ID")?.getNumberValue()
-        ndflPerson.snils = personRecord.get("SNILS")?.getStringValue()
-        ndflPerson.lastName = personRecord.get("LAST_NAME")?.getStringValue()
-        ndflPerson.firstName = personRecord.get("FIRST_NAME")?.getStringValue()
-        ndflPerson.middleName = personRecord.get("MIDDLE_NAME")?.getStringValue()
-        ndflPerson.birthDay = personRecord.get("BIRTH_DATE")?.getDateValue()
-        ndflPerson.innNp = personRecord.get("INN")?.getStringValue()
-        ndflPerson.innForeign = personRecord.get("INN_FOREIGN")?.getStringValue()
-
-
-        Long countryId = personRecord.get("CITIZENSHIP")?.getReferenceValue();
-
-        ndflPerson.citizenship = countryCodes.get(countryId)
-
-        //ДУЛ - заполняется на основе справочника Документы, удостоверяющие личность
-        Map<String, RefBookValue> docTypeRecord = (identityDocumentRecord != null) ? documentTypeRefBook.get(identityDocumentRecord.get("DOC_ID")?.getReferenceValue()) : null
-        ndflPerson.idDocType = docTypeRecord?.get("CODE")?.getStringValue();
-
-        ndflPerson.idDocNumber = identityDocumentRecord?.get("DOC_NUMBER")?.getStringValue()
-
-        ndflPerson.status = taxpayerStatusCodes.get(personRecord.get("TAXPAYER_STATE")?.getReferenceValue())
-
-        //адрес может быть не задан
-        if (addressRecord != null) {
-            ndflPerson.postIndex = addressRecord.get("POSTAL_CODE")?.getStringValue()
-            ndflPerson.regionCode = addressRecord.get("REGION_CODE")?.getStringValue()
-            ndflPerson.area = addressRecord.get("DISTRICT")?.getStringValue()
-            ndflPerson.city = addressRecord.get("CITY")?.getStringValue()
-            ndflPerson.locality = addressRecord.get("LOCALITY")?.getStringValue()
-            ndflPerson.street = addressRecord.get("STREET")?.getStringValue()
-            ndflPerson.house = addressRecord.get("HOUSE")?.getStringValue()
-            ndflPerson.building = addressRecord.get("BUILD")?.getStringValue()
-            ndflPerson.flat = addressRecord.get("APPARTMENT")?.getStringValue()
-            ndflPerson.countryCode = countryCodes.get(addressRecord.get("COUNTRY_ID")?.getReferenceValue())
-            ndflPerson.address = addressRecord.get("ADDRESS")?.getStringValue()
-            //ndflPerson.additionalData = currentNdflPerson.additionalData
-        }
-
-        return ndflPerson
-    }
-
-    /**
-     * При
-     * @param ndflPersonDetail
-     * @param i
-     * @return
-     */
-    static <T extends NdflPersonOperation> T consolidateDetail(T ndflPersonDetail, BigDecimal rowNum) {
-        def sourceId = ndflPersonDetail.id;
-        ndflPersonDetail.id = null
-        ndflPersonDetail.ndflPersonId = null
-        ndflPersonDetail.rowNum = rowNum
-        ndflPersonDetail.sourceId = sourceId;
-        return ndflPersonDetail
-    }
-
-    /**
-     * Найти все NdflPerson привязанные к НФ вместе с данными о доходах
-     * @param declarationDataId
-     * @return
-     */
-    List<NdflPerson> findNdflPersonWithData(Long declarationDataId) {
-
-        List<NdflPerson> result = new ArrayList<NdflPerson>();
-        List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationDataId);
-
-        Map<Long, List<NdflPersonIncome>> imcomesList = mapToPesonId(ndflPersonService.findNdflPersonIncome(declarationDataId));
-        Map<Long, List<NdflPersonDeduction>> deductionList = mapToPesonId(ndflPersonService.findNdflPersonDeduction(declarationDataId));
-        Map<Long, List<NdflPersonPrepayment>> prepaymentList = mapToPesonId(ndflPersonService.findNdflPersonPrepayment(declarationDataId));
-
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            Long ndflPersonId = ndflPerson.getId();
-            ndflPerson.setIncomes(imcomesList.get(ndflPersonId));
-            ndflPerson.setDeductions(deductionList.get(ndflPersonId));
-            ndflPerson.setPrepayments(prepaymentList.get(ndflPersonId));
-            result.add(ndflPerson);
-        }
-        return result;
     }
 
     /**
@@ -585,7 +734,7 @@ class Calculate extends AbstractScriptClass {
      * @param providerId
      * @return
      */
-    RefBookDataProvider getProvider(def long providerId) {
+    RefBookDataProvider getProvider(long providerId) {
         if (!providerCache.containsKey(providerId)) {
             providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
         }
@@ -593,162 +742,70 @@ class Calculate extends AbstractScriptClass {
     }
 
     /**
-     * Получить актуальные на отчетную дату записи справочника "Физические лица"
-     * @return Map < person_id , Map < имя_поля , значение_поля > >
+     * Получить дату создания налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @return  дата создания налоговой формы
      */
-    Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(declarationDataId) {
-        String whereClause = """
-                    JOIN ref_book_person p ON (frb.record_id = p.record_id)
-                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
-                """
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(RefBook.Id.PERSON.id, whereClause, getReportPeriodEndDate() - 1)
-        Map<Long, Map<String, RefBookValue>> refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>();
-        refBookMap.each { Long personId, Map<String, RefBookValue> refBookValue ->
-            Long refBookRecordId = (Long) refBookValue.get(RF_RECORD_ID).value
-            refBookMapResult.put(refBookRecordId, refBookValue)
+    Date getDeclarationDataCreationDate(Long declarationDataId) {
+        Date toReturn = creationDateCache.get(declarationDataId)
+        if (toReturn == null) {
+            toReturn = declarationService.getDeclarationDataCreationDate(declarationDataId)
+            creationDateCache.put(declarationDataId, toReturn)
         }
-        return refBookMapResult
-    }
-
-    String getVal(Map<String, RefBookValue> refBookPersonRecord, String attrName) {
-        RefBookValue refBookValue = refBookPersonRecord.get(attrName);
-        if (refBookValue != null) {
-            return refBookValue.toString();
-        } else {
-            return null;
-        }
+        return toReturn
     }
 
     /**
-     * Получить "Страны"
-     * @return
+     * Сравнить значения
+     * @param v1            значение 1
+     * @param v2            значение 2
+     * @param comparator    компаратор
+     * @return отрицательное значение если параметр v1 меньше параметра v2, положительное значение если параметр v1
+     * больше параметра v2, 0 если параметры v1 и v2 равны
      */
-    Map<Long, String> getRefCountryCode() {
-        if (countryCodeCache.size() == 0) {
-            List<Map<String, RefBookValue>> refBookMap = getRefBookAll(RefBook.Id.COUNTRY.getId())
-            refBookMap.each { Map<String, RefBookValue> refBook ->
-                countryCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
-            }
-        }
-        return countryCodeCache;
-    }
-
-    /**
-     * Получить "Виды документов"
-     */
-    Map<Long, Map<String, RefBookValue>> getRefDocumentType() {
-        if (documentTypeCache.size() == 0) {
-            List<Map<String, RefBookValue>> refBookList = getRefBookAll(RefBook.Id.DOCUMENT_CODES.getId())
-            refBookList.each { Map<String, RefBookValue> refBook ->
-                documentTypeCache.put((Long) refBook?.id?.numberValue, refBook)
-            }
-        }
-        return documentTypeCache;
-    }
-
-    /**
-     * Получить "Статусы налогоплательщика"
-     * @return
-     */
-    Map<Long, String> getRefTaxpayerStatusCode() {
-        if (taxpayerStatusCodeCache.size() == 0) {
-            List<Map<String, RefBookValue>> refBookMap = getRefBookAll(RefBook.Id.TAXPAYER_STATUS.getId())
-            refBookMap.each { Map<String, RefBookValue> refBook ->
-                taxpayerStatusCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
-            }
-        }
-        return taxpayerStatusCodeCache;
-    }
-
-    /**
-     * Выгрузка из справочников по условию
-     * @param refBookId
-     * @param whereClause
-     * @return
-     * Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb
-     */
-    Map<Long, Map<String, RefBookValue>> getRefBookByRecordWhere(Long refBookId, String whereClause) {
-        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
-        if (refBookMap == null || refBookMap.size() == 0) {
-            //throw new ScriptException("Не найдены записи справочника " + refBookId)
-            return Collections.emptyMap();
-        }
-        return refBookMap
-    }
-
-    static <T extends NdflPersonOperation> Map<Long, List<T>> mapToPesonId(List<T> operationList) {
-        Map<Long, List<T>> result = new HashMap<Long, List<T>>()
-        for (T personOperation : operationList) {
-            Long ndflPersonId = personOperation.getNdflPersonId();
-            if (!result.containsKey(ndflPersonId)) {
-                result.put(ndflPersonId, new ArrayList<T>());
-            }
-            result.get(ndflPersonId).add(personOperation);
-        }
-        return result;
-    }
-
-    /**
-     * Получить дату окончания отчетного периода
-     * @return
-     */
-    Date getReportPeriodEndDate() {
-        if (periodEndDate == null) {
-            periodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-        }
-        return periodEndDate
-    }
-
-    /**
-     * Получить все записи справочника по его идентификатору
-     * @param refBookId - идентификатор справочника
-     * @return - список всех версий всех записей справочника
-     */
-    List<Map<String, RefBookValue>> getRefBookAll(long refBookId) {
-        def recordData = getProvider(refBookId).getRecordDataWhere("1 = 1")
-        def refBookList = []
-        if (recordData != null) {
-            recordData.each { key, value ->
-                refBookList.add(value)
-            }
-        }
-
-        if (refBookList.size() == 0) {
-            throw new ServiceException("Ошибка при получении записей справочника " + refBookId)
-        }
-        return refBookList
-    }
-
-    /**
-     * Выгрузка из справочников по условию и версии
-     * @param refBookId
-     * @param whereClause
-     * @return
-     * Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb
-     */
-    Map<Long, Map<String, RefBookValue>> getRefBookByRecordVersionWhere(Long refBookId, String whereClause, Date version) {
-        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataVersionWhere(whereClause, version)
-        if (refBookMap == null || refBookMap.size() == 0) {
-            //throw new ScriptException("Не найдены записи справочника " + refBookId)
-            return Collections.emptyMap();
-        }
-        return refBookMap
-    }
-
-    /**
-     * Создание фиктивной xml для привязки к экземпляру
-     * declarationDataId
-     * @return
-     */
-
-    def generateXml() {
-        MarkupBuilder builder = new MarkupBuilder((FileWriter) xml)
-        createXmlNode(builder, "Файл", ["имя": declarationData.id])
-    }
-
     @TypeChecked(TypeCheckingMode.SKIP)
-    def createXmlNode(builder, name, attributes) {
-        builder.name(attributes)
+    static int compareValues(v1, v2, comparator) {
+        int result = 0
+        if (v1 != null && v2 != null) {
+            if (comparator != null) {
+                result = comparator.compare(v1, v2)
+            } else {
+                result = v1.compareTo(v2)
+            }
+        } else if (v1 == null && v2 != null) {
+            return Integer.MAX_VALUE
+        } else if (v1 != null) {
+            return Integer.MIN_VALUE
+        }
+        return result
+    }
+
+    /**
+     * Получить дату действия
+     * @param income объект строки дохода
+     * @return  вычисленная дата действия
+     */
+    static Date getActionDate(NdflPersonIncome income) {
+        if (income.taxDate != null) {
+            return income.taxDate
+        } else {
+            return income.paymentDate
+        }
+    }
+
+    /**
+     * Получить тип строки дохода
+     * @param income объект строки дохода
+     * @return  значение типа
+     */
+    static Integer getRowType(NdflPersonIncome income) {
+        if (income.incomeAccruedDate != null) {
+            return 100
+        } else if (income.incomePayoutDate != null) {
+            return 200
+        }
+        return 300
+
     }
 
 }

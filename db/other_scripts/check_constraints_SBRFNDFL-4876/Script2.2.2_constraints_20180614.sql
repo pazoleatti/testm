@@ -1,7 +1,21 @@
+set serveroutput on;
+
+column filename new_val filename
+column outpath new_val outpath
+
+select 'C:\temp\logs' outpath from dual;
+select 'constraints_' || user || '_' || to_char(sysdate, 'yyyymmdd')||'.txt' filename from dual;
+
+spool &outpath\&filename;
+
+delete from department_report_period where department_id not in (select id from department);
+delete from notification where user_id not in (select id from sec_user);
+commit;
+
 DECLARE
 	v_count number;
 BEGIN
-
+	
 	select count(1) into v_count from user_constraints where table_name='DEPARTMENT_DECLARATION_TYPE' and constraint_name='DEPT_DECL_TYPE_FK_DEPT';
 	IF v_count=0 THEN
 		dbms_output.put_line('Constraint DEPT_DECL_TYPE_FK_DEPT on table DEPARTMENT_DECLARATION_TYPE not exists');
@@ -258,3 +272,7 @@ BEGIN
 
 END;
 /
+
+spool off;
+
+exit;	

@@ -34,6 +34,8 @@ import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -51,6 +53,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -68,6 +71,7 @@ import static java.util.Collections.singletonList;
 @Repository
 @Transactional
 public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
+    private static final Log LOG = LogFactory.getLog(NdflPersonDaoImpl.class);
 
     @Autowired
     DBUtilsImpl dbUtils;
@@ -681,21 +685,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+        boolean isOperationIdEmpty = filter.getIncome().getOperationId() == null || filter.getIncome().getOperationId().isEmpty();
+        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty() || !isOperationIdEmpty) {
             queryBuilder.append(" and exists (");
-            if (!incomeFilter.isEmpty()) {
+            if (!incomeFilter.isEmpty() || !isOperationIdEmpty) {
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
                         .append(incomeFilter);
                 appendSqlLikeCondition("npi.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
-            if (!deductionFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
+            if (!deductionFilter.isEmpty() || !isOperationIdEmpty) {
+                queryBuilder.append(!incomeFilter.isEmpty() || !isOperationIdEmpty ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
                         .append(deductionFilter);
                 appendSqlLikeCondition("npd.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
-            if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+            if (!prepaymentFilter.isEmpty() || !isOperationIdEmpty) {
+                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !isOperationIdEmpty ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
                         .append(prepaymentFilter);
                 appendSqlLikeCondition("npp.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
@@ -732,10 +737,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("np.middle_name", filter.getMiddleName(), filterBuilder, params);
         appendSqlDateBetweenCondition("np.birth_day", filter.getDateFrom(), filter.getDateTo(), filterBuilder, params);
         appendSqlLikeCondition("np.id_doc_type", filter.getIdDocType(), filterBuilder, params);
-        if (filter.getIdDocNumber() != null) {
-            filterBuilder.append("and REGEXP_REPLACE(lower(np.id_doc_number), '[^0-9A-Za-zА-Яа-яЁё]', '') like concat(concat('%', REGEXP_REPLACE(lower(:idDocNumber), '[^0-9A-Za-zА-Яа-яЁё]', '')), '%') ");
-            params.addValue("idDocNumber", filter.getIdDocNumber().toLowerCase());
-        }
+        appendSqlLikeCondition("np.id_doc_number", filter.getIdDocNumber(), filterBuilder, params, true);
         appendSqlLikeCondition("np.citizenship", filter.getCitizenship(), filterBuilder, params);
         appendSqlLikeCondition("np.status", filter.getStatus(), filterBuilder, params);
 
@@ -749,7 +751,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("np.building", filter.getBuilding(), filterBuilder, params);
         appendSqlLikeCondition("np.flat", filter.getFlat(), filterBuilder, params);
 
-        appendSqlLikeCondition("np.snils", filter.getSnils(), filterBuilder, params);
+        appendSqlLikeCondition("np.snils", filter.getSnils(), filterBuilder, params, true);
         appendSqlLikeCondition("np.inn_np", filter.getInnNp(), filterBuilder, params);
         appendSqlLikeCondition("np.inn_foreign", filter.getInnForeign(), filterBuilder, params);
         appendSqlLikeCondition("np.row_num", filter.getRowNum(), filterBuilder, params);
@@ -774,15 +776,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlDateBetweenCondition("npi.payment_date", filter.getPaymentDateFrom(), filter.getPaymentDateTo(), filterBuilder, params);
         appendSqlLikeCondition("npi.payment_number", filter.getNumberPaymentOrder(), filterBuilder, params);
 
-
         if (!filter.getUrmList().isEmpty() && !filter.getUrmList().containsAll(asList(URM.values()))) {
+            StopWatch stopWatch = new StopWatch("SEARCH BY URM");
+            stopWatch.start();
             List<URM> urmList = filter.getUrmList();
             List<Pair<String, String>> kppOktmoPairs = getKppOktmoPairsByURM(filter.getNdflFilter().getDeclarationDataId(), urmList);
+            System.out.println(kppOktmoPairs.toString());
             if (!filter.getUrmList().contains(URM.NONE_TB)) {
                 filterBuilder.append(SqlUtils.pairInStatement("and (npi.kpp, npi.oktmo)", kppOktmoPairs));
             } else {
                 filterBuilder.append(SqlUtils.pairInStatement("and not (npi.kpp, npi.oktmo)", kppOktmoPairs));
             }
+            stopWatch.stop();
+            LOG.info(stopWatch.shortSummary());
         }
         appendSqlLikeCondition("npi.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npi.id", filter.getId(), filterBuilder, params);
@@ -838,9 +844,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     private void appendSqlLikeCondition(String column, String value, StringBuilder queryBuilder, MapSqlParameterSource params) {
+        appendSqlLikeCondition(column, value, queryBuilder, params, false);
+    }
+
+    private void appendSqlLikeCondition(String column, String value, StringBuilder queryBuilder, MapSqlParameterSource params, boolean onlyAlphanumeric) {
         if (value != null && !value.isEmpty()) {
             String paramName = column.replace('.', '_');
-            queryBuilder.append("and lower(").append(column).append(") like '%' || :").append(paramName).append(" || '%' ");
+            queryBuilder.append("and lower(")
+                    .append(onlyAlphanumeric && isSupportOver() ? "regexp_replace(" : "")
+                    .append(column)
+                    .append(onlyAlphanumeric && isSupportOver() ? ", '[^[:alnum:]]', '')" : "")
+                    .append(") like '%' || ")
+                    .append(onlyAlphanumeric && isSupportOver() ? "regexp_replace(:" : ":")
+                    .append(paramName)
+                    .append(onlyAlphanumeric && isSupportOver() ? ", '[^[:alnum:]]', '')" : "")
+                    .append(" || '%' ");
             params.addValue(paramName, value.toLowerCase());
         }
     }
@@ -865,8 +883,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 return departmentConfigDao.fetchKppOktmoPairs(singletonList(currentTB), new Date());
             } else if (urmList.size() == 1 && urmList.contains(URM.OTHERS_TB) ||
                     urmList.size() == 2 && urmList.containsAll(asList(URM.CURRENT_TB, URM.NONE_TB))) {
-                allTB.remove(currentTB);
-                return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
+                List<Integer> allTbExceptCurrent = new ArrayList<>(allTB);
+                allTbExceptCurrent.remove(currentTB);
+                return departmentConfigDao.fetchKppOktmoPairs(allTbExceptCurrent, new Date());
             } else {
                 return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
             }

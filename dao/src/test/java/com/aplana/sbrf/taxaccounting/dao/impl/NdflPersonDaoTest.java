@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.URM;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -20,6 +23,7 @@ import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,6 +33,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -36,8 +41,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Andrey Drunk
@@ -57,6 +68,17 @@ public class NdflPersonDaoTest {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    @Before
+    public void init() {
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        ReflectionTestUtils.setField(ndflPersonDao, "departmentDao", departmentDao);
+        when(departmentDao.getParentTBId(anyInt())).thenReturn(7);
+        when(departmentDao.getDepartmentIdsByType(anyInt())).thenReturn(asList(6, 7));
+        Object repository = ReflectionTestUtils.getField(SqlUtils.class, "repository");
+        Object namedParameterJdbcTemplate = ReflectionTestUtils.getField(ndflPersonDao, "namedParameterJdbcTemplate");
+        ReflectionTestUtils.setField(repository, "namedParameterJdbcTemplate", namedParameterJdbcTemplate);
+    }
 
     @Test
     public void buildQueryTest() {
@@ -124,6 +146,106 @@ public class NdflPersonDaoTest {
         pagingParams.setDirection(direction);
         pagingParams.setProperty(property);
         return pagingParams;
+    }
+
+    @Test
+    public void combinedSearchByOperationId() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+        filter.getIncome().setOperationId("1");
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+
+        AllSectionsResult result = fetchAll(filter, pagingParams);
+        assertEquals(1, result.getOperationIds().size());
+        assertEquals(asList(1, 3, 3, 3), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
+    }
+
+    @Test
+    public void combinedSearchIncomeTest() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+        filter.getIncome().setKpp("555");
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+
+        AllSectionsResult result = fetchAll(filter, pagingParams);
+        assertEquals(1, result.getOperationIds().size());
+        assertEquals(asList(1, 1, 3, 3), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
+    }
+
+    @Test
+    public void combinedSearchDeductionTest() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+        filter.getDeduction().setNotifNum("555");
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+
+        AllSectionsResult result = fetchAll(filter, pagingParams);
+        assertEquals(1, result.getOperationIds().size());
+        assertEquals(asList(1, 3, 1, 3), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
+    }
+
+    @Test
+    public void combinedSearchPrepaymentTest() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+        filter.getPrepayment().setNotifSource("11");
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+
+        AllSectionsResult result = fetchAll(filter, pagingParams);
+        assertEquals(2, result.getOperationIds().size());
+        assertEquals(asList(2, 6, 6, 2), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
+    }
+
+    @Test
+    public void combinedSearchAllTest() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+        filter.getIncome().setOktmo("1");
+        filter.getDeduction().setNotifType("11");
+        filter.getPrepayment().setNotifNum("1");
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+
+        AllSectionsResult result = fetchAll(filter, pagingParams);
+        assertEquals(1, result.getOperationIds().size());
+        assertEquals(asList(1, 3, 3, 1), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
+    }
+
+    Map<List<URM>, Iterable<Long>> searchByURMCases = new HashMap<List<URM>, Iterable<Long>>() {{
+        List<Long> ofCurrentTB = asList(50001L, 50002L, 50003L);
+        List<Long> ofOthersTB = asList(50004L, 50005L, 50006L);
+        List<Long> ofNoneTB = asList(50007L, 50008L, 50009L);
+
+        put(Collections.EMPTY_LIST, concat(ofCurrentTB, ofOthersTB, ofNoneTB));
+        put(asList(URM.CURRENT_TB), ofCurrentTB);
+        put(asList(URM.OTHERS_TB), ofOthersTB);
+        put(asList(URM.NONE_TB), ofNoneTB);
+        put(asList(URM.CURRENT_TB, URM.OTHERS_TB), concat(ofCurrentTB, ofOthersTB));
+        put(asList(URM.CURRENT_TB, URM.NONE_TB), concat(ofCurrentTB, ofNoneTB));
+        put(asList(URM.OTHERS_TB, URM.NONE_TB), concat(ofOthersTB, ofNoneTB));
+        put(asList(URM.CURRENT_TB, URM.OTHERS_TB, URM.NONE_TB), concat(ofCurrentTB, ofOthersTB, ofNoneTB));
+    }};
+
+    @Test
+    public void searchByURM() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+
+        for (Map.Entry<List<URM>, Iterable<Long>> searchByURMCase : searchByURMCases.entrySet()) {
+            filter.getIncome().setUrmList(searchByURMCase.getKey());
+
+            PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+            List<NdflPersonIncomeDTO> incomes = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+
+            System.out.println(searchByURMCase.getKey().toString());
+            System.out.println(searchByURMCase.getValue().toString());
+            System.out.println(getIds(incomes).toString());
+            assertEquals(newHashSet(searchByURMCase.getValue()), newHashSet(getIds(incomes)));
+        }
     }
 
     @Test
@@ -867,7 +989,7 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFindIncomeOperationId() {
-        List<String> result = ndflPersonDao.findIncomeOperationId(Arrays.asList("a", "b", "3"));
+        List<String> result = ndflPersonDao.findIncomeOperationId(asList("a", "b", "3"));
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("3", result.get(0));
     }
@@ -892,21 +1014,21 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testDeleteNdflPersonIncomeBatch() {
-        ndflPersonDao.deleteNdflPersonIncomeBatch(Arrays.asList(1036L, 1037L));
+        ndflPersonDao.deleteNdflPersonIncomeBatch(asList(1036L, 1037L));
         Assert.assertNull(ndflPersonDao.fetchOneNdflPersonIncome(1036L));
         Assert.assertNull(ndflPersonDao.fetchOneNdflPersonIncome(1037L));
     }
 
     @Test
     public void testDeleteNdflPersonDeductionBatch() {
-        ndflPersonDao.deleteNdflPersonDeductionBatch(Arrays.asList(1L, 2L));
+        ndflPersonDao.deleteNdflPersonDeductionBatch(asList(1L, 2L));
         Assert.assertNull(ndflPersonDao.fetchOneNdflPersonDeduction(1L));
         Assert.assertNull(ndflPersonDao.fetchOneNdflPersonDeduction(2L));
     }
 
     @Test
     public void testDeleteNdflPersonPrepaymentBatch() {
-        ndflPersonDao.deleteNdflPersonPrepaymentBatch(Arrays.asList(1L, 2L));
+        ndflPersonDao.deleteNdflPersonPrepaymentBatch(asList(1L, 2L));
         Assert.assertNull(ndflPersonDao.fetchOneNdflPersonPrepayment(1L));
         Assert.assertNull(ndflPersonDao.fetchOneNdflPersonPrepayment(2L));
     }
@@ -931,13 +1053,13 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testUpdateNdflPersons() {
-        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L));
+        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
         ndflPersonList.get(0).setLastName("Петров");
         ndflPersonList.get(0).setModifiedBy("me");
         ndflPersonList.get(1).setLastName("Смит");
         ndflPersonList.get(1).setModifiedBy("me");
         ndflPersonDao.updateNdflPersons(ndflPersonList);
-        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L, 203L));
+        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L, 203L));
         Assert.assertEquals("me", ndflPersonListResult.get(0).getModifiedBy());
         Assert.assertEquals("Петров", ndflPersonListResult.get(0).getLastName());
         Assert.assertEquals("me", ndflPersonListResult.get(1).getModifiedBy());
@@ -978,12 +1100,12 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testUpdateNdflPersonsRowNum() {
-        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L));
+        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
         for (long i = 0; i < ndflPersonList.size(); i++) {
             ndflPersonList.get((int) i).setRowNum(i);
         }
         ndflPersonDao.updateNdflPersonsRowNum(ndflPersonList);
-        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(Arrays.asList(201L, 202L));
+        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
         Assert.assertEquals(new Long(0), ndflPersonListResult.get(0).getRowNum());
         Assert.assertEquals(new Long(1), ndflPersonListResult.get(1).getRowNum());
     }
@@ -994,7 +1116,7 @@ public class NdflPersonDaoTest {
         startDate.set(2005, 0, 1);
         Calendar endDate = Calendar.getInstance();
         endDate.set(2005, 11, 31);
-        int result = ndflPersonDao.findInpCountForPersonsAndIncomeAccruedDatePeriod(Arrays.asList(101L, 102L), startDate.getTime(), endDate.getTime());
+        int result = ndflPersonDao.findInpCountForPersonsAndIncomeAccruedDatePeriod(asList(101L, 102L), startDate.getTime(), endDate.getTime());
         Assert.assertEquals(2, result);
     }
 
@@ -1004,7 +1126,7 @@ public class NdflPersonDaoTest {
         startDate.set(2005, 0, 1);
         Calendar endDate = Calendar.getInstance();
         endDate.set(2005, 11, 31);
-        List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(Arrays.asList(1036L, 1037L, 1038L), startDate.getTime(), endDate.getTime());
+        List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(asList(1036L, 1037L, 1038L), startDate.getTime(), endDate.getTime());
         Assert.assertEquals(2, result.size());
     }
 
@@ -1036,7 +1158,7 @@ public class NdflPersonDaoTest {
         System.out.println(incomes);
         Assert.assertEquals(8, incomes.size());
         List<Long> incomesIds = new ArrayList<>();
-        for(ConsolidationIncome income : incomes) {
+        for (ConsolidationIncome income : incomes) {
             incomesIds.add(income.getId());
         }
         Collections.sort(incomes, new Comparator<ConsolidationIncome>() {
@@ -1219,6 +1341,44 @@ public class NdflPersonDaoTest {
         public int hash(NdflPersonPrepayment o) {
             return HashCodeBuilder.reflectionHashCode(o);
         }
+    }
+
+    class AllSectionsResult {
+        List<NdflPerson> persons;
+        List<NdflPersonIncomeDTO> incomes;
+        List<NdflPersonDeductionDTO> deductions;
+        List<NdflPersonPrepaymentDTO> prepayments;
+
+        List<String> getOperationIds() {
+            Set<String> operationIds = new HashSet<>();
+            for (NdflPersonIncomeDTO income : incomes) {
+                operationIds.add(income.getOperationId());
+            }
+            for (NdflPersonDeductionDTO deduction : deductions) {
+                operationIds.add(deduction.getOperationId());
+            }
+            for (NdflPersonPrepaymentDTO prepayment : prepayments) {
+                operationIds.add(prepayment.getOperationId());
+            }
+            return new ArrayList<>(operationIds);
+        }
+    }
+
+    private AllSectionsResult fetchAll(NdflFilter filter, PagingParams pagingParams) {
+        AllSectionsResult result = new AllSectionsResult();
+        result.persons = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
+        result.incomes = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        result.deductions = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        result.prepayments = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
+        return result;
+    }
+
+    private List<Long> getIds(List<NdflPersonIncomeDTO> incomes) {
+        List<Long> ids = new ArrayList<>();
+        for (NdflPersonIncomeDTO income : incomes) {
+            ids.add(income.getId());
+        }
+        return ids;
     }
 
 

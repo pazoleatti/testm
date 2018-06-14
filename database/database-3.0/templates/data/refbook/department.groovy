@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.model.util.Pair
@@ -28,7 +29,7 @@ import groovy.transform.TypeCheckingMode
  * В скрипт перенесены:
  *      проверки корректности 1..9 - http://conf.aplana.com/pages/viewpage.action?pageId=11378367
  *      проверки при редактировании записи шаги 3, 5, 6 - http://conf.aplana.com/pages/viewpage.action?pageId=11378355
-*/
+ */
 
 (new Department(this)).run();
 
@@ -38,6 +39,7 @@ class Department extends AbstractScriptClass {
     Long uniqueRecordId;
     Boolean isNewRecords;
     RefBookFactory refBookFactory
+    CommonRefBookService commonRefBookService
     List<Map<String, RefBookValue>> saveRecords
     RefBookService refBookService
     DepartmentService departmentService
@@ -89,7 +91,7 @@ class Department extends AbstractScriptClass {
         // главный банк
         com.aplana.sbrf.taxaccounting.model.Department rootBank = getDepartment(ROOT_BANK_ID)
         RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID)
-        RefBook refBook = refBookFactory.get(REF_BOOK_ID)
+        RefBook refBook = commonRefBookService.get(REF_BOOK_ID)
         List<RefBookAttribute> attributes = refBook.getAttributes()
 
         // в saveRecords всегда одна запись

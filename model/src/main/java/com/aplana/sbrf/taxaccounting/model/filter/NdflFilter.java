@@ -51,6 +51,7 @@ public class NdflFilter {
     public NdflPersonIncomeFilter getIncome() {
         if (income == null) {
             income = new NdflPersonIncomeFilter();
+            income.setNdflFilter(this);
         }
         return income;
     }
