@@ -529,5 +529,14 @@
             where exists(select 1 from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
         </sql>
     </changeSet>
-
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4924 Дата актуальности для "Кода дохода" 3010 не соответствует постановке -->
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4925 Кол-во версий записи "Кода видов дохода" = 3010 не соответствует постановке -->
+	<changeSet id="3.0-rnurgaleev-5" author="rnurgaleev">
+        <sql>
+			delete from ref_book_income_type where code='3010' and name='Выигрыши, выплачиваемые организаторами лотерей, тотализаторов и других основанных на риске игр (в том числе с использованием игровых автоматов)';
+		
+			update ref_book_income_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='3010';
+		</sql>
+    </changeSet>
 </databaseChangeLog>
