@@ -39,17 +39,10 @@
                 </property>
             </bean>
         </mvc:interceptor>
-
         <mvc:interceptor>
             <mvc:mapping path="/rest/**"/>
             <mvc:mapping path="/actions/**"/>
             <bean class="com.aplana.sbrf.taxaccounting.web.spring.CacheRequestInterceptor"/>
-        </mvc:interceptor>
-
-        <mvc:interceptor>
-            <mvc:mapping path="/rest/**"/>
-            <mvc:mapping path="/actions/**"/>
-            <bean class="com.aplana.sbrf.taxaccounting.web.spring.json.JsonFilterInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
 
