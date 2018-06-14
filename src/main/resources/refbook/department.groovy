@@ -68,6 +68,9 @@ class Department extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("departmentService")) {
             this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
         }
+        if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
+            this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
+        }
     }
 
     @Override
