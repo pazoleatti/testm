@@ -520,5 +520,13 @@
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
         </update>
     </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4926 "Дата начала актуальности" для "Кода вида дохода"=2003 не соответствует постановке -->
+	<changeSet id="3.0-rnurgaleev-4" author="rnurgaleev">
+        <sql>
+            update ref_book_income_kind set ref_book_income_kind.VERSION=(select ref_book_income_type.version from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
+            where exists(select 1 from ref_book_income_type where ref_book_income_type.id = ref_book_income_kind.income_type_id)
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
