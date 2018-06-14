@@ -31,7 +31,7 @@ import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_ID_ALIAS;
 
-@Service
+@Service("commonRefBookService")
 public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Autowired

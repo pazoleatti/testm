@@ -175,6 +175,9 @@ class Report2Ndfl extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("paramMap")) {
             this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
         }
+        if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
+            this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
+        }
         reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
     }
 

@@ -371,7 +371,7 @@
         "title.prepayment.notifDateFrom": "Дата выдачи уведомления c",
         "title.prepayment.notifSource": "Код налогового органа, выдавшего уведомление",
         "title.prepayment.filter.notifSource": "Код НО, выдавшего уведомление",
-        "title.adjustNegativeValues": "Корректировать отрицательные значения",
+        "title.adjustNegativeValues": "Отрицательные значения Раздела 2",
         "negativeValuesAdjustment.true": "Корректировать",
         "negativeValuesAdjustment.false": "Не корректировать",
 

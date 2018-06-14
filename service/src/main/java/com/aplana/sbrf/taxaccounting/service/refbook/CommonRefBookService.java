@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Collection;
 import java.util.Date;
@@ -15,6 +16,7 @@ import java.util.Map;
 /**
  * Общий сервис для работы со справочниками. Содержимт методы обработки небольших справочников, не имеющих собственной крупной логики из которых требуется только получать данные
  */
+@ScriptExposed
 public interface CommonRefBookService {
 
     /**

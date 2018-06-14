@@ -666,21 +666,23 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 
     @Override
     public void savePerformers(final long ddtId, final List<Integer> performerIds) {
-        getJdbcTemplate().batchUpdate(
-                "insert into department_decl_type_performer (DEPARTMENT_DECL_TYPE_ID, PERFORMER_DEP_ID) " +
-                        " values (?, ?)",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setLong(1, ddtId);
-                        ps.setInt(2, performerIds.get(i));
-                    }
+        if (performerIds != null && !performerIds.isEmpty()) {
+            getJdbcTemplate().batchUpdate(
+                    "INSERT INTO department_decl_type_performer (DEPARTMENT_DECL_TYPE_ID, PERFORMER_DEP_ID) " +
+                            " VALUES (?, ?)",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            ps.setLong(1, ddtId);
+                            ps.setInt(2, performerIds.get(i));
+                        }
 
-                    @Override
-                    public int getBatchSize() {
-                        return performerIds.size();
-                    }
-                });
+                        @Override
+                        public int getBatchSize() {
+                            return performerIds.size();
+                        }
+                    });
+        }
     }
 
     @Override
