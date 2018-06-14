@@ -4,7 +4,6 @@
              xmlns:context="http://www.springframework.org/schema/context"
              xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:util="http://www.springframework.org/schema/util"
-             xmlns:mvc="http://www.springframework.org/schema/mvc"
              xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
              http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -17,30 +16,6 @@
             <beans:bean class="com.aplana.sbrf.taxaccounting.web.spring.json.JsonFilterHttpMessageConverter"/>
         </message-converters>
     </annotation-driven>
-
-    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/rest/**"/>
-            <mvc:mapping path="/actions/**"/>
-            <beans:bean class="org.springframework.web.servlet.mvc.WebContentInterceptor">
-                <beans:property name="cacheSeconds" value="0"/>
-                <beans:property name="cacheControl">
-                    <beans:bean class="com.aplana.sbrf.taxaccounting.web.spring.CacheControlFactory"
-                          factory-method="buildDefaultCacheControl"/>
-                </beans:property>
-            </beans:bean>
-        </mvc:interceptor>
-        <mvc:interceptor>
-            <mvc:mapping path="/rest/**"/>
-            <mvc:mapping path="/actions/**"/>
-            <beans:bean class="com.aplana.sbrf.taxaccounting.web.spring.CacheRequestInterceptor"/>
-        </mvc:interceptor>
-        <mvc:interceptor>
-            <mvc:mapping path="/rest/**"/>
-            <mvc:mapping path="/actions/**"/>
-            <beans:bean class="com.aplana.sbrf.taxaccounting.web.spring.json.JsonFilterInterceptor"/>
-        </mvc:interceptor>
-    </mvc:interceptors>
 
     <beans:bean id="objectMapper"
                 class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
