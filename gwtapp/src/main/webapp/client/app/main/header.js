@@ -235,13 +235,13 @@
                 };
 
                 $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {
-                    //$scope.updateNotificationCount();
+                    $scope.updateNotificationCount();
                 });
 
-                //$scope.updateNotificationCount();
+                $scope.updateNotificationCount();
 
                 setInterval(function () {
-                    //$scope.updateNotificationCount();
+                    $scope.updateNotificationCount();
                 }, 4000);
             }]);
 }());
