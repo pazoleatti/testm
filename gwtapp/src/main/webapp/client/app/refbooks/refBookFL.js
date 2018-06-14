@@ -379,6 +379,10 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/refBook/" + $scope.refBookId + "/reportXlsx",
+                        data: {
+                            FIRST_NAME: $scope.search.firstName,
+                            LAST_NAME: $scope.search.lastName
+                        },
                         params: {
                             version: $scope.data.recordVersion,
                             pagingParams: JSON.stringify({
@@ -400,6 +404,10 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/refBook/" + $scope.refBookId + "/reportCsv",
+                        data: {
+                            FIRST_NAME: $scope.search.firstName,
+                            LAST_NAME: $scope.search.lastName
+                        },
                         params: {
                             version: $scope.data.recordVersion,
                             pagingParams: JSON.stringify({

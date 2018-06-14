@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -14,13 +15,17 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.spring.json.JsonMixins;
 import com.aplana.sbrf.taxaccounting.web.spring.json.JsonPredefinedMixins;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Контроллер для работы с записями справочников
@@ -67,7 +72,7 @@ public class RefBookController {
      */
     @GetMapping(value = "/rest/refBook/{refBookId}", params = "projection=light")
     @JsonMixins({
-            @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter .class)
+            @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter.class)
     })
     public RefBook fetchRefBookLight(@PathVariable Long refBookId) {
         return commonRefBookService.get(refBookId);
@@ -82,6 +87,7 @@ public class RefBookController {
      * @param pagingParams  Параметры пейджинга
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param extraParams   дополнительные параметры для фильтрации записей
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookRecords/{refBookId}")
@@ -90,9 +96,12 @@ public class RefBookController {
                                                                           @RequestParam(required = false) Date version,
                                                                           @RequestParam(required = false) String searchPattern,
                                                                           @RequestParam(required = false) boolean exactSearch,
-                                                                          @RequestParam PagingParams pagingParams) {
+                                                                          @RequestParam PagingParams pagingParams,
+                                                                          @RequestBody(required = false) Map<String, String> extraParams) {
+        RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
+                commonRefBookService.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         PagingResult<Map<String, RefBookValue>> records = commonRefBookService.fetchAllRecords(
-                refBookId, recordId, version, searchPattern, exactSearch, pagingParams);
+                refBookId, recordId, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, pagingParams.getDirection());
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
@@ -106,10 +115,10 @@ public class RefBookController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookRecords/{refBookId}", params = "projection=hier")
-    public Collection<Map<String, RefBookValue>> fetchHierRefBookRecords(@PathVariable Long refBookId,
-                                                                         @RequestParam(required = false) String searchPattern,
-                                                                         @RequestParam(required = false) boolean exactSearch) {
-        return commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch);
+    public PagingResult<Map<String, RefBookValue>> fetchHierRefBookRecords(@PathVariable Long refBookId,
+                                                                           @RequestParam(required = false) String searchPattern,
+                                                                           @RequestParam(required = false) boolean exactSearch) {
+        return commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, true);
     }
 
     /**
@@ -119,7 +128,7 @@ public class RefBookController {
      */
     @GetMapping(value = "rest/refBook")
     @JsonMixins({
-            @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter .class)
+            @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter.class)
     })
     public List<RefBook> fetchAllRefBooks() {
         return commonRefBookService.fetchAll();
@@ -211,6 +220,7 @@ public class RefBookController {
      * @param pagingParams  параметры сортировки для отображения записей в отчете так же как и в GUI
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param extraParams   дополнительные параметры для фильтрации записей
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportXlsx")
@@ -218,9 +228,10 @@ public class RefBookController {
                                             @RequestParam(required = false) Date version,
                                             @RequestParam(required = false) PagingParams pagingParams,
                                             @RequestParam(required = false) String searchPattern,
-                                            @RequestParam(required = false) boolean exactSearch) {
+                                            @RequestParam(required = false) boolean exactSearch,
+                                            @RequestBody(required = false) Map<String, String> extraParams) {
         return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
-                searchPattern, exactSearch, AsyncTaskType.EXCEL_REF_BOOK);
+                searchPattern, exactSearch, extraParams, AsyncTaskType.EXCEL_REF_BOOK);
     }
 
     /**
@@ -231,6 +242,7 @@ public class RefBookController {
      * @param pagingParams  параметры сортировки для отображения записей в отчете так же как и в GUI
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param extraParams   дополнительные параметры для фильтрации записей
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/refBook/{refBookId}/reportCsv")
@@ -238,8 +250,9 @@ public class RefBookController {
                                            @RequestParam(required = false) Date version,
                                            @RequestParam(required = false) PagingParams pagingParams,
                                            @RequestParam(required = false) String searchPattern,
-                                           @RequestParam(required = false) boolean exactSearch) {
+                                           @RequestParam(required = false) boolean exactSearch,
+                                           @RequestBody(required = false) Map<String, String> extraParams) {
         return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
-                searchPattern, exactSearch, AsyncTaskType.CSV_REF_BOOK);
+                searchPattern, exactSearch, extraParams, AsyncTaskType.CSV_REF_BOOK);
     }
 }

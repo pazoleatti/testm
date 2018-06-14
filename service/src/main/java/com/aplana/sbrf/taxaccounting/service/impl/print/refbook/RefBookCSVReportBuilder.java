@@ -54,30 +54,29 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
 
     private CSVWriter csvWriter;
 
+    private List<RefBookAttribute> attributes;
     private List<Map<String, RefBookValue>> records;
     private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<Long, List<Map<String, RefBookValue>>>();
     private Map<Long, Map<Long, String>> dereferenceValues;
     private RefBook refBook;
     private Date version;
-    private List<RefBookAttribute> refBookAttributeList;
     private RefBookAttribute sortAttribute;
     private String searchPattern;
     private Boolean exactSearch;
 
-    public RefBookCSVReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Map<Long, String>> dereferenceValues, Date version, RefBookAttribute sortAttribute, String searchPattern, Boolean exactSearch) {
+    public RefBookCSVReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Date version, String searchPattern, boolean exactSearch, final RefBookAttribute sortAttribute) {
         super("acctax", ".csv");
-        this.records = records;
         this.refBook = refBook;
+        this.attributes = attributes;
+        this.records = records;
         this.version = version;
-        this.dereferenceValues = dereferenceValues;
-        this.sortAttribute = sortAttribute;
         this.searchPattern = searchPattern;
         this.exactSearch = exactSearch;
-        refBookAttributeList = new LinkedList<RefBookAttribute>();
+        this.sortAttribute = sortAttribute;
         if (refBook.isHierarchic()) {
-            refBookAttributeList.add(levelAttribute);
+            attributes.add(levelAttribute);
             Long parent_id;
-            for(Map<String, RefBookValue> record: records) {
+            for (Map<String, RefBookValue> record : records) {
                 parent_id = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
                 if (!hierarchicRecords.containsKey(parent_id)) {
                     hierarchicRecords.put(parent_id, new ArrayList<Map<String, RefBookValue>>());
@@ -85,29 +84,28 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
                 hierarchicRecords.get(parent_id).add(record);
             }
         }
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (attribute.isVisible()) {
-                refBookAttributeList.add(attribute);
-            }
-        }
     }
 
     @Override
-    protected void createTableHeaders() {}
+    protected void createTableHeaders() {
+    }
 
     @Override
-    protected void fillHeader() {}
+    protected void fillHeader() {
+    }
 
     @Override
-    protected void createDataForTable() {}
+    protected void createDataForTable() {
+    }
 
     @Override
-    protected void fillFooter() {}
+    protected void fillFooter() {
+    }
 
     @Override
     protected File createTempFile() throws IOException {
         String fileName = refBook.getName().replace(' ', '_');
-        if(refBook.isVersioned()) {
+        if (refBook.isVersioned()) {
             fileName = fileName + "_" + sdf.get().format(version);
         }
         fileName = fileName + ".csv";
@@ -124,7 +122,7 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         try {
             List<String> headersNames = new ArrayList<String>();
             fillHeaderInfo();
-            for (RefBookAttribute attribute : refBookAttributeList) {
+            for (RefBookAttribute attribute : attributes) {
                 headersNames.add(attribute.getName());
             }
             csvWriter.writeNext(headersNames.toArray(new String[headersNames.size()]));
@@ -146,15 +144,15 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         List<String> headerInfo = new ArrayList<>();
 
         headerInfo.add("Справочник: " + refBook.getName());
-        if (refBook.isVersioned()){
+        if (refBook.isVersioned()) {
             headerInfo.add("Дата актуальности: " + new SimpleDateFormat("dd.MM.yyyy").format(version));
         }
         headerInfo.add("Параметр поиска: " + (searchPattern != null && !searchPattern.isEmpty() ? searchPattern + (exactSearch ? "(по точному совпадению)" : "") : "не задан"));
 
-        for (int i = 0; i < 4; i++){
+        for (int i = 0; i < 4; i++) {
             if (i < headerInfo.size()) {
                 csvWriter.writeNext(new String[]{headerInfo.get(i)});
-            }else {
+            } else {
                 csvWriter.writeNext(new String[]{""});
             }
         }
@@ -173,45 +171,62 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         }
     }
 
+    /**
+     * Проставляет значение атрибута в ячейку в зависимости от его типа
+     *
+     * @param value     объект, из которого надо извлечь значение
+     * @param attribute атрибут, значение которого надо извлечь
+     */
+    private String getCellValue(RefBookValue value, RefBookAttribute attribute) {
+        String result = "";
+        switch (value.getAttributeType()) {
+            case NUMBER:
+                if (value.getNumberValue() != null) {
+                    result = value.getNumberValue().toString();
+                }
+                break;
+            case DATE:
+                if (value.getDateValue() != null) {
+                    if (attribute.getFormat() != null) {
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+                                attribute.getFormat().getFormat());
+                        result = simpleDateFormat.format(value.getDateValue());
+                    } else {
+                        result = sdf.get().format(value.getDateValue());
+                    }
+                }
+                break;
+            case STRING:
+                if (value.getStringValue() != null) {
+                    result = "\t" + value.getStringValue();
+                }
+                break;
+            case REFERENCE:
+                if (value.getReferenceObject() != null) {
+                    getCellValue(value.getReferenceObject().get(attribute.getAlias()), attribute);
+                }
+                break;
+            default:
+                result = "undefined";
+        }
+        return result;
+    }
+
     private void createRow(Map<String, RefBookValue> record) {
         List<String> oneRow = new ArrayList<String>();
-        for (RefBookAttribute attribute : refBookAttributeList) {
+        for (RefBookAttribute attribute : attributes) {
             RefBookValue value = record.get(attribute.getAlias());
             String tableCell;
             if (value == null) {
                 tableCell = "";
             } else {
-                switch (value.getAttributeType()) {
-                    case NUMBER:
-                        if (value.getNumberValue() == null) tableCell = "";
-                        else tableCell = value.getNumberValue().toString();
-                        break;
-                    case DATE:
-                        if (value.getDateValue() == null) tableCell = "";
-                        else {
-                            if (attribute.getFormat() != null) {
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
-                                        attribute.getFormat().getFormat());
-                                tableCell = simpleDateFormat.format(value.getDateValue());
-                            } else {
-                                tableCell = value.getDateValue().toString();
-                            }
-                        }
-                        break;
-                    case STRING:
-                        if (value.getStringValue() == null) tableCell = "";
-                        else tableCell = "\t" + value.getStringValue();
-                        break;
-                    case REFERENCE:
-                        if (value.getReferenceValue() == null) tableCell = "";
-                        else {
-                            tableCell = dereferenceValues.get(attribute.getId()).get(value.getReferenceValue());
-                        }
-                        break;
-                    default:
-                        tableCell = "undefined";
-                        break;
+                RefBookAttribute attr;
+                if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                    attr = attribute.getRefBookAttribute();
+                } else {
+                    attr = attribute;
                 }
+                tableCell = getCellValue(value, attr);
             }
             oneRow.add(tableCell);
         }

@@ -41,9 +41,6 @@
                     if ($scope.refBook.sortAttribute) {
                         // Если в настройках справочника указан атрибут для сортировки - берем его
                         $scope.sortAttribute =  $scope.refBook.sortAttribute.alias;
-                    } else {
-                        // Иначе первый атрибут в списке
-                        $scope.sortAttribute =  $scope.refBook.attributes[0].alias;
                     }
 
                     if ($scope.refBook.versioned) {
@@ -318,7 +315,7 @@
                         method: "POST",
                         url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportXlsx",
                         params: {
-                            version: $scope.data.recordVersion,
+                            version: $scope.refBook.versioned ? $scope.data.recordVersion : null,
                             pagingParams: JSON.stringify({
                                 property: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
                                 direction: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
@@ -339,7 +336,7 @@
                         method: "POST",
                         url: "controller/actions/refBook/" + $stateParams.refBookId + "/reportCsv",
                         params: {
-                            version: $scope.data.recordVersion,
+                            version: $scope.refBook.versioned ? $scope.data.recordVersion : null,
                             pagingParams: JSON.stringify({
                                 property: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
                                 direction: $scope.refBookGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')

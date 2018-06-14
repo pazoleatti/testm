@@ -22,16 +22,16 @@ public interface RefBookSimpleDao {
     /**
      * Загружает данные справочника (включая информацию о дате начала и окончания действия версии) из отдельной таблицы на определенную дату актуальности
      *
-     * @param refBook         справочник
-     * @param version         дата актуальности
-     * @param pagingParams    определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param filter          условие фильтрации строк. Может быть не задано
-     * @param sortAttribute   сортируемый столбец. Может быть не задан
-     * @param isSortAscending признак сортировки по возрастанию
+     * @param refBook       справочник
+     * @param version       дата актуальности
+     * @param pagingParams  определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter        условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @param direction     направление сортировки (asc, desc)
      * @return список записей
      */
     PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams,
-                                                                      String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+                                                                      String filter, RefBookAttribute sortAttribute, String direction);
 
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности

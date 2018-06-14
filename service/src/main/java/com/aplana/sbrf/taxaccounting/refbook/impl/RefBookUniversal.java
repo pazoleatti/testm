@@ -106,7 +106,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction) {
         throw new UnsupportedOperationException();
     }
 

@@ -59,7 +59,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
             // справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
             // аналогично Справочник: "Признак кода вычета", реализован как нередактируемый
             OKTMO.getId(),
-            DEDUCTION_MARK.getId());
+            DEDUCTION_MARK.getId(),
+
+            // Ранее read_only справочники, но теперь нормально работают на simple-провайдере, который более производителен
+            SEC_ROLE.getId(),
+            ASNU.getId());
 
     private RefBookDataProvider getDataProviderInternal(Long refBookId) {
         RefBook refBook = commonRefBookService.get(refBookId);

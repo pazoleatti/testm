@@ -1,16 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
@@ -20,14 +18,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * User: avanteev
- * Класс для построения отчета по "Журналу аудита"
+ * Класс для построения XLSX-отчета по линейным и иерархическим справочникам
  */
 public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
-	private static final Log LOG = LogFactory.getLog(RefBookExcelReportBuilder.class);
+    private static final Log LOG = LogFactory.getLog(RefBookExcelReportBuilder.class);
 
-	private static final String DATE_FORMAT = "dd.MM.yyyy";
+    private static final String DATE_FORMAT = "dd.MM.yyyy";
     private static final RefBookAttribute levelAttribute = new RefBookAttribute() {
         {
             setAlias("level");
@@ -57,16 +54,14 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     private int rowNumber = 3;
     private int cellNumber = 0;
 
-    public static final String FILE_NAME = "Отчет_";
-
+    private List<RefBookAttribute> attributes;
     private List<Map<String, RefBookValue>> records;
-    private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<Long, List<Map<String, RefBookValue>>>();
-    private Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues;
+    private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<>();
     private RefBook refBook;
-    private List<RefBookAttribute> refBookAttributeList;
     private CellStyleBuilder cellStyleBuilder;
     private Date version;
-    private String filter;
+    private String searchPattern;
+    private boolean exactSearch;
     private RefBookAttribute sortAttribute;
 
     public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -76,34 +71,29 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         }
     };
 
-    public RefBookExcelReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues, Date version, String filter, final RefBookAttribute sortAttribute) {
+    public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Date version, String searchPattern, boolean exactSearch, final RefBookAttribute sortAttribute) {
         this.workBook = new XSSFWorkbook();
         String sheetName = refBook.getName().replaceAll("[/\\[\\]\\*\\:\\?\\\\]", "_"); //Убираем недостимые символы в названии листа
-        this.sheet = workBook.createSheet(sheetName.length()>31?sheetName.substring(0, 31):sheetName);
+        this.sheet = workBook.createSheet(sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName);
         sheet.setRowSumsBelow(false);
         sheet.getLastRowNum();
         this.refBook = refBook;
+        this.attributes = attributes;
         this.records = records;
-        this.dereferenceValues = dereferenceValues;
         this.version = version;
-        this.filter = filter;
-        this.sortAttribute= sortAttribute;
+        this.searchPattern = searchPattern;
+        this.exactSearch = exactSearch;
+        this.sortAttribute = sortAttribute;
         cellStyleBuilder = new CellStyleBuilder();
-        refBookAttributeList = new LinkedList<RefBookAttribute>();
         if (refBook.isHierarchic()) {
-            refBookAttributeList.add(levelAttribute);
-            Long parent_id;
-            for(Map<String, RefBookValue> record: records) {
-                parent_id = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+            attributes.add(levelAttribute);
+            // Для иерархических справочников записи упорядочиваем по родительскому узлу
+            for (Map<String, RefBookValue> record : records) {
+                Long parent_id = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
                 if (!hierarchicRecords.containsKey(parent_id)) {
                     hierarchicRecords.put(parent_id, new ArrayList<Map<String, RefBookValue>>());
                 }
                 hierarchicRecords.get(parent_id).add(record);
-            }
-        }
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (attribute.isVisible()) {
-                refBookAttributeList.add(attribute);
             }
         }
     }
@@ -111,7 +101,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     @Override
     protected void createTableHeaders() {
         if (LOG.isDebugEnabled())
-            LOG.debug("Initialize table headers " + getClass());
+            LOG.info("Initialize table headers " + getClass());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setBorderBottom(CellStyle.BORDER_THIN);
@@ -124,7 +114,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         cs.setWrapText(true);
 
         Row row = sheet.createRow(rowNumber);
-        for (RefBookAttribute attribute : refBookAttributeList){
+        for (RefBookAttribute attribute : attributes) {
             fillWidth(cellNumber, cellWidthMin);
             Cell cell = row.createCell(cellNumber++);
             cell.setCellStyle(cs);
@@ -138,7 +128,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     @Override
     protected void fillHeader() {
         if (LOG.isDebugEnabled())
-            LOG.debug("Initialize file header. " + getClass());
+            LOG.info("Initialize file header. " + getClass());
         CellStyle cs = workBook.createCellStyle();
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -158,10 +148,10 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
             versionCell.setCellStyle(cs);
             cellNumber = 0;
         }
-        if (filter != null && !filter.isEmpty()) {
+        if (searchPattern != null && !searchPattern.isEmpty()) {
             Row filterRow = sheet.createRow((refBook.isVersioned() ? 2 : 1));
             Cell filterCell = filterRow.createCell(cellNumber);
-            filterCell.setCellValue("Параметр поиска: " + filter);
+            filterCell.setCellValue("Параметр поиска: " + searchPattern);
             filterCell.setCellStyle(cs);
             cellNumber = 0;
         }
@@ -173,7 +163,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     @Override
     protected void createDataForTable() {
         if (LOG.isDebugEnabled())
-            LOG.debug("Fill data for table. " + getClass() + "Data size: " + records.size());
+            LOG.info("Fill data for table. " + getClass() + "Data size: " + records.size());
 
         sheet.createFreezePane(0, rowNumber);
         if (!refBook.isHierarchic()) {
@@ -201,61 +191,74 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         }
     }
 
+    /**
+     * Проставляет значение атрибута в ячейку в зависимости от его типа
+     *
+     * @param cell      ячейка в которую будет проставлено значение
+     * @param value     объект, из которого надо извлечь значение
+     * @param attribute атрибут, значение которого надо извлечь
+     */
+    private void setCellValue(Cell cell, RefBookValue value, RefBookAttribute attribute) {
+        switch (value.getAttributeType()) {
+            case NUMBER:
+                if (value.getNumberValue() != null) {
+                    if (Formats.BOOLEAN.equals(attribute.getFormat())) {
+                        cell.setCellValue(value.getNumberValue().longValue() > 0 ? "Да" : "Нет");
+                    } else {
+                        BigDecimal bd = (BigDecimal) value.getNumberValue();
+                        if (bd != null) {
+                            cell.setCellValue(attribute.getPrecision() > 0 ? Double.parseDouble(bd.toString()) : bd.longValue());
+                        }
+                    }
+                }
+                break;
+            case DATE:
+                if (value.getDateValue() != null) {
+                    cell.setCellValue(value.getDateValue());
+                }
+                break;
+            case STRING:
+                if (value.getStringValue() != null) {
+                    cell.setCellValue(value.getStringValue());
+                }
+                break;
+            case REFERENCE:
+                if (value.getReferenceObject() != null) {
+                    setCellValue(cell, value.getReferenceObject().get(attribute.getAlias()), attribute);
+                }
+                break;
+            default:
+                cell.setCellValue("undefined");
+                break;
+        }
+    }
+
+    /**
+     * Добавляет строку в отчет
+     *
+     * @param record данные строки
+     */
     private void createRow(Map<String, RefBookValue> record) {
-        //if (LOG.isDebugEnabled())
-        //    LOG.debug("Data table " + record);
         Row row = sheet.createRow(rowNumber++);
-        RefBookAttribute attr;
-        for(RefBookAttribute attribute: refBookAttributeList) {
+        for (RefBookAttribute attribute : attributes) {
+            RefBookAttribute attr;
             RefBookValue value = record.get(attribute.getAlias());
             Cell cell = row.createCell(cellNumber);
-            if (value != null) {
-                if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                    attr = dereferenceValues.get(attribute.getId()).getFirst();
-                    if (value.getReferenceValue() != null) {
-                        value = dereferenceValues.get(attribute.getId()).getSecond().get(value.getReferenceValue());
-                    } else {
-                        value = null;
-                    }
-                } else {
-                    attr = attribute;
-                }
-                cell.setCellStyle(cellStyleBuilder.createCellStyle(attr, attribute.getAlias()));
-                if (value != null)
-                    switch (value.getAttributeType()) {
-                        case NUMBER:
-                            if (value.getNumberValue() != null) {
-                                if (Formats.BOOLEAN.equals(attr.getFormat())) {
-                                    cell.setCellValue(value.getNumberValue().longValue()>0?"Да":"Нет");
-                                } else {
-                                    BigDecimal bd = (BigDecimal) value.getNumberValue();
-                                    if (bd != null) {
-                                        cell.setCellValue(attr.getPrecision() > 0 ? Double.parseDouble(bd.toString()) : bd.longValue());
-                                    }
-                                }
-                            }
-                            break;
-                        case DATE:
-                            if (value.getDateValue() != null) {
-                                cell.setCellValue(value.getDateValue());
-                            }
-                            break;
-                        case STRING:
-                            if (value.getStringValue() != null)
-                                cell.setCellValue(value.getStringValue());
-                            break;
-                        default:
-                            cell.setCellValue("undefined");
-                            break;
-                    }
+            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                attr = attribute.getRefBookAttribute();
+            } else {
+                attr = attribute;
             }
+            if (value != null) {
+                setCellValue(cell, value, attr);
+            }
+            cell.setCellStyle(cellStyleBuilder.createCellStyle(attr, attribute.getAlias()));
             cellNumber++;
         }
-
         cellNumber = 0;
     }
 
-    private final class CellStyleBuilder{
+    private final class CellStyleBuilder {
 
         private Map<String, CellStyle> cellStyleMap = new HashMap<String, CellStyle>();
 
@@ -264,7 +267,6 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
         /**
          * Получить стриль для ячейки excel'я.
-         *
          */
         public CellStyle createCellStyle(RefBookAttribute attribute, String alias) {
             return createCellStyle(attribute, alias, null);
@@ -275,7 +277,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
          *
          * @param subKey дополнительное значение для ключа (что бы получить стили дельт)
          */
-        public CellStyle createCellStyle(RefBookAttribute attribute, String alias, String subKey){
+        public CellStyle createCellStyle(RefBookAttribute attribute, String alias, String subKey) {
             String key = alias + (subKey != null && !subKey.isEmpty() ? subKey : "");
             if (cellStyleMap.containsKey(key))
                 return cellStyleMap.get(key);
@@ -286,13 +288,13 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
             style.setBorderBottom(CellStyle.BORDER_THIN);
             style.setBorderTop(CellStyle.BORDER_THIN);
 
-            String format = attribute.getFormat()!=null?attribute.getFormat().getFormat():"";
-            switch (attribute.getAttributeType()){
+            String format = attribute.getFormat() != null ? attribute.getFormat().getFormat() : "";
+            switch (attribute.getAttributeType()) {
                 case DATE:
                     style.setAlignment(CellStyle.ALIGN_CENTER);
-                    if(format.isEmpty()){
+                    if (format.isEmpty()) {
                         style.setDataFormat(dataFormat.getFormat(sdf.get().toPattern()));
-                    } else{
+                    } else {
                         style.setDataFormat(dataFormat.getFormat(format));
                     }
                     break;
@@ -324,7 +326,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     @Override
     protected File createTempFile() throws IOException {
         String fileName = refBook.getName().replace(' ', '_');
-        if(refBook.isVersioned()) {
+        if (refBook.isVersioned()) {
             fileName = fileName + "_" + sdf.get().format(version);
         }
         fileName = fileName + ".xlsx";
@@ -335,18 +337,18 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void cellAlignment() {
-        for (int i = 0; i < refBookAttributeList.size(); i++){
-            widthCellsMap.put(i, refBookAttributeList.get(i).getWidth());
+        for (int i = 0; i < attributes.size(); i++) {
+            widthCellsMap.put(i, attributes.get(i).getWidth());
         }
         super.cellAlignment();
     }
 
     /*
- * Patterns for printing in Exel. "###," shows that we must grouping by 3 characters
- */
-    public static String getPrecision(int number){
+     * Patterns for printing in Excel. "###," shows that we must grouping by 3 characters
+     */
+    public static String getPrecision(int number) {
         StringBuilder str = new StringBuilder("#,##0");
-        if(number>0) {
+        if (number > 0) {
             str.append(".");
             for (int i = 0; i < number; i++)
                 str.append("0");

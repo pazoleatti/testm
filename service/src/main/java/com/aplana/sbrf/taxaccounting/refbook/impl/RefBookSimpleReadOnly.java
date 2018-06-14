@@ -31,8 +31,8 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	private String whereClause;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction) {
+        PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecordsWithVersionInfo(getRefBook(), version, pagingParams, filter, sortAttribute, direction);
         return commonRefBookService.dereference(getRefBook(), records);
     }
 
@@ -70,7 +70,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
-        throw new UnsupportedOperationException();
+        return refBookDao.getRecordData(getRefBookId(), recordIds);
     }
 
     @Override

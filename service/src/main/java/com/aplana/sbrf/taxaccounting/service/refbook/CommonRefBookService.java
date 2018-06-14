@@ -101,6 +101,7 @@ public interface CommonRefBookService {
 
     /**
      * Возвращает все видимые справочники
+     *
      * @return все видимые справочники
      */
     List<RefBook> fetchAll();
@@ -109,9 +110,18 @@ public interface CommonRefBookService {
      * Метод возвращает строку для фильтрации справочника по
      * определенному строковому ключу
      *
-     * @param query       - ключ для поиска
-     * @param refBookId   - справочник
-     * @param exactSearch - точное соответствие
+     * @param tablePrefix префикс для основной таблицы
+     * @param query       ключ для поиска
+     * @param refBookId   справочник
+     * @param exactSearch точное соответствие
+     * @return строку фильтрации для поиска по справочнику
+     */
+    String getSearchQueryStatement(String tablePrefix, String query, Long refBookId, boolean exactSearch);
+
+    /**
+     * Перегруженный метод com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService#getSearchQueryStatement
+     * с дефолтным префиксом tablePrefix = "frb"
+     *
      * @return строку фильтрации для поиска по справочнику
      */
     String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch);
@@ -119,8 +129,8 @@ public interface CommonRefBookService {
     /**
      * Метод возвращает строку для фильтрации справочника с неточным соответствием по определенному строковому ключу
      *
-     * @param query     - ключ для поиска
-     * @param refBookId - справочник
+     * @param query     ключ для поиска
+     * @param refBookId справочник
      * @return строку фильтрации для поиска по справочнику
      */
     String getSearchQueryStatement(String query, Long refBookId);
@@ -129,9 +139,18 @@ public interface CommonRefBookService {
      * Метод возвращает строку для фильтрации справочника по
      * определенному строковому ключу и дополнительным строковым параметрам присоединенным с условием "И"
      *
-     * @param parameters  - дополнительные строковые параметры, ключ - имя поля в таблице, значение поля в таблице
-     * @param refBookId   - справочник
-     * @param exactSearch - точное соответствие
+     * @param tablePrefix префикс для основной таблицы
+     * @param parameters  дополнительные строковые параметры, ключ - имя поля в таблице, значение поля в таблице
+     * @param refBookId   справочник
+     * @param exactSearch точное соответствие
+     * @return строку фильтрации для поиска по справочнику
+     */
+    String getSearchQueryStatementWithAdditionalStringParameters(String tablePrefix, Map<String, String> parameters, String searchPattern, Long refBookId, boolean exactSearch);
+
+    /**
+     * Перегруженный метод com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService#getSearchQueryStatementWithAdditionalStringParameters
+     * с дефолтным префиксом tablePrefix = "frb"
+     *
      * @return строку фильтрации для поиска по справочнику
      */
     String getSearchQueryStatementWithAdditionalStringParameters(Map<String, String> parameters, String searchPattern, Long refBookId, boolean exactSearch);
@@ -202,11 +221,12 @@ public interface CommonRefBookService {
      * @param pagingParams  параметры сортировки для отображения записей в отчете так же как и в GUI
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param extraParams   дополнительные параметры для фильтрации записей
      * @param reportType    тип отчета
      * @return информация о создании отчета
      */
     ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams,
-                              String searchPattern, boolean exactSearch, AsyncTaskType reportType);
+                              String searchPattern, boolean exactSearch, Map<String, String> extraParams, AsyncTaskType reportType);
 
     /**
      * Получает данные иерархического справочника. В случае применения фильтра для элементов дополнительно подгружаются
@@ -215,9 +235,10 @@ public interface CommonRefBookService {
      * @param refBookId     идентификатор справочника
      * @param searchPattern Строка с запросом поиска по справочнику
      * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param needGroup     Признак того, что записи нужно группировать по родительским записям
      * @return
      */
-    Collection<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch);
+    PagingResult<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch, boolean needGroup);
 
     /**
      * Получение всех значений указанного справочника с возможностью самостоятельно сформировать SQL-условие по входным параметрам фильтрации и поиска
@@ -227,11 +248,27 @@ public interface CommonRefBookService {
      * @param version       версия, на которую будут отобраны записи
      * @param searchPattern строка для полнотекстового поиска
      * @param exactSearch   флаг для полнотекстового поиска с точным совпадением
+     * @param extraParams   дополнительные параметры для фильтрации записей
      * @param pagingParams  параметры пейджинга
+     * @param sortAttribute атрибут, по которому будут отсортированы записи
+     * @param direction     направление сортировки - asc, desc
      * @return значения справочника
      */
     PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version,
-                                                            String searchPattern, boolean exactSearch, PagingParams pagingParams);
+                                                            String searchPattern, boolean exactSearch, Map<String, String> extraParams,
+                                                            PagingParams pagingParams, RefBookAttribute sortAttribute, String direction);
+
+    /**
+     * Получает количество записей справочника, удовлетворяющим условиям поиска
+     *
+     * @param refBookId     идентификатор справочника
+     * @param version       дата актуальности
+     * @param searchPattern строка для полнотекстового поиска
+     * @param exactSearch   флаг для полнотекстового поиска с точным совпадением
+     * @param extraParams   дополнительные параметры для фильтрации записей
+     * @return количество записей
+     */
+    int getRecordsCount(Long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams);
 
     /**
      * Разыменовывает справочные атрибуты записей, т.е те, которые ссылаются на другие записи справочников. Получает полный объект вместо id-ссылки

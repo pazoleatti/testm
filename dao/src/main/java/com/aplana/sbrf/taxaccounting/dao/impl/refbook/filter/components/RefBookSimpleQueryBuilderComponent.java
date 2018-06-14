@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.QueryBuilder;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Ref;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -229,6 +231,122 @@ public class RefBookSimpleQueryBuilderComponent {
         return psGetRecordsQuery(refBook, ps, false, null, columns, filter, pagingParams, isSortAscending, false, false);
     }
 
+    /**
+     * Получает название столбца в таблице БД по которому надо отсортировать записи. Для ссылочных атрибутов выполняется разыменование
+     * @param sortAttribute атрибут, по которому надо отсортировтать записи
+     * @return название столбца в таблице БД
+     */
+    private String getSortColumnName(RefBookAttribute sortAttribute) {
+        String sortColumn;
+        if (sortAttribute != null) {
+            if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                sortColumn = "a_sort";
+            } else {
+                sortColumn = sortAttribute.getAlias();
+            }
+        } else {
+            // По умолчанию сортируем записи по ID
+            sortColumn = "id";
+        }
+        return sortColumn;
+    }
+
+    /**
+     * Выполняет формирование JOIN-части запроса
+     * @param refBook справочник
+     * @param filter SQL-запрос с дополнительной фильтрацией записей
+     * @param sortAttribute атрибут по которому надо отсортировать записи. Включается в запрос, если является ссылочным
+     * @return JOIN-часть SQL-запроса
+     */
+    private String getJoinPart(RefBook refBook, String filter, RefBookAttribute sortAttribute) {
+        StringBuilder joinPart = new StringBuilder();
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+            // Если атрибут ссылочный - надо добавить join на его таблицу для правильной сортировки по ссылочному столбцу
+            RefBook sortedRefBookLink = refbookDao.get(sortAttribute.getRefBookId());
+            joinPart.append(String.format("  LEFT JOIN %s a_sort ON a_sort.id = frb.%s \n", sortedRefBookLink.getTableName(), sortAttribute.getAlias()));
+        }
+        if (StringUtils.isNotEmpty(filter)) {
+            // Добавляем join на ссылочные атрибуты, если видимы и отображаются в таблице для фильтрации по ним
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                if (attribute.isVisible() && attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                    RefBook linkedRefBook = refbookDao.get(attribute.getRefBookId());
+                    if (attribute.isRequired()) {
+                        joinPart.append("  JOIN ");
+                    } else {
+                        joinPart.append("  LEFT JOIN ");
+                    }
+                    joinPart.append(linkedRefBook.getTableName()).append(" ").append(attribute.getAlias())
+                            .append(" ON ").append(attribute.getAlias()).append(".ID = ").append("frb.").append(attribute.getAlias()).append("\n");
+                }
+            }
+        }
+        return joinPart.toString();
+    }
+
+    private String getSelectPart(RefBookAttribute sortAttribute) {
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+            return ", a_sort." + sortAttribute.getRefBookAttribute().getAlias() + " a_sort";
+        }
+        return "";
+    }
+
+    /**
+     * Формирует запрос и параметры для отбора всех записей версионируемого справочника на определенную дату актуальности
+     * @param refBook справочник
+     * @param version дата актуальности
+     * @param filter фильтр для отбора записей. Фактически кусок SQL-запроса
+     * @param pagingParams параметры пэйджинга
+     * @param sortAttribute атрибут, по которому будут отсортированы записи
+     * @param direction направление сортировки
+     * @return SQL-запрос + параметры
+     */
+    public QueryBuilder allRecordsByVersion(RefBook refBook, @NotNull Date version, String filter, PagingParams pagingParams,
+                                            RefBookAttribute sortAttribute, String direction) {
+        QueryBuilder q = new QueryBuilder();
+
+        q.append("SELECT p.*, ").append("p.version as ").append(RefBook.RECORD_VERSION_FROM_ALIAS)
+                .append(", (SELECT min(version) - interval '1' day FROM ").append(refBook.getTableName())
+                .append(" WHERE status in (0,2) and record_id = p.record_id and version > p.version) as ").append(RefBook.RECORD_VERSION_TO_ALIAS).append(" \n")
+                .append("FROM ( \n")
+                .append(" SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
+                .append(getJoinPart(refBook, filter, sortAttribute))
+                .append(" WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) FROM ")
+                .append(refBook.getTableName())
+                .append(" WHERE version <= :version and record_id = frb.record_id))\n")
+                .append(StringUtils.isNotEmpty(filter) ? " AND " + filter + "\n" : "")
+                .append(" ) p\n");
+        q.addNamedParam("version", version);
+
+        return q.withSort(getSortColumnName(sortAttribute), direction)
+                .withPaging(pagingParams);
+    }
+
+    /**
+     * Формирует запрос и параметры для отбора всех записей неверсионируемого справочника
+     * @param refBook справочник
+     * @param filter фильтр для отбора записей. Фактически кусок SQL-запроса
+     * @param pagingParams параметры пэйджинга
+     * @param sortAttribute атрибут, по которому будут отсортированы записи
+     * @param direction направление сортировки
+     * @return SQL-запрос + параметры
+     */
+    public QueryBuilder allRecords(RefBook refBook, String filter, PagingParams pagingParams,
+                                            RefBookAttribute sortAttribute, String direction) {
+        QueryBuilder q = new QueryBuilder();
+
+        q.append("SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
+                .append(getJoinPart(refBook, filter, sortAttribute))
+                .append(StringUtils.isNotEmpty(filter) ? " WHERE " + filter + "\n" : "");
+
+        return q.withSort(getSortColumnName(sortAttribute), direction)
+                .withPaging(pagingParams);
+    }
+
+    /**
+     * TODO метод реализован неоптимально, но оставлен для совместимости, вместо него надо использовать RefBookSimpleQueryBuilderComponent#allRecordsByVersion
+     * @return
+     */
+    @Deprecated
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, Long recordId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
                                                    String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersionInfo) {
         PreparedStatementData ps = new PreparedStatementData();
@@ -284,6 +402,7 @@ public class RefBookSimpleQueryBuilderComponent {
      * @param filter      условия фильтрации (<strong>пока не реализовано</strong>)
      * @return
      */
+    @Deprecated
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT * FROM (SELECT r.id ")
@@ -321,6 +440,7 @@ public class RefBookSimpleQueryBuilderComponent {
         return ps;
     }
 
+    @Deprecated
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute, List<String> columns,
                                                    String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersion) {
         ps.appendQuery("SELECT /*+ FIRST_ROWS */* FROM (");

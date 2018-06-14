@@ -35,10 +35,11 @@ public interface RefBookDataProvider {
      * @param pagingParams  определяет параметры запрашиваемой страницы данных. Могут быть не заданы. Отсчет идет с 1,а не с 0
      * @param filter        условие фильтрации строк. Может быть не задано
      * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @param direction     направление сортировки (asc, desc)
      * @return
      */
     PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(@NotNull Date version, PagingParams pagingParams,
-                                                       String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+                                                                      String filter, RefBookAttribute sortAttribute, String direction);
 
     /**
      * Загружает данные справочника на определенную дату актуальности
@@ -64,20 +65,20 @@ public interface RefBookDataProvider {
     PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute);
 
-	/**
-	 * Возвращает версии записей справочника когда-либо бывших актуальными за указанный период времени.
-	 * Например, если какая-либо запись справочника имела в указанном интервале времени три версии, то все
-	 * три они вернуться, то есть ищутся пересечения версий записей с указанным интервалом времени.
-	 * <br>
-	 * Изначальное назначение метода - использование в логических проверках консолидированных за период данных.
-	 *
-	 * @param versionFrom начало интервала времени
-	 * @param versionTo окончание интервала времени
-	 * @params pagingParams параметры пейджинга
-	 * @param filter условие фильтрации
-	 * @return
-	 */
-	PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
+    /**
+     * Возвращает версии записей справочника когда-либо бывших актуальными за указанный период времени.
+     * Например, если какая-либо запись справочника имела в указанном интервале времени три версии, то все
+     * три они вернуться, то есть ищутся пересечения версий записей с указанным интервалом времени.
+     * <br>
+     * Изначальное назначение метода - использование в логических проверках консолидированных за период данных.
+     *
+     * @param versionFrom начало интервала времени
+     * @param versionTo   окончание интервала времени
+     * @param filter      условие фильтрации
+     * @return
+     * @params pagingParams параметры пейджинга
+     */
+    PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
 
     /**
      * Возвращает версии элементов справочника, удовлетворяющие указанному фильтру
@@ -203,7 +204,7 @@ public interface RefBookDataProvider {
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк
      *
-     * @param where коды строк справочника в виде запроса
+     * @param where   коды строк справочника в виде запроса
      * @param version версия справочника
      * @return
      */
@@ -312,9 +313,10 @@ public interface RefBookDataProvider {
     /**
      * Массовое обновление данных версии записей справочника
      * Если был изменен период актуальности, выполняются дополнительные проверки пересечений
-     *  @param versionFrom    дата начала актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
-     * @param versionTo      дата конца актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
-     * @param records        список обновленных значений атрибутов записи справочника
+     *
+     * @param versionFrom дата начала актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
+     * @param versionTo   дата конца актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
+     * @param records     список обновленных значений атрибутов записи справочника
      */
     void updateRecordVersions(Logger logger, Date versionFrom, Date versionTo, Set<Map<String, RefBookValue>> records);
 
