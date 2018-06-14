@@ -31,7 +31,9 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                         "FROM ( " +
                         "  SELECT * FROM ( " +
                         "    SELECT rbnd.*, " +
-                        "      lead(version) OVER(PARTITION BY rbnd.department_id, rbnd.record_id ORDER BY version) - interval '1' DAY version_end " +
+                        (isSupportOver() ?
+                                " lead(version) OVER(PARTITION BY rbnd.department_id, rbnd.record_id ORDER BY version) - interval '1' DAY version_end "
+                                : " null version_end ") +
                         "    FROM REF_BOOK_NDFL_DETAIL rbnd " +
                         "    WHERE status != -1 " +
                         "  ) " +
