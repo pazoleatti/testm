@@ -29,8 +29,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', '$aplanaModal', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, $aplanaModal, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', '$interval', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', '$aplanaModal', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, $interval, deviceDetector, $filter, ConfigResource, NotificationResource, $aplanaModal, amountCasesFormatterFilter) {
 
                 $scope.security = {
                     user: $rootScope.user
@@ -231,17 +231,23 @@
                             $scope.notificationsCountClass = "new-message empty-message";
                         }
                     });
-                    $scope.$broadcast("UPDATE_DECLARATION_DATA");
                 };
 
-                $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {
+                $scope.updateNotificationCountPeriodically = function() {
+                    if (angular.isDefined($scope.stop)) {
+                        return;
+                    }
                     $scope.updateNotificationCount();
+                    $scope.stop = $interval($scope.updateNotificationCount, 30000);
+                };
+
+                $scope.$on('$destroy', function() {
+                    if (angular.isDefined($scope.stop)) {
+                        $interval.cancel($scope.stop);
+                        $scope.stop = undefined;
+                    }
                 });
 
-                $scope.updateNotificationCount();
-
-                setInterval(function () {
-                    $scope.updateNotificationCount();
-                }, 4000);
+                $scope.updateNotificationCountPeriodically();
             }]);
 }());

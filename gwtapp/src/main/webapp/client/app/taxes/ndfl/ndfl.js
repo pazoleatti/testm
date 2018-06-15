@@ -33,8 +33,8 @@
                         }
                     }],
                 resolve: {
-                    checkExistenceAndKind: ['$q', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
-                        function ($q, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
+                    checkExistenceAndKind: ['$q', '$interval', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
+                        function ($q, $interval, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
                             var d = $q.defer();
                             DeclarationDataResource.query({
                                     declarationDataId: $stateParams.declarationDataId,
@@ -84,7 +84,7 @@
                 /**
                  * @description Инициализация первичных данных на странице
                  */
-                function initPage() {
+                $scope.updateDeclarationInfo = function updateDeclarationInfo() {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
                             projection: "declarationData",
@@ -112,13 +112,24 @@
                             }
                         }
                     );
-                }
+                };
 
-                initPage();
+                $scope.updateDeclarationInfoPeriodically = function() {
+                    if (angular.isDefined($scope.stop)) {
+                        return;
+                    }
+                    $scope.updateDeclarationInfo();
+                    $scope.stop = $interval($scope.updateDeclarationInfo, 3000);
+                };
 
-                $scope.$on("UPDATE_DECLARATION_DATA", function () {
-                    initPage();
+                $scope.$on('$destroy', function() {
+                    if (angular.isDefined($scope.stop)) {
+                        $interval.cancel($scope.stop);
+                        $scope.stop = undefined;
+                    }
                 });
+
+                $scope.updateDeclarationInfoPeriodically();
 
                 /**
                  * @description Проверяет готовность отчетов у открытой формы
@@ -488,7 +499,7 @@
                         function (response) {
                             if (response.uuid && response.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.uuid);
-                                initPage();
+                                $scope.updateDeclarationInfo();
                             } else {
                                 if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                     $dialogs.confirmDialog({
@@ -528,7 +539,7 @@
                     }, function (response) {
                         if (response.uuid && response.uuid !== null) {
                             $logPanel.open('log-panel-container', response.uuid);
-                            initPage();
+                            $scope.updateDeclarationInfo();
                         } else {
                             if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                 $dialogs.confirmDialog({
@@ -567,7 +578,7 @@
                             moveToCreatedDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
                                     reason: reason
                                 }, function (response) {
-                                    initPage();
+                                    $scope.updateDeclarationInfo();
                                 }
                             );
                         });
@@ -659,7 +670,7 @@
                     }).then(function (response) {
                         if (response.data && response.data !== null) {
                             $logPanel.open('log-panel-container', response.data);
-                            initPage();
+                            $scope.updateDeclarationInfo();
                         }
                     });
                 };
