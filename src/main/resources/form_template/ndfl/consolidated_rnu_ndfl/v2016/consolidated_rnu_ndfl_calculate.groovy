@@ -344,7 +344,7 @@ class Calculate extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis()
 
-        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date(20000000000000))
+        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(ndflPersonList.personId, new Date())
         //noinspection GroovyAssignabilityCheck
         logForDebug("Получение данных справочника ФЛ, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
