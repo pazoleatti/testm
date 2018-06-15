@@ -584,7 +584,7 @@
 			update ref_book_deduction_type set version=to_date('01.01.2016','DD.MM.YYYY') where code='220';
 		</sql>
     </changeSet>
-    <changeSet id="3.0-dnovikov-7" author="dnovikov">
+    <changeSet id="3.0-dnovikov-8" author="dnovikov">
         <sql>
             CREATE GLOBAL TEMPORARY TABLE TMP_STRING_PAIRS(
                 STRING1 VARCHAR2(4000 BYTE),
