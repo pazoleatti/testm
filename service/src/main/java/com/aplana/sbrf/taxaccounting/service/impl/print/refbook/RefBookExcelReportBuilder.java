@@ -141,17 +141,19 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         cell.setCellStyle(cs);
         cellNumber = 0;
 
+        int rowNum = 1;
         if (refBook.isVersioned()) {
-            Row versionRow = sheet.createRow(1);
+            Row versionRow = sheet.createRow(rowNum);
             Cell versionCell = versionRow.createCell(cellNumber);
             versionCell.setCellValue("Дата актуальности: " + new SimpleDateFormat(DATE_FORMAT).format(version));
             versionCell.setCellStyle(cs);
             cellNumber = 0;
+            rowNum++;
         }
         if (searchPattern != null && !searchPattern.isEmpty()) {
-            Row filterRow = sheet.createRow((refBook.isVersioned() ? 2 : 1));
+            Row filterRow = sheet.createRow(rowNum);
             Cell filterCell = filterRow.createCell(cellNumber);
-            filterCell.setCellValue("Параметр поиска: " + searchPattern);
+            filterCell.setCellValue("Параметр поиска: \"" + searchPattern + "\"" + (exactSearch ? " (по точному совпадению)" : ""));
             filterCell.setCellStyle(cs);
             cellNumber = 0;
         }

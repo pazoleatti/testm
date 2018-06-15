@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -77,24 +78,30 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(AsyncTaskData taskData) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
+        boolean exactSearch = (Boolean) taskData.getParams().get("exactSearch");
         Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : null;
         RefBook refBook = commonRefBookService.get(refBookId);
 
-        return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, Параметр поиска: %s",
-                getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
-                searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "не задан");
+        return String.format("Сформирован \"%s\" отчет справочника \"%s\".%s%s%s",
+                getAsyncTaskType().getName(), refBook.getName(),
+                version != null ? " Дата актуальности: " + SDF_DD_MM_YYYY.get().format(version) + "," : "",
+                StringUtils.isNotEmpty(searchPattern) ? " Параметр поиска: \"" + searchPattern + "\"" : " Параметр поиска: не задан",
+                exactSearch ? " (по точному совпадению)" : "");
     }
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
+        boolean exactSearch = (Boolean) taskData.getParams().get("exactSearch");
         Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : null;
         RefBook refBook = commonRefBookService.get(refBookId);
 
-        return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, Параметр поиска: %s",
-                getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
-                searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "не задан");
+        return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\".%s%s%s",
+                getAsyncTaskType().getName(), refBook.getName(),
+                version != null ? " Дата актуальности: " + SDF_DD_MM_YYYY.get().format(version) + "," : "",
+                StringUtils.isNotEmpty(searchPattern) ? " Параметр поиска: \"" + searchPattern + "\"" : " Параметр поиска: не задан",
+                exactSearch ? " (по точному совпадению)" : "");
     }
 
     @Override
