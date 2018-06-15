@@ -50,14 +50,15 @@ public interface RefBookSimpleDao {
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности, замапленные на определенную сущность
      *
-     * @param refBook      справочник
-     * @param version      дата актуальности
-     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param columns      список колонок в таблице, по которым выполняется фильтрация. Может быть не задано
-     * @param filter       условие фильтрации строк. Может быть не задано
+     * @param refBook       справочник
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @param direction     навправление сортировки - asc, desc
+     * @param pagingParams  определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param columns       список колонок в таблице, по которым выполняется фильтрация. Может быть не задано
+     * @param filter        условие фильтрации строк. Может быть не задано
      * @return список записей
      */
-    <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, PagingParams pagingParams, List<String> columns, String filter);
+    <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute, String direction, PagingParams pagingParams, List<String> columns, String filter);
 
     PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter);
 

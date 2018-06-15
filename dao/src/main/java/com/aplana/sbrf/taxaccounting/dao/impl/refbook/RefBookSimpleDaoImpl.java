@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,13 +101,17 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     }
 
     @Override
-    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, PagingParams pagingParams, List<String> columns, String filter) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQueryWithFilter(refBook, columns, filter, pagingParams, pagingParams.getDirection().toLowerCase().equals("asc"));
-        List<T> records = refBookDao.getMappedRecordsData(ps, refBook);
+    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute, String direction, PagingParams pagingParams, List<String> columns, String filter) {
+        QueryBuilder q;
+        if (refBook.isVersioned()) {
+            q = queryBuilder.allRecordsByVersion(refBook, new Date(), columns, filter, pagingParams, sortAttribute, direction);
+        } else {
+            q = queryBuilder.allRecords(refBook, columns, filter, pagingParams, sortAttribute, direction);
+        }
+        List<T> records = refBookDao.getMappedRecordsData(q, refBook);
 
         PagingResult<T> result = new PagingResult<>(records);
-        ps = queryBuilder.psGetRecordsQueryWithFilter(refBook, columns, filter, null, pagingParams.getDirection().toLowerCase().equals("asc"));
-        result.setTotalCount(refBookDao.getRecordsCount(ps));
+        result.setTotalCount(getNamedParameterJdbcTemplate().queryForObject(q.getCountQuery(), q.getNamedParams(), Integer.class));
         return result;
     }
 

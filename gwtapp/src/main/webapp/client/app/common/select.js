@@ -592,14 +592,14 @@
                 // ОКТМО
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO] = {
                     filter: {
-                        columns: ["name", "code"]
+                        columns: ["NAME", "CODE"]
                     },
                     formatter: "codeNameFormatter"
                 };
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
                     filter: {
-                        columns: ["name", "code"]
+                        columns: ["NAME", "CODE"]
                     },
                     formatter: "codeNameFormatter"
                 };
@@ -607,18 +607,18 @@
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON] = {
                     // TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет. По крайней мере можно использовать новое апи для этого справочника, чтобы быстрее получать записи
                     sort: {
-                        property: "last_name",
+                        property: "LAST_NAME",
                         direction: "asc"
                     },
                     filter: {
-                        columns: ["first_name, last_name, middle_name"]
+                        columns: ["FIRST_NAME, LAST_NAME, MIDDLE_NAME"]
                     },
                     formatter: "personFormatter"
                 };
                 // Адреса физических лиц TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON_ADDRESS] = {
                     sort: {
-                        property: "id", //TODO: тут нужна комбинация полей
+                        property: "ID", //TODO: тут нужна комбинация полей
                         direction: "asc"
                     },
                     filter: {
@@ -629,7 +629,7 @@
                 // Статусы налогоплательщика
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS] = {
                     filter: {
-                        columns: ["name", "code"]
+                        columns: ["NAME", "CODE"]
                     },
                     formatter: "codeNameFormatter"
                 };
@@ -639,11 +639,11 @@
                 // Признак кода вычета
                 $scope.refBookConfig.default = {
                     sort: {
-                        property: "name",
+                        property: "NAME",
                         direction: "asc"
                     },
                     filter: {
-                        columns: ["name"]
+                        columns: ["NAME"]
                     },
                     formatter: "nameFormatter"
                 };
