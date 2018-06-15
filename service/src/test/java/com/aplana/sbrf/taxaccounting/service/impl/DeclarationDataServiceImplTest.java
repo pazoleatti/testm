@@ -242,18 +242,7 @@ public class DeclarationDataServiceImplTest {
         r1.setDeclarationDataId(11L);
         r1.setDeclarationState(State.ACCEPTED);
 
-        Relation r2 = new Relation();
-        DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
-        declarationTemplate2.setName("Тестовый макет");
-        declarationTemplate2.setDeclarationFormKind(DeclarationFormKind.CONSOLIDATED);
-        r2.setFullDepartmentName("Тестовое подразделение");
-        r2.setDeclarationTemplate(declarationTemplate2);
-        r2.setPeriodName("1 квартал");
-        r2.setYear(2015);
-        r2.setCorrectionDate(new Date(0));
-        r2.setCreated(false);
         sources.add(r1);
-        sources.add(r2);
         when(sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger)).thenReturn(sources);
 
         when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
@@ -298,10 +287,6 @@ public class DeclarationDataServiceImplTest {
         assertEquals(
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Первичная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
                 logger.getEntries().get(0).getMessage()
-        );
-        assertEquals(
-                "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Консолидированная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
-                logger.getEntries().get(1).getMessage()
         );
     }
 

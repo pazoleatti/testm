@@ -36,7 +36,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.util.Pair
@@ -1128,119 +1127,6 @@ class Report6Ndfl extends AbstractScriptClass {
         }
     }
 
-/*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
-    ReportPeriod sourceReportPeriod = null
-
-    Map<Integer, DepartmentReportPeriod> departmentReportPeriodMap = [:]
-
-// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
-    Map<Integer, String> departmentFullNameMap = [:]
-
-
-    ReportPeriod getReportPeriod() {
-        if (sourceReportPeriod == null) {
-            sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        }
-        return sourceReportPeriod
-    }
-
-    /** Получить результат для события FormDataEvent.GET_SOURCES. */
-    void getSources() {
-        ScriptUtils.checkInterrupted()
-        if (!(needSources)) {
-            // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
-            return
-        }
-        ReportPeriod reportPeriod = getReportPeriod()
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-        DeclarationData sourceForm = findConsolidatedDeclaration(departmentReportPeriod)
-        Department department = departmentService.get(sourceForm.departmentId)
-        Relation relation = getRelation(sourceForm, department, reportPeriod, DECLARATION_TYPE_RNU_NDFL_ID)
-        if (relation) {
-            sources.sourceList.add(relation)
-        }
-        sources.sourcesProcessedByScript = true
-    }
-
-/**
- * Получить запись для источника-приемника.
- *
- * @param tmpDeclarationData нф
- * @param department подразделение
- * @param period период нф
- * @param monthOrder номер месяца (для ежемесячной формы)
- */
-    Relation getRelation(DeclarationData tmpDeclarationData, Department department, ReportPeriod period, Integer sourceTypeId) {
-        // boolean excludeIfNotExist - исключить несозданные источники
-
-        if (excludeIfNotExist && tmpDeclarationData == null) {
-            return null
-        }
-        // WorkflowState stateRestriction - ограничение по состоянию для созданных экземпляров
-        if (stateRestriction && tmpDeclarationData != null && stateRestriction != tmpDeclarationData.state) {
-            return null
-        }
-        Relation relation = new Relation()
-        Boolean isSource = sourceTypeId == 101
-
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpDeclarationData?.departmentReportPeriodId) as DepartmentReportPeriod
-        DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
-
-        // boolean light - заполняются только текстовые данные для GUI и сообщений
-        if (light) {
-            /**************  Параметры для легкой версии ***************/
-            /** Идентификатор подразделения */
-            relation.departmentId = department.id
-            /** полное название подразделения */
-            relation.fullDepartmentName = getDepartmentFullName(department.id)
-            /** Дата корректировки */
-            relation.correctionDate = departmentReportPeriod?.correctionDate
-            /** Вид нф */
-            relation.declarationTypeName = declarationTemplate?.name
-            /** Год налогового периода */
-            relation.year = period.taxPeriod.year
-            /** Название периода */
-            relation.periodName = period.name
-        }
-        /**************  Общие параметры ***************/
-        /** подразделение */
-        relation.department = department
-        /** Период */
-        relation.departmentReportPeriod = departmentReportPeriod
-        /** Статус ЖЦ */
-        relation.declarationState = tmpDeclarationData?.state
-        /** форма/декларация создана/не создана */
-        relation.created = (tmpDeclarationData != null)
-        /** является ли форма источников, в противном случае приемник*/
-        relation.source = isSource
-        /** Введена/выведена в/из действие(-ия) */
-        relation.status = declarationTemplate.status == VersionedObjectStatus.NORMAL
-        /** Налог */
-        relation.taxType = TaxType.NDFL
-        /**************  Параметры НФ ***************/
-        /** Идентификатор созданной формы */
-        relation.declarationDataId = tmpDeclarationData?.id
-        /** Вид НФ */
-        relation.declarationTemplate = declarationTemplate
-        /** Тип НФ */
-        //relation.formDataKind = tmpDeclarationData.kind
-
-        return relation
-    }
-
-    DepartmentReportPeriod getDepartmentReportPeriodById(Integer id) {
-        if (id != null && departmentReportPeriodMap.get(id) == null) {
-            departmentReportPeriodMap.put(id, departmentReportPeriodService.get(id))
-        }
-        return departmentReportPeriodMap.get(id)
-    }
-/** Получить полное название подразделения по id подразделения. */
-    String getDepartmentFullName(Integer id) {
-        if (departmentFullNameMap.get(id) == null) {
-            departmentFullNameMap.put(id, departmentService.getParentsHierarchy(id))
-        }
-        return departmentFullNameMap.get(id)
-    }
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
 /**

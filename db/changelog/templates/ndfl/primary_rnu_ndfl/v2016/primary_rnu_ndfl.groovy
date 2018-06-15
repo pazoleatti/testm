@@ -134,9 +134,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 // Подготовка для последующего формирования спецотчета
                 prepareSpecificReport()
                 break
-            case FormDataEvent.GET_SOURCES: //формирование списка приемников
-                getSourcesListForTemporarySolution()
-                break
             case FormDataEvent.CREATE_EXCEL_REPORT: //создание xlsx отчета
                 createXlsxReport()
                 break
@@ -168,110 +165,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     def getVersionFrom() {
         return getReportPeriodStartDate();
-    }
-
-    //------------------ GET_SOURCES ----------------------
-
-    List<Relation> getDestinationInfo(boolean isLight) {
-
-        List<Relation> destinationInfo = new ArrayList<Relation>();
-
-        //отчетный период в котором выполняется консолидация
-        ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
-
-        //Получаем список всех родительских подразделений и ищем для них консолидированные формы в нужном периоде
-        List<Integer> parentDepartments = departmentService.fetchAllParentDepartmentsIds(declarationData.departmentId)
-        List<DeclarationData> declarationDataList = declarationService.fetchAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, parentDepartments, declarationDataReportPeriod.id);
-        for (DeclarationData declarationDataDestination : declarationDataList) {
-            Department department = departmentService.get(declarationDataDestination.departmentId)
-            if (departmentReportPeriod.correctionDate != null) {
-                DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
-                if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
-                    continue
-                }
-            }
-            //Формируем связь источник-приемник
-            Relation relation = getRelation(declarationDataDestination, department, declarationDataReportPeriod, isLight)
-            destinationInfo.add(relation)
-        }
-
-        return destinationInfo;
-    }
-
-
-    def getSourcesListForTemporarySolution() {
-        if (needSources) {
-            return
-        }
-
-        for (Relation relation : getDestinationInfo(light)) {
-            sources.sourceList.add(relation)
-        }
-        sources.sourcesProcessedByScript = true
-    }
-
-    /**
-     * Получить запись для источника-приемника.
-     *
-     * @param declarationData первичная форма
-     * @param department подразделение
-     * @param period период нф
-     * @param monthOrder номер месяца (для ежемесячной формы)
-     */
-    Relation getRelation(DeclarationData declarationData, Department department, ReportPeriod period, boolean isLight) {
-
-        Relation relation = new Relation()
-
-        //Привязка отчетных периодов к подразделениям
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod
-
-        //Макет НФ
-        DeclarationTemplate declarationTemplate = getDeclarationTemplateById(declarationData?.declarationTemplateId)
-
-        def isSource = (declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID)
-        ReportPeriod rp = departmentReportPeriod.getReportPeriod();
-
-        if (isLight) {
-            //Идентификатор подразделения
-            relation.departmentId = department.id
-            //полное название подразделения
-            relation.fullDepartmentName = getDepartmentFullName(department.id)
-            //Дата корректировки
-            relation.correctionDate = departmentReportPeriod?.correctionDate
-            //Вид нф
-            relation.declarationTypeName = declarationTemplate?.name
-            //Год налогового периода
-            relation.year = period.taxPeriod.year
-            //Название периода
-            relation.periodName = period.name
-        }
-
-        //Общие параметры
-
-        //подразделение
-        relation.department = department
-        //Период
-        relation.departmentReportPeriod = departmentReportPeriod
-        //Статус ЖЦ
-        relation.declarationState = declarationData?.state
-        //форма/декларация создана/не создана
-        relation.created = (declarationData != null)
-        //является ли форма источников, в противном случае приемник
-        relation.source = isSource;
-        // Введена/выведена в/из действие(-ия)
-        relation.status = declarationTemplate.status == VersionedObjectStatus.NORMAL
-        // Налог
-        relation.taxType = TaxType.NDFL
-
-        //Параметры НФ
-
-        // Идентификатор созданной формы
-        relation.declarationDataId = declarationData?.id
-        // Вид НФ
-        relation.declarationTemplate = declarationTemplate
-        return relation
-
     }
 
     //------------------ PREPARE_SPECIFIC_REPORT ----------------------
@@ -896,57 +789,15 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             logger.warn("В ТФ неверно указана «Отчетная дата»: «${reportDate}». Должна быть указана дата окончания периода ТФ, равная «${reportPeriodEndDate}»")
         }
 
-        //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
-        QName infoPartName = QName.valueOf('ИнфЧасть')
-
-        //Используем StAX парсер для импорта
-        XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
-        xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
-        xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-        XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
-
         def ndflPersonNum = 1;
         def success = 0
-        def sb;
-        try {
-            while (reader.hasNext()) {
-                ScriptUtils.checkInterrupted()
-                XMLEvent event = reader.nextEvent()
 
-                if (event.isCharacters() && ((Characters) event).isWhiteSpace()) {
-                    continue;
-                }
-
-                if (!event.isStartElement() && !event.isEndElement()) {
-                    continue;
-                }
-
-                //Последовательно обрабатываем все элементы ИнфЧасть в документе
-                if (event.isStartElement() && event.getName().equals(infoPartName)) {
-                    sb = new StringBuilder()
-                }
-
-                if (event.isStartElement()) {
-                    sb?.append(processStartElement(event.asStartElement()))
-                }
-
-                if (event.isEndElement()) {
-                    sb?.append(processEndElement(event.asEndElement()))
-                }
-
-                if (event.isEndElement() && event.getName().equals(infoPartName)) {
-                    String personData = sb.toString();
-                    if (personData != null && !personData.isEmpty()) {
-                        def infoPart = new XmlSlurper().parseText(sb.toString())
-                        if (processInfoPart(infoPart, ndflPersonNum)) {
-                            success++
-                        }
-                        ndflPersonNum++
-                    }
-                }
+        for (infoPart in Файл.ИнфЧасть) {
+            ScriptUtils.checkInterrupted()
+            if (processInfoPart(infoPart, ndflPersonNum)) {
+                success++
             }
-        } finally {
-            reader?.close()
+            ndflPersonNum++
         }
         if (success == 0) {
             logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
@@ -1890,6 +1741,7 @@ class DeductionsSheetFiller implements SheetFiller {
         Styler styler = new Styler(wb)
         CellStyle borderStyle = styler.createBorderStyle()
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonDeduction npd : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted();

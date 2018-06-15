@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
@@ -168,4 +169,18 @@ public interface SourceDao {
      * @return false если есть хоть одна строка где НФ-источник равна null
      */
     boolean isDDConsolidationTopical(long ddTargetId);
+
+    /**
+     * Получить данные об источниках
+     * @param targetId  идентификатор целевой НФ
+     * @return список объектов хранения данных источников/приемников
+     */
+    List<Relation> getSourcesInfo(long targetId);
+
+    /**
+     * Получить данные о приемниках
+     * @param sourceId  идентификатор  НФ источника
+     * @return список объектов хранения данных источников/приемников
+     */
+    List<Relation> getDestinationsInfo(long sourceId);
 }

@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -996,45 +995,11 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
-        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<Relation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        params.put("light", light);
-        params.put("excludeIfNotExist", excludeIfNotExist);
-        params.put("stateRestriction", stateRestriction);
-        params.put("needSources", true);
-
-        Logger scriptLogger = new Logger();
-        declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, scriptLogger, params);
-        logger.getEntries().addAll(scriptLogger.getEntries());
-        if (scriptLogger.containsLevel(LogLevel.ERROR)) { // проверяем scriptLogger, т.к. в logger уже могут быть ошибки
-            throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }
-        return sources.getSourceList();
+        return sourceDao.getSourcesInfo(declaration.getId());
     }
 
     @Override
     public List<Relation> getDeclarationDestinationsInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
-        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<Relation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        params.put("light", light);
-        params.put("excludeIfNotExist", excludeIfNotExist);
-        params.put("stateRestriction", stateRestriction);
-        params.put("needSources", false);
-
-        Logger scriptLogger = new Logger();
-        declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, scriptLogger, params);
-        logger.getEntries().addAll(scriptLogger.getEntries());
-        if (scriptLogger.containsLevel(LogLevel.ERROR)) { // проверяем scriptLogger, т.к. в logger уже могут быть ошибки
-            throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }
-        return sources.getSourceList();
+        return sourceDao.getDestinationsInfo(declaration.getId());
     }
 }
