@@ -257,7 +257,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return new PagingResult<>(list, totalCount);
     }
 
-    private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status = 0 and record_id = p.record_id and version > p.version) as versionEnd from (\n" +
+    private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status in (0,2) and record_id = p.record_id and version > p.version) as versionEnd from (\n" +
             "  select frb.*, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
             "  c.id as CITIZENSHIP_ID, c.code as CITIZENSHIP_CODE, c.name as CITIZENSHIP_NAME, \n" +
             "  asnu.id as SOURCE_ID_ID, asnu.name as SOURCE_ID_NAME, asnu.code as SOURCE_ID_CODE, asnu.priority as SOURCE_ID_PRIORITY, asnu.type as SOURCE_ID_TYPE,\n" +

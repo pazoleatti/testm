@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Интерфейс для формирования отчета по справочнику
@@ -32,29 +33,32 @@ public interface PrintingService {
     /**
      * Формирует csv-отчет по справочнику
      *
-     * @param refBookId       идентификатор справочника
-     * @param version         дата актуальности
-     * @param filter          sql-фрагмент фильтрации
-     * @param sortAttribute   атрибут сортировки данных в отчете
-     * @param isSortAscending признак сортировки по возрастанию
-     * @param searchPattern   параметр поиска
-     * @param exactSearch     признак поиска по точному совпадению
-     * @param stateLogger     логгер статуса задачи
+     * @param refBookId     идентификатор справочника
+     * @param version       дата актуальности
+     * @param searchPattern строка с текстом для поиска по справочника
+     * @param exactSearch   признак точного совпадения при поиске
+     * @param extraParams   дополнительные параметры для фильтрации записей
+     * @param sortAttribute атрибут сортировки данных в отчете
+     * @param direction     направление сортировки - asc, desc
+     * @param stateLogger   логгер статуса задачи
      * @return uuid идентификатор файла blobData
      */
-    String generateRefBookCSV(long refBookId, Date version, String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String searchPattern, Boolean exactSearch, LockStateLogger stateLogger);
+    String generateRefBookCSV(long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams,
+                              RefBookAttribute sortAttribute, String direction, LockStateLogger stateLogger);
 
     /**
      * Формирует excel-отчет по справочнику
      *
-     * @param refBookId       идентификатор справочника
-     * @param version         дата актуальности
-     * @param filter          sql-фрагмент фильтрации
-     * @param sortAttribute   атрибут сортировки данных в отчете
-     * @param isSortAscending признак сортировки по возрастанию
-     * @param stateLogger     логгер статуса задачи
+     * @param refBookId     идентификатор справочника
+     * @param version       дата актуальности
+     * @param searchPattern строка с текстом для поиска по справочника
+     * @param exactSearch   признак точного совпадения при поиске
+     * @param extraParams   дополнительные параметры для фильтрации записей
+     * @param sortAttribute атрибут сортировки данных в отчете
+     * @param direction     направление сортировки - asc, desc
+     * @param stateLogger   логгер статуса задачи
      * @return uuid идентификатор файла blobData
      */
-    String generateRefBookExcel(long refBookId, Date version, String filter, String searchPattern,
-                                RefBookAttribute sortAttribute, boolean isSortAscending, LockStateLogger stateLogger);
+    String generateRefBookExcel(long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams,
+                                RefBookAttribute sortAttribute, String direction, LockStateLogger stateLogger);
 }

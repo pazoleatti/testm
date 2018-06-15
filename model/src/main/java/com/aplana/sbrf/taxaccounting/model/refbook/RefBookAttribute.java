@@ -75,6 +75,16 @@ public class RefBookAttribute implements Serializable {
      */
     private Integer maxLength;
 
+    public static final RefBookAttribute ID_ATTRIBUTE = new RefBookAttribute(RefBook.RECORD_ID_ALIAS, RefBookAttributeType.NUMBER);
+
+	public RefBookAttribute() {
+	}
+
+	public RefBookAttribute(String alias, RefBookAttributeType attributeType) {
+		this.alias = alias;
+		this.attributeType = attributeType;
+	}
+
 	/**
 	 * Возвращает код атрибута
 	 * @return код атрибута

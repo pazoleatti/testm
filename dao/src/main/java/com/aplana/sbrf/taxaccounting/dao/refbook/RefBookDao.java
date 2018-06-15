@@ -751,4 +751,6 @@ public interface RefBookDao {
      * @return все записи существуют?
      */
     boolean isRefBookExist(long refBookId);
+
+    PagingResult<Map<String,RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction);
 }

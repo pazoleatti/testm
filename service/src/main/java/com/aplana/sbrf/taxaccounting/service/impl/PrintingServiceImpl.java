@@ -8,9 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -126,48 +125,53 @@ public class PrintingServiceImpl implements PrintingService {
         }
     }
 
+    /**
+     * Возвращает список атрибутов, которые будут отображаться в отчете по справочнику
+     *
+     * @param refBook справочник
+     * @return список атрибутов
+     */
+    private List<RefBookAttribute> getAttributes(RefBook refBook) {
+        List<RefBookAttribute> attributes = new ArrayList<>();
+        if (refBook.isVersioned()) {
+            // Для версионируемых справочников дополняем список атрибутов, т.к они отсутствуют в БД
+            RefBookAttribute versionFromAttribute = new RefBookAttribute(RefBook.RECORD_VERSION_FROM_ALIAS, RefBookAttributeType.DATE);
+            versionFromAttribute.setName(RefBook.REF_BOOK_VERSION_FROM_TITLE);
+            versionFromAttribute.setWidth(10);
+            versionFromAttribute.setVisible(true);
+            attributes.add(versionFromAttribute);
+
+            RefBookAttribute versionToAttribute = new RefBookAttribute(RefBook.RECORD_VERSION_TO_ALIAS, RefBookAttributeType.DATE);
+            versionToAttribute.setName(RefBook.REF_BOOK_VERSION_TO_TITLE);
+            versionToAttribute.setWidth(10);
+            versionToAttribute.setVisible(true);
+            attributes.add(versionToAttribute);
+        }
+
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.isVisible()) {
+                attributes.add(attribute);
+            }
+        }
+        return attributes;
+    }
+
     @Override
-    public String generateRefBookCSV(long refBookId, Date version, String filter,
-                                     RefBookAttribute sortAttribute, boolean isSortAscending, String searchPattern, Boolean exactSearch, LockStateLogger stateLogger) {
+    public String generateRefBookCSV(long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams,
+                                     RefBookAttribute sortAttribute, String direction, LockStateLogger stateLogger) {
 
         String reportPath = null;
         try {
-            RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
             RefBook refBook = commonRefBookService.get(refBookId);
-            PagingParams pagingParams = new PagingParams();
-            pagingParams.setStartIndex(1);
-            pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));
-            List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
-                    pagingParams, filter, sortAttribute, isSortAscending);
-            Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
-            RefBookCSVReportBuilder refBookCSVReportBuilder;
-            if (!refBook.isHierarchic()) {
-                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, refBookPage, dereferenceValues, version, sortAttribute, searchPattern, exactSearch);
+            PagingResult<Map<String, RefBookValue>> records;
+
+            if (refBook.isHierarchic()) {
+                records = commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false);
             } else {
-                Map<Long, Map<String, RefBookValue>> hierarchicRecords = new HashMap<Long, Map<String, RefBookValue>>();
-                Iterator<Map<String, RefBookValue>> iterator = refBookPage.iterator();
-                while (iterator.hasNext()) {
-                    Map<String, RefBookValue> record = iterator.next();
-                    hierarchicRecords.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
-                }
-                do {
-                    iterator = refBookPage.iterator();
-                    List<Map<String, RefBookValue>> parentRecords = new ArrayList<Map<String, RefBookValue>>();
-                    while (iterator.hasNext()) {
-                        Map<String, RefBookValue> record = iterator.next();
-                        Long parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-                        if (parentId != null && !hierarchicRecords.containsKey(parentId)) {
-                            Map<String, RefBookValue> parentRecord = refBookDataProvider.getRecordData(parentId);
-                            hierarchicRecords.put(parentRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), parentRecord);
-                            parentRecords.add(parentRecord);
-                        }
-                    }
-                    Map<Long, Map<Long, String>> dereferenceParentValues = refBookHelper.dereferenceValues(refBook, parentRecords, false);
-                    dereferenceValues.putAll(dereferenceParentValues);
-                    refBookPage = parentRecords;
-                } while (!refBookPage.isEmpty());
-                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, version, sortAttribute, searchPattern, exactSearch);
+                records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
             }
+
+            RefBookCSVReportBuilder refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, getAttributes(refBook), records, version, searchPattern, exactSearch, sortAttribute);
             stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
             reportPath = refBookCSVReportBuilder.createReport();
             String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
@@ -182,47 +186,21 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateRefBookExcel(long refBookId, Date version, String filter, String searchPattern,
-                                       RefBookAttribute sortAttribute, boolean isSortAscending, LockStateLogger stateLogger) {
+    public String generateRefBookExcel(long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams,
+                                       RefBookAttribute sortAttribute, String direction, LockStateLogger stateLogger) {
 
         String reportPath = null;
         try {
-            RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
             RefBook refBook = commonRefBookService.get(refBookId);
-            PagingParams pagingParams = new PagingParams();
-            pagingParams.setStartIndex(1);
-            pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));
-            List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
-                    pagingParams, filter, sortAttribute, isSortAscending);
-            Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = refBookHelper.dereferenceValuesAttributes(refBook, refBookPage);
-            RefBookExcelReportBuilder refBookExcelReportBuilder;
-            if (!refBook.isHierarchic()) {
-                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, refBookPage, dereferenceValues, version, searchPattern, null);
+            PagingResult<Map<String, RefBookValue>> records;
+
+            if (refBook.isHierarchic()) {
+                records = commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false);
             } else {
-                Map<Long, Map<String, RefBookValue>> hierarchicRecords = new HashMap<Long, Map<String, RefBookValue>>();
-                Iterator<Map<String, RefBookValue>> iterator = refBookPage.iterator();
-                while (iterator.hasNext()) {
-                    Map<String, RefBookValue> record = iterator.next();
-                    hierarchicRecords.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
-                }
-                do {
-                    iterator = refBookPage.iterator();
-                    List<Map<String, RefBookValue>> parentRecords = new ArrayList<Map<String, RefBookValue>>();
-                    while (iterator.hasNext()) {
-                        Map<String, RefBookValue> record = iterator.next();
-                        Long parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-                        if (parentId != null && !hierarchicRecords.containsKey(parentId)) {
-                            Map<String, RefBookValue> parentRecord = refBookDataProvider.getRecordData(parentId);
-                            hierarchicRecords.put(parentRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), parentRecord);
-                            parentRecords.add(parentRecord);
-                        }
-                    }
-                    Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceParentValues = refBookHelper.dereferenceValuesAttributes(refBook, parentRecords);
-                    dereferenceValues.putAll(dereferenceParentValues);
-                    refBookPage = parentRecords;
-                } while (!refBookPage.isEmpty());
-                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, version, searchPattern, sortAttribute);
+                records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
             }
+
+            RefBookExcelReportBuilder refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook), records, version, searchPattern, exactSearch, sortAttribute);
             stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
             reportPath = refBookExcelReportBuilder.createReport();
             String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);

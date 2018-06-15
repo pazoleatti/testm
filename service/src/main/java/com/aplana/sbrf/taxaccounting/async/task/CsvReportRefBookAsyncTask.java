@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -30,8 +28,6 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
     @Autowired
     private CommonRefBookService commonRefBookService;
     @Autowired
-    private RefBookFactory refBookFactory;
-    @Autowired
     private PrintingService printingService;
     @Autowired
     private AsyncManager asyncManager;
@@ -44,12 +40,11 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
     @Override
     public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {
         long refBookId = (Long) params.get("refBookId");
-        String filter = (String) params.get("filter");
+        String searchPattern = (String) params.get("searchPattern");
+        boolean exactSearch = (Boolean) params.get("exactSearch");
+        Map<String, String> extraParams = (Map<String, String>) params.get("extraParams");
         Date version = (Date) params.get("version");
-        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
-        if (filter.isEmpty())
-            filter = null;
-        Long value = (long) refBookDataProvider.getRecordsCount(version, filter) * commonRefBookService.get(refBookId).getAttributes().size();
+        Long value = (long) commonRefBookService.getRecordsCount(refBookId, version, searchPattern, exactSearch, extraParams) * commonRefBookService.get(refBookId).getAttributes().size();
         String msg = String.format("количество выгружаемых ячеек(%s) превышает максимально допустимое(%s)!", value, "%s");
         return checkTask(value, taskDescription, msg);
     }
@@ -58,20 +53,16 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         Map<String, Object> params = taskData.getParams();
         long refBookId = (Long) params.get("refBookId");
-        String filter = (String) params.get("filter");
         Date version = (Date) params.get("version");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
         Boolean exactSearch = (Boolean) taskData.getParams().get("exactSearch");
-        RefBookAttribute sortAttribute = null;
-        if (params.containsKey("sortAttribute"))
-            sortAttribute = commonRefBookService.get(refBookId).getAttribute((Long) params.get("sortAttribute"));
-        Boolean isSortAscending = (Boolean) params.get("isSortAscending");
+        RefBookAttribute sortAttribute = (RefBookAttribute) taskData.getParams().get("sortAttribute");
+        String direction = (String) params.get("direction");
+        Map<String, String> extraParams = (Map<String, String>) params.get("extraParams");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
-        if (filter.isEmpty())
-            filter = null;
 
-        String uuid = printingService.generateRefBookCSV(refBookId, version, filter, sortAttribute, isSortAscending, searchPattern, exactSearch, new LockStateLogger() {
+        String uuid = printingService.generateRefBookCSV(refBookId, version, searchPattern, exactSearch, extraParams, sortAttribute, direction, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 asyncManager.updateState(taskData.getId(), state);
@@ -84,11 +75,11 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(AsyncTaskData taskData) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
-        Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : new Date();
+        Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : null;
         RefBook refBook = commonRefBookService.get(refBookId);
 
         return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, Параметр поиска: %s",
-                getAsyncTaskType().getName(), refBook.getName(), SDF_DD_MM_YYYY.get().format(version),
+                getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
                 searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "не задан");
     }
 
@@ -96,11 +87,11 @@ public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         String searchPattern = (String) taskData.getParams().get("searchPattern");
-        Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : new Date();
+        Date version = taskData.getParams().get("version") != null ? (Date) taskData.getParams().get("version") : null;
         RefBook refBook = commonRefBookService.get(refBookId);
 
         return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, %s, Параметр поиска: ",
-                getAsyncTaskType().getName(), refBook.getName(), SDF_DD_MM_YYYY.get().format(version),
+                getAsyncTaskType().getName(), refBook.getName(), version != null ? SDF_DD_MM_YYYY.get().format(version) : "нет",
                 searchPattern != null && !searchPattern.isEmpty() ? searchPattern : "не задан");
     }
 

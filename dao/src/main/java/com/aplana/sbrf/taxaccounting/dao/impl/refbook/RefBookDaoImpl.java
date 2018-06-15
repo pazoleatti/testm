@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookAddressValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
@@ -80,6 +81,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Autowired
     private RefBookMapperFactory refBookMapperFactory;
+
+    @Autowired
+    private RefBookSimpleQueryBuilderComponent queryBuilder;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -3083,6 +3087,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public boolean isRefBookExist(long refBookId) {
         return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction) {
+        QueryBuilder q;
+        if (refBook.isVersioned()) {
+            q = queryBuilder.allRecordsByVersion(refBook, version, filter, pagingParams, sortAttribute, direction);
+        } else {
+            q = queryBuilder.allRecords(refBook, filter, pagingParams, sortAttribute, direction);
+        }
+        List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(q.getPagedQuery(), q.getNamedParams(), getRowMapper(refBook));
+
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>(records);
+        if (pagingParams != null) {
+            result.setTotalCount(getNamedParameterJdbcTemplate().queryForObject(q.getCountQuery(), q.getNamedParams(), Integer.class));
+        } else {
+            result.setTotalCount(records.size());
+        }
+        return result;
     }
 
     @Override
