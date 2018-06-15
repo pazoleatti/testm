@@ -107,18 +107,19 @@
                     );
                 };
 
+                var interval;
                 $scope.updateDeclarationInfoPeriodically = function() {
-                    if (angular.isDefined($scope.stop)) {
+                    if (angular.isDefined(interval)) {
                         return;
                     }
                     $scope.updateDeclarationInfo();
-                    $scope.stop = $interval($scope.updateDeclarationInfo, 3000);
+                    interval = $interval($scope.updateDeclarationInfo, 3000);
                 };
 
                 $scope.$on('$destroy', function() {
-                    if (angular.isDefined($scope.stop)) {
-                        $interval.cancel($scope.stop);
-                        $scope.stop = undefined;
+                    if (angular.isDefined(interval)) {
+                        $interval.cancel(interval);
+                        interval = undefined;
                     }
                 });
 
