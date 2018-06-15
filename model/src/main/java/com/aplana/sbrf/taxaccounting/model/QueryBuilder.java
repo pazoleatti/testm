@@ -36,9 +36,8 @@ public class QueryBuilder {
 
     public QueryBuilder withPaging(PagingParams pagingParams) {
         if (pagingParams != null) {
-            int startIndex = pagingParams.getStartIndex() == 0 ? 1 : pagingParams.getStartIndex();
-            addNamedParam("paging_start", startIndex);
-            addNamedParam("paging_end", startIndex + pagingParams.getCount() - 1);
+            addNamedParam("paging_start", pagingParams.getStartIndex() + 1);
+            addNamedParam("paging_end", pagingParams.getStartIndex() + pagingParams.getCount());
             pagedQuery = "SELECT * FROM (\n" + (sortedQuery != null ? sortedQuery : query) + ") WHERE rn between :paging_start and :paging_end";
         } else {
             pagedQuery = sortedQuery != null ? sortedQuery : query.toString();

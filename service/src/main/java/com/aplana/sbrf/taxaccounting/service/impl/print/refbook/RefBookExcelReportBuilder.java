@@ -1,11 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.*;
@@ -55,7 +57,6 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     private int cellNumber = 0;
 
     private List<RefBookAttribute> attributes;
-    private List<Map<String, RefBookValue>> records;
     private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<>();
     private RefBook refBook;
     private CellStyleBuilder cellStyleBuilder;
@@ -63,6 +64,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     private String searchPattern;
     private boolean exactSearch;
     private RefBookAttribute sortAttribute;
+    private BatchIterator dataIterator;
 
     public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -71,7 +73,8 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         }
     };
 
-    public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Date version, String searchPattern, boolean exactSearch, final RefBookAttribute sortAttribute) {
+    public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version,
+                                     String searchPattern, boolean exactSearch, RefBookAttribute sortAttribute) {
         this.workBook = new XSSFWorkbook();
         String sheetName = refBook.getName().replaceAll("[/\\[\\]\\*\\:\\?\\\\]", "_"); //Убираем недостимые символы в названии листа
         this.sheet = workBook.createSheet(sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName);
@@ -79,12 +82,16 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         sheet.getLastRowNum();
         this.refBook = refBook;
         this.attributes = attributes;
-        this.records = records;
         this.version = version;
         this.searchPattern = searchPattern;
         this.exactSearch = exactSearch;
         this.sortAttribute = sortAttribute;
         cellStyleBuilder = new CellStyleBuilder();
+    }
+
+    public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version, String searchPattern,
+                                     boolean exactSearch, RefBookAttribute sortAttribute, PagingResult<Map<String, RefBookValue>> records) {
+        this(refBook, attributes, version, searchPattern, exactSearch, sortAttribute);
         if (refBook.isHierarchic()) {
             attributes.add(levelAttribute);
             // Для иерархических справочников записи упорядочиваем по родительскому узлу
@@ -96,6 +103,13 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
                 hierarchicRecords.get(parent_id).add(record);
             }
         }
+
+    }
+
+    public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version, String searchPattern,
+                                     boolean exactSearch, RefBookAttribute sortAttribute, BatchIterator dataIterator) {
+        this(refBook, attributes, version, searchPattern, exactSearch, sortAttribute);
+        this.dataIterator = dataIterator;
     }
 
     @Override
@@ -164,13 +178,10 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void createDataForTable() {
-        if (LOG.isDebugEnabled())
-            LOG.info("Fill data for table. " + getClass() + "Data size: " + records.size());
-
         sheet.createFreezePane(0, rowNumber);
         if (!refBook.isHierarchic()) {
-            for (Map<String, RefBookValue> record : records) {
-                createRow(record);
+            while (dataIterator.hasNext()) {
+                createRow(dataIterator.getNextRecord());
             }
         } else {
             printNode(null, 0);
