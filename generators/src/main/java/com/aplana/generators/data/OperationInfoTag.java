@@ -1,4 +1,4 @@
-package com.aplana.generatorTF.data;
+package com.aplana.generators.data;
 
 import java.util.ArrayList;
 import java.util.List;

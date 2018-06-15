@@ -1,4 +1,4 @@
-package com.aplana.generatorTF;
+package com.aplana.generators;
 
 import java.io.IOException;
 import java.io.InputStream;

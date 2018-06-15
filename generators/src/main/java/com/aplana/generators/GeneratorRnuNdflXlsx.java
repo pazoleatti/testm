@@ -1,4 +1,4 @@
-package com.aplana.generatorTF;
+package com.aplana.generators;
 
 import com.google.common.collect.Range;
 import org.apache.poi.ss.usermodel.Cell;
@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.aplana.generatorTF.Dictionary.*;
-import static com.aplana.generatorTF.Main.printStream;
-import static com.aplana.generatorTF.Utils.*;
+import static com.aplana.generators.Dictionary.*;
+import static com.aplana.generators.Main.printStream;
+import static com.aplana.generators.Utils.*;
 
 /**
  * Класс для генерации ТФ (Excel) РНУ

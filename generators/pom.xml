@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.aplana.generatorTF</groupId>
+    <groupId>com.aplana.generators</groupId>
     <artifactId>generators</artifactId>
     <description>Генераторы</description>
     <version>1.1</version>
@@ -52,7 +52,7 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/java/resources/com.aplana.generatorTF</directory>
+                <directory>src/main/java/resources/com/aplana/generators</directory>
             </resource>
         </resources>
         <plugins>
@@ -78,7 +78,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>com.aplana.generatorTF.Main</mainClass>
+                            <mainClass>com.aplana.generators.Main</mainClass>
                         </manifest>
                     </archive>
 
