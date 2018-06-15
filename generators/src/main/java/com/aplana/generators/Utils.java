@@ -1,11 +1,11 @@
-package com.aplana.generatorTF;
+package com.aplana.generators;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Random;
 
-import static com.aplana.generatorTF.Dictionary.regionsDictionary;
+import static com.aplana.generators.Dictionary.regionsDictionary;
 
 class Utils {
 

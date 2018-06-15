@@ -1,4 +1,4 @@
-package com.aplana.generatorTF;
+package com.aplana.generators;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Date;
 
-import static com.aplana.generatorTF.Dictionary.initDictionaries;
+import static com.aplana.generators.Dictionary.initDictionaries;
 
 public class Main {
 

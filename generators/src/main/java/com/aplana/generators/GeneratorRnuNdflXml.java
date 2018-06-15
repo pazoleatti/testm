@@ -1,16 +1,16 @@
-package com.aplana.generatorTF;
+package com.aplana.generators;
 
-import com.aplana.generatorTF.data.InfoPartTag;
-import com.aplana.generatorTF.data.OperationInfoTag;
-import com.aplana.generatorTF.data.KppOktmo;
+import com.aplana.generators.data.InfoPartTag;
+import com.aplana.generators.data.OperationInfoTag;
+import com.aplana.generators.data.KppOktmo;
 
 import javax.xml.stream.*;
 import java.io.*;
 import java.util.*;
 
-import static com.aplana.generatorTF.Dictionary.*;
-import static com.aplana.generatorTF.Main.printStream;
-import static com.aplana.generatorTF.Utils.*;
+import static com.aplana.generators.Dictionary.*;
+import static com.aplana.generators.Main.printStream;
+import static com.aplana.generators.Utils.*;
 
 /**
  * Класс для генерации ТФ (xml) РНУ НДФЛ
@@ -375,7 +375,11 @@ class GeneratorRnuNdflXml {
      * @param random        генератор случайных чисел
      */
     private void generateOperationInfo(Map<String, String> attributes, Random random) {
-        attributes.put(ATTR_ID_OPER, String.valueOf(random.nextLong()));
+        //генерируем только положительные значения long
+        Long lowBound = 1L;
+        Long upBound = Long.MAX_VALUE;
+        long generated = lowBound + (long) (random.nextDouble() * (upBound - lowBound));
+        attributes.put(ATTR_ID_OPER, String.valueOf(generated));
         List<KppOktmo> departmentDetails = null;
         if ((random.nextInt(5) + 1) % 5 == 0 ) {
             departmentDetails = DEPARTMENT_DETAIL_CACHE.get(OTHER_SBRF_CODES.get(random.nextInt(OTHER_SBRF_CODES.size())));
