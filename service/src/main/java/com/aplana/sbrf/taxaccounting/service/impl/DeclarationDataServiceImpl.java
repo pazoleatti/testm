@@ -525,8 +525,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void identify(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         LOG.info(String.format("DeclarationDataServiceImpl.identify by %s. docDate: %s; docDate: %s; exchangeParams: %s",
                 userInfo, docDate, docDate, exchangeParams));
-        calculate(targetIdAndLogger.getLogger(), targetIdAndLogger.getId(),
-                userInfo, docDate, exchangeParams, stateLogger);
+        DeclarationData declarationData = declarationDataDao.get(targetIdAndLogger.getId());
+
+        if (exchangeParams == null) {
+            exchangeParams = new HashMap<>();
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationData", declarationData);
+        exchangeParams.put("calculateParams", params);
+
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, targetIdAndLogger.getLogger(), exchangeParams);
+
+        if (targetIdAndLogger.getLogger().containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException();
+        }
+
+        logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
+        auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
     }
 
     @Override
@@ -545,6 +560,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, targetIdAndLogger.getLogger(), exchangeParams);
 
+        if (targetIdAndLogger.getLogger().containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException();
+        }
+
         logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
 
@@ -559,16 +578,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!createForm) {
             return createForm;
         }
-
-        //3. обновляет записи о консолидации
-        ArrayList<Long> declarationDataIds = new ArrayList<Long>();
-        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, State.ACCEPTED, userInfo, logger)) {
-            declarationDataIds.add(relation.getDeclarationDataId());
-        }
-
-        //Обновление информации о консолидации.
-        sourceService.deleteDeclarationConsolidateInfo(declarationData.getId());
-        sourceService.addDeclarationConsolidationInfo(declarationData.getId(), declarationDataIds);
 
         logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
@@ -2775,18 +2784,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Проверка того, что консолидация вообще когда то выполнялась для всех источников
             List<Relation> relations = sourceService.getDeclarationSourcesInfo(dd, true, false, null, userInfo, logger);
             for (Relation relation : relations) {
-                if (!relation.isCreated()) {
-                    consolidationOk = false;
-                    logger.warn(
-                            NOT_EXIST_SOURCE_DECLARATION_WARNING,
-                            relation.getFullDepartmentName(),
-                            relation.getDeclarationTemplate().getName(),
-                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
-                            relation.getPeriodName(),
-                            relation.getYear(),
-                            relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    sdf.get().format(relation.getCorrectionDate())) : "");
-                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getDeclarationDataId())) {
+                if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getDeclarationDataId())) {
                     consolidationOk = false;
                     logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
