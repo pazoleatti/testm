@@ -393,9 +393,13 @@ public class RefBookSimpleQueryBuilderComponent {
         q.append("SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
                 .append(getJoinPart(refBook, null, sortAttribute));
 
+        if (!refBook.isReadOnly()) {
+            q.append(" WHERE frb.status = 0");
+        }
+
         // Добавляем фильтрацию по выбранным столбцам
         if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter)) {
-            q.append(" WHERE ").append(getColumnFilterQuery(columns, columnFilter));
+            q.append(refBook.isReadOnly() ? " WHERE " : " AND ").append(getColumnFilterQuery(columns, columnFilter));
         }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)
@@ -417,8 +421,14 @@ public class RefBookSimpleQueryBuilderComponent {
         QueryBuilder q = new QueryBuilder();
 
         q.append("SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
-                .append(getJoinPart(refBook, filter, sortAttribute))
-                .append(StringUtils.isNotEmpty(filter) ? " WHERE " + filter + "\n" : "");
+                .append(getJoinPart(refBook, filter, sortAttribute));
+
+        if (!refBook.isReadOnly()) {
+            q.append(" WHERE frb.status = 0");
+        }
+        if (StringUtils.isNotEmpty(filter)) {
+            q.append((refBook.isReadOnly() ? " WHERE " : " AND ") + filter + "\n");
+        }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)
                 .withPaging(pagingParams);
