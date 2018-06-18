@@ -713,9 +713,6 @@ public class DeclarationDataController {
 
     /**
      * Выгрузка отчетности
-     *
-     * @param declarationDataIds
-     * @return
      */
     @PostMapping(value = "/actions/declarationData/downloadReports")
     public ActionResult downloadReports(@RequestBody List<Long> declarationDataIds) {
@@ -725,21 +722,15 @@ public class DeclarationDataController {
 
     /**
      * Создание отчетов и спецотчетов
-     *
-     * @param action
-     * @return
      */
     @PostMapping(value = "/rest/createReport", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public CreateReportResult createPdfReport(@RequestBody CreateReportAction action) {
+    public CreateReportResult createReport(@RequestBody CreateReportAction action) {
         return declarationService.createReportForReportDD(securityService.currentUserInfo(), action);
     }
 
     /**
      * Подготовить данные для спецотчета. Используется для получения списка ФЛ, для выбора одного из них для
      * создания спецотчета.
-     *
-     * @param action
-     * @return
      */
     @PostMapping(value = "/rest/declarationData/prepareSpecificReport", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PrepareSubreportResult prepareSubreport(@RequestBody PrepareSubreportAction action) {

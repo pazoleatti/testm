@@ -246,7 +246,7 @@
                             declarationDataId: $shareData.declarationDataId,
                             isForce: force,
                             taxType: 'NDFL',
-                            type: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
+                            type: $shareData.reportType,
                             create: create,
                             selectedRow: $scope.reportNdflGrid.value[0],
                             subreportParamValues: {

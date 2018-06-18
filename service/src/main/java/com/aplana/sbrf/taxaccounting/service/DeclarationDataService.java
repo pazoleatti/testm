@@ -204,9 +204,10 @@ public interface DeclarationDataService {
 
     /**
      * Создает задачу по постановке операции "Консолидировать НФ" в очередь
+     *
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор НФ
-     * @return  модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
+     * @return модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
      */
     RecalculateDeclarationResult createConsolidateDeclarationTask(TAUserInfo userInfo, long declarationDataId);
 
@@ -864,4 +865,15 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе
      */
     void performUpdatePersonsData(Long declarationDataId, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * Создает doc отчет "Уведомление о задолженности"
+     *
+     * @param declarationData налоговая форма
+     * @param selectedPerson  выбранное ФЛ, для которого будет создан отчет
+     * @param userInfo        пользователь запустивший задачу
+     * @param logger          логгер
+     * @return uuid созданного отчета
+     */
+    String createDocReportByPerson(DeclarationData declarationData, DataRow<Cell> selectedPerson, TAUserInfo userInfo, Logger logger);
 }

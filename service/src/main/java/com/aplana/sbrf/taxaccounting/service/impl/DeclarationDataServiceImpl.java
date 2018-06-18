@@ -80,6 +80,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType.UPDATE_PERSONS_DATA;
+import static java.util.Collections.singletonList;
 
 /**
  * Сервис для работы с декларациями
@@ -2760,6 +2761,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
             case SPECIFIC_REPORT_DEC:
+            case DEPT_NOTICE_DEC:
                 Map<String, Object> exchangeParams = new HashMap<String, Object>();
                 ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
                 taskComplexityHolder.setAlias(reportType.getReportAlias());
@@ -3381,19 +3383,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             params.put("viewParamValues", new LinkedHashMap<String, String>());
                             if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
                                 params.put("subreportParamValues", action.getSubreportParamValues());
-                                if (action.getSelectedRow() != null) {
-                                    List<Cell> cellList = new ArrayList<>();
-                                    for (Map.Entry<String, Object> cellData : action.getSelectedRow().entrySet()) {
-                                        Column column = new StringColumn();
-                                        column.setAlias(cellData.getKey());
-                                        Cell cell = new Cell(column, new ArrayList<FormStyle>());
-                                        cell.setStringValue(cellData.getValue().toString());
-                                        cellList.add(cell);
-                                    }
-                                    DataRow<Cell> dataRow = new DataRow<>(cellList);
-                                    params.put("selectedRecord", dataRow);
-                                }
                             }
+                        }
+                        if (action.getSelectedRow() != null) {
+                            List<Cell> cellList = new ArrayList<>();
+                            for (Map.Entry<String, Object> cellData : action.getSelectedRow().entrySet()) {
+                                Column column = new StringColumn();
+                                column.setAlias(cellData.getKey());
+                                Cell cell = new Cell(column, new ArrayList<FormStyle>());
+                                cell.setStringValue(cellData.getValue().toString());
+                                cellList.add(cell);
+                            }
+                            DataRow<Cell> dataRow = new DataRow<>(cellList);
+                            params.put("selectedRecord", dataRow);
                         }
                         asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                             @Override
@@ -3495,7 +3497,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<String, Object> params = new HashMap<>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = File.createTempFile("report", ".dat");
-        try (InputStream inputStream = declarationTemplateDao.getTemplateFileContent(declaration.getDeclarationTemplateId(), DeclarationTemplate.TF_TEMPLATE);
+        try (InputStream inputStream = declarationTemplateDao.getTemplateFileContent(declaration.getDeclarationTemplateId(), DeclarationTemplateFile.TF_TEMPLATE);
              OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile))) {
             if (inputStream == null) {
                 throw new ServiceException("Файл не найден");
@@ -3671,7 +3673,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome) {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
-        reportService.deleteDec(Collections.singletonList(declarationDataId),
+        reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
     }
 
@@ -3680,7 +3682,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction) {
         ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
-        reportService.deleteDec(Collections.singletonList(declarationDataId),
+        reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
     }
 
@@ -3689,7 +3691,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment) {
         ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
-        reportService.deleteDec(Collections.singletonList(declarationDataId),
+        reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
     }
 
@@ -3803,6 +3805,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger scriptLogger = new Logger();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.UPDATE_PERSONS_DATA, scriptLogger, null);
         logger.getEntries().addAll(scriptLogger.getEntries());
+    }
+
+    public String createDocReportByPerson(DeclarationData declarationData, DataRow<Cell> selectedPerson, TAUserInfo userInfo, Logger logger) {
+        try (InputStream inputStream = declarationTemplateDao.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.DEPT_NOTICE_DOC_TEMPLATE)) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("selectedPerson", selectedPerson);
+            params.put("templateInputStream", inputStream);
+            BlobData blobDataOut = new BlobData();
+            params.put("blobDataOut", blobDataOut);
+
+            if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.BUILD_DOC, logger, params)) {
+                throw new ServiceException();
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException();
+            }
+            return blobDataService.create(blobDataOut.getInputStream(), blobDataOut.getName());
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
     }
 
     /**

@@ -9,6 +9,15 @@ import java.io.Serializable;
 public class DeclarationTemplateFile implements Serializable{
 	private static final long serialVersionUID = 1L;
 
+    /**
+     * Шаблон РНУ
+     */
+    public static final String TF_TEMPLATE = "excel_template_dec.xlsx";
+    /**
+     * Уведомление о задолженности для 2-НДФЛ
+     */
+    public static final String DEPT_NOTICE_DOC_TEMPLATE = "dept_notice.doc";
+
     private String fileName;
     private String blobDataId;
 
