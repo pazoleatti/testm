@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportB
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -186,21 +187,47 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateRefBookExcel(long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams,
-                                       RefBookAttribute sortAttribute, String direction, LockStateLogger stateLogger) {
+    public String generateRefBookExcel(final long refBookId, final Date version, final String searchPattern, final boolean exactSearch, final Map<String, String> extraParams,
+                                       final RefBookAttribute sortAttribute, final String direction, LockStateLogger stateLogger) {
 
         String reportPath = null;
         try {
-            RefBook refBook = commonRefBookService.get(refBookId);
-            PagingResult<Map<String, RefBookValue>> records;
+            final RefBook refBook = commonRefBookService.get(refBookId);
 
+            RefBookExcelReportBuilder refBookExcelReportBuilder;
             if (refBook.isHierarchic()) {
-                records = commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false);
+                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook),
+                        version, searchPattern, exactSearch, sortAttribute, commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false));
             } else {
-                records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
-            }
+                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook),
+                        version, searchPattern, exactSearch, sortAttribute, new BatchIterator() {
+                    private PagingResult<Map<String, RefBookValue>> currentBatch = null;
+                    private Iterator<Map<String, RefBookValue>> iterator = null;
+                    private int page = 1;
 
-            RefBookExcelReportBuilder refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook), records, version, searchPattern, exactSearch, sortAttribute);
+                    @Override
+                    public boolean hasNext() {
+                        if (iterator == null || !iterator.hasNext()) {
+                            PagingParams pagingParams = new PagingParams();
+                            pagingParams.setPage(page);
+                            pagingParams.setCount(BATCH_SIZE);
+                            currentBatch = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, direction);
+                            page++;
+                            iterator = currentBatch.iterator();
+                            return iterator.hasNext();
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public Map<String, RefBookValue> getNextRecord() {
+                        if (iterator.hasNext()) {
+                            return iterator.next();
+                        }
+                        return null;
+                    }
+                });
+            }
             stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
             reportPath = refBookExcelReportBuilder.createReport();
             String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);

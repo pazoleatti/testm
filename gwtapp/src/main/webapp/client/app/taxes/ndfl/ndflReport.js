@@ -26,8 +26,8 @@
                 templateUrl: 'client/app/taxes/ndfl/ndflReport.html?v=${buildUuid}',
                 controller: 'ndflReportCtrl',
                 resolve: {
-                    checkExistenceAndKind: ['$q', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
-                        function ($q, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
+                    checkExistenceAndKind: ['$q', '$interval', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
+                        function ($q, $interval, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
                             var d = $q.defer();
                             DeclarationDataResource.query({
                                     declarationDataId: $stateParams.declarationDataId,
@@ -79,7 +79,7 @@
                 /**
                  * @description Инициализация первичных данных на странице
                  */
-                var initPage = function () {
+                $scope.updateDeclarationInfo = function () {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
                             projection: "declarationData",
@@ -107,11 +107,23 @@
                     );
                 };
 
-                initPage();
+                var interval;
+                $scope.updateDeclarationInfoPeriodically = function() {
+                    if (angular.isDefined(interval)) {
+                        return;
+                    }
+                    $scope.updateDeclarationInfo();
+                    interval = $interval($scope.updateDeclarationInfo, 3000);
+                };
 
-                $scope.$on("UPDATE_DECLARATION_DATA", function () {
-                    initPage();
+                $scope.$on('$destroy', function() {
+                    if (angular.isDefined(interval)) {
+                        $interval.cancel(interval);
+                        interval = undefined;
+                    }
                 });
+
+                $scope.updateDeclarationInfoPeriodically();
 
                 /**
                  * Обрабатывает результат формирования отчета
@@ -304,7 +316,7 @@
                         function (response) {
                             if (response.uuid && response.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.uuid);
-                                initPage();
+                                $scope.updateDeclarationInfo();
                             } else {
                                 if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                     $dialogs.confirmDialog({
@@ -344,7 +356,7 @@
                     }, function (response) {
                         if (response.uuid && response.uuid !== null) {
                             $logPanel.open('log-panel-container', response.uuid);
-                            initPage();
+                            $scope.updateDeclarationInfo();
                         } else {
                             if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                 $dialogs.confirmDialog({
@@ -383,7 +395,7 @@
                             moveToCreatedDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
                                     reason: reason
                                 }, function (response) {
-                                    initPage();
+                                    $scope.updateDeclarationInfo();
                                 }
                             );
                         });
@@ -430,7 +442,7 @@
                         function (response) {
                             if (response.uuid && response.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.uuid);
-                                initPage();
+                                $scope.updateDeclarationInfo();
                             }
                         }
                     );

@@ -233,6 +233,7 @@ public class RefBookSimpleQueryBuilderComponent {
 
     /**
      * Получает название столбца в таблице БД по которому надо отсортировать записи. Для ссылочных атрибутов выполняется разыменование
+     *
      * @param sortAttribute атрибут, по которому надо отсортировтать записи
      * @return название столбца в таблице БД
      */
@@ -253,8 +254,9 @@ public class RefBookSimpleQueryBuilderComponent {
 
     /**
      * Выполняет формирование JOIN-части запроса
-     * @param refBook справочник
-     * @param filter SQL-запрос с дополнительной фильтрацией записей
+     *
+     * @param refBook       справочник
+     * @param filter        SQL-запрос с дополнительной фильтрацией записей
      * @param sortAttribute атрибут по которому надо отсортировать записи. Включается в запрос, если является ссылочным
      * @return JOIN-часть SQL-запроса
      */
@@ -292,12 +294,13 @@ public class RefBookSimpleQueryBuilderComponent {
 
     /**
      * Формирует запрос и параметры для отбора всех записей версионируемого справочника на определенную дату актуальности
-     * @param refBook справочник
-     * @param version дата актуальности
-     * @param filter фильтр для отбора записей. Фактически кусок SQL-запроса
-     * @param pagingParams параметры пэйджинга
+     *
+     * @param refBook       справочник
+     * @param version       дата актуальности
+     * @param filter        фильтр для отбора записей. Фактически кусок SQL-запроса
+     * @param pagingParams  параметры пэйджинга
      * @param sortAttribute атрибут, по которому будут отсортированы записи
-     * @param direction направление сортировки
+     * @param direction     направление сортировки
      * @return SQL-запрос + параметры
      */
     public QueryBuilder allRecordsByVersion(RefBook refBook, @NotNull Date version, String filter, PagingParams pagingParams,
@@ -321,22 +324,111 @@ public class RefBookSimpleQueryBuilderComponent {
                 .withPaging(pagingParams);
     }
 
+    private String getColumnFilterQuery(List<String> columns, String columnFilter) {
+        StringBuilder q = new StringBuilder();
+        if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter)) {
+            q.append("(");
+            for (Iterator<String> it = columns.iterator(); it.hasNext(); ) {
+                String column = it.next();
+                q.append("lower(frb.").append(column).append(") like '%").append(columnFilter.toLowerCase()).append("%'");
+                if (it.hasNext()) {
+                    q.append(" or ");
+                }
+            }
+            q.append(") ");
+        }
+        return q.toString();
+    }
+
     /**
-     * Формирует запрос и параметры для отбора всех записей неверсионируемого справочника
-     * @param refBook справочник
-     * @param filter фильтр для отбора записей. Фактически кусок SQL-запроса
-     * @param pagingParams параметры пэйджинга
+     * Формирует запрос и параметры для отбора всех записей версионируемого справочника на определенную дату актуальности с учетом поиска по конкретным столбцам
+     * Фильтрация по ссылочным столбцам не реализована
+     *
+     * @param refBook       справочник
+     * @param version       дата актуальности
+     * @param columns       список стобцов в БД, по которым будет выполнена фильтрация
+     * @param columnFilter  строка с фильтрацией по столбцам. НЕ SQL-запрос, просто текст с которым будут сраваниваться значения колонок
+     * @param pagingParams  параметры пэйджинга
      * @param sortAttribute атрибут, по которому будут отсортированы записи
-     * @param direction направление сортировки
+     * @param direction     направление сортировки
      * @return SQL-запрос + параметры
      */
-    public QueryBuilder allRecords(RefBook refBook, String filter, PagingParams pagingParams,
+    public QueryBuilder allRecordsByVersion(RefBook refBook, @NotNull Date version, List<String> columns, String columnFilter, PagingParams pagingParams,
                                             RefBookAttribute sortAttribute, String direction) {
         QueryBuilder q = new QueryBuilder();
 
+        q.append("SELECT p.*, ").append("p.version as ").append(RefBook.RECORD_VERSION_FROM_ALIAS)
+                .append(", (SELECT min(version) - interval '1' day FROM ").append(refBook.getTableName())
+                .append(" WHERE status in (0,2) and record_id = p.record_id and version > p.version) as ").append(RefBook.RECORD_VERSION_TO_ALIAS).append(" \n")
+                .append("FROM ( \n")
+                .append(" SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
+                .append(getJoinPart(refBook, null, sortAttribute))
+                .append(" WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) FROM ")
+                .append(refBook.getTableName())
+                .append(" WHERE version <= :version and record_id = frb.record_id))\n")
+                .append(!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter) ? " AND " + getColumnFilterQuery(columns, columnFilter) + "\n" : "")
+                .append(" ) p\n");
+        q.addNamedParam("version", version);
+
+        return q.withSort(getSortColumnName(sortAttribute), direction)
+                .withPaging(pagingParams);
+    }
+
+    /**
+     * Формирует запрос и параметры для отбора всех записей неверсионируемого справочника с учетом поиска по конкретным столбцам
+     * Фильтрация по ссылочным столбцам не реализована
+     *
+     * @param refBook       справочник
+     * @param columns       список стобцов в БД, по которым будет выполнена фильтрация
+     * @param columnFilter  строка с фильтрацией по столбцам. НЕ SQL-запрос, просто текст с которым будут сраваниваться значения колонок
+     * @param pagingParams  параметры пэйджинга
+     * @param sortAttribute атрибут, по которому будут отсортированы записи
+     * @param direction     направление сортировки
+     * @return SQL-запрос + параметры
+     */
+    public QueryBuilder allRecords(RefBook refBook, List<String> columns, String columnFilter, PagingParams pagingParams,
+                                   RefBookAttribute sortAttribute, String direction) {
+        QueryBuilder q = new QueryBuilder();
+
         q.append("SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
-                .append(getJoinPart(refBook, filter, sortAttribute))
-                .append(StringUtils.isNotEmpty(filter) ? " WHERE " + filter + "\n" : "");
+                .append(getJoinPart(refBook, null, sortAttribute));
+
+        if (!refBook.isReadOnly()) {
+            q.append(" WHERE frb.status = 0");
+        }
+
+        // Добавляем фильтрацию по выбранным столбцам
+        if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter)) {
+            q.append(refBook.isReadOnly() ? " WHERE " : " AND ").append(getColumnFilterQuery(columns, columnFilter));
+        }
+
+        return q.withSort(getSortColumnName(sortAttribute), direction)
+                .withPaging(pagingParams);
+    }
+
+    /**
+     * Формирует запрос и параметры для отбора всех записей неверсионируемого справочника
+     *
+     * @param refBook       справочник
+     * @param filter        фильтр для отбора записей. Фактически кусок SQL-запроса
+     * @param pagingParams  параметры пэйджинга
+     * @param sortAttribute атрибут, по которому будут отсортированы записи
+     * @param direction     направление сортировки
+     * @return SQL-запрос + параметры
+     */
+    public QueryBuilder allRecords(RefBook refBook, String filter, PagingParams pagingParams,
+                                   RefBookAttribute sortAttribute, String direction) {
+        QueryBuilder q = new QueryBuilder();
+
+        q.append("SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
+                .append(getJoinPart(refBook, filter, sortAttribute));
+
+        if (!refBook.isReadOnly()) {
+            q.append(" WHERE frb.status = 0");
+        }
+        if (StringUtils.isNotEmpty(filter)) {
+            q.append((refBook.isReadOnly() ? " WHERE " : " AND ") + filter + "\n");
+        }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)
                 .withPaging(pagingParams);
@@ -344,6 +436,7 @@ public class RefBookSimpleQueryBuilderComponent {
 
     /**
      * TODO метод реализован неоптимально, но оставлен для совместимости, вместо него надо использовать RefBookSimpleQueryBuilderComponent#allRecordsByVersion
+     *
      * @return
      */
     @Deprecated

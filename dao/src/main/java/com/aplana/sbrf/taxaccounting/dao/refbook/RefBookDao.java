@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -643,10 +640,10 @@ public interface RefBookDao {
     /**
      * Получает данные записей справочника замапленные на сущности
      *
-     * @param ps      объект с sql-запросом и его параметрами
+     * @param q      объект с sql-запросом и его параметрами
      * @param refBook справочник
      */
-    <T extends RefBookSimple> List<T> getMappedRecordsData(PreparedStatementData ps, RefBook refBook);
+    <T extends RefBookSimple> List<T> getMappedRecordsData(QueryBuilder q, RefBook refBook);
 
     List<Map<String, RefBookValue>> getRecordsWithHasChild(PreparedStatementData ps, RefBook refBook);
 

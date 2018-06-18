@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
         Date startDate = new Date();
         try {
-            printStream = new PrintStream(System.out, true, "cp866");
+            printStream = new PrintStream(System.out, true, "windows-1251");
             if (args.length < 3) {
                 printStream.print("Вы ввели неверное количество аргументов");
             } else {
@@ -41,7 +41,11 @@ public class Main {
                                 Integer.toString(i + 1).length() == 1 ?
                                         RandomStringUtils.randomAlphanumeric(30) + "-" + Integer.toString(i + 1)
                                         : RandomStringUtils.randomAlphanumeric(29) + "-" + Integer.toString(i + 1));
-                        new GeneratorRnuNdflXml().generateXML(sourceFile, tmpPath, Integer.parseInt(args[2]));
+                        if (sourceFile.getName().startsWith("FL")) {
+                            new GeneratorFLNdflXml().generateXML(sourceFile, tmpPath, Integer.parseInt(args[2]));
+                        } else {
+                            new GeneratorRnuNdflXml().generateXML(sourceFile, tmpPath, Integer.parseInt(args[2]));
+                        }
                     }
                 } else {
                     printStream.println("Тип формируемого файла не указан (xml или xlsx)");
