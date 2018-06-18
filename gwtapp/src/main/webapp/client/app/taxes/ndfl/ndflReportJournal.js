@@ -168,7 +168,7 @@
                             },
                             {name: 'department', index: 'department', width: 200},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 175},
-                            {name: 'state', index: 'state', width: 175},
+                            {name: 'state', index: 'state', width: 100},
                             {name: 'kpp', index: 'kpp', width: 85},
                             {name: 'oktmo', index: 'oktmo', width: 80},
                             {name: 'taxOrganCode', index: 'taxOrganCode', width: 70},
