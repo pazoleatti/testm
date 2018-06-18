@@ -197,6 +197,8 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
                 }
                 break;
             case STRING:
+                // exel удаляет ведущие нули в числовых значениях. если в ячейке записаны только цифры, значение ячейки в формате "Общий"
+                //воспринимается как числовое. решение: добавить табуляцию в начало https://stackoverflow.com/a/18133595
                 if (value.getStringValue() != null) {
                     result = "\t" + value.getStringValue();
                 }
