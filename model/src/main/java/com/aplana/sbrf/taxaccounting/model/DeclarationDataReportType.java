@@ -13,6 +13,7 @@ public class DeclarationDataReportType implements Serializable {
     //Типы отчетов, связанные с асинхронными задачами
     public static final DeclarationDataReportType EXCEL_DEC = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
     public static final DeclarationDataReportType XML_DEC = new DeclarationDataReportType(AsyncTaskType.XML_DEC, null);
+    public static final DeclarationDataReportType DEPT_NOTICE_DEC = new DeclarationDataReportType(AsyncTaskType.DEPT_NOTICE_DEC, null);
     public static final DeclarationDataReportType IDENTIFY_PERSON = new DeclarationDataReportType(AsyncTaskType.IDENTIFY_PERSON, null);
     public static final DeclarationDataReportType CONSOLIDATE = new DeclarationDataReportType(AsyncTaskType.CONSOLIDATE, null);
     public static final DeclarationDataReportType PDF_DEC = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
@@ -104,6 +105,8 @@ public class DeclarationDataReportType implements Serializable {
             return IDENTIFY_PERSON;
         } else if (CONSOLIDATE.getReportType().getName().equals(name)) {
             return CONSOLIDATE;
+        } else if (DEPT_NOTICE_DEC.getReportType().getName().equals(name)) {
+            return DEPT_NOTICE_DEC;
         } else {
             return new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
         }
@@ -136,6 +139,8 @@ public class DeclarationDataReportType implements Serializable {
             return CONSOLIDATE;
         } else if (UPDATE_PERSONS_DATA.getReportType().equals(reportType)) {
             return UPDATE_PERSONS_DATA;
+        } else if (DEPT_NOTICE_DEC.getReportType().equals(reportType)) {
+            return DEPT_NOTICE_DEC;
         } else {
             throw new IllegalArgumentException("Некорректный тип отчета: " + reportType.getName());
         }

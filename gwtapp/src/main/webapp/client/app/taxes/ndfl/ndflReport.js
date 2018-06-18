@@ -34,12 +34,12 @@
                                     projection: "existenceAndKind"
                                 },
                                 function (data) {
-                                    if(data.exists && data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id) {
+                                    if (data.exists && data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id) {
                                         d.resolve();
                                     } else {
                                         d.reject();
                                         var message;
-                                        if(data.exists) {
+                                        if (data.exists) {
                                             message = $filter('translate')('ndfl.notReportDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notReportDeclarationDataEnd');
                                         } else {
                                             message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
@@ -108,7 +108,7 @@
                 };
 
                 var interval;
-                $scope.updateDeclarationInfoPeriodically = function() {
+                $scope.updateDeclarationInfoPeriodically = function () {
                     if (angular.isDefined(interval)) {
                         return;
                     }
@@ -116,7 +116,7 @@
                     interval = $interval($scope.updateDeclarationInfo, 3000);
                 };
 
-                $scope.$on('$destroy', function() {
+                $scope.$on('$destroy', function () {
                     if (angular.isDefined(interval)) {
                         $interval.cancel(interval);
                         interval = undefined;
@@ -146,7 +146,7 @@
                                 content: response.restartMsg,
                                 okBtnCaption: $filter('translate')('common.button.yes'),
                                 cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick:function () {
+                                okBtnClick: function () {
                                     restartFunc(true);
                                 }
                             });
@@ -183,6 +183,7 @@
                                 $scope.availablePdf = data.availablePdf;
                                 $scope.availableReports = data.downloadXmlAvailable;
                                 $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                $scope.availableDeptNoticeDoc = data.downloadDeptNoticeAvailable;
                                 if (!$scope.pdfLoaded && data.availablePdf) {
                                     $http({
                                         method: "GET",
@@ -284,7 +285,7 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
                  */
                 $scope.createReport = function () {
-                    var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id?$filter('translate')('reportPersonFace.title'):$filter('translate')('reportPersonFace.title2');
+                    var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id ? $filter('translate')('reportPersonFace.title') : $filter('translate')('reportPersonFace.title2');
                     $aplanaModal.open({
                         title: title,
                         templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html?v=${buildUuid}',
@@ -293,7 +294,28 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    declarationDataId: $scope.declarationDataId
+                                    declarationDataId: $scope.declarationDataId,
+                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL
+                                };
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Формирование отчета "Уведомление о задолженности"
+                 */
+                $scope.createDeptNotice = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('reportPersonFace.deptNotice'),
+                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html?v=${buildUuid}',
+                        controller: 'reportNdflPersonFaceFormCtrl',
+                        windowClass: 'modal1200',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    declarationDataId: $scope.declarationDataId,
+                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.DEPT_NOTICE
                                 };
                             }
                         }
@@ -465,6 +487,9 @@
                 };
                 $scope.downloadPdf = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf";
+                };
+                $scope.downloadDeptNoticeDoc = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/deptNoticeDoc";
                 };
             }]);
 }());

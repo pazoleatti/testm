@@ -22,7 +22,8 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createPdf()" ng-show="!availablePdf">{{::'link.ndfl.reporting.createPdf' | translate}}</a>
+                            <a ng-click="createPdf()" ng-show="!availablePdf">{{::'link.ndfl.reporting.createPdf' |
+                                translate}}</a>
                             <a ng-click="downloadPdf()" ng-show="availablePdf">{{::'link.ndfl.reporting.downloadPdf' |
                                 translate}}</a>
                         </div>
@@ -36,6 +37,13 @@
                         <div class="row menuitem"
                              ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id">
                             <a ng-click="createReport()">{{::'link.ndflReport.reporting.formForFL21' |
+                                translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem"
+                        ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id || declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id">
+                        <div class="row menuitem">
+                            <a ng-click="createDeptNotice()">{{::'link.ndflReport.reporting.deptNotice' |
                                 translate}}</a>
                         </div>
                     </li>
@@ -155,7 +163,8 @@
                                     <label class="control-label">{{::'title.dateAndTimeCreate' | translate}}:</label>
                                 </div>
                                 <div class="span6">
-                                    <label class="font-normal info-text">{{declarationData.creationDate | dateTimeFormatter}}</label>
+                                    <label class="font-normal info-text">{{declarationData.creationDate |
+                                        dateTimeFormatter}}</label>
                                 </div>
                             </div>
                             <div class="row-fluid">
@@ -166,12 +175,14 @@
                                     <label class="font-normal info-text">{{declarationData.taxOrganCode}}</label>
                                 </div>
                             </div>
-                            <div class="row-fluid" ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
+                            <div class="row-fluid"
+                                 ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
                                 <div class="span6">
                                     <label class="control-label">{{::'title.adjustNegativeValues' | translate}}:</label>
                                 </div>
                                 <div class="span6">
-                                    <label class="font-normal info-text">{{('negativeValuesAdjustment.' + !!declarationData.isAdjustNegativeValues) | translate}}</label>
+                                    <label class="font-normal info-text">{{('negativeValuesAdjustment.' +
+                                        !!declarationData.isAdjustNegativeValues) | translate}}</label>
                                 </div>
                             </div>
                         </div>

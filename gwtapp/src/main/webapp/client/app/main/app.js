@@ -181,6 +181,7 @@
         "link.ndfl.sources": "Источники и приемники",
         "link.ndflReport.reporting.formForFL21": "Сформировать \"2-НДФЛ (1) по физическому лицу\"",
         "link.ndflReport.reporting.formForFL22": "Сформировать \"2-НДФЛ (2) по физическому лицу\"",
+        "link.ndflReport.reporting.deptNotice": "Сформировать \"Уведомление о задолженности\"",
 
         "ndfl.button.importExcel": "Загрузить из ТФ (Excel)",
 
@@ -388,6 +389,7 @@
         "rnuPersonFace.error.dateIntervalOutOfBounds": "Значение поля \"Дата рождения\" должно входить в интервал дат \"от 01.01.1900 до 31.12.2099\".",
         "reportPersonFace.title": "2-НДФЛ (1) по физическому лицу",
         "reportPersonFace.title2": "2-НДФЛ (2) по физическому лицу",
+        "reportPersonFace.deptNotice": "Уведомление о задолженности",
         "reportPersonFace.error.fieldsAreEmpty": "Для поиска физического лица необходимо выбрать хотя бы один критерий поиска",
         "reportPersonFace.info.numberOfFoundEntries": "Найдено записей: ",
         "reportPersonFace.info.found": "Найдено ",

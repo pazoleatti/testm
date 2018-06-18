@@ -143,7 +143,8 @@
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу
                 RNU_NDFL_PERSON_ALL_DB: "rnu_ndfl_person_all_db", // РНУ НДФЛ по всем ФЛ
                 REPORT_KPP_OKTMO: "report_kpp_oktmo", // Реестр сформированной отчетности
-                REPORT_2NDFL: "report_2ndfl" // 2-НДФЛ (1) по физическому лицу
+                REPORT_2NDFL: "report_2ndfl", // 2-НДФЛ (1) по физическому лицу
+                DEPT_NOTICE: "DEPT_NOTICE" // Уведомление о задолженности
             },
             CREATE_ASYNC_TASK_STATUS: {
                 NOT_EXIST_XML: "NOT_EXIST_XML", //не существует XML

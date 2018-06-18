@@ -646,4 +646,36 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.0-dnovikov-9" author="dnovikov">
+        <insert tableName="blob_data">
+            <column name="id" value="efde6350-c417-4d12-aca1-bc268d9490fb"/>
+            <column name="name" value="dept_notice.doc"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/dept_notice.docx"/>
+            <column name="creation_date" valueDate="2020-04-18"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-10" author="dnovikov">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="102"/>
+            <column name="BLOB_DATA_ID" value="efde6350-c417-4d12-aca1-bc268d9490fb"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-11" author="dnovikov">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="104"/>
+            <column name="BLOB_DATA_ID" value="efde6350-c417-4d12-aca1-bc268d9490fb"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-12" author="dnovikov">
+        <insert tableName="async_task_type">
+            <column name="id" value="35"/>
+            <column name="name" value="Формирования уведомления о задолженности"/>
+            <column name="handler_bean" value="DeptNoticeDocAsyncTask"/>
+            <column name="limit_kind" value="Количество ФЛ в НФ"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
