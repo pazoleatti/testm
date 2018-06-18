@@ -655,13 +655,6 @@
         </insert>
     </changeSet>
 
-    <changeSet id="3.0-dnovikov-10" author="dnovikov">
-        <insert tableName="declaration_template_file">
-            <column name="DECLARATION_TEMPLATE_ID" value="102"/>
-            <column name="BLOB_DATA_ID" value="efde6350-c417-4d12-aca1-bc268d9490fb"/>
-        </insert>
-    </changeSet>
-
     <changeSet id="3.0-dnovikov-11" author="dnovikov">
         <insert tableName="declaration_template_file">
             <column name="DECLARATION_TEMPLATE_ID" value="104"/>
