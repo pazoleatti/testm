@@ -153,7 +153,7 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
                 params,
                 new RefBookDepartmentRowMapper());
 
-        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", Integer.class);
+        int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", params, Integer.class);
         return new PagingResult<>(departments, totalCount);
     }
 
