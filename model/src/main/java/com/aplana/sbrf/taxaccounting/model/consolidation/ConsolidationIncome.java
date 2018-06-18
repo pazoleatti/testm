@@ -70,6 +70,7 @@ public class ConsolidationIncome extends NdflPersonIncome {
         this.overholdingTax = income.getOverholdingTax();
         this.refoundTax = income.getRefoundTax();
         this.taxTransferDate = income.getTaxTransferDate();
+        this.paymentNumber = income.getPaymentNumber();
         this.paymentDate = income.getPaymentDate();
         this.taxSumm = income.getTaxSumm();
     }
