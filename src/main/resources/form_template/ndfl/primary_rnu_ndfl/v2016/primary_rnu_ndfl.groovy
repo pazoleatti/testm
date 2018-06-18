@@ -1888,6 +1888,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
         Styler styler = new Styler(wb)
         CellStyle centeredStyle =  styler.createVerticalByTopHorizontalByCenter()
         CellStyle centeredStyleDate = styler.createVerticalByTopHorizontalByCenterDate()
+        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         for (NdflPerson np : context.getNdflPersonList()) {
             ScriptUtils.checkInterrupted()
             // определяем для физлица какой вид операций имеет наибольшее количество строк (доход, вычет, аванс)
@@ -1970,7 +1971,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_12.setCellStyle(centeredStyle)
                 cell_12.setCellValue(np.getStatus() != null ? np.getStatus() : "");
                 Cell cell_13 = row.createCell(13);
-                cell_13.setCellStyle(centeredStyle)
+                cell_13.setCellStyle(textCenteredStyle)
                 cell_13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "");
                 Cell cell_14 = row.createCell(14);
                 cell_14.setCellStyle(centeredStyle)
@@ -2005,15 +2006,15 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_24 = row.createCell(24);
                 cell_24.setCellStyle(centeredStyle)
                 Cell cell_25 = row.createCell(25);
-                cell_25.setCellStyle(centeredStyle)
+                cell_25.setCellStyle(textCenteredStyle)
                 Cell cell_26 = row.createCell(26);
                 cell_26.setCellStyle(centeredStyleDate)
                 Cell cell_27 = row.createCell(27);
                 cell_27.setCellStyle(centeredStyleDate)
                 Cell cell_28 = row.createCell(28);
-                cell_28.setCellStyle(centeredStyle)
+                cell_28.setCellStyle(textCenteredStyle)
                 Cell cell_29 = row.createCell(29);
-                cell_29.setCellStyle(centeredStyle)
+                cell_29.setCellStyle(textCenteredStyle)
                 Cell cell_30 = row.createCell(30);
                 cell_30.setCellStyle(centeredStyle)
                 Cell cell_31 = row.createCell(31);
