@@ -115,7 +115,7 @@
                 };
 
                 var interval;
-                $scope.updateDeclarationInfoPeriodically = function() {
+                $scope.updateDeclarationInfoPeriodically = function () {
                     if (angular.isDefined(interval)) {
                         return;
                     }
@@ -123,7 +123,7 @@
                     interval = $interval($scope.updateDeclarationInfo, 3000);
                 };
 
-                $scope.$on('$destroy', function() {
+                $scope.$on('$destroy', function () {
                     if (angular.isDefined(interval)) {
                         $interval.cancel(interval);
                         interval = undefined;
@@ -214,7 +214,7 @@
                     $scope.ndflTabs.forEach(function (tab) {
                         tab.isDataLoaded = false;
                     });
-                    $scope.ndflFilter = getNdflFilter();
+
                     $scope.ndflTabsCtrl.getActiveTab().refreshGrid(page);
                 };
 
@@ -225,13 +225,23 @@
                 };
 
                 $scope.ndflFilter = getNdflFilter();
+                $scope.searchFilter.fillFilterParams = function () {
+                    $scope.ndflFilter = getNdflFilter();
+                };
 
                 /**
-                 * @description Поиск по фильтру
+                 * @description Установка признака заполненности фильтра
                  */
-                $scope.submitSearch = function () {
-                    $scope.refreshGrid(1);
+                $scope.searchFilter.isClearByFilterParams = function () {
+                    $scope.searchFilter.isClear = !(isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income)
+                        && isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
                 };
+
+                function isEmpty(object) {
+                    return Object.keys(object).every(function(key) {
+                        return !object[key];
+                    });
+                }
 
                 /**
                  * @description сброс фильтра
@@ -252,7 +262,11 @@
                         deduction: $scope.searchFilter.params.deduction,
                         prepayment: $scope.searchFilter.params.prepayment
                     };
-                    filter.income.urmList = filter.income.urmList ? filter.income.urmList.map(function(urm) { return urm.enumName; }) : undefined;
+                    if (filter.income.urmList) {
+                        filter.income.urmList = filter.income.urmList.map(function (urm) {
+                            return urm.enumName;
+                        });
+                    }
                     return filter;
                 }
 
@@ -384,7 +398,7 @@
                  * Зависит от выделенных строк на вкладках, поэтому реализовано через события
                  */
                 $scope.canEditRow = false;
-                $rootScope.$on("selectedRowCountChanged", function(event, count){
+                $rootScope.$on("selectedRowCountChanged", function (event, count) {
                     $scope.canEditRow = count === 1
                 });
 
@@ -428,7 +442,7 @@
                                 };
                             }
                         },
-                        closeCallback: function(scope) {
+                        closeCallback: function (scope) {
                             scope.close();
                         }
                     }).result.then(
