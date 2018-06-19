@@ -694,4 +694,24 @@
                     valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_build_doc.groovy"/>
         </insert>
     </changeSet>
+
+    <changeSet id="3.0-dnovikov-15" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 102</where>
+        </update>
+    </changeSet>
+    <changeSet id="3.0-dnovikov-16" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 104</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-17" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

@@ -1006,6 +1006,7 @@ class Report6Ndfl extends AbstractScriptClass {
             if ((declarationDataConsolidated = findConsolidatedDeclarationForReport(departmentReportPeriod)) == null) {
                 return
             }
+            scriptParams.put("sourceFormId", declarationDataConsolidated.id)
 
             def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
             def declarationTypeId = currDeclarationTemplate.type.id
