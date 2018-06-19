@@ -87,23 +87,23 @@
             <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-4655 Реализовать хранимую процедуру удаления из справочника физлиц -->
 	<changeSet id="3.0-rnurgaleev-0" author="rnurgaleev">
         <sql splitStatements="false">
-            create or replace 
+            create or replace
 			procedure DeleteRefBookPerson(p_person_id number)
 			is
 			  v_address number;
 			begin
 			  delete from REF_BOOK_ID_TAX_PAYER where person_id=p_person_id;
-			  
+
 			  delete from REF_BOOK_ID_DOC where person_id=p_person_id;
-			  
+
 			  select address into v_address from REF_BOOK_PERSON where id=p_person_id;
-			  
+
 			  delete from REF_BOOK_PERSON where id=p_person_id;
-			  
+
 			  if v_address is not null then
 				delete from REF_BOOK_ADDRESS where id=v_address;
 			  end if;
@@ -127,7 +127,7 @@
             <where>id=15</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-4733 Не отображается "0" в копейках для сумм в форме 6-НДФЛ -->
     <changeSet id="3.0-rnurgaleev-1" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -339,78 +339,78 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-4625 Изменить записи справочников Коды доходов, Кодов вычетов и Видов доходов -->
 	<changeSet id="3.0-rnurgaleev-3" author="rnurgaleev">
         <sql>
 			update ref_book_income_type set name='Проценты (за исключением процентов по облигациям с ипотечным покрытием, эмитированным до 01.01.2007, доходов в виде процентов, получаемых по вкладам в банках, и доходов, получаемых при погашении векселя), включая дисконт, полученный по долговому обязательству любого вида'
 			where code='1011' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0;
-			
+
             insert into ref_book_income_type (id, record_id, version, status, code, name)
 			values(seq_ref_book_record.nextval, (select max(record_id) from ref_book_income_type where code='1011'), to_date('01.01.2017','DD.MM.YYYY'), 0, '1011','Проценты (за исключением процентов по облигациям с ипотечным покрытием, эмитированным до 01.01.2007, доходов в виде процентов, получаемых по вкладам в банках, и доходов, получаемых при погашении векселя), включая дисконт, полученный по долговому обязательству любого вида, за исключением сумм дохода в виде процента (купона), получаемого налогоплательщиком по обращающимся облигациям российских организаций, номинированным в рублях и эмитированным после 1 января 2017 года');
-			
+
 			update ref_book_income_type set version=to_date('01.01.2016','DD.MM.YYYY') where code in ('2002','2003');
-			
+
 			update ref_book_income_type set version=to_date('01.01.2017','DD.MM.YYYY') where code in ('2013','2014','2301','2611','3023');
-			
+
 			merge into ref_book_income_kind a using
-			(select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'01' as mark, 'Начисление дохода при выводе денежных средств с брокерского счёта' as name, 
+			(select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'01' as mark, 'Начисление дохода при выводе денежных средств с брокерского счёта' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'02' as mark, 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'02' as mark, 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'03' as mark, 'Начисление дохода при расторжении договора брокерского обслуживания' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'03' as mark, 'Начисление дохода при расторжении договора брокерского обслуживания' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'04' as mark, 'Начисление дохода по окончанию налогового периода за который начислен доход' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'04' as mark, 'Начисление дохода по окончанию налогового периода за который начислен доход' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'01' as mark, 'Начисление дохода при выводе денежных средств с брокерского счёта' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'01' as mark, 'Начисление дохода при выводе денежных средств с брокерского счёта' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'02' as mark, 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'02' as mark, 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'03' as mark, 'Начисление дохода при расторжении договора брокерского обслуживания' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'03' as mark, 'Начисление дохода при расторжении договора брокерского обслуживания' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'04' as mark, 'Начисление дохода по окончанию налогового периода за который начислен доход' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'04' as mark, 'Начисление дохода по окончанию налогового периода за который начислен доход' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'01' as mark, 'Начисление дохода при выводе денежных средств с брокерского счёта' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'01' as mark, 'Начисление дохода при выводе денежных средств с брокерского счёта' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'02' as mark, 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'02' as mark, 'Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'03' as mark, 'Начисление дохода при расторжении договора брокерского обслуживания' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'03' as mark, 'Начисление дохода при расторжении договора брокерского обслуживания' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'04' as mark, 'Начисление дохода по окончанию налогового периода за который начислен доход' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'04' as mark, 'Начисление дохода по окончанию налогового периода за который начислен доход' as name,
 			to_date('26.12.2016','DD.MM.YYYY') as version from dual
 			union all
-			select (select id from (select id,version from ref_book_income_type where code='4800' and status=0 order by version desc) where rownum=1) as income_type_id, 
-			'00' as mark, '-' as name, 
+			select (select id from (select id,version from ref_book_income_type where code='4800' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'00' as mark, '-' as name,
 			to_date('01.01.2016','DD.MM.YYYY') as version from dual
 			) b
 			on (a.income_type_id=b.income_type_id and a.mark=b.mark)
 			when not matched then
 				insert (id, income_type_id, mark, name, version, record_id)
 				values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name, b.version, seq_ref_book_record.nextval);
-				
+
 			update ref_book_deduction_type set version=to_date('01.01.2017','DD.MM.YYYY') where code='619';
 		</sql>
     </changeSet>
@@ -482,7 +482,7 @@
             update ref_book_attribute set width = 3 where ref_book_id = 928 and alias = 'CODE';
 
             update ref_book_attribute set width = 6 where ref_book_id = 35 and alias = 'CODE';
-            
+
             update ref_book_attribute set width = 3 where ref_book_id = 903 and alias = 'CODE';
         </sql>
     </changeSet>
@@ -676,5 +676,22 @@
             <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
             <where>declaration_type_id = 100</where>
         </update>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-13" author="dnovikov">
+        <insert tableName="event">
+            <column name="id" value="30"/>
+            <column name="name" value="Формирование документа"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-dnovikov-14" author="dnovikov">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="18"/>
+            <column name="declaration_template_id" value="104"/>
+            <column name="event_id" value="30"/>
+            <column name="script"
+                    valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_build_doc.groovy"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>
