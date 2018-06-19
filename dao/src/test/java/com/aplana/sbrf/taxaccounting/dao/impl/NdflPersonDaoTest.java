@@ -152,6 +152,7 @@ public class NdflPersonDaoTest {
     public void combinedSearchByOperationId() {
         NdflFilter filter = new NdflFilter();
         filter.setDeclarationDataId(50000);
+        // операция 1 есть во всех разделах 2-4
         filter.getIncome().setOperationId("1");
 
         PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
@@ -159,6 +160,20 @@ public class NdflPersonDaoTest {
         AllSectionsResult result = fetchAll(filter, pagingParams);
         assertEquals(1, result.getOperationIds().size());
         assertEquals(asList(1, 3, 3, 3), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
+    }
+
+    @Test
+    public void combinedSearchByOperationId2() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(50000);
+        // операция 2 есть только в разделах 2 и 3 (нет в р4)
+        filter.getIncome().setOperationId("3");
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+
+        AllSectionsResult result = fetchAll(filter, pagingParams);
+        assertEquals(1, result.getOperationIds().size());
+        assertEquals(asList(1, 3, 3, 0), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
     }
 
     @Test
