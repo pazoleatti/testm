@@ -714,4 +714,11 @@
             <where>declaration_type_id = 103</where>
         </update>
     </changeSet>
+
+    <changeSet id="3.0-ishevchuk-1" author="ishevchuk">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id=(select script_id from ref_book where id = 207)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
