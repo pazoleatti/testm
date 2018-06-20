@@ -746,6 +746,7 @@ class DeclarationType extends AbstractScriptClass {
             declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
 
             if (logger.containsLevel(LogLevel.ERROR)) {
+                logger.error("Файл ответа \"%s\" не соответствует формату", UploadFileName)
                 return
             }
         }

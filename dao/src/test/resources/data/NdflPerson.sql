@@ -218,8 +218,4 @@ insert into ndfl_person_prepayment (id, ndfl_person_id, source_id, row_num, oper
 
 (50004, 50002, null, 4, '2', 100, '1', to_date('04-10-2005','DD-MM-YYYY'), '11'),
 (50005, 50002, null, 5, '2', 100, '2', to_date('05-10-2005','DD-MM-YYYY'), '22'),
-(50006, 50002, null, 6, '2', 100, '3', to_date('06-10-2005','DD-MM-YYYY'), '33'),
-
-(50007, 50003, null, 7, '3', 100, '1', to_date('07-10-2005','DD-MM-YYYY'), '99'),
-(50008, 50003, null, 8, '3', 100, '2', to_date('08-10-2005','DD-MM-YYYY'), '22'),
-(50009, 50003, null, 9, '3', 100, '3', to_date('09-10-2005','DD-MM-YYYY'), '33');
+(50006, 50002, null, 6, '2', 100, '3', to_date('06-10-2005','DD-MM-YYYY'), '33');

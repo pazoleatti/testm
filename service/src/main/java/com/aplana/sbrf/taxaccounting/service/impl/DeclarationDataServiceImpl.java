@@ -511,16 +511,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, isAdjustNegativeValues, note, writeAudit, false);
     }
 
-    @Transactional
-    public void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        LOG.info(String.format("DeclarationDataServiceImpl.calculate by %s. declarationDataId: %s; docDate: %s; exchangeParams: %s",
-                userInfo, declarationDataId, docDate, exchangeParams));
-        boolean createForm = calculateDeclaration(logger, declarationDataId, userInfo, docDate, exchangeParams, stateLogger);
-        if (createForm) {
-            declarationDataDao.setStatus(declarationDataId, State.CREATED);
-        }
-    }
-
     @Override
     @PreAuthorize("hasPermission(#targetIdAndLogger, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IDENTIFY)")
     public void identify(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
@@ -568,21 +558,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
 
-    }
-
-    private boolean calculateDeclaration(Logger logger, Long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-
-        //2. проверяет состояние XML отчета экземпляра декларации
-        boolean createForm = setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
-
-        if (!createForm) {
-            return createForm;
-        }
-
-        logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
-        return createForm;
     }
 
     @Override
@@ -2130,7 +2105,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private boolean setDeclarationBlobs(Logger logger,
+    private boolean createReportFormXml(Logger logger,
                                         DeclarationData declarationData, Date docDate, TAUserInfo userInfo, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         if (exchangeParams == null) {
             exchangeParams = new HashMap<String, Object>();
@@ -2973,8 +2948,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
+    public void createReportForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
                 userInfo, departmentReportPeriod, declarationTypeId));
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
@@ -2989,14 +2964,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         int success = 0;
         int pairKppOktomoTotal = (Integer) scriptParams.get("pairKppOktmoTotal");
-        List<String> errorMsgList = new ArrayList<String>();
+        Long sourceFormId = (Long) scriptParams.get("sourceFormId");
         for (Map.Entry<Long, Map<String, Object>> entry : formMap.entrySet()) {
+            Long reportFormCreatedId = entry.getKey();
+            DeclarationData createdReportForm = declarationDataDao.get(reportFormCreatedId);
             Logger scriptLogger = new Logger();
             boolean createForm = true;
             try {
                 Map<String, Object> exchangeParams = entry.getValue();
                 exchangeParams.put("isAdjustNegativeValues", isAdjustNegativeValues);
-                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), exchangeParams, stateLogger);
+                createForm = createReportFormXml(scriptLogger, createdReportForm, new Date(), userInfo, exchangeParams, stateLogger);
             } catch (Exception e) {
                 createForm = false;
                 if (e.getMessage() != null && !e.getMessage().isEmpty()) {
@@ -3004,24 +2981,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             } finally {
                 if (!createForm) {
-                    declarationDataDao.delete(entry.getKey());
+                    declarationDataDao.delete(reportFormCreatedId);
                 } else {
                     success++;
-                    DeclarationData declaration = declarationDataDao.get(entry.getKey());
+                    DeclarationData declaration = declarationDataDao.get(reportFormCreatedId);
+                    // Добавление информации о источнике созданной отчетной формы.
+                    sourceService.deleteDeclarationConsolidateInfo(reportFormCreatedId);
+                    sourceService.addDeclarationConsolidationInfo(reportFormCreatedId, singletonList(sourceFormId));
+
                     auditService.add(FormDataEvent.CREATE, userInfo, declaration, "Налоговая форма создана", null);
-                    String message = getDeclarationFullName(entry.getKey(), null);
+                    String message = getDeclarationFullName(reportFormCreatedId, null);
                     logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"));
                 }
                 logger.getEntries().addAll(scriptLogger.getEntries());
             }
         }
         logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", success, pairKppOktomoTotal - success);
-        if (!errorMsgList.isEmpty()) {
-            logger.warn("Не удалось создать формы со следующими параметрами:");
-            for (String errorMsg : errorMsgList) {
-                logger.warn(errorMsg);
-            }
-        }
     }
 
     @Override

@@ -666,25 +666,35 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        boolean isOperationIdEmpty = filter.getIncome().getOperationId() == null || filter.getIncome().getOperationId().isEmpty();
-        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty() || !isOperationIdEmpty) {
+        // через UNION, т.к. operation_id общий
+        if (filter.getIncome().getOperationId() != null && !filter.getIncome().getOperationId().isEmpty()) {
             queryBuilder.append(" and exists (");
-            if (!incomeFilter.isEmpty() || !isOperationIdEmpty) {
+            queryBuilder.append(" select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ");
+            appendSqlLikeCondition("npi.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            queryBuilder.append(" UNION ALL ");
+            queryBuilder.append(" select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ");
+            appendSqlLikeCondition("npd.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            queryBuilder.append(" UNION ALL ");
+            queryBuilder.append(" select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ");
+            appendSqlLikeCondition("npp.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            queryBuilder.append(")");
+        }
+        // через INTERSECT, чтобы найденные операции из р2-4 пересекались
+        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+            queryBuilder.append(" and exists (");
+            if (!incomeFilter.isEmpty()) {
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
                         .append(incomeFilter);
-                appendSqlLikeCondition("npi.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
-            if (!deductionFilter.isEmpty() || !isOperationIdEmpty) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !isOperationIdEmpty ? " INTERSECT " : "");
+            if (!deductionFilter.isEmpty()) {
+                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
                         .append(deductionFilter);
-                appendSqlLikeCondition("npd.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
-            if (!prepaymentFilter.isEmpty() || !isOperationIdEmpty) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !isOperationIdEmpty ? " INTERSECT " : "");
+            if (!prepaymentFilter.isEmpty()) {
+                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
                         .append(prepaymentFilter);
-                appendSqlLikeCondition("npp.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
             }
             queryBuilder.append(")");
         }

@@ -61,7 +61,7 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
             throw new ServiceException("Не удалось определить налоговый период.");
         }
 
-        declarationDataService.createForms(logger, userInfo, departmentReportPeriod, declarationTypeId, isAdjustNegativeValues, new LockStateLogger() {
+        declarationDataService.createReportForms(logger, userInfo, departmentReportPeriod, declarationTypeId, isAdjustNegativeValues, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 asyncManager.updateState(taskData.getId(), state);

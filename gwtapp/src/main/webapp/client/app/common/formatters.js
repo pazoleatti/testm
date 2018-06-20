@@ -275,6 +275,18 @@
         })
 
         /**
+         * @description Обрезает
+         */
+        .filter('truncateStringFormatter', function () {
+            return function (string, limit) {
+                if (string && string.length > limit) {
+                    return string.substring(0, limit) + '...';
+                }
+                return string
+            };
+        })
+
+        /**
          * @description Форматирует конфигурационный параметр для отображения описания сущности
          */
         .filter('configParamFormatter', function () {

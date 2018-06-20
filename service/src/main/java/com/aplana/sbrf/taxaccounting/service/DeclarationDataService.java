@@ -673,13 +673,13 @@ public interface DeclarationDataService {
     void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files);
 
     /**
-     * Создание экземпляров форм
+     * Создание экземпляров отчетных форм
      *
      * @param departmentReportPeriod отчетный период
      * @param declarationTypeId      идентификатор типа декларации
      * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
      */
-    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger);
+    void createReportForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger);
 
     /**
      * Создание отчетности для выгрузки

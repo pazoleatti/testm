@@ -40,8 +40,10 @@
                 </li>
             </ul>
         </li>
-        <li class="app-header-user-info" style="padding-top: 4px;">
-            <div>{{security.user.department.name}}</div>
+        <li class="app-header-user-info" style="padding-top: 0; max-width: 300px; white-space: nowrap;">
+            <div title="{{::security.user.department.name}}">
+                {{security.user.department.name | truncateStringFormatter : 40}}
+            </div>
             <div title="{{::security.user.roles | joinObjectsPropFormatter : '; '}}">
                 {{security.user.name}}
             </div>
