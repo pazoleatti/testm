@@ -201,7 +201,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     }
                 }
                 logger.info("Проверка выполнена по файлу xsd: \"%s\"", xsdFileName);
-                fileInfo(logger, vsax3ExeFile);
+                fileInfo(logger, vsax3DllFile);
             }
         } catch (IOException e) {
             LOG.error("", e);
