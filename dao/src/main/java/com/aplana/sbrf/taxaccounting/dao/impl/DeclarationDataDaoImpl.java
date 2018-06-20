@@ -1009,4 +1009,26 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return d;
         }
     }
+
+    @Override
+    public List<Long> findApplication2DeclarationDataId(int reportYear) {
+        String sql = "select max (dd.id) as dd_id from declaration_data dd\n" +
+                "left join department_report_period drp on dd.department_report_period_id = drp.id\n" +
+                "left join department dep on drp.department_id = dep.id\n" +
+                "left join report_period rp on drp.report_period_id = rp.id\n" +
+                "left join report_period_type rpt on rp.dict_tax_period_id = rpt.id\n" +
+                "left join tax_period tp on rp.tax_period_id = tp.id\n" +
+                "where dd.declaration_template_id = 101\n" +
+                "and dep.id in (select id from department where dep.type = 2)\n" +
+                "and dd.state = 3\n" +
+                "and rpt.code = '34'\n" +
+                "and tp.year = :reportYear\n" +
+                "group by dep.id";
+        MapSqlParameterSource params = new MapSqlParameterSource("reportYear", reportYear);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
+        } catch (EmptyResultDataAccessException e ) {
+            return new ArrayList<>();
+        }
+    }
 }

@@ -554,4 +554,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public Date getDeclarationDataCreationDate(Long declarationDataId) {
         return logBusinessService.getFormCreationDate(declarationDataId);
     }
+
+    @Override
+    public List<Long> findApplication2DeclarationDataId(int reportYear) {
+        return declarationDataDao.findApplication2DeclarationDataId(reportYear);
+    }
 }

@@ -280,4 +280,11 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return
      */
     boolean existDeclarationData(DeclarationData declarationData);
+
+    /**
+     * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП
+     * @param reportYear    отчетный год
+     * @return  идентификаторы найденных налоговых форм
+     */
+    List<Long> findApplication2DeclarationDataId(int reportYear);
 }

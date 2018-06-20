@@ -671,4 +671,26 @@
         </insert>
     </changeSet>
 
+    <changeSet id="3.0-ytrofimov-23" author="ytrofimov">
+        <insert tableName="async_task_type">
+            <column name="id" value="36"/>
+            <column name="name" value="Создание Приложения 2 к декларации НП"/>
+            <column name="handler_bean" value="CreateApplication2AsyncTask"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-ytrofimov-24" author="ytrofimov">
+        <insert tableName="EVENT">
+            <column name="id" value="31"/>
+            <column name="name" value="Создание Приложения 2 к декларации НП"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-ytrofimov-25" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id=(select script_id from ref_book where id = 207)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

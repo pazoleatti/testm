@@ -7,6 +7,7 @@ public class SharedConstants {
     public final static String DATE_ZERO_AS_STRING = "00.00.0000";
     public final static String DATE_ZERO_AS_DATE = "01.01.1901";
     public final static String DATE_FORMAT = "dd.MM.yyyy";
+    public final static String FULL_DATE_FORMAT = "yyyy.MM.dd HH:mm:ss";
 
     //Полное наименование параметров Раздела 1 РНУ - Реквизиты
     public final static String INP_FULL = "Налогоплательщик.ИНП";
