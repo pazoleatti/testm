@@ -729,4 +729,12 @@
             <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
         </update>
     </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-5012 - Реализовать увеличение размерности параметров Раздела 1 РНУ  -->
+	<changeSet id="3.0-bgladkih-0" author="bgladkih">
+        <sql>
+            ALTER TABLE NDFL_PERSON MODIFY (last_name VARCHAR2(60 CHAR), first_name VARCHAR2(60 CHAR), middle_name VARCHAR2(60 CHAR), flat VARCHAR2(20 CHAR));
+        </sql>
+    </changeSet>
+	
 </databaseChangeLog>
