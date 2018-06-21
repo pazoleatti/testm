@@ -40,7 +40,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.TaxType
@@ -175,6 +174,9 @@ class Report2Ndfl extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("paramMap")) {
             this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
         }
+        if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
+            this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
+        }
         reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
     }
 
@@ -205,9 +207,6 @@ class Report2Ndfl extends AbstractScriptClass {
                 } finally {
                     break
                 }
-            case FormDataEvent.GET_SOURCES: //формирование списка источников
-                getSources()
-                break
             case FormDataEvent.PREPARE_SPECIFIC_REPORT:
                 // Подготовка для последующего формирования спецотчета
                 prepareSpecificReport()
@@ -223,8 +222,6 @@ class Report2Ndfl extends AbstractScriptClass {
                 break
         }
     }
-
-/************************************* ДАННЫЕ ДЛЯ ОБЩИХ СОБЫТИЙ *******************************************************/
 
 /************************************* СОЗДАНИЕ XML *****************************************************************/
 
@@ -1590,6 +1587,7 @@ class Report2Ndfl extends AbstractScriptClass {
             if ((declarationDataConsolidated = findConsolidatedDeclarationForReport(departmentReportPeriod)) == null) {
                 return
             }
+            scriptParams.put("sourceFormId", declarationDataConsolidated.id)
 
             def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
             def declarationTypeId = currDeclarationTemplate.type.id
@@ -1964,99 +1962,6 @@ class Report2Ndfl extends AbstractScriptClass {
         } else {
             paramMap.put("successfullPreCreate", true)
         }
-    }
-
-/*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
-    ReportPeriod sourceReportPeriod = null
-
-    ReportPeriod getReportPeriod() {
-        if (sourceReportPeriod == null) {
-            sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        }
-        return sourceReportPeriod
-    }
-
-/** Получить результат для события FormDataEvent.GET_SOURCES. */
-    void getSources() {
-        if (!(needSources)) {
-            // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
-            return
-        }
-        ReportPeriod reportPeriod = getReportPeriod()
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-        DeclarationData sourceForm = findConsolidatedDeclaration(departmentReportPeriod)
-        Department department = departmentService.get(sourceForm.departmentId)
-        Relation relation = getRelation(sourceForm, department, reportPeriod, RNU_NDFL_DECLARATION_TYPE)
-        if (relation) {
-            sources.sourceList.add(relation)
-        }
-        sources.sourcesProcessedByScript = true
-    }
-
-/**
- * Получить запись для источника-приемника.
- *
- * @param tmpDeclarationData нф
- * @param department подразделение
- * @param period период нф
- * @param monthOrder номер месяца (для ежемесячной формы)
- */
-    Relation getRelation(DeclarationData tmpDeclarationData, Department department, ReportPeriod period, Integer sourceTypeId) {
-        // boolean excludeIfNotExist - исключить несозданные источники
-
-        if (excludeIfNotExist && tmpDeclarationData == null) {
-            return null
-        }
-        // WorkflowState stateRestriction - ограничение по состоянию для созданных экземпляров
-        if (stateRestriction && tmpDeclarationData != null && stateRestriction != tmpDeclarationData.state) {
-            return null
-        }
-        Relation relation = new Relation()
-        def isSource = sourceTypeId == 101
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(tmpDeclarationData?.departmentReportPeriodId)
-        DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
-
-        // boolean light - заполняются только текстовые данные для GUI и сообщений
-        if (light) {
-            /**************  Параметры для легкой версии ***************/
-            /** Идентификатор подразделения */
-            relation.departmentId = department.id
-            /** полное название подразделения */
-            relation.fullDepartmentName = departmentService.getParentsHierarchy(department.id)
-            /** Дата корректировки */
-            relation.correctionDate = departmentReportPeriod?.correctionDate
-            /** Вид нф */
-            relation.declarationTypeName = declarationTemplate?.name
-            /** Год налогового периода */
-            relation.year = period.taxPeriod.year
-            /** Название периода */
-            relation.periodName = period.name
-        }
-        /**************  Общие параметры ***************/
-        /** подразделение */
-        relation.department = department
-        /** Период */
-        relation.departmentReportPeriod = departmentReportPeriod
-        /** Статус ЖЦ */
-        relation.declarationState = tmpDeclarationData?.state
-        /** форма/декларация создана/не создана */
-        relation.created = (tmpDeclarationData != null)
-        /** является ли форма источников, в противном случае приемник*/
-        relation.source = isSource
-        /** Введена/выведена в/из действие(-ия) */
-        relation.status = declarationTemplate.status == VersionedObjectStatus.NORMAL
-        /** Налог */
-        relation.taxType = TaxType.NDFL
-        /**************  Параметры НФ ***************/
-        /** Идентификатор созданной формы */
-        relation.declarationDataId = tmpDeclarationData?.id
-        /** Вид НФ */
-        relation.declarationTemplate = declarationTemplate
-        /** Тип НФ */
-        //relation.formDataKind = tmpDeclarationData.kind
-
-        return relation
     }
 
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/

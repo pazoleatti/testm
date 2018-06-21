@@ -1,15 +1,19 @@
-package refbook // declaration_type_ref комментарий для локального поиска скрипта
+package refbook
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo
+import com.aplana.sbrf.taxaccounting.model.application2.Application2Income
+
+// declaration_type_ref комментарий для локального поиска скрипта
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
 import org.apache.commons.io.IOUtils
@@ -23,6 +27,8 @@ import org.xml.sax.helpers.DefaultHandler
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
+import java.math.MathContext
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
@@ -48,6 +54,14 @@ class DeclarationType extends AbstractScriptClass {
     BlobDataService blobDataServiceDaoImpl
     DepartmentReportPeriodService departmentReportPeriodService
     ReportPeriodService reportPeriodService
+    ScriptSpecificRefBookReportHolder scriptSpecificRefBookReportHolder
+    int reportYear
+    List<String> application2IncomeCodes = ["1010", "1011", "1110", "1120", "1530", "1531", "1532", "1533", "1535",
+                                            "1536", "1537", "1538", "1539", "1540", "1541", "1542", "1544", "1545",
+                                            "1546", "1547", "1548", "1549", "1550", "1551", "1552", "1553", "1554",
+                                            "2640", "2641", "3023"]
+    NdflPersonService ndflPersonService
+    String version
 
     private DeclarationType() {
     }
@@ -97,6 +111,18 @@ class DeclarationType extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
             this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
         }
+        if (scriptClass.getBinding().hasVariable("reportYear")) {
+            this.reportYear = (int) scriptClass.getProperty("reportYear")
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
+        }
+        if (scriptClass.getBinding().hasVariable("dataHolder")) {
+            this.scriptSpecificRefBookReportHolder = (ScriptSpecificRefBookReportHolder) scriptClass.getProperty("dataHolder")
+        }
+        if (scriptClass.getBinding().hasVariable("version")) {
+            this.version = (String) scriptClass.getProperty("version")
+        }
     }
 
     @Override
@@ -104,6 +130,9 @@ class DeclarationType extends AbstractScriptClass {
         switch (formDataEvent) {
             case FormDataEvent.IMPORT_TRANSPORT_FILE:
                 importTF()
+                break
+            case FormDataEvent.CREATE_APPLICATION_2:
+                createApplication2()
                 break
         }
     }
@@ -380,7 +409,6 @@ class DeclarationType extends AbstractScriptClass {
     final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(NONDFL.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
     final int sizeLastEntry = 4
 
-
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
  */
@@ -423,7 +451,7 @@ class DeclarationType extends AbstractScriptClass {
                         line = bufferedReader.readLine()
 
                         //Необходимо условие если две ошибки идут подряд и не разделены между собой спец строкой
-                        if ((lastEntry != null) && (lastEntry.size()==sizeLastEntry)){
+                        if ((lastEntry != null) && (lastEntry.size() == sizeLastEntry)) {
                             notCorrectList.add(lastEntry)
                             lastEntry = [:]
                             continue
@@ -718,6 +746,7 @@ class DeclarationType extends AbstractScriptClass {
             declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
 
             if (logger.containsLevel(LogLevel.ERROR)) {
+                logger.error("Файл ответа \"%s\" не соответствует формату", UploadFileName)
                 return
             }
         }
@@ -939,7 +968,7 @@ class DeclarationType extends AbstractScriptClass {
             }
             if (formDepartments.size() > 1) {
                 String departments = "";
-                for(Department department : formDepartments) {
+                for (Department department : formDepartments) {
                     departments = departments + "\"" + department.getName().replaceAll("\"", "") + "\", ";
                 }
                 departments = departments.substring(0, departments.length() - 2);
@@ -1167,6 +1196,181 @@ class DeclarationType extends AbstractScriptClass {
     String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
         def dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : "";
+    }
+
+    void createApplication2() {
+        List<Long> declarationDataIdList = declarationService.findApplication2DeclarationDataId(reportYear)
+        if (declarationDataIdList.isEmpty()) {
+            logger.error("Файл Приложения 2 не может быть сформирован: не обнаружено КНФ в состоянии \"Принята\"")
+            return
+        }
+        logger.info("Для формирования Приложения 2 используются КНФ в состоянии \"Принята\": %s", declarationDataIdList.join(", "))
+        List<Application2Income> incomes = ndflPersonService.fetchApplication2Incomes(application2IncomeCodes, declarationDataIdList)
+        if (incomes.isEmpty()) {
+            logger.error("Файл Приложения 2 не может быть сформирован: не обнаружено строк Раздела 2 \"Сведения о доходах и НДФЛ\" с кодами дохода 1010, 1011, 1110, 1120, 1530, 1531, 1532, 1533, 1535, 1536, 1537, 1538, 1539, 1540, 1541, 1542, 1544, 1545, 1546, 1547, 1548, 1549, 1550, 1551, 1552, 1553, 1554, 2640, 2641, 3023")
+            return
+        }
+        List<NdflPerson> refBookPersons = ndflPersonService.fetchRefBookPersonsAsNdflPerson(new ArrayList<Long>(incomes.refBookPersonId.toSet()))
+        Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
+        for (NdflPerson refBookPerson : refBookPersons) {
+            refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
+        }
+        Map<Pair<Long, Integer>, List<Application2Income>> incomesGroupedByPersonAndTaxRate = [:]
+        for (Application2Income income : incomes) {
+            Pair<Long, Integer> key = new Pair<>(income.refBookPersonId, income.taxRate);
+            List<Application2Income> group = incomesGroupedByPersonAndTaxRate.get(key)
+            if (group == null) {
+                incomesGroupedByPersonAndTaxRate.put(key, [income])
+            } else {
+                group.add(income)
+            }
+        }
+
+
+        OutputStream writer = scriptSpecificRefBookReportHolder.getFileOutputStream()
+        com.aplana.sbrf.taxaccounting.model.Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
+        StringBuilder headerBuilder = new StringBuilder(new Date().format(SharedConstants.FULL_DATE_FORMAT))
+                .append("|")
+                .append(userDepartment.getName().replaceAll("\\|", " "))
+                .append("|")
+                .append("Приложение 2")
+                .append("|")
+                .append(String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version))
+                .append("|")
+                .append("\r\n")
+                .append("\r\n")
+        IOUtils.write(headerBuilder.toString(), writer, "IBM866")
+
+        int refNum = 1
+        for (Pair<Long, Integer> personTaxRate : incomesGroupedByPersonAndTaxRate.keySet()) {
+            NdflPerson refBookPerson = refBookPersonsGroupedById.get(personTaxRate.getFirst())
+
+            BigDecimal incomeAccruedSumm = null
+            BigDecimal incomeDeductionSumm = null
+            BigDecimal taxBaseSumm = null
+            BigDecimal withholdingTaxSumm = null
+            Long taxTransferSumm = null
+            BigDecimal overholdingTaxSumm = null
+            BigDecimal notholdingTaxSumm = null
+
+            for (Application2Income income : incomesGroupedByPersonAndTaxRate.get(personTaxRate)) {
+                if (income.incomeAccruedSumm != null) {
+                    if (incomeAccruedSumm == null) {
+                        incomeAccruedSumm = new BigDecimal("0", new MathContext(2, RoundingMode.HALF_UP))
+                    }
+                    incomeAccruedSumm = incomeAccruedSumm.add(income.incomeAccruedSumm)
+                }
+                if (income.totalDeductionsSumm != null) {
+                    if (incomeDeductionSumm == null) {
+                        incomeDeductionSumm = new BigDecimal("0", new MathContext(2, RoundingMode.HALF_UP))
+                    }
+                    incomeDeductionSumm = incomeDeductionSumm.add(income.totalDeductionsSumm)
+                }
+                if (income.taxBase != null) {
+                    if (taxBaseSumm == null) {
+                        taxBaseSumm = new BigDecimal("0", new MathContext(2, RoundingMode.HALF_UP))
+                    }
+                    taxBaseSumm = taxBaseSumm.add(income.taxBase)
+                }
+                if (income.withholdingTax != null) {
+                    if (withholdingTaxSumm == null) {
+                        withholdingTaxSumm = new BigDecimal("0")
+                    }
+                    withholdingTaxSumm = withholdingTaxSumm.add(income.withholdingTax)
+                }
+                if (income.taxSumm != null) {
+                    if (taxTransferSumm == null) {
+                        taxTransferSumm = 0L
+                    }
+                    taxTransferSumm += income.taxSumm
+                }
+                if (income.overholdingTax != null) {
+                    if (overholdingTaxSumm == null) {
+                        overholdingTaxSumm = new BigDecimal("0")
+                    }
+                    overholdingTaxSumm = overholdingTaxSumm.add(income.overholdingTax)
+                }
+                if (income.notHoldingTax != null) {
+                    if (notholdingTaxSumm == null) {
+                        notholdingTaxSumm = new BigDecimal("0")
+                    }
+                    notholdingTaxSumm = notholdingTaxSumm.add(income.notHoldingTax)
+                }
+            }
+
+            StringBuilder dataBuilder = new StringBuilder(refNum++)
+            dataBuilder.append("|")
+                    .append((refBookPerson.innNp ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.innForeign ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.lastName ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.firstName ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.middleName ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.status ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : ""))
+                    .append("|")
+                    .append((refBookPerson.citizenship ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.idDocType ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.idDocNumber ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.postIndex ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.regionCode ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.area ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.city ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.locality ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.street ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.house ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.building ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.flat ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.countryCode ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append((refBookPerson.address ?: "").replaceAll("\\|", ""))
+                    .append("|")
+                    .append(personTaxRate.getSecond() ?: "")
+                    .append("|")
+                    .append(incomeAccruedSumm ?: "")
+                    .append("|")
+                    .append(incomeDeductionSumm ?: "")
+                    .append("|")
+                    .append(taxBaseSumm ?: "")
+                    .append("|")
+                    .append(withholdingTaxSumm ?: "")
+                    .append("|")
+                    .append(incomeAccruedSumm ?: "")
+                    .append("|")
+                    .append(overholdingTaxSumm ?: "")
+                    .append("|")
+                    .append(notholdingTaxSumm ?: "")
+                    .append("|")
+                    .append("\r\n")
+            IOUtils.write(dataBuilder.toString(), writer, "IBM866")
+        }
+        IOUtils.closeQuietly(writer)
+        scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName(userDepartment.getName()))
+    }
+
+    String createApplication2FileName(String departmentName) {
+        StringBuilder nameBuilder = new StringBuilder("_____app2_______")
+        nameBuilder.append(departmentName)
+        .append("34")
+        .append(reportYear)
+        .append(".rnu")
     }
 
 }
