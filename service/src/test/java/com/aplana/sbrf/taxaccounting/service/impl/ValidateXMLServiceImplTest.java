@@ -5,12 +5,15 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.ClassUtils;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -210,6 +214,12 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setDeclarationTemplateId(5);
         data.setId(3l);
         Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, uuidXsd1));
+        Iterables.find(logger.getEntries(), new Predicate<LogEntry>() {
+            @Override
+            public boolean apply(@Nullable LogEntry input) {
+                return input.getMessage().equals("Проверка выполнена по библиотеке ФНС версии 3.2.0.2");
+            }
+        });
     }
 
     @Test
@@ -217,11 +227,10 @@ public class ValidateXMLServiceImplTest implements Runnable {
         if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
 
-        File fileVSAX = File.createTempFile("VSAX3", ".exe");
+        File fileVSAX = File.createTempFile("VSAX3", ".dll");
         try {
             FileOutputStream outputStream = new FileOutputStream(fileVSAX);
-            InputStream inputStream = this.getClass().getResourceAsStream("/vsax3/VSAX3.exe");
-            ;
+            InputStream inputStream = this.getClass().getResourceAsStream("/vsax3/VSAX3.dll");
             try {
                 IOUtils.copy(inputStream, outputStream);
             } finally {
@@ -236,7 +245,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
             Assert.assertTrue(!logger.containsLevel(LogLevel.ERROR));
             Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
-            System.out.println(logger.getEntries().get(0).getMessage());
+            Assert.assertEquals("Проверка выполнена по библиотеке ФНС версии 3.2.0.2", logger.getEntries().get(0).getMessage());
         } finally {
             fileVSAX.delete();
         }

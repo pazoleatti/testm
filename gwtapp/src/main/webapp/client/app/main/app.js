@@ -128,6 +128,7 @@
         "title.commonParams.default": "Восстановление значений по умолчанию",
         "menu.taxes": "Налоги",
         "menu.taxes.ndfl": "НДФЛ",
+        "menu.taxes.application2": "Сформировать Приложение 2",
         "menu.taxes.ndfl.details": "НДФЛ детализация",
         "menu.taxes.ndfl.forms": "Формы",
         "menu.taxes.ndfl.maintenanceOfPeriods": "Ведение периодов",
@@ -878,7 +879,10 @@
 
         "scriptExecution.title": "Выполнение скриптов",
         "scriptExecution.button.execute": "Выполнить скрипт",
-        "scriptExecution.label.upload": "Выберите архив со скриптом для загрузки"
+        "scriptExecution.label.upload": "Выберите архив со скриптом для загрузки",
+
+        "application2.title.modal": "Создание файла приложения 2",
+        "application2.label.year": "Год"
     };
     /**
      * @description Основной модуль приложения

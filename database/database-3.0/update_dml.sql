@@ -9,6 +9,12 @@ prompt ref_book
 prompt update blob_data
 @@blob_data.sql;
 
+prompt fill async_task_type
+@@async_task_type.sql;
+
+prompt fill event
+@@event.sql;
+
 
 commit;
 exit;

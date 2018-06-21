@@ -729,4 +729,34 @@
             <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
         </update>
     </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-5012 - Реализовать увеличение размерности параметров Раздела 1 РНУ  -->
+	<changeSet id="3.0-bgladkih-0" author="bgladkih">
+        <sql>
+            ALTER TABLE NDFL_PERSON MODIFY (last_name VARCHAR2(60 CHAR), first_name VARCHAR2(60 CHAR), middle_name VARCHAR2(60 CHAR), flat VARCHAR2(20 CHAR));
+        </sql>
+    </changeSet>
+
+    <changeSet id="3.0-ytrofimov-23" author="ytrofimov">
+        <insert tableName="async_task_type">
+            <column name="id" value="36"/>
+            <column name="name" value="Создание Приложения 2 к декларации НП"/>
+            <column name="handler_bean" value="CreateApplication2AsyncTask"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-ytrofimov-24" author="ytrofimov">
+        <insert tableName="EVENT">
+            <column name="id" value="31"/>
+            <column name="name" value="Создание Приложения 2 к декларации НП"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.0-ytrofimov-25" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id=(select script_id from ref_book where id = 207)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

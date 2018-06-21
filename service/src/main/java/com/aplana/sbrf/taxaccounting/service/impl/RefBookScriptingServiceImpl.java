@@ -98,7 +98,11 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         boolean result = executeScript(userInfo, refBook, script, scriptFilePath, event, logger, additionalParameters);
         // Откат при возникновении фатальных ошибок в скрипте
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
+            if (event.equals(FormDataEvent.CREATE_APPLICATION_2)) {
+                throw new ServiceException();
+            } else {
+                throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
+            }
         }
         return result;
 

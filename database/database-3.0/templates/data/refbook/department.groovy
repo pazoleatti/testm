@@ -29,7 +29,7 @@ import groovy.transform.TypeCheckingMode
  * В скрипт перенесены:
  *      проверки корректности 1..9 - http://conf.aplana.com/pages/viewpage.action?pageId=11378367
  *      проверки при редактировании записи шаги 3, 5, 6 - http://conf.aplana.com/pages/viewpage.action?pageId=11378355
- */
+*/
 
 (new Department(this)).run();
 
@@ -67,6 +67,9 @@ class Department extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentService")) {
             this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
+        if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
+            this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
         }
     }
 

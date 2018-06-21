@@ -1,0 +1,32 @@
+<form class="form-horizontal" name="createApplication2Form" data-aplana-submit-valid="create()">
+    <div class="modal-body" style="min-height:30px">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
+               style="height: 30px;">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'application2.label.year' | translate}}:</label>
+                </td>
+                <td>
+                    <input  type="number"
+                            min="1000"
+                            max="9999"
+                            onKeyPress="if(this.value.length==4) return false;"
+                            data-ng-model="reportYear"
+                            style="width: 300px"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton">
+            <span data-translate-once="button.create"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" data-ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

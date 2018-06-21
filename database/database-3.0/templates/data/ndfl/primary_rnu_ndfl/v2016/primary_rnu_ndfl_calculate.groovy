@@ -162,6 +162,9 @@ class Calculate extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("personService")) {
             this.personService = (PersonService) scriptClass.getProperty("personService")
         }
+        if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
+            this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
+        }
     }
 
     @Override

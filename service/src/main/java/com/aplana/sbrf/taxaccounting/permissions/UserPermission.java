@@ -137,6 +137,11 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> VIEW_TAXES_SERVICE = new ViewTaxesServicePermission(1 << 25);
 
+    /**
+     * Право доступа к пункту меню "Налоги - Создание файла приложения 2"
+     */
+    public static final Permission<TAUser> VIEW_TAXES_CREATE_APPLICATION_2 = new ViewTaxesCreateApplication2Permission(1 << 26);
+
     public UserPermission(long mask) {
         super(mask);
     }
@@ -537,6 +542,18 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN);
+        }
+    }
+
+    public static final class ViewTaxesCreateApplication2Permission extends UserPermission {
+
+        public ViewTaxesCreateApplication2Permission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 }

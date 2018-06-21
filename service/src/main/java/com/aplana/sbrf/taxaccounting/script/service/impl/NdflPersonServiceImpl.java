@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.script.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.application2.Application2Income;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -384,5 +385,15 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> ndflPersonIdList, Date actualDate) {
         return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(ndflPersonIdList, actualDate);
+    }
+
+    @Override
+    public List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds) {
+        return ndflPersonDao.fetchApplication2Incomes(incomeCodes, declarationDataIds);
+    }
+
+    @Override
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList) {
+        return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(personIdList);
     }
 }

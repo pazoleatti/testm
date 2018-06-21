@@ -533,4 +533,11 @@ public interface DeclarationService {
      * @return  дата
      */
     Date getDeclarationDataCreationDate(Long declarationDataId);
+
+    /**
+     * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП
+     * @param reportYear    отчетный год
+     * @return  идентификаторы найденых налоговых форм
+     */
+    List<Long> findApplication2DeclarationDataId(int reportYear);
 }

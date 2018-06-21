@@ -500,11 +500,6 @@ class Calculate extends AbstractScriptClass {
                 prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
                 prepayment.rowNum = prepaymentRowNum
             }
-
-            ndflPerson.id = null
-            ndflPerson.declarationDataId = declarationData.id
-            ndflPerson.modifiedDate = null
-            ndflPerson.modifiedBy = null
         }
 
         //noinspection GroovyAssignabilityCheck
@@ -532,6 +527,11 @@ class Calculate extends AbstractScriptClass {
                         "${declarationDataPerson.declarationDataId}")
                 continue
             }
+
+            declarationDataPerson.id = null
+            declarationDataPerson.modifiedDate = null
+            declarationDataPerson.modifiedBy = null
+            declarationDataPerson.declarationDataId = declarationData.id
 
             if (refBookPerson.idDocType == null) {
                 withoutDulPersonList << refBookPerson

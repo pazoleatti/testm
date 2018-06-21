@@ -170,6 +170,12 @@ PROMPT Fill tables...
 PROMPT Fill complete
 PROMPT ======================
 
+PROMPT Fill declaration_template_file...
+@declaration_template_file.sql
+PROMPT Fill complete
+PROMPT ======================
+
+
 set feedback off;
 set verify off;
 set serveroutput on;

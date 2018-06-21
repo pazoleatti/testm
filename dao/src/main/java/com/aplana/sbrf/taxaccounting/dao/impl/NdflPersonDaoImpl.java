@@ -7,29 +7,14 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.URM;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.application2.Application2Income;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.*;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -43,11 +28,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
+import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -2289,6 +2270,68 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
         params.addValue("currentDate", actualDate);
         return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRefBookRowMapper());
+    }
+
+    @Override
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList) {
+        if (personIdList.size() > IN_CLAUSE_LIMIT) {
+            List<NdflPerson> result = new ArrayList<>();
+            int n = (personIdList.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(personIdList, i);
+                List<NdflPerson> subResult = fetchNdflPersonByIdList(subList);
+                result.addAll(subResult);
+            }
+            return result;
+        }
+        String sql = "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
+                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
+                "rba.appartment, rbc.code AS country_code, rba.address " +
+                "FROM ref_book_person rbp " +
+                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
+                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
+                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
+                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
+                "WHERE rbp.id IN (:personIdList)";
+
+        MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRefBookRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds) {
+        String sql = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", rbp.id as person_id from ndfl_person_income npi\n" +
+                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on np.declaration_data_id = dd.id\n" +
+                "left join ref_book_person rbp on np.person_id = rbp.id\n" +
+                "where dd.id in (:declarationDataIds)\n" +
+                "and rbp.status = 0\n" +
+                "and npi.operation_id in (select distinct npi.operation_id from ndfl_person_income npi \n" +
+                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on np.declaration_data_id = dd.id\n" +
+                "where dd.id in (:declarationDataIds)\n" +
+                "and npi.income_code in (:incomeCodes))";
+        MapSqlParameterSource params = new MapSqlParameterSource("incomeCodes", incomeCodes);
+        params.addValue("declarationDataIds", declarationDataIds);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Application2Income>() {
+                @Override
+                public Application2Income mapRow(ResultSet resultSet, int i) throws SQLException {
+                    Application2Income income = new Application2Income(new NdflPersonIncomeRowMapper().mapRow(resultSet, i));
+                    income.setRefBookPersonId(SqlUtils.getLong(resultSet, "person_id"));
+                    return income;
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
     }
 
     private static final class NdflPersonRefBookRowMapper implements RowMapper<NdflPerson> {
