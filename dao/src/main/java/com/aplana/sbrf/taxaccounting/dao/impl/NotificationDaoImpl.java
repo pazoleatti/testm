@@ -84,7 +84,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
                 "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, LOG_ID, TYPE, REPORT_ID)" +
-                " values (?, ?, ?, ?, ?, ?, sysdate ,?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+                " values (?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Notification elem = notifications.get(i);
@@ -95,12 +95,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 ps.setObject(4, elem.getReceiverDepartmentId(), Types.NUMERIC);
                 ps.setBoolean(5, elem.isRead());
                 ps.setString(6, elem.getText());
-                ps.setDate(7, elem.getDeadline() != null ? new java.sql.Date(elem.getDeadline().getTime()) : null);
-                ps.setObject(8, elem.getUserId(), Types.NUMERIC);
-                ps.setObject(9, elem.getRoleId(), Types.NUMERIC);
-                ps.setString(10, elem.getLogId());
-                ps.setInt(11, elem.getNotificationType().getId());
-                ps.setString(12, elem.getReportId());
+                ps.setTimestamp(7, new java.sql.Timestamp(new Date().getTime()));
+                ps.setDate(8, elem.getDeadline() != null ? new java.sql.Date(elem.getDeadline().getTime()) : null);
+                ps.setObject(9, elem.getUserId(), Types.NUMERIC);
+                ps.setObject(10, elem.getRoleId(), Types.NUMERIC);
+                ps.setString(11, elem.getLogId());
+                ps.setInt(12, elem.getNotificationType().getId());
+                ps.setString(13, elem.getReportId());
             }
 
             @Override

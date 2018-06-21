@@ -133,8 +133,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     @Override
     public void execute(final AsyncTaskData taskData) {
+        TimeZone.setDefault(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
         final Logger logger = new Logger();
-        final Date startDate = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get())).getTime();
+        final Date startDate = Calendar.getInstance().getTime();
 
         Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
         final boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());

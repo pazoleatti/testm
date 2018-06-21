@@ -36,7 +36,7 @@
                                 name: 'createDate',
                                 index: 'create_date',
                                 width: 155,
-                                formatter: $filter('dateTimeFormatter')
+                                formatter: $filter('dateTimeWithTimeZoneFormatter')
                             },
                             {
                                 name: 'text',

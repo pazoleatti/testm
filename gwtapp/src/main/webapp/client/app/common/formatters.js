@@ -66,6 +66,26 @@
         }])
 
         /**
+         * @description Фильтр даты и времени с часовым поясом GMT+3
+         *
+         * @param value - значение, которое необходимо отформатировать
+         * @return Дата и время в формате 'dd.MM.yyyy HH:mm:ss'
+         */
+        .filter('dateTimeWithTimeZoneFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (!value) {
+                    return '';
+                }
+                if (!value.millis) {
+                    return $filter('date')(value, 'dd.MM.yyyy HH:mm:ss', '+3');
+                }
+                else {
+                    return $filter('date')(value.millis, 'dd.MM.yyyy HH:mm:ss', '+3');
+                }
+            };
+        }])
+
+        /**
          * @description Фильтр создаёт по коллекции объектов коллекцию их идентификаторов.
          *
          * @param items - коллекция объектов
