@@ -34,7 +34,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -768,8 +767,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("npi.payment_number", filter.getNumberPaymentOrder(), filterBuilder, params);
 
         if (!filter.getUrmList().isEmpty() && !filter.getUrmList().containsAll(asList(URM.values()))) {
-            StopWatch stopWatch = new StopWatch("SEARCH BY URM");
-            stopWatch.start();
             List<URM> urmList = filter.getUrmList();
             List<Pair<String, String>> kppOktmoPairs = getKppOktmoPairsByURM(filter.getNdflFilter().getDeclarationDataId(), urmList);
             System.out.println(kppOktmoPairs.toString());
@@ -778,8 +775,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             } else {
                 filterBuilder.append(SqlUtils.pairInStatement("and not (npi.kpp, npi.oktmo)", kppOktmoPairs));
             }
-            stopWatch.stop();
-            LOG.info(stopWatch.shortSummary());
         }
         appendSqlLikeCondition("npi.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npi.id", filter.getId(), filterBuilder, params);
