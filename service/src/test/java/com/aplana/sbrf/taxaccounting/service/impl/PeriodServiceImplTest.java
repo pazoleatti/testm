@@ -23,7 +23,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static com.aplana.sbrf.taxaccounting.mock.UserMockUtils.mockUser;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 

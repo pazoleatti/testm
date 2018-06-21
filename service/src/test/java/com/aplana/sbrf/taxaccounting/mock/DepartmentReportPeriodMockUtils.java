@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.test;
+package com.aplana.sbrf.taxaccounting.mock;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;

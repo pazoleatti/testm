@@ -13,8 +13,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static com.aplana.sbrf.taxaccounting.mock.DeclarationTypeMockUtils.mockDeclarationType;
+import static com.aplana.sbrf.taxaccounting.mock.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
