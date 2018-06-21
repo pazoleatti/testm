@@ -609,6 +609,8 @@ class Report6Ndfl extends AbstractScriptClass {
                                         if (minusIncome > 0) {
                                             minusIncome = 0
                                         }
+                                    } else {
+                                        minusIncome += value.incomeSum
                                     }
                                     if (value.withholdingTaxSum > 0) {
                                         def tmp = value.withholdingTaxSum
@@ -617,14 +619,14 @@ class Report6Ndfl extends AbstractScriptClass {
                                         if (minusWithholding > 0) {
                                             minusWithholding = 0
                                         }
+                                    } else {
+                                        minusWithholding += value.withholdingTaxSum
                                     }
 
                                     if (value.incomeSum < 0) {
-                                        minusIncome += value.incomeSum
                                         value.incomeSum = 0
                                     }
                                     if (value.withholdingTaxSum < 0) {
-                                        minusWithholding += value.withholdingTaxSum
                                         value.withholdingTaxSum = 0
                                     }
                                 }
