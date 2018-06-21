@@ -20,7 +20,8 @@
                 <div class="btn-toolbar" role="toolbar">
                     <!--Идентифицировать ФЛ -->
                     <span>
-                        <button type="button" class="btn btn-default" data-ng-click="identify()">
+                        <button type="button" class="btn btn-default" data-ng-click="identify()"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.IDENTIFY)">
                             <span data-translate-once="button.identifyPersons"></span>
                         </button>
                     </span>

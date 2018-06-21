@@ -76,7 +76,8 @@
                 DOWNLOAD_REPORTS: 1 << 8,
                 SHOW: 1 << 9,
                 IMPORT_EXCEL: 1 << 10,
-                EDIT: 1 << 13
+                EDIT: 1 << 13,
+                IDENTIFY: 1 << 11
             },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},

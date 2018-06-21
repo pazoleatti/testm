@@ -227,7 +227,8 @@
                             <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="identify()"
-                                        data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                                        data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id"
+                                        data-ng-disabled="declarationData.state === APP_CONSTANTS.STATE.ACCEPTED.name">
                                     <span data-translate-once="button.identifyPersons"></span>
                                 </button>
                             </span>
