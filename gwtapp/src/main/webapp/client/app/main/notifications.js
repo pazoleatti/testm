@@ -17,6 +17,21 @@
                     $rootScope.$broadcast('UPDATE_NOTIFICATION_COUNT');
                 });
 
+                /**
+                 * @description форматтер для поля 'Ссылка' для получения файла
+                 * @param row строка таблицы
+                 * @param cellValue значение ячейки
+                 * @param options данные таблицы
+                 * без cellValue и options ссылка формируется некорректно
+                 */
+                function linkFileFormatter(cellValue, options, row) {
+                    if (row.reportId) {
+                        return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/notif'>" + $filter('translate')('title.link.download') + "</a>";
+                    } else {
+                        return "";
+                    }
+                }
+
                 // Грид оповещений
                 $scope.notificationsGrid = {
                     ctrl: {},
@@ -28,36 +43,28 @@
                         colNames: [
                             $filter('translate')('notifications.title.createDate'),
                             $filter('translate')('notifications.title.content'),
-                            $filter('translate')('notifications.title.link'),
-                            ""
+                            $filter('translate')('notifications.title.link')
                         ],
                         colModel: [
                             {
                                 name: 'createDate',
                                 index: 'create_date',
-                                width: 155,
+                                width: 140,
                                 formatter: $filter('dateTimeWithTimeZoneFormatter')
                             },
                             {
                                 name: 'text',
                                 index: 'text',
-                                width: 830,
+                                width: 700,
                                 formatter: $filter('notificationTextFormatter'),
                                 classes: 'grid-cell-white-space'
                             },
                             {
                                 name: 'link',
                                 index: 'link',
-                                width: 175,
+                                width: 80,
                                 sortable: false,
                                 formatter: linkFileFormatter
-                            },
-                            {
-                                name: 'reportId',
-                                index: 'report_id',
-                                hidden: true,
-                                width: 175,
-                                sortable: false
                             }
 
                         ],
@@ -70,22 +77,6 @@
                         multiselect: true
                     }
                 };
-
-                /**
-                 * @description форматтер для поля 'Ссылка' для получения файла
-                 * @param row строка таблицы
-                 * @param cellValue значение ячейки
-                 * @param options данные таблицы
-                 * без cellValue и options ссылка формируется некорректно
-                 */
-                function linkFileFormatter(cellValue, options, row) {
-                    if (row.reportId) {
-                        return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/notif'>" + $filter('translate')('title.link.download') + " </a>";
-                    } else {
-                        return "";
-                    }
-                }
-
 
                 /**
                  * @description Удаление выбранных в гриде оповещений
@@ -128,16 +119,13 @@
         /**
          * @description Фильтр для формирования ссылки на оповещение
          */
-        .filter('notificationTextFormatter', ['$filter', function ($filter) {
+        .filter('notificationTextFormatter', [function () {
             return function (value, row, notification) {
                 if (notification.logId) {
                     return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
                 } else {
-                    return value
+                    return value;
                 }
-
             };
         }]);
-
-
 }());

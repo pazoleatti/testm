@@ -216,7 +216,7 @@
                         title: $filter('translate')('notifications.title.listNotifications'),
                         templateUrl: 'client/app/main/notifications.html?v=${buildUuid}',
                         controller: 'notificationsCtrl',
-                        windowClass: 'modal800'
+                        windowClass: 'modal1000'
                     });
                 };
 
@@ -247,6 +247,10 @@
                     $scope.updateNotificationCount();
                     $scope.stop = $interval($scope.updateNotificationCount, 30000);
                 };
+
+                $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {
+                    $scope.updateNotificationCount();
+                });
 
                 $scope.$on('$destroy', function() {
                     if (angular.isDefined($scope.stop)) {
