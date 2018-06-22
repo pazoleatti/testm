@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -23,6 +24,9 @@ import java.util.Map;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
+
+    @Autowired
+    private RefBookSimpleDao refBookSimpleDao;
 
     @Autowired
     private CommonRefBookService commonRefBookService;
@@ -70,7 +74,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
-        return refBookDao.getRecordData(getRefBookId(), recordIds);
+        return refBookSimpleDao.getRecordData(refBookDao.get(getRefBookId()), recordIds);
     }
 
     @Override
