@@ -646,13 +646,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     DeclarationData declarationData = declarationDataDao.get(declarationDataId);
                     DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
                     Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                    TAUser blocker = taUserService.getUser(lockData.getUserId());
                     logger.error("Форма №: %d, Период: \"%s, %s\", Подразделение: \"%s\" заблокирована пользователем %s (%s)",
                             declarationDataId,
                             departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             departmentReportPeriod.getReportPeriod().getName(),
                             department.getName(),
-                            userInfo.getUser().getName(),
-                            userInfo.getUser().getLogin());
+                            blocker.getName(),
+                            blocker.getLogin());
                 }
             } catch (Exception e) {
                 LOG.error(e.getLocalizedMessage(), e);
@@ -778,13 +779,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DeclarationData declarationData = declarationDataDao.get(declarationDataId);
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
                         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                        TAUser blocker = taUserService.getUser(lockData.getUserId());
                         logger.error("Форма №: %d, Период: \"%s, %s\", Подразделение: \"%s\" заблокирована пользователем %s (%s)",
                                 declarationDataId,
                                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                                 departmentReportPeriod.getReportPeriod().getName(),
                                 department.getName(),
-                                userInfo.getUser().getName(),
-                                userInfo.getUser().getLogin());
+                                blocker.getName(),
+                                blocker.getLogin());
                     }
                 }
             } else {
