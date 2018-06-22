@@ -21,13 +21,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department get(Integer id) {
-        List<Department> departments = departmentDao.listDepartments();
-        for (Department department : departments) {
-            if (department != null && id.equals(department.getId())) {
-                return department;
-            }
-        }
-        throw new IllegalArgumentException();
+        return departmentDao.getDepartment(id);
     }
 
     @Override

@@ -1138,11 +1138,11 @@ public class NdflPersonDaoTest {
     @Test
     public void testFetchPrepaymentByIncomesIdAndAccruedDate() {
         Calendar startDate = Calendar.getInstance();
-        startDate.set(2005, 0, 1);
+        startDate.set(2005, Calendar.OCTOBER, 1, 0, 0, 0);
         Calendar endDate = Calendar.getInstance();
-        endDate.set(2005, 11, 31);
-        List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(asList(1036L, 1037L, 1038L), startDate.getTime(), endDate.getTime());
-        Assert.assertEquals(2, result.size());
+        endDate.set(2005, Calendar.OCTOBER, 10, 0, 0, 0);
+        List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(asList(1001L, 1002L, 1003L, 1004L), startDate.getTime(), endDate.getTime());
+        Assert.assertEquals(3, result.size());
     }
 
     @Test

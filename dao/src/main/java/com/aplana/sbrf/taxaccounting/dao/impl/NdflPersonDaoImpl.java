@@ -2087,16 +2087,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate) {
-        String sql = "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " from ndfl_person_prepayment npp join ndfl_person np on npp.ndfl_person_id = np.id " +
-                "where np.inp in (select np.inp from ndfl_person np join ndfl_person_income npi on np.id = npi.ndfl_person_id where npi.id in (:ndflPersonIncomeIdList) and npi.income_accrued_date between :periodStartDate and :periodEndDate) " +
-                "and npp.operation_id in (select npi.operation_id from ndfl_person_income npi where npi.id in (:ndflPersonIncomeIdList) and npi.income_accrued_date between :periodStartDate and :periodEndDate) ";
-        MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIncomeIdList", ndflPersonIncomeIdList);
-        params.addValue("periodStartDate", periodStartDate)
+        String sql = "select DISTINCT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") +
+                " FROM ndfl_person_income npi " +
+                " JOIN ndfl_person_prepayment npp ON npp.ndfl_person_id = npi.ndfl_person_id and npp.OPERATION_ID = npi.OPERATION_ID " +
+                " WHERE npi.id in (:ndflPersonIncomeIdList) and npi.income_accrued_date between :periodStartDate and :periodEndDate ";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ndflPersonIncomeIdList", ndflPersonIncomeIdList)
+                .addValue("periodStartDate", periodStartDate)
                 .addValue("periodEndDate", periodEndDate);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonPrepayment>();
+            return new ArrayList<>();
         }
     }
 
