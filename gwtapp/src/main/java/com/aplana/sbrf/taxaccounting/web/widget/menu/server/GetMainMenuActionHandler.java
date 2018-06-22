@@ -112,7 +112,7 @@ public class GetMainMenuActionHandler extends
         if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                 TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             MenuItem nsiMenuItem = new MenuItem("НСИ");
-            nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+            nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", "index.html#/refbooks/refBookList"));
 
             menuItems.add(nsiMenuItem);
         }
