@@ -759,4 +759,11 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.0-dnovikov-18" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

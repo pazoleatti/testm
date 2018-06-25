@@ -1,5 +1,5 @@
 <div data-aplana-collapse data-label="'ndfl.filter.prepayments' | translate">
-    <div class="ndfl-subfilter row-fluid pull-control-label-right">
+    <div class="ndfl-subfilter row-fluid">
         <div class="span4">
             <!--Номер уведомления-->
             <div class="row-fluid form-group">
@@ -45,7 +45,7 @@
                     <label class="control-label">{{::'title.rowNum' | translate}}:</label>
                 </div>
                 <div class="span8">
-                    <input data-ng-model="searchFilter.params.prepayment.rowNum"
+                    <input data-ng-model="searchFilter.params.prepayment.rowNum" type="text"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            class="form-control"
                            title="{{searchFilter.params.prepayment.rowNum}}"/>
@@ -57,7 +57,7 @@
                     <label class="control-label">{{::'title.id' | translate}}:</label>
                 </div>
                 <div class="span8">
-                    <input data-ng-model="searchFilter.params.prepayment.id"
+                    <input data-ng-model="searchFilter.params.prepayment.id" type="text"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            class="form-control"
                            title="{{searchFilter.params.prepayment.id}}"/>
@@ -79,7 +79,7 @@
                         translate}}:</label>
                 </div>
                 <div class="span8">
-                    <input data-ng-model="searchFilter.params.prepayment.modifiedBy"
+                    <input data-ng-model="searchFilter.params.prepayment.modifiedBy" type="text"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            class="form-control"
                            title="{{searchFilter.params.prepayment.modifiedBy}}"/>

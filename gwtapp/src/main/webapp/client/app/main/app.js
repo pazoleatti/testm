@@ -764,7 +764,7 @@
 
         "declarationTemplate.tabs.info": "Основная информация",
         "declarationTemplate.tabs.info.activityPeriod": "Период актуальности",
-        "declarationTemplate.tabs.info.activityPeriod.valueFrom": "C 1 января {{yearFrom}} года " ,
+        "declarationTemplate.tabs.info.activityPeriod.valueFrom": "C 1 января {{yearFrom}} года ",
         "declarationTemplate.tabs.info.activityPeriod.valueTo": "по 31 декабря {{yearTo}} года",
         "declarationTemplate.tabs.info.name": "Наименование налоговой формы",
         "declarationTemplate.tabs.info.type": "Тип налоговой формы",
@@ -891,6 +891,7 @@
         // Стандартные/внешние модули, плагины, компоненты
         'ui.router',
         'ui.validate',
+        'ng.deviceDetector',
         'ui.select2',
         'ngMessages',
         'angularFileUpload',
@@ -922,6 +923,7 @@
         // Модули приложения
         'app.treeMenu',
         'app.header',
+        'app.footer',
         'app.logPanel',
         'app.refBookPicker',
         'app.validationUtils',
@@ -1034,46 +1036,58 @@
             }
         ]);
 
-    var UserDataResource = angular.injector(['app.rest']).get('UserDataResource');
-    var userRequest = UserDataResource.query({
-            projection: "user"
-        },
-        function (data) {
-            angular.element(document).ready(function () {
-                var $inj = angular.bootstrap(document, ['app']);
-                var $rootScope = $inj.get("$rootScope");
+    angular.element(document).ready(function () {
+        angular.bootstrap(document, ['app']);
+    });
 
-                $rootScope.user = {
-                    name: data.taUserInfo.user.name,
-                    login: data.taUserInfo.user.login,
-                    department: data.department,
-                    permissions: data.taUserInfo.user.permissions,
-                    roles: data.taUserInfo.user.roles,
-                    hasRole: function (role) {
-                        var roleAliasList = data.taUserInfo.user.roles.map(function (userRole) {
-                            return userRole.alias;
-                        });
-                        return roleAliasList.indexOf(role) >= 0;
+    appModule.run(['$q', '$transitions', '$rootScope', 'deviceDetector', 'UserDataResource', 'ConfigResource', 'PermissionChecker', 'ValidationUtils', 'APP_CONSTANTS',
+        function ($q, $transitions, $rootScope, deviceDetector, UserDataResource, ConfigResource, PermissionChecker, ValidationUtils, APP_CONSTANTS) {
+            var userRequest = UserDataResource.query({
+                    projection: "user"
+                },
+                function (data) {
+                    $rootScope.user = {
+                        name: data.taUserInfo.user.name,
+                        login: data.taUserInfo.user.login,
+                        department: data.department,
+                        permissions: data.taUserInfo.user.permissions,
+                        roles: data.taUserInfo.user.roles,
+                        hasRole: function (role) {
+                            var roleAliasList = data.taUserInfo.user.roles.map(function (userRole) {
+                                return userRole.alias;
+                            });
+                            return roleAliasList.indexOf(role) >= 0;
+                        }
+                    };
+                    $rootScope.permissionChecker = PermissionChecker;
+                    $rootScope.validationUtils = ValidationUtils;
+                    $rootScope.APP_CONSTANTS = APP_CONSTANTS;
+                    // Паттерны для проверки полей ввода
+                    $rootScope.patterns = {
+                        number: /^[+-]?([0-9]+)+([.][0-9]{1,2})?$/,         // Целые числа и числа с 2мя знаками после запятой
+                        fourDigits: /^\d{4}$/,                              // 4 цифры
+                        twoDigits: /^\d{1,2}$/                              // 4 цифры
                     }
-                };
-                $rootScope.permissionChecker = angular.injector(['app.permissionUtils']).get('PermissionChecker');
-                $rootScope.validationUtils = angular.injector(['app.validationUtils']).get('ValidationUtils');
-                $rootScope.APP_CONSTANTS = angular.injector(['app.constants']).get('APP_CONSTANTS');
-                // Паттерны для проверки полей ввода
-                $rootScope.patterns = {
-                    number:         /^[+-]?([0-9]+)+([.][0-9]{1,2})?$/,     // Целые числа и числа с 2мя знаками после запятой
-                    fourDigits:     /^\d{4}$/,                               // 4 цифры
-                    twoDigits:     /^\d{1,2}$/                               // 4 цифры
                 }
-            });
-        }
-    );
+            );
 
-    appModule.run(['$transitions',
-        function ($transitions) {
-            // Страницы не будут вычислятся пока не будут получены данные пользователя
+            var appConfigRequest = ConfigResource.query({
+                    projection: "configurations"
+                },
+                function (data) {
+                    $rootScope.gwtMode = data.gwtMode;
+                    $rootScope.version = data.versionInfoProperties.version;
+                    $rootScope.revision = data.versionInfoProperties.revision;
+                    $rootScope.serverName = data.serverInfo.serverName;
+                    $rootScope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
+                    $rootScope.aboutHref = "Main.jsp" + $rootScope.gwtMode + "#!about";
+                }
+            );
+
+
+            // Страницы не будут вычислятся пока не будут получены данные пользователя и параметры сервера/приложения
             $transitions.onStart({}, function () {
-                return userRequest.$promise;
+                return $q.all([userRequest.$promise, appConfigRequest.$promise]);
             });
         }
     ]);

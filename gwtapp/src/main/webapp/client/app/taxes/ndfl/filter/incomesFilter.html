@@ -1,5 +1,5 @@
 <div data-aplana-collapse data-label="'ndfl.filter.incomes' | translate">
-    <div class="ndfl-subfilter row-fluid pull-control-label-right">
+    <div class="ndfl-subfilter row-fluid">
         <div class="span4">
             <!--ID операции-->
             <div class="row-fluid form-group">
@@ -43,7 +43,7 @@
             <!--Процентная ставка-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label small-label">{{::'title.taxRate' |
+                    <label class="control-label">{{::'title.taxRate' |
                         translate}}:</label>
                 </div>
                 <div class="span8">
@@ -128,7 +128,7 @@
             <!--Номер платёжного поручения-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label small-label" style="min-width: 113px;">{{::'title.numberPaymentOrder' |
+                    <label class="control-label" style="min-width: 113px;">{{::'title.numberPaymentOrder' |
                         translate}}:</label>
                 </div>
                 <div class="span8">
@@ -141,11 +141,11 @@
         </div>
         <div class="span4">
             <!--Данные УРМ-->
-            <div class="row-fluid form-group">
-                <div class="span4">
+            <div class="row-fluid form-group" style="min-height: 70px; height: auto;">
+                <div class="span4" style="position: relative;">
                     <label class="control-label">{{::'title.URMData' | translate}}:</label>
                 </div>
-                <div class="span8">
+                <div class="span8" style="position: relative;">
                     <div data-aplana-field>
                         <div data-ng-controller="SelectMultipleFromArrayCtrl" style="width: 100%;"
                              data-ui-select2="selectFromArray.options"
@@ -155,9 +155,6 @@
                     </div>
                 </div>
             </div>
-            <!--Пустая строка-->
-            <div class="row-fluid form-group" style="height: 30px;">
-            </div>
             <!--Номер строки-->
             <div class="row-fluid form-group">
                 <div class="span4">
@@ -165,7 +162,7 @@
                         translate}}:</label>
                 </div>
                 <div class="span8">
-                    <input data-ng-model="searchFilter.params.income.rowNum"
+                    <input data-ng-model="searchFilter.params.income.rowNum" type="text"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            class="form-control"
                            title="{{searchFilter.params.income.rowNum}}"/>
@@ -178,7 +175,7 @@
                         translate}}:</label>
                 </div>
                 <div class="span8">
-                    <input data-ng-model="searchFilter.params.income.id"
+                    <input data-ng-model="searchFilter.params.income.id" type="text"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            class="form-control"
                            title="{{searchFilter.params.income.id}}"/>
@@ -200,7 +197,7 @@
                         translate}}:</label>
                 </div>
                 <div class="span8">
-                    <input data-ng-model="searchFilter.params.income.modifiedBy"
+                    <input data-ng-model="searchFilter.params.income.modifiedBy" type="text"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            class="form-control"
                            title="{{searchFilter.params.income.modifiedBy}}"/>

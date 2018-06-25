@@ -1,5 +1,5 @@
 <form id="refBookRecordForm" name="refBookRecordForm" class="form-horizontal" data-aplana-submit-valid="save()" novalidate>
-    <div id="refBookRecordFieldsContainer" class="modal-body">
+    <div class="modal-body">
         <!-- Данные о периоде актуальности записи -->
         <div class="row-fluid" style="margin-bottom: 20px;" data-ng-if="refBook.versioned">
             <div data-ng-if="mode === 'VIEW'" >
@@ -47,7 +47,7 @@
                 </div>
                 <div class="span8">
                     <!-- Режим просмотра -->
-                    <label data-ng-if="mode === 'VIEW'" class="inline-value">{{getAttributeFineValue(attribute)}}</label>
+                    <label data-ng-if="mode === 'VIEW'" class="info-text">{{getAttributeFineValue(attribute)}}</label>
                     <!-- Режим создания и редактирования -->
                     <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" data-ng-switch="attribute.attributeType">
                         <div data-ng-switch-when="STRING">
