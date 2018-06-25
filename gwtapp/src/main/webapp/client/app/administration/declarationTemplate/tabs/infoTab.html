@@ -1,6 +1,6 @@
 <div data-ng-controller="TemplateInfoTabCtrl"
      style="margin: 30px 30px 0 30px; line-height: 30px;">
-    <div class="info-wrapper pull-control-label-right">
+    <form class="form-horizontal info-wrapper">
         <div style="width: 700px">
             <div class="row-fluid">
                 <div class="span5">
@@ -8,7 +8,7 @@
                         translate}}:
                     </div>
                 </div>
-                <div class="span7">
+                <div class="span7 info-text">
                     {{:: 'declarationTemplate.tabs.info.activityPeriod.valueFrom' | translate:'{ yearFrom: ' +
                     declarationTemplate.yearFrom + ' }'}}
                     <span data-ng-if="declarationTemplate.yearTo && declarationTemplate.yearTo !== null">
@@ -22,7 +22,7 @@
                         translate}}:
                     </div>
                 </div>
-                <div class="span7">
+                <div class="span7 info-text">
                     {{declarationTemplate.name}}
                 </div>
             </div>
@@ -30,7 +30,7 @@
                 <div class="span5">
                     <div class="control-label">{{::'declarationTemplate.tabs.info.type' | translate}}:</div>
                 </div>
-                <div class="span7">
+                <div class="span7 info-text">
                     {{declarationTemplate.declarationFormKind.name}}
                 </div>
             </div>
@@ -40,12 +40,12 @@
                         translate}}:
                     </div>
                 </div>
-                <div class="span7">
+                <div class="span7 info-text">
                     {{declarationTemplate.formType.name}}
                 </div>
             </div>
         </div>
-    </div>
+    </form>
     <div style="margin-top: 30px;">
         <button type="button" class="btn btn-default" data-ng-click="downloadXsdClick()"
                 data-ng-disabled="!declarationTemplate.xsdId">

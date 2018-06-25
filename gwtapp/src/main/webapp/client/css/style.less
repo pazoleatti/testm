@@ -315,6 +315,23 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
   margin-bottom: 20px;
 }
 
+#ndfl_group_filter {
+  .form-group {
+    position: relative;
+    height: 30px;
+  }
+
+  .form-group > [class*='span'] {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+
+  .form-group > [class*='span']:nth-child(1) {
+    left: 0;
+  }
+}
+
 .form-group .input-group {
   margin-bottom: 0;
 }
@@ -1369,6 +1386,8 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   vertical-align: middle;
   font-size: 12px;
   font-weight: 700;
+  line-height: 18px;
+  padding: 3px 0 0;
 }
 
 .info-text200 {
@@ -1486,88 +1505,12 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
     min-width: 100% !important;
   }
 
-  .info-wrapper {
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    position: relative;
-    width: 99.6%;
-
-    .filter-col {
-      width: 27%;
-      div {
-        width: 100%;
-        margin-bottom: 1px;
-      }
-      .control-label {
-        float: left;
-        margin-right: -20px !important;
-        text-align: left;
-      }
-      button:not('.btn-sm') {
-        margin-top: 16px;
-      }
-    }
-    .datepicker-block {
-      .date-from-label {
-        margin-bottom: -8px;
-      }
-      .date-to-block {
-        margin-right: -11px !important;
-      }
-      .row-fluid [class*="span"] {
-        margin-left: 7px;
-      }
-    }
-    .button-block {
-      width: 113px !important;
-      position: absolute;
-      right: 4px;
-      top: 10px;
-      text-align: right;
-
-      button {
-        margin: 4px 0 0 0;
-      }
-    }
-    div.cbr-picker {
-      width: 98px;
-      .cbr-picker-button, .cbr-picker-input {
-        display: inline-block;
-        vertical-align: top;
-      }
-      .cbr-picker-button {
-        width: 22px;
-      }
-      .cbr-picker-input {
-        width: 60px;
-        margin: 0 0 0 2px;
-        input{
-
-        }
-      }
-
-    }
-    .date-to-label {
-      .control-label {
-        width: 34px;
-      }
-    }
-  }
-
   .report-wrapper {
     min-height: 504px !important;
   }
 
   .report-content {
     height: 496px;
-  }
-  .small-label, .info-wrapper .datepicker-block .date-from-label{
-    float: right;
-    margin: 0;
-    line-height: 13px;
-  }
-  .margin-left-minus5{
-     margin: 0 0 0 -5px;
   }
 }
 
@@ -1722,18 +1665,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   margin-top: 0;
 }
 
-.pull-control-label-right .control-label {
-  width: 100%;
-  text-align: right;
-}
-form .pull-control-label-right .control-label {
-  width: 100%;
-  text-align: right;
-  line-height: 12px;
-  vertical-align: middle;
-  margin-bottom: -4px;
-
-}
 .flex-column {
   display: flex;
   flex-flow: column;
@@ -1854,15 +1785,6 @@ form .pull-control-label-right .control-label {
 .inline-value {
   font-size: 12px;
   font-weight: 700;
-}
-
-#refBookRecordFieldsContainer .controls {
-  margin-left: 0;
-}
-
-#refBookRecordFieldsContainer .control-label {
-  text-align: right;
-  padding-top: 0;
 }
 
 .ui-th-div{
