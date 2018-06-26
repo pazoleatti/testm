@@ -26,7 +26,7 @@
 
                 // Ждем пока не загрузятся даныне пользователя и параметры приложения
                 var unwatch = $scope.$watchCollection('[user, gwtMode]', function (newValues, oldValues) {
-                    if (newValues[0] && newValues[1]) {
+                    if (angular.isDefined(newValues[0]) && angular.isDefined(newValues[1])) {
                         $scope.security = {
                             user: $rootScope.user
                         };
