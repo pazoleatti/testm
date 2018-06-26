@@ -1,11 +1,10 @@
 <div data-ng-controller="CommonFilterCtrl">
-    <div class="grid-filter"
-         style="margin: -6px 0 0 -19px; padding: 0 0 0 21px;">
+    <div class="grid-filter">
         <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
              data-label="'filterPanelLabel' | translate">
-            <form class="form-horizontal info-wrapper" role="form" novalidate>
-                <div class="row">
-                    <div class="filter-col w450">
+            <form class="form-horizontal info-wrapper" role="form" style="display: flex;" novalidate>
+                <div class="row-fluid flex-fill">
+                    <div class="span4">
                         <div class="row-fluid form-group">
                             <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.periodType' | translate}}:</label>
@@ -49,7 +48,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="filter-col w500">
+                    <div class="span4">
                         <div class="row-fluid form-group">
                             <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.declarationKind' |
@@ -83,7 +82,7 @@
                                  class="span8"></div>
                         </div>
                     </div>
-                    <div class="filter-col w350">
+                    <div class="span4">
                         <div class="row-fluid form-group">
                             <div class="span3">
                                 <label class="control-label">{{::'ndflJournal.filter.state' | translate}}:</label>
@@ -105,22 +104,22 @@
                             </div>
                         </div>
                     </div>
-                    <div class="filter-col button-block">
-                        <!--Кнопка Найти-->
-                        <button type="button"
-                                class="btn btn-default"
-                                id="searchButton"
-                                data-ng-click="submitSearch('declarationList')">
-                            <span data-translate-once="common.button.search"></span>
-                        </button>
-                        <!--Кнопка Сбросить-->
-                        <button type="button" data-ng-show="searchFilter.isClear"
-                                class="btn btn-default"
-                                id="clearButton"
-                                data-ng-click="resetFilter('declarationList')">
-                            <span data-translate-once="common.button.clear"></span>
-                        </button>
-                    </div>
+                </div>
+                <div class="vertical-btn-group" style="flex: 0 100px; padding-left: 20px">
+                    <!--Кнопка Найти-->
+                    <button type="button"
+                            class="btn btn-default"
+                            id="searchButton"
+                            data-ng-click="submitSearch('declarationList')">
+                        <span data-translate-once="common.button.search"></span>
+                    </button>
+                    <!--Кнопка Сбросить-->
+                    <button type="button" data-ng-show="searchFilter.isClear"
+                            class="btn btn-default"
+                            id="clearButton"
+                            data-ng-click="resetFilter('declarationList')">
+                        <span data-translate-once="common.button.clear"></span>
+                    </button>
                 </div>
             </form>
         </div>
