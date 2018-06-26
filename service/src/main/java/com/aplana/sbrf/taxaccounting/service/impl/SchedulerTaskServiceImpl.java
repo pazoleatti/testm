@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Service
 @Transactional
@@ -28,7 +29,9 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     @Autowired
     private SchedulerService schedulerService;
 
-    private FastDateFormat dateFormatter = FastDateFormat.getInstance("dd-MM-yyyy, HH:mm:ss");
+    private String TIME_ZONE_MOSCOW = "Europe/Moscow";
+
+    private FastDateFormat dateFormatter = FastDateFormat.getInstance("dd-MM-yyyy, HH:mm:ss", TimeZone.getTimeZone(TIME_ZONE_MOSCOW));
 
     @Override
     public SchedulerTaskData fetchOne(SchedulerTask task) {

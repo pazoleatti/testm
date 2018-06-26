@@ -57,10 +57,10 @@
                     return '';
                 }
                 if (!value.millis) {
-                    return $filter('date')(value, 'dd.MM.yyyy HH:mm:ss');
+                    return $filter('date')(value, 'dd.MM.yyyy HH:mm:ss', '+3');
                 }
                 else {
-                    return $filter('date')(value.millis, 'dd.MM.yyyy HH:mm:ss');
+                    return $filter('date')(value.millis, 'dd.MM.yyyy HH:mm:ss', '+3');
                 }
             };
         }])
