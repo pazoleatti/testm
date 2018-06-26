@@ -2129,8 +2129,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "not exists (select 1 from ref_book_ndfl_detail r2 where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate)\n" +
                 "group by record_id),\n" +
                 "kpp_oktmo as (select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
-                "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId)\n" +
-                "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date from ndfl_person_income npi\n" +
+                "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId),\n" +
+                "cons_data as (select npi.operation_id, dd.asnu_id, np.inp, tp.year, rpt.code as period_code, drp.correction_date from ndfl_person_income npi\n" +
                 "left join kpp_oktmo on kpp_oktmo.kpp = npi.kpp\n" +
                 "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
                 "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
@@ -2143,7 +2143,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "and kpp_oktmo.oktmo = npi.oktmo \n" +
                 "and (npi.income_accrued_date between :periodStartDate and :periodEndDate or npi.income_payout_date between :periodStartDate and :periodEndDate or npi.tax_date between :periodStartDate and :periodEndDate or npi.tax_transfer_date between :periodStartDate and :periodEndDate)\n" +
                 "and dt.declaration_type_id = :declarationType\n" +
-                "and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear";
+                "and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear)" +
+                "select distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, cd.inp, cd.year, cd.period_code, cd.correction_date from ndfl_person_income npi\n" +
+                "left join cons_data cd on cd.operation_id = npi.operation_id\n" +
+                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "where dd.asnu_id = cd.asnu_id and npi.operation_id = cd.operation_id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("currentDate", searchData.getCurrentDate())
                 .addValue("periodStartDate", searchData.getPeriodStartDate())
