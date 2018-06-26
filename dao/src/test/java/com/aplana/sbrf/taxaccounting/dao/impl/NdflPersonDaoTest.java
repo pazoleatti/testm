@@ -1170,8 +1170,7 @@ public class NdflPersonDaoTest {
                 .departmentId(7);
         ConsolidationSourceDataSearchFilter filter = filterBuilder.createConsolidationSourceDataSearchFilter();
         List<ConsolidationIncome> incomes = ndflPersonDao.fetchIncomeSourcesConsolidation(filter);
-        System.out.println(incomes);
-        Assert.assertEquals(8, incomes.size());
+        Assert.assertEquals(15, incomes.size());
         List<Long> incomesIds = new ArrayList<>();
         for (ConsolidationIncome income : incomes) {
             incomesIds.add(income.getId());
@@ -1182,8 +1181,15 @@ public class NdflPersonDaoTest {
                 return o1.getId().compareTo(o2.getId());
             }
         });
+        Assert.assertTrue(incomesIds.contains(3070L));
         Assert.assertTrue(incomesIds.contains(3080L));
+        Assert.assertTrue(incomesIds.contains(3090L));
+        Assert.assertTrue(incomesIds.contains(3100L));
+        Assert.assertTrue(incomesIds.contains(3110L));
+        Assert.assertTrue(incomesIds.contains(3120L));
         Assert.assertTrue(incomesIds.contains(3130L));
+        Assert.assertTrue(incomesIds.contains(3140L));
+        Assert.assertTrue(incomesIds.contains(3150L));
         Assert.assertTrue(incomesIds.contains(3220L));
         Assert.assertTrue(incomesIds.contains(3230L));
         Assert.assertTrue(incomesIds.contains(3240L));
