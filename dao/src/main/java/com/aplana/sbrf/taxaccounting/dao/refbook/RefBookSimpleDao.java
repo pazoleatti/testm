@@ -55,10 +55,13 @@ public interface RefBookSimpleDao {
      * @param direction     навправление сортировки - asc, desc
      * @param pagingParams  определяет параметры запрашиваемой страницы данных. Могут быть не заданы
      * @param columns       список колонок в таблице, по которым выполняется фильтрация. Может быть не задано
+     * @param searchPattern шаблон поиска. Может быть не задано
      * @param filter        условие фильтрации строк. Может быть не задано
      * @return список записей
      */
-    <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute, String direction, PagingParams pagingParams, List<String> columns, String filter);
+    <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute, String direction,
+                                                         PagingParams pagingParams, List<String> columns,
+                                                         String searchPattern, String filter);
 
     PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter);
 

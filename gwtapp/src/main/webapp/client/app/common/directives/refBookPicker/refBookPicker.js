@@ -19,6 +19,7 @@
                     ngModel: '=',
                     buttonTitle: '@',
                     refBookId: '@',
+                    filter: '@',
                     onSelect: '&'
                 },
                 link: function (scope, element, attr) {
@@ -34,7 +35,8 @@
                             resolve: {
                                 $shareData: function () {
                                     return {
-                                        refBookId: scope.refBookId
+                                        refBookId: scope.refBookId,
+                                        filter: scope.filter
                                     };
                                 }
                             }

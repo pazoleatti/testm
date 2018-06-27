@@ -10,13 +10,12 @@ import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,12 +100,14 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     }
 
     @Override
-    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute, String direction, PagingParams pagingParams, List<String> columns, String filter) {
+    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute,
+                                                                String direction, PagingParams pagingParams,
+                                                                List<String> columns, String searchPattern, String filter) {
         QueryBuilder q;
         if (refBook.isVersioned()) {
-            q = queryBuilder.allRecordsByVersion(refBook, new Date(), columns, filter, pagingParams, sortAttribute, direction);
+            q = queryBuilder.allRecordsByVersion(refBook, new Date(), columns, searchPattern, filter, pagingParams, sortAttribute, direction);
         } else {
-            q = queryBuilder.allRecords(refBook, columns, filter, pagingParams, sortAttribute, direction);
+            q = queryBuilder.allRecords(refBook, columns, searchPattern, filter, pagingParams, sortAttribute, direction);
         }
         List<T> records = refBookDao.getMappedRecordsData(q, refBook);
 

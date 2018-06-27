@@ -100,10 +100,8 @@
                 if (searchField === undefined) {
                     searchField = "name";
                 }
-
                 //Создать список с общими для всех типов параметрами
                 var select = buildSelectOptionsTemplate(isMultiple, allowClear, formatter);
-
                 //Добавить в него объект, поля которого используются для фильтрации данных
                 select.options.dataFilter = dataFilter;
 
@@ -133,6 +131,23 @@
                     }
                 };
 
+                return select;
+            };
+
+            /**
+             * Получить настройки выпадающего списка с возможностью использования дополнительного фильтра
+             * @param isMultiple    выбор множественный
+             * @param allowClear    возможна ли очистка
+             * @param url           URL, по которому запрашиваются элементы списка
+             * @param filterColumns объект с параметрами для фильтрации данных
+             * @param filter        строка являющаяся часть sql выражения и выступающая в качестве фильтра
+             * @param sortParams    параметры сортировки: property - поле, по которому выполняется сортировка, direction - порядок
+             * @param formatter     фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
+             * @param searchField   поле, по которому выполняется поиск. Значение по умолчанию: name
+             */
+            this.getAjaxAdditionalFilterSelectOptions = function (isMultiple, allowClear, url, filterColumns, filter, sortParams, formatter, searchField) {
+                var select = this.getAjaxSelectOptions(isMultiple, allowClear, url, filterColumns, sortParams, formatter, searchField)
+                select.options.dataFilter.filter = filter;
                 return select;
             };
         }])
@@ -653,7 +668,7 @@
                  * @param refBookId идентификатор справочника, записи которого будут получены
                  * @param attributeAlias алиас атрибута записи справочника, сама которая является ссылочным значением. Используется для подгрузки полного значения в поле объекта
                  */
-                $scope.initSelect = function (refBookId, attributeAlias) {
+                $scope.initSelect = function (refBookId, attributeAlias, filter) {
                     if (attributeAlias) {
                         /**
                          * Событие первичного проставления значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
@@ -680,11 +695,12 @@
                     }
 
                     $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
-                    $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBook/" + refBookId + "/records",
+                    $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(false, true, "controller/rest/refBook/" + refBookId + "/records",
                         $scope.config.filter,
+                        filter,
                         $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
                         $scope.config.formatter,
-                        "filter"
+                        "searchPattern"
                     );
                 };
             }

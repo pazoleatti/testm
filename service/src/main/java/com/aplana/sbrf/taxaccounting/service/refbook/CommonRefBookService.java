@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -158,13 +157,14 @@ public interface CommonRefBookService {
     /**
      * Получение всех значений указанного справочника
      *
-     * @param refBookId    идентификатор справочника
-     * @param columns      список столбцов таблицы справочника, по которым будет выполняться фильтрация
-     * @param filter       параметр фильтрации
-     * @param pagingParams параметры пейджинга
+     * @param refBookId     идентификатор справочника
+     * @param columns       список столбцов таблицы справочника, по которым будет выполняться фильтрация
+     * @param searchPattern шаблон поиска по полям справочника
+     * @param filter        параметр фильтрации
+     * @param pagingParams  параметры пейджинга
      * @return значения справочника
      */
-    <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String filter, PagingParams pagingParams);
+    <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String searchPattern, String filter, PagingParams pagingParams);
 
     /**
      * Получение одного значения указанного справочника
