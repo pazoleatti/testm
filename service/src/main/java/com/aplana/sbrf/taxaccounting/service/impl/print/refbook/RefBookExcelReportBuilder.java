@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -75,9 +76,10 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
     public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version,
                                      String searchPattern, boolean exactSearch, RefBookAttribute sortAttribute) {
-        this.workBook = new XSSFWorkbook();
+        initWorkbook();
         String sheetName = refBook.getName().replaceAll("[/\\[\\]\\*\\:\\?\\\\]", "_"); //Убираем недостимые символы в названии листа
-        this.sheet = workBook.createSheet(sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName);
+        sheetName = sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName;
+        this.sheet = workBook.createSheet(sheetName);
         sheet.setRowSumsBelow(false);
         sheet.getLastRowNum();
         this.refBook = refBook;
@@ -87,6 +89,10 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         this.exactSearch = exactSearch;
         this.sortAttribute = sortAttribute;
         cellStyleBuilder = new CellStyleBuilder();
+    }
+
+    protected void initWorkbook() {
+        this.workBook = new XSSFWorkbook();
     }
 
     public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version, String searchPattern,
@@ -181,6 +187,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         sheet.createFreezePane(0, rowNumber);
         if (!refBook.isHierarchic()) {
             while (dataIterator.hasNext()) {
+                checkInterrupted();
                 createRow(dataIterator.getNextRecord());
             }
         } else {
@@ -369,4 +376,10 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         return str.toString();
     }
 
+    private void checkInterrupted() {
+        if (Thread.interrupted()) {
+            LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
+            throw new TAInterruptedException();
+        }
+    }
 }

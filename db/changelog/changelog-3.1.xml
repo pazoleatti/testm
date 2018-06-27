@@ -46,4 +46,11 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.1-dnovikov-5" author="dnovikov">
+        <update tableName="async_task_type">
+            <column name="name" value="Формирование уведомления о задолженности"/>
+            <where>id = 35</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

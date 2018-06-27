@@ -106,8 +106,9 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("schedule", taskData.getSchedule());
         params.addValue("taskId", taskData.getTask().getSchedulerTaskId());
+        params.addValue("modification_date", new Date());
         getNamedParameterJdbcTemplate().update(
-                "UPDATE CONFIGURATION_SCHEDULER SET schedule = :schedule, MODIFICATION_DATE = CURRENT_DATE WHERE id = :taskId",
+                "UPDATE CONFIGURATION_SCHEDULER SET schedule = :schedule, MODIFICATION_DATE = :modification_date WHERE id = :taskId",
                 params
         );
         updateTaskParam(taskData.getParams());
@@ -117,8 +118,9 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
     public void updateStartDate(long taskId) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
+        params.addValue("modification_date", new Date());
         getNamedParameterJdbcTemplate().update(
-                "UPDATE CONFIGURATION_SCHEDULER SET last_fire_date = CURRENT_DATE WHERE id = :taskId",
+                "UPDATE CONFIGURATION_SCHEDULER SET last_fire_date = :modification_date WHERE id = :taskId",
                 params
         );
     }

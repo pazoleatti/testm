@@ -167,6 +167,12 @@ angular.module('aplana.modal', ['aplana.utils'])
                             return maxModalBodyHeight;
                         });
                     }
+                    $timeout(function () {
+                        modalDomElement.draggable({handle: ".modal-header", containment: "document", cursor: 'move'});
+                        modalDomElement.css("left", ($(document).width() - modalDomElement.width()) / 2);
+                        modalDomElement.css("top", ($(document).height() - modalDomElement.height()) / 2);
+                        modalDomElement.css("display", "block");
+                    }, 0);
                 }
 
                 $http.get(AplanaUtils.templatePath + 'modal/window.html', {cache: $templateCache}).then(function (result) {

@@ -101,7 +101,7 @@
                                         index: 'date',
                                         width: 126,
                                         sortable: false,
-                                        formatter: $filter('dateTimeWithTimeZoneFormatter')
+                                        formatter: $filter('dateTimeFormatter')
                                     },
                                     {
                                         name: 'icon',
