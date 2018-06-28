@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.StreamingRefBookExcelReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
@@ -196,10 +197,10 @@ public class PrintingServiceImpl implements PrintingService {
 
             RefBookExcelReportBuilder refBookExcelReportBuilder;
             if (refBook.isHierarchic()) {
-                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook),
+                refBookExcelReportBuilder = new StreamingRefBookExcelReportBuilder(refBook, getAttributes(refBook),
                         version, searchPattern, exactSearch, sortAttribute, commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false));
             } else {
-                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook),
+                refBookExcelReportBuilder = new StreamingRefBookExcelReportBuilder(refBook, getAttributes(refBook),
                         version, searchPattern, exactSearch, sortAttribute, new BatchIterator() {
                     private PagingResult<Map<String, RefBookValue>> currentBatch = null;
                     private Iterator<Map<String, RefBookValue>> iterator = null;

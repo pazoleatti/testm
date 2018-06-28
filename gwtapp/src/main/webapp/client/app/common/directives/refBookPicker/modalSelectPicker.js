@@ -12,6 +12,10 @@
         .controller('refBookPickerModalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData', 'RefBookResource', '$injector',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, RefBookResource, $injector) {
                 $scope.refBookId = $shareData.refBookId;
+                $scope.filter = '';
+                if ($shareData.filter) {
+                    $scope.filter = $shareData.filter;
+                }
                 $scope.temp = {
                     selectedRecord: null
                 };
@@ -27,7 +31,7 @@
                     $injector.invoke(function ($compile) {
                         var parent = angular.element(document.querySelector("#selectContainer"));
                         var select = $compile("<div style=\"width: 100%\" data-ui-select2=\"select.options\" data-ng-controller=\"SelectRefBookCtrl\"\n" +
-                            "         data-ng-init=\"initSelect(refBook.id)\"\n" +
+                            "         data-ng-init=\"initSelect(refBook.id, null, filter)\"\n" +
                             "         data-ng-model=\"temp.selectedRecord\"></div>")(parent.scope());
                         parent.append(select);
                     });

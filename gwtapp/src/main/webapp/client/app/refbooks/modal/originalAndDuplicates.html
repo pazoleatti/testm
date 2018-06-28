@@ -26,6 +26,7 @@
                 (original.docNumber ? ", Серия и номер ДУЛ = " + original.docNumber : "")}}</label>
             <div>
                 <data-ref-book-picker
+                        filter="{{filter()}}"
                         data-ng-model="original"
                         data-ref-book-id="{{APP_CONSTANTS.REFBOOK.PERSON}}"></data-ref-book-picker>
                 <button type="button" class="btn btn-default"
@@ -40,6 +41,7 @@
             <label class="inline-label">{{::'refBook.fl.label.duplicates' | translate}}:</label>
             <div style="margin-bottom: 10px">
                 <data-ref-book-picker
+                        filter="{{filter()}}"
                         button-title="{{::'button.add' | translate}}"
                         data-ng-model="temp.duplicate"
                         data-ref-book-id="{{APP_CONSTANTS.REFBOOK.PERSON}}"

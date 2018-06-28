@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.validation.constraints.NotNull;
-import java.sql.Ref;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -324,20 +323,30 @@ public class RefBookSimpleQueryBuilderComponent {
                 .withPaging(pagingParams);
     }
 
-    private String getColumnFilterQuery(List<String> columns, String columnFilter) {
+    private String getColumnFilterQuery(List<String> columns, String searchPattern, String filter) {
         StringBuilder q = new StringBuilder();
-        if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter)) {
-            q.append("(");
-            for (Iterator<String> it = columns.iterator(); it.hasNext(); ) {
-                String column = it.next();
-                q.append("lower(frb.").append(column).append(") like '%").append(columnFilter.toLowerCase()).append("%'");
-                if (it.hasNext()) {
-                    q.append(" or ");
-                }
+        if (!CollectionUtils.isEmpty(columns)) {
+            if (StringUtils.isNotEmpty(filter)) {
+                q.append("(")
+                        .append(filter)
+                        .append(") ");
             }
-            q.append(") ");
+            if (StringUtils.isNotEmpty(searchPattern)) {
+                if (StringUtils.isNotEmpty(filter)) {
+                    q.append("and ");
+                }
+                q.append("(");
+                for (Iterator<String> it = columns.iterator(); it.hasNext(); ) {
+                    String column = it.next();
+                    q.append("lower(frb.").append(column).append(") like '%").append(searchPattern.toLowerCase()).append("%'");
+                    if (it.hasNext()) {
+                        q.append(" or ");
+                    }
+                }
+                q.append(") ");
+            }
         }
-        return q.toString();
+        return q.toString().trim();
     }
 
     /**
@@ -347,13 +356,13 @@ public class RefBookSimpleQueryBuilderComponent {
      * @param refBook       справочник
      * @param version       дата актуальности
      * @param columns       список стобцов в БД, по которым будет выполнена фильтрация
-     * @param columnFilter  строка с фильтрацией по столбцам. НЕ SQL-запрос, просто текст с которым будут сраваниваться значения колонок
+     * @param searchPattern строка с фильтрацией по столбцам. НЕ SQL-запрос, просто текст с которым будут сраваниваться значения колонок
      * @param pagingParams  параметры пэйджинга
      * @param sortAttribute атрибут, по которому будут отсортированы записи
      * @param direction     направление сортировки
      * @return SQL-запрос + параметры
      */
-    public QueryBuilder allRecordsByVersion(RefBook refBook, @NotNull Date version, List<String> columns, String columnFilter, PagingParams pagingParams,
+    public QueryBuilder allRecordsByVersion(RefBook refBook, @NotNull Date version, List<String> columns, String searchPattern, String filter, PagingParams pagingParams,
                                             RefBookAttribute sortAttribute, String direction) {
         QueryBuilder q = new QueryBuilder();
 
@@ -366,7 +375,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 .append(" WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) FROM ")
                 .append(refBook.getTableName())
                 .append(" WHERE version <= :version and record_id = frb.record_id))\n")
-                .append(!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter) ? " AND " + getColumnFilterQuery(columns, columnFilter) + "\n" : "")
+                .append(!CollectionUtils.isEmpty(columns) && (StringUtils.isNotEmpty(searchPattern) || StringUtils.isNotEmpty(filter)) ? " AND " + getColumnFilterQuery(columns, searchPattern, filter) + "\n" : "")
                 .append(" ) p\n");
         q.addNamedParam("version", version);
 
@@ -380,13 +389,14 @@ public class RefBookSimpleQueryBuilderComponent {
      *
      * @param refBook       справочник
      * @param columns       список стобцов в БД, по которым будет выполнена фильтрация
-     * @param columnFilter  строка с фильтрацией по столбцам. НЕ SQL-запрос, просто текст с которым будут сраваниваться значения колонок
+     * @param searchPattern строка с шаблоном поиска по столбцам. НЕ SQL-запрос, просто текст с которым будут сраваниваться значения колонок
+     * @param filter        часть sql запроса для дополнительной фильтрации
      * @param pagingParams  параметры пэйджинга
      * @param sortAttribute атрибут, по которому будут отсортированы записи
      * @param direction     направление сортировки
      * @return SQL-запрос + параметры
      */
-    public QueryBuilder allRecords(RefBook refBook, List<String> columns, String columnFilter, PagingParams pagingParams,
+    public QueryBuilder allRecords(RefBook refBook, List<String> columns, String searchPattern, String filter, PagingParams pagingParams,
                                    RefBookAttribute sortAttribute, String direction) {
         QueryBuilder q = new QueryBuilder();
 
@@ -398,8 +408,8 @@ public class RefBookSimpleQueryBuilderComponent {
         }
 
         // Добавляем фильтрацию по выбранным столбцам
-        if (!CollectionUtils.isEmpty(columns) && StringUtils.isNotEmpty(columnFilter)) {
-            q.append(refBook.isReadOnly() ? " WHERE " : " AND ").append(getColumnFilterQuery(columns, columnFilter));
+        if (!CollectionUtils.isEmpty(columns) && (StringUtils.isNotEmpty(searchPattern) || StringUtils.isNotEmpty(filter))) {
+            q.append(refBook.isReadOnly() ? " WHERE " : " AND ").append(getColumnFilterQuery(columns, searchPattern, filter));
         }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)
@@ -525,7 +535,7 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.addNamedParam("maxDate", maxDate.getTime());
 
 		/*PreparedStatementData filterPS = new PreparedStatementData();
-		SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
 		simpleFilterTreeListener.setRefBook(refBook);
 		simpleFilterTreeListener.setPs(filterPS);
 

@@ -215,6 +215,27 @@
                 $scope.modalCloseCallback = function () {
                     $scope.close();
                 };
+
+                /**
+                 * Возвращает фильтр при поиске записей для назначения дубликатами или оригиналами. Дубликат не должен быть текущей или оригинальной записью.
+                 * Также и оригинальная запись не может быть текущей или дубликатом.
+                 * @returns {string}
+                 */
+                $scope.filter = function () {
+                    var filter = 'OLD_ID is null';
+                    if ($scope.original) {
+                        filter += ' and id != ' + $scope.original.id;
+                    }
+                    if ($scope.record) {
+                        filter += ' and id != ' + $scope.record.id;
+                    }
+                    if ($scope.duplicates) {
+                        angular.forEach($scope.duplicates, function (value, key) {
+                            filter += ' and id != ' + value.id;
+                        });
+                    }
+                    return filter;
+                };
             }
         ]);
 }());

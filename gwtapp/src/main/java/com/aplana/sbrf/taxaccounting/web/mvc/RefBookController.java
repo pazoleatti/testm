@@ -138,15 +138,16 @@ public class RefBookController {
      * Получение всех значений указанного справочника замапленных на определенные сущности.
      * Используется для заполнения данными выпадашек.
      *
-     * @param refBookId    идентификатор справочника
-     * @param columns      список столбов таблицы справочника, по которым будет выполняться фильтрация
-     * @param filter       параметр фильтрации
-     * @param pagingParams параметры пейджинга
+     * @param refBookId     идентификатор справочника
+     * @param columns       список столбов таблицы справочника, по которым будет выполняться фильтрация
+     * @param searchPattern шаблон поиска по полям справочника
+     * @param filter        параметр фильтрации
+     * @param pagingParams  параметры пейджинга
      * @return значения справочника
      */
     @GetMapping(value = "/rest/refBook/{refBookId}/records")
-    public <T extends RefBookSimple> JqgridPagedList<T> fetchAllRecords(@PathVariable Long refBookId, @RequestParam String[] columns, @RequestParam String filter, @RequestParam PagingParams pagingParams) {
-        PagingResult<T> result = commonRefBookService.fetchAllRecords(refBookId, Arrays.asList(columns), filter, pagingParams);
+    public <T extends RefBookSimple> JqgridPagedList<T> fetchAllRecords(@PathVariable Long refBookId, @RequestParam String[] columns, @RequestParam String searchPattern, @RequestParam String filter, @RequestParam PagingParams pagingParams) {
+        PagingResult<T> result = commonRefBookService.fetchAllRecords(refBookId, Arrays.asList(columns), searchPattern, filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
     }
 

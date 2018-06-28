@@ -267,7 +267,7 @@
                             title: $filter('translate')('filesComment.header'),
                             templateUrl: 'client/app/taxes/ndfl/filesComments.html?v=${buildUuid}',
                             controller: 'filesCommentsCtrl',
-                            windowClass: 'modalMax',
+                            windowClass: 'modal1200',
                             resolve: {
                                 $shareData: function () {
                                     return {
