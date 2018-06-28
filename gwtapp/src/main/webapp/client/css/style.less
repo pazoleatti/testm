@@ -20,9 +20,9 @@ html {
 body {
   color: #333;
   min-width: 1200px;
-  font-family: 'Open Sans', sans-serif;
-  font-size: @basic-font-size;
-  line-height: @basic-line-height;
+  font-family: @baseFontFamily;
+  font-size: @baseFontSize;
+  line-height: @baseLineHeight;
   background-color: @grayMoreLighter;
 }
 
@@ -596,10 +596,6 @@ button.btn-back-to-list {
   margin: 0;
 }
 
-input[type="checkbox"] {
-  margin-top: 2px;
-}
-
 ::-ms-clear {
   height: 17px;
 }
@@ -916,6 +912,7 @@ button.btn.btn-default.ng-binding {
 
 .btn-toolbar {
   margin-left: 0;
+  font-size: @baseFontSize;
 }
 
 .btn {
@@ -1368,9 +1365,9 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
 .info-text {
   vertical-align: middle;
-  font-size: 12px;
+  font-size: @baseFontSize;
   font-weight: 700;
-  line-height: 18px;
+  line-height: @baseLineHeight;
   padding: 3px 0 0;
 }
 
@@ -1435,8 +1432,18 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   box-shadow: inset 2px 2px 0 2px rgba(0, 0, 0, 0.05);
 }
 
+.ui-jqgrid {
+  font-family: @baseFontFamily;
+}
+
 .ui-jqgrid .ui-widget-content {
   border: none;
+}
+
+.ui-jqgrid {
+  .ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
+    color: #333;
+  }
 }
 
 .ui-jqgrid,
@@ -1499,10 +1506,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 }
 
 @media (max-width: 1450px) {
-  .grid-filter {
-    min-width: 100% !important;
-  }
-
   .report-wrapper {
     min-height: 504px !important;
   }
@@ -1522,10 +1525,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   .report-content {
     height: 418px;
   }
-}
-
-.cbr-picker input {
-  box-sizing: content-box;
 }
 
 .appPager td {
@@ -1615,14 +1614,15 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
     border-radius: 0;
     height: 26px;
   }
-  button.btn.btn-default:hover:not([disabled]):hover {
-    border-top: 3px solid #6ec151;
-  }
-  .cbr-picker-input input {
-    height: 16px;
-    background-color: #fff;
-    border: solid 1px rgba(0, 0, 0, 0.2);
-    border-radius: 0;
+  .cbr-picker-input {
+    margin-right: 22px;
+    input {
+      padding: 1px 5px;
+      background-color: #fff;
+      border: solid 1px rgba(0, 0, 0, 0.2);
+      border-right: none;
+      border-radius: 0;
+    }
   }
   .btn-sm {
     height: 28px;
@@ -1650,7 +1650,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 }
 
 .vertical-btn-group .btn {
-  height: 25px;
+  height: 26px;
   text-align: center;
   width: 100%;
 }
@@ -1777,7 +1777,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 .inline-label {
   font-size: 13px;
   font-weight: normal;
-  line-height: 18px;
+  line-height: @labelLineHeight;
 }
 
 .inline-value {

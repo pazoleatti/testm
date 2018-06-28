@@ -41,7 +41,7 @@
         <div data-ng-repeat="attribute in refBook.attributes"
              data-ng-if="attribute.visible && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS &&
              attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS">
-            <div class="row-fluid">
+            <div class="row-fluid form-group">
                 <div class="span4">
                     <label class="control-label">{{attribute.name}}:</label>
                 </div>
@@ -52,7 +52,7 @@
                     <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" data-ng-switch="attribute.attributeType">
                         <div data-ng-switch-when="STRING">
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
-                                <input type="text"
+                                <input class="form-control" type="text"
                                        data-ng-model="record[attribute.alias].value"
                                        title="{{record[attribute.alias].value}}"
                                        aplana-input-outer-width="400"
@@ -64,7 +64,7 @@
                         </div>
                         <div data-ng-switch-when="NUMBER" data-model-id="{{attribute.alias}}">
                             <div data-aplana-field>
-                                <input type='text'
+                                <input class="form-control" type='text'
                                        data-ng-model="record[attribute.alias].value"
                                        title="{{attribute.name}}"
                                        aplana-input-outer-width="400"
