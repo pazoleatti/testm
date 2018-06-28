@@ -697,7 +697,7 @@
                     $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
                     $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(false, true, "controller/rest/refBook/" + refBookId + "/records",
                         $scope.config.filter,
-                        filter,
+                        filter ? filter : '',
                         $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
                         $scope.config.formatter,
                         "searchPattern"
