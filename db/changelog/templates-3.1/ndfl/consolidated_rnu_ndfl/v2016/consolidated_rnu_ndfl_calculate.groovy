@@ -248,8 +248,6 @@ class Calculate extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis()
 
-        // Доходы сгруппированные по идОперации и ИНП. Будут использоваться для вычисления доп полей сортировки
-        Map<Pair<String, String>, List<ConsolidationIncome>> incomesGroupedByOperationAndInp = [:]
         // Доходы сгруппированные по физлицам
         Map<Long, List<? extends NdflPersonIncome>> incomesGroupedByPerson = [:]
         // Доходы сгруппированные по идОперации и физлицу. Используются для нахождения вычетов и авансов
@@ -260,13 +258,7 @@ class Calculate extends AbstractScriptClass {
             Pair<String, String> operationAndInpKey = new Pair(income.operationId, income.inp)
             Pair<String, Long> operationAndPersonKey = new Pair(income.operationId, income.ndflPersonId)
             List<? extends NdflPersonIncome> personGroup = incomesGroupedByPerson.get(income.ndflPersonId)
-            List<ConsolidationIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey)
             List<ConsolidationIncome> operationAndPersonGroup = incomesGroupedByOperationAndPerson.get(operationAndPersonKey)
-            if (operationAndInpGroup == null) {
-                incomesGroupedByOperationAndInp.put(operationAndInpKey, [income])
-            } else {
-                operationAndInpGroup << income
-            }
             if (personGroup == null) {
                 incomesGroupedByPerson.put(income.ndflPersonId, [income])
             } else {
@@ -277,38 +269,6 @@ class Calculate extends AbstractScriptClass {
             } else {
                 operationAndPersonGroup << income
             }
-        }
-
-        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
-        Map<Pair<String, String>, Date> operationDates = [:]
-
-        for (List<ConsolidationIncome> group : incomesGroupedByOperationAndInp.values()) {
-            Pair<String, String> key = new Pair(group.get(0).operationId, group.get(0).inp)
-            List<Date> incomeAccruedDates = group.incomeAccruedDate
-            incomeAccruedDates.removeAll([null])
-            if (!incomeAccruedDates.isEmpty()) {
-                Collections.sort(incomeAccruedDates)
-                operationDates.put(key, incomeAccruedDates.get(0))
-                continue
-            }
-
-            List<Date> incomePayoutDates = group.incomePayoutDate
-            incomePayoutDates.removeAll([null])
-            if (!incomePayoutDates.isEmpty()) {
-                Collections.sort(incomePayoutDates)
-                operationDates.put(key, incomePayoutDates.get(0))
-                continue
-            }
-
-            List<Date> paymentDates = group.paymentDate
-            paymentDates.removeAll([null])
-            if (!paymentDates.isEmpty()) {
-                Collections.sort(paymentDates)
-                operationDates.put(key, paymentDates.get(0))
-                continue
-            }
-
-            operationDates.put(key, null)
         }
 
         List<Long> incomeIdsForFetchingDeductionsAndPrepayments = []
@@ -350,61 +310,19 @@ class Calculate extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis()
 
-        Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
-            @Override
-            int compare(NdflPerson o1, NdflPerson o2) {
-                int lastNameComp = compareValues(o1.lastName, o2.lastName, RnuNdflStringComparator.INSTANCE)
-                if (lastNameComp != 0) {
-                    return lastNameComp
-                }
-
-                int firstNameComp = compareValues(o1.firstName, o2.firstName, RnuNdflStringComparator.INSTANCE)
-                if (firstNameComp != 0) {
-                    return firstNameComp
-                }
-
-                int middleNameComp = compareValues(o1.middleName, o2.middleName, RnuNdflStringComparator.INSTANCE)
-                if (middleNameComp != 0) {
-                    return middleNameComp
-                }
-
-                int innComp = compareValues(o1.innNp, o2.innNp, RnuNdflStringComparator.INSTANCE)
-                if (innComp != 0) {
-                    return innComp
-                }
-
-                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, RnuNdflStringComparator.INSTANCE)
-                if (innForeignComp != 0) {
-                    return innForeignComp
-                }
-
-                int birthDayComp = compareValues(o1.birthDay, o2.birthDay, null)
-                if (birthDayComp != 0) {
-                    return birthDayComp
-                }
-
-                return compareValues(o1.idDocNumber, o2.idDocNumber, RnuNdflStringComparator.INSTANCE)
-            }
-        })
-
-        //noinspection GroovyAssignabilityCheck
-        logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
-        ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis()
         Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
 
         for (NdflPerson refBookPerson : refBookPersonList) {
             refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
         }
 
-        Map<Long, List<NdflPersonDeduction>> deductionsGroupedByRefBookPerson = [:]
+        Map<Long, List<NdflPersonDeduction>> deductionsGroupedByPerson = [:]
         Map<Long, List<NdflPersonPrepayment>> prepaymentsGroupedByPerson = [:]
 
-        // Сортируем разделы 2, 3, 4
         for (NdflPersonDeduction deduction : deductions) {
-            List<NdflPersonDeduction> group = deductionsGroupedByRefBookPerson.get(deduction.ndflPersonId)
+            List<NdflPersonDeduction> group = deductionsGroupedByPerson.get(deduction.ndflPersonId)
             if (group == null) {
-                deductionsGroupedByRefBookPerson.put(deduction.ndflPersonId, [deduction])
+                deductionsGroupedByPerson.put(deduction.ndflPersonId, [deduction])
             } else {
                 group << deduction
             }
@@ -419,93 +337,11 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
-        BigDecimal incomeRowNum = new BigDecimal("0")
-        BigDecimal deductionRowNum = new BigDecimal("0")
-        BigDecimal prepaymentRowNum = new BigDecimal("0")
-
         for (NdflPerson ndflPerson : ndflPersonList) {
             ndflPerson.incomes = incomesGroupedByPerson.get(ndflPerson.id)
-            ndflPerson.deductions = deductionsGroupedByRefBookPerson.get(ndflPerson.id)
+            ndflPerson.deductions = deductionsGroupedByPerson.get(ndflPerson.id)
             ndflPerson.prepayments = prepaymentsGroupedByPerson.get(ndflPerson.id)
-
-            Collections.sort(ndflPerson.incomes, new Comparator<NdflPersonIncome>() {
-                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
-                    int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.inp)), operationDates.get(new Pair(o2.operationId, ndflPerson.inp)), null)
-                    if (operationDateComp != 0) {
-                        return operationDateComp
-                    }
-
-                    int operationIdComp = compareValues(o1.operationId, o2.operationId, RnuNdflStringComparator.INSTANCE)
-                    if (operationIdComp != 0) {
-                        return operationIdComp
-                    }
-
-                    int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null)
-                    if (actionDateComp != 0) {
-                        return actionDateComp
-                    }
-
-                    return compareValues(getRowType(o1), getRowType(o2), null)
-                }
-
-            })
-
-            List<String> operationIdOrderList = ndflPerson.incomes.operationId
-
-            Collections.sort(ndflPerson.deductions, new Comparator<NdflPersonDeduction>() {
-                @Override
-                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
-                    int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null)
-                    if (incomeAccruedComp != 0) {
-                        return incomeAccruedComp
-                    }
-
-                    int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
-                        @Override
-                        int compare(String s1, String s2) {
-                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
-                        }
-                    })
-                    if (operationIdComp != 0) {
-                        return operationIdComp
-                    }
-
-                    return compareValues(o1.periodCurrDate, o2.periodCurrDate, null)
-                }
-            })
-
-            Collections.sort(ndflPerson.prepayments, new Comparator<NdflPersonPrepayment>() {
-                @Override
-                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
-                    return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
-                        @Override
-                        int compare(String s1, String s2) {
-                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
-                        }
-                    })
-                }
-            })
-
-            for (NdflPersonIncome income : ndflPerson.incomes) {
-                incomeRowNum = incomeRowNum.add(new BigDecimal("1"))
-                income.rowNum = incomeRowNum
-            }
-
-            for (NdflPersonDeduction deduction : ndflPerson.deductions) {
-                deductionRowNum = deductionRowNum.add(new BigDecimal("1"))
-                deduction.rowNum = deductionRowNum
-            }
-
-            for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
-                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
-                prepayment.rowNum = prepaymentRowNum
-            }
         }
-
-        //noinspection GroovyAssignabilityCheck
-        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, (" + ScriptUtils.calcTimeMillis(time))
-        ScriptUtils.checkInterrupted()
-        time = System.currentTimeMillis()
 
         // Физлица для сохранения сгуппированные по идентификатору физлица в справочнике
         Map<Long, NdflPerson> ndflPersonsToPersistGroupedByRefBookPersonId = [:]
@@ -515,7 +351,6 @@ class Calculate extends AbstractScriptClass {
 
         // Данные для заполнения раздела 1
 
-        long personRowNum = 0L
         for (NdflPerson declarationDataPerson : ndflPersonList) {
             NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
 
@@ -615,8 +450,6 @@ class Calculate extends AbstractScriptClass {
                 declarationDataPerson.address = refBookPerson.address
             }
 
-            declarationDataPerson.rowNum = ++personRowNum
-
             ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.personId, declarationDataPerson)
         }
 
@@ -649,7 +482,183 @@ class Calculate extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
         time = System.currentTimeMillis()
 
-        ndflPersonService.save(ndflPersonsToPersistGroupedByRefBookPersonId.values())
+        List<NdflPerson> ndflPersonsToPersistList = new ArrayList<>(ndflPersonsToPersistGroupedByRefBookPersonId.values())
+
+        Collections.sort(ndflPersonsToPersistList, new Comparator<NdflPerson>() {
+            @Override
+            int compare(NdflPerson o1, NdflPerson o2) {
+                int lastNameComp = compareValues(o1.lastName, o2.lastName, RnuNdflStringComparator.INSTANCE)
+                if (lastNameComp != 0) {
+                    return lastNameComp
+                }
+
+                int firstNameComp = compareValues(o1.firstName, o2.firstName, RnuNdflStringComparator.INSTANCE)
+                if (firstNameComp != 0) {
+                    return firstNameComp
+                }
+
+                int middleNameComp = compareValues(o1.middleName, o2.middleName, RnuNdflStringComparator.INSTANCE)
+                if (middleNameComp != 0) {
+                    return middleNameComp
+                }
+
+                int innComp = compareValues(o1.innNp, o2.innNp, RnuNdflStringComparator.INSTANCE)
+                if (innComp != 0) {
+                    return innComp
+                }
+
+                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, RnuNdflStringComparator.INSTANCE)
+                if (innForeignComp != 0) {
+                    return innForeignComp
+                }
+
+                int birthDayComp = compareValues(o1.birthDay, o2.birthDay, null)
+                if (birthDayComp != 0) {
+                    return birthDayComp
+                }
+
+                return compareValues(o1.idDocNumber, o2.idDocNumber, RnuNdflStringComparator.INSTANCE)
+            }
+        })
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
+
+        // Доходы сгруппированные по идОперации и ИНП. Будут использоваться для вычисления доп полей сортировки
+        Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = [:]
+
+        for (NdflPerson ndflPerson : ndflPersonsToPersistList) {
+            for (NdflPersonIncome income : ndflPerson.incomes) {
+                Pair<String, String> operationAndInpKey = new Pair(income.operationId, ndflPerson.inp)
+                List<NdflPersonIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey)
+                if (operationAndInpGroup == null) {
+                    incomesGroupedByOperationAndInp.put(operationAndInpKey, [income])
+                } else {
+                    operationAndInpGroup << income
+                }
+            }
+        }
+
+        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
+        Map<Pair<String, String>, Date> operationDates = [:]
+
+        for (Map.Entry<Pair<String, String>, List<NdflPersonIncome>> entry : incomesGroupedByOperationAndInp.entrySet()) {
+            Pair<String, String> key = entry.getKey();
+            List<NdflPersonIncome> group = entry.getValue();
+            List<Date> incomeAccruedDates = group.incomeAccruedDate
+            incomeAccruedDates.removeAll([null])
+            if (!incomeAccruedDates.isEmpty()) {
+                Collections.sort(incomeAccruedDates)
+                operationDates.put(key, incomeAccruedDates.get(0))
+                continue
+            }
+
+            List<Date> incomePayoutDates = group.incomePayoutDate
+            incomePayoutDates.removeAll([null])
+            if (!incomePayoutDates.isEmpty()) {
+                Collections.sort(incomePayoutDates)
+                operationDates.put(key, incomePayoutDates.get(0))
+                continue
+            }
+
+            List<Date> paymentDates = group.paymentDate
+            paymentDates.removeAll([null])
+            if (!paymentDates.isEmpty()) {
+                Collections.sort(paymentDates)
+                operationDates.put(key, paymentDates.get(0))
+                continue
+            }
+
+            operationDates.put(key, null)
+        }
+
+        Long personRowNum = 0L
+        BigDecimal incomeRowNum = new BigDecimal("0")
+        BigDecimal deductionRowNum = new BigDecimal("0")
+        BigDecimal prepaymentRowNum = new BigDecimal("0")
+        for (NdflPerson ndflPerson : ndflPersonsToPersistList) {
+            Collections.sort(ndflPerson.incomes, new Comparator<NdflPersonIncome>() {
+                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                    int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.inp)), operationDates.get(new Pair(o2.operationId, ndflPerson.inp)), null)
+                    if (operationDateComp != 0) {
+                        return operationDateComp
+                    }
+
+                    int operationIdComp = compareValues(o1.operationId, o2.operationId, RnuNdflStringComparator.INSTANCE)
+                    if (operationIdComp != 0) {
+                        return operationIdComp
+                    }
+
+                    int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null)
+                    if (actionDateComp != 0) {
+                        return actionDateComp
+                    }
+
+                    return compareValues(getRowType(o1), getRowType(o2), null)
+                }
+
+            })
+
+            List<String> operationIdOrderList = ndflPerson.incomes.operationId
+
+            Collections.sort(ndflPerson.deductions, new Comparator<NdflPersonDeduction>() {
+                @Override
+                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                    int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null)
+                    if (incomeAccruedComp != 0) {
+                        return incomeAccruedComp
+                    }
+
+                    int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                        @Override
+                        int compare(String s1, String s2) {
+                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
+                        }
+                    })
+                    if (operationIdComp != 0) {
+                        return operationIdComp
+                    }
+
+                    return compareValues(o1.periodCurrDate, o2.periodCurrDate, null)
+                }
+            })
+
+            Collections.sort(ndflPerson.prepayments, new Comparator<NdflPersonPrepayment>() {
+                @Override
+                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                    return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                        @Override
+                        int compare(String s1, String s2) {
+                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
+                        }
+                    })
+                }
+            })
+
+            for (NdflPersonIncome income : ndflPerson.incomes) {
+                incomeRowNum = incomeRowNum.add(new BigDecimal("1"))
+                income.rowNum = incomeRowNum
+            }
+
+            for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                deductionRowNum = deductionRowNum.add(new BigDecimal("1"))
+                deduction.rowNum = deductionRowNum
+            }
+
+            for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
+                prepayment.rowNum = prepaymentRowNum
+            }
+
+            ndflPerson.rowNum = ++personRowNum
+        }
+
+        //noinspection GroovyAssignabilityCheck
+        logForDebug("Сортировка разделов 2,3,4 и присвоение № пп, (" + ScriptUtils.calcTimeMillis(time))
+        ScriptUtils.checkInterrupted()
+        time = System.currentTimeMillis()
+
+        ndflPersonService.save(ndflPersonsToPersistList)
 
         //noinspection GroovyAssignabilityCheck
         logForDebug("Сохранение данных в БД, (" + ScriptUtils.calcTimeMillis(time))
