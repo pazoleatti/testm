@@ -44,7 +44,7 @@
     border-right: 2px dotted rgba(0, 0, 0, 0.2);
     text-align: center;
     font-weight: 100;
-    padding: 8px 6px;
+    padding: 8px 10px 8px 6px;
     border-left: 2px dotted rgba(0, 0, 0, 0.2);
     margin: 0 0 0 -4px;
 }
@@ -59,7 +59,7 @@
 .border-radius(4px);
     /*float: right;*/
     position: absolute;
-    right: 7px;
+    right: 3px;
     top: 8px;
 }
 
@@ -195,12 +195,12 @@ background-position: -40px 0;*/
 
 .ui-jqgrid .ui-icon-asc {
     margin-left: -1px;
-    margin-top: -3px;
+    margin-top: 0;
 }
 
 .ui-jqgrid .ui-icon-desc {
     margin-left: -2px;
-    margin-top: 4px;
+    margin-top: 7px;
 }
 
 .ui-state-hover .ui-icon, .ui-state-focus .ui-icon {
@@ -373,4 +373,12 @@ height: 2000px - for IE because height: 100% not work
 
 .ui-jqgrid tr.jqgfirstrow td {
     padding: 0 3px 0 3px;
+}
+
+.ui-state-disabled, .ui-widget-content .ui-state-disabled, .ui-widget-header .ui-state-disabled {
+    opacity: .35;
+}
+
+.ui-jqgrid .ui-grid-ico-sort {
+    background-image: url("ui-icons_000000_256x240.png");
 }
