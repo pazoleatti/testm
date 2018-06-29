@@ -226,7 +226,7 @@
                                     // управление позицией всплывающих подсказок
                                 var updateHintPosition = function () {
                                     //Если мы оказались на невидимой вкладке - ничего не меняем
-                                    if (!isInTab || tabModel.hasClass('active')) {
+                                    if ($(divControls).is(":visible") && (!isInTab || tabModel.hasClass('active'))) {
                                         if (angular.isUndefined(fieldContent) && ($(divControls).find("div.field-content").length !== 0)) {
                                             fieldContent = $(divControls).find("div.field-content")[0];
                                         }

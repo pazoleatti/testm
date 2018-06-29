@@ -246,12 +246,11 @@
                      style="overflow: auto; width: 100%; padding: 10px 12px 0; background-color: lightgray; text-align: center">
                     <img id="pdfImage" style="width: 793px; height: auto; margin: 0 auto;" ng-src="{{reportImage}}">
                 </div>
-                <div style="position: relative; text-align: center; border-top: 1px solid #ccc; padding-top: 7px;">
+                <div style="text-align: center; border-top: 1px solid #ccc; padding-top: 7px;">
                     <div data-resizer
                          data-element-selector="#pdfImage">
                     </div>
-                    <div data-app-pager
-                         style="position: absolute; top: 7px; right: 30px;"
+                    <div data-app-pager style="float: right;"
                          data-on-page-change="onPageChange()"
                          data-ng-model="pager"
                          data-pages-total="pagesTotal">

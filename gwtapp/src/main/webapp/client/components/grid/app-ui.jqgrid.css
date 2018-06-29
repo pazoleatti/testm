@@ -168,6 +168,7 @@ background-position: -40px 0;*/
     width: 28px;
     line-height: 18px;
     padding: 0 1px 0 0;
+    margin-bottom: 1px;
     text-align: center;
 }
 
@@ -184,14 +185,12 @@ background-position: -40px 0;*/
     width: 4px;
 }
 
-.ui-jqgrid .ui-pg-button span {
-    margin: -1px 1px 1px;
-}
-
 .ui-jqgrid .ui-paging-info {
     /*font-size: small;*/
+    height: 21px;
     color: #999999;
     margin-top: 0;
+    margin-bottom: 3px;
 }
 
 .ui-jqgrid .ui-icon-asc {

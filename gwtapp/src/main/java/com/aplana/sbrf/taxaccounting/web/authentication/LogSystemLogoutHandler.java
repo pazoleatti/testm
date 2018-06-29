@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.handlers;
+package com.aplana.sbrf.taxaccounting.web.authentication;
 
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;

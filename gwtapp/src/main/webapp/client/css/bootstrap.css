@@ -2039,6 +2039,7 @@ table {
 
 .table-condensed th,
 .table-condensed td {
+  box-sizing: content-box;
   padding: 4px 5px;
 }
 

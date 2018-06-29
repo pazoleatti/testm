@@ -43,8 +43,8 @@
                 <div class="btn-toolbar grid-filter" style="margin-left: 40px; white-space: nowrap;" role="toolbar" data-ng-hide="versionMode">
                     <span data-ng-show="refBook.versioned && !versionMode">
                         <!-- Выбор даты актуальности -->
-                        <label class="control-label pull-left" style="float: left; margin-right: 5px;">{{::'refBook.version' | translate}}:</label>
-                        <div style="float: left; width: 110px;">
+                        <label class="control-label pull-left" style="margin-right: 5px;">{{::'refBook.version' | translate}}:</label>
+                        <div class="pull-left" style="width: 110px;">
                             <span data-aplana-datepicker data-ng-model="data.recordVersion"
                                   data-ng-change="onChangeVersion()"></span>
                         </div>

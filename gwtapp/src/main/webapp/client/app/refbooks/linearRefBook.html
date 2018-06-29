@@ -38,16 +38,16 @@
             <!--Панель кнопок -->
             <div class="button_panel pull-left">
                 <div class="btn-toolbar" role="toolbar">
-                    <span data-ng-show="refBook.versioned && !versionMode">
+                    <span data-ng-show="refBook.versioned && !versionMode" style="display: inline-block; vertical-align: middle;">
                         <!-- Выбор даты актуальности -->
-                        <label style="float:left; margin: 8px 5px 5px;" class="control-label">{{::'refBook.version' | translate}}:</label>
-                        <div style="width: 150px;float:left;margin-right: 50px;margin-top: 3px">
+                        <label class="control-label pull-left" style="margin-right: 5px;">{{::'refBook.version' | translate}}:</label>
+                        <div class="pull-left" style="width: 110px;">
                             <span data-aplana-datepicker data-ng-model="data.recordVersion"
                                   data-ng-change="onChangeVersion()"></span>
                         </div>
                     </span>
                     <!-- Создать -->
-                    <button type="button" class="btn btn-default" data-ng-hide="refBook.readOnly"
+                    <button type="button" class="btn btn-default" data-ng-hide="refBook.readOnly" style="margin-left: 10px"
                             data-ng-click="createRecord()">
                         <span data-translate-once="button.create"></span>
                     </button>

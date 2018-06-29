@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.aplana.sbrf.taxaccounting.web.handlers.SUDIRRedirectLogoutSuccessHandler.WEBSEAL_HEADER_NAME;
+import static com.aplana.sbrf.taxaccounting.web.authentication.SUDIRRedirectLogoutSuccessHandler.WEBSEAL_HEADER_NAME;
 
 /**
  * Контроллер для работы с кэшем

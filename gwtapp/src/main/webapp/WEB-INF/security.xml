@@ -38,11 +38,11 @@
     <!-- Фильтр, отвечающий за логаут. -->
     <beans:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
         <beans:constructor-arg>
-            <beans:bean class="com.aplana.sbrf.taxaccounting.web.handlers.SUDIRRedirectLogoutSuccessHandler"/>
+            <beans:bean class="com.aplana.sbrf.taxaccounting.web.authentication.SUDIRRedirectLogoutSuccessHandler"/>
         </beans:constructor-arg>
         <beans:constructor-arg>
             <beans:list>
-                <beans:bean class="com.aplana.sbrf.taxaccounting.web.handlers.LogSystemLogoutHandler"/>
+                <beans:bean class="com.aplana.sbrf.taxaccounting.web.authentication.LogSystemLogoutHandler"/>
                 <beans:bean
                         class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
             </beans:list>
@@ -53,7 +53,7 @@
                 class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
 
     <beans:bean id="j2eePreAuthFilter"
-                class="org.springframework.security.web.authentication.preauth.j2ee.J2eePreAuthenticatedProcessingFilter">
+                class="com.aplana.sbrf.taxaccounting.web.authentication.PreAuthenticatedProcessingFilter">
         <beans:property name="authenticationManager" ref="appControlAuthenticationManager"/>
         <beans:property name="authenticationDetailsSource">
             <beans:bean
