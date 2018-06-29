@@ -82,48 +82,7 @@ public class PersonServiceImpl implements PersonService {
                 commonRefBookService.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         PagingResult<RefBookPerson> records;
         if (recordId == null) {
-            String filter = "";
-            // Отдельная фильтрация по имени и фамилии - выполняем сначала, чтобы меньше результатов попало под полнотекстовый поиск
-            if (StringUtils.isNotEmpty(firstName)) {
-                filter += "LOWER(FIRST_NAME) = '" + prepareForQuery(firstName) + "'";
-            }
-            if (StringUtils.isNotEmpty(lastName)) {
-                if (StringUtils.isNotEmpty(filter)) {
-                    filter += " and ";
-                }
-                filter += "LOWER(LAST_NAME) = '" + prepareForQuery(lastName) + "'";
-            }
-
-            // Полнотекстовый поиск
-            if (StringUtils.isNotEmpty(searchPattern)) {
-                String prepared = prepareForQuery(searchPattern);
-                if (StringUtils.isNotEmpty(filter)) {
-                    filter += " and ";
-                }
-                // Пытаемся распарсить дату из строки поиска, пробуем только один формат, т.к он используется в таблице - если не получилось, то игнорируем поиск по дате
-                Date birthDate = null;
-                try {
-                    birthDate = formatter.get().parse(prepared);
-                } catch (ParseException e) {
-                    // ignored
-                }
-                filter += ("(TO_CHAR(RECORD_ID) :searchPattern or " +
-                        (StringUtils.isEmpty(lastName) ? "LOWER(LAST_NAME) :searchPattern or " : "") +
-                        (StringUtils.isEmpty(firstName) ? "LOWER(FIRST_NAME) :searchPattern or " : "") +
-                        "LOWER(MIDDLE_NAME) :searchPattern or " +
-                        "LOWER(INN) :searchPattern or " +
-                        "LOWER(INN_FOREIGN) :searchPattern or " +
-                        "LOWER(SNILS) :searchPattern or " +
-                        "LOWER(TAXPAYER_STATE_CODE) :searchPattern or " +
-                        "LOWER(BIRTH_PLACE) :searchPattern or " +
-                        "LOWER(CITIZENSHIP_CODE) :searchPattern or " +
-                        "TO_CHAR(EMPLOYEE) :searchPattern or " +
-                        "LOWER(SOURCE_ID_CODE) :searchPattern or " +
-                        "TO_CHAR(OLD_ID) :searchPattern or " +
-                        (birthDate != null ? "to_char(BIRTH_DATE, 'DD.MM.YYYY') = '" + prepared + "' or " : "") +
-                        "LOWER(ADDRESS_ADDRESS_FULL) :searchPattern)")
-                        .replaceAll(":searchPattern", (exactSearch ? "= '" + prepared + "'" : "like '%" + prepared + "%'"));
-            }
+            String filter = createSearchFilter(firstName, lastName, searchPattern, exactSearch);
             // Отбираем все записи справочника
             records = getPersons(version, pagingParams, filter, sortAttribute);
         } else {
@@ -290,5 +249,52 @@ public class PersonServiceImpl implements PersonService {
     public void changeRecordId(List<Long> recordIds, Long originalId) {
         LOG.info(String.format("PersonServiceImpl.changeRecordId. recordIds: %s; originalId: %s", recordIds, originalId));
         refBookPersonDao.changeRecordId(recordIds, originalId);
+    }
+
+    private String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch) {
+        String filter = "";
+        // Отдельная фильтрация по имени и фамилии - выполняем сначала, чтобы меньше результатов попало под полнотекстовый поиск
+        if (StringUtils.isNotEmpty(firstName)) {
+            String prepared = prepareForQuery(firstName);
+            filter += "LOWER(FIRST_NAME) :searchPattern".replace(":searchPattern", (exactSearch ? "= '" + prepared + "'" : "like '%" + prepared + "%'"));
+        }
+        if (StringUtils.isNotEmpty(lastName)) {
+            String prepared = prepareForQuery(lastName);
+            if (StringUtils.isNotEmpty(filter)) {
+                filter += " and ";
+            }
+            filter += "LOWER(LAST_NAME) :searchPattern".replace(":searchPattern", (exactSearch ? "= '" + prepared + "'" : "like '%" + prepared + "%'"));
+        }
+
+        // Полнотекстовый поиск
+        if (StringUtils.isNotEmpty(searchPattern)) {
+            String prepared = prepareForQuery(searchPattern);
+            if (StringUtils.isNotEmpty(filter)) {
+                filter += " and ";
+            }
+            // Пытаемся распарсить дату из строки поиска, пробуем только один формат, т.к он используется в таблице - если не получилось, то игнорируем поиск по дате
+            Date birthDate = null;
+            try {
+                birthDate = formatter.get().parse(prepared);
+            } catch (ParseException ignore) {}
+            filter += ("(TO_CHAR(RECORD_ID) :searchPattern or " +
+                    (StringUtils.isEmpty(lastName) ? "LOWER(LAST_NAME) :searchPattern or " : "") +
+                    (StringUtils.isEmpty(firstName) ? "LOWER(FIRST_NAME) :searchPattern or " : "") +
+                    "LOWER(MIDDLE_NAME) :searchPattern or " +
+                    "LOWER(INN) :searchPattern or " +
+                    "LOWER(INN_FOREIGN) :searchPattern or " +
+                    "LOWER(SNILS) :searchPattern or " +
+                    "LOWER(TAXPAYER_STATE_CODE) :searchPattern or " +
+                    "LOWER(BIRTH_PLACE) :searchPattern or " +
+                    "LOWER(CITIZENSHIP_CODE) :searchPattern or " +
+                    "TO_CHAR(EMPLOYEE) :searchPattern or " +
+                    "LOWER(SOURCE_ID_CODE) :searchPattern or " +
+                    "TO_CHAR(OLD_ID) :searchPattern or " +
+                    (birthDate != null ? "to_char(BIRTH_DATE, 'DD.MM.YYYY') = '" + prepared + "' or " : "") +
+                    "LOWER(ADDRESS_ADDRESS_FULL) :searchPattern)")
+                    .replaceAll(":searchPattern", (exactSearch ? "= '" + prepared + "'" : "like '%" + prepared + "%'"));
+        }
+
+        return filter;
     }
 }
