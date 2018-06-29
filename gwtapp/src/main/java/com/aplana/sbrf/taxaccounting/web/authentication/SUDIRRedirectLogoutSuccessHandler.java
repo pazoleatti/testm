@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.handlers;
+package com.aplana.sbrf.taxaccounting.web.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
