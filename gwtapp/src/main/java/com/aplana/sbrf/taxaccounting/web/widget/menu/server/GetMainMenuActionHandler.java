@@ -141,10 +141,8 @@ public class GetMainMenuActionHandler extends
             if (currentUser.hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
                 MenuItem templateMenu = new MenuItem("Настройки", "", null);
                 adminMenuItem.getSubMenu().add(templateMenu);
-                templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
-                        + DeclarationTemplateTokens.declarationTemplateList));
-                templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
-                        + RefBookListTokens.REFBOOK_LIST_ADMIN));
+                templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", "index.html#/administration/refBookConfList"));
+                templateMenu.getSubMenu().add(new MenuItem("Справочники", "index.html#/administration/refBookConfList"));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK, "", "_blank"));
                 templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
                 templateMenu.getSubMenu().add(new MenuItem("Импорт скриптов", NUMBER_SIGN
