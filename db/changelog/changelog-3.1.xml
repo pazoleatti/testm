@@ -76,4 +76,19 @@
 			and version=to_date('25.12.16','DD.MM.YY');
 		</sql>
     </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4984 Уведомление об отсутствии пары "Код дохода"/"Признак дохода" в справочнике "Виды дохода" -->
+	<changeSet id="3.1-rnurgaleev-2" author="rnurgaleev">
+        <sql>
+			merge into ref_book_income_kind a using
+			(select (select id from (select id,version from ref_book_income_type where code='1011' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'00' as mark, '-' as name,
+			to_date('01.01.2017','DD.MM.YYYY') as version from dual
+			) b
+			on (a.income_type_id=b.income_type_id and a.mark=b.mark)
+			when not matched then
+			insert (id, income_type_id, mark, name, version, record_id)
+			values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name, b.version, seq_ref_book_record.nextval);
+		</sql>
+    </changeSet>
 </databaseChangeLog>
