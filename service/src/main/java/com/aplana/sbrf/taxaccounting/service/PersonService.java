@@ -109,4 +109,14 @@ public interface PersonService {
      * @return результат выполнения операции
      */
     ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, RefBookPerson currentPerson, RefBookPerson original, List<RefBookPerson> newDuplicates, List<RefBookPerson> deletedDuplicates);
+
+    /**
+     * Создает фильтр поиска
+     * @param firstName     значение имени
+     * @param lastName      значение фамилии
+     * @param searchPattern строка для по всем полям
+     * @param exactSearch   искать по точному совпадению
+     * @return              часть sql запроса в виде строки
+     */
+    String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch);
 }

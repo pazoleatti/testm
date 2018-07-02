@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -11,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -24,24 +21,15 @@ public class PersonServiceImplTest {
     @Autowired
     private RefBookPersonDao refBookPersonDao;
 
-    private static Method createSearchFilterMethod;
-
-    @BeforeClass
-    public static void setUp() throws NoSuchMethodException {
-        Class<? extends PersonService> clazz = PersonServiceImpl.class;
-        createSearchFilterMethod = clazz.getDeclaredMethod("createSearchFilter", String.class, String.class, String.class, Boolean.class);
-        createSearchFilterMethod.setAccessible(true);
-    }
-
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternEmptyApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, null, null, false);
+    public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternEmptyApproxSearch() {
+        String result = personService.createSearchFilter( null, null, null, false);
         Assert.assertEquals("", result);
     }
 
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternFilledApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, null, "A", false);
+    public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternFilledApproxSearch() {
+        String result = personService.createSearchFilter( null, null, "A", false);
         String expected = "(TO_CHAR(RECORD_ID) like '%a%' or LOWER(LAST_NAME) like '%a%' or " +
                 "LOWER(FIRST_NAME) like '%a%' or LOWER(MIDDLE_NAME) like '%a%' or LOWER(INN) like '%a%' or " +
                 "LOWER(INN_FOREIGN) like '%a%' or LOWER(SNILS) like '%a%' or LOWER(TAXPAYER_STATE_CODE) like '%a%' or " +
@@ -51,8 +39,8 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternFilledExactSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, null, "A", true);
+    public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternFilledExactSearch() {
+        String result = personService.createSearchFilter( null, null, "A", true);
         String expected = "(TO_CHAR(RECORD_ID) = 'a' or LOWER(LAST_NAME) = 'a' or " +
                 "LOWER(FIRST_NAME) = 'a' or LOWER(MIDDLE_NAME) = 'a' or LOWER(INN) = 'a' or " +
                 "LOWER(INN_FOREIGN) = 'a' or LOWER(SNILS) = 'a' or LOWER(TAXPAYER_STATE_CODE) = 'a' or " +
@@ -62,22 +50,22 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternEmptyApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, "F", null, null, false);
+    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternEmptyApproxSearch() {
+        String result = personService.createSearchFilter( "F", null, null, false);
         String expected = "LOWER(FIRST_NAME) like '%f%'";
         Assert.assertEquals(expected, result);
     }
 
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternEmptyExactSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, "F", null, null, true);
+    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternEmptyExactSearch() {
+        String result = personService.createSearchFilter("F", null, null, true);
         String expected = "LOWER(FIRST_NAME) = 'f'";
         Assert.assertEquals(expected, result);
     }
 
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternFilledApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, "F", null, "A", false);
+    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternFilledApproxSearch() {
+        String result = personService.createSearchFilter( "F", null, "A", false);
         String expected = "LOWER(FIRST_NAME) like '%f%' and (TO_CHAR(RECORD_ID) like '%a%' or LOWER(LAST_NAME) like '%a%' or " +
                 "LOWER(MIDDLE_NAME) like '%a%' or LOWER(INN) like '%a%' or " +
                 "LOWER(INN_FOREIGN) like '%a%' or LOWER(SNILS) like '%a%' or LOWER(TAXPAYER_STATE_CODE) like '%a%' or " +
@@ -87,8 +75,8 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternFilledExactSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, "F", null, "A", true);
+    public void testCreateSearchFilterLastNameEmptyFirstNameFilledSearchPatternFilledExactSearch() {
+        String result = personService.createSearchFilter( "F", null, "A", true);
         String expected = "LOWER(FIRST_NAME) = 'f' and (TO_CHAR(RECORD_ID) = 'a' or LOWER(LAST_NAME) = 'a' or " +
                 "LOWER(MIDDLE_NAME) = 'a' or LOWER(INN) = 'a' or " +
                 "LOWER(INN_FOREIGN) = 'a' or LOWER(SNILS) = 'a' or LOWER(TAXPAYER_STATE_CODE) = 'a' or " +
@@ -98,22 +86,22 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternEmptyApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, "L", null, false);
+    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternEmptyApproxSearch() {
+        String result = personService.createSearchFilter( null, "L", null, false);
         String expected = "LOWER(LAST_NAME) like '%l%'";
         Assert.assertEquals(expected, result);
     }
 
     @Test
-    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternEmptyExactSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, "L", null, true);
+    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternEmptyExactSearch() {
+        String result = personService.createSearchFilter( null, "L", null, true);
         String expected = "LOWER(LAST_NAME) = 'l'";
         Assert.assertEquals(expected, result);
     }
 
     @Test
-    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternFilledApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, "L", "A", false);
+    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternFilledApproxSearch() {
+        String result = personService.createSearchFilter( null, "L", "A", false);
         String expected = "LOWER(LAST_NAME) like '%l%' and (TO_CHAR(RECORD_ID) like '%a%' or LOWER(FIRST_NAME) like '%a%' or " +
                 "LOWER(MIDDLE_NAME) like '%a%' or LOWER(INN) like '%a%' or " +
                 "LOWER(INN_FOREIGN) like '%a%' or LOWER(SNILS) like '%a%' or LOWER(TAXPAYER_STATE_CODE) like '%a%' or " +
@@ -123,8 +111,8 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternFilledExactSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, null, "L", "A", true);
+    public void testCreateSearchFilterLastNameFilledFirstNameEmptySearchPatternFilledExactSearch() {
+        String result = personService.createSearchFilter( null, "L", "A", true);
         String expected = "LOWER(LAST_NAME) = 'l' and (TO_CHAR(RECORD_ID) = 'a' or LOWER(FIRST_NAME) = 'a' or " +
                 "LOWER(MIDDLE_NAME) = 'a' or LOWER(INN) = 'a' or " +
                 "LOWER(INN_FOREIGN) = 'a' or LOWER(SNILS) = 'a' or LOWER(TAXPAYER_STATE_CODE) = 'a' or " +
@@ -134,8 +122,8 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameFilledFirstNameFilledSearchPatternFilledApproxSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, "F", "L", "A", false);
+    public void testCreateSearchFilterLastNameFilledFirstNameFilledSearchPatternFilledApproxSearch() {
+        String result = personService.createSearchFilter( "F", "L", "A", false);
         String expected = "LOWER(FIRST_NAME) like '%f%' and LOWER(LAST_NAME) like '%l%' and (TO_CHAR(RECORD_ID) like '%a%' or " +
                 "LOWER(MIDDLE_NAME) like '%a%' or LOWER(INN) like '%a%' or " +
                 "LOWER(INN_FOREIGN) like '%a%' or LOWER(SNILS) like '%a%' or LOWER(TAXPAYER_STATE_CODE) like '%a%' or " +
@@ -145,8 +133,8 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testCreateSearchFilterLastNameFilledFirstNameFilledSearchPatternFilledExactSearch() throws InvocationTargetException, IllegalAccessException {
-        String result = (String) createSearchFilterMethod.invoke(personService, "F", "L", "A", true);
+    public void testCreateSearchFilterLastNameFilledFirstNameFilledSearchPatternFilledExactSearch() {
+        String result = personService.createSearchFilter( "F", "L", "A", true);
         String expected = "LOWER(FIRST_NAME) = 'f' and LOWER(LAST_NAME) = 'l' and (TO_CHAR(RECORD_ID) = 'a' or " +
                 "LOWER(MIDDLE_NAME) = 'a' or LOWER(INN) = 'a' or " +
                 "LOWER(INN_FOREIGN) = 'a' or LOWER(SNILS) = 'a' or LOWER(TAXPAYER_STATE_CODE) = 'a' or " +
@@ -156,7 +144,7 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    public void testGetPersons() throws InvocationTargetException, IllegalAccessException {
+    public void testGetPersons() {
         Date version = Mockito.mock(Date.class);
         personService.getPersons(null, version, null, "", "", "", false);
         Mockito.verify(refBookPersonDao, Mockito.times(1)).getPersons(version, null, "", null);

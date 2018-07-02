@@ -251,7 +251,7 @@ public class PersonServiceImpl implements PersonService {
         refBookPersonDao.changeRecordId(recordIds, originalId);
     }
 
-    private String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch) {
+    public String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch) {
         String filter = "";
         // Отдельная фильтрация по имени и фамилии - выполняем сначала, чтобы меньше результатов попало под полнотекстовый поиск
         if (StringUtils.isNotEmpty(firstName)) {

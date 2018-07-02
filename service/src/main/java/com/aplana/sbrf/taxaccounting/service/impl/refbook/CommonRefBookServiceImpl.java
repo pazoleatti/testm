@@ -14,10 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +48,8 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private TAUserService userService;
+    @Autowired
+    private PersonService personService;
 
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -559,15 +558,8 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         PagingResult<Map<String, RefBookValue>> records;
         if (recordId == null) {
-            String filter = null;
-            if (StringUtils.isNotEmpty(searchPattern) || !CollectionUtils.isEmpty(extraParams)) {
-                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-                if (CollectionUtils.isEmpty(extraParams)) {
-                    filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
-                } else {
-                    filter = getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, exactSearch);
-                }
-            }
+            String filter = createSearchFilter(refBookId, extraParams, searchPattern, exactSearch);
+
             // Отбираем все записи справочника
             records = provider.getRecordsWithVersionInfo(version, pagingParams, filter, sortAttribute, direction);
         } else {
@@ -678,5 +670,22 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             }
         }
         return records;
+    }
+
+    private String createSearchFilter(Long refBookId, Map<String, String> extraParams, String searchPattern, Boolean exactSearch) {
+        String filter = "";
+        if (refBookId == RefBook.Id.PERSON.getId()) {
+            filter = personService.createSearchFilter(extraParams.get("FIRST_NAME"), extraParams.get("LAST_NAME"), searchPattern, exactSearch);
+        } else {
+            if (StringUtils.isNotEmpty(searchPattern) || !CollectionUtils.isEmpty(extraParams)) {
+                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
+                if (CollectionUtils.isEmpty(extraParams)) {
+                    filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+                } else {
+                    filter = getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, exactSearch);
+                }
+            }
+        }
+        return filter;
     }
 }

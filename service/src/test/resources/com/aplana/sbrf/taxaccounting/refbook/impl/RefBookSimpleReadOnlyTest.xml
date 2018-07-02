@@ -37,6 +37,10 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.impl.refbook.CommonRefBookServiceImpl" />
     </bean>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PersonService" />
+    </bean>
+
     <bean id="refBookSimpleReadOnly" class="com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly" />
 
 </beans>
