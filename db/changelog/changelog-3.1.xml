@@ -59,4 +59,36 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4982 Уведомление об отсутствии пары КПП/ОКТМО в справочнике "Настройки подразделений" -->
+	<changeSet id="3.1-rnurgaleev-0" author="rnurgaleev">
+        <sql>
+            update ref_book_ndfl_detail a set oktmo=(select max(id) from ref_book_oktmo where code=(select code from ref_book_oktmo where id=a.oktmo) and status=0)
+			where oktmo in (select id from ref_book_oktmo where status=2);
+        </sql>
+    </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4947 "Дата окончания актуальности" для "Кодов видов вычета" = 221 не соответствует постановке -->
+	<changeSet id="3.1-rnurgaleev-1" author="rnurgaleev">
+        <sql>
+			update ref_book_deduction_type set version=to_date('26.12.16','DD.MM.YY')
+			where code in ('221')
+			and version=to_date('25.12.16','DD.MM.YY');
+		</sql>
+    </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4984 Уведомление об отсутствии пары "Код дохода"/"Признак дохода" в справочнике "Виды дохода" -->
+	<changeSet id="3.1-rnurgaleev-2" author="rnurgaleev">
+        <sql>
+			merge into ref_book_income_kind a using
+			(select (select id from (select id,version from ref_book_income_type where code='1011' and status=0 order by version desc) where rownum=1) as income_type_id,
+			'00' as mark, '-' as name,
+			to_date('01.01.2017','DD.MM.YYYY') as version from dual
+			) b
+			on (a.income_type_id=b.income_type_id and a.mark=b.mark)
+			when not matched then
+			insert (id, income_type_id, mark, name, version, record_id)
+			values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name, b.version, seq_ref_book_record.nextval);
+		</sql>
+    </changeSet>
 </databaseChangeLog>
