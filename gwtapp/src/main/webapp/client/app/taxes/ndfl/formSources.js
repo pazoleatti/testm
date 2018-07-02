@@ -68,7 +68,7 @@
                             {
                                 name: 'srcOrDest',
                                 index: 'srcOrDest',
-                                width: 157,
+                                width: 150,
                                 sortable: false,
                                 formatter: $filter('sourceFormatter')
                             },
