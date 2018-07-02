@@ -59,4 +59,12 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-4982 Уведомление об отсутствии пары КПП/ОКТМО в справочнике "Настройки подразделений" -->
+	<changeSet id="3.1-rnurgaleev-0" author="rnurgaleev">
+        <sql>
+            update ref_book_ndfl_detail a set oktmo=(select max(id) from ref_book_oktmo where code=(select code from ref_book_oktmo where id=a.oktmo) and status=0)
+			where oktmo in (select id from ref_book_oktmo where status=2);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
