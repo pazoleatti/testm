@@ -67,4 +67,13 @@
 			where oktmo in (select id from ref_book_oktmo where status=2);
         </sql>
     </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4947 "Дата окончания актуальности" для "Кодов видов вычета" = 221 не соответствует постановке -->
+	<changeSet id="3.1-rnurgaleev-1" author="rnurgaleev">
+        <sql>
+			update ref_book_deduction_type set version=to_date('26.12.16','DD.MM.YY')
+			where code in ('221')
+			and version=to_date('25.12.16','DD.MM.YY');
+		</sql>
+    </changeSet>
 </databaseChangeLog>
