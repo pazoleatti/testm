@@ -104,7 +104,7 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
             sourceClientData.setDestinationDepartmentId(action.getRightDepartmentId());
         }
 
-        sourceService.createSources(logger, sourceClientData);
+//        sourceService.createSources(logger, sourceClientData);
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.clear(LogLevel.INFO);
         }

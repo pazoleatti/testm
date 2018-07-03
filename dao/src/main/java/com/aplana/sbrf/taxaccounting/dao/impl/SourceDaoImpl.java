@@ -1,220 +1,27 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
-import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 @Repository
 public class SourceDaoImpl extends AbstractDao implements SourceDao {
-
-    @Autowired
-    private DepartmentDao departmentDao;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    private String buildSourcePairsInQuery(String query, String pairNames, List<SourcePair> sourcePairs) {
-        StringBuilder in = new StringBuilder();
-        in.append("(");
-        int maxSize = SqlUtils.IN_CAUSE_LIMIT;
-        int counter = 0;
-        int sum = 0;
-        int size = sourcePairs.size();
-        for (SourcePair pair : sourcePairs) {
-            if (counter == 0) {
-                in.append(pairNames).append(" in (");
-            }
-            in.append("(").append(pair.getSource()).append(",").append(pair.getDestination()).append(")");
-            if (counter == maxSize - 1) {
-                in.append(")");
-                if (sum < size) {
-                    in.append(" OR ");
-                }
-                counter = 0;
-            } else {
-                if (sum < size - 1) {
-                    in.append(",");
-                } else {
-                    in.append(")");
-                }
-                counter++;
-            }
-            sum++;
-        }
-        in.append(")");
-        return String.format(query, in.toString());
-    }
-
-    private String buildConsolidatedPairsInQuery(String pairNames, Set<ConsolidatedInstance> pairs) {
-        StringBuilder in = new StringBuilder();
-        in.append("(");
-        int maxSize = SqlUtils.IN_CAUSE_LIMIT;
-        int counter = 0;
-        int sum = 0;
-        int size = pairs.size();
-        for (ConsolidatedInstance pair : pairs) {
-            if (counter == 0) {
-                in.append(pairNames).append(" in (");
-            }
-            in.append("(").append(pair.getSourceId()).append(",").append(pair.getId()).append(")");
-            if (counter == maxSize - 1) {
-                in.append(")");
-                if (sum < size) {
-                    in.append(" OR ");
-                }
-                counter = 0;
-            } else {
-                if (sum < size - 1) {
-                    in.append(",");
-                } else {
-                    in.append(")");
-                }
-                counter++;
-            }
-            sum++;
-        }
-        in.append(")");
-        return in.toString();
-    }
-
-    private final static String GET_FORM_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, s_d.name as s_department, \n" +
-            "a.department_form_type_id as destination, d_kind.name as d_kind, d_type.name as d_type, d_d.name as d_department, \n" +
-            "a.period_start, a.period_end \n" +
-            "from form_data_source a \n" +
-            "join department_form_type s_dft on s_dft.id = src_department_form_type_id\n" +
-            "join department s_d on s_d.id = s_dft.department_id\n" +
-            "join form_kind s_kind on s_kind.id = s_dft.kind\n" +
-            "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
-            "join department_form_type d_dft on d_dft.id = department_form_type_id\n" +
-            "join department d_d on d_d.id = d_dft.department_id\n" +
-            "join form_kind d_kind on d_kind.id = d_dft.kind\n" +
-            "join form_type d_type on d_type.id = d_dft.form_type_id\n" +
-            "where \n" +
-            "%s \n" + //--список пар
-            "and (period_end >= :periodStart or period_end is null)  \n" + //--дата открытия периода
-            "and (:periodEnd is null or period_start <= :periodEnd) \n" + //--дата окончания периода (может быть передана null)
-            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) "; //--исключить этот период
-
-    private final static String GET_DECLARATION_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, s_d.name as s_department, \n" +
-            "a.department_declaration_type_id as destination, null as d_kind, d_type.name as d_type, d_d.name as d_department, \n" +
-            "a.period_start, a.period_end\n" +
-            "from declaration_source a\n" +
-            "join department_form_type s_dft on s_dft.id = src_department_form_type_id\n" +
-            "join department s_d on s_d.id = s_dft.department_id\n" +
-            "join form_kind s_kind on s_kind.id = s_dft.kind\n" +
-            "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
-            "join department_declaration_type d_ddt on d_ddt.id = department_declaration_type_id\n" +
-            "join department d_d on d_d.id = d_ddt.department_id\n" +
-            "join declaration_type d_type on d_type.id = d_ddt.declaration_type_id\n" +
-            "where \n" +
-            "%s \n" + //--список пар
-            "and (period_end >= :periodStart or period_end is null) \n" + //--дата открытия периода
-            "and (:periodEnd is null or period_start <= :periodEnd) \n" + //--дата окончания периода (может быть передана null)
-            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) "; //--исключить этот период
-
-    @Override
-    public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
-                                                                Date excludedPeriodStart, Date excludedPeriodEnd, final boolean declaration) {
-        final Map<SourcePair, List<SourceObject>> result = new HashMap<SourcePair, List<SourceObject>>();
-        //формируем in-часть вида ((1, 2), (1, 3))
-        String sql;
-        if (declaration) {
-            sql = buildSourcePairsInQuery(GET_DECLARATION_INTERSECTIONS, "(src_department_form_type_id, department_declaration_type_id)", sourcePairs);
-        } else {
-            sql = buildSourcePairsInQuery(GET_FORM_INTERSECTIONS, "(src_department_form_type_id, department_form_type_id)", sourcePairs);
-        }
-        //составляем все параметры вместе. PreparedStatementData использовать не получается, т.к несколько параметров могут быть равны null
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-        params.put("excludedPeriodStart", excludedPeriodStart);
-        params.put("excludedPeriodEnd", excludedPeriodEnd);
-
-
-        //TODO: (dloshkarev) надо переделывать тут получение через department_form_type и declaration_source пока что закомментирую, чтоб не ругалось на несуществующие таблицы
-        return Collections.emptyMap();
-        /*getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
-            @Override
-            public void processRow(ResultSet rs) throws SQLException {
-                SourcePair pair = new SourcePair(rs.getLong("source"), rs.getLong("destination"));
-                pair.setSourceKind(rs.getString("s_kind"));
-                pair.setSourceType(rs.getString("s_type"));
-                pair.setDestinationKind(rs.getString("d_kind"));
-                pair.setDestinationType(rs.getString("d_type"));
-                pair.setSourceDepartmentName(rs.getString("s_department"));
-                pair.setDestinationDepartmentName(rs.getString("d_department"));
-
-                if (result.containsKey(pair)) {
-                    result.get(pair).add(new SourceObject(pair, rs.getDate("period_start"), rs.getDate("period_end")));
-                } else {
-                    List<SourceObject> list = new ArrayList<SourceObject>();
-                    list.add(new SourceObject(pair, rs.getDate("period_start"), rs.getDate("period_end")));
-                    result.put(pair, list);
-                }
-            }
-        });
-        return result;*/
-    }
-
-    private final static String GET_LOOPS = "with subset(src, tgt, period_start, period_end, base) as\n" +
-            "(\n" +
-            //"--существующие записи из таблицы соответствия\n" +
-            "select tds.src_department_form_type_id, tds.department_form_type_id, period_start, period_end, 1 as base from form_data_source tds\n" +
-            "union all \n" + //--записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации
-            "select a.id, b.id, :periodStart, cast(:periodEnd as date), 0 as base from department_form_type a, department_form_type b where %s \n" + //--список пар
-            ")\n" +
-            "select \n" +
-            "       CONNECT_BY_ROOT src as IN_src_department_form_type_id, \n" + //--исходный источник
-            "       CONNECT_BY_ROOT tgt as IN_department_form_type_id, \n" + //--исходный приемник
-            "       src as src_department_form_type_id, \n" +
-            "       tgt as department_form_type_id\n" +
-            "from subset \n" +
-            "where connect_by_iscycle = 1 \n" + // -- есть зацикливание
-            "connect by nocycle prior src = tgt and (period_end >= :periodStart or period_end is null) and (:periodEnd is null or period_start <= :periodEnd) \n" + //-- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх
-            "start with base  = 0 "; //-- начать с тех записей, которые были добавлены в граф фиктивно
-
-    @Override
-    public Map<SourcePair, SourcePair> getLoops(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd) {
-        final Map<SourcePair, SourcePair> result = new HashMap<SourcePair, SourcePair>();
-        //составляем все параметры вместе. PreparedStatementData использовать не получается, т.к несколько параметров могут быть равны null
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-
-        //формируем in-часть вида ((1, 2), (1, 3))
-        /*String sql = buildSourcePairsInQuery(GET_LOOPS, "(a.id, b.id)", sourcePairs);
-        getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
-            @Override
-            public void processRow(ResultSet rs) throws SQLException {
-                result.put(
-                        new SourcePair(rs.getLong("in_src_department_form_type_id"), rs.getLong("in_department_form_type_id")),
-                        new SourcePair(rs.getLong("src_department_form_type_id"), rs.getLong("department_form_type_id"))
-                );
-            }
-        });
-        return result;*/
-        //TODO: (dloshkarev) надо переделывать тут получение через department_form_type и declaration_source пока что закомментирую, чтоб не ругалось на несуществующие таблицы
-        return Collections.emptyMap();
-    }
 
     private final class SourceBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
         private List<SourceObject> sources;
@@ -272,149 +79,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public void deleteAll(final List<SourceObject> sources) {
         getJdbcTemplate().batchUpdate("delete from declaration_source where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
                 new SourceBatchPreparedStatementSetter(sources, true));
-    }
-
-    @Override
-    public void createAll(List<SourceObject> sources) {
-        getJdbcTemplate().batchUpdate("insert into declaration_source (src_department_form_type_id, department_declaration_type_id, period_start, period_end) values (?,?,?,?)",
-                new SourceBatchPreparedStatementSetter(sources, false));
-    }
-
-    @Override
-    public void updateAll(List<SourceObject> sources, Date periodStart, Date periodEnd) {
-        getJdbcTemplate().batchUpdate("update declaration_source set period_start = ?, period_end = ? where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
-                new SourceBatchPreparedStatementSetter(sources, periodStart, periodEnd, true));
-    }
-
-    private static final String GET_SOURCE_NAMES = "select dft.id, fk.name as form_kind, ft.name as form_type, d.name as department_name from department_form_type dft\n" +
-            "join form_kind fk on fk.id = dft.kind\n" +
-            "join form_type ft on ft.id = dft.form_type_id\n" +
-            "join department d on ft.id = dft.department_id\n" +
-            "where ";
-
-    @Override
-    public Map<Long, String> getSourceNames(List<Long> sourceIds) {
-        final Map<Long, String> result = new HashMap<Long, String>();
-        try {
-            String sql = GET_SOURCE_NAMES + SqlUtils.transformToSqlInStatement("dft.id", sourceIds);
-            /*getJdbcTemplate().query(sql, new RowCallbackHandler() {
-                @Override
-                public void processRow(ResultSet rs) throws SQLException {
-                    result.put(
-                            rs.getLong("id"),
-                            rs.getString("department_name") + ", " + rs.getString("form_kind") + " - " + rs.getString("form_type")
-                    );
-                }
-            });
-            return result;*/
-            //TODO: (dloshkarev) надо переделывать тут получение через department_form_type и declaration_source пока что закомментирую, чтоб не ругалось на несуществующие таблицы
-            return Collections.emptyMap();
-        } catch (EmptyResultDataAccessException e) {
-            return new HashMap<Long, String>();
-        }
-    }
-
-    @Override
-    public List<Long> checkDDTExistence(List<Long> departmentDeclarationTypeIds) {
-        try {
-            String sql = "select id from department_declaration_type where " + SqlUtils.transformToSqlInStatement("id", departmentDeclarationTypeIds);
-            return getJdbcTemplate().query(sql, new RowMapper<Long>() {
-                @Override
-                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("id");
-                }
-            });
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Long>();
-        }
-    }
-
-    private static final String GET_EMPTY_PERIODS = "WITH \n" +
-            "form_data_src AS\n" +
-            "  (SELECT *\n" +
-            "   FROM form_data_source\n" +
-            "   WHERE department_form_type_id = :destination\n" +
-            "     AND src_department_form_type_id = :source),    \n" +
-            "form_data_src_extended (period_start, period_end) AS\n" +
-            "  (SELECT period_end + interval '1' DAY, lead(period_start) over (ORDER BY period_start) - interval '1' DAY FROM form_data_src\n" +
-            "   UNION ALL \n" +
-            "   SELECT :newPeriodStart AS period_start, min(period_start) - interval '1' DAY\n" +
-            "   FROM form_data_src \n" + //-- дата начала нового периода
-            "   UNION ALL \n" +
-            "   SELECT max(coalesce(period_end, to_date('30.12.9999', 'DD.MM.YYYY'))) + interval '1' DAY AS period_start, to_date(:newPeriodEnd, 'DD.MM.YYYY') period_end FROM form_data_src\n" + //-- дата окончания нового периода
-            ")\n" +
-            "SELECT *\n" +
-            "FROM form_data_src_extended\n" +
-            "WHERE period_end > period_start\n" +
-            "ORDER BY 1";
-
-    @Override
-    public List<SourceObject> getEmptyPeriods(final SourcePair sourcePair, Date newPeriodStart, Date newPeriodEnd) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("source", sourcePair.getSource());
-        params.put("destination", sourcePair.getDestination());
-        params.put("newPeriodStart", newPeriodStart);
-        params.put("newPeriodEnd", newPeriodEnd != null ? new SimpleDateFormat("dd.MM.yyyy").format(newPeriodEnd) : null);
-        /*return getNamedParameterJdbcTemplate().query(GET_EMPTY_PERIODS, params, new RowMapper<SourceObject>() {
-            @Override
-            public SourceObject mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new SourceObject(sourcePair, rs.getDate("period_start"), rs.getDate("period_end"));
-            }
-        });*/
-        //TODO: (dloshkarev) не уверен что этот метод вообще нужен
-        return Collections.emptyList();
-    }
-
-    private static final String FIND_CONSOLIDATED_DECLARATIONS =
-            "select tdd.id as declaration_id, fd.id as SOURCE_DECLARATION_DATA_ID, dt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate, tdd.tax_organ_code as taxOrganCode, tdd.kpp as kpp \n" +
-                    "from department_form_type dft\n" +
-                    "join form_template ft on ft.type_id = dft.form_type_id\n" +
-                    "join department_report_period drp on drp.department_id = dft.department_id\n" +
-                    "join form_data fd on (fd.kind = dft.kind and fd.form_template_id = ft.id and fd.department_report_period_id = drp.id)\n" +
-                    "join declaration_data_consolidation ddc on ddc.SOURCE_DECLARATION_DATA_ID = fd.id\n" +
-                    "join declaration_data tdd on tdd.id = ddc.target_declaration_data_id\n" +
-                    "join declaration_template tdt on tdt.id = tdd.declaration_template_id\n" +
-                    "join declaration_type dt on dt.id = tdt.declaration_type_id\n" +
-                    "join department_report_period tdrp on tdrp.id = tdd.department_report_period_id\n" +
-                    "join department td on td.id = tdrp.department_id\n" +
-                    "join report_period trp on trp.id = tdrp.report_period_id\n" +
-                    "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
-                    "join department_declaration_type tddt on (tddt.declaration_type_id = dt.id and tddt.department_id = td.id)\n" +
-                    "where dft.id = :source and tddt.id = :destination and (\n" +
-                    "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
-                    "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
-                    ")";
-
-    @Override
-    public List<ConsolidatedInstance> findConsolidatedInstances(long source, long destination, Date periodStart, Date periodEnd) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("source", source);
-        params.put("destination", destination);
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-        List<ConsolidatedInstance> formsAndDeclarations = new ArrayList<ConsolidatedInstance>();
-
-        /** Получаем декларации, которые консолидируются из указанного источника */
-        /*formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_DECLARATIONS, params, new RowMapper<ConsolidatedInstance>() {
-            @Override
-            public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
-                ConsolidatedInstance declaration = new ConsolidatedInstance();
-                declaration.setId(rs.getLong("declaration_id"));
-                declaration.setSourceId(rs.getLong("SOURCE_DECLARATION_DATA_ID"));
-                declaration.setType(rs.getString("type"));
-                declaration.setDepartment(rs.getString("department"));
-                declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
-                declaration.setCorrectionDate(rs.getDate("correctionDate"));
-                declaration.setDeclaration(true);
-                declaration.setTaxOrganCode(rs.getString("taxOrganCode"));
-                declaration.setKpp(rs.getString("kpp"));
-                return declaration;
-            }
-        }));
-        return formsAndDeclarations;*/
-
-        //TODO: (dloshkarev) надо переделывать из-за department_form_type
-        return Collections.emptyList();
     }
 
     private static final String ADD_DECLARATION_CONSOLIDATION =
@@ -527,18 +191,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     }
 
     @Override
-    public void updateConsolidationInfo(Set<ConsolidatedInstance> instances, boolean declaration) {
-        String sql;
-        if (declaration) {
-            sql = "update DECLARATION_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where " + buildConsolidatedPairsInQuery("(SOURCE_DECLARATION_DATA_ID, target_declaration_data_id)", instances);
-            getJdbcTemplate().update(sql);
-        } else {
-            sql = "update FORM_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where " + buildConsolidatedPairsInQuery("(SOURCE_DECLARATION_DATA_ID, target_form_data_id)", instances);
-        }
-        getJdbcTemplate().update(sql);
-    }
-
-    @Override
     public int updateDDConsolidationInfo(long sourceFormId) {
         return getJdbcTemplate().update(
                 "update DECLARATION_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where SOURCE_DECLARATION_DATA_ID = ?",
@@ -573,7 +225,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 "where ddc.target_declaration_data_id = :targetId and ddc.source_declaration_data_id is not null";
         MapSqlParameterSource params = new MapSqlParameterSource("targetId", targetId);
         List<Relation> result = new ArrayList<>();
-        getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result,  true));
+        getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, true));
         return result;
     }
 

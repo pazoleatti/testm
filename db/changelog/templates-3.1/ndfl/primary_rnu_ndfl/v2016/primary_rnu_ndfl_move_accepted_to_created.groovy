@@ -60,7 +60,7 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
         List<Long> notCreatedDestinationIds = new ArrayList<>()
         for (Relation relation : destinationInfo) {
             if (!relation.declarationState.equals(State.CREATED)) {
-               notCreatedDestinationIds.add(relation.declarationDataId)
+                notCreatedDestinationIds.add(relation.declarationDataId)
             }
         }
         if (notCreatedDestinationIds.size() != 0){
