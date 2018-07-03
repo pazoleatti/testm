@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -46,10 +45,10 @@ public interface SourceService {
      * @param sourceDepartmentId идентификатор подразделения формы-источника
      * @param sourceFormTypeId   вид налоговой формы-источника
      * @param sourceKind         тип налоговой формы-источника
-     * @param periodStart  начало периода, в котором действуют назначения
-     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param periodStart        начало периода, в котором действуют назначения
+     * @param periodEnd          окончание периода, в котором действуют назначения
      * @return информация о декларациях-потребителях в виде списка
-     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType}
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType}
      */
     List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 
@@ -78,7 +77,7 @@ public interface SourceService {
      * @param ids id на удаление
      */
     void deleteDDT(Collection<Long> ids);
-	
+
     /**
      * Получить описание вида декларации по идентификатору
      *
@@ -94,47 +93,29 @@ public interface SourceService {
 
     /**
      * Находит назначенные виды деклараций, которые являются потребителями налоговой формы{@code typeId}
-     * @param typeId вид налоговой формы потребителя
+     *
+     * @param typeId   вид налоговой формы потребителя
      * @param dateFrom дата начала действия
-     * @param dateTo дата окончания действия
+     * @param dateTo   дата окончания действия
      * @return список назначений
      */
     List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo);
 
     /**
      * ПОлучение назначений деклараций
+     *
      * @param declarationTypeId идентификатор {@link DeclarationType}
      * @return список
      */
     List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
+
     List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
-
-    /**
-     * Создает новые назначения источников-приемников
-     *
-     * @param sourceClientData данные связок источников-приемников
-     */
-    void createSources(Logger logger, SourceClientData sourceClientData);
-
-    /**
-     * Удаляет указанные назначения источников-приемников
-     *
-     * @param sourceClientData данные связок источников-приемников
-     */
-    void deleteSources(Logger logger, SourceClientData sourceClientData);
-
-    /**
-     * Обновляет указанные назначения источников-приемников
-     *
-     * @param sourceClientDataList список связок источников-приемников
-     */
-    void updateSources(Logger logger, List<SourceClientData> sourceClientDataList);
 
     /**
      * Возвращает количество назначенных деклараций для выбранного налога и подразделений
      *
      * @param departmentsIds идентификаторы подразделений
-     * @param taxType       идентификатор вида налога
+     * @param taxType        идентификатор вида налога
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
     int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType);
@@ -142,19 +123,22 @@ public interface SourceService {
     /**
      * Добавляет информацию о консолидации(т.е. была ли она сделана).
      * Соответствие либо один-к-одному, либо один-ко-многим(т.е. одно в одном списке и сногов другом)
+     *
      * @param tgtDeclarationId идентификатор НФ
-     * @param srcFormDataIds форма-источник с которой делалась консолидация для НФ
+     * @param srcFormDataIds   форма-источник с которой делалась консолидация для НФ
      */
     void addDeclarationConsolidationInfo(Long tgtDeclarationId, Collection<Long> srcFormDataIds);
 
     /**
      * Удалить записи о консолидации для текущего экземпляра
+     *
      * @param targetDeclarationDataId идентификатор декларации
      */
     void deleteDeclarationConsolidateInfo(long targetDeclarationDataId);
 
     /**
      * Проверяет консолидирован ли источник с идентификатором sourceFormDataId для декларации с declarationId
+     *
      * @param sourceFormDataId НФ источник
      * @return true если есть запись о консолидации
      */
@@ -163,12 +147,14 @@ public interface SourceService {
     /**
      * Проставление признака неактуальности данных в НФ-приёмнике
      * http://conf.aplana.com/pages/viewpage.action?pageId=19662408
+     *
      * @param sourceFormId идентификатор источника
      */
     void updateDDConsolidation(long sourceFormId);
 
     /**
      * Проверяет не изменились ли данные консолидации для декларации
+     *
      * @param ddTargetId идентификатор декларации-приемника для проверки
      * @return true - данные актуальны
      */
@@ -176,10 +162,11 @@ public interface SourceService {
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     * @param declaration декларациz-приемник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     *
+     * @param declaration       декларациz-приемник
+     * @param light             true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @param stateRestriction  ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
     List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction,
@@ -187,10 +174,11 @@ public interface SourceService {
 
     /**
      * Возвращает список нф-приемников для указанной декларации (включая несозданные)
-     * @param declaration декларациz-приемник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     *
+     * @param declaration       декларациz-источник
+     * @param light             true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @param stateRestriction  ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
 

@@ -159,7 +159,7 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
             sourceClientDataList.add(sourceClientData);
         }
 
-        sourceService.updateSources(logger, sourceClientDataList);
+//        sourceService.updateSources(logger, sourceClientDataList);
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.clear(LogLevel.INFO);
         }

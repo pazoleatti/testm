@@ -1701,6 +1701,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             logger.clear();
         } catch (Exception e) {
             logger.error(e);
+            sendNotification("Не выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
         } finally {
             lockDataService.unlock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
         }

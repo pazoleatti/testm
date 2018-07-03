@@ -97,6 +97,12 @@
             update ref_book_attribute set visible = 1 where ref_book_id = 902 and lower(alias) = 'duplicate_record_id'
         </sql>
     </changeSet>
+    <changeSet id="3.1-apronin-1" author="apronin">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_accepted_to_created.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 106</where>
+        </update>
+    </changeSet>
 
     <changeSet id="3.1-ytrofimov-4" author="ytrofimov">
         <update tableName="BLOB_DATA">

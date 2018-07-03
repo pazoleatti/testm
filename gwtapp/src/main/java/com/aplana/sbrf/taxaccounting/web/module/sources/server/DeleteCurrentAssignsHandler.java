@@ -91,7 +91,7 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
         sourceClientData.setPeriodEnd(PeriodConvertor.getDateTo(period));
         sourceClientData.setPeriodEndName(period.getPeriodTo() != null ? period.getPeriodEndName() : null);
 
-        sourceService.deleteSources(logger, sourceClientData);
+//        sourceService.deleteSources(logger, sourceClientData);
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.clear(LogLevel.INFO);
         }
