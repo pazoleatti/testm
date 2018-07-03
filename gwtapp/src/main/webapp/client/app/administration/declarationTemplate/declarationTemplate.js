@@ -17,7 +17,7 @@
             '$logPanel', '$dialogs', 'APP_CONSTANTS', 'BlobDataResource', 'Upload', '$window',
             function ($scope, $filter, $stateParams, DeclarationTemplateResource, $logPanel, $dialogs,
                       APP_CONSTANTS, BlobDataResource, Upload, $window) {
-                $scope.declarationTemplate = {id: $stateParams.declarationTemplateId, formType: {}};
+                $scope.declarationTemplate = {id: $stateParams.declarationTemplateId, formType: {}, yearFrom: 0, yearTo: 0};
 
                 // Загружаем данные по макету
                 function loadTemplate() {
