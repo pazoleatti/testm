@@ -39,7 +39,7 @@
                         ],
                         colModel: [
                             {name: 'uuid', index: 'uuid', width: 176, key: true, hidden: true},
-                            {name: 'fileName', index: 'fileName', width: 415, formatter: linkFileFormatter},
+                            {name: 'fileName', index: 'fileName', width: 360, formatter: linkFileFormatter},
                             {
                                 name: 'fileTypeId', index: 'fileTypeId', width: 90,
                                 editable: true,

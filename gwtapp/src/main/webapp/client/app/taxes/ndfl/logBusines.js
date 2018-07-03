@@ -45,9 +45,9 @@
                     colModel: [
                         {name: 'id', index: 'id', width: 176, key: true, hidden: true},
                         {name: 'eventName', index: 'event', width: 216},
-                        {name: 'logDate', index: 'date', width: 167, formatter: $filter('dateTimeFormatter')},
+                        {name: 'logDate', index: 'date', width: 130, formatter: $filter('dateTimeFormatter')},
                         {name: 'userFullName', index: 'user', width: 173},
-                        {name: 'roles', index: 'user_role', width: 165},
+                        {name: 'roles', index: 'user_role', width: 150},
                         {name: 'departmentName', index: 'department', width: 220},
                         {name: 'note', index: 'note', width: 273}
                     ],

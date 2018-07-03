@@ -48,19 +48,41 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        final String blobDataId = (String) taskData.getParams().get("blobDataId");
-        BlobData blobData = blobDataService.get(blobDataId);
-        String fileName= blobData.getName();
+        String fileName = getFileName(taskData);
         return "Загрузка файла \"" + fileName + "\" завершена" + (msg.isEmpty() ? "" : (": " + msg));
     }
 
+
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
+
+        String fileName = getFileName(taskData);
+
+        if (unexpected) {
+            return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"";
+        } else {
+            // Для ожидаемых ошибок добавляем описание
+            Throwable e = (Throwable) taskData.getParams().get("exceptionThrown");
+            String exceptionMessage = "";
+            if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+                exceptionMessage += e.getMessage();
+            }
+            return "Ошибка загрузки файла \"" + fileName + "\". " + exceptionMessage;
+        }
+    }
+
+    /**
+     * Извлечение имени файла из данных о выполнении загрузки файла
+     *
+     * @param taskData данные о выполнении загрузки файла
+     * @return имя загружаемого файла
+     */
+    private String getFileName(AsyncTaskData taskData) {
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
-        String fileName = blobData.getName();
-        return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"";
+        return blobData.getName();
     }
+
 
     @Override
     protected AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {

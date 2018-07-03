@@ -166,13 +166,20 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             } else {
                                 asyncManager.updateState(taskData.getId(), AsyncTaskState.SENDING_ERROR_MSGS);
                             }
-                            Date endDate = new Date();
-                            String msg = (e instanceof ScriptServiceException) ? getErrorMsg(taskData, false) : getErrorMsg(taskData, true);
+
+                            // Кладём в данные о таске ошибку для возможности формирования текста на её основе
+                            taskData.getParams().put("exceptionThrown", e);
+
+                            // Формирование текста об основной ошибке
+                            boolean isExpectedScriptException = (e instanceof ScriptServiceException) || (e instanceof ServiceLoggerException);
+                            String msg = getErrorMsg(taskData, !isExpectedScriptException);
+
                             logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
                             if (e.getMessage() != null && !e.getMessage().isEmpty()) {
                                 logger.error(e);
                             }
                             if (isShowTiming) {
+                                Date endDate = new Date();
                                 logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
                             }
                             sendNotifications(taskData, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);

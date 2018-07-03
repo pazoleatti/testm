@@ -275,7 +275,7 @@
                         title: $filter('translate')('logBusiness.title'),
                         templateUrl: 'client/app/taxes/ndfl/logBusines.html?v=${buildUuid}',
                         controller: 'logBusinesFormCtrl',
-                        windowClass: 'modal1000',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {

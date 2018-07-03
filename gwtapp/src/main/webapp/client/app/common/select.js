@@ -218,7 +218,7 @@
 
                 $scope.initSingleSelectAsnu = function () {
                     $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptions(true);
-                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU, nooverlay: true}, function (data) {
                         $scope.asnuSelect.options.data.results = data;
                     });
                 };
@@ -286,7 +286,8 @@
                             DeclarationTypeForCreateResource.query({
                                 formDataKindIdList: declarationKind,
                                 departmentId: department.id,
-                                periodId: period.id
+                                periodId: period.id,
+                                nooverlay : true
                             }, function (data) {
                                 data = data.filter(function (declarationType) {
                                     if (declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id) {
