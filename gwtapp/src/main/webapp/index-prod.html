@@ -1,0 +1,60 @@
+<!doctype html>
+<html class="not-overflow">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- For bootstrap: the above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <link rel="icon" href="client/img/favicon.ico">
+    <title>ФП "НДФЛ"</title>
+
+    <link rel="stylesheet" type="text/css" href="client/components/collapse/accordion.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/splitter/splitter.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2-bootstrap.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/codemirror.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/select2.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/app-select2.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/tooltip/ndflTooltip.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/datePicker/datepicker.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/link/link.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/alert/alert.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/outerWidth/outerwidth.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/datetimepicker/datetimepicker.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/popover/popover.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/tabs/tabs.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/css/style.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/grid/ui.jqgrid.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/grid/app-ui.jqgrid.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/treeview/treeview.css?v=${buildUuid}">
+    <style>.CodeMirror {border-top: 1px solid #500; border-bottom: 1px solid #500;}</style>
+</head>
+<body>
+<div class="cbr-page">
+    <!-- шапка -->
+    <div data-app-header></div>
+    <!-- основное содержимое -->
+    <div class="cbr-page-layout">
+        <div class="cbr-page-layout__view">
+            <div id="app-content" ui-view></div>
+            <div id="log-panel-container"></div>
+        </div>
+    </div>
+    <!-- футер -->
+    <div data-app-footer></div>
+</div>
+
+<script src="client/vendor.js?v=${buildUuid}"></script>
+
+<script src="client/components-templates.js?v=${buildUuid}"></script>
+<script src="client/components.js?v=${buildUuid}"></script>
+
+<script type="text/javascript">
+    moment.locale('ru');
+</script>
+
+<script src="client/app-templates.js?v=${buildUuid}"></script>
+<script src="client/app.js?v=${buildUuid}"></script>
+
+</body>
+</html>
