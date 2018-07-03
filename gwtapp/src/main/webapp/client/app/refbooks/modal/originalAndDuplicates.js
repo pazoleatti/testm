@@ -197,7 +197,7 @@
                         }
                     }).then(function (response) {
                         $logPanel.open('log-panel-container', response.data.uuid);
-                        $modalInstance.close();
+                        $modalInstance.close(true);
                     });
                 };
 
