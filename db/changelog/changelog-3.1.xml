@@ -91,4 +91,10 @@
 			values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name, b.version, seq_ref_book_record.nextval);
 		</sql>
     </changeSet>
+
+    <changeSet id="3.1-ytrofimov-3" author="ytrofimov">
+        <sql>
+            update ref_book_attribute set visible = 1 where ref_book_id = 902 and lower(alias) = 'duplicate_record_id'
+        </sql>
+    </changeSet>
 </databaseChangeLog>
