@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("SourceServiceTest.xml")
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration("SourceServiceTest.xml")
 public class SourceServiceTest {
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
