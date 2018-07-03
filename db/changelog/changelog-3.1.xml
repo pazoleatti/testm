@@ -97,4 +97,12 @@
             update ref_book_attribute set visible = 1 where ref_book_id = 902 and lower(alias) = 'duplicate_record_id'
         </sql>
     </changeSet>
+
+    <changeSet id="3.1-ytrofimov-4" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 101)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
