@@ -1017,6 +1017,7 @@
                 // глобальные настройки для select2
                 angular.extend(uiSelect2Config, {
                     openOnEnter: false,
+                    closeOnSelect: false,
                     formatLoadMore: function () {
                         return $filter('translate')('common.select.formatLoadMore');
                     },

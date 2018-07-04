@@ -575,41 +575,41 @@
                                             <output>${webappDirectory}/client/vendor.js</output>
                                             <inputDir>${basedir}/src/main/webapp/client/lib</inputDir>
                                             <includes>
-                                                <include>/jquery.js</include>
-                                                <include>/jquery-ui-1.12.1.js</include>
-                                                <include>/angular-1.4.7.js</include>
+                                                <include>/jquery.min.js</include>
+                                                <include>/jquery-ui-1.12.1.min.js</include>
+                                                <include>/angular-1.4.7.min.js</include>
                                                 <include>/angular-locale_ru-ru.js</include>
-                                                <include>/angular-translate-2.15.1.js</include>
-                                                <include>/angular-translate-loader-url-2.15.1.js</include>
-                                                <include>/angular-sanitize-1.5.9.js</include>
-                                                <include>/angular-ui-router-1.0.3.js</include>
-                                                <include>/angular-strap.js</include>
-                                                <include>/angular-strap.tpl.js</include>
-                                                <include>/bootstrap.js</include>
-                                                <include>/bootstrap-tooltip-extension.js</include>
-                                                <include>/angular-messages-1.5.9.js</include>
-                                                <include>/angular-animate-1.5.9.js</include>
-                                                <include>/angular-file-upload-2.5.0.js</include>
-                                                <include>/moment-2.18.1.js</include>
+                                                <include>/angular-translate-2.15.1.min.js</include>
+                                                <include>/angular-translate-loader-url-2.15.1.min.js</include>
+                                                <include>/angular-sanitize-1.5.9.min.js</include>
+                                                <include>/angular-ui-router-1.0.3.min.js</include>
+                                                <include>/angular-strap.min.js</include>
+                                                <include>/angular-strap.tpl.min.js</include>
+                                                <include>/bootstrap.min.js</include>
+                                                <include>/bootstrap-tooltip-extension.min.js</include>
+                                                <include>/angular-messages-1.5.9.min.js</include>
+                                                <include>/angular-animate-1.5.9.min.js</include>
+                                                <include>/angular-file-upload-2.5.0.min.js</include>
+                                                <include>/moment-2.18.1.min.js</include>
                                                 <include>/moment-locale-ru.js</include>
-                                                <include>/underscore-1.8.3.js</include>
+                                                <include>/underscore-1.8.3.min.js</include>
                                                 <include>/grid.locale-ru.js</include>
-                                                <include>/jquery.jqGrid-5.2.1.js</include>
-                                                <include>/select2-3.4.5.js</include>
+                                                <include>/jquery.jqGrid-5.2.1.min.js</include>
+                                                <include>/select2-3.4.5.min.js</include>
                                                 <include>/he.js</include>
                                                 <include>/re-tree.js</include>
-                                                <include>/ng-device-detector.js</include>
-                                                <include>/angular-translate-once.js</include>
-                                                <include>/angular-resource-1.4.7.js</include>
-                                                <include>/date.format.js</include>
-                                                <include>/date-parser.js</include>
-                                                <include>/codemirror.js</include>
-                                                <include>/groovy.js</include>
+                                                <include>/ng-device-detector.min.js</include>
+                                                <include>/angular-translate-once.min.js</include>
+                                                <include>/angular-resource-1.4.7.min.js</include>
+                                                <include>/date.format.min.js</include>
+                                                <include>/date-parser.min.js</include>
+                                                <include>/codemirror-5.39.0.min.js</include>
+                                                <include>/groovy.min.js</include>
                                             </includes>
                                         </aggregation>
                                     </aggregations>
                                     <force>true</force>
-                                    <nocompress>true</nocompress>
+                                    <nocompress>false</nocompress>
                                     <nosuffix>true</nosuffix>
                                     <jswarn>false</jswarn>
                                     <disableOptimizations>true</disableOptimizations>
