@@ -636,29 +636,12 @@
                                     <goal>html2js</goal>
                                 </goals>
                                 <configuration>
-                                    <sourceDir>${basedir}/src/main/webapp/client/app</sourceDir>
+                                    <sourceDir>${basedir}/src/main/webapp/client</sourceDir>
                                     <angularDependency>angular</angularDependency>
                                     <include>**/*.html</include>
-                                    <target>${webappDirectory}/client/app-templates.js</target>
+                                    <target>${webappDirectory}/client/templates.js</target>
                                     <addRequireWrapper>false</addRequireWrapper>
-                                    <prefix>client/app</prefix>
-                                    <multiModule>true</multiModule>
-                                </configuration>
-                            </execution>
-                            <!--COMPONENTS-TEMPLATES-->
-                            <execution>
-                                <id>components-templates</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>html2js</goal>
-                                </goals>
-                                <configuration>
-                                    <sourceDir>${basedir}/src/main/webapp/client/components</sourceDir>
-                                    <angularDependency>angular</angularDependency>
-                                    <include>**/*.html</include>
-                                    <target>${webappDirectory}/client/components-templates.js</target>
-                                    <addRequireWrapper>false</addRequireWrapper>
-                                    <prefix>client/components</prefix>
+                                    <prefix>client</prefix>
                                     <multiModule>true</multiModule>
                                 </configuration>
                             </execution>
