@@ -641,7 +641,7 @@
                                     <include>**/*.html</include>
                                     <target>${webappDirectory}/client/app-templates.js</target>
                                     <addRequireWrapper>false</addRequireWrapper>
-                                    <prefix>client</prefix>
+                                    <prefix>client/app</prefix>
                                     <multiModule>true</multiModule>
                                 </configuration>
                             </execution>
@@ -658,7 +658,7 @@
                                     <include>**/*.html</include>
                                     <target>${webappDirectory}/client/components-templates.js</target>
                                     <addRequireWrapper>false</addRequireWrapper>
-                                    <prefix>client</prefix>
+                                    <prefix>client/components</prefix>
                                     <multiModule>true</multiModule>
                                 </configuration>
                             </execution>
