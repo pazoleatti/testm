@@ -37,19 +37,19 @@
                 $scope.configParamTabsCtrl = {};
                 $scope.commonParam = {
                     title: $filter('translate')('tab.configParam.commonParam'),
-                    contentUrl: 'client/app/administration/configParams/configTabs/commonParam.html?v=${buildUuid}',
+                    contentUrl: 'client/app/administration/configParams/configTabs/commonParam.html',
                     fetchTab: true,
                     active: true
                 };
                 $scope.asyncParam = {
                     title: $filter('translate')('tab.configParam.asyncParam'),
-                    contentUrl: 'client/app/administration/configParams/configTabs/asyncParam.html?v=${buildUuid}',
+                    contentUrl: 'client/app/administration/configParams/configTabs/asyncParam.html',
                     fetchTab: true,
                     active: false
                 };
                 $scope.emailParam = {
                     title: $filter('translate')('tab.configParam.emailConfig'),
-                    contentUrl: 'client/app/administration/configParams/configTabs/emailParam.html?v=${buildUuid}',
+                    contentUrl: 'client/app/administration/configParams/configTabs/emailParam.html',
                     fetchTab: true,
                     active: false
                 };

@@ -8,25 +8,25 @@
     <link rel="icon" href="client/img/favicon.ico">
     <title>ФП "НДФЛ"</title>
 
-    <link rel="stylesheet" type="text/css" href="client/components/collapse/accordion.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/splitter/splitter.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2-bootstrap.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/css/lib/codemirror.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/select2.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/app-select2.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/tooltip/ndflTooltip.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/datePicker/datepicker.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/link/link.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/alert/alert.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/outerWidth/outerwidth.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/datetimepicker/datetimepicker.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/popover/popover.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/tabs/tabs.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/css/style.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/grid/ui.jqgrid.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/grid/app-ui.jqgrid.css?v=${buildUuid}">
-    <link rel="stylesheet" type="text/css" href="client/components/treeview/treeview.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/collapse/accordion.css">
+    <link rel="stylesheet" type="text/css" href="client/components/splitter/splitter.css">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2.css">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/select2/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="client/css/lib/codemirror.css">
+    <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/select2.css">
+    <link rel="stylesheet" type="text/css" href="client/components/uiSelect2/app-select2.css">
+    <link rel="stylesheet" type="text/css" href="client/components/tooltip/ndflTooltip.css">
+    <link rel="stylesheet" type="text/css" href="client/components/datePicker/datepicker.css">
+    <link rel="stylesheet" type="text/css" href="client/components/link/link.css">
+    <link rel="stylesheet" type="text/css" href="client/components/alert/alert.css">
+    <link rel="stylesheet" type="text/css" href="client/components/outerWidth/outerwidth.css">
+    <link rel="stylesheet" type="text/css" href="client/components/datetimepicker/datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="client/components/popover/popover.css">
+    <link rel="stylesheet" type="text/css" href="client/components/tabs/tabs.css">
+    <link rel="stylesheet" type="text/css" href="client/css/style.css">
+    <link rel="stylesheet" type="text/css" href="client/components/grid/ui.jqgrid.css">
+    <link rel="stylesheet" type="text/css" href="client/components/grid/app-ui.jqgrid.css">
+    <link rel="stylesheet" type="text/css" href="client/components/treeview/treeview.css">
     <style>.CodeMirror {border-top: 1px solid #500; border-bottom: 1px solid #500;}</style>
 </head>
 <body>
@@ -73,8 +73,8 @@
 <script src="client/lib/angular-resource-1.4.7.js"></script>
 <script src="client/lib/date.format.js"></script>
 <script src="client/lib/date-parser.js"></script>
-<script src="client/lib/codemirror.js?v=${buildUuid}"></script>
-<script src="client/lib/groovy.js?v=${buildUuid}"></script>
+<script src="client/lib/codemirror.js"></script>
+<script src="client/lib/groovy.js"></script>
 
 <script type="text/javascript">
     moment.locale('ru');
@@ -82,114 +82,114 @@
     angular.module('templates-main', []); // Пустой для dev
 </script>
 
-<script src="client/components/utils/aplana.js?v=${buildUuid}"></script>
-<script src="client/components/validation/validation.js?v=${buildUuid}"></script>
-<script src="client/components/collapse/collapse.js?v=${buildUuid}"></script>
-<script src="client/components/submitValid/submitValid.js?v=${buildUuid}"></script>
-<script src="client/components/overlay/overlay.js?v=${buildUuid}"></script>
-<script src="client/components/alert/alert.js?v=${buildUuid}"></script>
-<script src="client/components/grid/grid.js?v=${buildUuid}"></script>
-<script src="client/components/grid/gridExt.js?v=${buildUuid}"></script>
-<script src="client/components/grid/deep.js?v=${buildUuid}"></script>
-<script src="client/components/dropDown/dropdown.js?v=${buildUuid}"></script>
-<script src="client/components/dropdownMenu/dropdownMenu.js?v=${buildUuid}"></script>
-<script src="client/components/webStorage/webStorage.js?v=${buildUuid}"></script>
-<script src="client/components/uiSelect2/uiSelect2.js?v=${buildUuid}"></script>
-<script src="client/components/field/field.js?v=${buildUuid}"></script>
-<script src="client/components/focus/focus.js?v=${buildUuid}"></script>
-<script src="client/components/outerWidth/outerWidth.js?v=${buildUuid}"></script>
-<script src="client/components/datePicker/datepicker.js?v=${buildUuid}"></script>
-<script src="client/components/datepickerTimepicker/datepickerTimepicker.js?v=${buildUuid}"></script>
-<script src="client/components/datetimepicker/datetimepicker.js?v=${buildUuid}"></script>
-<script src="client/components/popover/popover.js?v=${buildUuid}"></script>
-<script src="client/components/selectUniversal/selectUniversal.js?v=${buildUuid}"></script>
-<script src="client/components/timeHint/timeHint.js?v=${buildUuid}"></script>
-<script src="client/components/timepicker/timepicker.js?v=${buildUuid}"></script>
-<script src="client/components/tooltip/tooltip.js?v=${buildUuid}"></script>
-<script src="client/components/dateFromToFilter/dateFromToFilter.js?v=${buildUuid}"></script>
-<script src="client/components/formLeaveConfirmer/formLeaveConfirmer.js?v=${buildUuid}"></script>
-<script src="client/components/link/link.js?v=${buildUuid}"></script>
-<script src="client/components/modal/modal.js?v=${buildUuid}"></script>
-<script src="client/components/modal/dialogs.js?v=${buildUuid}"></script>
-<script src="client/components/splitter/splitter.js?v=${buildUuid}"></script>
-<script src="client/components/ngFileUpload/ng-file-upload.js?v=${buildUuid}"></script>
-<script src="client/components/tabs/tabs.js?v=${buildUuid}"></script>
-<script src="client/components/tabs/tabs.js?v=${buildUuid}"></script>
-<script src="client/components/treeview/treeview.js?v=${buildUuid}"></script>
+<script src="client/components/utils/aplana.js"></script>
+<script src="client/components/validation/validation.js"></script>
+<script src="client/components/collapse/collapse.js"></script>
+<script src="client/components/submitValid/submitValid.js"></script>
+<script src="client/components/overlay/overlay.js"></script>
+<script src="client/components/alert/alert.js"></script>
+<script src="client/components/grid/grid.js"></script>
+<script src="client/components/grid/gridExt.js"></script>
+<script src="client/components/grid/deep.js"></script>
+<script src="client/components/dropDown/dropdown.js"></script>
+<script src="client/components/dropdownMenu/dropdownMenu.js"></script>
+<script src="client/components/webStorage/webStorage.js"></script>
+<script src="client/components/uiSelect2/uiSelect2.js"></script>
+<script src="client/components/field/field.js"></script>
+<script src="client/components/focus/focus.js"></script>
+<script src="client/components/outerWidth/outerWidth.js"></script>
+<script src="client/components/datePicker/datepicker.js"></script>
+<script src="client/components/datepickerTimepicker/datepickerTimepicker.js"></script>
+<script src="client/components/datetimepicker/datetimepicker.js"></script>
+<script src="client/components/popover/popover.js"></script>
+<script src="client/components/selectUniversal/selectUniversal.js"></script>
+<script src="client/components/timeHint/timeHint.js"></script>
+<script src="client/components/timepicker/timepicker.js"></script>
+<script src="client/components/tooltip/tooltip.js"></script>
+<script src="client/components/dateFromToFilter/dateFromToFilter.js"></script>
+<script src="client/components/formLeaveConfirmer/formLeaveConfirmer.js"></script>
+<script src="client/components/link/link.js"></script>
+<script src="client/components/modal/modal.js"></script>
+<script src="client/components/modal/dialogs.js"></script>
+<script src="client/components/splitter/splitter.js"></script>
+<script src="client/components/ngFileUpload/ng-file-upload.js"></script>
+<script src="client/components/tabs/tabs.js"></script>
+<script src="client/components/tabs/tabs.js"></script>
+<script src="client/components/treeview/treeview.js"></script>
 
-<script src="client/app/common/directives/refBookPicker/modalSelectPicker.js?v=${buildUuid}"></script>
-<script src="client/app/common/directives/refBookPicker/refBookPicker.js?v=${buildUuid}"></script>
-<script src="client/app/common/directives/treeMenu/treeMenu.js?v=${buildUuid}"></script>
-<script src="client/app/common/filterUtils.js?v=${buildUuid}"></script>
-<script src="client/app/common/rest.js?v=${buildUuid}"></script>
-<script src="client/app/common/formatters.js?v=${buildUuid}"></script>
-<script src="client/app/common/permissionUtils.js?v=${buildUuid}"></script>
-<script src="client/app/common/validationUtils.js?v=${buildUuid}"></script>
-<script src="client/app/common/constants.js?v=${buildUuid}"></script>
-<script src="client/app/common/select.js?v=${buildUuid}"></script>
-<script src="client/app/main/app.js?v=${buildUuid}"></script>
-<script src="client/app/main/header.js?v=${buildUuid}"></script>
-<script src="client/app/main/footer.js?v=${buildUuid}"></script>
-<script src="client/app/main/logPanel.js?v=${buildUuid}"></script>
-<script src="client/app/main/notifications.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndfl.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflJournal.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/declarationTypeAssignment.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/createDeclarationTypeAssignment.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/editDeclarationTypeAssignment.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflTabs/personsTab.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflTabs/incomesTab.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflTabs/deductionsTab.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflTabs/prepaymentsTab.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/formSources.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/createDeclaration.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/editNdflIncomesAndTax.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/editNdflDeduction.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/editNdflPrepayment.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/service/uploadTransportData.js?v=${buildUuid}"></script>
-<script src="client/app/main/notifications.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/logBusines.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/rnuNdflPersonFace.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/reportNdflPersonFace.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/commonParams/commonParams.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/filesComments.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflReport.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/ndflReportJournal.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/createReport.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/service/uploadTransportData.js?v=${buildUuid}"></script>
-<script src="client/app/administration/schedulerTaskList.js?v=${buildUuid}"></script>
-<script src="client/app/administration/updateSchedulerTask.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/returnToCreatedDialog.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/commonParams/editCommonParams.js?v=${buildUuid}"></script>
-<script src="client/app/administration/locks.js?v=${buildUuid}"></script>
-<script src="client/app/administration/async.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/periods/reportPeriod.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/periods/modal/createReportPeriodModal.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/periods/modal/updateDeadlinePeriodModal.js?v=${buildUuid}"></script>
-<script src="client/app/taxes/ndfl/departmentConfig/departmentConfig.js?v=${buildUuid}"></script>
+<script src="client/app/common/directives/refBookPicker/modalSelectPicker.js"></script>
+<script src="client/app/common/directives/refBookPicker/refBookPicker.js"></script>
+<script src="client/app/common/directives/treeMenu/treeMenu.js"></script>
+<script src="client/app/common/filterUtils.js"></script>
+<script src="client/app/common/rest.js"></script>
+<script src="client/app/common/formatters.js"></script>
+<script src="client/app/common/permissionUtils.js"></script>
+<script src="client/app/common/validationUtils.js"></script>
+<script src="client/app/common/constants.js"></script>
+<script src="client/app/common/select.js"></script>
+<script src="client/app/main/app.js"></script>
+<script src="client/app/main/header.js"></script>
+<script src="client/app/main/footer.js"></script>
+<script src="client/app/main/logPanel.js"></script>
+<script src="client/app/main/notifications.js"></script>
+<script src="client/app/taxes/ndfl/ndfl.js"></script>
+<script src="client/app/taxes/ndfl/ndflJournal.js"></script>
+<script src="client/app/taxes/ndfl/declarationTypeAssignment.js"></script>
+<script src="client/app/taxes/ndfl/createDeclarationTypeAssignment.js"></script>
+<script src="client/app/taxes/ndfl/editDeclarationTypeAssignment.js"></script>
+<script src="client/app/taxes/ndfl/ndflTabs/personsTab.js"></script>
+<script src="client/app/taxes/ndfl/ndflTabs/incomesTab.js"></script>
+<script src="client/app/taxes/ndfl/ndflTabs/deductionsTab.js"></script>
+<script src="client/app/taxes/ndfl/ndflTabs/prepaymentsTab.js"></script>
+<script src="client/app/taxes/ndfl/formSources.js"></script>
+<script src="client/app/taxes/ndfl/createDeclaration.js"></script>
+<script src="client/app/taxes/ndfl/editNdflIncomesAndTax.js"></script>
+<script src="client/app/taxes/ndfl/editNdflDeduction.js"></script>
+<script src="client/app/taxes/ndfl/editNdflPrepayment.js"></script>
+<script src="client/app/taxes/service/uploadTransportData.js"></script>
+<script src="client/app/main/notifications.js"></script>
+<script src="client/app/taxes/ndfl/logBusines.js"></script>
+<script src="client/app/taxes/ndfl/rnuNdflPersonFace.js"></script>
+<script src="client/app/taxes/ndfl/reportNdflPersonFace.js"></script>
+<script src="client/app/taxes/commonParams/commonParams.js"></script>
+<script src="client/app/taxes/ndfl/filesComments.js"></script>
+<script src="client/app/taxes/ndfl/ndflReport.js"></script>
+<script src="client/app/taxes/ndfl/ndflReportJournal.js"></script>
+<script src="client/app/taxes/ndfl/createReport.js"></script>
+<script src="client/app/taxes/service/uploadTransportData.js"></script>
+<script src="client/app/administration/schedulerTaskList.js"></script>
+<script src="client/app/administration/updateSchedulerTask.js"></script>
+<script src="client/app/taxes/ndfl/returnToCreatedDialog.js"></script>
+<script src="client/app/taxes/commonParams/editCommonParams.js"></script>
+<script src="client/app/administration/locks.js"></script>
+<script src="client/app/administration/async.js"></script>
+<script src="client/app/taxes/ndfl/periods/reportPeriod.js"></script>
+<script src="client/app/taxes/ndfl/periods/modal/createReportPeriodModal.js"></script>
+<script src="client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.js"></script>
+<script src="client/app/taxes/ndfl/periods/modal/updateDeadlinePeriodModal.js"></script>
+<script src="client/app/taxes/ndfl/departmentConfig/departmentConfig.js"></script>
 <script src="client/app/taxes/application2/application2.js"></script>
-<script src="client/app/administration/configParams/configParam.js?v=${buildUuid}"></script>
-<script src="client/app/administration/configParams/configTabs/asyncParam.js?v=${buildUuid}"></script>
-<script src="client/app/administration/configParams/configTabs/commonParam.js?v=${buildUuid}"></script>
-<script src="client/app/administration/configParams/configTabs/emailParam.js?v=${buildUuid}"></script>
-<script src="client/app/administration/configParams/modal/createRecordModal.js?v=${buildUuid}"></script>
-<script src="client/app/administration/declarationTemplate/declarationTypeJournal.js?v=${buildUuid}"></script>
-<script src="client/app/administration/declarationTemplate/declarationTemplateJournal.js?v=${buildUuid}"></script>
-<script src="client/app/administration/declarationTemplate/declarationTemplate.js?v=${buildUuid}"></script>
-<script src="client/app/administration/refBookConf/refBookConfList.js?v=${buildUuid}"></script>
-<script src="client/app/administration/declarationTemplate/tabs/checksTab.js?v=${buildUuid}"></script>
-<script src="client/app/administration/declarationTemplate/tabs/infoTab.js?v=${buildUuid}"></script>
-<script src="client/app/administration/scriptExecution.js?v=${buildUuid}"></script>
+<script src="client/app/administration/configParams/configParam.js"></script>
+<script src="client/app/administration/configParams/configTabs/asyncParam.js"></script>
+<script src="client/app/administration/configParams/configTabs/commonParam.js"></script>
+<script src="client/app/administration/configParams/configTabs/emailParam.js"></script>
+<script src="client/app/administration/configParams/modal/createRecordModal.js"></script>
+<script src="client/app/administration/declarationTemplate/declarationTypeJournal.js"></script>
+<script src="client/app/administration/declarationTemplate/declarationTemplateJournal.js"></script>
+<script src="client/app/administration/declarationTemplate/declarationTemplate.js"></script>
+<script src="client/app/administration/refBookConf/refBookConfList.js"></script>
+<script src="client/app/administration/declarationTemplate/tabs/checksTab.js"></script>
+<script src="client/app/administration/declarationTemplate/tabs/infoTab.js"></script>
+<script src="client/app/administration/scriptExecution.js"></script>
 
-<script src="client/app/common/directives/resizer/resizer.js?v=${buildUuid}"></script>
-<script src="client/app/common/directives/pager/pager.js?v=${buildUuid}"></script>
+<script src="client/app/common/directives/resizer/resizer.js"></script>
+<script src="client/app/common/directives/pager/pager.js"></script>
 
-<script src="client/app/refbooks/refBookList.js?v=${buildUuid}"></script>
-<script src="client/app/refbooks/linearRefBook.js?v=${buildUuid}"></script>
-<script src="client/app/refbooks/refBookFL.js?v=${buildUuid}"></script>
-<script src="client/app/refbooks/hierRefBook.js?v=${buildUuid}"></script>
-<script src="client/app/refbooks/modal/refBookRecordModal.js?v=${buildUuid}"></script>
-<script src="client/app/refbooks/modal/originalAndDuplicates.js?v=${buildUuid}"></script>
+<script src="client/app/refbooks/refBookList.js"></script>
+<script src="client/app/refbooks/linearRefBook.js"></script>
+<script src="client/app/refbooks/refBookFL.js"></script>
+<script src="client/app/refbooks/hierRefBook.js"></script>
+<script src="client/app/refbooks/modal/refBookRecordModal.js"></script>
+<script src="client/app/refbooks/modal/originalAndDuplicates.js"></script>
 </body>
 </html>

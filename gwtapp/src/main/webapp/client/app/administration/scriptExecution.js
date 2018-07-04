@@ -9,7 +9,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('scriptExecution', {
                 url: '/administration/scriptExecution',
-                templateUrl: 'client/app/administration/scriptExecution.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/scriptExecution.html',
                 controller: 'scriptExecutionCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {

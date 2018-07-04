@@ -10,7 +10,7 @@
         .directive('resizer', [function () {
             return {
                 restrict: 'EA',
-                templateUrl: 'client/app/common/directives/resizer/resizer.html?v=${buildUuid}',
+                templateUrl: 'client/app/common/directives/resizer/resizer.html',
                 transclude: true,
                 replace: true,
                 scope: {

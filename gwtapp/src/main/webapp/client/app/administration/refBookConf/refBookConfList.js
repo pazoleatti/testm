@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('refBookConfList', {
                 url: '/administration/refBookConfList',
-                templateUrl: 'client/app/administration/refBookConf/refBookConfList.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/refBookConf/refBookConfList.html',
                 controller: 'RefBookConfListCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {

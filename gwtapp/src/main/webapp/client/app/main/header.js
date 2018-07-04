@@ -16,7 +16,7 @@
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'client/app/main/header.html?v=${buildUuid}',
+                templateUrl: 'client/app/main/header.html',
                 controller: 'HeaderController'
             };
         })
@@ -198,7 +198,7 @@
                 $scope.openNotifications = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('notifications.title.listNotifications'),
-                        templateUrl: 'client/app/main/notifications.html?v=${buildUuid}',
+                        templateUrl: 'client/app/main/notifications.html',
                         controller: 'notificationsCtrl',
                         windowClass: 'modal1000'
                     });
@@ -248,7 +248,7 @@
                 var openApplication2Modal = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('application2.title.modal'),
-                        templateUrl: 'client/app/taxes/application2/application2.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/application2/application2.html',
                         controller: 'application2Ctrl',
                         windowClass: 'modal200'
                     });

@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('lockDataList', {
                 url: '/administration/locks',
-                templateUrl: 'client/app/administration/locks.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/locks.html',
                 controller: 'locksCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {

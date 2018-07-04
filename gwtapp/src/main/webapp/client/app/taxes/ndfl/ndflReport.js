@@ -23,7 +23,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReport', {
                 url: '/taxes/ndfl/ndflReport/{declarationDataId}?uuid',
-                templateUrl: 'client/app/taxes/ndfl/ndflReport.html?v=${buildUuid}',
+                templateUrl: 'client/app/taxes/ndfl/ndflReport.html',
                 controller: 'ndflReportCtrl',
                 resolve: {
                     checkExistenceAndKind: ['$q', '$interval', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
@@ -239,7 +239,7 @@
                 $scope.openHistoryOfChange = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('logBusiness.title'),
-                        templateUrl: 'client/app/taxes/ndfl/logBusines.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/logBusines.html',
                         controller: 'logBusinesFormCtrl',
                         windowClass: 'modal1200',
                         resolve: {
@@ -265,7 +265,7 @@
                         });
                         $aplanaModal.open({
                             title: $filter('translate')('filesComment.header'),
-                            templateUrl: 'client/app/taxes/ndfl/filesComments.html?v=${buildUuid}',
+                            templateUrl: 'client/app/taxes/ndfl/filesComments.html',
                             controller: 'filesCommentsCtrl',
                             windowClass: 'modal1200',
                             resolve: {
@@ -288,7 +288,7 @@
                     var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id ? $filter('translate')('reportPersonFace.title') : $filter('translate')('reportPersonFace.title2');
                     $aplanaModal.open({
                         title: title,
-                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html',
                         controller: 'reportNdflPersonFaceFormCtrl',
                         windowClass: 'modal1200',
                         resolve: {
@@ -308,7 +308,7 @@
                 $scope.createDeptNotice = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('reportPersonFace.deptNotice'),
-                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html',
                         controller: 'reportNdflPersonFaceFormCtrl',
                         windowClass: 'modal1200',
                         resolve: {
@@ -402,7 +402,7 @@
                 $scope.returnToCreated = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('title.indicateReasonForReturn'),
-                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html',
                         controller: 'returnToCreatedCtrl',
                         windowClass: 'modal600',
                         resolve: {
@@ -476,7 +476,7 @@
                 $scope.showSourcesClick = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('sources.title.sourcesList'),
-                        templateUrl: 'client/app/taxes/ndfl/formSources.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/formSources.html',
                         controller: 'sourcesFormCtrl',
                         windowClass: 'modal1200'
                     });

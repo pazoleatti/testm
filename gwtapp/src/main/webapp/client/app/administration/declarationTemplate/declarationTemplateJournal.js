@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTemplateJournal', {
                 url: '/administration/declarationTemplateJournal/{declarationTypeId}',
-                templateUrl: 'client/app/administration/declarationTemplate/declarationTemplateJournal.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/declarationTemplate/declarationTemplateJournal.html',
                 controller: 'DeclarationTemplateJournalCtrl'
             });
         }])

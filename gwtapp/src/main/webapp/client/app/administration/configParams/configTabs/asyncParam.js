@@ -61,7 +61,7 @@
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('configParam.modal.editParam.title'),
-                        templateUrl: 'client/app/administration/configParams/modal/createRecordModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/administration/configParams/modal/createRecordModal.html',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal600',
                         resolve: {

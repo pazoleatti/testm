@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTemplate', {
                 url: '/administration/declarationTemplate/{declarationTemplateId}',
-                templateUrl: 'client/app/administration/declarationTemplate/declarationTemplate.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/declarationTemplate/declarationTemplate.html',
                 controller: 'DeclarationTemplateCtrl'
             });
         }])
@@ -46,13 +46,13 @@
                 $scope.templateTabsCtrl = {};
                 $scope.infoTab = {
                     title: $filter('translate')('declarationTemplate.tabs.info'),
-                    contentUrl: 'client/app/administration/declarationTemplate/tabs/infoTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/administration/declarationTemplate/tabs/infoTab.html',
                     fetchTab: true,
                     active: true
                 };
                 $scope.checksTab = {
                     title: $filter('translate')('declarationTemplate.tabs.checks'),
-                    contentUrl: 'client/app/administration/declarationTemplate/tabs/checksTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/administration/declarationTemplate/tabs/checksTab.html',
                     fetchTab: true
                 };
                 $scope.templateTabs = [$scope.infoTab, $scope.checksTab];

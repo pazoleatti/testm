@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('hierRefBook', {
                 url: '/refBooks/hierRefBook/{refBookId}?uuid',
-                templateUrl: 'client/app/refbooks/hierRefBook.html?v=${buildUuid}',
+                templateUrl: 'client/app/refbooks/hierRefBook.html',
                 controller: 'hierRefBookCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
@@ -86,7 +86,7 @@
                 $scope.showRecord = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('refBooks.showRecord'),
-                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html',
                         controller: 'refBookRecordModalCtrl',
                         windowClass: 'modal800',
                         resolve: {

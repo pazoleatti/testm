@@ -199,7 +199,7 @@
                 $scope.openPeriod = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.pils.openPeriod'),
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html',
                         controller: 'reportPeriodCtrlModal',
                         windowClass: 'modal600',
                         resolve: {
@@ -384,7 +384,7 @@
 
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.pils.correctPeriod'),
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html',
                         controller: 'openCorrectCtrlModal',
                         windowClass: 'modal600',
                         resolve: {
@@ -406,7 +406,7 @@
                 $scope.deadlinePeriod = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.deadline.title') + $scope.reportPeriodGrid.value[0].name + " " + $scope.reportPeriodGrid.value[0].year,
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/updateDeadlinePeriodModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/periods/modal/updateDeadlinePeriodModal.html',
                         controller: 'deadlinePeriodController',
                         windowClass: 'modal500',
                         resolve: {

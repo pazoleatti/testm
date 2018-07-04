@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('asyncTaskList', {
                 url: '/administration/async',
-                templateUrl: 'client/app/administration/async.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/async.html',
                 controller: 'asyncCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {

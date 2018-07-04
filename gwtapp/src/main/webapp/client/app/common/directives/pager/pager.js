@@ -8,7 +8,7 @@
         .directive('appPager', [function () {
             return {
                 restrict: 'EA',
-                templateUrl: 'client/app/common/directives/pager/pager.html?v=${buildUuid}',
+                templateUrl: 'client/app/common/directives/pager/pager.html',
                 transclude: true,
                 replace: true,
                 scope: {

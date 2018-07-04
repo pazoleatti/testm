@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTypeJournal', {
                 url: '/administration/declarationTypeJournal',
-                templateUrl: 'client/app/administration/declarationTemplate/declarationTypeJournal.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/declarationTemplate/declarationTypeJournal.html',
                 controller: 'DeclarationTypeJournalCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {

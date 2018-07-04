@@ -10,7 +10,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('commonParams', {
                 url: '/taxes/commonParams/editCommonParams',
-                templateUrl: 'client/app/taxes/commonParams/commonParams.html?v=${buildUuid}',
+                templateUrl: 'client/app/taxes/commonParams/commonParams.html',
                 controller: 'commonParamsCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
@@ -91,7 +91,7 @@
 
                     $aplanaModal.open({
                         title: $filter('translate')('title.redactParametr'),
-                        templateUrl: 'client/app/taxes/commonParams/editCommonParams.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/commonParams/editCommonParams.html',
                         controller: 'editParamsCtrl',
                         windowClass: 'modal600',
                         resolve: {

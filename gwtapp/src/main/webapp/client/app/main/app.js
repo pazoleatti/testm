@@ -976,7 +976,7 @@
                 $stateProvider
                     .state('/', {
                         url: '/',
-                        templateUrl: 'client/app/main/app.html?v=${buildUuid}'
+                        templateUrl: 'client/app/main/app.html'
                     });
 
                 // Настройка источника локализованных сообщений

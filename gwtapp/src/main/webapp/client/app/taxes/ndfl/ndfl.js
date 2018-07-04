@@ -24,7 +24,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
-                templateUrl: 'client/app/taxes/ndfl/ndfl.html?v=${buildUuid}',
+                templateUrl: 'client/app/taxes/ndfl/ndfl.html',
                 controller: 'ndflCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
@@ -189,23 +189,23 @@
                 $scope.ndflTabsCtrl = {};
                 $scope.ndfFLTab = {
                     title: $filter('translate')('tab.ndfl.requisites'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/personsTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/personsTab.html',
                     fetchTab: true,
                     active: true
                 };
                 $scope.incomesAndTaxTab = {
                     title: $filter('translate')('tab.ndfl.informationOnIncomesAndNdfl'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/incomesTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/incomesTab.html',
                     fetchTab: true
                 };
                 $scope.deductionsTab = {
                     title: $filter('translate')('tab.ndfl.informationOnDeductions'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/deductionsTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/deductionsTab.html',
                     fetchTab: true
                 };
                 $scope.prepaymentTab = {
                     title: $filter('translate')('tab.ndfl.informationOnAdvancePayments'),
-                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/prepaymentsTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/prepaymentsTab.html',
                     fetchTab: true
                 };
                 $scope.ndflTabs = [$scope.ndfFLTab, $scope.incomesAndTaxTab, $scope.deductionsTab, $scope.prepaymentTab];
@@ -273,7 +273,7 @@
                 $scope.openHistoryOfChange = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('logBusiness.title'),
-                        templateUrl: 'client/app/taxes/ndfl/logBusines.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/logBusines.html',
                         controller: 'logBusinesFormCtrl',
                         windowClass: 'modal1200',
                         resolve: {
@@ -299,7 +299,7 @@
                         });
                         $aplanaModal.open({
                             title: $filter('translate')('filesComment.header'),
-                            templateUrl: 'client/app/taxes/ndfl/filesComments.html?v=${buildUuid}',
+                            templateUrl: 'client/app/taxes/ndfl/filesComments.html',
                             controller: 'filesCommentsCtrl',
                             windowClass: 'modal1200',
                             resolve: {
@@ -410,18 +410,18 @@
 
                     //Раздел 2 (Сведения о доходах и НДФЛ)
                     var title = "incomesAndTax.edit.title";
-                    var templateUrl = "client/app/taxes/ndfl/editNdflIncomesAndTax.html?v=${buildUuid}";
+                    var templateUrl = "client/app/taxes/ndfl/editNdflIncomesAndTax.html";
                     var controller = "editNdflIncomesAndTaxFormCtrl";
 
                     if ($scope.ndflTabsCtrl.getActiveTab().getSection() === 3) {
                         //Раздел 3 (Сведения о вычетах)
                         title = "ndflDeduction.edit.title";
-                        templateUrl = "client/app/taxes/ndfl/editNdflDeduction.html?v=${buildUuid}";
+                        templateUrl = "client/app/taxes/ndfl/editNdflDeduction.html";
                         controller = "editNdflDeductionFormCtrl";
                     } else if ($scope.ndflTabsCtrl.getActiveTab().getSection() === 4) {
                         //Раздел 4 (Сведения о доходах в виде авансовых платежей)
                         title = "ndlfPrepayment.edit.title";
-                        templateUrl = "client/app/taxes/ndfl/editNdflPrepayment.html?v=${buildUuid}";
+                        templateUrl = "client/app/taxes/ndfl/editNdflPrepayment.html";
                         controller = "editNdflPrepaymentFormCtrl";
                     }
 
@@ -578,7 +578,7 @@
                 $scope.returnToCreated = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('title.indicateReasonForReturn'),
-                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html',
                         controller: 'returnToCreatedCtrl',
                         windowClass: 'modal600',
                         resolve: {
@@ -696,7 +696,7 @@
                 $scope.showSourcesClick = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('sources.title.sourcesList'),
-                        templateUrl: 'client/app/taxes/ndfl/formSources.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/formSources.html',
                         controller: 'sourcesFormCtrl',
                         windowClass: 'modal1200'
                     });

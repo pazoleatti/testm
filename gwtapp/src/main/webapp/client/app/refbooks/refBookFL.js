@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('refBookFL', {
                 url: '/refBooks/linearRefBook/904?recordId',
-                templateUrl: 'client/app/refbooks/refBookFL.html?v=${buildUuid}',
+                templateUrl: 'client/app/refbooks/refBookFL.html',
                 controller: 'refBookFLCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
@@ -260,7 +260,7 @@
                 $scope.createRecord = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('refBooks.createRecord'),
-                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html',
                         controller: 'refBookRecordModalCtrl',
                         windowClass: 'modal800',
                         resolve: {
@@ -291,7 +291,7 @@
                     });
                     $aplanaModal.open({
                         title: $filter('translate')('refBooks.showRecord'),
-                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html',
                         controller: 'refBookRecordModalCtrl',
                         windowClass: 'modal800',
                         resolve: {
@@ -314,7 +314,7 @@
                     var transformedRecord = $scope.transformRecord($scope.personGrid.value[0]);
                     $aplanaModal.open({
                         title: $filter('translate')('refBooks.editRecord'),
-                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/refbooks/modal/refBookRecordModal.html',
                         controller: 'refBookRecordModalCtrl',
                         windowClass: 'modal800',
                         resolve: {
@@ -428,7 +428,7 @@
                 $scope.setOriginalAndDuplicate = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('refBook.fl.title.originalAndDuplicate'),
-                        templateUrl: 'client/app/refbooks/modal/originalAndDuplicates.html?v=${buildUuid}',
+                        templateUrl: 'client/app/refbooks/modal/originalAndDuplicates.html',
                         controller: 'originalAndDuplicatesModalCtrl',
                         windowClass: 'modal1200',
                         resolve: {

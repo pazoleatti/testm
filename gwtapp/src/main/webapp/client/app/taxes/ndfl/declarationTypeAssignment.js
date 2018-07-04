@@ -9,7 +9,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTypeAssignment', {
                 url: '/taxes/declarationTypeAssignment',
-                templateUrl: 'client/app/taxes/ndfl/declarationTypeAssignment.html?v=${buildUuid}',
+                templateUrl: 'client/app/taxes/ndfl/declarationTypeAssignment.html',
                 controller: 'declarationTypeAssignmentCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
@@ -114,7 +114,7 @@
                 $scope.showCreateAssignmentModal = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('declarationTypeAssignment.modal.create.title'),
-                        templateUrl: 'client/app/taxes/ndfl/createDeclarationTypeAssignment.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/createDeclarationTypeAssignment.html',
                         controller: 'createDeclarationTypeAssignmentCtrl',
                         windowClass: 'modal600'
                     }).result.then(
@@ -149,7 +149,7 @@
                 $scope.showEditAssignmentModal = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('declarationTypeAssignment.modal.edit.title'),
-                        templateUrl: 'client/app/taxes/ndfl/editDeclarationTypeAssignment.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/editDeclarationTypeAssignment.html',
                         controller: 'editDeclarationTypeAssignmentCtrl',
                         windowClass: 'modal600',
                         resolve: {

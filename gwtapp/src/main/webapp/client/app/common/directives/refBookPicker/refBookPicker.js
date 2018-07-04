@@ -14,7 +14,7 @@
                 restrict: "E",
                 require: 'ngModel',
                 replace: true,
-                templateUrl: 'client/app/common/directives/refBookPicker/refBookPicker.html?v=${buildUuid}',
+                templateUrl: 'client/app/common/directives/refBookPicker/refBookPicker.html',
                 scope: {
                     ngModel: '=',
                     buttonTitle: '@',
@@ -29,7 +29,7 @@
 
                     scope.openSelectDialog = function () {
                         $aplanaModal.open({
-                            templateUrl: 'client/app/common/directives/refBookPicker/modalSelectPicker.html?v=${buildUuid}',
+                            templateUrl: 'client/app/common/directives/refBookPicker/modalSelectPicker.html',
                             controller: 'refBookPickerModalCtrl',
                             windowClass: 'modal800',
                             resolve: {

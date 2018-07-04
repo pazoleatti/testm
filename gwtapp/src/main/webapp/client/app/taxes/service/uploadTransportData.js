@@ -9,7 +9,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('uploadTransportData', {
                 url: '/taxes/service/uploadTransportData',
-                templateUrl: 'client/app/taxes/service/uploadTransportData.html?v=${buildUuid}',
+                templateUrl: 'client/app/taxes/service/uploadTransportData.html',
                 controller: 'uploadTransportDataController',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {

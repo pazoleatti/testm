@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('schedulerTaskList', {
                 url: '/administration/schedulerTaskList',
-                templateUrl: 'client/app/administration/schedulerTaskList.html?v=${buildUuid}',
+                templateUrl: 'client/app/administration/schedulerTaskList.html',
                 controller: 'schedulerTaskListCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
