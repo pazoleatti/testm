@@ -888,7 +888,8 @@
      * @description Основной модуль приложения
      */
     var appModule = angular.module('app', [
-        'templates-main',
+        'app-templates',
+        'components-templates',
         // Стандартные/внешние модули, плагины, компоненты
         'ui.router',
         'ui.validate',
