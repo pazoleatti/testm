@@ -381,146 +381,11 @@
                                 </resource>
                             </webResources>
                             <packagingExcludes>
-                                client/app/,
-                                client/lib/,
-                                client/components/**/*.js,
-                                client/components/**/*.html,
                                 client/css/**/*.less,
                                 index-dev.html,
                                 index-prod.html
                             </packagingExcludes>
                         </configuration>
-                    </plugin>
-
-                    <!--Упаковка js и css файлов в бандлы-->
-                    <plugin>
-                        <groupId>net.alchim31.maven</groupId>
-                        <artifactId>yuicompressor-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>yuicompressor</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>compress</goal>
-                                </goals>
-                                <configuration>
-                                    <preProcessAggregates>true</preProcessAggregates>
-                                    <aggregations>
-                                        <!--APP-->
-                                        <aggregation>
-                                            <insertNewLine>true</insertNewLine>
-                                            <output>${webappDirectory}/client/app.js</output>
-                                            <inputDir>${basedir}/src/main/webapp/client/app</inputDir>
-                                            <includes>
-                                                <include>/main/app.js</include>
-                                                <include>**/*.js</include>
-                                            </includes>
-                                        </aggregation>
-                                        <!--COMPONENTS-->
-                                        <aggregation>
-                                            <insertNewLine>true</insertNewLine>
-                                            <output>${webappDirectory}/client/components.js</output>
-                                            <inputDir>${basedir}/src/main/webapp/client/components</inputDir>
-                                            <includes>
-                                                <include>**/*.js</include>
-                                            </includes>
-                                        </aggregation>
-                                        <!--LIB-->
-                                        <aggregation>
-                                            <insertNewLine>true</insertNewLine>
-                                            <output>${webappDirectory}/client/vendor.js</output>
-                                            <inputDir>${basedir}/src/main/webapp/client/lib</inputDir>
-                                            <includes>
-                                                <include>/jquery.js</include>
-                                                <include>/jquery-ui-1.12.1.js</include>
-                                                <include>/angular-1.4.7.js</include>
-                                                <include>/angular-locale_ru-ru.js</include>
-                                                <include>/angular-translate-2.15.1.js</include>
-                                                <include>/angular-translate-loader-url-2.15.1.js</include>
-                                                <include>/angular-sanitize-1.5.9.js</include>
-                                                <include>/angular-ui-router-1.0.3.js</include>
-                                                <include>/angular-strap.js</include>
-                                                <include>/angular-strap.tpl.js</include>
-                                                <include>/bootstrap.js</include>
-                                                <include>/bootstrap-tooltip-extension.js</include>
-                                                <include>/angular-messages-1.5.9.js</include>
-                                                <include>/angular-animate-1.5.9.js</include>
-                                                <include>/angular-file-upload-2.5.0.js</include>
-                                                <include>/moment-2.18.1.js</include>
-                                                <include>/moment-locale-ru.js</include>
-                                                <include>/underscore-1.8.3.js</include>
-                                                <include>/grid.locale-ru.js</include>
-                                                <include>/jquery.jqGrid-5.2.1.js</include>
-                                                <include>/select2-3.4.5.js</include>
-                                                <include>/he.js</include>
-                                                <include>/re-tree.js</include>
-                                                <include>/ng-device-detector.js</include>
-                                                <include>/angular-translate-once.js</include>
-                                                <include>/angular-resource-1.4.7.js</include>
-                                                <include>/date.format.js</include>
-                                                <include>/date-parser.js</include>
-                                                <include>/codemirror.js</include>
-                                                <include>/groovy.js</include>
-                                            </includes>
-                                        </aggregation>
-                                    </aggregations>
-                                    <force>true</force>
-                                    <nocompress>true</nocompress>
-                                    <nosuffix>true</nosuffix>
-                                    <jswarn>false</jswarn>
-                                    <disableOptimizations>true</disableOptimizations>
-                                    <sourceDirectory>${webappDirectory}/client</sourceDirectory>
-                                    <outputDirectory>${webappDirectory}/client</outputDirectory>
-                                    <includes>
-                                        <include>**/components.js</include>
-                                    </includes>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!--Упаковка шаблонов html в один js-файл-->
-                    <plugin>
-                        <groupId>com.keithbranton.mojo</groupId>
-                        <artifactId>angular-maven-plugin</artifactId>
-                        <executions>
-                            <!--APP-TEMPLATES-->
-                            <execution>
-                                <id>app-templates</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>html2js</goal>
-                                </goals>
-                                <configuration>
-                                    <sourceDir>${basedir}/src/main/webapp/client/app</sourceDir>
-                                    <angularDependency>angular</angularDependency>
-                                    <include>**/*.html</include>
-                                    <target>${webappDirectory}/client/app-templates.js</target>
-                                    <addRequireWrapper>false</addRequireWrapper>
-                                    <prefix>client/app</prefix>
-                                    <moduleName>app-templates</moduleName>
-                                    <multiModule>true</multiModule>
-                                </configuration>
-                            </execution>
-                            <!--COMPONENTS-TEMPLATES-->
-                            <execution>
-                                <id>components-templates</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>html2js</goal>
-                                </goals>
-                                <configuration>
-                                    <sourceDir>${basedir}/src/main/webapp/client/components</sourceDir>
-                                    <angularDependency>angular</angularDependency>
-                                    <include>**/*.html</include>
-                                    <target>${webappDirectory}/client/components-templates.js</target>
-                                    <addRequireWrapper>false</addRequireWrapper>
-                                    <prefix>client/components</prefix>
-                                    <moduleName>components-templates</moduleName>
-                                    <multiModule>true</multiModule>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
 
                     <plugin>
@@ -534,7 +399,7 @@
                                     <goal>rename</goal>
                                 </goals>
                                 <configuration>
-                                    <sourceFile>${webappDirectory}/index-prod.html</sourceFile>
+                                    <sourceFile>${webappDirectory}/index-dev.html</sourceFile>
                                     <destinationFile>${webappDirectory}/index.html</destinationFile>
                                 </configuration>
                             </execution>
