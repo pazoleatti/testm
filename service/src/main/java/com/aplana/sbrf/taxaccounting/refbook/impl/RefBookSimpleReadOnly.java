@@ -99,7 +99,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public int getRecordsCount(Date version, String filter) {
-        return refBookDao.getRecordsCount(getRefBookId(), getTableName(), filter);
+        return refBookSimpleDao.getRecordsCount(refBookDao.get(getRefBookId()), version, filter);
     }
 
     public String getTableName() {
