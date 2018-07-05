@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
-import com.aplana.sbrf.taxaccounting.model.Relation;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +9,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "SourceDaoTest.xml" })
+@ContextConfiguration({"SourceDaoTest.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Transactional
 public class SourceDaoTest {
@@ -35,8 +31,8 @@ public class SourceDaoTest {
 
     @Test
     public void testIsDeclarationSourceConsolidated() {
-        assertTrue(sourceDao.isDeclarationSourceConsolidated(1,2));
-        assertTrue(sourceDao.isDeclarationSourceConsolidated(1,3));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 2));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 3));
         assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 4));
     }
 
@@ -54,12 +50,12 @@ public class SourceDaoTest {
     }
 
     @Test
-    public void testSourcesInfo(){
+    public void testSourcesInfo() {
         assertEquals(3, sourceDao.getSourcesInfo(1L).size());
     }
 
     @Test
-    public void testDestinationsInfo(){
+    public void testDestinationsInfo() {
         assertEquals(3, sourceDao.getDestinationsInfo(1L).size());
     }
 
