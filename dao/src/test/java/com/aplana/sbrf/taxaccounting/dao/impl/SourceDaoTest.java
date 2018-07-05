@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +9,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.Collections;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-@Ignore("Работа с источниками приемниками будет переделана!")
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "SourceDaoTest.xml" })
+@ContextConfiguration({"SourceDaoTest.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Transactional
 public class SourceDaoTest {
@@ -25,75 +22,49 @@ public class SourceDaoTest {
     @Autowired
     SourceDao sourceDao;
 
+
     @Test
-    public void deleteConsolidateInfo() {
-        assertTrue(sourceDao.isDeclarationSourceConsolidated(2, 11));
-        assertTrue(sourceDao.isDeclarationSourceConsolidated(2, 12));
+    public void testAddDeclarationConsolidationInfo() {
+        sourceDao.addDeclarationConsolidationInfo(4L, Collections.singleton(5L));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(4L, 5L));
+    }
+
+    @Test
+    public void testIsDeclarationSourceConsolidated() {
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 2));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 3));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 4));
+    }
+
+    @Test
+    public void testUpdateDDConsolidationInfo() {
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(5, 5));
+        sourceDao.updateDDConsolidationInfo(5);
+        assertFalse(sourceDao.isDeclarationSourceConsolidated(5, 5));
+    }
+
+    @Test
+    public void testIsDDConsolidationTopical() {
+        assertTrue(sourceDao.isDDConsolidationTopical(1));
+        assertFalse(sourceDao.isDDConsolidationTopical(123));
+    }
+
+    @Test
+    public void testSourcesInfo() {
+        assertEquals(3, sourceDao.getSourcesInfo(1L).size());
+    }
+
+    @Test
+    public void testDestinationsInfo() {
+        assertEquals(3, sourceDao.getDestinationsInfo(1L).size());
+    }
+
+    @Test
+    public void testDeleteDeclarationConsolidateInfo() {
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(2, 1));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(2, 2));
         sourceDao.deleteDeclarationConsolidateInfo(2);
-        assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 11));
-        assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 12));
+        assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 1));
+        assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 2));
     }
-
-    @Test
-    public void addConsolidateInfo() {
-        sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
-        assertTrue(sourceDao.isFDSourceConsolidated(1, 1));
-    }
-
-    @Test
-    public void deleteFDConsolidateInfo() {
-        sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
-        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 1));
-        sourceDao.deleteFormDataConsolidationInfo(Arrays.asList(1l));
-        assertFalse(sourceDao.isFDSourceConsolidated(1, 1));
-    }
-
-    @Test
-    public void testUpdateFD(){
-        sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
-        sourceDao.updateFDConsolidationInfo(1);
-        assertFalse(sourceDao.isFDConsolidationTopical(1));
-    }
-
-    @Test
-    public void testUpdateDD(){
-        sourceDao.addDeclarationConsolidationInfo(1l, Arrays.asList(1l));
-        sourceDao.updateDDConsolidationInfo(1);
-        assertFalse(sourceDao.isDDConsolidationTopical(1));
-    }
-
-    /*@Test
-    public void testSaveDeclarationSources() {
-        List<DepartmentFormType> sources = departmentFormTypeDao.getDeclarationSources(2, 1);
-        List<Long> sourceIds = new ArrayList<Long>();
-
-        for (DepartmentFormType source : sources) {
-            sourceIds.add(source.getId());
-        }
-
-        sourceIds.add(3l);
-
-        assertEquals(5, sourceIds.size());
-        assertTrue(sourceIds.contains(3l));
-        assertTrue(sourceIds.contains(5l));
-        assertTrue(sourceIds.contains(6l));
-        assertTrue(sourceIds.contains(21l));
-        assertTrue(sourceIds.contains(22l));
-
-        sourceIds.remove(21l);
-
-        departmentFormTypeDao.saveDeclarationSources(1l, sourceIds);
-        sources = departmentFormTypeDao.getDeclarationSources(2, 1);
-        sourceIds.clear();
-
-        for (DepartmentFormType source : sources) {
-            sourceIds.add(source.getId());
-        }
-
-        assertEquals(4, sourceIds.size());
-        assertTrue(sourceIds.contains(3l));
-        assertTrue(sourceIds.contains(5l));
-        assertTrue(sourceIds.contains(6l));
-        assertTrue(sourceIds.contains(22l));
-    }*/
 }

@@ -8,6 +8,7 @@
     <jdbc:initialize-database>
         <!--<jdbc:script location="classpath:data/SourceDaoTestTest.sql" encoding="UTF-8"/>-->
         <jdbc:script location="classpath:data/State.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/Event.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationTemplate.sql" encoding="UTF-8"/>
@@ -17,5 +18,6 @@
         <jdbc:script location="classpath:data/DepartmentReportPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationData.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationDataConsolidation.sql" encoding="UTF-8"/>
+
     </jdbc:initialize-database>
 </beans>

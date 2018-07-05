@@ -75,12 +75,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         }
     }
 
-    @Override
-    public void deleteAll(final List<SourceObject> sources) {
-        getJdbcTemplate().batchUpdate("delete from declaration_source where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
-                new SourceBatchPreparedStatementSetter(sources, true));
-    }
-
     private static final String ADD_DECLARATION_CONSOLIDATION =
             "insert into DECLARATION_DATA_CONSOLIDATION (TARGET_DECLARATION_DATA_ID, SOURCE_DECLARATION_DATA_ID) values (?,?)";
 
@@ -125,83 +119,11 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         return true;
     }
 
-    private static final String ADD_CONSOLIDATION =
-            "insert into FORM_DATA_CONSOLIDATION (TARGET_FORM_DATA_ID, SOURCE_DECLARATION_DATA_ID) values (?,?)";
-
-    @Override
-    public void addFormDataConsolidationInfo(final Long tgtFormDataId, Collection<Long> srcFormDataIds) {
-        final Object[] srcArray = srcFormDataIds.toArray();
-        try {
-            getJdbcTemplate().batchUpdate(ADD_CONSOLIDATION, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setLong(1, tgtFormDataId);
-                    ps.setLong(2, (Long) srcArray[i]);
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return srcArray.length;
-                }
-            });
-        } catch (DataAccessException e) {
-            throw new DaoException("", e);
-        }
-    }
-
-    private static final String DELETE_CONSOLIDATION =
-            "delete from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ?";
-
-    @Override
-    public void deleteFormDataConsolidationInfo(final Collection<Long> tgtFormDataIds) {
-        try {
-            getJdbcTemplate().batchUpdate(DELETE_CONSOLIDATION, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setLong(1, (Long) tgtFormDataIds.toArray()[i]);
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return tgtFormDataIds.size();
-                }
-            });
-        } catch (DataAccessException e) {
-            throw new DaoException("", e);
-        }
-    }
-
-    @Override
-    public boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "select 1 from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ? and SOURCE_DECLARATION_DATA_ID = ?",
-                    Integer.class,
-                    formDataId, sourceFormDataId) > 0;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public void updateFDConsolidationInfo(long sourceFormId) {
-        getJdbcTemplate().update(
-                "update FORM_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where SOURCE_DECLARATION_DATA_ID = ?",
-                sourceFormId);
-    }
-
     @Override
     public int updateDDConsolidationInfo(long sourceFormId) {
         return getJdbcTemplate().update(
                 "update DECLARATION_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where SOURCE_DECLARATION_DATA_ID = ?",
                 sourceFormId);
-    }
-
-    @Override
-    public boolean isFDConsolidationTopical(long fdTargetId) {
-        return getJdbcTemplate().queryForObject(
-                "select count(*) from form_data_consolidation where TARGET_FORM_DATA_ID = ? and SOURCE_DECLARATION_DATA_ID is null",
-                Integer.class, fdTargetId) == 0;
     }
 
     @Override
