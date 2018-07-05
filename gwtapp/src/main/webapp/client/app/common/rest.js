@@ -34,7 +34,7 @@
          */
         .factory('NotificationResource', ['$resource', function ($resource) {
             return $resource('controller/rest/notification?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false, nooverlay : true}
+                query: {method: 'GET', isArray: false, cache: false}
             });
         }])
         /**
@@ -58,8 +58,8 @@
          */
         .factory('DeclarationDataResource', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false, nooverlay : true},
-                querySource: {method: 'GET', isArray: true, cache: false, nooverlay : true}
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
         /**
