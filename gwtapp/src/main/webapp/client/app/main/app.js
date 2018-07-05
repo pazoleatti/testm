@@ -881,7 +881,7 @@
         "scriptExecution.button.execute": "Выполнить скрипт",
         "scriptExecution.label.upload": "Выберите архив со скриптом для загрузки",
 
-        "application2.title.modal": "Создание файла приложения 2",
+        "application2.title.modal": "Создание файла Приложения 2 к декларации по налогу на прибыль",
         "application2.label.year": "Год"
     };
     /**
