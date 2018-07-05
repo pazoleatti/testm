@@ -15,39 +15,41 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: " + logPanel.height + "px; " +
-                        "max-height: " + angular.element('.cbr-page-layout__view').height() + "px; min-height: 36px;'>" +
-                        "    <div data-aplana-splitter" +
-                        "         data-splitter='horizontal'" +
-                        "         data-splitter-thick='16'" +
-                        "         data-splitter-left-top='app-content'" +
-                        "         data-splitter-right-bottom='log-entry-list'" +
-                        "         data-splitter-max='994' data-splitter-min='12'" +
-                        "         data-splitter-start='540'" +
-                        "         data-splitter-resizing='true'" +
-                        "         id='resize-button'></div>" +
-                        "    <div id='log-panel-header'>" +
-                        "        <div id='log-panel-header-message'></div>" +
-                        "        <div style='float: right; margin: -7px 6px 0 4px;'>" +
-                        "            <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
-                        "        </div>" +
-                        "        <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
-                        "            <img src='resources/img/unload-white-16.png'>" +
-                        "            <a href='controller/actions/logEntry/" + uuid + "' title=\"{{'logPanel.header.unload.title' | translate}}\">{{'logPanel.header.unload' | translate}}</a>" +
-                        "        </div>" +
-                        "    </div>" +
-                        "    <div id='log-entry-list' class='flex-fill flex-column'>" +
-                        "        <div class='flex-grid flex-fill' data-aplana-grid" +
-                        "             data-grid-fill-space='true' " +
-                        "             data-grid-refresh-button='false'  " +
-                        "             data-grid-options='logEntryGrid.options' " +
-                        "             data-grid-fill-space-container-selector='#log-entry-list' " +
-                        "             data-grid-fill-space-container-selector-top='#log-panel-header' " +
-                        "             data-grid-ctrl='logEntryGrid.ctrl'" +
-                        "             data-ng-model='logEntryGrid.value'" +
-                        "             style='float: left; width: 100%;'" +
-                        "             id='log-entry-grid' ></div>" +
-                        "    </div>" +
+                        "<div id='log-panel' class='flex-column' style='background: #fff;'>" +
+                        "   <div data-aplana-splitter" +
+                        "        data-splitter='horizontal'" +
+                        "        data-splitter-thick='36'" +
+                        "        data-splitter-left-top='app-content'" +
+                        "        data-splitter-right-bottom='log-entry-list'" +
+                        "        data-splitter-major-side='log-entry-list'" +
+                        "        data-splitter-container='.cbr-page-layout__view'" +
+                        "        data-splitter-start='" + logPanel.height + "'" +
+                        "        data-splitter-resizing='true'" +
+                        "        id='resize-button'>" +
+                        "       <div id='log-panel-header' style='top: 16px;'>" +
+                        "           <div id='log-panel-header-message'></div>" +
+                        "           <div style='float: right; margin: -7px 6px 0 4px;'>" +
+                        "               <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
+                        "           </div>" +
+                        "           <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
+                        "               <img src='resources/img/unload-white-16.png'>" +
+                        "               <a href='controller/actions/logEntry/" + uuid + "' title=\"{{'logPanel.header.unload.title' | translate}}\">{{'logPanel.header.unload' | translate}}</a>" +
+                        "           </div>" +
+                        "       </div>" +
+                        "   </div>" +
+                        "   <div id='log-entry-list'>" +
+                        "       <div class='flex-grid' style='height: 100%;'" +
+                        "            data-aplana-grid" +
+                        "            data-grid-fill-space='true' " +
+                        "            data-grid-refresh-button='false'  " +
+                        "            data-grid-options='logEntryGrid.options' " +
+                        "            data-grid-fill-space-container-selector='#log-entry-list' " +
+                        "            data-grid-fill-space-container-selector-top='#log-panel-header' " +
+                        "            data-grid-ctrl='logEntryGrid.ctrl'" +
+                        "            data-ng-model='logEntryGrid.value'" +
+                        "            style='float: left; width: 100%;'" +
+                        "            id='log-entry-grid' ></div>" +
+                        "   </div>" +
                         "</div>"
                     )(scope = $rootScope.$new());
                 }
@@ -155,43 +157,6 @@
                             var fatalErrors = data.ERROR;
                             updateLogPanelHeaderMessage(totalCount, fatalErrors);
                         });
-
-                        var container = angular.element('.cbr-page-layout__view');
-                        var topDiv = angular.element('#app-content');
-                        var resizeButton = angular.element('#resize-button');
-                        var bottomDiv = angular.element('#log-panel');
-
-                        $rootScope.$on('WINDOW_RESIZED_MSG', function () {
-                            bottomDiv.css({
-                                maxHeight: container.height()
-                            });
-                        });
-
-                        resizeButton.on('mousedown', function (e) {
-                            var startHeight = bottomDiv.height(),
-                                pY = e.pageY;
-
-                            $document.on('mouseup', unbindEvents);
-                            $document.on('mousemove', mouseMove);
-
-                            function mouseMove(me) {
-                                var my = (me.pageY - pY);
-
-                                $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
-
-                                logPanel.height = Math.max(Math.min(startHeight - my, container.height()), 0);
-
-                                bottomDiv.css({
-                                    height: logPanel.height,
-                                    maxHeight: container.height()
-                                });
-                            }
-
-                            function unbindEvents() {
-                                $document.unbind('mouseup', unbindEvents);
-                                $document.unbind('mousemove', mouseMove);
-                            }
-                        });
                     }
                     $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                 };
@@ -201,6 +166,7 @@
                  */
                 logPanel.close = function () {
                     if (scope) {
+                        logPanel.height = angular.element(document.querySelector('#log-entry-list')).height();
                         $rootScope.logEntryGrid = undefined;
                         angular.element(document.querySelector('#log-panel')).remove();
                         angular.element(document.querySelector('#app-content')).css('height', '100%');

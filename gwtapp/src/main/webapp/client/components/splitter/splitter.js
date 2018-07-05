@@ -1,7 +1,7 @@
 (function () {
     'use strict';
     angular.module('aplana.splitter', ['aplana.utils'])
-        .directive('aplanaSplitter',['AplanaUtils', '$document', function(AplanaUtils, $document) {
+        .directive('aplanaSplitter', ['AplanaUtils', '$document', function (AplanaUtils, $document) {
             return {
                 restrict: 'A',
                 scope: {
@@ -9,9 +9,11 @@
                     splitterThick: '@',  // толщина: высота-ширина
                     splitterLeftTop: '@', // айди левого компонента или верхнего
                     splitterRightBottom: '@', // айди левого компонента или верхнего
+                    splitterMajorSide: '@', // сторона, размеры которой будут изменяться при движении сплиттера
+                    splitterContainer: '@',  // контейнер, ограничивающий движение сплиттера
                     splitterMax: '@',  // максимально на сколько можно подвинуть
                     splitterMin: '@',  // минимально на сколько можно подвинуть
-                    splitterStart: '@',  // начальная позиция. нужна для инициализации, двигает компонент splitterLeftTop
+                    splitterStart: '@',  // начальная позиция. нужна для инициализации, двигает компонент splitterMajorSide
                     splitterResizing: '@'  // возможность динамически менять ширину элемента. по умолчанию false
                 },
                 transclude: true,
@@ -22,8 +24,11 @@
                     // иконка для элемента сворачивания.
                     $scope.iconClassHide = $scope.splitter === 'vertical' ? 'splitter-icon-chevron-left' : 'splitter-icon-chevron-up';
 
-                    if (!angular.isDefined($scope.splitterResizing)){
+                    if (angular.isUndefined($scope.splitterResizing)) {
                         $scope.splitterResizing = false;
+                    }
+                    if (angular.isUndefined($scope.splitterMajorSide)) {
+                        $scope.splitterMajorSide = $scope.splitterLeftTop;
                     }
 
                     if (!angular.isDefined($scope.splitterLeftTop)) {
@@ -36,117 +41,86 @@
 
                     function init() {
                         // если нет ресайза, то курсор меняется на обычный
-                        if (!$scope.splitterResizing){
+                        if (!$scope.splitterResizing) {
                             $element.css({
                                 cursor: 'default'
                             });
                         }
 
+                        // установка в начальное состояние
                         if ($scope.splitter === 'vertical') {
-                            //$scope.styleClickElement = {
-                            //    height: $scope.splitterThick,
-                            //    width: $scope.splitterThick,
-                            //    'margin-top': '5px'
-                            //};
-
-                            // установка в начальное состояние
                             $element.css({
-                                left: $scope.splitterStart + 'px',
                                 width: $scope.splitterThick
                             });
-                            angular.element('#' + $scope.splitterLeftTop).width($scope.splitterStart);
+                            angular.element('#' + $scope.splitterMajorSide).width($scope.splitterStart);
                         } else {
-                            //$scope.styleClickElement = {
-                            //    height: $scope.splitterThick,
-                            //    width: $scope.splitterThick,
-                            //    'margin-left': '5px'
-                            //};
-
-                            // установка в начальное состояние
                             $element.css({
-                                top: $scope.splitterStart + 'px',
                                 height: $scope.splitterThick
                             });
-                            //angular.element('#' + $scope.splitterLeftTop).height($scope.splitterStart);
+                            angular.element('#' + $scope.splitterMajorSide).height($scope.splitterStart);
                         }
+                        updateSplitterIcon();
                     }
 
                     init();
 
+                    var startHeight, pY,
+                        moving = false;
+
                     $element.on('mousedown', function (event) {
                         event.preventDefault();
+
+                        startHeight = angular.element('#' + $scope.splitterMajorSide)[0].offsetHeight;
+                        pY = event.pageY;
 
                         if ($scope.splitterResizing) {
                             $document.on('mousemove', mouseMove);
                             $document.on('mouseup', mouseUp);
                         }
+                        moving = false;
                     });
 
-                    // клик по вертикальному сплитеру   скрыть/показать
-                    function updateCssElementVertical(x) {
-                        if ($scope.splitterMax && x > $scope.splitterMax) {
-                            x = parseInt($scope.splitterMax);
-                        }
-
-                        $element.css({left: x + 'px'});
-                        //angular.element('#' + $scope.splitterRightBottom).css({left: (x + parseInt($scope.splitterThick)) + 'px'});
-                    }
-
                     $scope.onClick = function () {
-                        var el = angular.element('#' + $scope.splitterLeftTop);
-                        //el.toggle();
-
-                        if ($scope.splitter === 'vertical') {
-                            updateCssElementVertical(el.is(':visible') ? el.outerWidth() : 0);
-                            $scope.iconClassHide = el.is(':visible') ? 'splitter-icon-chevron-left' : 'splitter-icon-chevron-right';
-                        } else {
-                            $scope.iconClassHide = el.is(':visible') ? 'splitter-icon-chevron-up' : 'splitter-icon-chevron-down';
+                        if (!moving) {
+                            var el = angular.element('#' + $scope.splitterMajorSide);
+                            el.toggle();
+                            updateSplitterIcon();
                         }
                     };
 
+                    // смена иконки
+                    function updateSplitterIcon() {
+                        var el = angular.element('#' + $scope.splitterMajorSide);
+                        if ($scope.splitter === 'vertical') {
+                            $scope.iconClassHide = ($scope.splitterMajorSide === $scope.splitterRightBottom) !== el.is(':visible') ? 'splitter-icon-chevron-left' : 'splitter-icon-chevron-right';
+                        } else {
+                            $scope.iconClassHide = ($scope.splitterMajorSide === $scope.splitterRightBottom) !== el.is(':visible') ? 'splitter-icon-chevron-up' : 'splitter-icon-chevron-down';
+                        }
+                    }
+
                     function mouseMove(event) {
+                        moving = true;
 
                         // если елемент скрыт, но двигается  сам сплитер
-                        var el = angular.element('#' + $scope.splitterLeftTop);
+                        var el = angular.element('#' + $scope.splitterMajorSide);
                         if (!el.is(':visible')) {
                             el.show();
-
-                            // смена иконки
-                            if ($scope.splitter === 'vertical') {
-                                $scope.iconClassHide = el.is(':visible') ? 'splitter-icon-chevron-left' : 'splitter-icon-chevron-right';
-                            } else {
-                                $scope.iconClassHide = el.is(':visible') ? 'splitter-icon-chevron-up' : 'splitter-icon-chevron-down';
-                            }
+                            updateSplitterIcon();
                         }
 
                         if ($scope.splitter === 'vertical') {
-                            var x = event.pageX - angular.element('#' + $scope.splitterLeftTop).offset().left;
-
-                            // проверяем границы
-                            if ($scope.splitterMax && x > $scope.splitterMax) {
-                                x = parseInt($scope.splitterMax);
-                            }
-
-                            if ($scope.splitterMin && x < $scope.splitterMin) {
-                                x = parseInt($scope.splitterMin);
-                            }
-
-                            // апдейт позиций
-                            $element.css({left: x + 'px'});
-                            angular.element('#' + $scope.splitterLeftTop).css({width: x + 'px'});
-                            //angular.element('#' + $scope.splitterRightBottom).css({
-                            //    left: (x + parseInt($scope.splitterThick)) + 'px'
-                            //});
-
+                            // TODO
                         } else {
-                            var y = event.pageY - angular.element('#'+$scope.splitterLeftTop).offset().top;
-                            if ($scope.splitterMax && y > $scope.splitterMax) {
-                                y = parseInt($scope.splitterMax);
-                            }
-                            if ($scope.splitterMin && y < $scope.splitterMin) {
-                                y = parseInt($scope.splitterMin);
-                            }
-                            //angular.element('#' + $scope.splitterLeftTop).css({height: y + 'px'});
+                            var my = (event.pageY - pY);
+
+                            $scope.$root.$broadcast('UPDATE_GIRD_HEIGHT');
+
+                            var height = Math.max(Math.min(startHeight - my, angular.element($scope.splitterContainer).height() - $element.height()), 0);
+
+                            angular.element('#' + $scope.splitterMajorSide).css({
+                                height: height,
+                                maxHeight: angular.element($scope.splitterContainer).height()
+                            });
                         }
                     }
 
@@ -156,6 +130,12 @@
                             $document.unbind('mouseup', mouseUp);
                         }
                     }
+
+                    $scope.$root.$on('WINDOW_RESIZED_MSG', function () {
+                        angular.element('#' + $scope.splitterMajorSide).css({
+                            maxHeight: angular.element($scope.splitterContainer).height() - $element.height()
+                        });
+                    });
                 }
             };
         }]);

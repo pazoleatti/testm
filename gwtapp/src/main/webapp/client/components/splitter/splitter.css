@@ -23,7 +23,7 @@ div[data-splitter] {
     box-shadow: 2px 0 3px rgba(68, 75, 75, 0.5);
 }
 
-div[data-splitter] a {
+div[data-splitter] > a {
     content: "";
     position: absolute;
 }
