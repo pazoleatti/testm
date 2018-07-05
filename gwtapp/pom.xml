@@ -324,6 +324,13 @@
                                         <include>client/css/fonts/*.*</include>
                                         <include>client/img/**</include>
                                         <include>client/**</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>src/main/webapp</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>client/**/*.js</include>
                                         <include>index*.html</include>
                                     </includes>
                                 </resource>
@@ -369,14 +376,6 @@
                                     <targetPath>WEB-INF</targetPath>
                                     <includes>
                                         <include>**/*.xml</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${basedir}/src/main/webapp</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>**/index.html</include>
-                                        <include>**/*.js</include>
                                     </includes>
                                 </resource>
                             </webResources>
@@ -513,14 +512,6 @@
                                     <targetPath>WEB-INF</targetPath>
                                     <includes>
                                         <include>**/*.xml</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${basedir}/src/main/webapp</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>**/index.html</include>
-                                        <include>**/*.js</include>
                                     </includes>
                                 </resource>
                             </webResources>
