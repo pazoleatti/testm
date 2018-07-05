@@ -29,8 +29,8 @@ public interface SourceService {
     /**
      * Возвращает список нф-приемников для указанной декларации (включая несозданные)
      *
-     * @param declarationData декларациz-источник
+     * @param declarationData декларация-источник
      * @return список нф-источников
      */
-    List<Relation> getDeclarationDestinationsInfo(DeclarationData declarationData);
+    List<Relation> getDestinationsInfo(DeclarationData declarationData);
 }

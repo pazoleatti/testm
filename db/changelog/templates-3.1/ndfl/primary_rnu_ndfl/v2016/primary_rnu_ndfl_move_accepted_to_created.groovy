@@ -1,8 +1,6 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.script.service.*
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 
@@ -63,11 +61,11 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
                 notCreatedDestinationIds.add(relation.declarationDataId)
             }
         }
-        if (notCreatedDestinationIds.size() != 0){
+        if (notCreatedDestinationIds.size() != 0) {
             StringBuilder destinationIdsString = new StringBuilder();
-            for (int i = 0; i < notCreatedDestinationIds.size(); i++){
+            for (int i = 0; i < notCreatedDestinationIds.size(); i++) {
                 destinationIdsString.append(notCreatedDestinationIds.get(i))
-                if (i < notCreatedDestinationIds.size()-1){
+                if (i < notCreatedDestinationIds.size() - 1) {
                     destinationIdsString.append(", ")
                 }
             }

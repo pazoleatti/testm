@@ -27,7 +27,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Relation> getDeclarationDestinationsInfo(DeclarationData declarationData) {
+    public List<Relation> getDestinationsInfo(DeclarationData declarationData) {
         return sourceDao.getDestinationsInfo(declarationData.getId());
     }
 }
