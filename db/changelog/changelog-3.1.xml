@@ -104,6 +104,7 @@
         </update>
     </changeSet>
 
+    <!-- ВНИМАНИЕ  changeSet id="3.1-ytrofimov-4" не добавлять в патч!!!-->
     <changeSet id="3.1-ytrofimov-4" author="ytrofimov">
         <update tableName="BLOB_DATA">
             <column name="data"
