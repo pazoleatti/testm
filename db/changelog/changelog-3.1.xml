@@ -146,4 +146,11 @@
 			and b.mark='00' and b.status=0;
 		</sql>
     </changeSet>
+
+    <changeSet id="3.1-dnovikov-6" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
