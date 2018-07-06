@@ -80,10 +80,10 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
-            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            this.department = departmentService.get(departmentReportPeriod.departmentId)
-            this.reportPeriod = this.departmentReportPeriod.reportPeriod
+            this.declarationTemplate = declarationData.declarationTemplateId ? declarationService.getTemplate(declarationData.declarationTemplateId) : null
+            this.departmentReportPeriod = declarationData.departmentReportPeriodId ? departmentReportPeriodService.get(declarationData.departmentReportPeriodId) : null
+            this.department = departmentReportPeriod ? departmentService.get(departmentReportPeriod.departmentId) : null
+            this.reportPeriod = this.departmentReportPeriod ? this.departmentReportPeriod.reportPeriod : null
         }
         if (scriptClass.getBinding().hasVariable("userInfo")) {
             this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo")

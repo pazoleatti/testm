@@ -191,10 +191,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         try {
             // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
             DeclarationData declaration = new DeclarationData();
-            declaration.setDepartmentReportPeriodId(1);
-            declaration.setReportPeriodId(1);
-            declaration.setDepartmentId(1);
-            declaration.setState(State.CREATED);
 
             declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userInfo, declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
             if (tempLogger.containsLevel(LogLevel.ERROR)) {

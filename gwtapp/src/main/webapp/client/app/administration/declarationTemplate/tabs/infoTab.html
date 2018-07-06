@@ -9,11 +9,13 @@
                     </label>
                 </div>
                 <div class="span7 info-text">
-                    {{:: 'declarationTemplate.tabs.info.activityPeriod.valueFrom' | translate:'{ yearFrom: ' +
-                    declarationTemplate.yearFrom + ' }'}}
+                    <span data-ng-if="declarationTemplate.yearFrom && declarationTemplate.yearFrom !== null">
+                        {{:: 'declarationTemplate.tabs.info.activityPeriod.valueFrom' | translate:'{ yearFrom: ' +
+                                        declarationTemplate.yearFrom + ' }'}}
+                    </span>
                     <span data-ng-if="declarationTemplate.yearTo && declarationTemplate.yearTo !== null">
-                    {{:: 'declarationTemplate.tabs.info.activityPeriod.valueTo' | translate:'{ yearTo: ' + declarationTemplate.yearTo + ' }'}}
-                </span>
+                        {{:: 'declarationTemplate.tabs.info.activityPeriod.valueTo' | translate:'{ yearTo: ' + declarationTemplate.yearTo + ' }'}}
+                    </span>
                 </div>
             </div>
             <div class="row-fluid">
