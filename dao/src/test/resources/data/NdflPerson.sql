@@ -1,5 +1,14 @@
 SET DATABASE REFERENTIAL INTEGRITY FALSE;
 
+create global temporary table tmp_cons_data(
+				operation_id varchar2(100 char),
+				asnu_id number(18),
+				inp varchar2(25 char),
+				year number(4),
+				period_code varchar2(2 char),
+				correction_date date)
+			on commit delete rows;
+
 insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
 values (100, 'РНУ НДФЛ (первичная)', date '2016-01-01', null, 100, 0, '1', 2);
 insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)

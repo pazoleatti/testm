@@ -2125,30 +2125,39 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
-        String sql = "with temp as (select max(version) version, record_id from ref_book_ndfl_detail r where status = 0 and version <= :currentDate  and\n" +
-                "not exists (select 1 from ref_book_ndfl_detail r2 where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate)\n" +
+        String insertSql = "insert into tmp_cons_data(operation_id, asnu_id, inp, year, period_code, correction_date)\n" +
+                "with temp as\n" +
+                "(select max(version) version, record_id\n" +
+                "from ref_book_ndfl_detail r\n" +
+                "where status = 0 and version <= :currentDate and not exists\n" +
+                "(select 1\n" +
+                "from ref_book_ndfl_detail r2\n" +
+                "where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate ) \n" +
                 "group by record_id),\n" +
-                "kpp_oktmo as (select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
-                "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId),\n" +
-                "cons_data as (select npi.operation_id, dd.asnu_id, np.inp, tp.year, rpt.code as period_code, drp.correction_date from ndfl_person_income npi\n" +
-                "left join kpp_oktmo on kpp_oktmo.kpp = npi.kpp\n" +
-                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
-                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
-                "left join declaration_template dt on dd.declaration_template_id = dt.id\n" +
-                "left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
-                "left join report_period rp on rp.id = drp.report_period_id\n" +
-                "left join tax_period tp on rp.tax_period_id = tp.id\n" +
+                "kpp_oktmo as\n" +
+                "(select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
+                "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo\n" +
+                "where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId )\n" +
+                "select npi.operation_id, dd.asnu_id, np.inp, tp.year, rpt.code as period_code, drp.correction_date\n" +
+                "from ndfl_person_income npi \n" +
+                "join kpp_oktmo on kpp_oktmo.kpp = npi.kpp and kpp_oktmo.oktmo = npi.oktmo\n" +
+                "join ndfl_person np on npi.ndfl_person_id = np.id \n" +
+                "join declaration_data dd on dd.id = np.declaration_data_id \n" +
+                "join declaration_template dt on dd.declaration_template_id = dt.id \n" +
+                "join department_report_period drp on drp.id = dd.department_report_period_id \n" +
+                "join report_period rp on rp.id = drp.report_period_id \n" +
+                "join tax_period tp on rp.tax_period_id = tp.id \n" +
                 "left join report_period_type rpt on rp.dict_tax_period_id = rpt.id\n" +
-                "where kpp_oktmo.kpp = npi.kpp \n" +
-                "and kpp_oktmo.oktmo = npi.oktmo \n" +
-                "and (npi.income_accrued_date between :periodStartDate and :periodEndDate or npi.income_payout_date between :periodStartDate and :periodEndDate or npi.tax_date between :periodStartDate and :periodEndDate or npi.tax_transfer_date between :periodStartDate and :periodEndDate)\n" +
-                "and dt.declaration_type_id = :declarationType\n" +
-                "and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear)" +
-                "select distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, cd.inp, cd.year, cd.period_code, cd.correction_date from ndfl_person_income npi\n" +
-                "left join cons_data cd on cd.operation_id = npi.operation_id\n" +
+                "where (npi.income_accrued_date between :periodStartDate and :periodEndDate \n" +
+                "or npi.income_payout_date between :periodStartDate and :periodEndDate \n" +
+                "or npi.tax_date between :periodStartDate and :periodEndDate \n" +
+                "or npi.tax_transfer_date between :periodStartDate and :periodEndDate ) \n" +
+                "and dt.declaration_type_id = :declarationType and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear";
+        String selectSql = "select distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, cd.inp, cd.year, cd.period_code, cd.correction_date from ndfl_person_income npi\n" +
+                "left join tmp_cons_data cd on cd.operation_id = npi.operation_id\n" +
                 "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
                 "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
-                "where dd.asnu_id = cd.asnu_id and npi.operation_id = cd.operation_id";
+                "where dd.asnu_id = cd.asnu_id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("currentDate", searchData.getCurrentDate())
                 .addValue("periodStartDate", searchData.getPeriodStartDate())
@@ -2158,7 +2167,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .addValue("consolidateDeclarationDataYear", searchData.getConsolidateDeclarationDataYear())
                 .addValue("departmentId", searchData.getDepartmentId());
         try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new ConsolidationIncomeRowMapper());
+            getNamedParameterJdbcTemplate().update(insertSql, params);
+            return getNamedParameterJdbcTemplate().query(selectSql, new ConsolidationIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
