@@ -71,11 +71,11 @@
                             $filter('translate')('ndlfPrepayment.title.modifiedDate'),
                             $filter('translate')('ndlfPrepayment.title.modifiedBy')],
                         colModel: [
-                            {name: 'rowNum', index: 'rowNum', width: 60, key: true},
+                            {name: 'rowNum', index: 'rowNum', width: 65, key: true},
                             {name: 'inp', index: 'inp', width: 100},
                             {name: 'operationId', index: 'operationId', width: 245},
                             {name: 'summ', index: 'summ', width: 285},
-                            {name: 'notifNum', index: 'notifNum', width: 140},
+                            {name: 'notifNum', index: 'notifNum', width: 145},
                             {
                                 name: 'notifDate',
                                 index: 'notifDate',
@@ -84,7 +84,7 @@
                             },
                             {name: 'notifSource', index: 'notifSource', width: 315},
                             {name: 'id', index: 'id', width: 160},
-                            {name: 'modifiedDate', index: 'modifiedDate', width: 200, formatter: $filter('dateTimeFormatter')},
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 205, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 300}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],

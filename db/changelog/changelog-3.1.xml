@@ -133,4 +133,17 @@
 			on commit delete rows;
 		</sql>
     </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-4984 Уведомление об отсутствии пары "Код дохода"/"Признак дохода" в справочнике "Виды дохода" -->
+	<changeSet id="3.1-rnurgaleev-4" author="rnurgaleev">
+        <sql>
+			update ref_book_income_kind b 
+				set record_id=(select max(record_id) from ref_book_income_kind a 
+					where exists(select 1 from ref_book_income_type where id=a.income_type_id and code='1011') 
+					and a.version=to_date('01.01.2016','DD.MM.YYYY')
+					and a.mark='00' and a.status=0)
+			where exists(select 1 from ref_book_income_type where id=b.income_type_id and code='1011') and b.version=to_date('01.01.2017','DD.MM.YYYY')
+			and b.mark='00' and b.status=0;
+		</sql>
+    </changeSet>
 </databaseChangeLog>
