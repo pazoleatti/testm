@@ -8,12 +8,25 @@
                     <label class="control-label">{{::'application2.label.year' | translate}}:</label>
                 </td>
                 <td>
-                    <input  type="number"
-                            min="1000"
-                            max="9999"
-                            onKeyPress="if(this.value.length==4) return false;"
-                            data-ng-model="reportYear"
-                            style="width: 300px"/>
+                    <div data-aplana-field>
+                        <input type="number"
+                               style="width: 300px;"
+                               data-ng-model="reportYear"
+                               data-required
+                               max="9999"
+                               min="1000"/>
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
+                        </div>
+                        <div data-aplana-validator data-key='min'>
+                            {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
+                            1000 + ' }'}}
+                        </div>
+                        <div data-aplana-validator data-key='max'>
+                            {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
+                            9999 + ' }'}}
+                        </div>
+                    </div>
                 </td>
             </tr>
             </tbody>
