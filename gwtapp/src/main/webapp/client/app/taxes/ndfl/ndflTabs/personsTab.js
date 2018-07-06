@@ -81,7 +81,7 @@
                             $filter('translate')('ndflFL.title.modifiedDate'),
                             $filter('translate')('ndflFL.title.modifiedBy')],
                         colModel: [
-                            {name: 'rowNum', index: 'rowNum', width: 60, key: true},
+                            {name: 'rowNum', index: 'rowNum', width: 65, key: true},
                             {name: 'inp', index: 'inp', width: 100},
                             {name: 'lastName', index: 'lastName', width: 130},
                             {name: 'firstName', index: 'firstName', width: 110},
@@ -98,7 +98,7 @@
                             {name: 'idDocType', index: 'idDocType', width: 85},
                             {name: 'idDocNumber', index: 'idDocNumber', width: 95},
                             {name: 'status', index: 'status', width: 100},
-                            {name: 'regionCode', index: 'regionCode', width: 100, sortable: false},
+                            {name: 'regionCode', index: 'regionCode', width: 105, sortable: false},
                             {name: 'postIndex', index: 'postIndex', width: 100},
                             {name: 'area', index: 'area', width: 160},
                             {name: 'city', index: 'city', width: 160},
@@ -109,7 +109,7 @@
                             {name: 'flat', index: 'flat', width: 80},
                             {name: 'snils', index: 'snils', width: 120, sortable: false},
                             {name: 'id', index: 'id', width: 160},
-                            {name: 'modifiedDate', index: 'modifiedDate', width: 200, formatter: $filter('dateTimeFormatter')},
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 205, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 300}],
 
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],

@@ -88,15 +88,15 @@
                             $filter('translate')('incomesAndTax.title.modifiedDate'),
                             $filter('translate')('incomesAndTax.title.modifiedBy')],
                         colModel: [
-                            {name: 'rowNum', index: 'rowNum', width: 60},
+                            {name: 'rowNum', index: 'rowNum', width: 65},
                             {name: 'inp', index: 'inp', width: 100},
                             {name: 'operationId', index: 'operationId', width: 245},
                             {name: 'incomeCode', index: 'incomeCode', width: 90},
-                            {name: 'incomeType', index: 'incomeType', width: 115},
+                            {name: 'incomeType', index: 'incomeType', width: 120},
                             {
                                 name: 'incomeAccruedDate',
                                 index: 'incomeAccruedDate',
-                                width: 165,
+                                width: 170,
                                 formatter: $filter('dateFormatter')
                             },
                             {
@@ -108,20 +108,20 @@
                             {name: 'kpp', index: 'kpp', width: 80, sortable: false},
                             {name: 'oktmo', index: 'oktmo', width: 100},
                             {name: 'incomeAccruedSumm', index: 'incomeAccruedSumm', width: 195},
-                            {name: 'incomePayoutSumm', index: 'incomePayoutSumm', width: 195},
-                            {name: 'totalDeductionsSumm', index: 'totalDeductionsSumm', width: 105},
+                            {name: 'incomePayoutSumm', index: 'incomePayoutSumm', width: 200},
+                            {name: 'totalDeductionsSumm', index: 'totalDeductionsSumm', width: 110},
                             {name: 'taxBase', index: 'taxBase', width: 115},
-                            {name: 'taxRate', index: 'taxRate', width: 150},
+                            {name: 'taxRate', index: 'taxRate', width: 155},
                             {name: 'taxDate', index: 'taxDate', width: 90, formatter: $filter('dateFormatter')},
                             {name: 'calculatedTax', index: 'calculatedTax', width: 145},
-                            {name: 'withholdingTax', index: 'withholdingTax', width: 135},
+                            {name: 'withholdingTax', index: 'withholdingTax', width: 140},
                             {name: 'notHoldingTax', index: 'notHoldingTax', width: 155},
-                            {name: 'overholdingTax', index: 'overholdingTax', width: 190},
+                            {name: 'overholdingTax', index: 'overholdingTax', width: 195},
                             {name: 'refoundTax', index: 'refoundTax', width: 180},
                             {
                                 name: 'taxTransferDate',
                                 index: 'taxTransferDate',
-                                width: 195,
+                                width: 200,
                                 formatter: $filter('dateZeroFormatter')
                             },
                             {
@@ -133,7 +133,7 @@
                             {name: 'paymentNumber', index: 'paymentNumber', width: 205},
                             {name: 'taxSumm', index: 'taxSumm', width: 205},
                             {name: 'id', index: 'id', width: 160, key: true},
-                            {name: 'modifiedDate', index: 'modifiedDate', width: 200, formatter: $filter('dateTimeFormatter')},
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 205, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 300}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
