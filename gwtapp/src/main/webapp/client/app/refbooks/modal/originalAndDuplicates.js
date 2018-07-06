@@ -38,7 +38,7 @@
                         ],
                         colModel: [
                             {name: 'id', index: 'id', width: 100, key: true, hidden: true},
-                            {name: 'recordId', index: 'recordId', width: 100, sortable: false},
+                            {name: 'recordId', index: 'recordId', width: 120, sortable: false},
                             {name: 'lastName', index: 'lastName', width: 100, sortable: false},
                             {name: 'firstName', index: 'firstName', width: 100, sortable: false},
                             {name: 'middleName', index: 'middleName', width: 100, sortable: false},
