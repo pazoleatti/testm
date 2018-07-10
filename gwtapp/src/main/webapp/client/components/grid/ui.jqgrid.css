@@ -348,7 +348,7 @@ transform: scale(1);
 
 .ui-jqgrid .ui-pg-button span {
     display: block;
-    margin: 1px;
+    margin: 1px 1px 2px;
     float: left;
 }
 
