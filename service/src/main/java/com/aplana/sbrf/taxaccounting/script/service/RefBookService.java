@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -237,4 +230,12 @@ public interface RefBookService {
      * @return uuid ссылку на уведомления с результатом выполнения
      */
     String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo);
+
+    /**
+     * Получение данных настройщика из файлового хранилища
+     * @param blobDataId    идентификатор данных в ффайловом хранилище
+     * @param user          пользователь пытающийся получить данный
+     * @return              данные полученные из файлового хранилища
+     */
+    BlobData getAdministrationSettingsBlobData(String blobDataId, TAUser user);
 }

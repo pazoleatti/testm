@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
@@ -9,15 +8,13 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +57,8 @@ public class DeclarationDataServiceImplTest {
     ReportService reportService;
     @Autowired
     DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
+    @Autowired
+    BlobDataService blobDataService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -166,10 +165,8 @@ public class DeclarationDataServiceImplTest {
         blobData2.setInputStream(this.getClass().getClassLoader().getResourceAsStream(TEST_XML_FILE_NAME));
         blobData2.setName(expectedName);
 
-        BlobDataService blobDataService = mock(BlobDataService.class);
         when(blobDataService.get(uuid1)).thenReturn(blobData1);
         when(blobDataService.get(uuid2)).thenReturn(blobData2);
-        ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
         long declarationDataId1 = 1, declarationDataId2 = 2;
         TAUserInfo userInfo = new TAUserInfo();
@@ -429,5 +426,23 @@ public class DeclarationDataServiceImplTest {
         assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, new DeclarationSubreport() {{
             setAlias("alias1");
         }})));
+    }
+
+    @Test
+    public void testUploadFile() {
+        long declarationDataId = 0L;
+        InputStream inputStream = mock(InputStream.class);
+        String fileName = "fileName";
+
+        declarationDataService.uploadFile(inputStream, fileName, declarationDataId);
+
+        verify(blobDataService, times(1)).create(inputStream, fileName);
+    }
+
+    @Test
+    public void testDownLoadFile() {
+        String blobId = "blobId";
+        declarationDataService.downloadFile(blobId, 0L);
+        Mockito.verify(blobDataService, Mockito.times(1)).get(blobId);
     }
 }

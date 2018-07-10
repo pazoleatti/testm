@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -90,4 +87,11 @@ public interface NotificationService {
      * Возвращяет дату последнего оповещения
      */
     Date fetchLastNotificationDate();
+
+    /**
+     * Получение данных настройщика из файлового хранилища
+     * @param blobDataId    идентификатор данных в ффайловом хранилище
+     * @return              данные полученные из файлового хранилища
+     */
+    BlobData getNotificationBlobData(String blobDataId);
 }

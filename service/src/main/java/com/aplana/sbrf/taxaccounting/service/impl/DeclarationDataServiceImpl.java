@@ -3806,6 +3806,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
+    public String uploadFile(InputStream fileInputStream, String fileName, Long declarationDataId) {
+        return blobDataService.create(fileInputStream, fileName);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
+    public BlobData downloadFile(String blobDataId, Long declarationDataId) {
+        return blobDataService.get(blobDataId);
+    }
+
     /**
      * Проверяет необходимо ли использовать xml формы для проведения операций с ней.
      *

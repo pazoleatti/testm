@@ -2,14 +2,7 @@ package com.aplana.sbrf.taxaccounting.script.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -294,6 +287,12 @@ public class RefBookServiceImpl implements RefBookService {
             logger.logTopMessage(LogLevel.INFO, "Выполнен импорт скриптов и xsd справочников. Загружаемых файлов в архиве не обнаружено.");
         }
         return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(user.getId(), T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
+    public BlobData getAdministrationSettingsBlobData(String blobDataId, TAUser user) {
+        return blobDataService.get(blobDataId);
     }
 
     private void importRefBookConf(ByteArrayInputStream inputStream, String fileName, Logger logger) throws IOException {

@@ -26,7 +26,7 @@
                  */
                 function linkFileFormatter(cellValue, options, row) {
                     if (row.reportId) {
-                        return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/notif'>" + $filter('translate')('title.link.download') + "</a>";
+                        return "<a target='_self' href='controller/actions/notification/" + row.reportId + "/download'>" + $filter('translate')('title.link.download') + "</a>";
                     } else {
                         return "";
                     }

@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +19,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private NotificationDao notificationDao;
+
+    @Autowired
+    private BlobDataService blobDataService;
 
     @Override
     public Notification fetchOne(long id) {
@@ -80,5 +81,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Date fetchLastNotificationDate() {
         return notificationDao.fetchLastNotificationDate();
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public BlobData getNotificationBlobData(String blobDataId) {
+        return blobDataService.get(blobDataId);
     }
 }

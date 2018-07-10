@@ -14,9 +14,9 @@
         }])
 
         .controller('DeclarationTemplateCtrl', ['$scope', '$filter', '$stateParams', 'DeclarationTemplateResource',
-            '$logPanel', '$dialogs', 'APP_CONSTANTS', 'BlobDataResource', 'Upload', '$window',
+            '$logPanel', '$dialogs', 'APP_CONSTANTS', 'Upload', '$window',
             function ($scope, $filter, $stateParams, DeclarationTemplateResource, $logPanel, $dialogs,
-                      APP_CONSTANTS, BlobDataResource, Upload, $window) {
+                      APP_CONSTANTS, Upload, $window) {
                 $scope.declarationTemplate = {id: $stateParams.declarationTemplateId, formType: {}, yearFrom: 0, yearTo: 0};
 
                 // Загружаем данные по макету

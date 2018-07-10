@@ -91,7 +91,7 @@
                  * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-                    return "<a target='_self' href='controller/rest/blobData/" + row.uuid + "/notif'>" + row.fileName + " </a>";
+                    return "<a target='_self' href='controller/actions/declarationData/" + row.uuid + "/download/" + $shareData.declarationDataId + "'>" + row.fileName + " </a>";
 
                 }
 
@@ -139,10 +139,13 @@
                 $scope.addFileClick = function (file) {
                     if (file) {
                         Upload.upload({
-                            url: 'controller/actions/blobData/uploadFiles',
-                            data: {uploader: file}
+                            url: 'controller/actions/declarationData/uploadFile',
+                            data: {uploader: file,
+                                    declarationDataId: $shareData.declarationDataId},
+                            method: 'POST'
                         }).progress(function (e) {
                         }).then(function (response) {
+                            console.log(response)
                             if (response.data && response.data.uuid) {
                                 var newFile = [{
                                     uuid: response.data.uuid,

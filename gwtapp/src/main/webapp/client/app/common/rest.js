@@ -366,13 +366,6 @@
         }])
 
         /**
-         * @description Ресурс на файлы (BlobData)
-         */
-        .factory('BlobDataResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/blobData/:uuid?projection=:projection', {}, {});
-        }])
-
-        /**
          * @description Список справочников
          */
         .factory('RefBookListResource', ['$resource', function ($resource) {

@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,11 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -780,6 +777,36 @@ public class DeclarationDataController {
     public String updatePersonData(@PathVariable long declarationDataId) throws JSONException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createUpdatePersonsDataTask(declarationDataId, userInfo);
+    }
+
+    /**
+     * Загрузка на сервер файла
+     *
+     * @param file файл
+     * @return строка с uuid
+     * @throws IOException в случае исключения при работе с потоками/файлами
+     */
+    @PostMapping(value = "/actions/declarationData/uploadFile", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
+    public String uploadFile(@RequestParam("uploader") MultipartFile file, @RequestParam Long declarationDataId) throws IOException, JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(UuidEnum.UUID.toString(), declarationService.uploadFile(file.getInputStream(), file.getOriginalFilename(), declarationDataId));
+        return jsonObject.toString();
+    }
+
+    /**
+     * Загрузка на сервер файла
+     *
+     * @return строка с uuid
+     * @throws IOException в случае исключения при работе с потоками/файлами
+     */
+    @GetMapping(value = "/actions/declarationData/{uuid}/download/{declarationDataId}")
+    public void downloadFile(@PathVariable("uuid") String uuid, @PathVariable("declarationDataId") Long declarationDataId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        BlobData blobData = declarationService.downloadFile(uuid, declarationDataId);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, resp, blobData);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 
     @ExceptionHandler(AccessDeniedException.class)

@@ -93,7 +93,7 @@
                         url: "controller/actions/refBookConf/export"
                     }).success(function (uuid) {
                         if (uuid) {
-                            $window.location = "controller/rest/blobData/" + uuid + "/conf";
+                            $window.location = "controller/actions/refBookConf/" + uuid + "/download";
                         }
                     });
                 };

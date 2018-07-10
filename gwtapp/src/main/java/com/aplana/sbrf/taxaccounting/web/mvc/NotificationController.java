@@ -10,6 +10,9 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -113,5 +116,22 @@ public class NotificationController {
         filter.setUserId(user.getId());
         filter.setUserRoleIds(userRoles);
         notificationService.updateReadTrueByFilter(filter);
+    }
+
+    /**
+     * Выгрузка файла по uuid из окна оповещения
+     * @param uuid уникальный идентификатор файла
+     * @param req запрос
+     * @param resp ответ
+     * @throws IOException
+     */
+    @GetMapping(value = "/actions/notification/{uuid}/download")
+    public void processDownloadNotif (@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        BlobData blobData = notificationService.getNotificationBlobData(uuid);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, resp, blobData);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 }
