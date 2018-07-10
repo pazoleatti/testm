@@ -1,13 +1,16 @@
 <form class="form-horizontal" name="editNdflDeductionForm" data-aplana-submit-valid="save()">
     <div class="modal-body" style="min-height: 155px">
         <div class="row-fluid">
-            <label class="control-label" style="text-align: left">{{temp.person.lastName}} {{temp.person.firstName}}
-                {{temp.person.middleName}},
-                {{temp.person.birthDay | dateFormatter}} , ИНП={{row.inp}}</label>
-            <label class="control-label" style="text-align: left">{{temp.docTypeName}} №
-                {{temp.person.idDocNumber}}</label>
-            <label class="control-label" style="text-align: left">Гражданство={{temp.person.citizenship}}, ИНН в
-                РФ={{temp.person.innNp}}</label>
+            <label class="control-label" style="text-align: left"
+                   ng-bind-html="'ndlfPrepayment.edit.title.person' | translate:
+                   {lastName: temp.person.lastName, firstName: temp.person.firstName, middleName: temp.person.middleName, birthDay: temp.person.birthDay, inp: row.inp}">
+            </label>
+            <label class="control-label" style="text-align: left"
+                   ng-bind-html="'ndlfPrepayment.edit.title.doc' | translate: {docTypeName: temp.docTypeName, idDocNumber: temp.person.idDocNumber}">
+            </label>
+            <label class="control-label" style="text-align: left"
+                   ng-bind-html="'ndlfPrepayment.edit.title.citizenship' | translate: {citizenship: temp.person.citizenship, idDocNumber: temp.person.innNp}">
+            </label>
         </div>
 
         <div style="height: 400px; overflow-y: scroll">

@@ -1,29 +1,34 @@
-<form id="originalAndDuplicatesForm" name="originalAndDuplicatesForm" class="form-horizontal" data-aplana-submit-valid="save()" novalidate>
+<form id="originalAndDuplicatesForm" name="originalAndDuplicatesForm" class="form-horizontal"
+      data-aplana-submit-valid="save()" novalidate>
     <div class="modal-body">
         <!-- Данные о текущем ФЛ -->
         <div class="row-fluid" style="margin-bottom: 20px;">
             <label class="inline-label">{{::'refBook.fl.label.record' | translate}}:</label>
-            <label class="inline-value">{{"Идентификатор ФЛ = " + record.recordId +
-                (record.lastName ? ", Фамилия = " + record.lastName : "") +
-                (record.firstName ? ", Имя = " + record.firstName : "") +
-                (record.middleName ? ", Отчество = " + record.middleName : "") +
-                (record.inn ? ", ИНН в Российской Федерации = " + record.inn : "") +
-                (record.innForeign ? ", ИНН в стране гражданства = " + record.innForeign : "") +
-                (record.snils ? ", СНИЛС = " + record.snils : "") +
-                (record.docNumber ? ", Серия и номер ДУЛ = " + record.docNumber : "")}}</label>
+            <label class="inline-value" ng-bind-html="('refBook.fl.label.record.data' | translate: {
+                recordId: record.recordId,
+                lastName: (record.lastName ? ('refBook.fl.label.record.data.lastName' | translate: {lastName: record.lastName}) : ''),
+                firstName: (record.firstName ? ('refBook.fl.label.record.data.firstName' | translate: {firstName: record.firstName}) : ''),
+                middleName: (record.middleName ? ('refBook.fl.label.record.data.middleName' | translate: {middleName: record.middleName}) : ''),
+                inn: (record.inn ? ('refBook.fl.label.record.data.inn' | translate: {inn: record.inn}) : ''),
+                innForeign: (record.innForeign ? ('refBook.fl.label.record.data.innForeign' | translate: {innForeign: record.innForeign}) : ''),
+                snils: (record.snils ? ('refBook.fl.label.record.data.snils' | translate: {snils: record.snils}) : ''),
+                docNumber: (record.docNumber ? ('refBook.fl.label.record.data.docNumber' | translate: {docNumber: record.docNumber}) : '')
+                })"></label>
         </div>
 
         <!-- Оригинал -->
         <div class="row-fluid" style="margin-bottom: 20px;">
             <label class="inline-label">{{::'refBook.fl.label.original' | translate}}:</label>
-            <label class="inline-value" data-ng-show="original">{{"Идентификатор ФЛ = " + original.recordId +
-                (original.lastName ? ", Фамилия = " + original.lastName : "") +
-                (original.firstName ? ", Имя = " + original.firstName : "") +
-                (original.middleName ? ", Отчество = " + original.middleName : "") +
-                (original.inn ? ", ИНН в Российской Федерации = " + original.inn : "") +
-                (original.innForeign ? ", ИНН в стране гражданства = " + original.innForeign : "") +
-                (original.snils ? ", СНИЛС = " + original.snils : "") +
-                (original.docNumber ? ", Серия и номер ДУЛ = " + original.docNumber : "")}}</label>
+            <label class="inline-value" data-ng-show="original" ng-bind-html="('refBook.fl.label.record.data' | translate: {
+                recordId: record.recordId,
+                lastName: (original.lastName ? ('refBook.fl.label.record.data.lastName' | translate: {lastName: original.lastName}) : ''),
+                firstName: (original.firstName ? ('refBook.fl.label.record.data.firstName' | translate: {firstName: original.firstName}) : ''),
+                middleName: (original.middleName ? ('refBook.fl.label.record.data.middleName' | translate: {middleName: original.middleName}) : ''),
+                inn: (original.inn ? ('refBook.fl.label.record.data.inn' | translate: {inn: original.inn}) : ''),
+                innForeign: (original.innForeign ? ('refBook.fl.label.record.data.innForeign' | translate: {innForeign: original.innForeign}) : ''),
+                snils: (original.snils ? ('refBook.fl.label.record.data.snils' | translate: {snils: original.snils}) : ''),
+                docNumber: (original.docNumber ? ('refBook.fl.label.record.data.docNumber' | translate: {docNumber: original.docNumber}) : '')
+                })"></label>
             <div>
                 <data-ref-book-picker
                         filter="{{filter()}}"
