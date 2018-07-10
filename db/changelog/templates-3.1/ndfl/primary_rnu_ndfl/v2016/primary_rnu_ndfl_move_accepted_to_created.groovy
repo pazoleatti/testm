@@ -3,6 +3,7 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
+import com.aplana.sbrf.taxaccounting.script.service.*
 
 new MoveAcceptedToCreated(this).run()
 
@@ -54,7 +55,7 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
     }
 
     def moveAcceptedToCreated() {
-        List<Relation> destinationInfo = sourceService.getDeclarationDestinationsInfo(declarationData)
+        List<Relation> destinationInfo = sourceService.getDestinationsInfo(declarationData)
         List<Long> notCreatedDestinationIds = new ArrayList<>()
         for (Relation relation : destinationInfo) {
             if (!relation.declarationState.equals(State.CREATED)) {
