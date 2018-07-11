@@ -35,17 +35,22 @@
     </div>
     <div id="refBookGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
         <div id="refBookRecordsGridTop">
+            <!-- Дата актуальности для версионируемых справочников -->
+            <div class="btn-toolbar" data-ng-show="refBook.versioned && !versionMode">
+                <span style="display: inline-block; vertical-align: middle;">
+                    <!-- Выбор даты актуальности -->
+                    <label class="control-label pull-left" style="margin-left: 10px; margin-right: 5px;">{{::'refBook.version' | translate}}:</label>
+                    <div class="pull-left" style="width: 110px;">
+                        <span data-aplana-datepicker
+                              data-ng-model="data.recordVersion"
+                              data-ng-change="onChangeVersion()">
+                        </span>
+                    </div>
+                </span>
+            </div>
             <!--Панель кнопок -->
             <div class="button_panel pull-left">
                 <div class="btn-toolbar" role="toolbar">
-                    <span data-ng-show="refBook.versioned && !versionMode" style="display: inline-block; vertical-align: middle;">
-                        <!-- Выбор даты актуальности -->
-                        <label class="control-label pull-left" style="margin-right: 5px;">{{::'refBook.version' | translate}}:</label>
-                        <div class="pull-left" style="width: 110px;">
-                            <span data-aplana-datepicker data-ng-model="data.recordVersion"
-                                  data-ng-change="onChangeVersion()"></span>
-                        </div>
-                    </span>
                     <!-- Создать -->
                     <button type="button" class="btn btn-default" data-ng-hide="refBook.readOnly" style="margin-left: 10px"
                             data-ng-click="createRecord()">
