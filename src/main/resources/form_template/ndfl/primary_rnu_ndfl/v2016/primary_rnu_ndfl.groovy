@@ -1606,6 +1606,7 @@ class IncomesSheetFiller implements SheetFiller {
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
         for (NdflPersonIncome npi : ndflPersonIncomeList) {
             ScriptUtils.checkInterrupted();
 
@@ -1643,22 +1644,22 @@ class IncomesSheetFiller implements SheetFiller {
             cell9.setCellStyle(textCenteredStyle)
             cell9.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "");
             Cell cell10 = row.createCell(10);
-            cell10.setCellStyle(borderStyle)
+            cell10.setCellStyle(numberCenteredStyle)
             if (npi.incomeAccruedSumm != null) {
                 cell10.setCellValue(npi.incomeAccruedSumm.doubleValue());
             }
             Cell cell11 = row.createCell(11);
-            cell11.setCellStyle(borderStyle)
+            cell11.setCellStyle(numberCenteredStyle)
             if (npi.incomePayoutSumm != null) {
                 cell11.setCellValue(npi.incomePayoutSumm.doubleValue());
             }
             Cell cell12 = row.createCell(12);
-            cell12.setCellStyle(borderStyle)
+            cell12.setCellStyle(numberCenteredStyle)
             if (npi.totalDeductionsSumm != null) {
                 cell12.setCellValue(npi.totalDeductionsSumm.doubleValue());
             }
             Cell cell13 = row.createCell(13);
-            cell13.setCellStyle(borderStyle)
+            cell13.setCellStyle(numberCenteredStyle)
             if (npi.taxBase != null) {
                 cell13.setCellValue(npi.taxBase.doubleValue());
             }
@@ -1674,27 +1675,27 @@ class IncomesSheetFiller implements SheetFiller {
             }
 
             Cell cell16 = row.createCell(16);
-            cell16.setCellStyle(borderStyle)
+            cell16.setCellStyle(numberCenteredStyle)
             if (npi.calculatedTax != null) {
                 cell16.setCellValue(npi.calculatedTax.doubleValue())
             }
             Cell cell17 = row.createCell(17);
-            cell17.setCellStyle(borderStyle)
+            cell17.setCellStyle(numberCenteredStyle)
             if (npi.withholdingTax != null) {
                 cell17.setCellValue(npi.withholdingTax.doubleValue());
             }
             Cell cell18 = row.createCell(18);
-            cell18.setCellStyle(borderStyle)
+            cell18.setCellStyle(numberCenteredStyle)
             if (npi.notHoldingTax != null) {
                 cell18.setCellValue(npi.notHoldingTax.doubleValue());
             }
             Cell cell19 = row.createCell(19);
-            cell19.setCellStyle(borderStyle)
+            cell19.setCellStyle(numberCenteredStyle)
             if (npi.overholdingTax != null) {
                 cell19.setCellValue(npi.overholdingTax.doubleValue());
             }
             Cell cell20 = row.createCell(20);
-            cell20.setCellStyle(borderStyle)
+            cell20.setCellStyle(numberCenteredStyle)
             if (npi.refoundTax != null) {
                 cell20.setCellValue(npi.refoundTax.doubleValue());
             }
@@ -1719,7 +1720,7 @@ class IncomesSheetFiller implements SheetFiller {
             cell23.setCellStyle(centeredStyle)
             cell23.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "");
             Cell cell24 = row.createCell(24);
-            cell24.setCellStyle(borderStyle)
+            cell24.setCellStyle(numberCenteredStyle)
             if (npi.taxSumm != null) {
                 cell24.setCellValue(npi.taxSumm.intValue());
             }
@@ -1743,6 +1744,7 @@ class DeductionsSheetFiller implements SheetFiller {
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
         for (NdflPersonDeduction npd : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted();
 
@@ -1772,7 +1774,7 @@ class DeductionsSheetFiller implements SheetFiller {
             cell7.setCellStyle(centeredStyle)
             cell7.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "");
             Cell cell8 = row.createCell(8);
-            cell8.setCellStyle(borderStyle)
+            cell8.setCellStyle(numberCenteredStyle)
             if (npd.notifSumm != null) {
                 cell8.setCellValue(npd.notifSumm.doubleValue());
             }
@@ -1788,7 +1790,7 @@ class DeductionsSheetFiller implements SheetFiller {
             cell11.setCellStyle(centeredStyle)
             cell11.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "");
             Cell cell12 = row.createCell(12);
-            cell12.setCellStyle(borderStyle)
+            cell12.setCellStyle(numberCenteredStyle)
             if (npd.incomeSumm != null) {
                 cell12.setCellValue(npd.incomeSumm.doubleValue());
             }
@@ -1798,7 +1800,7 @@ class DeductionsSheetFiller implements SheetFiller {
                 cell13.setCellValue(npd.periodPrevDate);
             }
             Cell cell14 = row.createCell(14);
-            cell14.setCellStyle(borderStyle)
+            cell14.setCellStyle(numberCenteredStyle)
             if (npd.periodPrevSumm != null) {
                 cell14.setCellValue(npd.periodPrevSumm.doubleValue());
             }
@@ -1808,7 +1810,7 @@ class DeductionsSheetFiller implements SheetFiller {
                 cell15.setCellValue(npd.periodCurrDate);
             }
             Cell cell16 = row.createCell(16);
-            cell16.setCellStyle(borderStyle)
+            cell16.setCellStyle(numberCenteredStyle)
             if (npd.periodCurrSumm != null) {
                 cell16.setCellValue(npd.periodCurrSumm.doubleValue());
             }
@@ -1832,6 +1834,7 @@ class PrepaymentSheetFiller implements SheetFiller {
         CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
         for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
             ScriptUtils.checkInterrupted();
 
@@ -1847,7 +1850,7 @@ class PrepaymentSheetFiller implements SheetFiller {
             cell3.setCellStyle(centeredStyle)
             cell3.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "");
             Cell cell4 = row.createCell(4);
-            cell4.setCellStyle(borderStyle)
+            cell4.setCellStyle(numberCenteredStyle)
             if (npp.summ != null) {
                 cell4.setCellValue(npp.summ.doubleValue());
             }
@@ -1889,6 +1892,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
         CellStyle centeredStyle =  styler.createVerticalByTopHorizontalByCenter()
         CellStyle centeredStyleDate = styler.createVerticalByTopHorizontalByCenterDate()
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
+        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
         for (NdflPerson np : context.getNdflPersonList()) {
             ScriptUtils.checkInterrupted()
             // определяем для физлица какой вид операций имеет наибольшее количество строк (доход, вычет, аванс)
@@ -2016,34 +2020,34 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_29 = row.createCell(29);
                 cell_29.setCellStyle(textCenteredStyle)
                 Cell cell_30 = row.createCell(30);
-                cell_30.setCellStyle(centeredStyle)
+                cell_30.setCellStyle(numberCenteredStyle)
                 Cell cell_31 = row.createCell(31);
-                cell_31.setCellStyle(centeredStyle)
+                cell_31.setCellStyle(numberCenteredStyle)
                 Cell cell_32 = row.createCell(32);
-                cell_32.setCellStyle(centeredStyle)
+                cell_32.setCellStyle(numberCenteredStyle)
                 Cell cell_33 = row.createCell(33);
-                cell_33.setCellStyle(centeredStyle)
+                cell_33.setCellStyle(numberCenteredStyle)
                 Cell cell_34 = row.createCell(34);
                 cell_34.setCellStyle(centeredStyle)
                 Cell cell_35 = row.createCell(35);
                 cell_35.setCellStyle(centeredStyleDate)
                 Cell cell_36 = row.createCell(36);
-                cell_36.setCellStyle(centeredStyle)
+                cell_36.setCellStyle(numberCenteredStyle)
                 Cell cell_37 = row.createCell(37);
-                cell_37.setCellStyle(centeredStyle)
+                cell_37.setCellStyle(numberCenteredStyle)
                 Cell cell_38 = row.createCell(38);
-                cell_38.setCellStyle(centeredStyle)
+                cell_38.setCellStyle(numberCenteredStyle)
                 Cell cell_39 = row.createCell(39);
-                cell_39.setCellStyle(centeredStyle)
+                cell_39.setCellStyle(numberCenteredStyle)
                 Cell cell_40 = row.createCell(40);
-                cell_40.setCellStyle(centeredStyle)
+                cell_40.setCellStyle(numberCenteredStyle)
                 Cell cell_41 = row.createCell(41);
                 Cell cell_42 = row.createCell(42);
                 cell_42.setCellStyle(centeredStyleDate)
                 Cell cell_43 = row.createCell(43);
                 cell_43.setCellStyle(centeredStyle)
                 Cell cell_44 = row.createCell(44);
-                cell_44.setCellStyle(centeredStyle)
+                cell_44.setCellStyle(numberCenteredStyle)
                 if (i < np.incomes.size()) {
                     NdflPersonIncome npi = np.incomes.get(i)
                     cell0Value.append(npi.id.toString())
@@ -2121,7 +2125,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_49 = row.createCell(49);
                 cell_49.setCellStyle(centeredStyle)
                 Cell cell_50 = row.createCell(50);
-                cell_50.setCellStyle(centeredStyle)
+                cell_50.setCellStyle(numberCenteredStyle)
                 Cell cell_51 = row.createCell(51);
                 cell_51.setCellStyle(centeredStyle)
                 Cell cell_52 = row.createCell(52);
@@ -2129,15 +2133,15 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_53 = row.createCell(53);
                 cell_53.setCellStyle(centeredStyle)
                 Cell cell_54 = row.createCell(54);
-                cell_54.setCellStyle(centeredStyle)
+                cell_54.setCellStyle(numberCenteredStyle)
                 Cell cell_55 = row.createCell(55);
                 cell_55.setCellStyle(centeredStyleDate)
                 Cell cell_56 = row.createCell(56);
-                cell_56.setCellStyle(centeredStyle)
+                cell_56.setCellStyle(numberCenteredStyle)
                 Cell cell_57 = row.createCell(57);
                 cell_57.setCellStyle(centeredStyleDate)
                 Cell cell_58 = row.createCell(58);
-                cell_58.setCellStyle(centeredStyle)
+                cell_58.setCellStyle(numberCenteredStyle)
                 if (i < np.deductions.size()) {
                     NdflPersonDeduction npd = np.deductions.get(i)
                     cell0Value.append(npd.id.toString())
@@ -2177,7 +2181,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_59 = row.createCell(59);
                 cell_59.setCellStyle(centeredStyle)
                 Cell cell_60 = row.createCell(60);
-                cell_60.setCellStyle(centeredStyle)
+                cell_60.setCellStyle(numberCenteredStyle)
                 Cell cell_61 = row.createCell(61);
                 cell_61.setCellStyle(centeredStyle)
                 Cell cell_62 = row.createCell(62);
@@ -2302,6 +2306,15 @@ class Styler {
         addThinBorderStyle(style)
         DataFormat format = workbook.createDataFormat()
         style.setDataFormat(format.getFormat("text"))
+        return style
+    }
+
+    CellStyle createBorderStyleCenterAlignedTypeNumber(){
+        CellStyle style = workbook.createCellStyle()
+        style.setAlignment(CellStyle.ALIGN_CENTER)
+        addThinBorderStyle(style)
+        DataFormat format = workbook.createDataFormat()
+        style.setDataFormat(format.getFormat("0.00"))
         return style
     }
 }
