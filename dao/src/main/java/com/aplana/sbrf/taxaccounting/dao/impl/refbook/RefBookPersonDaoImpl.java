@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -280,7 +279,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
         }
 
-        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id)" : "") +
+        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
                 (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
 
         String sortColumnName = "id";

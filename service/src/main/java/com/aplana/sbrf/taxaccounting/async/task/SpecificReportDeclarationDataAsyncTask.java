@@ -18,9 +18,6 @@ import java.util.Map;
 @Component("SpecificReportDeclarationDataAsyncTask")
 public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationAsyncTask {
 
-    private static final String SUCCESS = "Сформирован отчет \"%s\": %s";
-    private static final String FAIL = "Произошла %sошибка при формировании отчета \"%s\": %s. Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета";
-
     @Autowired
     private TAUserService userService;
 
@@ -84,8 +81,6 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
 
     @Override
     protected String getAdditionalString(DeclarationData declaration, Map<String, Object> params) {
-        String alias = (String) params.get("alias");
-        DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
         StringBuilder strSubreportParamValues = new StringBuilder(", ");
 
         Map<String, String> subreportParamValues = (Map<String, String>) params.get("viewParamValues");
@@ -120,30 +115,50 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
-        return getMessage(taskData, false, unexpected);
+        String errorsText = (String) taskData.getParams().get("errorsText");
+        // Для ожидаемых исключений выводим в оповещение текст из errorsText, сфомрмированный из логов
+        if (!unexpected && !errorsText.isEmpty()) {
+            return errorsText;
+        } else {
+            String reportName = getReportName(taskData);
+            String declarationDescription = getDeclarationDescription(taskData);
+            return String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\": %s. Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+                    reportName,
+                    declarationDescription);
+        }
     }
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        return getMessage(taskData, true, false);
+        String reportName = getReportName(taskData);
+        String declarationDescription = getDeclarationDescription(taskData);
+        return String.format("Сформирован отчет \"%s\": %s",
+                reportName,
+                declarationDescription);
     }
 
-    private String getMessage(AsyncTaskData taskData, boolean isSuccess, boolean unexpected) {
+    /**
+     * Название формируемого отчёта.
+     *
+     * @param taskData данные асинхронной задачи формирования отчёта
+     * @return название формируемого отчёта
+     */
+    private String getReportName(AsyncTaskData taskData) {
         String alias = (String) taskData.getParams().get("alias");
         DeclarationData declaration = getDeclaration(taskData.getUserId(), taskData.getParams());
-        DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
+        int declarationTemplateId = declaration.getDeclarationTemplateId();
+        DeclarationSubreport report = declarationTemplateService.getSubreportByAlias(declarationTemplateId, alias);
+        return report.getName();
+    }
 
-        String template = isSuccess ? SUCCESS : FAIL;
-        if (isSuccess) {
-            return String.format(template,
-                    subreport.getName(),
-                    getDeclarationDescription(taskData.getUserId(), taskData.getParams()));
-        } else {
-            return String.format(template,
-                    unexpected ? "непредвиденная " : "",
-                    subreport.getName(),
-                    getDeclarationDescription(taskData.getUserId(), taskData.getParams()));
-        }
+    /**
+     * Текстовое представление параметров НФ.
+     *
+     * @param taskData данные асинхронной задачи формирования отчёта
+     * @return текст с параметрами НФ
+     */
+    private String getDeclarationDescription(AsyncTaskData taskData) {
+        return getDeclarationDescription(taskData.getUserId(), taskData.getParams());
     }
 
     @Override

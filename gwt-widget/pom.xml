@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.aplana.taxaccounting</groupId>
+        <groupId>com.aplana.sbrf</groupId>
         <artifactId>ndfl</artifactId>
         <version>3.1</version>
     </parent>

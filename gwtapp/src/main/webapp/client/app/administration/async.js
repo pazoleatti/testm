@@ -56,7 +56,7 @@
                             $filter('translate')('async.title.stateDate'),
                             $filter('translate')('async.title.description')],
                         colModel: [
-                            {name: 'id', index: 'id', width: 50},
+                            {name: 'id', index: 'id', width: 65},
                             {
                                 name: 'createDate',
                                 index: 'create_date',

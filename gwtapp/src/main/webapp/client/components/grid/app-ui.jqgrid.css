@@ -58,9 +58,6 @@
     background-color: white;*/
 .border-radius(4px);
     /*float: right;*/
-    position: absolute;
-    right: 1px;
-    top: 8px;
 }
 
 .ui-th-column,
