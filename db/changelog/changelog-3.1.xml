@@ -166,4 +166,27 @@
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 106</where>
         </update>
     </changeSet>
+
+    <changeSet id="3.1-apronin-5" author="apronin">
+        <insert tableName="blob_data">
+            <column name="id" value="4b85f92c-7fd0-4d67-834d-e61g34684336"/>
+            <column name="name" value="report.xlsx"/>
+            <column name="data" valueBlobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/report.xlsx"/>
+            <column name="creation_date" valueDate="2018-07-10"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.1-apronin-6" author="apronin">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="100"/>
+            <column name="BLOB_DATA_ID" value="4b85f92c-7fd0-4d67-834d-e61g34684336"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.1-apronin-7" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

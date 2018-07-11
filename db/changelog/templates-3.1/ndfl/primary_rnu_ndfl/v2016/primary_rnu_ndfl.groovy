@@ -2327,7 +2327,7 @@ class ReportXlsxSheetFiller implements SheetFiller {
         for (NdflPersonIncome npi in ndflPersonIncomeList) {
             KppOktmoPair kppOktmoPair = new KppOktmoPair(npi.kpp, npi.oktmo)
             if (flIncomeDataMap.get(kppOktmoPair) == null) {
-                flIncomeDataMap.put(kppOktmoPair, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
+                flIncomeDataMap.put(kppOktmoPair, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0), new BigDecimal(0)))
             }
             FlIncomeData flIncomeData = flIncomeDataMap.get(kppOktmoPair)
             flIncomeData.personIdSet.add(npi.ndflPersonId)
