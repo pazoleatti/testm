@@ -170,19 +170,32 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             // Кладём в данные о таске ошибку для возможности формирования текста на её основе
                             taskData.getParams().put("exceptionThrown", e);
 
-                            // Формирование текста об основной ошибке
-                            boolean isExpectedScriptException = (e instanceof ScriptServiceException) || (e instanceof ServiceLoggerException);
-                            String msg = getErrorMsg(taskData, !isExpectedScriptException);
+                            // Извлекаем из логгера тексты ошибок и складываем их в данные о таске
+                            String errorsText = collectErrorsText(logger);
+                            taskData.getParams().put("errorsText", errorsText);
 
-                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
+                            // Формирование текста оповещения (для верхнего меню)
+                            boolean isExpectedScriptException = (e instanceof ScriptServiceException) || (e instanceof ServiceLoggerException);
+                            String notification = getErrorMsg(taskData, !isExpectedScriptException);
+
+                            // Заполнение уведомлений (нижняя панель с сообщениями)
+                            // На первом месте текст из оповещения
+                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, notification));
+                            // В конце текст из ошибки
                             if (e.getMessage() != null && !e.getMessage().isEmpty()) {
                                 logger.error(e);
                             }
+                            // Если нужно, добавляем время выполнения скрипта
                             if (isShowTiming) {
                                 Date endDate = new Date();
-                                logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                                logger.info("Длительность выполнения операции: %d мс (%s - %s)",
+                                        (endDate.getTime() - startDate.getTime()),
+                                        sdf_time.get().format(startDate),
+                                        sdf_time.get().format(endDate));
                             }
-                            sendNotifications(taskData, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+
+                            // Публикация оповещений всем подписчикам
+                            sendNotifications(taskData, notification, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                             return null;
                         }
                     });
@@ -218,6 +231,22 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         LOG.info(String.format("Async task with id %s complete successfully", taskData.getId()));
     }
 
+    /**
+     * Сбор текстов ошибок из логгера
+     * @param logger внутренний логгер
+     * @return сборный текст ошибок из логгера
+     */
+    private String collectErrorsText(Logger logger) {
+        StringBuilder errorsText = new StringBuilder();
+        for (LogEntry entry : logger.getEntries()) {
+            if (entry.getLevel().equals(LogLevel.ERROR)) {
+                errorsText.append(entry.getMessage());
+            }
+        }
+        return errorsText.toString();
+    }
+
+
     @Override
     public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params) throws AsyncTaskException {
         Logger logger = new Logger();
@@ -231,7 +260,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     }
 
     /**
-     * Отправка уведомлений подписчикам на указанную задачу
+     * Отправка оповещений подписчикам на указанную задачу
      */
     protected void sendNotifications(AsyncTaskData taskData, String msg, String uuid, NotificationType notificationType, String reportId) {
         LOG.info(String.format("Sending notification for async task with id %s", taskData.getId()));
