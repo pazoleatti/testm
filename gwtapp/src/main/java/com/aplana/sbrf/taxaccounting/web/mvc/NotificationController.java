@@ -7,6 +7,9 @@ import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -127,11 +130,19 @@ public class NotificationController {
      */
     @GetMapping(value = "/actions/notification/{uuid}/download")
     public void processDownloadNotif (@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BlobData blobData = notificationService.getNotificationBlobData(uuid);
+        Notification stub = new Notification();
+        stub.setUserId(securityService.currentUserInfo().getUser().getId());
+        stub.setReportId(uuid);
+        BlobData blobData = notificationService.getNotificationBlobData(stub);
         if (blobData != null) {
             ResponseUtils.createBlobResponse(req, resp, blobData);
         } else {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity handleAccessDeniedException() {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 }

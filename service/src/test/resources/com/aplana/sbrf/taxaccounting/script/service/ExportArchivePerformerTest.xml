@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>
+    <import resource="classpath:com/aplana/sbrf/taxaccounting/script-support.xml"/>
+
+    <!-- Для декларативного управления транзакциями с помощью @Transactional -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- Встроенная тестовая база данных HSQLDB -->
+    <jdbc:embedded-database id="dataSource" type="HSQL">
+        <jdbc:script location="classpath:script/hsql_init.sql" encoding="UTF-8"/>
+    </jdbc:embedded-database>
+
+    <bean id="exportArchivePerformer"
+          class="com.aplana.sbrf.taxaccounting.script.service.impl.RefBookServiceImpl$ExportArchivePerformer"/>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper$CreateArchiveDataHelper"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>
+    </bean>
+
+</beans>

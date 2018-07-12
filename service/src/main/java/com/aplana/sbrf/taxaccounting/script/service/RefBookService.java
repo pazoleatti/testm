@@ -219,7 +219,7 @@ public interface RefBookService {
      * @param userInfo пользователь запустивший операцию
      * @return uuid ссылку на файл {@link com.aplana.sbrf.taxaccounting.model.BlobData}
      */
-    String exportRefBookConfs(TAUserInfo userInfo);
+    BlobData exportRefBookConfs(TAUserInfo userInfo);
 
     /**
      * Выполняет импорт скриптов и др файлов, связанных со справочниками
@@ -231,11 +231,4 @@ public interface RefBookService {
      */
     String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo);
 
-    /**
-     * Получение данных настройщика из файлового хранилища
-     * @param blobDataId    идентификатор данных в ффайловом хранилище
-     * @param user          пользователь пытающийся получить данный
-     * @return              данные полученные из файлового хранилища
-     */
-    BlobData getAdministrationSettingsBlobData(String blobDataId, TAUser user);
 }

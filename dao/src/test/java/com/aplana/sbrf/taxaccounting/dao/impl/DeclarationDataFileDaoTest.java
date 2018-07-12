@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataFileDaoTest.xml"})
@@ -209,5 +208,17 @@ public class DeclarationDataFileDaoTest {
         declarationDataFileDao.deleteTransportFileExcel(1L);
         List<DeclarationDataFile> result = declarationDataFileDao.fetchByDeclarationDataId(1L);
         Assert.assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testIsExistsTrue() {
+        boolean isExist = declarationDataFileDao.isExists(1, "uuid_2");
+        assertTrue(isExist);
+    }
+
+    @Test
+    public void testIsExistsFalse() {
+        boolean isExist = declarationDataFileDao.isExists(1, "uuid_3");
+        assertFalse(isExist);
     }
 }

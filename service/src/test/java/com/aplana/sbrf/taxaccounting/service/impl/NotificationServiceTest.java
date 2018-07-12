@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import org.junit.Test;
@@ -20,7 +21,10 @@ public class NotificationServiceTest {
     @Test
     public void getNotificationBlobDataTest() {
         String blobId = "blobId";
-        notificationService.getNotificationBlobData(blobId);
+        Notification notification = new Notification();
+        notification.setReportId(blobId);
+        notification.setUserId(0);
+        notificationService.getNotificationBlobData(notification);
         Mockito.verify(blobDataService, Mockito.times(1)).get(blobId);
     }
 }

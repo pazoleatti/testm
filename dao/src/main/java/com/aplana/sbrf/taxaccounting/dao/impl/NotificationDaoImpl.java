@@ -244,6 +244,14 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         return null;
     }
 
+    @Override
+    public boolean isExistsNotificationBlobForUser(int userId, String blobId) {
+        String sql = "select count(*) from NOTIFICATION where user_id = :userId and report_id = :blobId";
+        MapSqlParameterSource params = new MapSqlParameterSource("userId", userId);
+        params.addValue("blobId", blobId);
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class) > 0;
+    }
+
     private String orInStatement(String prefix, List<Integer> numbers) {
         return numbers == null || numbers.isEmpty() ?
                 "" : " or \n" + SqlUtils.transformToSqlInStatement(prefix, numbers);

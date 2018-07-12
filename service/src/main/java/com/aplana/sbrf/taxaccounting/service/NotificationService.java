@@ -89,9 +89,9 @@ public interface NotificationService {
     Date fetchLastNotificationDate();
 
     /**
-     * Получение данных настройщика из файлового хранилища
-     * @param blobDataId    идентификатор данных в ффайловом хранилище
+     * Получение данных оповещения из файлового хранилища
+     * @param notification  объект оповещения. Необходим огрызок объекта с заполненными {@link Notification#userId} и {@link Notification#reportId}.
      * @return              данные полученные из файлового хранилища
      */
-    BlobData getNotificationBlobData(String blobDataId);
+    BlobData getNotificationBlobData(Notification notification);
 }

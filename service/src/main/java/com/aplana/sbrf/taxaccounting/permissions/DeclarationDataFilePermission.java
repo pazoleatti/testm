@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -17,11 +18,19 @@ public abstract class DeclarationDataFilePermission extends AbstractPermission<D
     @Autowired
     protected DeclarationDataDao declarationDataDao;
     @Autowired
+    protected DeclarationDataFileDao declarationDataFileDao;
+    @Autowired
     protected TAUserService userService;
     /**
      * Право на удаление файла декларации
      */
     public static final Permission<DeclarationDataFile> DELETE = new DeletePermission(1 << 0);
+
+    /**
+     * Право на скачивание файла
+     */
+    public static final Permission<DeclarationDataFile> DOWNLOAD = new DownloadPermission(1 << 1);
+
     /**
      * Создает новое право по заданной битовой маске.
      *
@@ -46,6 +55,21 @@ public abstract class DeclarationDataFilePermission extends AbstractPermission<D
             }
 
             return false;
+        }
+    }
+
+    /**
+     * Право на скачивание файла
+     */
+    public static final class DownloadPermission extends DeclarationDataFilePermission {
+        public DownloadPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationDataFile targetDomainObject, Logger logger) {
+            return DeclarationDataPermission.VIEW.isGranted(user, declarationDataDao.get(targetDomainObject.getDeclarationDataId()), logger)
+                    && declarationDataFileDao.isExists(targetDomainObject.getDeclarationDataId(), targetDomainObject.getUuid());
         }
     }
 }

@@ -9,7 +9,7 @@ import java.util.Objects;
  *
  * @author dloshkarev
  */
-public class Notification implements Serializable {
+public class Notification implements SecuredEntity, Serializable {
     private static final long serialVersionUID = -5255606476850599691L;
 
     private static final int MAX_LENGTH_TEXT = 1000;
@@ -42,6 +42,11 @@ public class Notification implements Serializable {
      * Тип оповещения
      */
     private NotificationType notificationType = NotificationType.DEFAULT;
+
+    /**
+     * Права доступа
+     */
+    private long permissions;
 
     public Integer getRoleId() {
         return roleId;
@@ -150,6 +155,16 @@ public class Notification implements Serializable {
 
     public void setLogId(String logId) {
         this.logId = logId;
+    }
+
+    @Override
+    public long getPermissions() {
+        return permissions;
+    }
+
+    @Override
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
     }
 
     @Override

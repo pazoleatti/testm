@@ -3813,9 +3813,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
-    public BlobData downloadFile(String blobDataId, Long declarationDataId) {
-        return blobDataService.get(blobDataId);
+    @PreAuthorize("hasPermission(#declarationDataFile, T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission).DOWNLOAD)")
+    public BlobData downloadFile(DeclarationDataFile declarationDataFile) {
+        return blobDataService.get(declarationDataFile.getUuid());
     }
 
     /**

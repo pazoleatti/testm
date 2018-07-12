@@ -801,7 +801,10 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/actions/declarationData/{uuid}/download/{declarationDataId}")
     public void downloadFile(@PathVariable("uuid") String uuid, @PathVariable("declarationDataId") Long declarationDataId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BlobData blobData = declarationService.downloadFile(uuid, declarationDataId);
+        DeclarationDataFile stub = new DeclarationDataFile();
+        stub.setDeclarationDataId(declarationDataId);
+        stub.setUuid(uuid);
+        BlobData blobData = declarationService.downloadFile(stub);
         if (blobData != null) {
             ResponseUtils.createBlobResponse(req, resp, blobData);
         } else {

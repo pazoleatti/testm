@@ -53,8 +53,13 @@ public class RefBookConfController {
      * @return uuid ссылку на уведомления с результатом выполнения
      */
     @GetMapping(value = "/actions/refBookConf/export")
-    public String exportRefBooks() {
-        return refBookService.exportRefBookConfs(securityService.currentUserInfo());
+    public void exportRefBooks(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        BlobData blobData = refBookService.exportRefBookConfs(securityService.currentUserInfo());
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, resp, blobData);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 
     /**
@@ -69,22 +74,4 @@ public class RefBookConfController {
         }
     }
 
-    /**
-     * Выгрузка файла по uuid (работа настройщика)
-     *
-     * @param uuid уникальный идентификатор файла
-     * @param req  запрос
-     * @param resp ответ
-     * @throws IOException IOException
-     */
-    @GetMapping(value = "/actions/refBookConf/{uuid}/download")
-    public void processDownloadConf(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        BlobData blobData = refBookService.getAdministrationSettingsBlobData(uuid, securityService.currentUserInfo().getUser());
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(req, resp, blobData);
-        } else {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
-    }
 }

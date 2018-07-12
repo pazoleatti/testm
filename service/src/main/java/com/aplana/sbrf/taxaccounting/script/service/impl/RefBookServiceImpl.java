@@ -7,12 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -20,33 +15,25 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.utils.IoHelper;
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -84,6 +71,9 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private RefBookServiceImpl.ExportArchivePerformer exportArchivePerformer;
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
@@ -225,40 +215,10 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
-    public String exportRefBookConfs(TAUserInfo userInfo) {
-        String resultUUID;
-        File file = null;
-        try {
-            file = File.createTempFile("refBookData", "zip");
-
-            try (OutputStream outputStream = new FileOutputStream(file);
-                 ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)
-            ) {
-                List<RefBook> refBooks = commonRefBookService.fetchAll();
-                for (RefBook refBook : refBooks) {
-                    addFileToZip(refBook.getScriptId(), zos, refBook.getId() + "\\script.groovy");
-                    addFileToZip(refBook.getXsdId(), zos, refBook.getId() + "\\schema.xsd");
-                }
-            }
-
-            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
-                resultUUID = blobDataService.create(inputStream, "refBooksData.zip");
-            }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage(), e);
-        } finally {
-            AppFileUtils.deleteTmp(file);
-        }
-        return resultUUID;
-    }
-
-    private void addFileToZip(String uuid, ZipArchiveOutputStream zipOutputStream, String path) throws IOException {
-        if (!StringUtils.isEmpty(uuid)) {
-            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path);
-            zipOutputStream.putArchiveEntry(zipEntry);
-            IOUtils.copy(blobDataService.get(uuid).getInputStream(), zipOutputStream);
-            zipOutputStream.closeArchiveEntry();
-        }
+    @Transactional
+    public BlobData exportRefBookConfs(TAUserInfo userInfo) {
+        String resultUUID = exportArchivePerformer.createExportArchive();
+        return blobDataService.get(resultUUID);
     }
 
     @Override
@@ -287,12 +247,6 @@ public class RefBookServiceImpl implements RefBookService {
             logger.logTopMessage(LogLevel.INFO, "Выполнен импорт скриптов и xsd справочников. Загружаемых файлов в архиве не обнаружено.");
         }
         return logEntryService.save(logger.getEntries());
-    }
-
-    @Override
-    @PreAuthorize("hasPermission(user.getId(), T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
-    public BlobData getAdministrationSettingsBlobData(String blobDataId, TAUser user) {
-        return blobDataService.get(blobDataId);
     }
 
     private void importRefBookConf(ByteArrayInputStream inputStream, String fileName, Logger logger) throws IOException {
@@ -349,6 +303,43 @@ public class RefBookServiceImpl implements RefBookService {
         } else {
             logger.warn("Пропущен файл \"%s\". Загружаемый файл должен лежать в папке с именем, соответствующим идентификатору справочника.",
                     fileName);
+        }
+    }
+
+    @Component
+    public static class ExportArchivePerformer {
+
+        @Autowired
+        private IoHelper ioHelper;
+        @Autowired
+        private IoHelper.CreateArchiveDataHelper createArchiveDataHelper;
+        @Autowired
+        private CommonRefBookService commonRefBookService;
+        @Autowired
+        private BlobDataService blobDataService;
+
+        public String createExportArchive() {
+            File file = null;
+            try {
+                file = createArchiveDataHelper.createTempFile("refBookData", "zip");
+
+                try (
+                        ZipArchiveOutputStream zos = createArchiveDataHelper.createZipArchiveOutputStream(file)
+                ) {
+                    List<RefBook> refBooks = commonRefBookService.fetchAll();
+                    for (RefBook refBook : refBooks) {
+                        ioHelper.addFileToZip(refBook.getScriptId(), zos, refBook.getId() + "\\script.groovy");
+                        ioHelper.addFileToZip(refBook.getXsdId(), zos, refBook.getId() + "\\schema.xsd");
+                    }
+                }
+                try (InputStream inputStream = createArchiveDataHelper.createFileInputStream(file)) {
+                    return blobDataService.create(inputStream, "refBooksData.zip");
+                }
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage(), e);
+            } finally {
+                AppFileUtils.deleteTmp(file);
+            }
         }
     }
 }

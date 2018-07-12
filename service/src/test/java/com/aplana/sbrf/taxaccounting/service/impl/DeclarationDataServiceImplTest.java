@@ -442,7 +442,10 @@ public class DeclarationDataServiceImplTest {
     @Test
     public void testDownLoadFile() {
         String blobId = "blobId";
-        declarationDataService.downloadFile(blobId, 0L);
+        DeclarationDataFile declarationDataFile = mock(DeclarationDataFile.class);
+        when(declarationDataFile.getDeclarationDataId()).thenReturn(0L);
+        when(declarationDataFile.getUuid()).thenReturn(blobId);
+        declarationDataService.downloadFile(declarationDataFile);
         Mockito.verify(blobDataService, Mockito.times(1)).get(blobId);
     }
 }
