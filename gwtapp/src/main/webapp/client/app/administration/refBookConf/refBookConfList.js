@@ -91,11 +91,7 @@
                     $http({
                         method: "GET",
                         url: "controller/actions/refBookConf/export"
-                    }).success(function (uuid) {
-                        if (uuid) {
-                            $window.location = "controller/actions/refBookConf/" + uuid + "/download";
-                        }
-                    });
+                    })
                 };
 
                 /** Импорт скриптов и xsd */

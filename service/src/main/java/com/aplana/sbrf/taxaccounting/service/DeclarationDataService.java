@@ -883,5 +883,10 @@ public interface DeclarationDataService {
      */
     String uploadFile(InputStream fileInputStream, String fileName, Long declarationDataId);
 
-    BlobData downloadFile(String blobDataId, Long declarationDataId);
+    /**
+     * Скачать файл налоговой формы
+     * @param declarationDataFile объект файла налоговой формы. Нам нужен не понлоценный объект, а огрызок объекта, где заполнены поля {@link DeclarationDataFile#declarationDataId} и {@link DeclarationDataFile#uuid}
+     * @return данные файла
+     */
+    BlobData downloadFile(DeclarationDataFile declarationDataFile);
 }

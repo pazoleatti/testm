@@ -84,8 +84,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @PreAuthorize("isAuthenticated()")
-    public BlobData getNotificationBlobData(String blobDataId) {
-        return blobDataService.get(blobDataId);
+    @PreAuthorize("hasPermission(#notification, T(com.aplana.sbrf.taxaccounting.permissions.NotificationPermission).DOWNLOAD_NOTIFICATION_FILE)")
+    public BlobData getNotificationBlobData(Notification notification) {
+        return blobDataService.get(notification.getReportId());
     }
 }

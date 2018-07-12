@@ -98,4 +98,12 @@ public interface NotificationDao {
      * Возвращяет дату последнего оповещения
      */
     Date fetchLastNotificationDate();
+
+    /**
+     * Проверяет существование записи с определенныи блобом для пользователя. Используется для того чтобы определить может ли пользователь скачать данные блоба.
+     * @param userId идентификатор пользователя
+     * @param blobId идентификатор таблицы хранящей данные файла
+     * @return  возвращает {@code true} если такая запись существует, иначе возвращает {@code false}
+     */
+    boolean isExistsNotificationBlobForUser(int userId, String blobId);
 }

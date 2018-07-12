@@ -58,4 +58,12 @@ public interface DeclarationDataFileDao extends PermissionDao {
      * @return список объектов хранящих информацию о файлах налоговой формы
      */
     List<DeclarationDataFile> fetchByAttachFileTypeName(Long declarationDataId, String fileTypeName);
+
+    /**
+     * Проверяет по первичному ключу существование записи
+     * @param declarationDataId идентификатор налоговой формы
+     * @param blobId            идентификатор таблицы хранящей данные файла
+     * @return  возвращает {@code true} если такая запись существует, иначе возвращает {@code false}
+     */
+    boolean isExists(long declarationDataId, String blobId);
 }

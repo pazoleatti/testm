@@ -7,6 +7,10 @@
 
     <bean id="rebBookService" class="com.aplana.sbrf.taxaccounting.script.service.impl.RefBookServiceImpl" />
 
+    <bean id="exportArchivePerformer" class="org.mockito.Mockito" factory-method="mock" >
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.script.service.impl.RefBookServiceImpl$ExportArchivePerformer" />
+    </bean>
+
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService" />
     </bean>
@@ -33,5 +37,13 @@
 
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper$CreateArchiveDataHelper" />
     </bean>
 </beans>

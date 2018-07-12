@@ -250,4 +250,12 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         params.addValue("type", AttachFileType.TYPE_1.getId());
         getNamedParameterJdbcTemplate().update(query, params);
     }
+
+    @Override
+    public boolean isExists(long declarationDataId, String blobId) {
+        String sql = "select count(*) from DECLARATION_DATA_FILE where DECLARATION_DATA_ID = :declarationDataId and BLOB_DATA_ID = :blobId";
+        MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId);
+        params.addValue("blobId", blobId);
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class) > 0;
+    }
 }

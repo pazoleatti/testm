@@ -16,9 +16,24 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory"/>
     </bean>
 
-    <jdbc:initialize-database>
+<!--    <jdbc:initialize-database>
         <jdbc:script location="classpath:data/RefBookPersonServiceTest.sql" encoding="UTF-8"/>
-    </jdbc:initialize-database>
+    </jdbc:initialize-database>-->
 
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.script.service.impl"/>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper$CreateArchiveDataHelper" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService" />
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService" />
+    </bean>
 </beans>

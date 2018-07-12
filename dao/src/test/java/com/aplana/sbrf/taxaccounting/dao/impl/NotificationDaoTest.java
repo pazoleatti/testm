@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import org.joda.time.LocalDateTime;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,5 +219,17 @@ public class NotificationDaoTest {
     public void fetchLastNotificationDate() {
         assertEquals(date1,
                 notificationDao.fetchLastNotificationDate());
+    }
+
+    @Test
+    public void testIsExistsNotificationBlobForUserTrue() {
+        boolean isExist = notificationDao.isExistsNotificationBlobForUser(1, "uuid_2");
+        assertTrue(isExist);
+    }
+
+    @Test
+    public void testIsExistsNotificationBlobForUserFalse() {
+        boolean isExist = notificationDao.isExistsNotificationBlobForUser(1, "uuid_3");
+        Assert.assertFalse(isExist);
     }
 }

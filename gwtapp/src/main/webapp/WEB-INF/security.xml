@@ -109,6 +109,8 @@
                              value-ref="configurationPermissionFactory"/>
                 <beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationTemplate"
                              value-ref="declarationTemplatePermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.Notification"
+                             value-ref="notificationPermissionFactory"/>
             </beans:map>
         </beans:property>
     </beans:bean>
@@ -159,6 +161,11 @@
         <beans:constructor-arg
                 value="com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission"/>
     </beans:bean>
+    <beans:bean id="notificationPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.NotificationPermission"/>
+    </beans:bean>
 
     <!--Объекты расчета прав-->
     <beans:bean id="userPermissionSetter"
@@ -206,6 +213,11 @@
     <beans:bean id="declarationTemplatePermissionSetter"
                 class="com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermissionSetter">
         <beans:property name="permissionFactory" ref="declarationTemplatePermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="notificationPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.NotifictationPermissionSetter">
+        <beans:property name="permissionFactory" ref="notificationPermissionFactory"/>
         <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
     </beans:bean>
 </beans:beans>

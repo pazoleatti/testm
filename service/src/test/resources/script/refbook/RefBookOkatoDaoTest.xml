@@ -15,4 +15,19 @@
     <!-- JDBC-based DAOs -->
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.script.dao.impl.refbook"/>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.utils.IoHelper$CreateArchiveDataHelper" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService" />
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService" />
+    </bean>
+
 </beans>
