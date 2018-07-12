@@ -2323,7 +2323,7 @@ class ReportXlsxSheetFiller implements SheetFiller {
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle textRightStyle = styler.createBorderStyleRightAlignedTypeText()
         CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
-        FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0), new BigDecimal(0))
+        FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
         for (NdflPersonIncome npi in ndflPersonIncomeList) {
             KppOktmoPair kppOktmoPair = new KppOktmoPair(npi.kpp, npi.oktmo)
             if (flIncomeDataMap.get(kppOktmoPair) == null) {
@@ -2358,10 +2358,10 @@ class ReportXlsxSheetFiller implements SheetFiller {
             cell4.setCellValue(flIncomeData.personIdSet.size());
             Cell cell5 = row.createCell(5);
             cell5.setCellStyle(textRightStyle)
-            cell5.setCellValue(flIncomeData.incomeAccruedSumm?.doubleValue());
+            cell5.setCellValue(flIncomeData.incomeAccruedSumm?.toString());
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(textRightStyle)
-            cell6.setCellValue(flIncomeData.calculatedTax?.doubleValue());
+            cell6.setCellValue(flIncomeData.calculatedTax?.toString());
             rowNumber++
             ppNumber++
         }
@@ -2381,10 +2381,10 @@ class ReportXlsxSheetFiller implements SheetFiller {
         cell4.setCellValue(summaryFlIncomeData.personIdSet.size())
         Cell cell5 = row.createCell(5)
         cell5.setCellStyle(textRightStyle)
-        cell5.setCellValue(summaryFlIncomeData.incomeAccruedSumm.doubleValue())
+        cell5.setCellValue(summaryFlIncomeData.incomeAccruedSumm.toString())
         Cell cell6 = row.createCell(6)
         cell6.setCellStyle(textRightStyle)
-        cell6.setCellValue(summaryFlIncomeData.calculatedTax.doubleValue())
+        cell6.setCellValue(summaryFlIncomeData.calculatedTax.toString())
 
     }
 }
