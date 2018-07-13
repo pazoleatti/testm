@@ -48,19 +48,25 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
+            return simpleDateFormat;
         }
     };
     protected static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
+            return simpleDateFormat;
         }
     };
     private static final ThreadLocal<SimpleDateFormat> sdf_time = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("HH:mm:ss.SSS");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
+            return simpleDateFormat;
         }
     };
 
