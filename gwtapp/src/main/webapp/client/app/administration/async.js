@@ -52,9 +52,9 @@
                             $filter('translate')('async.title.user'),
                             $filter('translate')('async.title.node'),
                             $filter('translate')('async.title.queue'),
+                            $filter('translate')('async.title.description'),
                             $filter('translate')('async.title.state'),
-                            $filter('translate')('async.title.stateDate'),
-                            $filter('translate')('async.title.description')],
+                            $filter('translate')('async.title.stateDate')],
                         colModel: [
                             {name: 'id', index: 'id', width: 65},
                             {
@@ -66,14 +66,14 @@
                             {name: 'user', index: 'user', width: 250},
                             {name: 'node', index: 'node', width: 150},
                             {name: 'queue', index: 'queue', width: 250},
+                            {name: 'description', index: 'description', width: 350},
                             {name: 'state', index: 'state', width: 250},
                             {
                                 name: 'stateDate',
                                 index: 'stateDate',
                                 width: 200,
                                 formatter: $filter('dateTimeFormatter')
-                            },
-                            {name: 'description', index: 'description', width: 350}
+                            }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
