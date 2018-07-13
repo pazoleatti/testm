@@ -18,25 +18,15 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (52,10,'Код (3-х букв.)','CODE_3',1,2,null,null,1,null,10,1,3,null,null,0,3);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (53,10,'Краткое наименование','NAME',1,3,null,null,1,null,30,1,4,null,null,0,500);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (54,10,'Полное наименование','FULLNAME',1,4,null,null,1,null,50,1,5,null,null,0,500);
--- values
-Insert into REF_BOOK_RECORD (ID,RECORD_ID,REF_BOOK_ID,VERSION,STATUS) values ('262254399','284','10',to_date('01.01.12','DD.MM.YY'),'0');
-Insert into REF_BOOK_RECORD (ID,RECORD_ID,REF_BOOK_ID,VERSION,STATUS) values ('262259899','339','10',to_date('01.01.12','DD.MM.YY'),'0');
-Insert into REF_BOOK_RECORD (ID,RECORD_ID,REF_BOOK_ID,VERSION,STATUS) values ('262244299','183','10',to_date('01.01.12','DD.MM.YY'),'0');
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262244299','50','276',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262244299','51','DE',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262244299','52','DEU',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262244299','53','ГЕРМАНИЯ',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262244299','54','Федеративная Республика Германия',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262254399','50','643',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262254399','51','RU',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262254399','52','RUS',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262254399','53','РОССИЯ',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262254399','54','Российская Федерация',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262259899','50','840',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262259899','51','US',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262259899','52','USA',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262259899','53','СОЕДИНЕННЫЕ ШТАТЫ',null,null,null);
-Insert into REF_BOOK_VALUE (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('262259899','54','Соединенные Штаты Америки',null,null,null);
+
+insert into ref_book_country(id, record_id, status, version, code, code_2, code_3, name, fullname) values (1, 1, 0, date '2016-01-01', '643', 'RU', 'RUS', 'РОССИЯ', 'Российская Федерация');
+---------------------------------------------------------
+-- Адреса
+---------------------------------------------------------
+insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (1, 1, date '2016-01-01', 0, 0, null, 77, 119234, null, null, null, 'Ленинские Горы ул', '1', 'в', 'общ', '77,119234,,,,Ленинские Горы ул,1,в,общ', null);
+insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (2, 2, date '2016-01-01', 0, 0, null, 50, 143080, 'ОДИНЦОВСКИЙ р-н', null, 'ВНИИССОК п', 'Рябиновая ул', '1', null, 'общ', '50,143080,ОДИНЦОВСКИЙ р-н,,ВНИИССОК п,Рябиновая ул,1,,общ', null);
+insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (3, 3, date '2016-01-01', 0, 0, null, 50, 143080, 'ОДИНЦОВСКИЙ р-н', null, 'ВНИИССОК п', 'Рябиновая ул', '1', null, 'общ', '50,143080,ОДИНЦОВСКИЙ р-н,,ВНИИССОК п,Рябиновая ул,1,,общ', null);
+insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (4, 4, date '2016-01-01', 0, 0, null, 77, 109431, null, null, null, 'Привольная ул', '57', '1', '5', '77,109431,,,,Привольная ул,57,1,5', null);
 
 --------------------------------------------------------
 --  REF_BOOK_ASNU
@@ -112,13 +102,17 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9062, 905, 'АС НУ', 'AS_NU', 4, 2, 900, 9002, 1, null, 15, 1, 0, null, null, 0, null);
 
 
-insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'1','Налогоплательщик является налоговым резидентом Российской Федерации', 1, date '2016-01-01');
-insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'2','Налогоплательщик не является налоговым резидентом Российской Федерации', 2, date '2016-01-01');
-insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'3','Налогоплательщик - высококвалифицированный специалист не является налоговым резидентом Российской Федерации', 3, date '2016-01-01');
-insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'4','Налогоплательщик - участник Государственной программы по оказанию содействия добровольному переселению в Российскую Федерацию соотечественников, проживающих за рубежом (член экипажа судна, плавающего под Государственным флагом Российской Федерации), не является налоговым резидентом Российской Федерации', 4, date '2016-01-01');
-insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'5','Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации', 5, date '2016-01-01');
-insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента', 6, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(1,'1','Налогоплательщик является налоговым резидентом Российской Федерации', 1, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(2,'2','Налогоплательщик не является налоговым резидентом Российской Федерации', 2, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(3,'3','Налогоплательщик - высококвалифицированный специалист не является налоговым резидентом Российской Федерации', 3, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(4,'4','Налогоплательщик - участник Государственной программы по оказанию содействия добровольному переселению в Российскую Федерацию соотечественников, проживающих за рубежом (член экипажа судна, плавающего под Государственным флагом Российской Федерации), не является налоговым резидентом Российской Федерации', 4, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(5,'5','Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации', 5, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(6,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента', 6, date '2016-01-01');
 
 
 
-
+insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (1, 'Иванов', 'Борис', 'Петрович', null, null, null, 1, date '1975-04-15', null, 1, 1, 2, 1, date '2016-01-01', 0, 6, null, null);
+insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (2, 'Чучкалова', 'Екатерина', 'Викторовна', null, null, null, 1, date '1981-10-16', null, 1, 2, 2, 2, date '2016-01-01', 0, 6, null, null);
+insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (3, 'Потапов', 'Сергей', 'Сергеевич', null, null, null, 1, date '1992-07-29', null, 1, 3, 2, 3, date '2016-01-01', 0, 6, null, null);
+insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (4, 'Сульжик', 'Владислав', 'Сергеевич', null, null, null, 1, date '1992-09-25', null, 1, 4, 2, 4, date '2016-01-01', 0, 6, null, null);
+insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (5, 'Жулик', 'Владислав', 'Сергеевич', null, null, null, 1, date '1992-09-25', null, 1, 4, 2, 4, date '2016-07-01', -1, 6, 5, 0);
