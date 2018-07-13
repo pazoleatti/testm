@@ -52,21 +52,17 @@
                 ROLE_ADMIN: "ROLE_ADMIN"
             },
             REFBOOK: {
+                DEPARTMENT: 30,
+                DECLARATION_TYPE: 207,
                 ASNU: 900,
                 ATTACH_FILE_TYPE: 934,
                 DECLARATION_DATA_TYPE_REF_BOOK: 931,
-                DECLARATION_TYPE: 207,
-                DEPARTMENT: 30,
-                INCOME_CODE: 922,
-                OKTMO: 96,
-                PERIOD_CODE: 8,
                 PERSON: 904,
+                OKTMO: 96,
+                INCOME_CODE: 922,
                 PERSON_ADDRESS: 901,
-                REORGANIZATION: 928,
-                TAXPAYER_STATUS: 903
-            },
-            ATTRIBUTE: {
-                REORGANIZATION_CODE: 9281
+                TAXPAYER_STATUS: 903,
+                PERIOD_CODE: 8
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

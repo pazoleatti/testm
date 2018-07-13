@@ -233,14 +233,6 @@
                 $scope.modalCloseCallback = function () {
                     $scope.close();
                 };
-
-                $scope.getRegexPattern = function (attrId) {
-                    if ($scope.refBook.id === APP_CONSTANTS.REFBOOK.REORGANIZATION) {
-                        if (attrId === APP_CONSTANTS.ATTRIBUTE.REORGANIZATION_CODE) {
-                            return 'patterns.digitsRangeFrom0IncludedTo7Included'
-                        }
-                    }
-                }
             }
         ]);
 }());

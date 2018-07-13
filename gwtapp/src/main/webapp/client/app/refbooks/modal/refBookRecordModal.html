@@ -56,11 +56,9 @@
                                        data-ng-model="record[attribute.alias].value"
                                        title="{{record[attribute.alias].value}}"
                                        aplana-input-outer-width="400"
-                                       data-ng-pattern="{{getRegexPattern(attribute.id)}}"
                                        maxlength="{{attribute.maxLength}}"
                                        data-ng-disabled="attribute.readOnly"
                                        data-ng-required="{{attribute.required}}"/>
-                                <div data-aplana-validator data-key='pattern'>{{'common.validation.required' | translate}}</div>
                                 <div data-aplana-validator data-key='required'>{{'common.validation.required' | translate}}</div>
                             </div>
                         </div>

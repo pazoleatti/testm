@@ -1084,7 +1084,6 @@
                     $rootScope.APP_CONSTANTS = APP_CONSTANTS;
                     // Паттерны для проверки полей ввода
                     $rootScope.patterns = {
-                        digitsRangeFrom0IncludedTo7Included: /^[0-7]{1}$/,  // 1 цифра от 0 до 7
                         number: /^[+-]?([0-9]+)+([.][0-9]{1,2})?$/,         // Целые числа и числа с 2мя знаками после запятой
                         fourDigits: /^\d{4}$/,                              // 4 цифры
                         twoDigits: /^\d{1,2}$/                              // 4 цифры
