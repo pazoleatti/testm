@@ -1,19 +1,20 @@
 package com.aplana.sbrf.taxaccounting.service.print.tausers;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.print.AbstractReportBuilderTest;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/**
- * User: avanteev
- */
-public class TAUsersReportBuilderTest {
+import static org.junit.Assert.assertEquals;
+
+public class TAUsersReportBuilderTest extends AbstractReportBuilderTest {
 
     private List<TAUserView> taUserList = new ArrayList<TAUserView>();
 
@@ -44,15 +45,29 @@ public class TAUsersReportBuilderTest {
     }
 
     @Test
-    public void createReportTest() throws IOException {
-        TAUsersReportBuilder report = new TAUsersReportBuilder(taUserList);
+    public void createReportTest() throws Exception {
+        TAUsersReportBuilder reportBuilder = new TAUsersReportBuilder(taUserList);
+
         String reportPath = null;
         try {
-            reportPath = report.createReport();
+            reportPath = reportBuilder.createReport();
+
+            String[][] rowsExpected = new String[][]{
+                    {"", "", "", "Список пользователей"},
+                    {"", "", "", FastDateFormat.getInstance("dd-MMM-yyyy").format(new Date())},
+                    {""},
+                    {"Полное имя пользователя", "Логин", "Электронная почта", "Признак активности", "Подразделение", "Роль"},
+                    {"Контролер", "controlBank", "@sd", "Да", "Департамент", "Контролёр, Контролёр УНП"},
+                    {"Контролер2", "controlBank", "@gmail.com", "Нет", "Департамент", "Контролёр, Контролёр УНП"},
+                    {"Контролер", "controlBank", "@sd", "Да", "Департамент", "Контролёр, Контролёр УНП"}
+            };
+            assertEquals(toList(rowsExpected).toString(),
+                    readExcelFile(reportPath).toString());
         } finally {
-            assert reportPath != null;
-            File file = new File(reportPath);
-            file.delete();
+            if (reportPath != null) {
+                File file = new File(reportPath);
+                file.delete();
+            }
         }
     }
 }

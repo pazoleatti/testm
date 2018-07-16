@@ -15,8 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * User: avanteev
- * Date: 20.05.13
+ * Абстрактный класс для формирования отчетности
  */
 public abstract class AbstractReportBuilder {
 
@@ -32,23 +31,24 @@ public abstract class AbstractReportBuilder {
 
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 
-    private String prefix;
-    private String postfix;
+    private String fileName;
+    private String fileExtension;
 
     protected AbstractReportBuilder() {
-        this.prefix = "";
-        this.postfix = "";
+        this.fileName = "";
+        this.fileExtension = "";
     }
 
-    protected AbstractReportBuilder(String fileName, String postfix) {
-        this.prefix = fileName;
-        this.postfix = postfix;
+    protected AbstractReportBuilder(String fileName, String fileExtension) {
+        this.fileName = fileName;
+        this.fileExtension = fileExtension;
     }
 
     /**
      * Формирование отчета. Условно разбит на шесть частей.
      * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
      * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
+     *
      * @return путь до сформированного файла
      * @throws IOException
      */
@@ -64,7 +64,7 @@ public abstract class AbstractReportBuilder {
 
     protected void cellAlignment() {
         for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
-            sheet.setColumnWidth(width.getKey(), width.getValue() *256 *2);
+            sheet.setColumnWidth(width.getKey(), width.getValue() * 256 * 2);
         }
     }
 
@@ -92,7 +92,7 @@ public abstract class AbstractReportBuilder {
      * Выставление области печати для отчета.
      * Она может масштабироваться самим Excel, в зависимости от ширины области печати.
      */
-    protected void setPrintSetup(){
+    protected void setPrintSetup() {
         //Nothing
     }
 
@@ -109,7 +109,7 @@ public abstract class AbstractReportBuilder {
     }
 
     protected File createTempFile() throws IOException {
-        return File.createTempFile(prefix, postfix);
+        return File.createTempFile(fileName, fileExtension);
     }
 
     protected void flush(File file) throws IOException {
@@ -123,25 +123,23 @@ public abstract class AbstractReportBuilder {
 
     /**
      * Необходимо, чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
+     *
      * @param cellNumber номер ячейки
-     * @param length ширина
+     * @param length     ширина
      */
-    protected final void fillWidth(Integer cellNumber,Integer length){
+    protected final void fillWidth(Integer cellNumber, Integer length) {
 
-        if(widthCellsMap.get(cellNumber) == null && length >= cellWidthMin && length <= cellWidthMax)
+        if (widthCellsMap.get(cellNumber) == null && length >= cellWidthMin && length <= cellWidthMax)
             widthCellsMap.put(cellNumber, length);
-        else if(widthCellsMap.get(cellNumber) == null && length <= cellWidthMin){
+        else if (widthCellsMap.get(cellNumber) == null && length <= cellWidthMin) {
             widthCellsMap.put(cellNumber, cellWidthMin);
-        }
-        else if(widthCellsMap.get(cellNumber) == null && length >= cellWidthMax){
+        } else if (widthCellsMap.get(cellNumber) == null && length >= cellWidthMax) {
             widthCellsMap.put(cellNumber, cellWidthMax);
-        }
-        else if(widthCellsMap.get(cellNumber) != null){
+        } else if (widthCellsMap.get(cellNumber) != null) {
             if (length.compareTo(cellWidthMax) < 0 && length.compareTo(cellWidthMin) > 0 &&
                     widthCellsMap.get(cellNumber).compareTo(length) < 0)
                 widthCellsMap.put(cellNumber, length);
-        }
-        else
+        } else
             widthCellsMap.put(cellNumber, cellWidthMin);
     }
 }

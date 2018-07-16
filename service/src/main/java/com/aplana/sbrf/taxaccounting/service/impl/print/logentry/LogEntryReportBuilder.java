@@ -4,12 +4,19 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Класс для формирования CSV отчета уведомлений
+ */
 public class LogEntryReportBuilder extends AbstractReportBuilder {
 
     private static final String FIRST_COLUMN = "№ п/п";
@@ -19,16 +26,11 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     private static final String FIFTH_COLUMN = "Тип";
     private static final String SIXTH_COLUMN = "Объект";
 
-    private static final ThreadLocal<SimpleDateFormat> DATE_DATA_FORMAT = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        }
-    };
-
+    // Шапка таблицы
     private static final String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN, FIFTH_COLUMN, SIXTH_COLUMN};
     private static final String ENCODING = "windows-1251";
 
+    // Список записей уведомления
     private final List<LogEntry> list;
 
 
@@ -70,7 +72,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 
             csvWriter.writeNext(headers);
             for (int i = 0; i < list.size(); i++) {
-                csvWriter.writeNext(assemble(list.get(i), i + 1));
+                csvWriter.writeNext(createRow(list.get(i), i + 1));
             }
             csvWriter.close();
         } catch (IOException e) {
@@ -80,10 +82,10 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         }
     }
 
-    private String[] assemble(LogEntry item, int numberStr) {
+    private String[] createRow(LogEntry item, int numberStr) {
         List<String> entries = new ArrayList<>(4);
         entries.add(String.valueOf(numberStr));
-        entries.add(DATE_DATA_FORMAT.get().format(item.getDate()));
+        entries.add(FastDateFormat.getInstance("dd.MM.yyyy HH:mm:ss").format(item.getDate()));
         switch (item.getLevel()) {
             case ERROR:
                 entries.add("ошибка");
