@@ -262,10 +262,8 @@
                 }]
             };
         }])
-        .factory('_OverlayHttpInterceptor', [
-            '$q',
-            'Overlay',
-            function ($q, Overlay) {
+        .factory('_OverlayHttpInterceptor', ['$q', 'Overlay', '$state',
+            function ($q, Overlay, $state) {
                 //notice:
                 //Если использовать $http в этом interceptor, то для того, чтобы
                 //избежать circular dependency используем $inject.invoke
@@ -302,6 +300,9 @@
                             }
                         } else {
                             Overlay.processResponse();
+                        }
+                        if (response.headers()['content-type'] === "text/html") {
+                            $state.reload();
                         }
 
                         return response || $q.when(response);
