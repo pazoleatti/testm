@@ -404,14 +404,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
  * @return
  */
     def createXlsxReport() {
-//        def params = new HashMap<String, Object>()
-//        params.put("declarationId", declarationData.getId());
-//
-//        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id, userInfo));
-//
-//
-//        exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-//
+
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
@@ -2365,6 +2358,7 @@ class ReportXlsxSheetFiller implements SheetFiller {
             rowNumber++
             ppNumber++
         }
+        textRightStyle.setFont(styler.createBoldFont())
         sheet.addMergedRegion(new CellRangeAddress(rowNumber, rowNumber, 1, 3))
         Row row = sheet.createRow(rowNumber)
         Cell cell1 = row.createCell(1)
@@ -2495,7 +2489,7 @@ class Styler {
     }
 
     /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по левому краю
      * тип поля Текстовый
      * @return
      */
@@ -2504,7 +2498,7 @@ class Styler {
     }
 
     /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по правому краю
      * тип поля Текстовый
      * @return
      */
@@ -2524,6 +2518,12 @@ class Styler {
         DataFormat format = workbook.createDataFormat()
         style.setDataFormat(format.getFormat("0.00"))
         return style
+    }
+
+    XSSFont createBoldFont(){
+        XSSFont boldFont = workbook.createFont()
+        font.setBold(true)
+        return boldFont
     }
 }
 

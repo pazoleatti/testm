@@ -5,8 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,65 +14,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class RefBookCSVReportBuilder extends AbstractReportBuilder {
-
-    public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
-
-    private static final RefBookAttribute levelAttribute = new RefBookAttribute() {
-        {
-            setAlias("level");
-            setName("Уровень");
-            setAttributeType(RefBookAttributeType.NUMBER);
-            setPrecision(0);
-            setWidth(3);
-        }
-    };
-
-    private final Comparator<Map<String, RefBookValue>> comparator = new Comparator<Map<String, RefBookValue>>() {
-        @Override
-        public int compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-            if (sortAttribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                String s1 = o1.get(sortAttribute.getAlias()).getStringValue();
-                String s2 = o2.get(sortAttribute.getAlias()).getStringValue();
-                return s1.compareToIgnoreCase(s2);
-            } else if (sortAttribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                BigDecimal d1 = (BigDecimal) o1.get(sortAttribute.getAlias()).getNumberValue();
-                BigDecimal d2 = (BigDecimal) o2.get(sortAttribute.getAlias()).getNumberValue();
-                return d1.compareTo(d2);
-            }
-            return 0;
-        }
-    };
-
+/**
+ * Класс для формирования CSV-отчета справочника
+ */
+public class RefBookCSVReportBuilder extends AbstractRefBookReportBuilder {
 
     private CSVWriter csvWriter;
 
-    private List<RefBookAttribute> attributes;
+    // Записи справочника
     private List<Map<String, RefBookValue>> records;
-    private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<Long, List<Map<String, RefBookValue>>>();
-    private Map<Long, Map<Long, String>> dereferenceValues;
-    private RefBook refBook;
-    private Date version;
-    private RefBookAttribute sortAttribute;
-    private String searchPattern;
-    private Boolean exactSearch;
+    // Записи справочника, иерархического
+    private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<>();
 
     public RefBookCSVReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Date version, String searchPattern, boolean exactSearch, final RefBookAttribute sortAttribute) {
-        super("acctax", ".csv");
-        this.refBook = refBook;
-        this.attributes = attributes;
+        super(refBook, attributes, version, searchPattern, exactSearch, sortAttribute);
+
         this.records = records;
-        this.version = version;
-        this.searchPattern = searchPattern;
-        this.exactSearch = exactSearch;
-        this.sortAttribute = sortAttribute;
         if (refBook.isHierarchic()) {
             attributes.add(levelAttribute);
             Long parent_id;
@@ -103,10 +67,10 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
     }
 
     @Override
-    protected File createTempFile() throws IOException {
+    protected File createTempFile() {
         String fileName = refBook.getName().replace(' ', '_');
         if (refBook.isVersioned()) {
-            fileName = fileName + "_" + sdf.get().format(version);
+            fileName = fileName + "_" + FastDateFormat.getInstance("dd.MM.yyyy").format(version);
         }
         fileName = fileName + ".csv";
         //Используется такой подход, т.к. File.createTempFile в именах генерирует случайные числа. Здесь запись
@@ -120,7 +84,7 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         csvWriter = new CSVWriter(bufferedWriter, ';');
         try {
-            List<String> headersNames = new ArrayList<String>();
+            List<String> headersNames = new ArrayList<>();
             fillHeaderInfo();
             for (RefBookAttribute attribute : attributes) {
                 headersNames.add(attribute.getName());
@@ -140,6 +104,9 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         }
     }
 
+    /**
+     * Формирует в отчете информационные строки с параметрами поиска
+     */
     private void fillHeaderInfo() {
         List<String> headerInfo = new ArrayList<>();
 
@@ -159,6 +126,9 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
 
     }
 
+    /**
+     * Формирует рекурсивно строки таблицу для иерархического справочника
+     */
     private void printNode(Long parent_id, int level) {
         level++;
         if (hierarchicRecords.containsKey(parent_id)) {
@@ -192,12 +162,12 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
                                 attribute.getFormat().getFormat());
                         result = simpleDateFormat.format(value.getDateValue());
                     } else {
-                        result = sdf.get().format(value.getDateValue());
+                        result = FastDateFormat.getInstance("dd.MM.yyyy").format(value.getDateValue());
                     }
                 }
                 break;
             case STRING:
-                // exel удаляет ведущие нули в числовых значениях. если в ячейке записаны только цифры, значение ячейки в формате "Общий"
+                // excel удаляет ведущие нули в числовых значениях. если в ячейке записаны только цифры, значение ячейки в формате "Общий"
                 //воспринимается как числовое. решение: добавить табуляцию в начало https://stackoverflow.com/a/18133595
                 if (value.getStringValue() != null) {
                     result = "\t" + value.getStringValue();
@@ -214,8 +184,11 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
         return result;
     }
 
+    /**
+     * Формирует строку таблицы с данынми отчета
+     */
     private void createRow(Map<String, RefBookValue> record) {
-        List<String> oneRow = new ArrayList<String>();
+        List<String> oneRow = new ArrayList<>();
         for (RefBookAttribute attribute : attributes) {
             RefBookValue value = record.get(attribute.getAlias());
             String tableCell;

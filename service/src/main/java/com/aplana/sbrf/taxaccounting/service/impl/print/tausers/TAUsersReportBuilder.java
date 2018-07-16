@@ -3,17 +3,22 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.Calendar;
 import java.util.List;
 
 /**
- *
+ * Класс для формирования отчета пользователей
  */
 public class TAUsersReportBuilder extends AbstractReportBuilder {
 
+    // Список пользователей
     private List<TAUserView> taUserList;
 
     private int rowNumber = 3;
@@ -81,23 +86,23 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         cs.setFont(font);
-	    cs.setAlignment(CellStyle.ALIGN_CENTER);
+        cs.setAlignment(CellStyle.ALIGN_CENTER);
 
         Row row = sheet.createRow(0);
         Cell cell = row.createCell(3);
         cell.setCellValue("Список пользователей");
         cell.setCellStyle(cs);
 
-	    CellStyle dateStyle = workBook.createCellStyle();
-	    dateStyle.setFont(font);
-	    dateStyle.setAlignment(CellStyle.ALIGN_CENTER);
-	    DataFormat format = workBook.createDataFormat();
-	    dateStyle.setDataFormat(format.getFormat("dd.MM.yyyy"));
-	    Row rowDate = sheet.createRow(1);
-	    Cell cellDate = rowDate.createCell(3);
-	    cellDate.setCellValue(Calendar.getInstance());
+        CellStyle dateStyle = workBook.createCellStyle();
+        dateStyle.setFont(font);
+        dateStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        DataFormat format = workBook.createDataFormat();
+        dateStyle.setDataFormat(format.getFormat("dd.MM.yyyy"));
+        Row rowDate = sheet.createRow(1);
+        Cell cellDate = rowDate.createCell(3);
+        cellDate.setCellValue(Calendar.getInstance());
 
-	    cellDate.setCellStyle(dateStyle);
+        cellDate.setCellStyle(dateStyle);
 
         rowNumber = sheet.getLastRowNum() + 2;
     }
@@ -113,45 +118,45 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         cs.setBorderLeft(CellStyle.BORDER_DOUBLE);
 
         sheet.createFreezePane(0, sheet.getLastRowNum() + 1);
-        for (TAUserView user : taUserList){
+        for (TAUserView user : taUserList) {
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 
-	        Cell cell = row.createCell(cellNumber);
+            Cell cell = row.createCell(cellNumber);
 
-	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getName());
-	        fillWidth(cellNumber, cell.getStringCellValue().length());
-	        cellNumber++;
+            cell.setCellStyle(cs);
+            cell.setCellValue(user.getName());
+            fillWidth(cellNumber, cell.getStringCellValue().length());
+            cellNumber++;
 
-	        cell = row.createCell(cellNumber);
+            cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(user.getLogin());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
-	        cell = row.createCell(cellNumber);
-	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getEmail());
-	        fillWidth(cellNumber, cell.getStringCellValue().length());
-	        cellNumber++;
-
-	        cell = row.createCell(cellNumber);
-	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getActive()?"Да":"Нет");
-	        fillWidth(cellNumber, cell.getStringCellValue().length());
-	        cellNumber++;
+            cell = row.createCell(cellNumber);
+            cell.setCellStyle(cs);
+            cell.setCellValue(user.getEmail());
+            fillWidth(cellNumber, cell.getStringCellValue().length());
+            cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-	        cell.setCellValue(user.getDepName());
+            cell.setCellValue(user.getActive() ? "Да" : "Нет");
+            fillWidth(cellNumber, cell.getStringCellValue().length());
+            cellNumber++;
+
+            cell = row.createCell(cellNumber);
+            cell.setCellStyle(cs);
+            cell.setCellValue(user.getDepName());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(user.getRoles());
-	        fillWidth(cellNumber, cell.getStringCellValue().length());
-	        cellNumber++;
+            fillWidth(cellNumber, cell.getStringCellValue().length());
+            cellNumber++;
 
             cellNumber = 0;
             rowNumber = sheet.getLastRowNum();

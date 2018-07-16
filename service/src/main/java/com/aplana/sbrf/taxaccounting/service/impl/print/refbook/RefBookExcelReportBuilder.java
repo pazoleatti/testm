@@ -7,92 +7,64 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.streaming.SheetDataWriter;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Класс для построения XLSX-отчета по линейным и иерархическим справочникам
  */
-public class RefBookExcelReportBuilder extends AbstractReportBuilder {
+public class RefBookExcelReportBuilder extends AbstractRefBookReportBuilder {
 
     private static final Log LOG = LogFactory.getLog(RefBookExcelReportBuilder.class);
-
-    private static final String DATE_FORMAT = "dd.MM.yyyy";
-    private static final RefBookAttribute levelAttribute = new RefBookAttribute() {
-        {
-            setAlias("level");
-            setName("Уровень");
-            setAttributeType(RefBookAttributeType.NUMBER);
-            setPrecision(0);
-            setWidth(3);
-        }
-    };
-
-    private final Comparator<Map<String, RefBookValue>> comparator = new Comparator<Map<String, RefBookValue>>() {
-        @Override
-        public int compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-            if (sortAttribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                String s1 = o1.get(sortAttribute.getAlias()).getStringValue();
-                String s2 = o2.get(sortAttribute.getAlias()).getStringValue();
-                return s1.compareToIgnoreCase(s2);
-            } else if (sortAttribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                BigDecimal d1 = (BigDecimal) o1.get(sortAttribute.getAlias()).getNumberValue();
-                BigDecimal d2 = (BigDecimal) o2.get(sortAttribute.getAlias()).getNumberValue();
-                return d1.compareTo(d2);
-            }
-            return 0;
-        }
-    };
 
     private int rowNumber = 3;
     private int cellNumber = 0;
 
-    private List<RefBookAttribute> attributes;
+    // Записи для иерархического справочника
     private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<>();
-    private RefBook refBook;
-    private CellStyleBuilder cellStyleBuilder;
-    private Date version;
-    private String searchPattern;
-    private boolean exactSearch;
-    private RefBookAttribute sortAttribute;
+    // Записи справочника, загружаются по мере необходимости
     private BatchIterator dataIterator;
+    // Утилита для формирования стилей ячейки
+    private CellStyleBuilder cellStyleBuilder;
 
-    public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
+    private RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version,
+                                      String searchPattern, boolean exactSearch, RefBookAttribute sortAttribute) {
+        super(refBook, attributes, version, searchPattern, exactSearch, sortAttribute);
 
-    public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version,
-                                     String searchPattern, boolean exactSearch, RefBookAttribute sortAttribute) {
-        initWorkbook();
+        workBook = new SXSSFWorkbook();
+        workBook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK);
         String sheetName = refBook.getName().replaceAll("[/\\[\\]\\*\\:\\?\\\\]", "_"); //Убираем недостимые символы в названии листа
         sheetName = sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName;
         this.sheet = workBook.createSheet(sheetName);
         sheet.setRowSumsBelow(false);
         sheet.getLastRowNum();
-        this.refBook = refBook;
-        this.attributes = attributes;
-        this.version = version;
-        this.searchPattern = searchPattern;
-        this.exactSearch = exactSearch;
-        this.sortAttribute = sortAttribute;
         cellStyleBuilder = new CellStyleBuilder();
-    }
-
-    protected void initWorkbook() {
-        this.workBook = new XSSFWorkbook();
     }
 
     public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version, String searchPattern,
@@ -165,7 +137,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         if (refBook.isVersioned()) {
             Row versionRow = sheet.createRow(rowNum);
             Cell versionCell = versionRow.createCell(cellNumber);
-            versionCell.setCellValue("Дата актуальности: " + new SimpleDateFormat(DATE_FORMAT).format(version));
+            versionCell.setCellValue("Дата актуальности: " + FastDateFormat.getInstance("dd.MM.yyyy").format(version));
             versionCell.setCellStyle(cs);
             cellNumber = 0;
             rowNum++;
@@ -195,6 +167,9 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         }
     }
 
+    /**
+     * Формирует рекурсивно строки таблицу для иерархического справочника
+     */
     private void printNode(Long parent_id, int level) {
         level++;
         if (hierarchicRecords.containsKey(parent_id)) {
@@ -280,7 +255,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
     private final class CellStyleBuilder {
 
-        private Map<String, CellStyle> cellStyleMap = new HashMap<String, CellStyle>();
+        private Map<String, CellStyle> cellStyleMap = new HashMap<>();
 
         private CellStyleBuilder() {
         }
@@ -313,7 +288,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
                 case DATE:
                     style.setAlignment(CellStyle.ALIGN_CENTER);
                     if (format.isEmpty()) {
-                        style.setDataFormat(dataFormat.getFormat(sdf.get().toPattern()));
+                        style.setDataFormat(dataFormat.getFormat("dd.MM.yyyy"));
                     } else {
                         style.setDataFormat(dataFormat.getFormat(format));
                     }
@@ -344,10 +319,27 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     }
 
     @Override
-    protected File createTempFile() throws IOException {
+    protected void flush(File file) throws IOException {
+        OutputStream out = new FileOutputStream(file);
+        try {
+            workBook.write(out);
+        } finally {
+            IOUtils.closeQuietly(out);
+            // SXSSFWorkbook создаёт временные файлы, надо удалять
+            //((SXSSFWorkbook) workBook).dispose(); // c версии poi 3.9
+            try {
+                deleteSXSSFTempFiles((SXSSFWorkbook) workBook);
+            } catch (Exception e) {
+                LOG.warn("Временнный файл не был удален.");
+            }
+        }
+    }
+
+    @Override
+    protected File createTempFile() {
         String fileName = refBook.getName().replace(' ', '_');
         if (refBook.isVersioned()) {
-            fileName = fileName + "_" + sdf.get().format(version);
+            fileName = fileName + "_" + FastDateFormat.getInstance("dd.MM.yyyy").format(version);
         }
         fileName = fileName + ".xlsx";
         //Используется такой подход, т.к. File.createTempFile в именах генерирует случайные числа. Здесь запись
@@ -381,5 +373,34 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
             LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
             throw new TAInterruptedException();
         }
+    }
+
+    /**
+     * Удаляет временные файлы, создаваемые при работе с SXSSFWorkbook
+     */
+    private void deleteSXSSFTempFiles(SXSSFWorkbook workbook) throws NoSuchFieldException, IllegalAccessException {
+
+        int numberOfSheets = workbook.getNumberOfSheets();
+
+        //iterate through all sheets (each sheet as a temp file)
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheetAt = workbook.getSheetAt(i);
+
+            //delete only if the sheet is written by stream
+            if (sheetAt instanceof SXSSFSheet) {
+                SheetDataWriter sdw = (SheetDataWriter) getPrivateAttribute(sheetAt, "_writer");
+                File f = (File) getPrivateAttribute(sdw, "_fd");
+
+                if (!f.delete()) {
+                    LOG.warn(String.format("Временнный файл %s не был удален.", f.getName()));
+                }
+            }
+        }
+    }
+
+    private Object getPrivateAttribute(Object containingClass, String fieldToGet) throws NoSuchFieldException, IllegalAccessException {
+        Field declaredField = containingClass.getClass().getDeclaredField(fieldToGet);
+        declaredField.setAccessible(true);
+        return declaredField.get(containingClass);
     }
 }

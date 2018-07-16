@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
         Date startDate = new Date();
         try {
-            printStream = new PrintStream(System.out, true, "windows-1251");
+            printStream = new PrintStream(System.out, true, "cp866");
             if (args.length < 3) {
                 printStream.print("Вы ввели неверное количество аргументов");
             } else {
