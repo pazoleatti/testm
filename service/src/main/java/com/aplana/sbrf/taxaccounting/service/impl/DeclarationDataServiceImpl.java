@@ -1684,7 +1684,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
 
                 declarationData.setState(State.CREATED);
-                sourceService.updateDDConsolidation(declarationData.getId());
 
                 logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
                 auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);

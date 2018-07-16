@@ -448,4 +448,30 @@ public class DeclarationDataServiceImplTest {
         declarationDataService.downloadFile(declarationDataFile);
         Mockito.verify(blobDataService, Mockito.times(1)).get(blobId);
     }
+
+    @Test
+    public void testCancel() {
+        Logger logger = mock(Logger.class);
+        long declarationDataId = 1L;
+        String note = "note";
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+
+        TAUser user = mock(TAUser.class);
+        int userId = 1;
+        when(userInfo.getUser()).thenReturn(user);
+        when(user.getId()).thenReturn(userId);
+
+        DeclarationData declarationData = mock(DeclarationData.class);
+        when(declarationDataDao.get(declarationDataId)).thenReturn(declarationData);
+        DeclarationTemplate declarationTemplate = mock(DeclarationTemplate.class);
+        when(declarationData.getDeclarationTemplateId()).thenReturn(100);
+        when(declarationTemplateService.get(100)).thenReturn(declarationTemplate);
+
+        when(declarationTemplate.getDeclarationFormKind()).thenReturn(DeclarationFormKind.PRIMARY);
+
+        declarationDataService.cancel(logger, declarationDataId, note, userInfo);
+
+        verify(declarationDataDao).setStatus(eq(declarationDataId), any(State.class));
+
+    }
 }
