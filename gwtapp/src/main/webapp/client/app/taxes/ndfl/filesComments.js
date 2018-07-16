@@ -91,7 +91,7 @@
                  * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-                    return "<a target='_self' href='controller/actions/declarationData/" + row.uuid + "/download/" + $shareData.declarationDataId + "'>" + row.fileName + " </a>";
+                    return "<a target='_self' href='controller/actions/declarationData/" + $shareData.declarationDataId + "/download/" + row.uuid + "'>" + row.fileName + " </a>";
 
                 }
 

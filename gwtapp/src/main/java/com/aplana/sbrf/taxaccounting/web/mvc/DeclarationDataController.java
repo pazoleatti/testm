@@ -799,7 +799,7 @@ public class DeclarationDataController {
      * @return строка с uuid
      * @throws IOException в случае исключения при работе с потоками/файлами
      */
-    @GetMapping(value = "/actions/declarationData/{uuid}/download/{declarationDataId}")
+    @GetMapping(value = "/actions/declarationData/{declarationDataId}/download/{uuid}")
     public void downloadFile(@PathVariable("uuid") String uuid, @PathVariable("declarationDataId") Long declarationDataId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         DeclarationDataFile stub = new DeclarationDataFile();
         stub.setDeclarationDataId(declarationDataId);

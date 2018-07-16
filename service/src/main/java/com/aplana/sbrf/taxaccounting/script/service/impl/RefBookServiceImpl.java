@@ -17,23 +17,20 @@ import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
-import com.aplana.sbrf.taxaccounting.utils.IoHelper;
 import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -71,9 +68,6 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private LogEntryService logEntryService;
-
-    @Autowired
-    private RefBookServiceImpl.ExportArchivePerformer exportArchivePerformer;
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
@@ -217,8 +211,39 @@ public class RefBookServiceImpl implements RefBookService {
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
     @Transactional
     public BlobData exportRefBookConfs(TAUserInfo userInfo) {
-        String resultUUID = exportArchivePerformer.createExportArchive();
+        String resultUUID;
+        File file = null;
+        try {
+            file = File.createTempFile("refBookData", "zip");
+
+            try (OutputStream outputStream = new FileOutputStream(file);
+                 ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)
+            ) {
+                List<RefBook> refBooks = commonRefBookService.fetchAll();
+                for (RefBook refBook : refBooks) {
+                    addFileToZip(refBook.getScriptId(), zos, refBook.getId() + "\\script.groovy");
+                    addFileToZip(refBook.getXsdId(), zos, refBook.getId() + "\\schema.xsd");
+                }
+            }
+
+            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
+                resultUUID = blobDataService.create(inputStream, "refBooksData.zip");
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage(), e);
+        } finally {
+            AppFileUtils.deleteTmp(file);
+        }
         return blobDataService.get(resultUUID);
+    }
+
+    private void addFileToZip(String uuid, ZipArchiveOutputStream zipOutputStream, String path) throws IOException {
+        if (!StringUtils.isEmpty(uuid)) {
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path);
+            zipOutputStream.putArchiveEntry(zipEntry);
+            IOUtils.copy(blobDataService.get(uuid).getInputStream(), zipOutputStream);
+            zipOutputStream.closeArchiveEntry();
+        }
     }
 
     @Override
@@ -303,43 +328,6 @@ public class RefBookServiceImpl implements RefBookService {
         } else {
             logger.warn("Пропущен файл \"%s\". Загружаемый файл должен лежать в папке с именем, соответствующим идентификатору справочника.",
                     fileName);
-        }
-    }
-
-    @Component
-    public static class ExportArchivePerformer {
-
-        @Autowired
-        private IoHelper ioHelper;
-        @Autowired
-        private IoHelper.CreateArchiveDataHelper createArchiveDataHelper;
-        @Autowired
-        private CommonRefBookService commonRefBookService;
-        @Autowired
-        private BlobDataService blobDataService;
-
-        public String createExportArchive() {
-            File file = null;
-            try {
-                file = createArchiveDataHelper.createTempFile("refBookData", "zip");
-
-                try (
-                        ZipArchiveOutputStream zos = createArchiveDataHelper.createZipArchiveOutputStream(file)
-                ) {
-                    List<RefBook> refBooks = commonRefBookService.fetchAll();
-                    for (RefBook refBook : refBooks) {
-                        ioHelper.addFileToZip(refBook.getScriptId(), zos, refBook.getId() + "\\script.groovy");
-                        ioHelper.addFileToZip(refBook.getXsdId(), zos, refBook.getId() + "\\schema.xsd");
-                    }
-                }
-                try (InputStream inputStream = createArchiveDataHelper.createFileInputStream(file)) {
-                    return blobDataService.create(inputStream, "refBooksData.zip");
-                }
-            } catch (IOException e) {
-                throw new ServiceException(e.getMessage(), e);
-            } finally {
-                AppFileUtils.deleteTmp(file);
-            }
         }
     }
 }
