@@ -159,7 +159,7 @@
                             $filter('translate')('title.xmlFile'),
                             $filter('translate')('title.note')],
                         colModel: [
-                            {name: 'declarationDataId', index: 'declarationDataId', width: 110, key: true},
+                            {name: 'declarationDataId', index: 'declarationDataId', width: 120, key: true},
                             {
                                 name: 'declarationType',
                                 index: 'declarationType',
@@ -176,7 +176,7 @@
                             {
                                 name: 'creationDate',
                                 index: 'creationDate',
-                                width: 205,
+                                width: 215,
                                 formatter: $filter('dateTimeFormatter')
                             },
                             {name: 'creationUserName', index: 'creationUserName', width: 130},

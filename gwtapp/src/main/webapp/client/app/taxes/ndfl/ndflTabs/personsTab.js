@@ -81,7 +81,7 @@
                             $filter('translate')('ndflFL.title.modifiedDate'),
                             $filter('translate')('ndflFL.title.modifiedBy')],
                         colModel: [
-                            {name: 'rowNum', index: 'rowNum', width: 65, key: true},
+                            {name: 'rowNum', index: 'rowNum', width: 75, key: true},
                             {name: 'inp', index: 'inp', width: 100},
                             {name: 'lastName', index: 'lastName', width: 130},
                             {name: 'firstName', index: 'firstName', width: 110},
@@ -89,14 +89,14 @@
                             {
                                 name: 'birthDay',
                                 index: 'birthDay',
-                                width: 115,
+                                width: 125,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'citizenship', index: 'citizenship', width: 185},
+                            {name: 'citizenship', index: 'citizenship', width: 195},
                             {name: 'innNp', index: 'innNp', width: 95},
                             {name: 'innForeign', index: 'innForeign', width: 95},
                             {name: 'idDocType', index: 'idDocType', width: 85},
-                            {name: 'idDocNumber', index: 'idDocNumber', width: 95},
+                            {name: 'idDocNumber', index: 'idDocNumber', width: 105},
                             {name: 'status', index: 'status', width: 100},
                             {name: 'regionCode', index: 'regionCode', width: 105, sortable: false},
                             {name: 'postIndex', index: 'postIndex', width: 100},
@@ -108,8 +108,8 @@
                             {name: 'building', index: 'building', width: 70},
                             {name: 'flat', index: 'flat', width: 80},
                             {name: 'snils', index: 'snils', width: 120, sortable: false},
-                            {name: 'id', index: 'id', width: 160},
-                            {name: 'modifiedDate', index: 'modifiedDate', width: 205, formatter: $filter('dateTimeFormatter')},
+                            {name: 'id', index: 'id', width: 170},
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 215, formatter: $filter('dateTimeFormatter')},
                             {name: 'modifiedBy', index: 'modifiedBy', width: 300}],
 
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
