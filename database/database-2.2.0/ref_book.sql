@@ -125,8 +125,8 @@ BEGIN
 	'00' as mark, '-' as name from dual) b
 	on (a.income_type_id=b.income_type_id and a.mark=b.mark)
 	when not matched then
-		insert (id, income_type_id, mark, name)
-		values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name);
+		insert (id, income_type_id, mark, name, record_id)
+		values (seq_ref_book_record.nextval, b.income_type_id, b.mark, b.name, seq_ref_book_record.nextval);
 	
 	delete from REF_BOOK_INCOME_KIND where
 				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) and mark='01')
