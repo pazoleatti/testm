@@ -518,9 +518,10 @@
                             <packagingExcludes>
                                 client/app/,
                                 client/lib/,
-                                client/components/**/*.js,
-                                client/components/**/*.html,
-                                client/css/**/*.less,
+                                client/components/,
+                                client/css/less/,
+                                client/css/lib/,
+                                client/css/*.*,
                                 index-dev.html,
                                 index-prod.html
                             </packagingExcludes>
@@ -598,6 +599,48 @@
                                                 <include>/groovy.min.js</include>
                                             </includes>
                                         </aggregation>
+                                        <!--CSS-APP-->
+                                        <aggregation>
+                                            <insertNewLine>true</insertNewLine>
+                                            <output>${webappDirectory}/client/app-styles.css</output>
+                                            <inputDir>${webappDirectory}/client</inputDir>
+                                            <includes>
+                                                <include>/css/style.css</include>
+                                                <include>/components/grid/ui.jqgrid.css</include>
+                                                <include>/components/grid/app-ui.jqgrid.css</include>
+                                                <include>/components/treeview/treeview.css</include>
+                                            </includes>
+                                        </aggregation>
+                                        <!--CSS-VENDOR-->
+                                        <aggregation>
+                                            <insertNewLine>true</insertNewLine>
+                                            <output>${webappDirectory}/client/vendor-styles.css</output>
+                                            <inputDir>${webappDirectory}/client/css/lib</inputDir>
+                                            <includes>
+                                                <include>../bootstrap.css</include>
+                                                <include>**/*.css</include>
+                                            </includes>
+                                        </aggregation>
+                                        <!--CSS-COMPONENTS-->
+                                        <aggregation>
+                                            <insertNewLine>true</insertNewLine>
+                                            <output>${webappDirectory}/client/components-styles.css</output>
+                                            <inputDir>${webappDirectory}/client/components</inputDir>
+                                            <includes>
+                                                <include>/collapse/accordion.css</include>
+                                                <include>/splitter/splitter.css</include>
+                                                <include>/uiSelect2/select2.css</include>
+                                                <include>/uiSelect2/app-select2.css</include>
+                                                <include>/tooltip/ndflTooltip.css</include>
+                                                <include>/datePicker/datepicker.css</include>
+                                                <include>/link/link.css</include>
+                                                <include>/alert/alert.css</include>
+                                                <include>/outerWidth/outerwidth.css</include>
+                                                <include>/datetimepicker/datetimepicker.css</include>
+                                                <include>/popover/popover.css</include>
+                                                <include>/tabs/tabs.css</include>
+                                            </includes>
+                                        </aggregation>
                                     </aggregations>
                                     <force>true</force>
                                     <nocompress>false</nocompress>
@@ -608,6 +651,9 @@
                                     <outputDirectory>${webappDirectory}/client</outputDirectory>
                                     <includes>
                                         <include>**/components.js</include>
+                                        <include>**/app-styles.css</include>
+                                        <include>**/vendor-styles.css</include>
+                                        <include>**/components-styles.css</include>
                                     </includes>
                                 </configuration>
                             </execution>
@@ -674,6 +720,61 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>copy-img-resources</id>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <target>
+                                        <!--Переносит все изображения в общую папку-->
+                                        <copy todir="${webappDirectory}/client/img" flatten="true">
+                                            <fileset dir="src/main/webapp/client/">
+                                                <include name="**/*.png"/>
+                                                <include name="**/*.jpg"/>
+                                                <include name="**/*.gif"/>
+                                            </fileset>
+                                        </copy>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>com.google.code.maven-replacer-plugin</groupId>
+                        <artifactId>replacer</artifactId>
+                        <executions>
+                            <execution>
+                                <id>img-path-replacer</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <basedir>${webappDirectory}/client</basedir>
+                            <includes>
+                                <include>app-styles.css</include>
+                                <include>components-styles.css</include>
+                                <include>vendor-styles.css</include>
+                            </includes>
+                            <replacements>
+                                <replacement>
+                                    <!--Изменяем url изображений в css-файлах на общую папку изображений-->
+                                    <token>[\w\.-\\\/]*?([\w-]*\.(png|jpg|gif))</token>
+                                    <value>img/$1</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
