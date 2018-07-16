@@ -15,7 +15,6 @@
         <module>dao</module>
         <module>service</module>
         <module>gwtapp</module>
-        <module>ndfl-ear</module>
         <module>dynacache-spring</module>
         <module>fonts</module>
         <module>gwt-widget</module>
@@ -596,9 +595,9 @@
                     <version>1.0.1</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>2.6</version>
+                    <groupId>com.google.code.maven-replacer-plugin</groupId>
+                    <artifactId>replacer</artifactId>
+                    <version>1.5.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -647,6 +646,12 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>production</id>
+            <modules>
+                <module>ndfl-ear</module>
+            </modules>
+        </profile>
         <profile>
             <id>sonar</id>
             <activation>
