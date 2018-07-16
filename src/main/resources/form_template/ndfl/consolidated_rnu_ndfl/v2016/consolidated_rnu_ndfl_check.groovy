@@ -626,42 +626,42 @@ class Check extends AbstractScriptClass {
                     List<String> ndflPersonAddress = []
 
                     // Адрес регистрации в Российской Федерации.Код субъекта
-                    if (ndflPerson.regionCode != null && !ndflPerson.regionCode.equals(regionCode)) {
+                    if (ndflPerson.regionCode != null && !ndflPerson.equalsIgnoreCase(regionCode)) {
                         ndflPersonAddress.add("Код субъекта=" + ndflPerson.regionCode ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Район
-                    if (ndflPerson.area != null && !ndflPerson.area.toLowerCase().equals(area.toLowerCase())) {
+                    if (ndflPerson.area != null && !ndflPerson.area.equalsIgnoreCase(area.toLowerCase())) {
                         ndflPersonAddress.add("Район=" + ndflPerson.area ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Город
-                    if (ndflPerson.city != null && !ndflPerson.city.toLowerCase().equals(city.toLowerCase())) {
+                    if (ndflPerson.city != null && !ndflPerson.city.equalsIgnoreCase(city.toLowerCase())) {
                         ndflPersonAddress.add("Город=" + ndflPerson.city ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Населенный пункт
-                    if (ndflPerson.locality != null && !ndflPerson.locality.toLowerCase().equals(locality.toLowerCase())) {
+                    if (ndflPerson.locality != null && !ndflPerson.locality.equalsIgnoreCase(locality.toLowerCase())) {
                         ndflPersonAddress.add("Населенный пункт=" + ndflPerson.locality ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Улица
-                    if (ndflPerson.street != null && !ndflPerson.street.toLowerCase().equals(street.toLowerCase())) {
+                    if (ndflPerson.street != null && !ndflPerson.street.equalsIgnoreCase(street.toLowerCase())) {
                         ndflPersonAddress.add("Улица=" + ndflPerson.street ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Дом
-                    if (ndflPerson.house != null && !ndflPerson.house.equals(house)) {
+                    if (ndflPerson.house != null && !ndflPerson.house.equalsIgnoreCase(house)) {
                         ndflPersonAddress.add("Дом=" + ndflPerson.house ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Корпус
-                    if (ndflPerson.building != null && !ndflPerson.building.equals(building)) {
+                    if (ndflPerson.building != null && !ndflPerson.building.equalsIgnoreCase(building)) {
                         ndflPersonAddress.add("Корпус=" + ndflPerson.building ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Квартира
-                    if (ndflPerson.flat != null && !ndflPerson.flat.equals(flat)) {
+                    if (ndflPerson.flat != null && !ndflPerson.flat.equalsIgnoreCase(flat)) {
                         ndflPersonAddress.add("Квартира=" + ndflPerson.flat ?: "")
                     }
                     if (!ndflPersonAddress.isEmpty()) {
