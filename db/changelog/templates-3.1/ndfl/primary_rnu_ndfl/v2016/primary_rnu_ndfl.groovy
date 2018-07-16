@@ -1,15 +1,5 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.HorizontalAlignment
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.VerticalAlignment
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.DataFormat
-import org.apache.poi.xssf.streaming.SXSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -24,6 +14,10 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -35,13 +29,13 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.EndElement
 import javax.xml.stream.events.StartElement
 import java.text.SimpleDateFormat
-import com.aplana.sbrf.taxaccounting.script.service.*
 
 new PrimaryRnuNdfl(this).run();
 
@@ -2520,9 +2514,9 @@ class Styler {
         return style
     }
 
-    XSSFont createBoldFont(){
-        XSSFont boldFont = workbook.createFont()
-        font.setBold(true)
+    XSSFFont createBoldFont(){
+        XSSFFont boldFont = workbook.createFont()
+        boldFont.setBold(true)
         return boldFont
     }
 }
