@@ -773,6 +773,11 @@
                                     <token>[\w\.-\\\/]*?([\w-]*\.(png|jpg|gif))</token>
                                     <value>img/$1</value>
                                 </replacement>
+                                <replacement>
+                                    <!--Изменяем url шрифтов в css-файлах-->
+                                    <token>[\w\.-\\\/]*?([\w-]*\.(ttf))</token>
+                                    <value>css/fonts/$1</value>
+                                </replacement>
                             </replacements>
                         </configuration>
                     </plugin>
