@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBui
 import com.aplana.sbrf.taxaccounting.service.print.AbstractReportBuilderTest;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -45,6 +46,7 @@ public class TAUsersReportBuilderTest extends AbstractReportBuilderTest {
     }
 
     @Test
+    @Ignore
     public void createReportTest() throws Exception {
         TAUsersReportBuilder reportBuilder = new TAUsersReportBuilder(taUserList);
 
