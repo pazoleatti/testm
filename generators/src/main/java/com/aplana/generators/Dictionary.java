@@ -8,13 +8,13 @@ import java.util.Scanner;
 
 public class Dictionary {
 
-    static List<String> lastnameDictionary;
+    public static List<String> lastnameDictionary;
 
-    static List<String> firstnameDictionary;
+    public static List<String> firstnameDictionary;
 
-    static List<String> middlenameDictionary;
+    public static List<String> middlenameDictionary;
 
-    static List<String> regionsDictionary;
+    public static List<String> regionsDictionary;
 
     /**
      * Инициализирует словари
