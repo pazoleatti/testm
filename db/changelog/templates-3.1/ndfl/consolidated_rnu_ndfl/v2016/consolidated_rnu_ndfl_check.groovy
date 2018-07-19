@@ -626,27 +626,27 @@ class Check extends AbstractScriptClass {
                     List<String> ndflPersonAddress = []
 
                     // Адрес регистрации в Российской Федерации.Код субъекта
-                    if (ndflPerson.regionCode != null && !ndflPerson.equalsIgnoreCase(regionCode)) {
+                    if (ndflPerson.regionCode != null && !ndflPerson.regionCode.equalsIgnoreCase(regionCode)) {
                         ndflPersonAddress.add("Код субъекта=" + ndflPerson.regionCode ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Район
-                    if (ndflPerson.area != null && !ndflPerson.area.equalsIgnoreCase(area.toLowerCase())) {
+                    if (ndflPerson.area != null && !ndflPerson.area.equalsIgnoreCase(area)) {
                         ndflPersonAddress.add("Район=" + ndflPerson.area ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Город
-                    if (ndflPerson.city != null && !ndflPerson.city.equalsIgnoreCase(city.toLowerCase())) {
+                    if (ndflPerson.city != null && !ndflPerson.city.equalsIgnoreCase(city)) {
                         ndflPersonAddress.add("Город=" + ndflPerson.city ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Населенный пункт
-                    if (ndflPerson.locality != null && !ndflPerson.locality.equalsIgnoreCase(locality.toLowerCase())) {
+                    if (ndflPerson.locality != null && !ndflPerson.locality.equalsIgnoreCase(locality)) {
                         ndflPersonAddress.add("Населенный пункт=" + ndflPerson.locality ?: "")
                     }
 
                     // Адрес регистрации в Российской Федерации.Улица
-                    if (ndflPerson.street != null && !ndflPerson.street.equalsIgnoreCase(street.toLowerCase())) {
+                    if (ndflPerson.street != null && !ndflPerson.street.equalsIgnoreCase(street)) {
                         ndflPersonAddress.add("Улица=" + ndflPerson.street ?: "")
                     }
 
