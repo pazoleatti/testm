@@ -1,5 +1,6 @@
 package com.aplana.generators;
 
+import com.aplana.generators.data.FL;
 import com.aplana.generators.data.InfoPartTag;
 import com.aplana.generators.data.OperationInfoTag;
 import com.aplana.generators.data.KppOktmo;
@@ -8,9 +9,7 @@ import javax.xml.stream.*;
 import java.io.*;
 import java.util.*;
 
-import static com.aplana.generators.Dictionary.*;
 import static com.aplana.generators.Main.printStream;
-import static com.aplana.generators.Utils.*;
 
 /**
  * Класс для генерации ТФ (xml) РНУ НДФЛ
@@ -327,7 +326,7 @@ class GeneratorRnuNdflXml {
     private void generateInfoPart(InfoPartTag infoPartTag, XMLStreamWriter writer, Random random, int infoPartLevel, int count) throws XMLStreamException {
         for (int i = 0; i < count; i++) {
             writeElement(writer, TAG_INFO_PART, infoPartLevel, false, infoPartTag.getInfoPartTagAttributes());
-            generateFLData(infoPartTag.getIncomeTagAttributes(), random);
+            generateFLData(infoPartTag.getIncomeTagAttributes());
             writeElement(writer, TAG_INCOME, infoPartLevel + 1, true, infoPartTag.getIncomeTagAttributes());
             for (OperationInfoTag operInfo : infoPartTag.getOperationInfoTags()) {
                 generateOperationInfo(operInfo.getOperationInfoTagAttributes(), random);
@@ -351,19 +350,18 @@ class GeneratorRnuNdflXml {
      * Сгенерировать данные для ТФ по ФЛ и записать их в атрибуты тега ПолучДох
      *
      * @param incomeAttributes Атрибуты тега ПолучДох
-     * @param random           Генератор случайных чисел
      */
-    private void generateFLData(Map<String, String> incomeAttributes, Random random) {
-        String inp = String.valueOf(1000000000 + random.nextInt(2000000000));
-        incomeAttributes.put(ATTR_INP, inp.length() == 10 ? inp : inp.substring(inp.length() - 10, inp.length()));
-        incomeAttributes.put(ATTR_SNILS, generateSnils(random));
-        incomeAttributes.put(ATTR_SURNAME, lastnameDictionary.get(random.nextInt(lastnameDictionary.size())));
-        incomeAttributes.put(ATTR_NAME_1, firstnameDictionary.get(random.nextInt(firstnameDictionary.size())));
-        incomeAttributes.put(ATTR_NAME_2, middlenameDictionary.get(random.nextInt(middlenameDictionary.size())));
-        incomeAttributes.put(ATTR_BIRTHDAY, generateDate(random));
-        incomeAttributes.put(ATTR_INN, generateInn(random));
+    private void generateFLData(Map<String, String> incomeAttributes) {
+        FL fl = FL.generate();
+        incomeAttributes.put(ATTR_INP, fl.inp);
+        incomeAttributes.put(ATTR_SNILS, fl.snils);
+        incomeAttributes.put(ATTR_SURNAME, fl.lastname);
+        incomeAttributes.put(ATTR_NAME_1, fl.firstname);
+        incomeAttributes.put(ATTR_NAME_2, fl.middlename);
+        incomeAttributes.put(ATTR_BIRTHDAY, fl.birthday);
+        incomeAttributes.put(ATTR_INN, fl.inn);
         if (incomeAttributes.get(ATTR_PERS_CODE).equals(ATTR_PERS_CODE_VAL)) {
-            incomeAttributes.put(ATTR_PERS_NUM, generateNumberDul(random));
+            incomeAttributes.put(ATTR_PERS_NUM, fl.dul);
         }
     }
 

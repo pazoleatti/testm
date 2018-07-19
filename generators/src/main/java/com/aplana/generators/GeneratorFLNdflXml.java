@@ -1,5 +1,6 @@
 package com.aplana.generators;
 
+import com.aplana.generators.data.FL;
 import com.aplana.generators.data.InfoPartFLTag;
 
 import javax.xml.stream.*;
@@ -9,9 +10,7 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.generators.Dictionary.*;
 import static com.aplana.generators.Main.printStream;
-import static com.aplana.generators.Utils.*;
 
 public class GeneratorFLNdflXml {
 
@@ -338,7 +337,7 @@ public class GeneratorFLNdflXml {
             String idFlEnd = String.valueOf(Math.abs(1000000000 + random.nextInt(2000000000)));
             infoPartTag.getInfoPartTagAttributes().put(ATTR_ID_FL, templateIdFl + idFlEnd);
             writeElement(writer, TAG_INFO_PART, infoPartLevel, false, infoPartTag.getInfoPartTagAttributes());
-            generateFLData(infoPartTag.getFlDataTagAttributes(), infoPartTag.getFlDocTagAttributes(), random);
+            generateFLData(infoPartTag.getFlDataTagAttributes(), infoPartTag.getFlDocTagAttributes());
             writeElement(writer, TAG_FL_DATA, infoPartLevel + 1, true, infoPartTag.getFlDataTagAttributes());
             writeElement(writer, TAG_FL_DOC, infoPartLevel + 1, true, infoPartTag.getFlDocTagAttributes());
             writeElement(writer, TAG_SYSTEM_SOURCE, infoPartLevel + 1, true, infoPartTag.getSystemSourceTagAttributes());
@@ -352,15 +351,14 @@ public class GeneratorFLNdflXml {
      *
      * @param flDataTagAttributes Атрибуты тега АнкетДаннФЛ
      * @param flDocTagAttributes  Атрибуты тега УдЛичнФЛ
-     * @param random              Генератор случайных чисел
      */
-    private void generateFLData(Map<String, String> flDataTagAttributes, Map<String, String> flDocTagAttributes, Random random) {
-
-        flDataTagAttributes.put(ATTR_SURNAME, lastnameDictionary.get(random.nextInt(lastnameDictionary.size())));
-        flDataTagAttributes.put(ATTR_NAME_1, firstnameDictionary.get(random.nextInt(firstnameDictionary.size())));
-        flDataTagAttributes.put(ATTR_NAME_2, middlenameDictionary.get(random.nextInt(middlenameDictionary.size())));
-        flDataTagAttributes.put(ATTR_BIRTHDAY, generateDate(random));
-        flDataTagAttributes.put(ATTR_INN, generateInn(random));
-        flDocTagAttributes.put(ATTR_DUL_NUM, generateNumberDul(random));
+    private void generateFLData(Map<String, String> flDataTagAttributes, Map<String, String> flDocTagAttributes) {
+        FL fl = FL.generate();
+        flDataTagAttributes.put(ATTR_SURNAME, fl.lastname);
+        flDataTagAttributes.put(ATTR_NAME_1, fl.firstname);
+        flDataTagAttributes.put(ATTR_NAME_2, fl.middlename);
+        flDataTagAttributes.put(ATTR_BIRTHDAY, fl.birthday);
+        flDataTagAttributes.put(ATTR_INN, fl.inn);
+        flDocTagAttributes.put(ATTR_DUL_NUM, fl.dul);
     }
 }

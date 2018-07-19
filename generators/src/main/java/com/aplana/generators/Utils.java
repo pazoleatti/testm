@@ -7,9 +7,9 @@ import java.util.Random;
 
 import static com.aplana.generators.Dictionary.regionsDictionary;
 
-class Utils {
+public class Utils {
 
-    static String generateSnils(Random r) {
+    public static String generateSnils(Random r) {
         int group1 = r.nextInt(1000), group2 = r.nextInt(1000), group3 = r.nextInt(1000);
         int controlSum = 9 * (group1 / 100) + 8 * (group1 / 10 % 10) + 7 * (group1 % 10) +
                 6 * (group2 / 100) + 5 * (group2 / 10 % 10) + 4 * (group2 % 10) +
@@ -23,7 +23,7 @@ class Utils {
         return String.format("%03d-%03d-%03d-%02d", group1, group2, group3, controlSumMod);
     }
 
-    static String generateNumberDul(Random r) {
+    public static String generateNumberDul(Random r) {
         String numberDul = "";
 
         numberDul += (10 + r.nextInt(89)) + " " + (10 + r.nextInt(89)) + " " + (100000 + r.nextInt(899999));
@@ -37,7 +37,7 @@ class Utils {
      * @param r
      * @return
      */
-    static String generateDate(Random r) {
+    public static String generateDate(Random r) {
         Calendar calendar = Calendar.getInstance();
         int year = randomBetween(1970, 2000, r);
         int dayOfYear = randomBetween(1, calendar.getActualMaximum(Calendar.DAY_OF_YEAR), r);
@@ -55,7 +55,7 @@ class Utils {
      * @param r
      * @return
      */
-    static int randomBetween(int start, int end, Random r) {
+    public static int randomBetween(int start, int end, Random r) {
         int difference = end - start;
         return r.nextInt(difference) + start;
     }
@@ -66,7 +66,7 @@ class Utils {
      * @param r
      * @return
      */
-    static String generateInn(Random r) {
+    public static String generateInn(Random r) {
         StringBuilder builder = new StringBuilder(regionsDictionary.get(r.nextInt(regionsDictionary.size())));
         for (int i = 0; i < 8; i++) {
             builder.append(generateDigit(r));
@@ -82,7 +82,7 @@ class Utils {
      * @param r
      * @return
      */
-    static char generateDigit(Random r) {
+    public static char generateDigit(Random r) {
         String digits = "0123456789";
         return digits.charAt(r.nextInt(10));
     }
