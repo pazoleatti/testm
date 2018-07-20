@@ -12,7 +12,7 @@ select '"id";"code";"name";"type";"role_alias";"role_name";"priority"' from dual
 select 'Строки, которых нет в эталоне' from dual;
 
 select '"'||to_char(b.id)||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'";"'||to_char(b.type)||'";"'||to_char(b.role_alias)||'";"'||to_char(b.role_name)||'";"'||to_char(b.priority)||'"'
-from ndfl_etalon.REF_BOOK_ASNU a
+from &3..REF_BOOK_ASNU a
 full outer join &2..REF_BOOK_ASNU b 
 on a.code=b.code and a.name=b.name and a.type=b.type and 
 (a.role_alias=b.role_alias or (a.role_alias is null and b.role_alias is null)) and 
@@ -24,7 +24,7 @@ order by b.code, b.name, b.priority;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'";"'||to_char(a.type)||'";"'||to_char(a.role_alias)||'";"'||to_char(a.role_name)||'";"'||to_char(a.priority)||'"'
-from ndfl_etalon.REF_BOOK_ASNU a
+from &3..REF_BOOK_ASNU a
 full outer join &2..REF_BOOK_ASNU b 
 on a.code=b.code and a.name=b.name and a.type=b.type and 
 (a.role_alias=b.role_alias or (a.role_alias is null and b.role_alias is null)) and 
@@ -43,8 +43,8 @@ select '"'||to_char(t2.id)||'";"'||to_char(t2.income_type_version,'DD.MM.YYYY')|
 to_char(t2.income_type_name)||'";"'||to_char(t2.mark)||'";"'||to_char(t2.name)||'";"'||to_char(t2.version,'DD.MM.YYYY')||'";"'||to_char(t2.status)||'";"'||to_char(t2.record_id)||'"'
 from 
 (select a1.id, b1.version income_type_version, b1.status income_type_status, b1.code income_type_code, 
-b1.name income_type_name,a1.mark, a1.name, a1.version, a1.status, a1.record_id from ndfl_etalon.REF_BOOK_INCOME_KIND a1 
-join ndfl_etalon.ref_book_income_type b1 on a1.income_type_id=b1.id) t1
+b1.name income_type_name,a1.mark, a1.name, a1.version, a1.status, a1.record_id from &3..REF_BOOK_INCOME_KIND a1 
+join &3..ref_book_income_type b1 on a1.income_type_id=b1.id) t1
 full outer join 
 (select a2.id, b2.version income_type_version, b2.status income_type_status, b2.code income_type_code, 
 b2.name income_type_name,a2.mark, a2.name, a2.version, a2.status, a2.record_id from &2..REF_BOOK_INCOME_KIND a2
@@ -56,14 +56,14 @@ t1.version=t2.version and t1.status=t2.status
 where t1.id is null
 order by t2.mark, t2.version, t2.status, t2.name;
 
-select 'Строки, которых есть в эталоне, но отсутствуют в схеме' from dual; 
+select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(t1.id)||'";"'||to_char(t1.income_type_version,'DD.MM.YYYY')||'";"'||to_char(t1.income_type_status)||'";"'||to_char(t1.income_type_code)||'";"'||
 to_char(t1.income_type_name)||'";"'||to_char(t1.mark)||'";"'||to_char(t1.name)||'";"'||to_char(t1.version,'DD.MM.YYYY')||'";"'||to_char(t1.status)||'";"'||to_char(t1.record_id)||'"'
 from 
 (select a1.id, b1.version income_type_version, b1.status income_type_status, b1.code income_type_code, 
-b1.name income_type_name,a1.mark, a1.name, a1.version, a1.status, a1.record_id from ndfl_etalon.REF_BOOK_INCOME_KIND a1 
-join ndfl_etalon.ref_book_income_type b1 on a1.income_type_id=b1.id) t1
+b1.name income_type_name,a1.mark, a1.name, a1.version, a1.status, a1.record_id from &3..REF_BOOK_INCOME_KIND a1 
+join &3..ref_book_income_type b1 on a1.income_type_id=b1.id) t1
 full outer join 
 (select a2.id, b2.version income_type_version, b2.status income_type_status, b2.code income_type_code, 
 b2.name income_type_name,a2.mark, a2.name, a2.version, a2.status, a2.record_id from &2..REF_BOOK_INCOME_KIND a2
@@ -82,7 +82,7 @@ select '"cdate";"ctype";"id"' from dual;
 select 'Строки, которых нет в эталоне' from dual;
 
 select '"'||to_char(b.cdate,'DD.MM.YYYY')||'";"'||to_char(b.ctype)||'";"'||to_char(b.id)||'"'
-from ndfl_etalon.REF_BOOK_CALENDAR a
+from &3..REF_BOOK_CALENDAR a
 full outer join &2..REF_BOOK_CALENDAR b 
 on a.cdate=b.cdate and a.ctype=b.ctype
 where a.id is null
@@ -91,7 +91,7 @@ order by b.cdate;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.cdate,'DD.MM.YYYY')||'";"'||to_char(a.ctype)||'";"'||to_char(a.id)||'"'
-from ndfl_etalon.REF_BOOK_CALENDAR a
+from &3..REF_BOOK_CALENDAR a
 full outer join &2..REF_BOOK_CALENDAR b 
 on a.cdate=b.cdate and a.ctype=b.ctype
 where b.id is null
@@ -107,8 +107,8 @@ select '"'||to_char(t2.id)||'";"'||to_char(t2.record_id)||'";"'||to_char(t2.vers
 ||to_char(t2.mark_version,'DD.MM.YYYY')||'";"'||to_char(t2.mark_status)||'";"'||to_char(t2.mark_code)||'";"'||to_char(t2.mark_name)||'"'
 from 
 (select a1.id, a1.record_id, a1.version, a1.status, a1.code, a1.name, b1.version as mark_version, b1.status as mark_status,
-b1.code as mark_code, b1.name as mark_name from ndfl_etalon.REF_BOOK_DEDUCTION_TYPE a1
-join ndfl_etalon.ref_book_deduction_mark b1 on a1.deduction_mark=b1.id) t1 
+b1.code as mark_code, b1.name as mark_name from &3..REF_BOOK_DEDUCTION_TYPE a1
+join &3..ref_book_deduction_mark b1 on a1.deduction_mark=b1.id) t1 
 full outer join
 (select a2.id, a2.record_id, a2.version, a2.status, a2.code, a2.name, b2.version as mark_version, b2.status as mark_status,
 b2.code as mark_code, b2.name as mark_name from &2..REF_BOOK_DEDUCTION_TYPE a2
@@ -124,8 +124,8 @@ select '"'||to_char(t1.id)||'";"'||to_char(t1.record_id)||'";"'||to_char(t1.vers
 ||to_char(t1.mark_version,'DD.MM.YYYY')||'";"'||to_char(t1.mark_status)||'";"'||to_char(t1.mark_code)||'";"'||to_char(t1.mark_name)||'"'
 from
 (select a1.id, a1.record_id, a1.version, a1.status, a1.code, a1.name, b1.version as mark_version, b1.status as mark_status,
-b1.code as mark_code, b1.name as mark_name from ndfl_etalon.REF_BOOK_DEDUCTION_TYPE a1
-join ndfl_etalon.ref_book_deduction_mark b1 on a1.deduction_mark=b1.id) t1 
+b1.code as mark_code, b1.name as mark_name from &3..REF_BOOK_DEDUCTION_TYPE a1
+join &3..ref_book_deduction_mark b1 on a1.deduction_mark=b1.id) t1 
 full outer join
 (select a2.id, a2.record_id, a2.version, a2.status, a2.code, a2.name, b2.version as mark_version, b2.status as mark_status,
 b2.code as mark_code, b2.name as mark_name from &2..REF_BOOK_DEDUCTION_TYPE a2
@@ -142,7 +142,7 @@ select '"id";"record_id";"version";"status";"code";"name"' from dual;
 select 'Строки, которых нет в эталоне' from dual; 
 
 select '"'||to_char(b.id)||'";"'||to_char(b.record_id)||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.status)||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'"'
-from ndfl_etalon.REF_BOOK_INCOME_TYPE a 
+from &3..REF_BOOK_INCOME_TYPE a 
 full outer join &2..REF_BOOK_INCOME_TYPE b 
 on a.code=b.code and a.name=b.name and a.status=b.status and a.version=b.version
 where a.id is null
@@ -151,7 +151,7 @@ order by b.code, b.version, b.status, b.name;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.record_id)||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.status)||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'"'
-from ndfl_etalon.REF_BOOK_INCOME_TYPE a 
+from &3..REF_BOOK_INCOME_TYPE a 
 full outer join &2..REF_BOOK_INCOME_TYPE b 
 on a.code=b.code and a.name=b.name and a.status=b.status and a.version=b.version
 where b.id is null
@@ -164,7 +164,7 @@ select '"id";"record_id";"status";"version";"code";"name";"priority"' from dual;
 select 'Строки, которых нет в эталоне' from dual;
 
 select '"'||to_char(b.id)||'";"'||to_char(b.record_id)||'";"'||to_char(b.status)||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'";"'||to_char(b.priority)||'"'
-from ndfl_etalon.REF_BOOK_DOC_TYPE a
+from &3..REF_BOOK_DOC_TYPE a
 full outer join &2..REF_BOOK_DOC_TYPE b 
 on a.status=b.status and a.version=b.version and a.code=b.code and a.name=b.name and 
 (a.priority=b.priority or (a.priority is null and b.priority is null))
@@ -174,7 +174,7 @@ order by b.code, b.version, b.status, b.name;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.record_id)||'";"'||to_char(a.status)||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'";"'||to_char(a.priority)||'"'
-from ndfl_etalon.REF_BOOK_DOC_TYPE a
+from &3..REF_BOOK_DOC_TYPE a
 full outer join &2..REF_BOOK_DOC_TYPE b 
 on a.status=b.status and a.version=b.version and a.code=b.code and a.name=b.name and 
 (a.priority=b.priority or (a.priority is null and b.priority is null))
@@ -188,7 +188,7 @@ select '"id";"record_id";"version";"status";"code";"name"' from dual;
 select 'Строки, которых нет в эталоне' from dual; 
 
 select '"'||to_char(b.id)||'";"'||to_char(b.record_id)||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.status)||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'"'
-from ndfl_etalon.REF_BOOK_PRESENT_PLACE a 
+from &3..REF_BOOK_PRESENT_PLACE a 
 full outer join &2..REF_BOOK_PRESENT_PLACE b 
 on a.version=b.version and a.status=b.status and a.code=b.code and a.name=b.name
 where a.id is null
@@ -197,7 +197,7 @@ order by b.code, b.version, b.status, b.name;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.record_id)||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.status)||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'"'
-from ndfl_etalon.REF_BOOK_PRESENT_PLACE a 
+from &3..REF_BOOK_PRESENT_PLACE a 
 full outer join &2..REF_BOOK_PRESENT_PLACE b 
 on a.version=b.version and a.status=b.status and a.code=b.code and a.name=b.name
 where b.id is null
@@ -211,7 +211,7 @@ select 'Строки, которых нет в эталоне' from dual;
 
 select '"'||to_char(b.id)||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'";"'||to_char(b.start_date,'DD.MM.YYYY')||'";"'||to_char(b.end_date,'DD.MM.YYYY')||'";"'||
 to_char(b.calendar_start_date,'DD.MM.YYYY')||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.status)||'";"'||to_char(b.record_id)||'"'
-from ndfl_etalon.REPORT_PERIOD_TYPE a 
+from &3..REPORT_PERIOD_TYPE a 
 full outer join &2..REPORT_PERIOD_TYPE b 
 on a.code=b.code and a.name=b.name and 
 (a.start_date=b.start_date or (a.start_date is null and b.start_date is null)) and
@@ -225,7 +225,7 @@ select 'Строки, которые есть в эталоне, но отсут
 
 select '"'||to_char(a.id)||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'";"'||to_char(a.start_date,'DD.MM.YYYY')||'";"'||to_char(a.end_date,'DD.MM.YYYY')||'";"'||
 to_char(a.calendar_start_date,'DD.MM.YYYY')||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.status)||'";"'||to_char(a.record_id)||'"'
-from ndfl_etalon.REPORT_PERIOD_TYPE a 
+from &3..REPORT_PERIOD_TYPE a 
 full outer join &2..REPORT_PERIOD_TYPE b 
 on a.code=b.code and a.name=b.name and 
 (a.start_date=b.start_date or (a.start_date is null and b.start_date is null)) and
@@ -247,8 +247,8 @@ select '"'||to_char(t2.id)||'";"'||to_char(t2.record_id)||'";"'||to_char(t2.vers
 from 
 (select a1.id, a1.record_id, a1.version, a1.status, a1.code, a1.name, a1.okato_definition,
 b1.code as oktmo_code, b1.name as oktmo_name, b1.version as oktmo_version, b1.status as oktmo_status,
-b1.razd as oktmo_razd, a1.oktmo_definition from ndfl_etalon.REF_BOOK_REGION a1
-left join ndfl_etalon.ref_book_oktmo b1 on a1.oktmo=b1.id) t1 
+b1.razd as oktmo_razd, a1.oktmo_definition from &3..REF_BOOK_REGION a1
+left join &3..ref_book_oktmo b1 on a1.oktmo=b1.id) t1 
 full outer join
 (select a2.id, a2.record_id, a2.version, a2.status, a2.code, a2.name, a2.okato_definition,
 b2.code as oktmo_code, b2.name as oktmo_name, b2.version as oktmo_version, b2.status as oktmo_status,
@@ -273,8 +273,8 @@ select '"'||to_char(t1.id)||'";"'||to_char(t1.record_id)||'";"'||to_char(t1.vers
 from 
 (select a1.id, a1.record_id, a1.version, a1.status, a1.code, a1.name, a1.okato_definition,
 b1.code as oktmo_code, b1.name as oktmo_name, b1.version as oktmo_version, b1.status as oktmo_status,
-b1.razd as oktmo_razd, a1.oktmo_definition from ndfl_etalon.REF_BOOK_REGION a1
-left join ndfl_etalon.ref_book_oktmo b1 on a1.oktmo=b1.id) t1 
+b1.razd as oktmo_razd, a1.oktmo_definition from &3..REF_BOOK_REGION a1
+left join &3..ref_book_oktmo b1 on a1.oktmo=b1.id) t1 
 full outer join
 (select a2.id, a2.record_id, a2.version, a2.status, a2.code, a2.name, a2.okato_definition,
 b2.code as oktmo_code, b2.name as oktmo_name, b2.version as oktmo_version, b2.status as oktmo_status,
@@ -298,7 +298,7 @@ select '"id";"record_id";"version";"status";"code";"name"' from dual;
 select 'Строки, которых нет в эталоне' from dual; 
 
 select '"'||to_char(b.id)||'";"'||to_char(b.record_id)||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.status)||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'"'
-from ndfl_etalon.REF_BOOK_REORGANIZATION a 
+from &3..REF_BOOK_REORGANIZATION a 
 full outer join &2..REF_BOOK_REORGANIZATION b 
 on a.version=b.version and a.status=b.status and a.code=b.code and a.name=b.name
 where a.id is null
@@ -307,7 +307,7 @@ order by b.code, b.version, b.status, b.name;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.record_id)||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.status)||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'"'
-from ndfl_etalon.REF_BOOK_REORGANIZATION a 
+from &3..REF_BOOK_REORGANIZATION a 
 full outer join &2..REF_BOOK_REORGANIZATION b 
 on a.version=b.version and a.status=b.status and a.code=b.code and a.name=b.name
 where b.id is null
@@ -320,7 +320,7 @@ select '"id";"record_id";"version";"status";"code";"name"' from dual;
 select 'Строки, которых нет в эталоне' from dual; 
 
 select '"'||to_char(b.id)||'";"'||to_char(b.record_id)||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.status)||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'"'
-from ndfl_etalon.REF_BOOK_DEDUCTION_MARK a 
+from &3..REF_BOOK_DEDUCTION_MARK a 
 full outer join &2..REF_BOOK_DEDUCTION_MARK b 
 on a.version=b.version and a.status=b.status and a.code=b.code and a.name=b.name
 where a.id is null
@@ -329,7 +329,7 @@ order by b.code, b.version, b.status, b.name;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.record_id)||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.status)||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'"'
-from ndfl_etalon.REF_BOOK_DEDUCTION_MARK a 
+from &3..REF_BOOK_DEDUCTION_MARK a 
 full outer join &2..REF_BOOK_DEDUCTION_MARK b 
 on a.version=b.version and a.status=b.status and a.code=b.code and a.name=b.name
 where b.id is null
@@ -342,7 +342,7 @@ select '"id";"record_id";"status";"version";"code";"name"' from dual;
 select 'Строки, которых нет в эталоне' from dual; 
 
 select '"'||to_char(b.id)||'";"'||to_char(b.record_id)||'";"'||to_char(b.status)||'";"'||to_char(b.version,'DD.MM.YYYY')||'";"'||to_char(b.code)||'";"'||to_char(b.name)||'"'
-from ndfl_etalon.REF_BOOK_SIGNATORY_MARK a 
+from &3..REF_BOOK_SIGNATORY_MARK a 
 full outer join &2..REF_BOOK_SIGNATORY_MARK b 
 on a.status=b.status and a.version=b.version and a.code=b.code and a.name=b.name
 where a.id is null
@@ -351,7 +351,7 @@ order by b.code, b.version, b.status, b.name;
 select 'Строки, которые есть в эталоне, но отсутствуют в схеме' from dual; 
 
 select '"'||to_char(a.id)||'";"'||to_char(a.record_id)||'";"'||to_char(a.status)||'";"'||to_char(a.version,'DD.MM.YYYY')||'";"'||to_char(a.code)||'";"'||to_char(a.name)||'"'
-from ndfl_etalon.REF_BOOK_SIGNATORY_MARK a 
+from &3..REF_BOOK_SIGNATORY_MARK a 
 full outer join &2..REF_BOOK_SIGNATORY_MARK b 
 on a.status=b.status and a.version=b.version and a.code=b.code and a.name=b.name
 where b.id is null
