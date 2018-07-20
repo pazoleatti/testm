@@ -93,4 +93,20 @@
         </update>
     </changeSet>
 
+    <!-- SBRFNDFL-5184 Реализовать возможность хранения для ФЛ списка тербанков и заполнять этот список ТБ при первичной загрузке ФЛ  -->
+    <changeSet id="3.0.1-ytrofimov-3" author="ytrofimov">
+        <update tableName="REF_BOOK_ATTRIBUTE">
+            <column name="name" value="Идентификатор версии ФЛ"/>
+            <where>id=9081</where>
+        </update>
+        <update tableName="REF_BOOK_ATTRIBUTE">
+            <column name="name" value="Тербанк"/>
+            <where>id=9082</where>
+        </update>
+        <update tableName="REF_BOOK_ATTRIBUTE">
+            <column name="name" value="Дата"/>
+            <where>id=9083</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
