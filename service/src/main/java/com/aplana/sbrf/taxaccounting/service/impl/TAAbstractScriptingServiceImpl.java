@@ -178,7 +178,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
                 try {
                     String line = reader.readLine();
                     if (line != null && line.equals("package " + packageName) && line.contains(file.getName().substring(0, file.getName().indexOf(".groovy")))
-                            || (packageName.contains("refbook") && packageName.contains(file.getName().substring(0, file.getName().indexOf(".groovy"))))) {
+                            || (packageName.equals("refbook." + file.getName().substring(0, file.getName().indexOf(".groovy")) + "_ref"))) {
                         return file.getAbsolutePath();
                     }
                 } finally {

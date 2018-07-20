@@ -167,7 +167,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
-        throw new UnsupportedOperationException();
+        return refBookDepartmentDao.getRecordData(recordIds);
     }
 
     @Override

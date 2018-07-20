@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- SBRFNDFL-5184 Реализовать возможность хранения для ФЛ списка тербанков и заполнять этот список ТБ при первичной загрузке ФЛ  -->
+    <changeSet id="3.0.1-ytrofimov-0" author="ytrofimov">
+        <insert tableName="blob_data">
+            <column name="id" value="10d898c7-8db0-4df2-a4f2-3df135deab40"/>
+            <column name="name" value="tb-person.groovy"/>
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/tb_person.groovy"/>
+            <column name="creation_date" valueDate="2018-07-19"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="9538d273-51dd-4331-9c1c-510468b5ebee"/>
+            <column name="name" value="person_tb.groovy"/>
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/person_tb.groovy"/>
+            <column name="creation_date" valueDate="2018-07-19"/>
+        </insert>
+    </changeSet>
+
+    <!-- SBRFNDFL-5184 Реализовать возможность хранения для ФЛ списка тербанков и заполнять этот список ТБ при первичной загрузке ФЛ  -->
+    <changeSet id="3.0.1-ytrofimov-1" author="ytrofimov">
+        <sql>
+            create table ref_book_tb_person
+            (
+            id number(18) not null,
+            record_id number(18) not null,
+            version date not null,
+            status number(1) not null,
+            guid varchar2(500 char) not null,
+            tb_department_id number(18) not null
+            );
+            comment on table ref_book_tb_person is 'Справочник Тербанки для ФЛ при первичной загрузке';
+            comment on column ref_book_tb_person.id is 'Уникальный идентификатор';
+            comment on column ref_book_tb_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+            comment on column ref_book_tb_person.version is 'Версия. Дата актуальности записи';
+            comment on column ref_book_tb_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+            comment on column ref_book_tb_person.guid is 'Значение GUID';
+            comment on column ref_book_tb_person.tb_department_id is 'Ссылка на запись Справочник Подразделения';
+            alter table ref_book_tb_person add constraint ref_book_tb_person_pk primary key (id);
+            alter table ref_book_tb_person add constraint tb_person_fk_department foreign key (tb_department_id) references department (id);
+            alter table ref_book_tb_person add constraint chk_ref_book_tb_person_status check (status in (-1, 0, 1, 2));
+
+            create table ref_book_person_tb
+            (
+            id number(18) not null,
+            record_id number(18) not null,
+            version date not null,
+            status number(1) not null,
+            person_id number(18) not null,
+            tb_department_id number(18) not null,
+            import_date timestamp default null
+            );
+            comment on table ref_book_person_tb is 'Список тербанков назначенных ФЛ';
+            comment on column ref_book_person_tb.id is 'Уникальный идентификатор';
+            comment on column ref_book_person_tb.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+            comment on column ref_book_person_tb.version is 'Версия. Дата актуальности записи';
+            comment on column ref_book_person_tb.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+            comment on column ref_book_person_tb.person_id is 'Ссылка на запись справочника ФЛ';
+            comment on column ref_book_person_tb.tb_department_id is 'Ссылка на тербанк';
+            comment on column ref_book_person_tb.import_date is 'Время выгрузки файла для загрузки справочника ФЛ';
+            alter table ref_book_person_tb add constraint ref_book_person_tb_pk primary key (id);
+            alter table ref_book_person_tb add constraint person_tb_fk_person foreign key (person_id) references ref_book_person(id) on delete cascade;
+            alter table ref_book_person_tb add constraint person_tb_fk_department foreign key (tb_department_id) references department(id) on delete cascade;
+            alter table ref_book_person_tb add constraint chk_ref_book_person_tb_status check (status in (-1, 0, 1, 2));
+        </sql>
+        <sql splitStatements="false">
+            begin
+            insert into ref_book (id, name, script_id, visible, type, read_only, table_name, is_versioned) values (907, 'Тербанки для ФЛ при первичной загрузке', '10d898c7-8db0-4df2-a4f2-3df135deab40',  1, 0, 0, 'REF_BOOK_TB_PERSON', 0);
+            insert into ref_book (id, name, script_id, visible, type, read_only, table_name, is_versioned) values (908, 'Список тербанков назначенных ФЛ', '9538d273-51dd-4331-9c1c-510468b5ebee', 1, 0, 0, 'REF_BOOK_PERSON_TB', 0);
+
+            insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9071, 907, 'Значение GUID', 'GUID', 1, 1, null, null, 1, null, 15, 1, 1, null, null, 0, 500);
+            insert into ref_book_attribute (id, ref_book_id, name ,alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9072, 907, 'Тербанк', 'TB_DEPARTMENT_ID', 4, 2, 30, 161, 1, null, 15, 1, 0, null, null, 0, null);
+
+            insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9081, 908, 'Ссылка на версию ФЛ', 'PERSON_ID', 4, 1, 904, 9041, 1, null, 15, 1, 0, null, null, 0, null);
+            insert into ref_book_attribute (id, ref_book_id, name ,alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9082, 908, 'Ссылка на запись справочника Подразделений', 'TB_DEPARTMENT_ID', 4, 2, 30, 161, 1, null, 15, 1, 0, null, null, 0, null);
+            insert into ref_book_attribute (id, ref_book_id, name ,alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9083, 908, 'Дата, показывающая, когда в Систему была загружена из даного ТБ последняя РНУ.', 'IMPORT_DATE', 3, 3, null, null, 1, null, 15, 0, 0, null, 1, 0, null);
+            end;
+        </sql>
+    </changeSet>
+
+    <!-- SBRFNDFL-5184 Реализовать возможность хранения для ФЛ списка тербанков и заполнять этот список ТБ при первичной загрузке ФЛ  -->
+    <changeSet id="3.0.1-ytrofimov-2" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+            <where>id=(select script_id from ref_book where id = 904)</where>
+        </update>
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/declaration_type.groovy"/>
+            <where>id=(select script_id from ref_book where id = 207)</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

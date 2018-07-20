@@ -1530,3 +1530,43 @@ CREATE GLOBAL TEMPORARY TABLE TMP_STRING_PAIRS(
   STRING1 VARCHAR2(4000 BYTE),
   STRING2 VARCHAR2(4000 BYTE)
 ) ON COMMIT DELETE ROWS;
+
+----------------------------------------------------------------------------------------------------------
+--Справочник Тербанки для ФЛ
+----------------------------------------------------------------------------------------------------------
+create table ref_book_tb_person
+(
+  id number(18) not null,
+  record_id number(18) not null,
+  version date not null,
+  status number(1) not null,
+  guid varchar2(500 char) not null,
+  tb_department_id number(18) not null
+);
+comment on table ref_book_tb_person is 'Справочник Тербанки для ФЛ при первичной загрузке';
+comment on column ref_book_tb_person.id is 'Уникальный идентификатор';
+comment on column ref_book_tb_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_tb_person.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_tb_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_tb_person.guid is 'Значение GUID';
+comment on column ref_book_tb_person.tb_department_id is 'Ссылка на запись Справочник Подразделения';
+
+create table ref_book_person_tb
+(
+  id number(18) not null,
+  record_id number(18) not null,
+  version date not null,
+  status number(1) not null,
+  person_id number(18) not null,
+  tb_department_id number(18) not null,
+  import_date timestamp default null
+);
+
+comment on table ref_book_person_tb is 'Список тербанков назначенных ФЛ';
+comment on column ref_book_person_tb.id is 'Уникальный идентификатор';
+comment on column ref_book_person_tb.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_person_tb.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_person_tb.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_person_tb.person_id is 'Ссылка на запись справочника ФЛ';
+comment on column ref_book_person_tb.tb_department_id is 'Ссылка на тербанк';
+comment on column ref_book_person_tb.import_date is 'Дата, показывающая, когда в Систему была загружена из даного ТБ последняя РНУ.';

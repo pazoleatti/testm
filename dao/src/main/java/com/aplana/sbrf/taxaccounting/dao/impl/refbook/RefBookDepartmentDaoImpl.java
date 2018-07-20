@@ -69,6 +69,11 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 		return refBookDao.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
     }
 
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds) {
+        return refBookDao.getRecordData(REF_BOOK_ID, uniqRecordIds);
+    }
+
     private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION =
             "select name from department t where t.is_active = 1 AND %s %s %s";
     @Override
