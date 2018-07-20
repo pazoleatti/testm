@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
@@ -48,6 +49,8 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     ReportPeriodDao reportPeriodDao;
     @Autowired
     RefBookDao refBookDao;
+    @Autowired
+    RefBookSimpleDao refBookSimpleDao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -71,7 +74,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds) {
-        return refBookDao.getRecordData(REF_BOOK_ID, uniqRecordIds);
+        return refBookSimpleDao.getRecordData(refBookDao.get(REF_BOOK_ID), uniqRecordIds);
     }
 
     private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION =
