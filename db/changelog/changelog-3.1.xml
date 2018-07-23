@@ -59,7 +59,7 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-4982 Уведомление об отсутствии пары КПП/ОКТМО в справочнике "Настройки подразделений" -->
 	<changeSet id="3.1-rnurgaleev-0" author="rnurgaleev">
         <sql>
@@ -67,7 +67,7 @@
 			where oktmo in (select id from ref_book_oktmo where status=2);
         </sql>
     </changeSet>
-	
+
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-4947 "Дата окончания актуальности" для "Кодов видов вычета" = 221 не соответствует постановке -->
 	<changeSet id="3.1-rnurgaleev-1" author="rnurgaleev">
         <sql>
@@ -76,7 +76,7 @@
 			and version=to_date('25.12.16','DD.MM.YY');
 		</sql>
     </changeSet>
-	
+
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-4984 Уведомление об отсутствии пары "Код дохода"/"Признак дохода" в справочнике "Виды дохода" -->
 	<changeSet id="3.1-rnurgaleev-2" author="rnurgaleev">
         <sql>
@@ -119,27 +119,27 @@
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 106</where>
         </update>
     </changeSet>
-	
+
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-5066 Изучить причины высокого потребления памяти СУБД при консолидации НФ -->
 	<changeSet id="3.1-rnurgaleev-3" author="rnurgaleev">
         <sql>
 			create global temporary table tmp_cons_data(
-				operation_id varchar2(100 char), 
-				asnu_id number(18), 
-				inp varchar2(25 char), 
-				year number(4), 
-				period_code varchar2(2 char), 
+				operation_id varchar2(100 char),
+				asnu_id number(18),
+				inp varchar2(25 char),
+				year number(4),
+				period_code varchar2(2 char),
 				correction_date date)
 			on commit delete rows;
 		</sql>
     </changeSet>
-	
+
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-4984 Уведомление об отсутствии пары "Код дохода"/"Признак дохода" в справочнике "Виды дохода" -->
 	<changeSet id="3.1-rnurgaleev-4" author="rnurgaleev">
         <sql>
-			update ref_book_income_kind b 
-				set record_id=(select max(record_id) from ref_book_income_kind a 
-					where exists(select 1 from ref_book_income_type where id=a.income_type_id and code='1011') 
+			update ref_book_income_kind b
+				set record_id=(select max(record_id) from ref_book_income_kind a
+					where exists(select 1 from ref_book_income_type where id=a.income_type_id and code='1011')
 					and a.version=to_date('01.01.2016','DD.MM.YYYY')
 					and a.mark='00' and a.status=0)
 			where exists(select 1 from ref_book_income_type where id=b.income_type_id and code='1011') and b.version=to_date('01.01.2017','DD.MM.YYYY')
@@ -226,6 +226,49 @@
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.1-ytrofimov-8" author="ytrofimov">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="101"/>
+            <column name="BLOB_DATA_ID" value="4b85f92c-7fd0-4d67-834d-e61g34684336"/>
+        </insert>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5088 Реализовать изменения в форматах чисел в шаблонах файлов Excel-->
+    <changeSet id="3.1-ytrofimov-8" author="ytrofimov">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="101"/>
+            <column name="BLOB_DATA_ID" value="4b85f92c-7fd0-4d67-834d-e61g34684336"/>
+        </insert>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5088 Реализовать изменения в форматах чисел в шаблонах файлов Excel-->
+    <changeSet id="3.1-ytrofimov-9" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="JRXML" value=""/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="JRXML" value=""/>
+            <where>declaration_type_id = 101</where>
         </update>
     </changeSet>
 

@@ -2,7 +2,12 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.BlobData
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -23,18 +28,12 @@ import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
 import groovy.util.slurpersupport.NodeChild
-import net.sf.jasperreports.engine.JasperPrint
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-import javax.xml.stream.events.Attribute
-import javax.xml.stream.events.EndElement
-import javax.xml.stream.events.StartElement
 import java.text.SimpleDateFormat
 
 new PrimaryRnuNdfl(this).run();
@@ -124,8 +123,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 break
             case FormDataEvent.IMPORT_TRANSPORT_FILE:
                 importData()
-                // Формирование pdf-отчета формы
-                declarationService.createPdfReport(logger, declarationData, userInfo)
                 break
             case FormDataEvent.PREPARE_SPECIFIC_REPORT:
                 // Подготовка для последующего формирования спецотчета
@@ -452,35 +449,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
         }
     }
-    /**
-     * Спец. отчет "РНУ НДФЛ по физическому лицу". Данные макет извлекает непосредственно из бд
-     */
-    def createSpecificReportPersonDb() {
-        DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = scriptSpecificReportHolder.getSelectedRecord()
-        NdflPerson ndflPerson = null
-        if (row != null) {
-            ndflPerson = ndflPersonService.get(Long.valueOf(row.id))
-
-            Map<String, String> subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
-            subReportViewParams.put('Фамилия', (String) row.lastName)
-            subReportViewParams.put('Имя', (String) row.firstName)
-            subReportViewParams.put('Отчество', (String) row.middleName)
-            subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(SharedConstants.DATE_FORMAT) : "")
-            subReportViewParams.put('№ ДУЛ', (String) row.idDocNumber)
-
-        } else {
-            ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
-        }
-        if (ndflPerson != null) {
-            Map<String, Object> params = [NDFL_PERSON_ID: (Object) ndflPerson.id];
-
-            JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params);
-            exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-            scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
-        } else {
-            throw new ServiceException("Не найдены данные для формирования отчета!");
-        }
-    }
 
     void loadPersonDataToExcel() {
         List<NdflPerson> ndflPersonList = []
@@ -540,35 +508,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         } else {
             throw new ServiceException("Не найдены данные для формирования отчета!");
         }
-    }
-
-    void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
-        try {
-            JRXlsxExporter exporter = new JRXlsxExporter();
-            exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
-                    jasperPrint);
-            exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
-            exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
-                    Boolean.TRUE);
-            exporter.setParameter(
-                    JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
-                    Boolean.FALSE);
-
-            exporter.exportReport();
-            exporter.reset();
-        } catch (Exception e) {
-            throw new ServiceException(
-                    "Невозможно экспортировать отчет в XLSX", e) as Throwable
-        }
-    }
-
-    /**
-     * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
-     */
-    def createSpecificReportDb() {
-        def params = [declarationId: (Object) declarationData.id]
-        JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params);
-        exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     }
 
     /**
@@ -817,35 +756,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
             logger.error("Налоговая форма не создана.")
         }
-    }
-
-    String processStartElement(StartElement start) {
-        String var1 = "<" + start.getName().getLocalPart();
-        Iterator var2;
-        Attribute var3;
-        if (start.getAttributes() != null) {
-            var2 = start.getAttributes();
-            for (var3 = null; var2.hasNext(); var1 = var1 + " " + processAttr(var3)) {
-                //println processAttr(var3)
-                var3 = (Attribute) var2.next();
-            }
-        }
-        var1 = var1 + ">";
-        return var1;
-    }
-
-    String processAttr(Attribute attr) {
-        if (attr != null) {
-            return attr.getName().getLocalPart() + "=\'" + attr.getValue() + "\'"
-        } else {
-            return "";
-        }
-    }
-
-    String processEndElement(EndElement end) {
-        StringBuffer var1 = new StringBuffer();
-        var1.append("</").append(end.getName().getLocalPart()).append(">");
-        return var1.toString();
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
@@ -1491,17 +1401,18 @@ class SheetFillerFactory {
     public static SheetFiller getSheetFiller(int sheetIndex) {
         switch (sheetIndex) {
             case 0:
-                return new TitleSheetFiller();
+                return new TitleSheetFiller()
             case 1:
-                return new RequisitesSheetFiller();
+                return new RequisitesSheetFiller()
             case 2:
-                return new IncomesSheetFiller();
+                return new IncomesSheetFiller()
             case 3:
-                return new DeductionsSheetFiller();
+                return new DeductionsSheetFiller()
             case 4:
-                return new PrepaymentSheetFiller();
+                return new PrepaymentSheetFiller()
             case 5:
-                return new ReportXlsxSheetFiller();
+                return new ReportXlsxSheetFiller()
+            default: return null
         }
     }
 }
