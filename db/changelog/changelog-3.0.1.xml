@@ -116,7 +116,7 @@
             <where>id=(select script_id from ref_book where id = 904)</where>
         </update>
         <update tableName="BLOB_DATA">
-            <column name="data" valueBlobFile="templates-3.0.1/refbook/tb_person.groovyy"/>
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/tb_person.groovy"/>
             <where>id=(select script_id from ref_book where id = 907)</where>
         </update>
         <update tableName="BLOB_DATA">
