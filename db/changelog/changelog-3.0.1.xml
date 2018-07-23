@@ -109,4 +109,20 @@
         </update>
     </changeSet>
 
+    <!-- SBRFNDFL-5184 Реализовать возможность хранения для ФЛ списка тербанков и заполнять этот список ТБ при первичной загрузке ФЛ  -->
+    <changeSet id="3.0.1-ytrofimov-4" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/person.groovy"/>
+            <where>id=(select script_id from ref_book where id = 904)</where>
+        </update>
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/tb_person.groovyy"/>
+            <where>id=(select script_id from ref_book where id = 907)</where>
+        </update>
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates-3.0.1/refbook/person_tb.groovy"/>
+            <where>id=(select script_id from ref_book where id = 908)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

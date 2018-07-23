@@ -152,7 +152,8 @@ class Person extends AbstractScriptClass {
         PagingResult<Map<String, RefBookValue>> records = provider.getRecordsWithVersionInfo(null, null, filter, null, "ASC")
         if (!records.isEmpty()) {
             Map<String, RefBookValue> record = records.get(0)
-            tbPersonDepartmentId = record.get("TB_DEPARTMENT_ID").getReferenceValue().intValue()
+            Map<String, RefBookValue> tbPersonDepartment = record.get("TB_DEPARTMENT_ID").getValue() as Map<String, RefBookValue>
+            tbPersonDepartmentId = tbPersonDepartment.get("id").numberValue.intValue()
             com.aplana.sbrf.taxaccounting.model.Department department = departmentService.get(tbPersonDepartmentId)
             if (department.type != DepartmentType.TERR_BANK) {
                 logger.error("Загрузка файла %s не может быть выполнена. Подразделение \"%s\" определенное для файла, не является территориальным банком.", fileName, department.name)
