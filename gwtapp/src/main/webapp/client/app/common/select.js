@@ -644,6 +644,10 @@
                 };
                 // Статусы налогоплательщика
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS] = {
+                    sort: {
+                        property: "CODE",
+                        direction: "asc"
+                    },
                     filter: {
                         columns: ["NAME", "CODE"]
                     },
