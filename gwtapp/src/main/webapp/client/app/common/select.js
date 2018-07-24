@@ -158,7 +158,7 @@
          */
         .controller('SelectCorrectionTagCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
-                var correctionTags = [APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE, APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY, APP_CONSTANTS.CORRETION_TAG.ALL];
+                var correctionTags = [APP_CONSTANTS.CORRECTION_TAG.ONLY_CORRECTIVE, APP_CONSTANTS.CORRECTION_TAG.ONLY_PRIMARY, APP_CONSTANTS.CORRECTION_TAG.ALL];
                 $scope.correctionTagSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, correctionTags);
             }])
 
@@ -218,7 +218,10 @@
 
                 $scope.initSingleSelectAsnu = function () {
                     $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptions(true);
-                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU, nooverlay: true}, function (data) {
+                    RefBookValuesResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.ASNU,
+                        nooverlay: true
+                    }, function (data) {
                         $scope.asnuSelect.options.data.results = data;
                     });
                 };
@@ -287,7 +290,7 @@
                                 formDataKindIdList: declarationKind,
                                 departmentId: department.id,
                                 periodId: period.id,
-                                nooverlay : true
+                                nooverlay: true
                             }, function (data) {
                                 data = data.filter(function (declarationType) {
                                     if (declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id) {
@@ -593,6 +596,45 @@
                         direction: "asc"
                     }, "codeNameFormatter");
                 };
+            }
+        ])
+
+        /**
+         * Контроллер для выбора признака активности пользователя.
+         */
+        .controller('SelectUserActivityCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var userActivities = [APP_CONSTANTS.USER_ACTIVITY.YES, APP_CONSTANTS.USER_ACTIVITY.NO];
+                $scope.userActivitySelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, userActivities);
+            }
+        ])
+
+        .controller('SelectUserRolesCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var userRoles = [
+                    APP_CONSTANTS.USER_ROLE_OBJECT.ROLE_ADMIN,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_CONTROL_UNP,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_CONF,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_CONTROL_NS,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_1000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_2000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_3000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_4000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_5000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6001,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_7000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6002,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6003,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6004,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6005,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_1001,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_8000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_9000,
+                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_ALL
+                ];
+                $scope.userRolesSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, userRoles);
             }
         ])
 

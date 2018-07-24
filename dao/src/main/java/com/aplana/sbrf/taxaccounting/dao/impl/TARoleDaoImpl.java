@@ -19,8 +19,7 @@ import java.util.List;
 @Transactional(readOnly=true)
 public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 
-	private static final RowMapper<TARole> TA_ROLE_MAPPER = new RowMapper<TARole>() {
-
+	static final RowMapper<TARole> TA_ROLE_MAPPER = new RowMapper<TARole>() {
 		@Override
 		public TARole mapRow(ResultSet rs, int index) throws SQLException {
 			TARole result = new TARole();
@@ -49,7 +48,7 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 	}
 
 	@Override
-	public List<Integer> getAll() {
+	public List<Integer> getAllRoleIds() {
 		try {
 			return getJdbcTemplate().queryForList("select id from sec_role", Integer.class);
 		} catch (DataAccessException e) {

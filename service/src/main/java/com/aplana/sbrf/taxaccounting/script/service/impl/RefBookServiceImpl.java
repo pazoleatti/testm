@@ -198,7 +198,7 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Override
     public PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter) {
-        return taUserService.getUsersByFilter(filter);
+        return taUserService.getUsersViewWithFilter(filter);
     }
 
     @Override

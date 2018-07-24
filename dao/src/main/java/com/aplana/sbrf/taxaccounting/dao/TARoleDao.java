@@ -8,21 +8,22 @@ import java.util.List;
  * ДАО для работы с ролями пользователей
  */
 public interface TARoleDao {
-	/**
-	 *
-	 * @param id идентификатор роли
-	 * @return роль
-	 */
-	TARole getRole(Integer id);
+    /**
+     * @param id идентификатор роли
+     * @return роль
+     */
+    TARole getRole(Integer id);
 
-	/**
-	 * возвращает список идентификаторов всех ролей
-	 * @return список идентификаторов ролей
-	 */
-	List<Integer> getAll();
+    /**
+     * возвращает список идентификаторов всех ролей
+     *
+     * @return список идентификаторов ролей
+     */
+    List<Integer> getAllRoleIds();
 
     /**
      * возвращает роль по алиасу
+     *
      * @return роль
      */
     TARole getRoleByAlias(String alias);

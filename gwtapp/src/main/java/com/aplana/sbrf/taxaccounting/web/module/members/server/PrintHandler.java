@@ -35,7 +35,7 @@ public class PrintHandler extends AbstractActionHandler<PrintAction, PrintResult
     @Override
     public PrintResult execute(PrintAction printAction, ExecutionContext executionContext) throws ActionException {
 
-        PagingResult<TAUserView> usersByFilter = taUserService.getUsersByFilter(printAction.getMembersFilterData());
+        PagingResult<TAUserView> usersByFilter = taUserService.getUsersViewWithFilter(printAction.getMembersFilterData());
 
         PrintResult result = new PrintResult();
         result.setUuid(printingService.generateExcelUsers(usersByFilter));

@@ -183,6 +183,15 @@
             });
         }])
 
+        /**
+         * @description Список пользователей
+         */
+        .factory('usersResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/users', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
         .factory('DepartmentReportPeriodResource', ['$resource', function ($resource) {
             return $resource('controller/rest/departmentReportPeriod?projection=:projection', {}, {
                 query: {method: 'GET', isArray: true, cache: false}

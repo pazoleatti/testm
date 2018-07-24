@@ -3,22 +3,16 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.TARoleDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -75,7 +69,7 @@ public class TAUserServiceTest {
 		when(userDao.getUser(1)).thenReturn(user);
 		when(userDao.getUser(2)).thenReturn(user);
 		when(userDao.getUser(3)).thenReturn(user);
-		when(userDao.getUserIds()).thenReturn(listUserIds);
+		when(userDao.getAllUserIds()).thenReturn(listUserIds);
 		when(userDao.checkUserRole(USER_ROLE)).thenReturn(1);
 		when(taUserService.existsUser(USER_LOGIN_CONTROL)).thenReturn(false);
 		when(taUserService.existsUser(USER_LOGIN_OPER)).thenReturn(true);

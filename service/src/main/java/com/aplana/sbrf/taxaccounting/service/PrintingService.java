@@ -15,6 +15,12 @@ import java.util.Map;
 public interface PrintingService {
     String generateExcelLogEntry(List<LogEntry> listLogEntries);
 
+    /**
+     * Формирует xlsx-файл со списком пользователей.
+     *
+     * @param taUserViewList список пользователей
+     * @return uuid идентификатор файла blobData
+     */
     String generateExcelUsers(List<TAUserView> taUserViewList);
 
     /**

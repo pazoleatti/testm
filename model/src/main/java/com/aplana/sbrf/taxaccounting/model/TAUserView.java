@@ -21,6 +21,8 @@ public class TAUserView implements Serializable {
     private Integer depId;
     private String asnu;
     private List<Long> asnuIds;
+    private String position;
+    private String phone;
 
     public Integer getId() {
         return id;
@@ -108,5 +110,21 @@ public class TAUserView implements Serializable {
 
     public void setAsnu(String asnu) {
         this.asnu = asnu;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

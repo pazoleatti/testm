@@ -118,7 +118,7 @@
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_USERS)) {
                         $scope.treeAdministration.push({
                             name: $filter('translate')('menu.administration.userList'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!members"
+                            href: $state.href('usersList')
                         });
                     }
 

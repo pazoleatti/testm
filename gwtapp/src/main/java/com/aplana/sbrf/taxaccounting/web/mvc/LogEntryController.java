@@ -103,6 +103,7 @@ public class LogEntryController {
         }
         // Построение отчета
         String fileUuid = printingService.generateExcelLogEntry(logEntryList);
+        // TODO snazin: заменить на использование ResponseUtils.createBlobResponse
         // Получение файла
         InputStream fis = blobDataService.get(fileUuid).getInputStream();
         // Копирование файла в http ответ

@@ -2,10 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,89 +14,112 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.*;
+
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TAUserDaoTest {
-	@Autowired
-	private TAUserDao userDao;
 
-	private static String LOGIN_CONTROL_BANK = "controlBank";
-	private static String LOGIN_TEST_BANK = "testBank";
-	
-	@Test
-	public void testGetById() {
-		TAUser user = userDao.getUser(1);
-		Assert.assertEquals(1, user.getId());
-		Assert.assertEquals("controlBank", user.getLogin());
-		Assert.assertEquals(1, user.getDepartmentId());
-		Assert.assertTrue(user.hasRole("N_ROLE_CONTROL_NS"));
-		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
-		Assert.assertTrue(user.isActive());
-	}
-	
-	@Test(expected=DaoException.class)
-	public void testGetByIncorrectId() {
-		userDao.getUser(-1);
-	}
-
-
-	@Test
-	public void testGetUserIdByLoginLower() {
-		Assert.assertEquals(1, userDao.getUserIdByLogin("controlBank"));
-	}
-
-    public void testGetUserIdByLogin() {
-        Assert.assertNull(userDao.getUserIdByLogin(LOGIN_CONTROL_BANK));
-    }
-
-	@Test
-	public void testGetUserIds(){
-		Assert.assertEquals(3, userDao.getUserIds().size());
-	}
-	
-	@Test
-	public void testCheckUserRole(){
-		Assert.assertEquals(1, userDao.checkUserRole("N_ROLE_OPER"));
-	}
-
-	@Test
-	public void testGetByFilter() {
-		MembersFilterData filter = new MembersFilterData();
-		filter.setUserName("Контролёр Банка");
-		Assert.assertEquals(1, userDao.getByFilter(filter).size());
-		Assert.assertEquals("Контролёр Банка", userDao.getUser(userDao.getByFilter(filter).get(0)).getName());
-
-		filter.setActive(false);
-		filter.setUserName(null);
-		Assert.assertEquals(1, userDao.getByFilter(filter).size());
-		Assert.assertEquals(3L, (long)userDao.getByFilter(filter).get(0));
-
-		Set<Integer> depIds = new HashSet<Integer>();
-		depIds.add(2);
-		depIds.add(3);
-		filter.setDepartmentIds(depIds);
-		filter.setActive(null);
-		Assert.assertEquals(2, userDao.getByFilter(filter).size());
-		filter.setActive(false);
-		Assert.assertEquals(1, userDao.getByFilter(filter).size());
-
-		filter.setRoleIds(Arrays.asList((long) 1));
-		filter.setDepartmentIds(null);
-		filter.setActive(null);
-		Assert.assertEquals(3, userDao.getByFilter(filter).size());
-		filter.setActive(true);
-		Assert.assertEquals(2, userDao.getByFilter(filter).size());
-	}
+    @Autowired
+    private TAUserDao userDao;
 
     @Test
-    public void testGetUsersByFilter(){
-        MembersFilterData membersFilterData = new MembersFilterData();
-        membersFilterData.setRoleIds(new ArrayList<Long>(Arrays.asList(2L,3L)));
-        Assert.assertEquals(0, userDao.getByFilter(membersFilterData).size());
-        membersFilterData.setRoleIds(new ArrayList<Long>(Arrays.asList(1L)));
-        Assert.assertEquals(3, userDao.getByFilter(membersFilterData).size());
+    public void testGetById() {
+        TAUser user = userDao.getUser(1);
+        assertEquals(1, user.getId());
+        assertEquals("controlBank", user.getLogin());
+        assertEquals(1, user.getDepartmentId());
+        assertEquals("controlBank@bank.ru", user.getEmail());
+        assertTrue(user.hasRole("N_ROLE_CONTROL_NS"));
+        assertTrue(user.isActive());
     }
 
+    @Test(expected = DaoException.class)
+    public void testGetByIncorrectId() {
+        userDao.getUser(-1);
+    }
+
+    @Test
+    public void testGetUserIdByLogin() {
+        assertEquals(1, userDao.getUserIdByLogin("controlBank"));
+    }
+
+    @Test
+    public void testGetUserIds() {
+        assertThat(userDao.getAllUserIds()).hasSize(3);
+    }
+
+    @Test
+    public void testCheckUserRole() {
+        assertEquals(1, userDao.checkUserRole("N_ROLE_OPER"));
+    }
+
+    @Test
+    public void testGetUserIdsByNullFilter() {
+        List<Integer> idsNotFiltered = userDao.getUserIdsByFilter(null);
+        assertThat(idsNotFiltered).hasSize(3);
+    }
+
+    @Test
+    public void testGetUserIdsByFilterWithUserName() {
+        MembersFilterData filter = new MembersFilterData();
+
+        filter.setUserName("Контролёр Банка");
+        List<Integer> idsByName = userDao.getUserIdsByFilter(filter);
+        assertThat(idsByName).hasSize(1);
+
+        Integer userId = idsByName.get(0);
+        TAUser user = userDao.getUser(userId);
+        assertThat(user.getName()).isEqualTo("Контролёр Банка");
+    }
+
+    @Test
+    public void testGetUserIdsByFilterActive() {
+        MembersFilterData filter = new MembersFilterData();
+
+        filter.setActive(false);
+        List<Integer> inactiveIds = userDao.getUserIdsByFilter(filter);
+        assertThat(inactiveIds).hasSize(1);
+
+        Integer userId = inactiveIds.get(0);
+        assertThat(userId).isEqualTo(3);
+    }
+
+    @Test
+    public void testGetUserIdsByFilterWithDepartments() {
+        MembersFilterData filter = new MembersFilterData();
+        Set<Integer> departmentIds = new HashSet<>();
+        departmentIds.add(2);
+        departmentIds.add(3);
+
+        filter.setDepartmentIds(departmentIds);
+        List<Integer> idsByDepartments = userDao.getUserIdsByFilter(filter);
+        assertThat(idsByDepartments).hasSize(2);
+
+        filter.setActive(false);
+        List<Integer> inactiveIdsByDepartments = userDao.getUserIdsByFilter(filter);
+        assertThat(inactiveIdsByDepartments).hasSize(1);
+    }
+
+    @Test
+    public void testGetUserIdsByFilterWithRoles() {
+        MembersFilterData filter = new MembersFilterData();
+
+        filter.setRoleIds(Arrays.asList(2L, 3L));
+        List<Integer> idsByRoles = userDao.getUserIdsByFilter(filter);
+        assertThat(idsByRoles).hasSize(0);
+
+        filter.setRoleIds(Collections.singletonList(1L));
+        List<Integer> idsByOneRole = userDao.getUserIdsByFilter(filter);
+        assertThat(idsByOneRole).hasSize(3);
+
+        filter.setActive(true);
+        List<Integer> activeIdsByRole = userDao.getUserIdsByFilter(filter);
+        assertThat(activeIdsByRole).hasSize(2);
+    }
 }

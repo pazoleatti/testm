@@ -186,16 +186,30 @@
             return function (correctionTag) {
                 if (correctionTag && correctionTag.id !== undefined) {
                     switch (correctionTag.id) {
-                        case APP_CONSTANTS.CORRETION_TAG.ALL.id:
+                        case APP_CONSTANTS.CORRECTION_TAG.ALL.id:
                             return undefined;
-                        case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY.id:
+                        case APP_CONSTANTS.CORRECTION_TAG.ONLY_PRIMARY.id:
                             return false;
-                        case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE.id:
+                        case APP_CONSTANTS.CORRECTION_TAG.ONLY_CORRECTIVE.id:
                             return true;
                     }
                 }
                 return undefined;
             };
+        }])
+
+        .filter('activityAttributeFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (activityAttribute) {
+                if (activityAttribute && activityAttribute.id !== undefined) {
+                    switch (activityAttribute.id) {
+                        case APP_CONSTANTS.USER_ACTIVITY.NO.id:
+                            return false;
+                        case APP_CONSTANTS.USER_ACTIVITY.YES.id:
+                            return true;
+                    }
+                }
+                return undefined;
+            }
         }])
 
         /**

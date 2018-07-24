@@ -38,7 +38,7 @@
 
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
 
-                var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
+                var defaultCorrectionTag = APP_CONSTANTS.CORRECTION_TAG.ALL;
 
                 $scope.searchFilter = {
                     params: {

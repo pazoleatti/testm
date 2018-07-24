@@ -59,7 +59,7 @@ public class DepartmentReportPeriodController {
      */
     @GetMapping(value = "/rest/departmentReportPeriod")
     public List<DepartmentReportPeriodJournalItem> getAllPeriods(@RequestParam DepartmentReportPeriodFilter filter) {
-        //утсанавливаем значение фильтра по-умолчанию
+        // устанавливаем значение фильтра по умолчанию
         if (filter.getDepartmentId() == null) {
             filter.setDepartmentId(departmentService.getBankDepartment().getId());
         }
