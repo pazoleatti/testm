@@ -315,7 +315,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 .append(" WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) FROM ")
                 .append(refBook.getTableName())
                 .append(" WHERE version <= :version and record_id = frb.record_id))\n")
-                .append(StringUtils.isNotEmpty(filter) ? " AND " + filter + "\n" : "")
+                .append(StringUtils.isNotEmpty(filter) ? " AND (" + filter + ")\n" : "")
                 .append(" ) p\n");
         q.addNamedParam("version", version);
 
@@ -437,7 +437,7 @@ public class RefBookSimpleQueryBuilderComponent {
             q.append(" WHERE frb.status = 0");
         }
         if (StringUtils.isNotEmpty(filter)) {
-            q.append((refBook.isReadOnly() ? " WHERE " : " AND ") + filter + "\n");
+            q.append((refBook.isReadOnly() ? " WHERE " : " AND (") + filter + ")\n");
         }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)
