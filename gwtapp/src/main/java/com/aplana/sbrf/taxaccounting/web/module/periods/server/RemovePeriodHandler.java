@@ -31,7 +31,14 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
 
 	@Override
 	public RemovePeriodResult execute(RemovePeriodAction removePeriodAction, ExecutionContext executionContext) throws ActionException {
-        throw new UnsupportedOperationException();
+        Logger logger = new Logger();
+		periodService.removeReportPeriod(removePeriodAction.getDepartmentReportPeriodId(), logger, securityService.currentUserInfo());
+		RemovePeriodResult result = new RemovePeriodResult();
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            result.setHasFatalErrors(true);
+        }
+		result.setUuid(logEntryService.save(logger.getEntries()));
+		return result;
 	}
 
 	@Override

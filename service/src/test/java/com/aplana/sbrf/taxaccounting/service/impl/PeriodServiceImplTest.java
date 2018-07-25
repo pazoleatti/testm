@@ -1,56 +1,31 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
-import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuidler;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.TaxPeriodService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.mock.UserMockUtils.mockUser;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("PeriodServiceImplTest.xml")
@@ -70,399 +45,279 @@ public class PeriodServiceImplTest {
     @Autowired
     DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
-    DepartmentReportPeriodDao departmentReportPeriodDao;
-    @Autowired
     DepartmentService departmentService;
-    @Autowired
-    DepartmentDao departmentDao;
-    @Autowired
-    TaxPeriodService taxPeriodService;
-    @Autowired
-    ReportPeriodService reportPeriodService;
-    @Autowired
-    LogEntryService logEntryService;
 
-    @Captor
-    private ArgumentCaptor<ArrayList<LogEntry>> logEntriesArgumentCaptor;
-    @Captor
-    private ArgumentCaptor<ArrayList<Integer>> integerListArgumentCaptor;
-
+    private static final Long PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
     private final static String LOCAL_IP = "127.0.0.1";
     private static final int CONTROL_USER_ID = 2;
     private TAUserInfo userInfo = new TAUserInfo();
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
-        reset(departmentReportPeriodService, logEntryService);
-
         userInfo.setIp(LOCAL_IP);
         userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.N_ROLE_CONTROL_NS));
 
-        mockDepartments();
+        /**
+         * Налоговые периоды 1,2 - транспорт.
+         * 3 - по прибыли
+         */
+        TaxPeriod taxPeriod1 = new TaxPeriod();
+        taxPeriod1.setId(1);
+        taxPeriod1.setYear(2012);
+
+        TaxPeriod taxPeriod2 = new TaxPeriod();
+        taxPeriod2.setId(2);
+        taxPeriod2.setYear(2013);
+
+        TaxPeriod taxPeriod3 = new TaxPeriod();
+        taxPeriod3.setId(3);
+        taxPeriod3.setYear(2012);
+
+        // список налоговых периодов по ТН
+        List<TaxPeriod> taxPeriodList = new ArrayList<TaxPeriod>();
+        taxPeriodList.add(taxPeriod1);
+        taxPeriodList.add(taxPeriod2);
+
+        // Mock для taxPeriodDao
+        when(taxPeriodDao.fetchOne(1)).thenReturn(taxPeriod1);
+        when(taxPeriodDao.fetchOne(2)).thenReturn(taxPeriod2);
+        when(taxPeriodDao.fetchOne(3)).thenReturn(taxPeriod3);
+        when(taxPeriodDao.fetchAllByTaxType(TaxType.NDFL)).thenReturn(taxPeriodList);
+        when(taxPeriodDao.fetchAllByYear(2012)).thenReturn(taxPeriod1);
+        /**
+         * подготовим отчетные периоды для 1 налогового
+         */
+        ReportPeriod reportPeriod11 = new ReportPeriod();
+        reportPeriod11.setId(1);
+        reportPeriod11.setTaxPeriod(taxPeriod1);
+        reportPeriod11.setOrder(1);
+        reportPeriod11.setName("Первый отчетный период в 1 налоговом периоде");
+        reportPeriod11.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+        reportPeriod11.setEndDate(new GregorianCalendar(2012, Calendar.MARCH, 31).getTime());
+        reportPeriod11.setCalendarStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+
+        ReportPeriod reportPeriod12 = new ReportPeriod();
+        reportPeriod12.setId(2);
+        reportPeriod12.setTaxPeriod(taxPeriod1);
+        reportPeriod12.setOrder(2);
+        reportPeriod12.setName("Второй отчетный период в 1 налоговом периоде");
+        reportPeriod12.setStartDate(new GregorianCalendar(2012, Calendar.APRIL, 1).getTime());
+        reportPeriod12.setEndDate(new GregorianCalendar(2012, Calendar.JUNE, 30).getTime());
+        reportPeriod12.setCalendarStartDate(new GregorianCalendar(2012, Calendar.APRIL, 1).getTime());
+
+        ReportPeriod reportPeriod13 = new ReportPeriod();
+        reportPeriod13.setId(3);
+        reportPeriod13.setTaxPeriod(taxPeriod1);
+        reportPeriod13.setOrder(3);
+        reportPeriod13.setName("Третий отчетный период в 1 налоговом периоде");
+        reportPeriod13.setStartDate(new GregorianCalendar(2012, Calendar.JULY, 1).getTime());
+        reportPeriod13.setEndDate(new GregorianCalendar(2012, Calendar.SEPTEMBER, 30).getTime());
+        reportPeriod13.setCalendarStartDate(new GregorianCalendar(2012, Calendar.JULY, 1).getTime());
+
+        ReportPeriod reportPeriod14 = new ReportPeriod();
+        reportPeriod14.setId(4);
+        reportPeriod14.setTaxPeriod(taxPeriod1);
+        reportPeriod14.setOrder(4);
+        reportPeriod14.setName("Четвертый отчетный период в 1 налоговом периоде");
+        reportPeriod14.setStartDate(new GregorianCalendar(2012, Calendar.OCTOBER, 1).getTime());
+        reportPeriod14.setEndDate(new GregorianCalendar(2012, Calendar.DECEMBER, 31).getTime());
+        reportPeriod14.setCalendarStartDate(new GregorianCalendar(2012, Calendar.OCTOBER, 1).getTime());
+
+        /**
+         * подготовим отчетные периоды для 2 налогового
+         */
+        ReportPeriod reportPeriod21 = new ReportPeriod();
+        reportPeriod21.setId(5);
+        reportPeriod21.setTaxPeriod(taxPeriod2);
+        reportPeriod21.setOrder(1);
+        reportPeriod21.setName("Первый отчетный период в 2 налоговом периоде");
+        reportPeriod21.setStartDate(new GregorianCalendar(2013, Calendar.JANUARY, 1).getTime());
+        reportPeriod21.setEndDate(new GregorianCalendar(2013, Calendar.MARCH, 31).getTime());
+        reportPeriod21.setCalendarStartDate(new GregorianCalendar(2013, Calendar.JANUARY, 1).getTime());
+
+        ReportPeriod reportPeriod22 = new ReportPeriod();
+        reportPeriod22.setId(6);
+        reportPeriod22.setTaxPeriod(taxPeriod2);
+        reportPeriod22.setOrder(2);
+        reportPeriod22.setName("Второй отчетный период в 2 налоговом периоде");
+        reportPeriod22.setStartDate(new GregorianCalendar(2013, Calendar.APRIL, 1).getTime());
+        reportPeriod22.setEndDate(new GregorianCalendar(2013, Calendar.JUNE, 30).getTime());
+        reportPeriod22.setCalendarStartDate(new GregorianCalendar(2013, Calendar.APRIL, 1).getTime());
+
+        /**
+         * подготовим отчетные периоды для 3 налогового
+         */
+        ReportPeriod reportPeriod31 = new ReportPeriod();
+        reportPeriod31.setId(7);
+        reportPeriod31.setTaxPeriod(taxPeriod3);
+        reportPeriod31.setOrder(1);
+        reportPeriod31.setName("Первый отчетный период в 3 налоговом периоде");
+        reportPeriod31.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+        reportPeriod31.setEndDate(new GregorianCalendar(2012, Calendar.MARCH, 31).getTime());
+        reportPeriod31.setCalendarStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+
+        ReportPeriod reportPeriod32 = new ReportPeriod();
+        reportPeriod32.setId(8);
+        reportPeriod32.setTaxPeriod(taxPeriod3);
+        reportPeriod32.setOrder(2);
+        reportPeriod32.setName("Второй отчетный период в 3 налоговом периоде");
+        reportPeriod32.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+        reportPeriod32.setEndDate(new GregorianCalendar(2012, Calendar.JUNE, 30).getTime());
+        reportPeriod32.setCalendarStartDate(new GregorianCalendar(2012, Calendar.APRIL, 1).getTime());
+
+        // списки отчетных периодов для налоговых
+        List<ReportPeriod> reportPeriodListBy1Period = new ArrayList<ReportPeriod>();
+        reportPeriodListBy1Period.add(reportPeriod11);
+        reportPeriodListBy1Period.add(reportPeriod12);
+        reportPeriodListBy1Period.add(reportPeriod13);
+        reportPeriodListBy1Period.add(reportPeriod14);
+
+        List<ReportPeriod> reportPeriodListBy2Period = new ArrayList<ReportPeriod>();
+        reportPeriodListBy2Period.add(reportPeriod21);
+        reportPeriodListBy2Period.add(reportPeriod22);
+
+        List<ReportPeriod> reportPeriodListBy3Period = new ArrayList<ReportPeriod>();
+        reportPeriodListBy3Period.add(reportPeriod31);
+        reportPeriodListBy3Period.add(reportPeriod32);
+
+
+        // Mock для reportPeriodDao
+        // перехват вызова функции получения отчетного периода по налоговому и возвращение нашего reportPeriod
+        when(reportPeriodDao.fetchOne(1)).thenReturn(reportPeriod11);
+        when(reportPeriodDao.fetchOne(2)).thenReturn(reportPeriod12);
+        when(reportPeriodDao.fetchOne(4)).thenReturn(reportPeriod14);
+        when(reportPeriodDao.fetchOne(5)).thenReturn(reportPeriod21);
+        when(reportPeriodDao.fetchOne(7)).thenReturn(reportPeriod31);
+        when(reportPeriodDao.fetchOne(8)).thenReturn(reportPeriod32);
+
+        // переотпределение вызовов метода fetchAllByTaxPeriod
+        when(reportPeriodDao.fetchAllByTaxPeriod(1)).thenReturn(reportPeriodListBy1Period);
+        when(reportPeriodDao.fetchAllByTaxPeriod(2)).thenReturn(reportPeriodListBy2Period);
+        when(reportPeriodDao.fetchAllByTaxPeriod(3)).thenReturn(reportPeriodListBy3Period);
+
+        /**
+         * Подготовим отчетные периоды подразделений
+         */
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setIsActive(true);
+        departmentReportPeriod.setCorrectionDate(null);
+        departmentReportPeriod.setDepartmentId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod11);
+        when(departmentReportPeriodService.fetchOne(1)).thenReturn(departmentReportPeriod);
+
+        RefBook refBook = new RefBook() {{
+            setId(PERIOD_CODE_REFBOOK);
+            setName("REFBOOK_NAME");
+        }};
+        when(commonRefBookService.get(PERIOD_CODE_REFBOOK)).thenReturn(refBook);
+
+        when(rbFactory.getDataProvider(PERIOD_CODE_REFBOOK)).thenReturn(provider);
+        Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
+        record.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
+        record.put("ORD", new RefBookValue(RefBookAttributeType.NUMBER, 1));
+        record.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
+        record.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 28)));
+        record.put("CALENDAR_START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
+        when(provider.getRecordData(1L)).thenReturn(record);
     }
 
-    void mockDepartments() {
-        when(departmentDao.fetchAllChildrenIds(1)).thenReturn(asList(1, 2, 3));
-        Department department = new Department();
-        department.setId(1);
-        department.setName("dep1Name");
-        when(departmentDao.getDepartment(1)).thenReturn(department);
-        when(departmentDao.getDepartment(1)).thenReturn(department);
-    }
+    private void checkDates(int year, int month, int day, Date date) {
+        Calendar cl = Calendar.getInstance();
+        cl.clear();
+        cl.set(year, month, day);
 
-    @Test
-    public void open() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
-        when(reportPeriodService.fetchOrCreate(any(TaxPeriod.class), any(ReportPeriodType.class))).thenReturn(departmentReportPeriod.getReportPeriod());
+        Calendar cl2 = new GregorianCalendar();
+        cl2.setTime(date);
 
-        periodService.open(departmentReportPeriod, null);
-
-        verify(departmentReportPeriodService, times(1)).create(any(DepartmentReportPeriod.class), eq(asList(1, 2, 3)));
-        verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
-        assertEquals(1, logEntriesArgumentCaptor.getValue().size());
-        assertEquals("Период \"2018:reportPeriodName\" открыт для \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
-    }
-
-    @Test(expected = ServiceException.class)
-    public void openExists() {
-        DepartmentReportPeriodBuidler departmentReportPeriodBuilder = new DepartmentReportPeriodBuidler()
-                .department(1).year(2018).dictTaxPeriodId(1L);
-
-        DepartmentReportPeriod existDepartmentReportPeriod = departmentReportPeriodBuilder.but()
-                .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").build();
-        when(reportPeriodService.fetchOrCreate(any(TaxPeriod.class), any(ReportPeriodType.class))).thenReturn(existDepartmentReportPeriod.getReportPeriod());
-        when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(existDepartmentReportPeriod);
-
-        try {
-            periodService.open(departmentReportPeriodBuilder.build(), null);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Период \"2018:reportPeriodName\" уже существует и открыт для подразделения \"dep1Name\" и всех дочерних подразделений", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void openDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
-        when(reportPeriodService.fetchOrCreate(any(TaxPeriod.class), any(ReportPeriodType.class))).thenReturn(departmentReportPeriod.getReportPeriod());
-        doThrow(new DaoException("123")).when(departmentReportPeriodService).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-
-        try {
-            periodService.open(departmentReportPeriod, null);
-        } catch (ServiceException e) {
-            assertEquals("Ошибка при открытии периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void openCorrection() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
-        when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
-
-        periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-
-        verify(departmentReportPeriodService, times(1)).create(any(DepartmentReportPeriod.class), eq(asList(1, 2, 3)));
-        verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
-        assertEquals(1, logEntriesArgumentCaptor.getValue().size());
-        assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 открыт для \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
-    }
-
-    @Test(expected = ServiceException.class)
-    public void openCorrectionExists() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
-        when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
-        DepartmentReportPeriod existPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).build();
-        when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(existPeriod);
-
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 уже существует и закрыт для подразделения \"dep1Name\" и всех дочерних подразделений", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void openCorrectionWhenOpenedCorrectionPeriodExists() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).active(true).build();
-        when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
-
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к. открыт более ранний корректирующий период!", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void openCorrectionWhenLaterCorrectionPeriodExists() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
-        when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
-        when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
-
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к. для него существует более поздние корректирующие периоды!", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void openCorrectionDaoException() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
-        when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
-        doThrow(new DaoException("123")).when(departmentReportPeriodService).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            assertEquals("Ошибка при открытии корректирующего периода \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void close() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
-
-        periodService.close(123);
-
-        verify(departmentReportPeriodService, times(1)).updateActive(integerListArgumentCaptor.capture(), eq(1), eq(false));
-        assertEquals(integerListArgumentCaptor.getValue(), asList(1, 2, 3));
-        verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
-        assertEquals(1, logEntriesArgumentCaptor.getValue().size());
-        assertEquals("Период \"2018:reportPeriodName\" закрыт для подразделения \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
-    }
-
-    @Test(expected = ServiceException.class)
-    public void closeClosed() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-
-        try {
-            periodService.close(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, поскольку он уже закрыт", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void closeDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
-            @Override
-            public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
-                Boolean isActive = ((DepartmentReportPeriodFilter) invocation.getArguments()[0]).isActive();
-                return isActive != null && !isActive ? Collections.<Integer>emptyList() : asList(1, 2, 3);
-            }
-        });
-        doThrow(new DaoException("123")).when(departmentReportPeriodService).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-
-        try {
-            periodService.close(123);
-        } catch (ServiceException e) {
-            assertEquals("Ошибка при закрытии периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
-            throw e;
-        }
+        assertEquals("DATE", cl.get(Calendar.DATE), cl2.get(Calendar.DATE));
+        assertEquals("MONTH", cl.get(Calendar.MONTH), cl2.get(Calendar.MONTH));
+        assertEquals("YEAR", cl.get(Calendar.YEAR), cl2.get(Calendar.YEAR));
     }
 
     @Test
-    public void reopen() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
-            @Override
-            public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
-                DepartmentReportPeriodFilter filterArg = ((DepartmentReportPeriodFilter) invocation.getArguments()[0]);
-                return filterArg.isCorrection() != null && filterArg.isCorrection() ? Collections.<Integer>emptyList() : asList(1, 2, 3);
-            }
-        });
-
-        periodService.reopen(123);
-
-        verify(departmentReportPeriodService, times(1)).updateActive(integerListArgumentCaptor.capture(), eq(1), eq(true));
-        assertEquals(integerListArgumentCaptor.getValue(), asList(1, 2, 3));
-        verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
-        assertEquals(1, logEntriesArgumentCaptor.getValue().size());
-        assertEquals("Период \"2018:reportPeriodName\" переоткрыт для подразделения \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
-    }
-
-    @Test(expected = ServiceException.class)
-    public void reopenDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
-            @Override
-            public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
-                DepartmentReportPeriodFilter filterArg = ((DepartmentReportPeriodFilter) invocation.getArguments()[0]);
-                return filterArg.isCorrection() != null && filterArg.isCorrection() ? Collections.<Integer>emptyList() : asList(1, 2, 3);
-            }
-        });
-        doThrow(new DaoException("123")).when(departmentReportPeriodService).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            assertEquals("Ошибка при открытии периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void reopenOpened() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" уже открыт для подразделения \"dep1Name\" и всех дочерних подразделений", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void reopenWhenCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
-
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" не может быть переоткрыт, т.к. для него созданы корректирующие периоды!", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expected = ServiceException.class)
-    public void reopenWhenLaterCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).correctionDate(new Date(2018 - 1900, 0, 1)).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
-
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName (корр. 01.01.2018)\" не может быть переоткрыт, т.к. для него существуют более поздние корректирующие периоды!", e.getMessage());
-            throw e;
-        }
+    public void getStartDate() {
+        checkDates(2012, Calendar.APRIL, 1, periodService.fetchReportPeriod(2).getStartDate());
     }
 
     @Test
-    public void delete() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).department(1).year(2018).reportPeriodId(1).taxPeriodId(1).reportPeriodName("reportPeriodName").build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
-            @Override
-            public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
-                DepartmentReportPeriodFilter filterArg = ((DepartmentReportPeriodFilter) invocation.getArguments()[0]);
-                return filterArg.isCorrection() != null && filterArg.isCorrection() ? Collections.<Integer>emptyList() : asList(1, 2, 3);
-            }
-        });
-
-        periodService.delete(123);
-
-        verify(departmentReportPeriodService, times(1)).delete(eq(asList(1, 2, 3)));
-        verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
-        assertEquals(1, logEntriesArgumentCaptor.getValue().size());
-        assertEquals("Период \"2018:reportPeriodName\" удалён для подразделения \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
+    public void getEndDate() {
+        checkDates(2012, Calendar.JUNE, 30, periodService.fetchReportPeriod(2).getEndDate());
     }
 
-    @Test(expected = ServiceException.class)
-    public void deleteDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).department(1).year(2018).reportPeriodId(1).taxPeriodId(1).reportPeriodName("reportPeriodName").build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
-            @Override
-            public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
-                DepartmentReportPeriodFilter filterArg = ((DepartmentReportPeriodFilter) invocation.getArguments()[0]);
-                return filterArg.isCorrection() != null && filterArg.isCorrection() ? Collections.<Integer>emptyList() : asList(1, 2, 3);
-            }
-        });
-        doThrow(new DaoException("123")).when(departmentReportPeriodService).delete(anyListOf(Integer.class));
-
-        try {
-            periodService.delete(123);
-        } catch (ServiceException e) {
-            assertEquals("Ошибка при удалении периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
-            throw e;
-        }
+    @Test
+    public void getReportDate() {
+        checkDates(2012, Calendar.JULY, 1, periodService.getReportDate(2).getTime());
     }
 
-    @Test(expected = ServiceException.class)
-    public void deleteWhenCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
-
-        try {
-            periodService.delete(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Удаление периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений невозможно, т.к. для него существует корректирующий период.", e.getMessage());
-            throw e;
-        }
+    @Test
+    public void getStartDateIncome() {
+        checkDates(2012, Calendar.JANUARY, 1, periodService.fetchReportPeriod(8).getStartDate());
     }
 
-    @Test(expected = ServiceException.class)
-    public void deleteWhenLaterCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
-                .active(false).correctionDate(new Date(2018 - 1900, 0, 1)).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
+    @Test
+    public void getCalendarStartDateIncome() {
+        checkDates(2012, Calendar.APRIL, 1, periodService.fetchReportPeriod(8).getCalendarStartDate());
+    }
 
-        try {
-            periodService.delete(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Удаление корректирующего периода \"2018:reportPeriodName (корр. 01.01.2018)\" для подразделения \"dep1Name\" и всех дочерних подразделений невозможно, т.к. для него существует более поздний корректирующий период.",
-                    e.getMessage());
-            throw e;
-        }
+    @Test
+    public void getEndDateIncome() {
+        checkDates(2012, Calendar.JUNE, 30, periodService.fetchReportPeriod(8).getEndDate());
+    }
+
+    @Test
+    public void getForthTransportPeriod() {
+        checkDates(2012, Calendar.OCTOBER, 1, periodService.fetchReportPeriod(4).getStartDate());
+    }
+
+    @Test
+    public void getMonthStartDate() {
+        checkDates(2012, Calendar.MAY, 1, periodService.getMonthStartDate(8, 5).getTime());
+    }
+
+    @Test
+    public void getMonthEndDate() {
+        checkDates(2012, Calendar.MAY, 31, periodService.getMonthEndDate(8, 5).getTime());
+    }
+
+    @Test
+    public void getMonthReportDate() {
+        checkDates(2012, Calendar.JUNE, 1, periodService.getMonthReportDate(8, 5).getTime());
+    }
+
+//    @Test
+//    public void open() {
+//        periodService.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), new Date());
+//
+//        ArgumentCaptor<ReportPeriod> argument = ArgumentCaptor.forClass(ReportPeriod.class);
+//        verify(reportPeriodDao, times(1)).save(argument.capture());
+//
+//        checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getStartDate());
+//        checkDates(2012, Calendar.FEBRUARY, 29, argument.getAllValues().get(0).getEndDate());
+//        checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getCalendarStartDate());
+//    }
+
+//    @Test
+//    public void close() {
+//        when(departmentService.fetchAllChildrenIds(1)).thenReturn(Arrays.asList(1,2,3));
+//
+//        periodService.close(TaxType.TRANSPORT, 1, new ArrayList<LogEntry>(), userInfo);
+//
+//        ArgumentCaptor<Integer> repPeriodId = ArgumentCaptor.forClass(Integer.class);
+//        ArgumentCaptor<Boolean> isActive = ArgumentCaptor.forClass(Boolean.class);
+//        verify(departmentReportPeriodService, times(1)).updateActive(anyListOf(Integer.class), repPeriodId.capture(), isActive.capture());
+//
+//        assertEquals(1, repPeriodId.getValue().intValue());
+//        assertEquals(false, isActive.getValue());
+//    }
+
+//    @Test(expected = ServiceException.class)
+//    public void closeNonExistentPeriod() {
+//        periodService.close(TaxType.TRANSPORT, 999, new ArrayList<LogEntry>(), userInfo);
+//    }
+
+    @Test(expected = ServiceException.class)
+    public void removeNonExistentPeriod() {
+        periodService.removeReportPeriod(999, new Logger(), userInfo);
     }
 }

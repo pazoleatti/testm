@@ -118,6 +118,19 @@ public abstract class ScriptTestBase {
         }
     }
 
+    @Test
+    public void checkScriptTest() {
+        when(testHelper.getReportPeriodService().getCalendarStartDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().getStartDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().getEndDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().getReportDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().get(anyInt())).thenCallRealMethod();
+
+
+        testHelper.execute(FormDataEvent.CHECK_SCRIPT);
+        checkLogger();
+    }
+
     public boolean containLog(String text) {
         for (LogEntry logEntry : testHelper.getLogger().getEntries()) {
             if (logEntry.getMessage().contains(text)) {

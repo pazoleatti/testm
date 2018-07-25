@@ -1,18 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 /**
  * Интерфейс DAO для работы с {@link DepartmentReportPeriod}
  */
-public interface DepartmentReportPeriodDao extends PermissionDao {
+public interface DepartmentReportPeriodDao {
 
     /**
      * Получение объекта {@link DepartmentReportPeriod} по идентификатору
@@ -49,7 +48,7 @@ public interface DepartmentReportPeriodDao extends PermissionDao {
      * Сохранение в БД отчетного периода для подразделения в пакетном режиме
      *
      * @param departmentReportPeriod сохраняемый объект {@link DepartmentReportPeriod}
-     * @param departmentIds          список подразделений, для которых создается отчетный период
+     * @param departmentIds список подразделений, для которых создается отчетный период
      */
     void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
@@ -85,15 +84,7 @@ public interface DepartmentReportPeriodDao extends PermissionDao {
      * @param reportPeriodId идентификатор отчетного периода
      * @return признак существования отчетного периода подразделения
      */
-    boolean isExistsByReportPeriodIdAndDepartmentId(int departmentId, int reportPeriodId);
-
-    /**
-     * Возвращяет признак, что {@link DepartmentReportPeriod} существует для данного отчетного периода
-     *
-     * @param reportPeriodId ид отчетного периода
-     * @return признак того, что {@link DepartmentReportPeriod} существует для данного отчетного периода
-     */
-    boolean isExistsByReportPeriodId(int reportPeriodId);
+    boolean checkExistForDepartment(int departmentId, int reportPeriodId);
 
     /**
      * Получение последнего отчетного периода подразделения
@@ -128,10 +119,12 @@ public interface DepartmentReportPeriodDao extends PermissionDao {
     /**
      * Возвращает признак наличия более позднего периода корректировки
      *
-     * @param departmentReportPeriod период, относительно которого будет выполнена проверка
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @param correctionDate период сдачи корректировки
      * @return признак наличия более позднего периода корректировки
      */
-    boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod);
+    boolean checkExistLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
 
     /**
      * Получение идентификаторов некорректирующих отчетных периодов подразделений по типу подразделения и

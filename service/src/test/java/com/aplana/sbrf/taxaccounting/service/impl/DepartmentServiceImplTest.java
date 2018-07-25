@@ -129,12 +129,12 @@ public class DepartmentServiceImplTest {
             taRoles.add(taRole);
         }
 
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(root.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentTB2.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentTB3.getId(), 0)).thenReturn(false);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentGOSB31.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentOSB311.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentOSB311.getId(), 1)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(root.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentTB2.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentTB3.getId(), 0)).thenReturn(false);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentGOSB31.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentOSB311.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
 
         doAnswer(new Answer<Object>() {
             @Override

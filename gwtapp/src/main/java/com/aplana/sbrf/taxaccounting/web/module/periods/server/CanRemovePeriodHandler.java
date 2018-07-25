@@ -47,7 +47,26 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
 
 	@Override
 	public CanRemovePeriodResult execute(CanRemovePeriodAction action, ExecutionContext executionContext) throws ActionException {
-		throw new UnsupportedOperationException();
+		CanRemovePeriodResult result = new CanRemovePeriodResult();
+        TAUserInfo user = securityService.currentUserInfo();
+        List<Integer> departmentIds = periodService.getAvailableDepartments(user.getUser(), PeriodService.Operation.EDIT);
+        List<LogEntry> logs = new ArrayList<LogEntry>();
+
+        DeclarationDataFilter filter = new DeclarationDataFilter();
+        filter.setDepartmentIds(departmentIds);
+        filter.setReportPeriodIds(Collections.singletonList(action.getReportPeriodId()));
+        List<Long> declarations = declarationDataSearchService.getDeclarationIds(filter, DeclarationDataSearchOrdering.ID, true);
+        for (Long id : declarations) {
+            DeclarationData dd = declarationDataService.get(id, user);
+            DeclarationTemplate dt = declarationService.get(dd.getDeclarationTemplateId());
+            logs.add(new LogEntry(LogLevel.ERROR, "\""+dt.getType().getName() + "\" в подразделении \"" +
+                    departmentService.getDepartment(dd.getDepartmentId()).getName() + "\" находится в " +
+                    action.getOperationName() +
+                    " периоде!"));
+        }
+		result.setCanRemove(declarations.isEmpty());
+        result.setUuid(logEntryService.save(logs));
+		return result;
 	}
 
 	@Override

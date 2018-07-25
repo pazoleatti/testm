@@ -12,19 +12,6 @@
   		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
-    <bean id="departmentReportPeriodCacheStore" class="java.util.HashMap"/>
-
-    <bean id="cacheManager" class="com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager">
-        <property name="caches">
-            <set>
-                <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
-                    <constructor-arg value="DepartmentReportPeriod"/>
-                    <constructor-arg ref="departmentReportPeriodCacheStore"/>
-                </bean>
-            </set>
-        </property>
-    </bean>
-
     <!-- Встроенная тестовая база данных HSQLDB -->
     <jdbc:embedded-database id="dataSource" type="HSQL">
         <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>

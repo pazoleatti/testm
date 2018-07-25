@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -22,14 +21,6 @@ public interface ConfigurationDao {
      * @return параметр {@link Configuration} или null, если не найден
      */
     Configuration fetchByEnum(ConfigurationParam param);
-
-    /**
-     * Возвращает общий параметр конфигурации по перечислению {@link ConfigurationParam}
-     *
-     * @param codes коллекция кодов запрашиваемых параметров
-     * @return список параметров {@link Configuration} или null, если не найден
-     */
-    List<Configuration> fetchAllByCodes(Collection<String> codes);
 
     /**
      * Возвращает все параметры в виде модели {@link ConfigurationParamModel}

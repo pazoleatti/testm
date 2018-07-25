@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import net.sf.jasperreports.web.actions.ActionException;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -21,19 +21,50 @@ public interface PeriodService {
      * Открываем отчетный период для департамента.
      * Логика описана в аналитике - Ведение периодов
      *
-     * @param period   отчетный период подразделения, который необходимо открыть
-     * @param userInfo пользователь запустивший операцию
+     * @param period - Отчетный период подразделения, который необходимо открыть
      * @return uuid логов
      */
-    String open(DepartmentReportPeriod period, TAUserInfo userInfo);
+    String open(DepartmentReportPeriod period);
+
+    /**
+     * Создание новых отчетных периодов подразделений или открытие существующих по комбинации параметров
+     * - Отчетный период
+     * - Дата корректировки
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param departmentIds          список подразделений, для которых необходимо открыть периоды
+     * @param logs                   логгер
+     */
+    void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs);
+
+    /**
+     * Создание нового отчетного периода подразделения или открытие существующего по комбинации параметров
+     * - Подразделение
+     * - Отчетный период
+     * - Дата корректировки
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param logs                   логгер
+     */
+    void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs);
+
 
     /**
      * Закрыть период
      *
-     * @param departmentReportPeriodId идентификатор периода для подразделения "Банк"
+     * @param departmentReportPeriodId - идентификатор периода для подразделения "Банк"
      * @return uuid логгера
      */
     String close(Integer departmentReportPeriodId);
+
+    /**
+     * Получение списка отчётных периодов, входящий в данный налоговый период.
+     * Список отсортирован по {@link ReportPeriod#getOrder()} порядковым номерам отчётных периодов
+     *
+     * @param taxPeriodId идентификатор налогового периода
+     * @return список {@link ReportPeriod} или пустой список
+     */
+    List<ReportPeriod> fetchAllByTaxPeriod(int taxPeriodId);
 
     /**
      * Получить объект отчётного периода по идентификатору периода
@@ -45,20 +76,77 @@ public interface PeriodService {
     ReportPeriod fetchReportPeriod(int reportPeriodId);
 
     /**
-     * Переоткрывает закрытый период
+     * Возвращает дату начала отчетного периода
      *
-     * @param departmentReportPeriodId период
-     * @return uuid логера
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link Calendar} или null
      */
-    String reopen(Integer departmentReportPeriodId);
+    Calendar getStartDate(int reportPeriodId);
+
+    /**
+     * Возвращает дату конца отчетного периода
+     *
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link Calendar} или null
+     */
+    Calendar getEndDate(int reportPeriodId);
+
+    /**
+     * Возвращает "отчетную дату" если требуется в чтз
+     * Отчетная дата = дата конца периода + 1 день
+     *
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link Calendar} или null
+     */
+    // TODO: возможно имеется в виду дата сдачи отчетности. Надо проверить (Marat Fayzullin 22.01.2014)
+    Calendar getReportDate(int reportPeriodId);
+
+
+    /**
+     * Получить дату начала месяца.
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder    очередность месяца в периоде (значение из formData.periodOrder)
+     * @return объект {@link Calendar} или null
+     */
+    Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
+
+    /**
+     * Получить дату окончания месяца.
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder    очередность месяца в периоде (значение из formData.periodOrder)
+     * @return объект {@link Calendar} или null
+     */
+    Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
+
+    /**
+     * Получить отчетную дату месяца.
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder    очередность месяца в периоде (значение из formData.periodOrder)
+     * @return объект {@link Calendar} или null
+     */
+    Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
 
     /**
      * Удалить отчетный период
      *
-     * @param id идентификатор периода
+     * @param drpId  идентификатор периода
+     * @param logger логер, при необходимости
+     * @param user   пользователь, который выполняет действие
+     */
+    @Deprecated
+    void removeReportPeriod(Integer drpId, Logger logger, TAUserInfo user);
+
+    /**
+     * Удалить отчетный период
+     *
+     * @param id       идентификатор периода
+     * @param userInfo пользователь, который обновляет запись
      * @return uuid логера
      */
-    String delete(Integer id);
+    String removeReportPeriod(Integer id, TAUserInfo userInfo);
 
     /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
@@ -89,6 +177,15 @@ public interface PeriodService {
     }
 
     /**
+     * Получение идентификаторов подразделений, для которых доступна операция {@link Operation} для пользователя {@link TAUser}
+     *
+     * @param user      пользователь, который совершает операцию
+     * @param operation операция, совершаемая над отчетным периодом
+     * @return список идентификаторов подразделений или пустой список
+     */
+    List<Integer> getAvailableDepartments(TAUser user, Operation operation);
+
+    /**
      * Получение списка отчетных периодов для указанных подразделений
      *
      * @param departmentList Список подразделений
@@ -104,6 +201,17 @@ public interface PeriodService {
      * @return true - существует, false - не существует
      */
     boolean existForDepartment(int departmentId, int reportPeriodId);
+
+    /**
+     * Проверяет статус подразделения
+     *
+     * @param year                  год отчетного периода
+     * @param departmentId          идентификатор подразделения
+     * @param dictionaryTaxPeriodId идентификатор записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @return объект {@link PeriodStatusBeforeOpen}
+     * @throws ServiceException если найдено несколько {@link ReportPeriod} для указанного года
+     */
+    PeriodStatusBeforeOpen checkPeriodStatus(int year, int departmentId, long dictionaryTaxPeriodId);
 
     /**
      * http://conf.aplana.com/pages/viewpage.action?pageId=11382680
@@ -131,12 +239,58 @@ public interface PeriodService {
     List<ReportPeriod> getCorrectPeriods(int departmentId);
 
     /**
+     * Открыть корректирующий период
+     *
+     * @param reportPeriod отчетный период
+     * @param departmentId идентификатор подразделения
+     * @param term         срок сдачи отчетности
+     * @param user         пользователь, который выполняет действие
+     * @param logs         логер, при необходимости
+     */
+    @Deprecated
+    void openCorrectionPeriod(ReportPeriod reportPeriod, int departmentId, Date term, TAUserInfo user, List<LogEntry> logs);
+
+    /**
      * Открыть Корректирующий период
      *
-     * @param action данные по корректирующему периоду
+     * @param period - отчетный период для подразделения
      * @return logs логер, при необходимости
      */
-    String openCorrectionPeriod(OpenCorrectionPeriodAction action);
+    String openCorrectionPeriod(DepartmentReportPeriod period);
+
+    /**
+     * проверяет статус периода перед открытием
+     *
+     * @param reportPeriod отчетный период
+     * @param departmentId идентификатор подразделения
+     * @param term         срок сдачи отчетности
+     * @return статус периода
+     */
+    PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, int departmentId, Date term);
+
+    /**
+     * Редактировать отчетный период
+     *
+     * @param departmentReportPeriod
+     * @param userInfo
+     * @return uuid логгера
+     */
+    String edit(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo);
+
+    /**
+     * Редактировать отчетный период
+     * Специальный метод для GWT
+     *
+     * @param reportPeriodId     идентификатор отчетного период
+     * @param newDictTaxPeriodId новый отчетный период
+     * @param newYear            новый год :)
+     * @param user               пользователь, который выполняет действие
+     * @param departmentId       идентификатор подразделения
+     * @param logs               логер, при необходимости
+     */
+    @Deprecated
+    void edit(int reportPeriodId, int oldDepartmentId, long newDictTaxPeriodId, int newYear, TAUserInfo user,
+              int departmentId, List<LogEntry> logs);
 
     /**
      * Получение отчетных периодов подразделения по списку идентификаторов подразделений
@@ -161,4 +315,13 @@ public interface PeriodService {
      * @return список {@link ReportPeriodType} или пустой список
      */
     List<ReportPeriodType> getPeriodType();
+
+    /**
+     * Возвращает все периоды по виду налога, которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
+     *
+     * @param startDate Начало периода
+     * @param endDate   Конец периода
+     */
+    @Deprecated
+    List<ReportPeriod> getReportPeriodsByDate(Date startDate, Date endDate);
 }

@@ -89,6 +89,9 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public ReportPeriodService mockReportPeriodService() {
         ReportPeriodService reportPeriodService = mock(ReportPeriodServiceImpl.class);
+        when(reportPeriodService.getStartDate(anyInt())).thenReturn(PERIOD_START_DATE);
+        when(reportPeriodService.getEndDate(anyInt())).thenReturn(PERIOD_END_DATE);
+        when(reportPeriodService.getReportDate(anyInt())).thenReturn(PERIOD_END_DATE);
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setTaxType(TaxType.INCOME);
         taxPeriod.setId(1);

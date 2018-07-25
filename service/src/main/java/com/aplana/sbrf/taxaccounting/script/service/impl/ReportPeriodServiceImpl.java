@@ -53,6 +53,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     }
 
     @Override
+    public Calendar getReportDate(int reportPeriodId) {
+       return reportPeriodService.getReportDate(reportPeriodId);
+    }
+
+    @Override
     public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
         return reportPeriodService.getByDictCodeAndYear(code, year);
     }

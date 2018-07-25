@@ -1,21 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
@@ -33,11 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @Repository
@@ -45,14 +37,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     private static final Log LOG = LogFactory.getLog(DepartmentReportPeriodDaoImpl.class);
 
-    @Autowired
     private ReportPeriodDao reportPeriodDao;
 
-    @Autowired
-    private DBUtils dbUtils;
-
-    @Autowired(required = false)
-    private CacheManagerDecorator cacheManagerDecorator;
+    public DepartmentReportPeriodDaoImpl(ReportPeriodDao reportPeriodDao) {
+        this.reportPeriodDao = reportPeriodDao;
+    }
 
     private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -115,7 +104,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             departmentReportPeriodJournalItem.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
             departmentReportPeriodJournalItem.setYear(reportPeriod.getTaxPeriod().getYear());
             departmentReportPeriodJournalItem.setName(reportPeriod.getName());
-            departmentReportPeriodJournalItem.setEndDate(reportPeriod.getEndDate());
             departmentReportPeriodJournalItem.setIsActive(!Objects.equals(SqlUtils.getInteger(rs, "is_active"), 0));
             departmentReportPeriodJournalItem.setCorrectionDate(rs.getDate("correction_date"));
             return departmentReportPeriodJournalItem;
@@ -251,17 +239,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void create(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
-        final List<Long> ids = dbUtils.getNextIds("seq_department_report_period", departmentIds.size());
         getJdbcTemplate().batchUpdate("INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
                 " VALUES (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, ids.get(i).intValue());
+                ps.setInt(1, generateId("seq_department_report_period", Integer.class));
                 ps.setInt(2, departmentIds.get(i));
                 ps.setInt(3, departmentReportPeriod.getReportPeriod().getId());
                 ps.setBoolean(4, departmentReportPeriod.isActive());
-                ps.setDate(5, departmentReportPeriod.getCorrectionDate() != null ?
-                        new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()) : null);
+                ps.setDate(5, new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()));
             }
 
             @Override
@@ -284,23 +270,25 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void updateActive(final List<Integer> ids, final Integer reportPeriodId, final boolean active) {
-        getJdbcTemplate().batchUpdate("UPDATE department_report_period SET is_active = ? WHERE report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, active ? 1 : 0);
-                ps.setInt(2, reportPeriodId);
-                ps.setInt(3, ids.get(i));
-            }
+        try {
+            getJdbcTemplate().batchUpdate("UPDATE department_report_period SET is_active = ? WHERE report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, active ? 1 : 0);
+                    ps.setInt(2, reportPeriodId);
+                    ps.setInt(3, ids.get(i));
+                }
 
-            @Override
-            public int getBatchSize() {
-                return ids.size();
-            }
-        });
-
-        for (Integer id : ids) {
-            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
+                @Override
+                public int getBatchSize() {
+                    return ids.size();
+                }
+            });
+        } catch (DataAccessException e) {
+            LOG.error("", e);
+            throw new DaoException("", e);
         }
     }
 
@@ -329,20 +317,13 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isExistsByReportPeriodIdAndDepartmentId(int departmentId, int reportPeriodId) {
+    public boolean checkExistForDepartment(int departmentId, int reportPeriodId) {
         Integer count = getJdbcTemplate().queryForObject(
-                "SELECT CASE WHEN exists(SELECT * FROM department_report_period WHERE department_id = ? AND report_period_id = ?) THEN 1 ELSE 0 END FROM dual",
-                Integer.class, departmentId, reportPeriodId
+                "SELECT count(*) FROM department_report_period WHERE department_id = ? AND report_period_id = ?",
+                new Object[]{departmentId, reportPeriodId},
+                new int[]{Types.NUMERIC, Types.NUMERIC},
+                Integer.class
         );
-        return count != 0;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public boolean isExistsByReportPeriodId(int reportPeriodId) {
-        Integer count = getJdbcTemplate().queryForObject(
-                "SELECT CASE WHEN exists(SELECT * FROM department_report_period WHERE report_period_id = ?) THEN 1 ELSE 0 END FROM dual",
-                Integer.class, reportPeriodId);
         return count != 0;
     }
 
@@ -407,13 +388,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod) {
-        return getJdbcTemplate().queryForObject(
-                "SELECT count(*) FROM department_report_period drp WHERE " +
-                        "drp.DEPARTMENT_ID = ? AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ?",
-                Integer.class, departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
-                departmentReportPeriod.getCorrectionDate()
-        ) > 0;
+    public boolean checkExistLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
+        try {
+            return getJdbcTemplate().
+                    queryForObject(
+                            "SELECT count(*) FROM department_report_period drp WHERE " +
+                                    "drp.DEPARTMENT_ID = ? AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ?",
+                            new Object[]{departmentId, reportPeriodId, correctionDate}, Integer.class) > 0;
+        } catch (DataAccessException e) {
+            LOG.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @Override
@@ -443,10 +428,5 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-    }
-
-    @Override
-    public SecuredEntity getSecuredEntity(long id) {
-        return fetchOne((int) id);
     }
 }

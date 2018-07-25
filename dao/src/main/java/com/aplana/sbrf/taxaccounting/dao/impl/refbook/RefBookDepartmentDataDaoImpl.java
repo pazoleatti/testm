@@ -33,10 +33,14 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
      */
     @Override
     public RefBookDepartment fetchDepartmentById(Integer id) {
-        String query = "SELECT * FROM ( " +
-                REF_BOOK_DEPARTMENT_SELECT +
-                "WHERE dep.is_active = 1 AND dep.id = ? " +
-                ") WHERE rownum = 1";
+        String query = "select * from ( " +
+                "  select dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
+                "dep.region_id, dep.is_active, dep.code, df.shortname as full_name " +
+                "from department dep " +
+                "inner join department_fullpath df " +
+                "on dep.id = df.id " +
+                "where dep.is_active = 1 and dep.id = ? " +
+                ") where rownum = 1";
         return getJdbcTemplate().queryForObject(query, new Object[]{id}, new RefBookDepartmentRowMapper());
     }
 
@@ -70,7 +74,12 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
      * @return Список значений справочника
      */
     private List<RefBookDepartment> fetchDepartments(Collection<Integer> ids, boolean activeOnly) {
-        String sql = REF_BOOK_DEPARTMENT_SELECT + "where dep.is_active = 1 AND dep.id IN (:ids)";
+        String sql = "select dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
+                "dep.region_id, dep.is_active, dep.code, df.shortname as full_name " +
+                "from department dep " +
+                "inner join department_fullpath df " +
+                "on dep.id = df.id " +
+                "where dep.is_active = 1 and dep.id in (:ids)";
         return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("ids", ids), new RefBookDepartmentRowMapper());
     }
 
@@ -102,11 +111,6 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
         return fetchDepartments(ids, name, true, pagingParams);
     }
 
-    @Override
-    public List<RefBookDepartment> fetchAllActiveByType(DepartmentType type) {
-        return getJdbcTemplate().query(REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = ? and dep.is_active = 1", new RefBookDepartmentRowMapper(), type.getCode());
-    }
-
     /**
      * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      * Также можно выбрать все подразделения или только действующие
@@ -119,7 +123,10 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
      * @return Страница списка значений справочника
      */
     private PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, boolean activeOnly, PagingParams pagingParams) {
-        String baseSql = String.format(REF_BOOK_DEPARTMENT_SELECT +
+        String baseSql = String.format("select  dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
+                "dep.region_id, dep.is_active, dep.code, df.shortname as full_name \n" +
+                "from department dep \n" +
+                "join department_fullpath df on dep.id = df.id \n" +
                 "where %s ", SqlUtils.transformToSqlInStatement("dep.id", ids));
 
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -149,12 +156,6 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", params, Integer.class);
         return new PagingResult<>(departments, totalCount);
     }
-
-    private final static String REF_BOOK_DEPARTMENT_SELECT =
-            "select dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
-                    "dep.region_id, dep.is_active, dep.code, df.shortname as full_name " +
-                    "from department dep " +
-                    "inner join department_fullpath df on dep.id = df.id ";
 
     private static final class RefBookDepartmentRowMapper implements RowMapper<RefBookDepartment> {
         @Override

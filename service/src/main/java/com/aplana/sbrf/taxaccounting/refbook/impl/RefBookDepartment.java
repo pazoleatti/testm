@@ -639,7 +639,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         drpCopy.setDepartmentId(depId);
                         drpCopy.setIsActive(drp.isActive());
                         drpCopy.setCorrectionDate(drp.getCorrectionDate());
-                        throw new UnsupportedOperationException();
+                        periodService.saveOrOpen(drpCopy, null);
                     }
                     return;
                 }
@@ -660,7 +660,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 drpCopy.setDepartmentId(depId);
                 drpCopy.setIsActive(drp.isActive());
                 drpCopy.setCorrectionDate(drp.getCorrectionDate());
-                throw new UnsupportedOperationException();
+                periodService.saveOrOpen(drpCopy, null);
             }
         }
     }

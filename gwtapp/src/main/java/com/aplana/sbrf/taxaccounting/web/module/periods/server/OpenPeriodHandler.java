@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,8 +19,6 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 
 	@Autowired
 	private PeriodService reportPeriodService;
-	@Autowired
-	private SecurityService securityService;
 
 	public OpenPeriodHandler() {
 		super(OpenPeriodAction.class);
@@ -37,7 +34,7 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 		departmentReportPeriod.setDepartmentId(action.getDepartmentId());
 		departmentReportPeriod.setCorrectionDate(action.getCorrectPeriod());
 		OpenPeriodResult result = new OpenPeriodResult();
-        result.setUuid(reportPeriodService.open(departmentReportPeriod, securityService.currentUserInfo()));
+        result.setUuid(reportPeriodService.open(departmentReportPeriod));
 		return result;
 	}
 

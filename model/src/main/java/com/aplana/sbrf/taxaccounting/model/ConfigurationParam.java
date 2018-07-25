@@ -47,9 +47,7 @@ public enum ConfigurationParam {
     SHOW_TIMING("Отображать сообщения о времени выполнения", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
     LIMIT_IDENT("Порог схожести ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
     ENABLE_IMPORT_PERSON("Загружать справочник ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
-    CONSOLIDATION_DATA_SELECTION_DEPTH("Горизонт отбора данных консолидации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
-    REPORT_PERIOD_YEAR_MIN("Минимальное значение отчетного года", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
-    REPORT_PERIOD_YEAR_MAX("Максимальное значение отчетного года", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
+    CONSOLIDATION_DATA_SELECTION_DEPTH("Горизонт отбора данных консолидации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
 
     private String caption;
     private ConfigurationParamGroup group;

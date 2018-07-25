@@ -7,7 +7,7 @@ import java.util.Date;
  * DTO для {@link DepartmentReportPeriod}
  */
 
-public class DepartmentReportPeriodJournalItem implements Serializable, SecuredEntity {
+public class DepartmentReportPeriodJournalItem implements Serializable, SecuredEntity{
 
     private Integer id;
 
@@ -29,12 +29,11 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
 
     private long dictTaxPeriodId;
 
-    private Date endDate;
-
     /**
      * Объект для грида в окне просмотра списка периодов для группировки по году
      */
     private DepartmentReportPeriodJournalItem parent;
+
 
 
     public Integer getId() {
@@ -107,14 +106,6 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
 
     public void setDictTaxPeriodId(long dictTaxPeriodId) {
         this.dictTaxPeriodId = dictTaxPeriodId;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
     }
 
     public DepartmentReportPeriodJournalItem getParent() {

@@ -70,7 +70,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
     }
 
     @Override
-    public TaxPeriod fetchOneByYear(int year) {
+    public TaxPeriod fetchAllByYear(int year) {
         try {
             return getJdbcTemplate().queryForObject(
                     "SELECT id, tax_type, year FROM tax_period WHERE year = ?",

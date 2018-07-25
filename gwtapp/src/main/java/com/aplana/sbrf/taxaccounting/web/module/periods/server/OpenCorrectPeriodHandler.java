@@ -33,7 +33,11 @@ public class OpenCorrectPeriodHandler extends AbstractActionHandler<OpenCorrectP
 
     @Override
     public OpenCorrectPeriodResult execute(OpenCorrectPeriodAction action, ExecutionContext executionContext) throws ActionException {
-        throw new UnsupportedOperationException();
+        List<LogEntry> logs = new ArrayList<LogEntry>();
+        periodService.openCorrectionPeriod(action.getSelectedPeriod(), action.getSelectedDepartments().get(0), action.getTerm(), securityService.currentUserInfo(), logs);
+        OpenCorrectPeriodResult result = new OpenCorrectPeriodResult();
+        result.setUuid(logEntryService.save(logs));
+        return result;
     }
 
     @Override

@@ -10,43 +10,40 @@
                     <tr>
                         <!--Подразделение-->
                         <td>
-                            <label class="control-label">{{::'reportPeriod.department' | translate}}:</label>
+                            <label class="control-label">{{::'reportPeriod.department' |
+                                translate}}:</label>
                         </td>
                         <td>
-                            <div data-ng-controller="SelectDepartmentCtrl"
-                                 data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initAllAvailableTBForPeriodManagementSelect(searchFilter.params)"
-                                 data-ng-model="searchFilter.params.department"
-                                 class="span8">
-                            </div>
+                            <label style="font-size: 13px; font-weight: bold">{{department.name}}</label>
                         </td>
 
                         <td class="col-separator"></td>
 
                         <!--Период, с-->
                         <td>
-                            <label class="control-label" for="searchfilter_params_yearstart">
-                                {{::'reportPeriod.filter.periodFrom' | translate}}
-                            </label>
+                            <label class="control-label" for="searchfilter_params_yearstart">{{::'reportPeriod.filter.periodFrom'
+                                | translate}}</label>
                         </td>
                         <td>
                             <div data-aplana-field>
                                 <input type="number"
-                                       style="width: 58px;text-align: left;"
+                                       style="padding: 0 2px; width: 58px;text-align: left;"
                                        data-ng-model="searchFilter.params.yearStart"
                                        id="searchfilter_params_yearstart"
                                        name="searchfilter_params_yearstart"
                                        data-required
-                                       data-ng-max="yearMax"
-                                       data-ng-min="yearMin"/>
+                                       max="2099"
+                                       min="1900"/>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key='min'>
-                                    {{'common.validation.min.value' | translate:'{ minValue: ' + yearMin + ' }'}}
+                                    {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
+                                    1900 + ' }'}}
                                 </div>
                                 <div data-aplana-validator data-key='max'>
-                                    {{'common.validation.max.value' | translate:'{ maxValue: ' + yearMax + ' }'}}
+                                    {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
+                                    2099 + ' }'}}
                                 </div>
                             </div>
                         </td>
@@ -59,21 +56,23 @@
                         <td>
                             <div data-aplana-field>
                                 <input type="number"
-                                       style="width: 58px; text-align: left;"
+                                       style="padding: 0 2px; width: 58px;text-align: left;"
                                        data-ng-model="searchFilter.params.yearEnd"
                                        id="searchfilter_params_yearend"
                                        name="searchfilter_params_yearend"
                                        data-required
-                                       data-ng-max="yearMax"
-                                       data-ng-min="yearMin"/>
+                                       max="2099"
+                                       min="1900"/>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key='min'>
-                                    {{'common.validation.min.value' | translate:'{ minValue: ' + yearMin + ' }'}}
+                                    {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
+                                    1900 + ' }'}}
                                 </div>
                                 <div data-aplana-validator data-key='max'>
-                                    {{'common.validation.max.value' | translate:'{ maxValue: ' + yearMax + ' }'}}
+                                    {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
+                                    2099 + ' }'}}
                                 </div>
                             </div>
                         </td>

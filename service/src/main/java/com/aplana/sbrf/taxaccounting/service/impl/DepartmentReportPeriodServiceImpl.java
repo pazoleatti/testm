@@ -1,35 +1,18 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.LockDataItem;
-import com.aplana.sbrf.taxaccounting.model.MessageGenerator;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -41,6 +24,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     private static final Log LOG = LogFactory.getLog(DepartmentReportPeriodServiceImpl.class);
 
     private final static String ERROR_BATCH_MESSAGE = "Пустой список отчетных периодов";
+    private final static String COMMON_ERROR_MESSAGE = "Ошибка при выполнении операции с отчетными периодами подразделения";
 
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
@@ -53,88 +37,152 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
+    private NotificationService notificationService;
+    @Autowired
     private LockDataService lockDataService;
 
     @Override
     public List<DepartmentReportPeriod> fetchAllByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        return departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-    }
-
-    @Override
-    public DepartmentReportPeriod fetchOneByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        if (departmentReportPeriods.size() > 1) {
-            throw new IllegalArgumentException();
-        } else if (!departmentReportPeriods.isEmpty()) {
-            return departmentReportPeriods.get(0);
+        try {
+            return departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
         }
-        return null;
     }
 
     @Override
     public List<Integer> fetchAllIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        return departmentReportPeriodDao.fetchAllIdsByFilter(departmentReportPeriodFilter);
+        try {
+            return departmentReportPeriodDao.fetchAllIdsByFilter(departmentReportPeriodFilter);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
     public void create(DepartmentReportPeriod departmentReportPeriod) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s", departmentReportPeriod));
-        departmentReportPeriodDao.create(departmentReportPeriod);
+        try {
+            departmentReportPeriodDao.create(departmentReportPeriod);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
     public void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s; departmentIds: %s", departmentReportPeriod, departmentIds));
-        if (departmentIds == null || departmentIds.isEmpty()) {
+        if (departmentIds == null || departmentIds.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
+        try {
+            for (Integer departmentId : departmentIds) {
+                departmentReportPeriod.setDepartmentId(departmentId);
+                departmentReportPeriodDao.create(departmentReportPeriod);
+            }
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
         }
-        departmentReportPeriodDao.create(departmentReportPeriod, departmentIds);
     }
 
     @Override
     public void updateActive(int id, boolean active) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.updateActive. id: %s; active: %s", id, active));
-        departmentReportPeriodDao.updateActive(id, active);
+        try {
+            departmentReportPeriodDao.updateActive(id, active);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
     public void updateActive(List<Integer> ids, Integer reportPeriodId, boolean active) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.updateActive. ids: %s; reportPeriodId: %s; active: %s", ids, reportPeriodId, active));
-        if (ids == null || ids.isEmpty()) {
+        if (ids == null || ids.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
+        try {
+            departmentReportPeriodDao.updateActive(ids, reportPeriodId, active);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
         }
-        departmentReportPeriodDao.updateActive(ids, reportPeriodId, active);
     }
 
     @Override
     public void delete(List<Integer> ids) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.delete. ids: %s", ids));
-        departmentReportPeriodDao.delete(ids);
+        try {
+            departmentReportPeriodDao.delete(ids);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
-    public boolean isExistsByReportPeriodIdAndDepartmentId(int departmentId, int reportPeriodId) {
-        return departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentId, reportPeriodId);
-    }
-
-    @Override
-    public boolean isExistsByReportPeriodId(int reportPeriodId) {
-        return departmentReportPeriodDao.isExistsByReportPeriodId(reportPeriodId);
+    public boolean checkExistForDepartment(int departmentId, int reportPeriodId) {
+        try {
+            return departmentReportPeriodDao.checkExistForDepartment(departmentId, reportPeriodId);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
     public DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId) {
-        return departmentReportPeriodDao.fetchLast(departmentId, reportPeriodId);
+        try {
+            return departmentReportPeriodDao.fetchLast(departmentId, reportPeriodId);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
-    public boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod) {
-        return departmentReportPeriodDao.isLaterCorrectionPeriodExists(departmentReportPeriod);
+    public boolean checkExistLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
+        try {
+            return departmentReportPeriodDao.checkExistLargeCorrection(departmentId, reportPeriodId, correctionDate);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(COMMON_ERROR_MESSAGE, e);
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
     }
 
     @Override
     public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter filter) {
-        return departmentReportPeriodDao.fetchJournalItemByFilter(filter);
+        List<DepartmentReportPeriodJournalItem> page = departmentReportPeriodDao.fetchJournalItemByFilter(filter);
+        for (DepartmentReportPeriodJournalItem item : page) {
+            Notification notification = notificationService.fetchOne(item.getReportPeriodId(), null, item.getDepartmentId());
+            if (notification != null) {
+                item.setDeadline(notification.getDeadline());
+            }
+        }
+        return page;
     }
 
     @Override
@@ -143,7 +191,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(id);
         if (departmentReportPeriod == null) {
-            throw new ServiceException("Ошибка загрузки отчтетного периода подразделения с id " + id +
+            throw new ServiceException(COMMON_ERROR_MESSAGE, "Ошибка загрузки отчтетного периода подразделения с id " + id +
                     ". Период не существует или не найден.");
         }
 
@@ -186,7 +234,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(id);
         if (departmentReportPeriod == null) {
-            throw new ServiceException("Ошибка загрузки отчетного периода подразделения с id " + id +
+            throw new ServiceException(COMMON_ERROR_MESSAGE, "Ошибка загрузки отчтетного периода подразделения с id " + id +
                     ". Период не существует или не найден.");
         }
 
@@ -211,7 +259,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
         }
         List<LockDataItem> lockDataItems = new ArrayList<>();
 
-        if (keysBlocker.size() > 0) {
+        if (keysBlocker.size() > 0){
             lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
         }
 

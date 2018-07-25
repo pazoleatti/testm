@@ -57,9 +57,4 @@ public class TaxPeriodDaoTest {
 		TaxPeriod lastTaxPeriod = taxPeriodDao.fetchOne(10);
 		assertEquals(lastTaxPeriod.getYear(), taxPeriodDao.getLast(TaxType.NDFL).getYear());
 	}
-
-	@Test
-	public void fetchOneByYear() {
-		assertEquals(taxPeriodDao.fetchOneByYear(2014).getYear(), 2014);
-	}
 }

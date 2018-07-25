@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,12 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -40,7 +36,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT * FROM department WHERE id = ?",
+                    "select * from department where id = ?",
                     new Object[]{id},
                     new DepartmentJdbcMapper()
             );
@@ -51,14 +47,14 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public boolean existDepartment(int id) {
-        return getJdbcTemplate().queryForObject("SELECT count(id) FROM department WHERE id = ?", new Object[]{id}, Integer.class) == 1;
+        return getJdbcTemplate().queryForObject("select count(id) from department where id = ?", new Object[]{id}, Integer.class) == 1;
     }
 
     @Override
     public List<Department> getChildren(int parentDepartmentId) {
         try {
             return getJdbcTemplate().query(
-                    "SELECT * FROM department WHERE parent_id = ?",
+                    "select * from department where parent_id = ?",
                     new Object[]{parentDepartmentId},
                     new DepartmentJdbcMapper()
             );
@@ -112,8 +108,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public Integer getParentTBId(int departmentId) {
         try {
-            return getJdbcTemplate().queryForObject("SELECT id FROM department WHERE parent_id = 0 AND type = 2 " +
-                    "START WITH id = ? CONNECT BY id = PRIOR parent_id", new Object[]{departmentId}, Integer.class);
+            return getJdbcTemplate().queryForObject("SELECT id FROM department WHERE parent_id = 0 and type = 2 " +
+                    "START WITH id = ? CONNECT BY id = prior parent_id", new Object[]{departmentId}, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (DataAccessException e) {
@@ -125,8 +121,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Cacheable(value = CacheConstants.DEPARTMENT, key = "'parent_tb_'+#departmentId")
     public Department getParentTB(int departmentId) {
         try {
-            return getJdbcTemplate().queryForObject("SELECT * FROM department WHERE parent_id = 0 AND type = 2 " +
-                    "START WITH id = ? CONNECT BY id = PRIOR parent_id", new Object[]{departmentId}, new DepartmentJdbcMapper());
+            return getJdbcTemplate().queryForObject("SELECT * FROM department WHERE parent_id = 0 and type = 2 " +
+                    "START WITH id = ? CONNECT BY id = prior parent_id", new Object[]{departmentId}, new DepartmentJdbcMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (DataAccessException e) {
@@ -138,7 +134,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Department> listDepartments() {
         try {
             return getJdbcTemplate().query(
-                    "SELECT * FROM department",
+                    "select * from department",
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
@@ -181,7 +177,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT * FROM department dp WHERE lower(dp.sbrf_code) = lower(?) AND (? = 0 OR dp.is_active = ?)",
+                    "SELECT * FROM department dp WHERE lower(dp.sbrf_code) = lower(?) and (? = 0 or dp.is_active = ?)",
                     new Object[]{sbrfCode, activeOnly ? 1 : 0, activeOnly ? 1 : 0},
                     new DepartmentJdbcMapper()
             );
@@ -193,7 +189,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly) {
         return getJdbcTemplate().query(
-                "SELECT * FROM department dp WHERE lower(dp.sbrf_code) = lower(?) AND (? = 0 OR dp.is_active = ?)",
+                "SELECT * FROM department dp WHERE lower(dp.sbrf_code) = lower(?) and (? = 0 or dp.is_active = ?)",
                 new Object[]{sbrfCode, activeOnly ? 1 : 0, activeOnly ? 1 : 0},
                 new DepartmentJdbcMapper()
         );
@@ -340,7 +336,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Department> getAllChildren(int parentDepartmentId) {
         try {
             return getJdbcTemplate().query(
-                    "SELECT * FROM department CONNECT BY PRIOR id = parent_id START WITH id = ?",
+                    "select * from department CONNECT BY prior id = parent_id start with id = ?",
                     new Object[]{parentDepartmentId},
                     new DepartmentJdbcMapper()
             );
@@ -368,7 +364,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         try {
             int usedInt = used ? 1 : 0;
             getJdbcTemplate().update(
-                    "UPDATE department SET garant_use = ? WHERE id = ?", usedInt, depId);
+                    "update department set garant_use = ? where id = ?", usedInt, depId);
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не удалось найти подразделение банка с id = " + depId);
         }
@@ -379,16 +375,20 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("userDepId", userDepId);
         params.put("declarationTypeId", declarationTypeId);
-        return getNamedParameterJdbcTemplate().queryForList("SELECT ddt.department_id\n" +
-                "FROM department_declaration_type ddt\n" +
-                "WHERE ddt.declaration_type_id = :declarationTypeId AND ddt.department_id IN (\n" +
-                "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID IN (\n" +
-                "    SELECT DISTINCT ddt.department_id\n" +
-                "    FROM department_declaration_type ddt\n" +
-                "    INNER JOIN department_decl_type_performer ddtp ON ddt.ID = ddtp.department_decl_type_id \n" +
-                "    WHERE ddt.declaration_type_id = :declarationTypeId AND ddtp.performer_dep_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = :userDepId)\n" +
-                "  )\n" +
-                ")", params, Integer.class);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT ddt.department_id\n" +
+                    "FROM department_declaration_type ddt\n" +
+                    "WHERE ddt.declaration_type_id = :declarationTypeId AND ddt.department_id IN (\n" +
+                    "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID in (\n" +
+                    "    SELECT DISTINCT ddt.department_id\n" +
+                    "    FROM department_declaration_type ddt\n" +
+                    "    INNER JOIN department_decl_type_performer ddtp ON ddt.ID = ddtp.department_decl_type_id \n" +
+                    "    WHERE ddt.declaration_type_id = :declarationTypeId AND ddtp.performer_dep_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = :userDepId)\n" +
+                    "  )\n" +
+                    ")", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
     }
 
     @Override
@@ -398,30 +398,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         String sql = "SELECT id\n" +
                 "FROM department\n" +
                 "WHERE parent_id = 0 AND type = 2\n" +
-                "CONNECT BY id = PRIOR parent_id START WITH id IN (\n" +
+                "CONNECT BY id = prior parent_id START WITH id IN (\n" +
                 "  SELECT DISTINCT ddt.department_id\n" +
                 "  FROM department_declaration_type ddt\n" +
                 "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
-                "  WHERE ddtp.performer_dep_id IN (\n" +
-                "    SELECT dep_ddtp.id FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.id = dep_ddtp.parent_id START WITH dep_ddtp.id = :performerDepartmentId\n" +
+                "  WHERE ddtp.performer_dep_id in (\n" +
+                "    select dep_ddtp.id from department dep_ddtp connect by prior dep_ddtp.id = dep_ddtp.parent_id start with dep_ddtp.id = :performerDepartmentId\n" +
                 "  )" +
                 ")";
-        return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
-    }
-
-    @Override
-    public List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("performerDepartmentId", performerDepartmentId);
-        String sql = "SELECT id\n" +
-                "FROM department\n" +
-                "WHERE type = 2 AND is_active = 1 AND id IN (\n" +
-                "  SELECT DISTINCT ddt.department_id\n" +
-                "  FROM department_declaration_type ddt\n" +
-                "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
-                "  WHERE ddtp.performer_dep_id = :performerDepartmentId\n" +
-                ") ORDER BY name";
-        return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
     }
 
     @Override
@@ -429,26 +418,30 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("userDepId", userDepId);
         params.put("declarationTypeId", declarationTypeId);
-        return getNamedParameterJdbcTemplate().queryForList("SELECT id\n" +
-                "FROM department\n" +
-                "WHERE parent_id = 0 AND type = 2\n" +
-                "CONNECT BY id = PRIOR parent_id START WITH id IN (\n" +
-                "  SELECT DISTINCT ddt.department_id\n" +
-                "  FROM department_declaration_type ddt\n" +
-                "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
-                "  WHERE ddt.declaration_type_id=:declarationTypeId AND ddtp.performer_dep_id IN (\n" +
-                "    SELECT dep_ddtp.id FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.id = dep_ddtp.parent_id START WITH dep_ddtp.id = :userDepId\n" +
-                "  )\n" +
-                ")", params, Integer.class);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT id\n" +
+                    "FROM department\n" +
+                    "WHERE parent_id = 0 AND type = 2\n" +
+                    "CONNECT BY id = prior parent_id START WITH id IN (\n" +
+                    "  SELECT DISTINCT ddt.department_id\n" +
+                    "  FROM department_declaration_type ddt\n" +
+                    "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
+                    "  where ddt.declaration_type_id=:declarationTypeId and ddtp.performer_dep_id in (\n" +
+                    "    select dep_ddtp.id from department dep_ddtp connect by prior dep_ddtp.id = dep_ddtp.parent_id start with dep_ddtp.id = :userDepId\n" +
+                    "  )\n" +
+                    ")", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
     }
 
     @Override
     public String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate) {
-        String query = "SELECT dep.name, max(rnd.version) " +
-                "FROM department dep " +
-                "JOIN ref_book_ndfl_detail rnd ON dep.id = rnd.department_id " +
-                "JOIN ref_book_oktmo ro ON ro.id = rnd.oktmo " +
-                "WHERE rnd.kpp = :kpp AND ro.code = :oktmo AND rnd.version <= :reportPeriodEndDate GROUP BY dep.NAME";
+        String query = "select dep.name, max(rnd.version) " +
+                "from department dep " +
+                "join ref_book_ndfl_detail rnd on dep.id = rnd.department_id " +
+                "join ref_book_oktmo ro on ro.id = rnd.oktmo " +
+                "where rnd.kpp = :kpp and ro.code = :oktmo and rnd.version <= :reportPeriodEndDate group by dep.NAME";
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo)
@@ -467,13 +460,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Integer> fetchAllIds() {
-        return getJdbcTemplate().queryForList("SELECT id FROM department", Integer.class);
+        return getJdbcTemplate().queryForList("select id from department", Integer.class);
     }
 
     @Override
     public List<Integer> fetchAllChildrenIds(int parentDepartmentId) {
         return getJdbcTemplate().queryForList(
-                "SELECT id FROM department CONNECT BY PRIOR id = parent_id START WITH id = ?",
+                "select id from department CONNECT BY prior id = parent_id start with id = ?",
                 new Object[]{parentDepartmentId},
                 Integer.class
         );
@@ -491,7 +484,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public List<Integer> fetchAllParentIds(int childDepartmentId) {
         return getJdbcTemplate().queryForList(
-                "SELECT id FROM department CONNECT BY PRIOR parent_id = id START WITH id = ?",
+                "select id from department CONNECT BY prior parent_id = id start with id = ?",
                 new Object[]{childDepartmentId},
                 Integer.class
         );
@@ -506,7 +499,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Department> fetchAllDepartmentByIds(Collection<Integer> ids) {
+    public List<Department> fetchAllDepartmentByIds(List<Integer> ids) {
         String where = "where" + SqlUtils.transformToSqlInStatement("id", ids);
         return getNamedParameterJdbcTemplate().query(
                 "select * from department " + where,

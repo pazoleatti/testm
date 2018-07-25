@@ -18,8 +18,6 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -44,8 +42,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String LIMIT_IDENT_DEFAULT = "0.65";
     private static final String ENABLE_IMPORT_PERSON_DEFAULT = "1";
     private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT = "3";
-    private static final String REPORT_PERIOD_YEAR_MIN = "2003";
-    private static final String REPORT_PERIOD_YEAR_MAX = "2100";
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
@@ -73,9 +69,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String EDIT_ASYNC_PARAM_MESSAGE = "%s. Изменён параметр \"%s\" для задания \"%s\": %s.";
     private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
     private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE = "Для параметра \"Горизонт отбора данных для консолидации, годы\" должно быть указано целое количество лет от 1 до 99";
-    private static final String REPORT_PERIOD_YEAR_ERROR = "Для параметра \"%s\" должно быть указано значение от 0001 до 9999";
-    private static final String REPORT_PERIOD_YEAR_MIN_HIGHER_MAX_ERROR = "Минимальное значение отчетного года\" должно быть не больше \"Максимального значения отчетного года";
-    private static final String REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR = "Максимальное значение отчетного года\" должно быть не меньше \"Минимального значения отчетного года";
 
 
     @Autowired
@@ -95,15 +88,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
-        List<Configuration> defaultCommonConfig = new ArrayList<>();
+        List<Configuration> defaultCommonConfig = new ArrayList<Configuration>();
         defaultCommonConfig.add(new Configuration(ConfigurationParam.SBERBANK_INN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, SBERBANK_INN_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(), COMMON_PARAM_DEPARTMENT_ID, NO_CODE_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(), COMMON_PARAM_DEPARTMENT_ID, SHOW_TIMING_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, LIMIT_IDENT_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.ENABLE_IMPORT_PERSON.getCaption(), COMMON_PARAM_DEPARTMENT_ID, ENABLE_IMPORT_PERSON_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.getCaption(), COMMON_PARAM_DEPARTMENT_ID, CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MIN));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MAX));
         return defaultCommonConfig;
     }
 
@@ -538,18 +529,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return configurationDao.fetchAllByGroupAndPaging(configurationParamGroup, pagingParams);
     }
 
-    @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
-            "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_GENERAL)")
-    public Map<String, Configuration> fetchAllByCodes(List<String> codes, TAUserInfo userInfo) {
-        List<Configuration> configurations = configurationDao.fetchAllByCodes(codes);
-        return Maps.uniqueIndex(configurations, new Function<Configuration, String>() {
-            @Override
-            public String apply(Configuration configuration) {
-                return configuration.getCode();
-            }
-        });
-    }
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
@@ -734,9 +713,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkDiscreteValue(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.name())) {
             checkConsolidationDataSelectionDepth(config.getValue(), logger);
-        } else if (config.getCode().equals(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.name()) ||
-                config.getCode().equals(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.name())) {
-            checkReportPeriodYear(config, logger);
         }
     }
 
@@ -758,6 +734,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param value  значение параметра
      * @param logger логгер
      */
+
     private void checkLimitIdent(String value, Logger logger) {
         try {
             BigDecimal decimal = new BigDecimal(value);
@@ -802,28 +779,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private void checkSberbankInn(String inn, Logger logger) {
         if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
             logger.error(INN_JUR_ERROR, inn);
-        }
-    }
-
-    private void checkReportPeriodYear(Configuration configuration, Logger logger) {
-        try {
-            Integer intValue = Integer.valueOf(configuration.getValue());
-            if (intValue < 0 || intValue > 9999) {
-                logger.error(REPORT_PERIOD_YEAR_ERROR, configuration.getDescription());
-            }
-            if (configuration.getCode().equals(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.name())) {
-                Integer maxValue = Integer.valueOf(configurationDao.fetchByEnum(ConfigurationParam.REPORT_PERIOD_YEAR_MAX).getValue());
-                if (intValue > maxValue) {
-                    logger.error(REPORT_PERIOD_YEAR_MIN_HIGHER_MAX_ERROR);
-                }
-            } else {
-                Integer minValue = Integer.valueOf(configurationDao.fetchByEnum(ConfigurationParam.REPORT_PERIOD_YEAR_MIN).getValue());
-                if (intValue < minValue) {
-                    logger.error(REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR);
-                }
-            }
-        } catch (NumberFormatException e) {
-            logger.error(REPORT_PERIOD_YEAR_ERROR, configuration.getDescription());
         }
     }
 

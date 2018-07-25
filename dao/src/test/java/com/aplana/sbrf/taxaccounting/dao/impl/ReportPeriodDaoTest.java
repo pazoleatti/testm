@@ -107,8 +107,8 @@ public class ReportPeriodDaoTest {
     public void getReportPeriodByTaxPeriodAndDictTest1() {
         ReportPeriod reportPeriod1 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 21);
         ReportPeriod reportPeriod2 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 22);
-        assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
-        assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
+        Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
+        Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class ReportPeriodDaoTest {
     public void getPeriodsByTaxTypeAndDepartmentsTest() {
         List<ReportPeriod> reportPeriods;
         reportPeriods = reportPeriodDao.fetchAllByDepartments(asList(1, 2, 3));
-        assertEquals(3, reportPeriods.size());
+        Assert.assertEquals(3, reportPeriods.size());
         Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
             }
 
@@ -183,7 +183,7 @@ public class ReportPeriodDaoTest {
         ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear("99", 2015);
         Assert.assertNull(reportPeriod1);
         Assert.assertNotNull(reportPeriod2);
-        assertEquals(3, reportPeriod2.getId().intValue());
+        Assert.assertEquals(3, reportPeriod2.getId().intValue());
     }
 
     @Test
@@ -194,12 +194,7 @@ public class ReportPeriodDaoTest {
         Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
         Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
         List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(startDate, endDate);
-        assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
-        assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
-    }
-
-    @Test
-    public void getReportPeriodTypeById() {
-	    assertEquals(reportPeriodDao.getReportPeriodTypeById(21L).getCode(), "99");
+        Assert.assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
+        Assert.assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
     }
 }

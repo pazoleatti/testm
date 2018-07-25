@@ -2,13 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,11 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -108,18 +98,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         try {
             return getJdbcTemplate().queryForObject("SELECT code, department_id, value FROM configuration WHERE code = ?",
                     new Object[]{param.name()}, configurationRowMapper);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public List<Configuration> fetchAllByCodes(Collection<String> codes) {
-        try {
-            MapSqlParameterSource sqlParams = new MapSqlParameterSource();
-            sqlParams.addValue("codes", codes);
-            return getNamedParameterJdbcTemplate().query("SELECT code, department_id, value FROM configuration WHERE code in (:codes)",
-                    sqlParams, configurationRowMapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

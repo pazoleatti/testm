@@ -43,6 +43,15 @@ public interface ReportPeriodService {
     Calendar getEndDate(int reportPeriodId);
 
     /**
+     * Возвращает "отчетную дату" если требуется в чтз
+     * Отчетная дата = дата конца периода + 1 день
+     *
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link Calendar} или null
+     */
+    Calendar getReportDate(int reportPeriodId);
+
+    /**
      * Получение отчетного периода по коду записи справочника "Коды, определяющие налоговый (отчётный) период" и году
      *
      * @param code код записи справочника "Коды, определяющие налоговый (отчётный) период"

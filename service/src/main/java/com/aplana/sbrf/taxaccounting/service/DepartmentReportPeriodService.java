@@ -30,15 +30,6 @@ public interface DepartmentReportPeriodService {
     List<DepartmentReportPeriod> fetchAllByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
-     * Получение списка отчетных периодов для подразделений по указанному фильтру
-     *
-     * @param departmentReportPeriodFilter фильтр
-     * @return {@link DepartmentReportPeriod} или null если не найден
-     * @throws IllegalArgumentException если по фильтру найдено несколько записей
-     */
-    DepartmentReportPeriod fetchOneByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
-
-    /**
      * Получение списка идентификаторов отчетных периодов для подразделений по указанному фильтру
      *
      * @param departmentReportPeriodFilter фильтр
@@ -92,15 +83,7 @@ public interface DepartmentReportPeriodService {
      * @param reportPeriodId идентификатор отчетного периода
      * @return признак существования отчетного периода пожразделения
      */
-    boolean isExistsByReportPeriodIdAndDepartmentId(int departmentId, int reportPeriodId);
-
-    /**
-     * Возвращяет признак, что {@link DepartmentReportPeriod} существует для данного отчетного периода
-     *
-     * @param reportPeriodId ид отчетного периода
-     * @return признак того, что {@link DepartmentReportPeriod} существует для данного отчетного периода
-     */
-    boolean isExistsByReportPeriodId(int reportPeriodId);
+    boolean checkExistForDepartment(int departmentId, int reportPeriodId);
 
     /**
      * Получение последнего отчетного периода подразделения
@@ -114,10 +97,12 @@ public interface DepartmentReportPeriodService {
     /**
      * Проверяет существует ли корректирующий период, атрибут "Период сдачи корректировки" которого содержит большее значение
      *
-     * @param departmentReportPeriod период, относительно которого будет выполнена проверка
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @param correctionDate дата выбранного периода
      * @return true, если существует
      */
-    boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod);
+    boolean checkExistLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
 
     /**
      * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией

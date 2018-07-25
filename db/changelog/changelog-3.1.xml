@@ -284,20 +284,4 @@
         </update>
     </changeSet>
 
-
-    <changeSet id="3.1-dnovikov-7" author="dnovikov">
-        <insert tableName="CONFIGURATION">
-            <column name="code" value="REPORT_PERIOD_YEAR_MIN"/>
-            <column name="department_id" value="0"/>
-            <column name="value" value="2003"/>
-        </insert>
-    </changeSet>
-
-    <changeSet id="3.1-dnovikov-8" author="dnovikov">
-        <insert tableName="CONFIGURATION">
-            <column name="code" value="REPORT_PERIOD_YEAR_MAX"/>
-            <column name="department_id" value="0"/>
-            <column name="value" value="2100"/>
-        </insert>
-    </changeSet>
 </databaseChangeLog>

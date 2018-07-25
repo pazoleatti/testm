@@ -15,12 +15,6 @@
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
-              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ReportPeriodService"/>
-       </bean>
-       <bean class="org.mockito.Mockito" factory-method="mock">
-              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TaxPeriodService"/>
-       </bean>
-       <bean class="org.mockito.Mockito" factory-method="mock">
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
@@ -43,6 +37,9 @@
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>

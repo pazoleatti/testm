@@ -117,15 +117,6 @@ public interface ConfigurationService {
     PagingResult<Configuration> fetchCommonParams(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo);
 
     /**
-     * Возвращяет map вида код-параметр для определенного списка кодов
-     *
-     * @param codes список кодов параметров
-     * @param userInfo пользователь
-     * @return map в виде код-параметр
-     */
-    Map<String, Configuration> fetchAllByCodes(List<String> codes, TAUserInfo userInfo);
-
-    /**
      * Создание конфигурацинного параметра
      *
      * @param commonParam конфигурационный параметр типа "Общие параметры"

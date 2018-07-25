@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -29,8 +28,6 @@ public class PermissionDaoFactory {
     private TAUserDao userDao;
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     /**
      * Возвращает дао, которое занимается обработкой указанной защищенной сущности
@@ -58,9 +55,6 @@ public class PermissionDaoFactory {
         }
         if (permissionClass.isAssignableFrom(DeclarationTemplate.class)) {
             return declarationTemplateDao;
-        }
-        if (permissionClass.isAssignableFrom(DepartmentReportPeriod.class)) {
-            return departmentReportPeriodDao;
         }
         throw new ServiceException("Не удалось получить дао, соответствующее защищенной сущности: " + permissionClass);
     }

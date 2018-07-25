@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.model;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
@@ -9,24 +8,18 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
  */
 public class UserDataModel {
     private TAUserInfo taUserInfo;
-    private RefBookDepartment userDepartment;
-    private Department userTB;
+    private RefBookDepartment department;
 
-    public UserDataModel(TAUserInfo taUserInfo, RefBookDepartment userDepartment, Department userTB) {
+    public UserDataModel(TAUserInfo taUserInfo, RefBookDepartment department) {
         this.taUserInfo = taUserInfo;
-        this.userDepartment = userDepartment;
-        this.userTB = userTB;
+        this.department = department;
     }
 
     public TAUserInfo getTaUserInfo() {
         return taUserInfo;
     }
 
-    public RefBookDepartment getUserDepartment() {
-        return userDepartment;
-    }
-
-    public Department getUserTB() {
-        return userTB;
+    public RefBookDepartment getDepartment() {
+        return department;
     }
 }
