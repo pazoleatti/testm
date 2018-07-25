@@ -49,4 +49,13 @@ public class RefBookDepartmentDaoTest {
         assertNotNull(result);
         assertEquals(DepartmentType.ROOT_BANK, result.getType());
     }
+
+    @Test
+    public void fetchAllActiveByType() {
+        List<RefBookDepartment> departments = refBookDepartmentDataDao.fetchAllActiveByType(DepartmentType.TERR_BANK);
+        assertEquals(3, departments.size());
+        for (RefBookDepartment department : departments) {
+            assertEquals(department.getType(), DepartmentType.TERR_BANK);
+        }
+    }
 }

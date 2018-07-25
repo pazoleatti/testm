@@ -15,6 +15,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -124,6 +125,16 @@ public class ConfigurationController {
     public JqgridPagedList<Configuration> fetchNonCreatedCommonParams(@RequestParam PagingParams pagingParams) {
         PagingResult<Configuration> result = configurationService.fetchNonCreatedCommonParams(pagingParams, securityService.currentUserInfo());
         return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение страницы общих параметров для налогов
+     *
+     * @return страница {@link JqgridPagedList} с данными {@link Configuration}
+     */
+    @GetMapping(value = "/rest/commonParam", params = "projection=allByCodes")
+    public Map<String, Configuration> fetchAllByCodes(@RequestParam List<String> codes) {
+        return configurationService.fetchAllByCodes(codes, securityService.currentUserInfo());
     }
 
     @PostMapping(value = "/actions/emailParam/checkValidate")

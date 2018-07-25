@@ -10,25 +10,24 @@
             <div class="button_panel" style="min-height: 52px;margin: -5px 0 -17px 0;">
                 <div class="btn-toolbar" role="toolbar">
                     <button type="button" class="btn btn-default" data-ng-click="openPeriod()"
-                            data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN)">
+                            data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN)">
                         {{::'reportPeriod.pils.openPeriod' | translate}}
                     </button>
-                    <button type="button" class="btn btn-default" data-ng-click="closePeriod()"
-                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE))">
-                        {{:: 'reportPeriod.pils.closePeriod' | translate}}
-                    </button>
                     <button type="button" class="btn btn-default" data-ng-click="openCorrectPeriod()"
-                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT))">
+                            data-ng-disabled="!(reportPeriodGrid.value && !reportPeriodGrid.value[0].isActive && checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT))">
                         {{:: 'reportPeriod.pils.correctPeriod' | translate}}
                     </button>
+                    <button type="button" class="btn btn-default" data-ng-click="closePeriod()"
+                            data-ng-disabled="!(reportPeriodGrid.value && reportPeriodGrid.value[0].isActive && checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE))">
+                        {{:: 'reportPeriod.pils.closePeriod' | translate}}
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="onReopenPeriod()"
+                            data-ng-disabled="!(reportPeriodGrid.value && !reportPeriodGrid.value[0].isActive && checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.REOPEN))">
+                        {{:: 'reportPeriod.pils.reopenPeriod' | translate}}
+                    </button>
                     <button type="button" class="btn btn-default" data-ng-click="deletePeriod()"
-
                             data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DELETE))">
                         {{:: 'reportPeriod.pils.deletePeriod' | translate}}
-                    </button>
-                    <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
-                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
-                        {{:: 'reportPeriod.pils.deadline' | translate}}
                     </button>
                 </div>
             </div>
@@ -42,7 +41,6 @@
              data-grid-ctrl="reportPeriodGrid.ctrl"
              data-ng-model="reportPeriodGrid.value"
              data-grid-data="periodGridData"
-             data-init-grid="initGrid()"
              id="reportPeriodGrid">
         </div>
 

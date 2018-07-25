@@ -23,10 +23,7 @@ public class CheckPeriodStatusHandler extends AbstractActionHandler<CheckPeriodS
 
 	@Override
 	public CheckPeriodStatusResult execute(CheckPeriodStatusAction action, ExecutionContext executionContext) throws ActionException {
-		CheckPeriodStatusResult result = new CheckPeriodStatusResult();
-		result.setStatus(periodService.checkPeriodStatus(action.getYear(),
-				action.getDepartmentId(), action.getDictionaryTaxPeriodId()));
-		return result;
+		throw new UnsupportedOperationException();
 
 	}
 

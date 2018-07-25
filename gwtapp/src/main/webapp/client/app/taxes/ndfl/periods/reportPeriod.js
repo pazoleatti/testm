@@ -4,13 +4,11 @@
     /**
      * @description Модуль для работы с вкладкой "НДФЛ - Ведение периодов"
      */
-
     angular.module('app.reportPeriod',
         ['ui.router',
             'app.logPanel',
             'app.rest',
             'app.reportPeriodModal',
-            'app.deadlinePeriodModal',
             'app.openCorrectPeriodModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('reportPeriod', {
@@ -29,22 +27,28 @@
         /**
          * @description Контроллер формы "Ведение периодов"
          */
-
-        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'BankDepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal',
+        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'CommonParamResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal',
             'ValidationUtils', '$dialogs', '$q', '$rootScope',
-            function ($scope, $filter, DepartmentReportPeriodResource, BankDepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal,
-                      ValidationUtils, $dialogs, $q, $rootScope) {
+            function ($scope, $filter, DepartmentReportPeriodResource, CommonParamResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal,
+                      ValidationUtils, $dialogs, $q) {
 
-                BankDepartmentResource.query({}, function (department) {
-                    $scope.department = department;
+                $scope.yearMin = 2003;
+                $scope.yearMax = 2100;//TODO сообщения валидатора не обновляются если изменить параметр и вернутся на страницу
+                CommonParamResource.query({
+                    codes: [APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MIN, APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MAX],
+                    projection: "allByCodes"
+                }, function (configurationsByCode) {
+                    $scope.yearMin = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MIN].value;
+                    $scope.yearMax = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MAX].value;
                 });
+
                 if (!$scope.searchFilter) {
                     $scope.searchFilter = {
                         ajaxFilter: [],
                         params: {
                             yearStart: new Date().getFullYear(),
                             yearEnd: new Date().getFullYear(),
-                            department: $scope.department
+                            department: null
                         },
                         isClear: false,
                         filterName: 'filter',
@@ -61,9 +65,7 @@
                         colNames: [
                             $filter('translate')('reportPeriod.grid.period'),
                             $filter('translate')('reportPeriod.grid.state'),
-                            $filter('translate')('reportPeriod.grid.deadline'),
                             $filter('translate')('reportPeriod.grid.correctionDate')
-
                         ],
                         colModel: [
                             {name: 'name', index: 'name', sortable: false, width: 300},
@@ -72,13 +74,6 @@
                                 index: 'isActive',
                                 width: 140,
                                 formatter: $filter('activeStatusPeriodFormatter')
-                            },
-                            {
-                                name: 'deadline',
-                                index: 'deadline',
-                                width: 250,
-                                sortable: false,
-                                formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'correctionDate',
@@ -104,6 +99,12 @@
                     }
                 };
 
+                $scope.$watch("searchFilter.params.department", function (newValue, oldValue) {
+                    if (!!newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                        $scope.initGrid();
+                    }
+                });
+
                 /**
                  *@description инициализирует данные в гриде
                  */
@@ -113,7 +114,7 @@
                         filter: JSON.stringify({
                             yearStart: $scope.searchFilter.params.yearStart,
                             yearEnd: $scope.searchFilter.params.yearEnd,
-                            departmentId: $scope.departmentId
+                            departmentId: $scope.searchFilter.params.department.id
                         })
                     }, function (response) {
                         var array = [];
@@ -205,8 +206,8 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    isAdd: true,
-                                    department: $scope.department
+                                    department: $scope.searchFilter.params.department,
+                                    isAdd: true
                                 };
                             }
                         }
@@ -221,6 +222,7 @@
                  * @description Закрыть период
                  */
                 $scope.closePeriod = function () {
+                    $logPanel.close();
                     // проверяем на наличие заблокированных форм на редактировании
                     $scope.checkHasBlocked().then(function (response) {
                         $scope.createLogPanel(response).then(function (response) {
@@ -239,27 +241,11 @@
                                                 okBtnCaption: $filter('translate')('common.button.yes'),
                                                 cancelBtnCaption: $filter('translate')('common.button.no'),
                                                 okBtnClick: function () {
-                                                    $http({
-                                                        method: "POST",
-                                                        url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
-                                                    }).then(function (response) {
-                                                        if (response.data) {
-                                                            $logPanel.open('log-panel-container', response.data);
-                                                            $scope.refreshGrid(1);
-                                                        }
-                                                    });
+                                                    doClosePeriod();
                                                 }
                                             });
                                         } else {
-                                            $http({
-                                                method: "POST",
-                                                url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
-                                            }).then(function (response) {
-                                                if (response.data) {
-                                                    $logPanel.open('log-panel-container', response.data);
-                                                    $scope.refreshGrid();
-                                                }
-                                            });
+                                            doClosePeriod();
                                         }
                                     });
                                 });
@@ -268,6 +254,18 @@
                     });
                 };
 
+                function doClosePeriod() {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
+                    }).then(function (response) {
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
+                            $scope.refreshGrid();
+                        }
+                    });
+                }
+
                 /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенным налоговыми периодами
                  * @param permission
                  * @return boolean возможность управления
@@ -275,11 +273,6 @@
                 $scope.checkPermissionForGridValue = function (permission) {
                     if ($scope.reportPeriodGrid.value && $scope.reportPeriodGrid.value.length > 0) {
                         return PermissionChecker.check($scope.reportPeriodGrid.value[0], permission);
-                    } else {
-                        if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN) {
-                            // проверяем роль авторизованного пользователя для операции открытия периода
-                            return PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.OPEN_DEPARTMENT_REPORT_PERIOD);
-                        }
                     }
                 };
 
@@ -287,101 +280,58 @@
                  * @description Удаление выбранного отчетного периода для подразделения
                  */
                 $scope.deletePeriod = function () {
-
-                    if (!$scope.reportPeriodGrid.value[0].correctionDate) {
-                        // проверка на наличие корректирующего периода
-                        $scope.hasCorrectionPeriod().then(function (response) {
-                            if (response) {
-                                $dialogs.errorDialog({
-                                    content: $filter('translate')('reportPeriod.error.deletePeriod.hasCorPeriod.text')
-                                });
-                            } else {
-                                // подтверждение удаления
-                                $dialogs.confirmDialog({
-                                    title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
-                                    content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $http({
-                                            method: "POST",
-                                            url: "controller/actions/departmentReportPeriod/remove",
-                                            params: {
-                                                departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
-
-                                            }
-                                        }).then(function (response) {
-                                            LogEntryResource.query({
-                                                    uuid: response.data,
-                                                    projection: 'count'
-                                                }, function (data) {
-                                                    if ((data.ERROR + data.WARNING) > 0) {
-                                                        $logPanel.open('log-panel-container', response.data);
-                                                        $dialogs.errorDialog({
-                                                            content: $filter('translate')('reportPeriod.error.deletePeriod.text')
-                                                        });
-                                                    } else {
-                                                        $logPanel.open('log-panel-container', response.data);
-                                                        $scope.refreshGrid();
-                                                    }
-                                                }
-                                            );
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        // проверка на наличие более позднего корректирующего периода
-                        $scope.hasLaterCorrectionPeriod().then(function (response) {
-                            if (response) {
-                                $dialogs.errorDialog({
-                                    content: $filter('translate')('reportPeriod.error.deletePeriod.hasLaterCorPeriod.text')
-                                });
-                            } else {
-                                // подтверждение удаления
-                                $dialogs.confirmDialog({
-                                    title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
-                                    content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $http({
-                                            method: "POST",
-                                            url: "controller/actions/departmentReportPeriod/remove",
-                                            params: {
-                                                departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
-
-                                            }
-                                        }).then(function (response) {
-                                            LogEntryResource.query({
-                                                    uuid: response.data,
-                                                    projection: 'count'
-                                                }, function (data) {
-                                                    if ((data.ERROR + data.WARNING) > 0) {
-                                                        $logPanel.open('log-panel-container', response.data);
-                                                        $dialogs.errorDialog({
-                                                            content: $filter('translate')('reportPeriod.error.deletePeriod.text')
-                                                        });
-                                                    } else {
-                                                        $logPanel.open('log-panel-container', response.data);
-                                                        $scope.refreshGrid();
-                                                    }
-                                                }
-                                            );
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
+                    $logPanel.close();
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
+                        content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            doDeletePeriod();
+                        }
+                    });
                 };
+
+                function doDeletePeriod() {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/departmentReportPeriod/delete",
+                        params: {
+                            departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
+                        }
+                    }).then(function (response) {
+                        $logPanel.open('log-panel-container', response.data);
+                        $scope.refreshGrid();
+                    });
+                }
+
+                /**
+                 * @description Переоткрытие выбранного периода
+                 */
+                $scope.onReopenPeriod = function () {
+                    $logPanel.close();
+                    reopenPeriod($scope.reportPeriodGrid.value[0].id);
+                };
+
+                function reopenPeriod(departmentReportPeriodId) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/departmentReportPeriod/reopen",
+                        params: {
+                            departmentReportPeriodId: departmentReportPeriodId
+                        }
+                    }).then(function (response) {
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
+                        }
+                        $scope.refreshGrid();
+                    });
+                }
 
                 /**
                  * @description Открытие модального окна окрытия корректирующего периода
                  */
                 $scope.openCorrectPeriod = function () {
-
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.pils.correctPeriod'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html',
@@ -390,29 +340,8 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    period: $scope.reportPeriodGrid.value[0],
-                                    department: $scope.department
-                                };
-                            }
-                        }
-                    }).result.then(function () {
-                        $scope.refreshGrid();
-                    });
-                };
-
-                /**
-                 * @description Открытие модального окна назначения срока сдачи отчетности
-                 */
-                $scope.deadlinePeriod = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('reportPeriod.deadline.title') + $scope.reportPeriodGrid.value[0].name + " " + $scope.reportPeriodGrid.value[0].year,
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/updateDeadlinePeriodModal.html',
-                        controller: 'deadlinePeriodController',
-                        windowClass: 'modal500',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    period: $scope.reportPeriodGrid.value[0]
+                                    department: $scope.searchFilter.params.department,
+                                    selectedPeriod: $scope.reportPeriodGrid.value[0]
                                 };
                             }
                         }
@@ -481,53 +410,6 @@
                         }
                     });
                     return $scope.checkHasBlockedDefer.promise;
-                };
-
-                /**
-                 * @description Проверяет на наличие коректирующих периодов с более поздней датой сдачи корректировки
-                 * @return признак существования корректирующих периодов с более поздней датой сдачи корректировки
-                 */
-                $scope.hasLaterCorrectionPeriod = function () {
-                    $scope.hasLaterCorrectionPeriodDefer = $q.defer();
-                    DepartmentReportPeriodResource.query({
-                        filter: JSON.stringify({
-                            yearStart: $scope.reportPeriodGrid.value[0].year,
-                            yearEnd: $scope.reportPeriodGrid.value[0].year,
-                            departmentId: $scope.departmentId
-                        })
-                    }, function (response) {
-                        response.forEach(function (item) {
-                            if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId &&
-                                $scope.reportPeriodGrid.value[0].correctionDate < item.correctionDate) {
-                                $scope.hasLaterCorrectionPeriodDefer.resolve(true);
-                            }
-                        });
-                        $scope.hasLaterCorrectionPeriodDefer.resolve(false);
-                    });
-                    return $scope.hasLaterCorrectionPeriodDefer.promise;
-                };
-
-                /**
-                 * @description Проверяет на наличие корректирующего периода
-                 * @return (Promise) признак корректировки
-                 */
-                $scope.hasCorrectionPeriod = function () {
-                    $scope.hasCorrectionPeriodDefer = $q.defer();
-                    DepartmentReportPeriodResource.query({
-                        filter: JSON.stringify({
-                            yearStart: $scope.reportPeriodGrid.value[0].year,
-                            yearEnd: $scope.reportPeriodGrid.value[0].year,
-                            departmentId: $scope.departmentId
-                        })
-                    }, function (response) {
-                        response.forEach(function (item) {
-                            if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId && item.correctionDate) {
-                                $scope.hasCorrectionPeriodDefer.resolve(true);
-                            }
-                        });
-                        $scope.hasCorrectionPeriodDefer.resolve(false);
-                    });
-                    return $scope.hasCorrectionPeriodDefer.promise;
                 };
 
             }]);

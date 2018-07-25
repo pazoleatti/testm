@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuidler;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
@@ -18,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentReportPeriodDaoTest.xml"})
@@ -41,15 +45,15 @@ public class DepartmentReportPeriodDaoTest {
         // 2
         departmentReportPeriod = departmentReportPeriodDao.fetchOne(303);
         Assert.assertNotNull(departmentReportPeriod);
-        Assert.assertEquals(1, departmentReportPeriod.getDepartmentId().intValue());
-        Assert.assertEquals(20, departmentReportPeriod.getReportPeriod().getId().intValue());
+        assertEquals(1, departmentReportPeriod.getDepartmentId().intValue());
+        assertEquals(20, departmentReportPeriod.getReportPeriod().getId().intValue());
         Assert.assertTrue(departmentReportPeriod.isActive());
-        Assert.assertEquals(SIMPLE_DATE_FORMAT.parse("02.01.2014"), departmentReportPeriod.getCorrectionDate());
+        assertEquals(SIMPLE_DATE_FORMAT.parse("02.01.2014"), departmentReportPeriod.getCorrectionDate());
         // 3
         departmentReportPeriod = departmentReportPeriodDao.fetchOne(101);
         Assert.assertNotNull(departmentReportPeriod);
-        Assert.assertEquals(1, departmentReportPeriod.getDepartmentId().intValue());
-        Assert.assertEquals(1, departmentReportPeriod.getReportPeriod().getId().intValue());
+        assertEquals(1, departmentReportPeriod.getDepartmentId().intValue());
+        assertEquals(1, departmentReportPeriod.getReportPeriod().getId().intValue());
         Assert.assertTrue(departmentReportPeriod.isActive());
         Assert.assertNull(departmentReportPeriod.getCorrectionDate());
     }
@@ -60,13 +64,13 @@ public class DepartmentReportPeriodDaoTest {
         // Пустой фильтр
         List<DepartmentReportPeriod> departmentReportPeriodList =
                 departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        Assert.assertEquals(37, departmentReportPeriodList.size());
+        assertEquals(37, departmentReportPeriodList.size());
         // Фильтр по подразделениям
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(4));
         departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            Assert.assertEquals(4, departmentReportPeriod.getDepartmentId().intValue());
+            assertEquals(4, departmentReportPeriod.getDepartmentId().intValue());
         }
         // Фильтр по отчетным периодам
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
@@ -82,7 +86,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setIsActive(false);
         departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            Assert.assertFalse(departmentReportPeriod.isActive());
+            assertFalse(departmentReportPeriod.isActive());
         }
         // Фильтр по корректирующему периоду
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
@@ -96,7 +100,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("02.01.2014"));
         departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            Assert.assertEquals(SIMPLE_DATE_FORMAT.parse("02.01.2014"), departmentReportPeriod.getCorrectionDate());
+            assertEquals(SIMPLE_DATE_FORMAT.parse("02.01.2014"), departmentReportPeriod.getCorrectionDate());
         }
         // Фильтр по дате корректирющего периода 2
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
@@ -110,9 +114,9 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setIsActive(true);
         departmentReportPeriodFilter.setIsCorrection(true);
         departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        Assert.assertEquals(2, departmentReportPeriodList.size());
-        Assert.assertEquals(303, departmentReportPeriodList.get(0).getId().intValue());
-        Assert.assertEquals(307, departmentReportPeriodList.get(1).getId().intValue());
+        assertEquals(2, departmentReportPeriodList.size());
+        assertEquals(303, departmentReportPeriodList.get(0).getId().intValue());
+        assertEquals(307, departmentReportPeriodList.get(1).getId().intValue());
     }
 
     @Test
@@ -121,7 +125,7 @@ public class DepartmentReportPeriodDaoTest {
         // Пустой фильтр
         List<Integer> departmentReportPeriodList =
                 departmentReportPeriodDao.fetchAllIdsByFilter(departmentReportPeriodFilter);
-        Assert.assertEquals(37, departmentReportPeriodList.size());
+        assertEquals(37, departmentReportPeriodList.size());
     }
 
     @Test
@@ -143,10 +147,10 @@ public class DepartmentReportPeriodDaoTest {
         DepartmentReportPeriod savedDepartmentReportPeriod = savedDepartmentReportPeriodList.get(0);
 
 
-        Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), DateUtils.truncate(savedDepartmentReportPeriod.getCorrectionDate(), Calendar.DATE));
+        assertEquals(DateUtils.truncate(date, Calendar.DATE), DateUtils.truncate(savedDepartmentReportPeriod.getCorrectionDate(), Calendar.DATE));
         Assert.assertTrue(savedDepartmentReportPeriod.isActive());
-        Assert.assertEquals(1, savedDepartmentReportPeriod.getDepartmentId().intValue());
-        Assert.assertEquals(1, savedDepartmentReportPeriod.getReportPeriod().getId().intValue());
+        assertEquals(1, savedDepartmentReportPeriod.getDepartmentId().intValue());
+        assertEquals(1, savedDepartmentReportPeriod.getReportPeriod().getId().intValue());
     }
 
     @Test
@@ -159,18 +163,14 @@ public class DepartmentReportPeriodDaoTest {
         depIds.add(2);
         depIds.add(3);
         depIds.add(4);
-        for (Integer departmentId : depIds) {
-            departmentReportPeriod.setDepartmentId(departmentId);
-            departmentReportPeriodDao.create(departmentReportPeriod);
-        }
+        departmentReportPeriodDao.create(departmentReportPeriod, depIds);
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setIsActive(true);
-        filter.setReportPeriodIdList(Collections.singletonList(reportPeriod.getId()));
+        filter.setReportPeriodIdList(singletonList(reportPeriod.getId()));
         filter.setDepartmentIdList(depIds);
         List<DepartmentReportPeriod> savedDepartmentReportPeriods = departmentReportPeriodDao.fetchAllByFilter(filter);
-        Assert.assertEquals(savedDepartmentReportPeriods.size(), 3);
-
+        assertEquals(savedDepartmentReportPeriods.size(), 3);
     }
 
     @Test
@@ -179,7 +179,7 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertTrue(departmentReportPeriod.isActive());
         departmentReportPeriodDao.updateActive(101, false);
         departmentReportPeriod = departmentReportPeriodDao.fetchOne(101);
-        Assert.assertFalse(departmentReportPeriod.isActive());
+        assertFalse(departmentReportPeriod.isActive());
     }
 
     @Test
@@ -196,23 +196,25 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void getFirstTest() {
-        Assert.assertEquals(301, departmentReportPeriodDao.fetchFirst(1, 20).getId().intValue());
-        Assert.assertEquals(601, departmentReportPeriodDao.fetchFirst(6, 1).getId().intValue());
-        Assert.assertEquals(101, departmentReportPeriodDao.fetchFirst(1, 1).getId().intValue());
+        assertEquals(301, departmentReportPeriodDao.fetchFirst(1, 20).getId().intValue());
+        assertEquals(601, departmentReportPeriodDao.fetchFirst(6, 1).getId().intValue());
+        assertEquals(101, departmentReportPeriodDao.fetchFirst(1, 1).getId().intValue());
         Assert.assertNull(departmentReportPeriodDao.fetchLast(-1, -1));
     }
 
     @Test
     public void getLastTest() {
-        Assert.assertEquals(303, departmentReportPeriodDao.fetchLast(1, 20).getId().intValue());
-        Assert.assertEquals(603, departmentReportPeriodDao.fetchLast(6, 1).getId().intValue());
-        Assert.assertEquals(101, departmentReportPeriodDao.fetchLast(1, 1).getId().intValue());
+        assertEquals(303, departmentReportPeriodDao.fetchLast(1, 20).getId().intValue());
+        assertEquals(603, departmentReportPeriodDao.fetchLast(6, 1).getId().intValue());
+        assertEquals(101, departmentReportPeriodDao.fetchLast(1, 1).getId().intValue());
         Assert.assertNull(departmentReportPeriodDao.fetchLast(-1, -1));
     }
 
     @Test
     public void existLargeCorrectionTest() throws ParseException {
-        Assert.assertTrue(departmentReportPeriodDao.checkExistLargeCorrection(1, 20, SIMPLE_DATE_FORMAT.parse("01.01.2011")));
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+                .department(1).reportPeriodId(20).correctionDate(SIMPLE_DATE_FORMAT.parse("01.01.2011")).build();
+        Assert.assertTrue(departmentReportPeriodDao.isLaterCorrectionPeriodExists(departmentReportPeriod));
     }
 
     @Test
@@ -229,14 +231,36 @@ public class DepartmentReportPeriodDaoTest {
 
         //1
         filter.setDepartmentId(1);
-        Assert.assertNotEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(filter).size());
+        assertNotEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(filter).size());
 
         //2
         filter.setDepartmentId(-1);
-        Assert.assertEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(filter).size());
+        assertEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(filter).size());
 
         //3 с пустым фильтром
-        Assert.assertNotEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(new DepartmentReportPeriodFilter()).size());
+        assertNotEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(new DepartmentReportPeriodFilter()).size());
     }
 
+    @Test
+    public void isExistsByReportPeriodIdAndDepartmentId() {
+        assertTrue(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(1, 1));
+
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setReportPeriodIdList(singletonList(1));
+        filter.setDepartmentId(1);
+        departmentReportPeriodDao.delete(departmentReportPeriodDao.fetchAllIdsByFilter(filter));
+
+        assertFalse(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(1, 1));
+    }
+
+    @Test
+    public void isExistsByReportPeriodId() {
+        assertTrue(departmentReportPeriodDao.isExistsByReportPeriodId(1));
+
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setReportPeriodIdList(singletonList(1));
+        departmentReportPeriodDao.delete(departmentReportPeriodDao.fetchAllIdsByFilter(filter));
+
+        assertFalse(departmentReportPeriodDao.isExistsByReportPeriodId(1));
+    }
 }

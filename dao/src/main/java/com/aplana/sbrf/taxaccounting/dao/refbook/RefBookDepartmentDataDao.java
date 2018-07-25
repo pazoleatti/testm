@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
@@ -57,4 +58,11 @@ public interface RefBookDepartmentDataDao {
      */
     PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 
+    /**
+     * Возвращяет список активных подразделений по типу
+     *
+     * @param type тип подразделений
+     * @return список подразделений
+     */
+    List<RefBookDepartment> fetchAllActiveByType(DepartmentType type);
 }

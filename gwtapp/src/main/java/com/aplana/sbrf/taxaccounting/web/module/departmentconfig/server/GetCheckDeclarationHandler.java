@@ -60,47 +60,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
 
     @Override
     public GetCheckDeclarationResult execute(GetCheckDeclarationAction action, ExecutionContext executionContext) throws ActionException {
-        GetCheckDeclarationResult result = new GetCheckDeclarationResult();
-        result.setControlUnp(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
-
-        Logger logger = new Logger();
-        ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
-        List<Integer> reportPeriodIds = new ArrayList<Integer>();
-        Long refBookId = null;
-        switch (action.getTaxType()) {
-            case NDFL:
-                refBookId = RefBook.WithTable.NDFL.getRefBookId();
-                break;
-        }
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
-        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartment();
-        List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
-        Date dateStart = period.getCalendarStartDate(), dateEnd;
-        if (!recordPairs.isEmpty()) {
-            //RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(recordPairs.get(0).getFirst());
-            dateEnd = provider.getRecordVersionInfo(recordPairs.get(0).getFirst()).getVersionEnd();
-            List<ReportPeriod> reportPeriodList = reportService.getReportPeriodsByDate(dateStart, dateEnd);
-            if (reportPeriodList.isEmpty()){
-                return result;
-            }
-
-            for(ReportPeriod reportPeriod: reportPeriodList)
-                reportPeriodIds.add(reportPeriod.getId());
-
-            StringBuffer periodName = new StringBuffer();
-            periodName.append("с ");
-            periodName.append(SIMPLE_DATE_FORMAT.get().format(dateStart));
-            periodName.append(" по ");
-            if (dateEnd != null) {
-                periodName.append(SIMPLE_DATE_FORMAT.get().format(dateEnd));
-            } else {
-                periodName.append(" \"-\"");
-            }
-
-            result.setReportPeriodName(periodName.toString());
-        }
-
-        return result;
+        throw new UnsupportedOperationException();
     }
 
     @Override

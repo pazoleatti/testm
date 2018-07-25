@@ -36,7 +36,7 @@ public interface TaxPeriodDao {
      * @param year год
      * @return объект {@link TaxPeriod} или null
      */
-    TaxPeriod fetchAllByYear(int year);
+    TaxPeriod fetchOneByYear(int year);
 
     /**
      * Добавить новый налоговый период

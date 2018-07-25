@@ -84,7 +84,8 @@
          */
         .factory('RefBookValuesResource', ['$resource', function ($resource) {
             return $resource('controller/rest/refBookValues/:refBookId', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
+                query: {method: 'GET', isArray: true, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
 
@@ -201,12 +202,6 @@
         .factory('ReportPeriodResource', ['$resource', function ($resource) {
             return $resource('controller/rest/reportPeriod?projection=:projection', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
-            });
-        }])
-
-        .factory('BankDepartmentResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/getBankDepartment', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
             });
         }])
 
@@ -427,7 +422,6 @@
         .factory('DepartmentResource', ['$resource', function ($resource) {
             return $resource('controller/rest/department/:departmentId?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
-
             });
         }])
 

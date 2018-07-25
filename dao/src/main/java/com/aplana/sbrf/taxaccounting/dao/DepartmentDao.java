@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +48,7 @@ public interface DepartmentDao extends PermissionDao {
     List<Department> getAllChildren(int parentDepartmentId);
 
     /**
-     * Получить список идентификаторов всех дочерних подразделений
+     * Получить список идентификаторов всех дочерних подразделений (вместе с родительским)
      *
      * @param parentDepartmentId Идентификатор родительского подразделения
      * @return Список идентификаторов всех дочерних подразделений
@@ -223,7 +223,7 @@ public interface DepartmentDao extends PermissionDao {
      * Получить список подразделений, исполнителями форм которых являются заданные подразделения
      *
      * @param performersIds Список подразделений-исполнителей
-     * @return Список подразделений, исполнителями форм которых являются заданные подразделения
+     * @return список подразделений, исполнителями форм которых являются заданные подразделения
      */
     List<Integer> fetchAllIdsByDeclarationsPerformers(List<Integer> performersIds);
 
@@ -231,17 +231,20 @@ public interface DepartmentDao extends PermissionDao {
      * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
      *
      * @param performerDepartmentId ID подразделения, которое является исполнителем
-     * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     * @return список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
      */
     List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
 
     /**
-     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
+     * Получить список ID Территориальных банков подразделений, исполнителем (без дочерних) макетов форм которых является заданное подразделение
      *
-     * @param kpp
-     * @param oktmo
-     * @param reportPeriodEndDate
-     * @return
+     * @param performerDepartmentId ID подразделения, которое является исполнителем
+     * @return список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     */
+    List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId);
+
+    /**
+     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
      */
     String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
 
@@ -251,5 +254,5 @@ public interface DepartmentDao extends PermissionDao {
      * @param ids список идентификаторов
      * @return список {@link Department} или пустой список
      */
-    List<Department> fetchAllDepartmentByIds(List<Integer> ids);
+    List<Department> fetchAllDepartmentByIds(Collection<Integer> ids);
 }
