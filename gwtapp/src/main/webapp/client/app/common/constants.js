@@ -130,7 +130,7 @@
                 DELETE: 1 << 1,
                 CLOSE: 1 << 2,
                 OPEN_CORRECT: 1 << 3,
-                DEADLINE: 1 << 4
+                REOPEN: 1 << 4
             },
             DEPARTMENT_PERMISSION: {
                 EDIT: 1 << 0
@@ -222,6 +222,10 @@
                 COMMON_PARAM: "commonParam",
                 ASYNC_PARAM: "asyncParam",
                 EMAIL_PARAM: "emailParam"
+            },
+            CONFIGURATION_PARAM: {
+                REPORT_PERIOD_YEAR_MIN: "REPORT_PERIOD_YEAR_MIN",
+                REPORT_PERIOD_YEAR_MAX: "REPORT_PERIOD_YEAR_MAX"
             },
             ASYNC_HANDLER_CLASS_NAME: {
                 UPLOAD_REFBOOK_ASYNC_TASK: "UploadRefBookAsyncTask"

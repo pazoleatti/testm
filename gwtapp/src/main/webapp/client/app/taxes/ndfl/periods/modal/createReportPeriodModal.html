@@ -1,6 +1,6 @@
 <form class="form-horizontal" data-aplana-submit-valid="save()">
     <div class="modal-body">
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
             <tbody>
             <tr>
                 <td>
@@ -8,18 +8,22 @@
                         translate}}:</label>
                 </td>
                 <td>
-                    {{department.name}}
+                    <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
+                         data-ui-select2="departmentsSelect.options"
+                         data-ng-init="initAllAvailableTBForPeriodManagementSelect(form)"
+                         data-ng-model="form.department">
+                    </div>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label class="control-label" for="period.reportPeriod.taxPeriod.year">{{::'reportPeriod.modal.year'
-                        | translate
-                        }}:</label>
+                    <label class="control-label" for="period.reportPeriod.taxPeriod.year">
+                        {{::'reportPeriod.modal.year' | translate }}:
+                    </label>
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <input data-ng-model="period.reportPeriod.taxPeriod.year"
+                        <input data-ng-model="form.year"
                                type="number"
                                class="form-control"
                                style="width: 75px"
@@ -55,7 +59,7 @@
                         <div style="width: 355px;" data-ng-controller="SelectCorrectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initReportPeriodType()"
-                             data-ng-model="period.reportPeriod.dictPeriod"
+                             data-ng-model="form.dictPeriod"
                              data-required>
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |

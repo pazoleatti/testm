@@ -1,10 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
@@ -12,7 +17,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -21,11 +29,13 @@ import java.util.List;
 @Service
 public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataService {
     private RefBookDepartmentDataDao refBookDepartmentDataDao;
+    private DepartmentDao departmentDao;
     private DepartmentService departmentService;
 
-    public RefBookDepartmentDataServiceImpl(RefBookDepartmentDataDao refBookDepartmentDataDao, DepartmentService departmentService) {
+    public RefBookDepartmentDataServiceImpl(RefBookDepartmentDataDao refBookDepartmentDataDao, DepartmentService departmentService, DepartmentDao departmentDao) {
         this.refBookDepartmentDataDao = refBookDepartmentDataDao;
         this.departmentService = departmentService;
+        this.departmentDao = departmentDao;
     }
 
     /**
@@ -136,5 +146,20 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     public List<RefBookDepartment> fetchActiveAvailableTB(TAUser user) {
         List<Integer> tbDepartmentIds = departmentService.getTBDepartmentIds(user, TaxType.NDFL, false);
         return refBookDepartmentDataDao.fetchDepartments(tbDepartmentIds);
+    }
+
+    @Override
+    public List<RefBookDepartment> fetchAllAvailableForPeriodManagement(TAUserInfo userInfo) {
+        TAUser user = userInfo.getUser();
+        if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+            return refBookDepartmentDataDao.fetchAllActiveByType(DepartmentType.TERR_BANK);
+        } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
+            Integer userTBId = departmentDao.getParentTBId(user.getDepartmentId());
+            // Все ТБ, для которых подразделение пользователя назначено исполнителем.
+            Set<Integer> TBIds = new HashSet<>(departmentDao.fetchAllTBIdsByPerformer(user.getDepartmentId()));
+            TBIds.add(userTBId);
+            return refBookDepartmentDataDao.fetchDepartments(TBIds);
+        }
+        throw new AccessDeniedException("Недостаточно прав");
     }
 }

@@ -8,7 +8,7 @@
                         translate}}:</label>
                 </td>
                 <td>
-                    {{department.name}}
+                    {{form.department.name}}
                 </td>
             </tr>
             <tr>
@@ -17,17 +17,7 @@
                         translate}}:</label>
                 </td>
                 <td>
-                    <div data-aplana-field>
-                        <div style="width: 220px;" data-ng-controller="SelectCorrectPeriodCtrl"
-                             data-ui-select2="periodSelect.options"
-                             data-ng-init="initCorrectPeriods(department.id)"
-                             data-ng-model="correctPeriod.reportPeriod"
-                             data-required>
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
-                        </div>
-                    </div>
+                    {{form.reportPeriod}}
                 </td>
             </tr>
             <tr>
@@ -39,7 +29,7 @@
                     <div data-aplana-field>
                         <div id="correctionDate"
                              data-aplana-datepicker
-                             data-ng-model="departmentReportPeriod.correctionDate"
+                             data-ng-model="form.correctionDate"
                              data-required></div>
                         <div data-aplana-validator data-key='required'>
                             {{:: 'common.validation.required' | translate}}

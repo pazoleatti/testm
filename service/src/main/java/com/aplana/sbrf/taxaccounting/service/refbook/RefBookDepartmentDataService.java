@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Сервис для работы со справочником Подразделения
@@ -83,4 +81,12 @@ public interface RefBookDepartmentDataService {
      * @return Список значений справочника
      */
     List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
+
+    /**
+     * Возвращяет подразделения уровня ТБ, доступные для ведения периодов
+     *
+     * @param userInfo пользователь, для которого будет проверяться доступность подразделения
+     * @return список подразделений
+     */
+    List<RefBookDepartment> fetchAllAvailableForPeriodManagement(TAUserInfo userInfo);
 }

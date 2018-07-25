@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
@@ -11,9 +16,13 @@ import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import net.sf.jasperreports.web.actions.ActionException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +50,7 @@ public class DepartmentReportPeriodController {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(DepartmentReportPeriodFilter.class, new RequestParamEditor(DepartmentReportPeriodFilter.class));
         binder.registerCustomEditor(DepartmentReportPeriod.class, new RequestParamEditor(DepartmentReportPeriod.class));
+        binder.registerCustomEditor(OpenCorrectionPeriodAction.class, new RequestParamEditor(OpenCorrectionPeriodAction.class));
         binder.registerCustomEditor(ReportPeriod.class, new RequestParamEditor(ReportPeriod.class));
         binder.registerCustomEditor(TaxPeriod.class, new RequestParamEditor(TaxPeriod.class));
     }
@@ -87,11 +97,12 @@ public class DepartmentReportPeriodController {
 
     /**
      * Получение последнего отчетного периода подразделения по ID подразделения и ID отчетного периода
-     * @param departmentId ID подразделения
+     *
+     * @param departmentId   ID подразделения
      * @param reportPeriodId ID отчетного периода
      * @return Последний отчетный период подразделения
      */
-    @GetMapping(value = "/rest/departmentReportPeriod",  params = "projection=fetchLast")
+    @GetMapping(value = "/rest/departmentReportPeriod", params = "projection=fetchLast")
     public DepartmentReportPeriod fetchLastPeriod(int departmentId, int reportPeriodId) {
         return departmentReportPeriodService.fetchLast(departmentId, reportPeriodId);
     }
@@ -119,7 +130,7 @@ public class DepartmentReportPeriodController {
      */
     @PostMapping(value = "/actions/departmentReportPeriod/open")
     public String open(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
-        return periodService.open(departmentReportPeriod);
+        return periodService.open(departmentReportPeriod, securityService.currentUserInfo());
     }
 
     /**
@@ -150,9 +161,9 @@ public class DepartmentReportPeriodController {
      * @param departmentReportPeriodId идентификатор удаляемого периода
      * @return uuid идентификатор логера
      */
-    @PostMapping(value = "/actions/departmentReportPeriod/remove")
-    public String remove(@RequestParam Integer departmentReportPeriodId) {
-        return periodService.removeReportPeriod(departmentReportPeriodId, securityService.currentUserInfo());
+    @PostMapping(value = "/actions/departmentReportPeriod/delete")
+    public String delete(@RequestParam Integer departmentReportPeriodId) {
+        return periodService.delete(departmentReportPeriodId);
     }
 
     /**
@@ -170,50 +181,24 @@ public class DepartmentReportPeriodController {
     }
 
     /**
-     * Проверка статуса отчетного периода для подразделения
+     * Открыть корректирующий период для подразделения
      *
-     * @param departmentId    идентификатор подразделения
-     * @param dictTaxPeriodId идентификатор типа отчетного периода из справочника
-     * @param year            год отчетного периода
-     * @return статус искомого отчетного периода {@link PeriodStatusBeforeOpen}
-     */
-    @PostMapping(value = "rest/departmentReportPeriod/status")
-    public String fetchStatus(@RequestParam Integer departmentId, @RequestParam Long dictTaxPeriodId, @RequestParam Integer year) {
-        return periodService.checkPeriodStatus(year, departmentId, dictTaxPeriodId).name();
-    }
-
-    /**
-     * Проверка статуса отчетного периода для подразделения
-     *
-     * @param departmentReportPeriod проверяемый коррекционный период
-     * @return статус искомого отчетного периода {@link PeriodStatusBeforeOpen}
-     */
-    @PostMapping(value = "rest/departmentReportPeriod/status", params = "projection=checkCorrectPeriod")
-    public String fetchStatusCorrectPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
-        return periodService.checkPeriodStatusBeforeOpen(departmentReportPeriod.getReportPeriod(), departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getCorrectionDate()).name();
-    }
-
-
-    /**
-     * Открыть коррекционный период для подразделения
-     *
-     * @param departmentReportPeriod открываемый коррекционный период
+     * @param action данные по корректирующему периоду
      * @return uuid идентификатор логера
      */
     @PostMapping(value = "actions/departmentReportPeriod/openCorrectPeriod")
-    public String openCorrectPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
-        return periodService.openCorrectionPeriod(departmentReportPeriod);
+    public String openCorrectPeriod(@RequestParam OpenCorrectionPeriodAction action) {
+        return periodService.openCorrectionPeriod(action);
     }
 
     /**
-     * Установка срока сдачи отчетности для периода
+     * Переоткрывает закрытый период
      *
-     * @param filter фильтр с данными о периоде и датой сдачи отчетности
-     * @throws ActionException если дата сдачи отчетности не указана
+     * @param departmentReportPeriodId фильтр с данными о периоде и датой сдачи отчетности
      */
-    @PostMapping(value = "actions/departmentReportPeriod/updateDeadline")
-    public void updateDeadline(@RequestParam DepartmentReportPeriodFilter filter) throws ActionException {
-        periodService.updateDeadline(filter);
+    @PostMapping(value = "actions/departmentReportPeriod/reopen")
+    public String reopen(@RequestParam Integer departmentReportPeriodId) {
+        return periodService.reopen(departmentReportPeriodId);
     }
 
     /**

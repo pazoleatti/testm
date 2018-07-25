@@ -33,14 +33,7 @@ public class EditPeriodHandler extends AbstractActionHandler<EditPeriodAction, E
 
     @Override
     public EditPeriodResult execute(EditPeriodAction action, ExecutionContext executionContext) throws ActionException {
-        List<LogEntry> logs = new ArrayList<LogEntry>();
-        if (action.getCorrectionDate() == null) {
-            periodService.edit(action.getReportPeriodId(), action.getOldDepartmentId(), action.getNewDictTaxPeriodId(), action.getYear(),
-                    securityService.currentUserInfo(), action.getNewDepartmentId(), logs);
-        }
-        EditPeriodResult result = new EditPeriodResult();
-        result.setUuid(logEntryService.save(logs));
-        return result;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -141,6 +141,14 @@ public class RefBookValuesController {
     }
 
     /**
+     * Возвращяет подразделения, доступные для ведения периодов текущему пользователю
+     */
+    @GetMapping(value = "rest/refBookValues/30", params = "projection=allAvailableForPeriodManagement")
+    public List<RefBookDepartment> fetchAllAvailableForPeriodManagement() {
+        return refBookDepartmentDataService.fetchAllAvailableForPeriodManagement(securityService.currentUserInfo());
+    }
+
+    /**
      * Получение всех значений справочника Виды форм
      *
      * @return Значения справочника
@@ -214,16 +222,6 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/reportPeriodTypeById")
     public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long dictTaxPeriodId) {
         return periodService.getPeriodTypeById(dictTaxPeriodId);
-    }
-
-    /**
-     * Получения подразделения с типом {@link DepartmentType}.ROOT_BANK
-     *
-     * @return Объект ПАО "Сбербанк России"
-     */
-    @GetMapping(value = "rest/getBankDepartment")
-    public Department getBankDepartment() {
-        return departmentService.getBankDepartment();
     }
 
     /**
