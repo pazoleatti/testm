@@ -381,6 +381,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
         SheetFillerContext context = new SheetFillerContext(ndflPersonList, ndflPersonIncomeList)
         Workbook sxssfWorkbook = new SXSSFWorkbook(getSpecialReportTemplate(REPORT_XLSX), 100, true)
+        sxssfWorkbook.setSheetName(0, "Реестр")
         SheetFillerFactory.getSheetFiller(5).fillSheet(sxssfWorkbook, context)
 
         OutputStream writer = null
