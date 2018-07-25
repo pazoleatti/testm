@@ -6,6 +6,8 @@ begin
 	from ref_book_person rbp where not exists (select * from ref_book_person_tb rbpt where rbpt.person_id=rbp.id);
 
 	DBMS_OUTPUT.PUT_LINE('Inserted ' || SQL%ROWCOUNT || ' rows into REF_BOOK_PERSON_TB.');	
+	
+	commit;
 end;
 /
 
