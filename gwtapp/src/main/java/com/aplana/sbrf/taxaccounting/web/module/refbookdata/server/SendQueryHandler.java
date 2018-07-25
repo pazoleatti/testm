@@ -81,7 +81,7 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
 
     private List<String> getEmails() {
         List<String> returnList = new ArrayList<String>();
-        PagingResult<TAUserView> unpList = taUserService.getUsersByFilter(new MembersFilterData() {{
+        PagingResult<TAUserView> unpList = taUserService.getUsersViewWithFilter(new MembersFilterData() {{
             setRoleIds(new ArrayList<Long>(Arrays.asList((long) taRoleService.getByAlias(TARole.N_ROLE_CONTROL_UNP).getId())));
         }});
         for (TAUserView userView : unpList) {

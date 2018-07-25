@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -73,6 +74,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
     public String generateExcelUsers(List<TAUserView> taUserViewList) {
         String reportPath = null;
         try {

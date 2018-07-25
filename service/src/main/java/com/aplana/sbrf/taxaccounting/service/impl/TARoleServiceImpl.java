@@ -19,7 +19,7 @@ public class TARoleServiceImpl implements TARoleService {
 	@Override
 	public List<TARole> getAll() {
 		List<TARole> roles = new ArrayList<TARole>();
-		for (Integer id : taRoleDao.getAll()) {
+		for (Integer id : taRoleDao.getAllRoleIds()) {
 			roles.add(taRoleDao.getRole(id));
 		}
 		return roles;

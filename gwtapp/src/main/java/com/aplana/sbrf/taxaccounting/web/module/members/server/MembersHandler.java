@@ -36,7 +36,7 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
         GetMembersResult result = new GetMembersResult();
         result.setStartIndex(action.getMembersFilterData().getStartIndex());
 
-        PagingResult<TAUserView> taUserFulls = taUserService.getUsersByFilter(action.getMembersFilterData());
+        PagingResult<TAUserView> taUserFulls = taUserService.getUsersViewWithFilter(action.getMembersFilterData());
         result.setTaUserList(taUserFulls);
         result.setStartIndex(action.getMembersFilterData().getStartIndex());
         return result;

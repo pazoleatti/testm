@@ -129,8 +129,7 @@ public class GetMainMenuActionHandler extends
             }
 
             if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
-                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
-                        + MembersTokens.MEMBERS));
+                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", "index.html#/administration/users"));
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {

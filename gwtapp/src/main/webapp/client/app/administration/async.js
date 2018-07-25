@@ -20,7 +20,7 @@
         }])
 
         /**
-         * @description Контроллер страницы "Список блокировок"
+         * @description Контроллер страницы "Асинхронные задачи"
          */
         .controller('asyncCtrl', ['$scope', '$filter', 'asyncTaskResource', '$http', 'APP_CONSTANTS',
             function ($scope, $filter, asyncTaskResource, $http, APP_CONSTANTS) {

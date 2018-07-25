@@ -58,7 +58,7 @@ public interface TAUserService {
 	 * @param filter фильтер
 	 * @return возвращает страницу со списком пользователей
      * @deprecated для вытаскиваине юзера по подразделению необходимо создать отдельный метод
-     * этот создавался для представления списка на клименте
+     * этот создавался для представления списка на клиенте
 	 */
     @Deprecated
 	PagingResult<TAUserFull> getByFilter(MembersFilterData filter);
@@ -68,7 +68,7 @@ public interface TAUserService {
      * @param filter фильтер
      * @return возвращает страницу со списком пользователей
      */
-    PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
+    PagingResult<TAUserView> getUsersViewWithFilter(MembersFilterData filter);
 
 	/**
 	 * Возвращает список-путь от переданного подразделения по иерархии вверх

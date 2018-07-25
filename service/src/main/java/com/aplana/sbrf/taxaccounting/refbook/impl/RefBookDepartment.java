@@ -695,7 +695,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //8 точка запроса
-        List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
+        List<TAUserView> users = taUserService.getUsersViewWithFilter(new MembersFilterData() {{
             setDepartmentIds(new HashSet<Integer>(Arrays.asList(department.getId())));
         }});
         for (TAUserView taUser : users)

@@ -26,7 +26,7 @@
                       $logPanel, $aplanaModal, $dialogs, APP_CONSTANTS, PermissionChecker, $webStorage) {
                 $scope.reportCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
-                var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
+                var defaultCorrectionTag = APP_CONSTANTS.CORRECTION_TAG.ALL;
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);

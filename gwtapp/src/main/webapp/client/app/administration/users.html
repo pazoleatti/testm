@@ -1,0 +1,32 @@
+<div class="flex-column">
+    <div class="content-header">
+        <h1>{{::'users.title' | translate}}</h1>
+    </div>
+    <div id="usersGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id="usersGridTop">
+            <!-- Кнопка выгрузки в Excel -->
+            <div style="float: right; padding-top: 10px">
+                <img src='resources/img/unload-white-16.png'>
+                <a ng-click="downloadXlsx()" title="{{'users.link.download.title' | translate}}">
+                    {{'users.link.download.label' | translate}}
+                </a>
+            </div>
+            <!-- Панель фильтра -->
+            <div>
+                <span data-ng-include="'client/app/administration/usersFilter.html'"></span>
+            </div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector="#usersGridContainer"
+             data-grid-fill-space-container-selector-top="#usersGridTop"
+             data-grid-options="usersGrid.options"
+             data-grid-ctrl="usersGrid.ctrl"
+             data-ng-model="usersGrid.value"
+             id="usersTable">
+        </div>
+    </div>
+</div>

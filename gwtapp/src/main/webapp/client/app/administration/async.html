@@ -7,25 +7,28 @@
             <!--Панель кнопок -->
             <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
-                <span>
-                    <!-- Остановить задачу -->
-                    <button type="button" class="btn btn-default"
-                            data-ng-click="interruptTask()" data-ng-disabled="asyncGrid.value.length == 0">
-                        <span data-translate-once="async.button.interrupt"></span>
-                    </button>
-                </span>
                     <span>
-                    <!--Фильтр-->
-                    <input style="float: left; margin-right: 4px; margin-top: 3px;" type="text"
-                           data-ng-model="searchFilter.filter"/>
-                </span>
+                        <!-- Остановить задачу -->
+                        <button type="button"
+                                class="btn btn-default"
+                                data-ng-click="interruptTask()"
+                                data-ng-disabled="asyncGrid.value.length == 0">
+                            <span data-translate-once="async.button.interrupt"></span>
+                        </button>
+                    </span>
                     <span>
-                    <!--Найти-->
-                    <button type="button" class="btn btn-default"
-                            data-ng-click="refreshGrid(1)">
-                        <span data-translate-once="async.button.search"></span>
-                    </button>
-                </span>
+                        <!--Фильтр-->
+                        <input style="float: left; margin-right: 4px; margin-top: 3px;"
+                               type="text"
+                               data-ng-model="searchFilter.filter"/>
+                    </span>
+                    <span>
+                        <!--Найти-->
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="refreshGrid(1)">
+                            <span data-translate-once="async.button.search"></span>
+                        </button>
+                    </span>
                 </div>
             </div>
         </div>
@@ -39,6 +42,7 @@
              data-grid-options="asyncGrid.options"
              data-grid-ctrl="asyncGrid.ctrl"
              data-ng-model="asyncGrid.value"
-             id="asyncTable"></div>
+             id="asyncTable">
+        </div>
     </div>
 </div>

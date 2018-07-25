@@ -29,7 +29,7 @@ public class TARoleDaoTest {
 
 	@Test
 	public void testGetAll() {
-		Assert.assertEquals(3, taRoleDao.getAll().size());
+		Assert.assertEquals(3, taRoleDao.getAllRoleIds().size());
 	}
 	@Test
 	public void testGetRoleByAlias() {

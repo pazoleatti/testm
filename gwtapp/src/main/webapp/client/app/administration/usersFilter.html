@@ -1,0 +1,72 @@
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter">
+        <div data-aplana-collapse
+             data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="'filterPanelLabel' | translate">
+            <form class="form-horizontal info-wrapper" role="form" style="display: flex;" novalidate>
+                <div class="row-fluid flex-fill">
+                    <div class="span3">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'users.filter.department' | translate}}:</label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initSelectWithAllDepartments()"
+                                 data-ng-model="searchFilter.params.departments">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span3">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'users.filter.role' | translate}}:</label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectUserRolesCtrl"
+                                 data-ui-select2="userRolesSelect.options"
+                                 data-ng-model="searchFilter.params.roles">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span3">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'users.filter.active' | translate}}:</label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectUserActivityCtrl"
+                                 data-ui-select2="userActivitySelect.options"
+                                 data-ng-model="searchFilter.params.active">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span3">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'users.filter.name' | translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <input data-ng-model="searchFilter.params.userName"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text"
+                                       class="form-control"
+                                       title="{{'users.filter.name' | translate}}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="vertical-btn-group" style="flex: 0 100px; padding-left: 20px">
+                    <!--Кнопка Найти-->
+                    <button type="button"
+                            class="btn btn-default"
+                            id="searchButton"
+                            data-ng-click="submitSearch()">
+                        <span data-translate-once="common.button.search"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -29,7 +29,7 @@ public class TARoleServiceTest {
     @Before
     public void init(){
         List<Integer> ids = Arrays.asList(1, 2, 3);
-        when(taRoleDao.getAll()).thenReturn(ids);
+        when(taRoleDao.getAllRoleIds()).thenReturn(ids);
         for (Integer i : ids) {
             final int id = i;
             when(taRoleDao.getRole(i)).thenAnswer(new Answer<Object>() {
