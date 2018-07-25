@@ -22,57 +22,67 @@
         .controller('refBookListCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state',
             function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state) {
 
-            function linkFormatter(cellValue, options, row) {
-                var url;
-                if (row.hierarchic) {
-                    url = $state.href('hierRefBook', {refBookId: row.id});
-                } else {
-                    url = $state.href('linearRefBook', {refBookId: row.id});
+                function linkFormatter(cellValue, options, row) {
+                    var url;
+                    if (row.hierarchic) {
+                        url = $state.href('hierRefBook', {refBookId: row.id});
+                    } else {
+                        url = $state.href('linearRefBook', {refBookId: row.id});
+                    }
+                    return '<a href="' + url + '">' + cellValue + '</a>';
                 }
-                return '<a href="' + url + '">' + cellValue + '</a>';
-            }
 
-            function typeFormatter(cellValue, options, row) {
-                if (row.readOnly) {
-                    return APP_CONSTANTS.REFBOOK_EDITING.IS_READ_ONLY;
-                } else {
-                    return APP_CONSTANTS.REFBOOK_EDITING.NOT_IS_READ_ONLY;
+                function typeFormatter(cellValue, options, row) {
+                    if (row.readOnly) {
+                        return APP_CONSTANTS.REFBOOK_EDITING.IS_READ_ONLY;
+                    } else {
+                        return APP_CONSTANTS.REFBOOK_EDITING.NOT_IS_READ_ONLY;
+                    }
                 }
-            }
 
-            $scope.refBookListGrid = {
-                ctrl: {},
-                value: [],
-                options: {
-                    datatype: "angularResource",
-                    angularResource: RefBookListResource,
-                    requestParameters: function () {
-                        return {
-                            projection: 'light'
-                        };
-                    },
-                    colNames: [
-                        $filter('translate')('refBooks.refBooksList.columnHeader.refBookName'),
-                        $filter('translate')('refBooks.refBooksList.columnHeader.refBookType')
-                    ],
-                    colModel: [
-                        {
-                            name: 'name',
-                            index: 'name',
-                            width: 600,
-                            formatter: linkFormatter
+                // Переменная для поля поиска
+                $scope.searchFilter = {
+                    params: {}
+                };
+
+                $scope.refBookListGrid = {
+                    ctrl: {},
+                    value: [],
+                    options: {
+                        datatype: "angularResource",
+                        angularResource: RefBookListResource,
+                        requestParameters: function () {
+                            return {
+                                projection: 'light',
+                                filter: $scope.searchFilter.params.text
+                            };
                         },
-                        {
-                            name: 'readOnly',
-                            index: 'readOnly',
-                            width: 250,
-                            formatter: typeFormatter
-                        }
-                    ],
-                    sortname: 'refBoookName',
-                    hidegrid: false
-                }
-            };
-        }])
-    ;
+                        colNames: [
+                            $filter('translate')('refBooks.refBooksList.columnHeader.refBookName'),
+                            $filter('translate')('refBooks.refBooksList.columnHeader.refBookType')
+                        ],
+                        colModel: [
+                            {
+                                name: 'name',
+                                index: 'name',
+                                width: 600,
+                                formatter: linkFormatter
+                            },
+                            {
+                                name: 'readOnly',
+                                index: 'readOnly',
+                                width: 250,
+                                formatter: typeFormatter
+                            }
+                        ],
+                        sortname: 'refBoookName',
+                        hidegrid: false
+                    }
+                };
+
+                $scope.refreshGrid = function (page) {
+                    $scope.refBookListGrid.ctrl.refreshGrid(page);
+                };
+            }
+        ]);
 }());
