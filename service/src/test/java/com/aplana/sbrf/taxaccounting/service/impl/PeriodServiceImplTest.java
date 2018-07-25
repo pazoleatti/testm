@@ -206,7 +206,7 @@ public class PeriodServiceImplTest {
             periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
         } catch (ServiceException e) {
             verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к. открыт более ранний корректирующий период!", e.getMessage());
+            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к уже открыт другой корректирующий период!", e.getMessage());
             throw e;
         }
     }
