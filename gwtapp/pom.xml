@@ -646,6 +646,7 @@
                                     <nocompress>false</nocompress>
                                     <nosuffix>true</nosuffix>
                                     <jswarn>false</jswarn>
+                                    <encoding>UTF-8</encoding>
                                     <disableOptimizations>true</disableOptimizations>
                                     <sourceDirectory>${webappDirectory}/client</sourceDirectory>
                                     <outputDirectory>${webappDirectory}/client</outputDirectory>
