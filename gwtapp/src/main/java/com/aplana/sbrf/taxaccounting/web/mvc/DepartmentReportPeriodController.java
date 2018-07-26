@@ -117,6 +117,7 @@ public class DepartmentReportPeriodController {
             DepartmentReportPeriod period = new DepartmentReportPeriod();
             period.setIsActive(item.getIsActive());
             period.setCorrectionDate(item.getCorrectionDate());
+            period.setDepartmentId(item.getDepartmentId());
             departmentReportPeriodPermissionSetter.setPermissions(period, null);
             item.setPermissions(period.getPermissions());
         }
