@@ -325,6 +325,9 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
     position: relative;
     height: 30px;
   }
+  .form-group label {
+    max-height: 40px;
+  }
 
   .form-group > [class*='span'] {
     position: absolute;
@@ -334,6 +337,20 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 
   .form-group > [class*='span']:nth-child(1) {
     left: 0;
+  }
+}
+
+#ndfl_journal_filter {
+  .form-group {
+    display: flex;
+    align-items: center;
+  }
+  .form-group label {
+    margin: 0 0 1px;
+    padding: 0;
+  }
+  [class*='span'] {
+    min-height: 0;
   }
 }
 
@@ -607,6 +624,10 @@ button.btn-back-to-list {
 
 .select2-input::-ms-clear {
   display: none;
+}
+
+.select2-input {
+  height: 24px !important;
 }
 
 .form-control-clear {
@@ -1500,7 +1521,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
 .date-from-label {
   width: 100% !important;
-  line-height: 15px;
 }
 
 @media (max-width: 1450px) {
