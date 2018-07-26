@@ -1088,7 +1088,7 @@
                         name: data.taUserInfo.user.name,
                         login: data.taUserInfo.user.login,
                         department: data.department,
-                        userTB: data.userTB,
+                        userTB: data.terBank,
                         permissions: data.taUserInfo.user.permissions,
                         roles: data.taUserInfo.user.roles,
                         hasRole: function (role) {

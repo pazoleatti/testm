@@ -9,24 +9,24 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
  */
 public class UserDataModel {
     private TAUserInfo taUserInfo;
-    private RefBookDepartment userDepartment;
-    private Department userTB;
+    private RefBookDepartment department;
+    private Department terBank;
 
-    public UserDataModel(TAUserInfo taUserInfo, RefBookDepartment userDepartment, Department userTB) {
+    public UserDataModel(TAUserInfo taUserInfo, RefBookDepartment department, Department terBank) {
         this.taUserInfo = taUserInfo;
-        this.userDepartment = userDepartment;
-        this.userTB = userTB;
+        this.department = department;
+        this.terBank = terBank;
     }
 
     public TAUserInfo getTaUserInfo() {
         return taUserInfo;
     }
 
-    public RefBookDepartment getUserDepartment() {
-        return userDepartment;
+    public RefBookDepartment getDepartment() {
+        return department;
     }
 
-    public Department getUserTB() {
-        return userTB;
+    public Department getTerBank() {
+        return terBank;
     }
 }
