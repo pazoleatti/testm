@@ -4,14 +4,29 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 
 import java.util.List;
 
+/**
+ * Сервис для работы с пользовательскими ролями.
+ */
 public interface TARoleService {
     /**
-     * Получить все роли
+     * Получить роль по алиасу.
+     *
+     * @param alias алиас роли пользователя
+     * @return роль
      */
-	List<TARole> getAll();
+    TARole getRoleByAlias(String alias);
 
     /**
-     * Получить роль по алиасу
+     * Получить все роли с проекта НДФЛ.
+     *
+     * @return список ролей
      */
-	TARole getByAlias(String alias);
+    List<TARole> getAllNdflRoles();
+
+    /**
+     * Получить все роли с проектов Сбербанка.
+     *
+     * @return список ролей
+     */
+    List<TARole> getAllSbrfRoles();
 }

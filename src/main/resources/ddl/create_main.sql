@@ -506,6 +506,16 @@ comment on table sec_role is 'Системные роли';
 comment on column sec_role.id is 'Первичный ключ';
 comment on column sec_role.alias is 'Код роли (мнемонический идентификатор)';
 comment on column sec_role.name is 'Наименование роли';
+-------------------------------------------------------------------------------------------------------------------------------------
+create table sec_role_ndfl (
+  id    number(9)    not null,
+  alias varchar2(20) not null,
+  name  varchar2(50) not null
+);
+comment on table sec_role_ndfl is 'Системные роли';
+comment on column sec_role_ndfl.id is 'Первичный ключ';
+comment on column sec_role_ndfl.alias is 'Код роли (мнемонический идентификатор)';
+comment on column sec_role_ndfl.name is 'Наименование роли';
 ---------------------------------------------------------------------------------------------------
 create table sec_user_role (
   user_id number(9) not null,

@@ -624,32 +624,26 @@
             }
         ])
 
-        .controller('SelectUserRolesCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
-            function ($scope, APP_CONSTANTS, GetSelectOption) {
-                var userRoles = [
-                    APP_CONSTANTS.USER_ROLE_OBJECT.ROLE_ADMIN,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_CONTROL_UNP,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_CONF,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_CONTROL_NS,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_1000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_2000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_3000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_4000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_5000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6001,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_7000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6002,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6003,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6004,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_6005,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_1001,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_8000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_9000,
-                    APP_CONSTANTS.USER_ROLE_OBJECT.N_ROLE_OPER_ALL
-                ];
-                $scope.userRolesSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, userRoles);
+        /**
+         * Контроллер для выбора роли пользователя.
+         */
+        .controller('SelectUserRolesCtrl', ['$scope', '$filter',
+            function ($scope, $filter) {
+                $scope.userRolesSelect = {
+                    // ручное заполнение опций select2
+                    options: {
+                        ajax: {
+                            url: 'controller/rest/roles',
+                            results: function (data) {
+                                return {results: data};
+                            }
+                        },
+                        formatSelection: $filter('nameFormatter'),
+                        formatResult: $filter('nameFormatter'),
+                        multiple: true,
+                        allowClear: true
+                    }
+                };
             }
         ])
 

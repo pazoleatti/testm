@@ -7,26 +7,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Transactional
 public class TARoleServiceImpl implements TARoleService {
-	@Autowired
-	TARoleDao taRoleDao;
 
-	@Override
-	public List<TARole> getAll() {
-		List<TARole> roles = new ArrayList<TARole>();
-		for (Integer id : taRoleDao.getAllRoleIds()) {
-			roles.add(taRoleDao.getRole(id));
-		}
-		return roles;
-	}
+    @Autowired
+    TARoleDao roleDao;
 
     @Override
-    public TARole getByAlias(String alias) {
-        return taRoleDao.getRoleByAlias(alias);
+    public List<TARole> getAllSbrfRoles() {
+        return roleDao.getAllSbrfRoles();
+    }
+
+    @Override
+    public List<TARole> getAllNdflRoles() {
+        return roleDao.getAllNdflRoles();
+    }
+
+    @Override
+    public TARole getRoleByAlias(String alias) {
+        return roleDao.getRoleByAlias(alias);
     }
 }

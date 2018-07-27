@@ -46,7 +46,7 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
         result.setCanEdit(false);
 
-        List<TARole> allRoles = taRoleService.getAll();
+        List<TARole> allRoles = taRoleService.getAllSbrfRoles();
 
         result.setRoles(allRoles);
 

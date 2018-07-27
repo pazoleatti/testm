@@ -24,9 +24,6 @@ import java.util.List;
 @Repository
 public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
-    @Autowired
-    private TARoleDao roleDao;
-
     private static final Log LOG = LogFactory.getLog(TAUserDaoImpl.class);
 
     private static final RowMapper<TAUser> TA_USER_MAPPER = new RowMapper<TAUser>() {
