@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import org.slf4j.MDC;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 //TODO https://jira.aplana.com/browse/SBRFNDFL-1687
@@ -18,8 +21,16 @@ public class CompatibilityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         response.addHeader("X-UA-Compatible", "IE=edge,chrome=1");
-        httpServletRequest.getSession();
-        filterChain.doFilter(servletRequest, response);
+        HttpSession session = httpServletRequest.getSession();
+        try {
+            MDC.put("processId", "SID=" + session.getId() + " ");
+            if (httpServletRequest.getUserPrincipal() != null) {
+                MDC.put("userInfo", String.format("%s ", httpServletRequest.getUserPrincipal().getName()));
+            }
+            filterChain.doFilter(servletRequest, response);
+        } finally {
+            MDC.clear();
+        }
     }
 
     @Override

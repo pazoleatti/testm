@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,9 +219,12 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                         @Override
                         public void run() {
                             try {
+                                MDC.put("processId", String.format("SchedulerId=%s code=%s ", Long.toString(System.currentTimeMillis(), 16), settingCode));
                                 executor.execute();
                             } catch (Exception e) {
                                 LOG.error(String.format("Cannot call executor for task with code: \"%s\"", settingCode), e);
+                            } finally {
+                                MDC.clear();
                             }
                         }
                     }, new CronTrigger(cron, TimeZone.getDefault())

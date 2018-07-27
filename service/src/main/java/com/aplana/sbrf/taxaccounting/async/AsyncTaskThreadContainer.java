@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -91,15 +93,19 @@ public class AsyncTaskThreadContainer {
                     return;
                 }
                 try {
+                    MDC.put("processId", String.format("AsyncTaskId=%s ", taskData.getId()));
                     //Запускаем выполнение бина-обработчика задачи в новом потоке
                     LOG.info("Task started: " + taskData);
                     final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
+                    final Map<String, String> mdcContext = MDC.getCopyOfContextMap();
                     Future<?> taskFuture = asyncTaskPool.submit(new Thread("AsyncTask-" + taskData.getId()) {
                         @Override
                         public void run() {
                             try {
+                                MDC.setContextMap(mdcContext);
                                 //Запускаем задачу под нужным пользователем
                                 TAUser user = taUserService.getUser(taskData.getUserId());
+                                MDC.put("userInfo", String.format("%s ", user.getLogin()));
                                 List<String> roles = new ArrayList<String>();
                                 for (TARole role : user.getRoles()) {
                                     roles.add(role.getAlias());
@@ -115,6 +121,7 @@ public class AsyncTaskThreadContainer {
                             } catch (Exception e) {
                                 LOG.error("Unexpected error during async task execution", e);
                             } finally {
+                                MDC.clear();
                                 asyncManager.finishTask(taskData.getId());
                             }
                         }
@@ -126,6 +133,8 @@ public class AsyncTaskThreadContainer {
                 } catch (Exception e) {
                     LOG.info("Unexpected error during startup async task execution", e);
                     asyncManager.finishTask(taskData.getId());
+                } finally {
+                    MDC.clear();
                 }
             }
         }
