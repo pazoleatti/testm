@@ -30,6 +30,7 @@
                         data: [],
                         colNames: [
                             '',
+                            '',
                             $filter('translate')('filesComment.title.fileName'),
                             $filter('translate')('filesComment.title.fileType'),
                             $filter('translate')('filesComment.title.comment'),
@@ -39,6 +40,7 @@
                         ],
                         colModel: [
                             {name: 'uuid', index: 'uuid', width: 176, key: true, hidden: true},
+                            {name: 'permissions', index: 'permissions', hidden: true},
                             {name: 'fileName', index: 'fileName', width: 360, formatter: linkFileFormatter},
                             {
                                 name: 'fileTypeId', index: 'fileTypeId', width: 90,
@@ -145,7 +147,6 @@
                             method: 'POST'
                         }).progress(function (e) {
                         }).then(function (response) {
-                            console.log(response)
                             if (response.data && response.data.uuid) {
                                 var newFile = [{
                                     uuid: response.data.uuid,
@@ -153,6 +154,7 @@
                                     fileTypeId: defaultFileType.id,
                                     fileTypeName: defaultFileType.name,
                                     note: "",
+                                    permissions: ~0,
                                     userName: $scope.$parent.security.user.name,
                                     userDepartmentName: $scope.$parent.security.user.department.name,
                                     date: new Date().getTime()

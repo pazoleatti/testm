@@ -44,7 +44,7 @@
     border-right: 2px dotted rgba(0, 0, 0, 0.2);
     text-align: center;
     font-weight: 100;
-    padding: 8px 6px;
+    padding: 8px 12px 8px 6px;
     border-left: 2px dotted rgba(0, 0, 0, 0.2);
     margin: 0 0 0 -4px;
 }
@@ -54,10 +54,10 @@
 .ui-jqgrid .ui-jqgrid-htable th.ui-th-column .ui-jqgrid-sortable .s-ico {
     height: 18px;
     width: 13px;
-/*    border: 1px solid #828282;
-    background-color: white;*/
-.border-radius(4px);
-    /*float: right;*/
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(0, -10px);
 }
 
 .ui-th-column,

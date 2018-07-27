@@ -15,7 +15,7 @@
                         <td>
                             <div data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initAllAvailableTBForPeriodManagementSelect(searchFilter.params)"
+                                 data-ng-init="initAllAvailableTBForPeriodManagementSelect(onDepartmentsSelectLoaded)"
                                  data-ng-model="searchFilter.params.department"
                                  class="span8">
                             </div>
