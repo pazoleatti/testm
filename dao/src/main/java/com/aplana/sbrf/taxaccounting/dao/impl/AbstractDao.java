@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,12 +41,31 @@ public abstract class AbstractDao {
     /**
      * Возвращает новое значение id, следующее за текущим значением sequenceName
      *
-     * @param sequenceName - наименования последовательности, из которой следует получить следующее значение
-     * @param resultType   - тип возвращаемого значения
+     * @param sequenceName наименования последовательности, из которой следует получить следующее значение
+     * @param resultType   тип возвращаемого значения
      * @return объект класса resultType со значением, следующим за текущим значеним sequenceName
      */
     protected <T extends Number> T generateId(String sequenceName, Class<T> resultType) {
         return getJdbcTemplate().queryForObject("select " + sequenceName + ".nextval from dual", resultType);
+    }
+
+    /**
+     * Возвращает список сгенерированных id для последовательности sequenceName
+     *
+     * @param sequenceName наименования последовательности
+     * @param resultType   тип возвращаемого значения
+     * @return список идентификаторов класса resultType
+     */
+    protected <T extends Number> List<T> generateIds(String sequenceName, int count, Class<T> resultType) {
+        if (isSupportOver())
+            return getJdbcTemplate().queryForList("SELECT " + sequenceName + ".NEXTVAL FROM DUAL CONNECT BY LEVEL<= ?", new Object[]{count}, resultType);
+        else {
+            ArrayList<T> listIds = new ArrayList<>(count);
+            for (Integer i = 0; i < count; i++) {
+                listIds.add(getJdbcTemplate().queryForObject("SELECT " + sequenceName + ".NEXTVAL FROM DUAL", resultType));
+            }
+            return listIds;
+        }
     }
 
     /**
@@ -73,9 +93,10 @@ public abstract class AbstractDao {
 
     /**
      * Получить часть листа размер которого ограничен значением {@code IN_CLAUSE_LIMIT}.
-     * @param list  основной лист
-     * @param i     порядковый номер части
-     * @return  часть основного листа размером не более 1000, начало которого является элементом лежащего по индексу {@code i} * {@code IN_CLAUSE_LIMIT} основного листа
+     *
+     * @param list основной лист
+     * @param i    порядковый номер части
+     * @return часть основного листа размером не более 1000, начало которого является элементом лежащего по индексу {@code i} * {@code IN_CLAUSE_LIMIT} основного листа
      */
     protected List<Long> getSubList(List<Long> list, int i) {
         return list.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, list.size()));

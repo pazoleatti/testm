@@ -54,6 +54,14 @@ public interface DepartmentReportPeriodDao extends PermissionDao {
     void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
     /**
+     * Создаёт копии отчетных периодов для отдельного подразделения
+     *
+     * @param departmentReportPeriods список отчетных периодов
+     * @param departmentId            ид подразделения
+     */
+    void create(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId);
+
+    /**
      * Открытие/закрытие отчетного периода подразделения
      *
      * @param id     идентификатор отчетного периода подразделения

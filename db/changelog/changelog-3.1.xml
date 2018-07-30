@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
@@ -306,5 +306,33 @@
             <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
         </update>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5245 Изменить возможные значения поля format из справочника ref_book_attribute -->
+    <changeSet id="3.1-akorobko-0" author="akorobko">
+        <sql>
+            alter table ref_book_attribute drop constraint REF_BOOK_ATTRIBUTE_CHK_FORMAT;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5245 Изменить возможные значения поля format из справочника ref_book_attribute -->
+    <changeSet id="3.1-akorobko-1" author="akorobko">
+        <sql>
+            alter table ref_book_attribute add constraint REF_BOOK_ATTRIBUTE_CHK_FORMAT CHECK (format in (0,1,2,3,4,5,6,7)) ENABLE;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5245 Изменить возможные значения поля format из справочника ref_book_attribute -->
+    <changeSet id="3.1-akorobko-2" author="akorobko">
+        <sql>
+            comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM", 7 - "dd.MM.yyyy HH:mm:ss"; Для чисел: 6 - чекбокс)';
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5245 Изменить возможные значения поля format из справочника ref_book_attribute -->
+    <changeSet id="3.1-akorobko-3" author="akorobko">
+        <sql>
+            update ref_book_attribute set format=7 where id=9083;
+        </sql>
     </changeSet>
 </databaseChangeLog>

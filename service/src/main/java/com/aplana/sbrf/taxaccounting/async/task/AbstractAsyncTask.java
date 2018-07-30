@@ -73,7 +73,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private static final ThreadLocal<String> TIME_ZONE_MOSCOW = new ThreadLocal<String>() {
         @Override
         protected String initialValue() {
-            return "Europe/Moscow";
+            return "GMT+3";
         }
     };
 
