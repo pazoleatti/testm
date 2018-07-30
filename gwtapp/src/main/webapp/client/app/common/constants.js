@@ -258,7 +258,8 @@
             EVENTS: {
                 DEPARTMENT_SELECTED: "DEPARTMENT_SELECTED",
                 USER_TB_SELECT: "USER_TB_SELECT",
-                LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT"
+                LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT",
+                DEPARTMENT_AND_PERIOD_SELECTED: "DEPARTMENT_AND_PERIOD_SELECTED"
             },
             REFBOOK_ALIAS: {
                 BUSINESS_ID_ALIAS: "record_id",

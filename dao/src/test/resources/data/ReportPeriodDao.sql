@@ -30,3 +30,5 @@ INSERT INTO department_report_period(id, department_id, report_period_id, is_act
 INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (3, 1, 3, 1);
 INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (5, 2, 1, 1);
 INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (6, 2, 2, 1);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (7, 1, 2, 0);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (8, 1, 2, 0);

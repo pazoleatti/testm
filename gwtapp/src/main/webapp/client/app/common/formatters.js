@@ -159,6 +159,24 @@
         })
 
         /**
+         * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода (срок корректировки)"
+         * @param reportPeriod Отчетный период
+         */
+        .filter('periodFormatterWithCorrectionDate', ['$filter', function ($filter) {
+            return function (reportPeriod) {
+                if (reportPeriod) {
+                    var correctionDateClause = "";
+                    if (reportPeriod.correctionDate) {
+                        correctionDateClause = $filter('translate')('createReport.correctionString', {correctionDate: $filter('date')(reportPeriod.correctionDate, 'dd.MM.yyyy')})
+                    }
+                    return reportPeriod.taxPeriod.year + ": " + reportPeriod.name + " " + correctionDateClause
+                } else {
+                    return "";
+                }
+            };
+        }])
+
+        /**
          * @description Форматтер для параметров запроса
          * @param param параметр запроса
          */

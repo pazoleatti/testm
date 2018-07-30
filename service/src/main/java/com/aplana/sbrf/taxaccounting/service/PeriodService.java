@@ -1,11 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import net.sf.jasperreports.web.actions.ActionException;
 
@@ -161,4 +158,11 @@ public interface PeriodService {
      * @return список {@link ReportPeriodType} или пустой список
      */
     List<ReportPeriodType> getPeriodType();
+
+    /**
+     * Получить открытые периода назначеннных подразделению
+     * @param departmentId идентификатор подразделения
+     * @return период с датой корректировки
+     */
+    List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId);
 }

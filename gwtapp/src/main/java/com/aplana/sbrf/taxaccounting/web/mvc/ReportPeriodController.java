@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -61,7 +62,7 @@ public class ReportPeriodController {
      * @return  возвращает список периодов назначенных подразделению
      */
     @GetMapping(value = "/rest/reportPeriod", params = "projection=forDepartment")
-    public List<ReportPeriod> fetchForDepartment(@RequestParam Integer departmentId) {
-        return periodService.getPeriodsByDepartments(Collections.singletonList(departmentId));
+    public List<ReportPeriodResult> fetchForDepartment(@RequestParam Integer departmentId) {
+        return periodService.fetchActiveByDepartment(departmentId);
     }
 }
