@@ -665,6 +665,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
+    public BlobData downloadXsd(int declarationTemplateId) {
+        DeclarationTemplate dt = declarationTemplateDao.get(declarationTemplateId);
+        return blobDataService.get(dt.getXsdId());
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
     public void exportDeclarationTemplate(TAUserInfo userInfo, Integer declarationTemplateId, OutputStream os) {
         try {
             ZipOutputStream zos = new ZipOutputStream(os);

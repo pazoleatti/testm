@@ -88,10 +88,7 @@
 
                 /** Экспорт скриптов и xsd */
                 $scope.refBookExport = function () {
-                    $http({
-                        method: "GET",
-                        url: "controller/actions/refBookConf/export"
-                    })
+                    $window.location = "controller/actions/refBookConf/export";
                 };
 
                 /** Импорт скриптов и xsd */

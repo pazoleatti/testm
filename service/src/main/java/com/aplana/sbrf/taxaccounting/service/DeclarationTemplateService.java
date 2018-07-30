@@ -359,6 +359,13 @@ public interface DeclarationTemplateService {
     String uploadXsd(int declarationTemplateId, InputStream inputStream, String fileName);
 
     /**
+     * Выгрузить xsd шаблон
+     * @param declarationTemplateId идентификатор макета
+     * @return данные xsd файла
+     */
+    BlobData downloadXsd(int declarationTemplateId);
+
+    /**
      * Экспорт скриптов, xsd и jrxml из макета в архив
      *
      * @param declarationTemplateId идентификатор макета

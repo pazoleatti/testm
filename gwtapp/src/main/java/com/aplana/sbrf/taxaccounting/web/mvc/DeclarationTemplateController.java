@@ -19,6 +19,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,6 +113,23 @@ public class DeclarationTemplateController {
     public String uploadXsd(@RequestParam int declarationTemplateId, @RequestParam("uploader") MultipartFile file) throws IOException {
         try (InputStream inputStream = file.getInputStream()) {
             return declarationTemplateService.uploadXsd(declarationTemplateId, inputStream, file.getOriginalFilename());
+        }
+    }
+
+    /**
+     * Выгрузить xsd шаблона
+     * @param declarationTemplateId идентификатор макета
+     * @param req   запрос
+     * @param resp  ответ
+     * @throws IOException
+     */
+    @GetMapping(value="/actions/declarationTemplate/{declarationTemplateId}", params = "projection=downloadXsd")
+    public void downloadXsd(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        BlobData blobData = declarationTemplateService.downloadXsd(declarationTemplateId);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, resp, blobData);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 

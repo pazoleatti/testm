@@ -9,7 +9,7 @@
 
             $scope.downloadXsdClick = function () {
                 if ($scope.declarationTemplate && $scope.declarationTemplate.xsdId) {
-                    $window.location = "controller/actions/refBookConf/" + $scope.declarationTemplate.xsdId + "/download";
+                    $window.location = "controller/actions/declarationTemplate/" + $scope.declarationTemplate.id + "?projection=downloadXsd";
                 }
             };
 

@@ -217,7 +217,7 @@ public interface RefBookService {
      * Формирует архив со скриптами и др файлами, связанными со всеми справочниками
      *
      * @param userInfo пользователь запустивший операцию
-     * @return uuid ссылку на файл {@link com.aplana.sbrf.taxaccounting.model.BlobData}
+     * @return данные архива скриптов и xsd
      */
     BlobData exportRefBookConfs(TAUserInfo userInfo);
 
