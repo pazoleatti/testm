@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -24,12 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.singletonList;
 
@@ -419,6 +415,11 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<ReportPeriodType> getPeriodType() {
         return reportPeriodDao.getPeriodType();
+    }
+
+    @Override
+    public List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId) {
+        return reportPeriodDao.fetchActiveByDepartment(departmentId);
     }
 
     private String periodDescription(DepartmentReportPeriod departmentReportPeriod) {

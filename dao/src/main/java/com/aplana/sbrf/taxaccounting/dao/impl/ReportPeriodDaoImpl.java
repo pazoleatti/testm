@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -284,4 +285,38 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         }
     }
 
+    @Override
+    public List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId) {
+        String sql = "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                "rp.calendar_start_date, drp.correction_date from report_period rp " +
+                "left join department_report_period drp on rp.id = drp.report_period_id " +
+                "left join tax_period tp on tp.id = rp.tax_period_id " +
+                "left join report_period_type rpt on rpt.id = rp.dict_tax_period_id " +
+                "where drp.is_active = 1 and drp.department_id = :departmentId " +
+                "order by tp.year desc, rpt.code asc";
+        MapSqlParameterSource params = new MapSqlParameterSource("departmentId", departmentId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<ReportPeriodResult>() {
+
+                private ReportPeriodMapper reportPeriodMapper = new ReportPeriodMapper();
+
+                @Override
+                public ReportPeriodResult mapRow(ResultSet resultSet, int i) throws SQLException {
+                    ReportPeriod reportPeriod = reportPeriodMapper.mapRow(resultSet, i);
+                    ReportPeriodResult reportPeriodResult = new ReportPeriodResult();
+                    reportPeriodResult.setCorrectionDate(resultSet.getDate("correction_date"));
+                    reportPeriodResult.setId(reportPeriod.getId());
+                    reportPeriodResult.setName(reportPeriod.getName());
+                    reportPeriodResult.setTaxPeriod(reportPeriod.getTaxPeriod());
+                    reportPeriodResult.setStartDate(reportPeriod.getStartDate());
+                    reportPeriodResult.setEndDate(reportPeriod.getEndDate());
+                    reportPeriodResult.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+                    reportPeriodResult.setCalendarStartDate(reportPeriod.getCalendarStartDate());
+                    return reportPeriodResult;
+                }
+            });
+        } catch(EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
 }

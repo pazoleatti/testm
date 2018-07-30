@@ -136,8 +136,7 @@ public class RefBookValuesController {
 
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeAvailableTB")
     public List<RefBookDepartment> fetchActiveAvailableTB() {
-        TAUser user = securityService.currentUserInfo().getUser();
-        return refBookDepartmentDataService.fetchActiveAvailableTB(user);
+        return refBookDepartmentDataService.fetchAllAvailableForPeriodManagement(securityService.currentUserInfo());
     }
 
     /**

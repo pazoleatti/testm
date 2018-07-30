@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 
 import java.util.Date;
 import java.util.List;
@@ -116,4 +118,11 @@ public interface ReportPeriodDao extends PermissionDao {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если записи справочника с таким id не существует
      */
     ReportPeriodType getReportPeriodTypeById(Long id);
+
+    /**
+     * Получить открытые периода назначеннных подразделению
+     * @param departmentId идентификатор подразделения
+     * @return период с датой корректировкиhttps://jira.aplana.com/browse/SBRFNDFL-5117
+     */
+    List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId);
 }

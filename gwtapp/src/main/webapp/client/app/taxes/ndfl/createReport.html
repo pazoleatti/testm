@@ -6,26 +6,8 @@
                 <col style="width:65%">
             </colgroup>
             <tbody>
-            <tr>
-                <td>
-                    <label class="control-label">{{::'createReport.period' | translate}}:</label>
-                </td>
-                <td>
-                    <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectPeriodCtrl"
-                             data-ui-select2="periodSelect.options"
-                             data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
-                             data-ng-model="reportData.period"
-                             data-required>
-                        </div>
-                        <div data-aplana-validator data-key='required'>
-                            {{::'ndflreportJournal.validation.required' | translate}}
-                        </div>
-                    </div>
-                </td>
-            </tr>
 
-            <tr data-ng-if="reportData.period">
+            <tr>
                 <td>
                     <label class="control-label">{{::'createReport.department' | translate}}:</label>
                 </td>
@@ -33,18 +15,56 @@
                     <div data-aplana-field>
                         <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
                              data-ui-select2="departmentsSelect.options"
-                             data-ng-init="initActiveAvailableTBSelect('reportData.period',userTBDepartment)"
-                             data-ng-model="reportData.department"
-                             data-required>
+                             data-ng-init="initActiveAvailableTBSelect(userTBDepartment)"
+                             data-ng-model="reportData.department">
                         </div>
-                        <div data-aplana-validator data-key='required'>
-                            {{::'ndflreportJournal.validation.required' | translate}}
+                        <div class="control-group"
+                             data-ng-class="{'error' : true}"
+                             data-ng-show="showDepError">
+                            <div class="controls">
+                                <div class="help-bottom-popup"
+                                     data-ng-style="{'display' : 'block'}">
+                                    <div class="help-container">
+                                        <div class="help-top-arrow"></div>
+                                        <div class="help-text">{{::'common.validation.required' | translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </td>
             </tr>
 
-            <tr data-ng-if="reportData.department && reportData.period">
+            <tr data-ng-if="hasLoaded || reportData.department" >
+                <td>
+                    <label class="control-label">{{::'createReport.period' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field >
+                        <div style="width: 355px;" data-ng-controller="SelectPeriodCtrl"
+                             data-ui-select2="periodSelect.options"
+                             data-ng-init="initSelectWithOpenDepartmentPeriods(reportData.department.id, selectedReportPeriod)"
+                             data-ng-model="reportData.period"
+                             data-ng-disabled="depErased">
+                        </div>
+                        <div class="control-group"
+                             data-ng-class="{'error' : true}"
+                             data-ng-show="showPeriodError">
+                            <div class="controls">
+                                <div class="help-bottom-popup"
+                                     data-ng-style="{'display' : 'block'}">
+                                    <div class="help-container">
+                                        <div class="help-top-arrow"></div>
+                                        <div class="help-text">{{::'common.validation.required' | translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-ng-if="hasLoaded || (reportData.department && reportData.period)">
                 <td>
                     <label class="control-label">{{::'createReport.reportType' | translate}}:</label>
                 </td>
@@ -53,13 +73,24 @@
                         <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-model="reportData.declarationType"
-                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                             data-required>
+                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportData.period.id, reportData.department.id)"
+                             data-ng-disabled="depErased || reportErased">
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'ndflreportJournal.validation.required' |
-                            translate}}
+                        <div class="control-group"
+                             data-ng-class="{'error' : true}"
+                             data-ng-show="showFormError">
+                            <div class="controls">
+                                <div class="help-bottom-popup"
+                                     data-ng-style="{'display' : 'block'}">
+                                    <div class="help-container">
+                                        <div class="help-top-arrow"></div>
+                                        <div class="help-text">{{::'common.validation.required' | translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                 </td>
             </tr>
 
@@ -80,9 +111,6 @@
             </tbody>
         </table>
 
-        <label class="control-label correction-message" data-ng-show="correctionPeriod">
-            {{::'createReport.correctionMessage' | translate}} {{correctionDate | dateFormatter}}
-        </label>
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-default iconed-btn">

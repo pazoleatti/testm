@@ -225,6 +225,13 @@
                         $scope.asnuSelect.options.data.results = data;
                     });
                 };
+
+                /**
+                 *
+                 */
+                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, department) {
+                    $scope.initSelectWithReportDeclarationTypesForCreate(period, department)
+                });
             }])
 
         /**
@@ -320,31 +327,30 @@
 
                 /**
                  * Инициализировать список с видами отчетных форм, которые можно создать
-                 * @param declarationKind Тип налоговой формы
-                 * @param periodObject Выражение из scope, по которому отслеживается изменение периода
-                 * @param departmentObject Выражение из scope, по которому отслеживается изменение подразделения
+                 * @param periodId Выражение из scope, по которому отслеживается изменение периода
+                 * @param departmentId Выражение из scope, по которому отслеживается изменение подразделения
                  */
                 //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
-                $scope.initSelectWithReportDeclarationTypesForCreate = function (declarationKind, periodObject, departmentObject) {
+                $scope.initSelectWithReportDeclarationTypesForCreate = function (periodId, departmentId) {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
-                    //Список обновляется при изменении отчетного периода и подразделения
-                    $scope.$watchGroup([periodObject, departmentObject], function (newValues) {
-                        var period = newValues[0];
-                        var department = newValues[1];
-                        if (declarationKind && period && department) {
-                            DeclarationTypeForCreateResource.query({
-                                formDataKindIdList: declarationKind,
-                                departmentId: department.id,
-                                periodId: period.id
-                            }, function (data) {
-                                data = data.filter(function (declarationType) {
-                                    return isReportForm(declarationType);
-                                });
-                                $scope.declarationTypeSelect.options.data.results = data;
-                            });
-                        }
+                    DeclarationTypeForCreateResource.query({
+                        formDataKindIdList: APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id,
+                        departmentId: departmentId,
+                        periodId: periodId
+                    }, function (data) {
+                        data = data.filter(function (declarationType) {
+                            return isReportForm(declarationType);
+                        });
+                        $scope.declarationTypeSelect.options.data.results = data;
                     });
                 };
+
+                /**
+                 * Событие возникающие при выборе подразделения и периода
+                 */
+                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, department) {
+                    $scope.initSelectWithReportDeclarationTypesForCreate(period, department)
+                });
             }])
 
         /**
@@ -399,15 +405,36 @@
                     $scope.periodSelect.options.data.results = [];
 
                 };
-                // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
-                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId) {
-                    ReportPeriodResource.query({
-                        projection: "forDepartment",
-                        departmentId: departmentId
-                    }, function (data) {
-                        $scope.$emit(APP_CONSTANTS.EVENTS.LAST_PERIOD_SELECT, data[0]);
-                        $scope.periodSelect.options.data.results = data;
-                    });
+
+                /**
+                 * Инициализировать выпадающий список периодами, коорые активны и открыты для определенного подразделения
+                 * @param departmentId идентификатор подразделения
+                 * @param periodObject объект периода который будет выделен в списке
+                 */
+                $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, periodObject) {
+                    if (typeof(departmentId) !== 'undefined' && departmentId != null) {
+                        $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatterWithCorrectionDate');
+                        ReportPeriodResource.query({
+                            projection: "forDepartment",
+                            departmentId: departmentId
+                        }, function (data) {
+                            $scope.periodSelect.options.data.results = data;
+                            if (periodObject && data && data.length > 0) {
+                                periodObject.period = data[0];
+                                angular.forEach(data, function (period) {
+                                    if (Date.parse(periodObject.period.endDate) <= Date.parse(period.endDate)) {
+                                        periodObject.period = period;
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                };
+
+                 // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
+                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId, latestPeriod) {
+                   $scope.initSelectWithOpenDepartmentPeriods(departmentId, latestPeriod);
                 });
             }])
 
@@ -475,26 +502,28 @@
                 };
                 /**
                  * Инициализировать список с загрузкой действующих доступных ТБ для создания отчётности через ajax
-                 * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  * @param userTBDepartment Объект из scope, по которому проставляется ТБ пользователя
                  */
-                $scope.initActiveAvailableTBSelect = function (periodObject, userTBDepartment) {
-                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "fullNameFormatter");
+                $scope.initActiveAvailableTBSelect = function (userTBDepartment) {
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true);
                     RefBookValuesResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
                         projection: "activeAvailableTB"
-                    }, function (data) {
-                        $scope.departmentsSelect.options.data.results = data;
-                        angular.forEach(data, function (department) {
-                            if (userTBDepartment.id === department.id) {
-                                userTBDepartment.department = department;
+                    }, function (availableTBs) {
+                        $scope.departmentsSelect.options.data.results = availableTBs;
+                        // получаем тербанк пользователя
+                        DepartmentResource.query({
+                                departmentId: $rootScope.user.department.id,
+                                projection: 'fetchParentTB'
+                            }, function (userTB) {
+                                // находим в списке тербанков тербанк пользователя и инициируем событие для выделения этого тербанка в выпадающем списке
+                                angular.forEach(availableTBs, function (department) {
+                                    if (userTB.id === department.id) {
+                                        userTBDepartment.department = department;
+                                    }
+                                });
                             }
-                        });
-                    });
-                    $scope.$watch(periodObject, function (period) {
-                        if (period) {
-                            $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};
-                        }
+                        );
                     });
                 };
 
