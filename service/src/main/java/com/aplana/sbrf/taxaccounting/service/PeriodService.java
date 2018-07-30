@@ -28,21 +28,19 @@ public interface PeriodService {
     String open(DepartmentReportPeriod period, TAUserInfo userInfo);
 
     /**
-     * Закрыть период
+     * Открыть Корректирующий период
      *
-     * @param departmentReportPeriodId идентификатор периода для подразделения "Банк"
-     * @return uuid логгера
+     * @param action данные по корректирующему периоду
+     * @return logs логер, при необходимости
      */
-    String close(Integer departmentReportPeriodId);
+    String openCorrectionPeriod(OpenCorrectionPeriodAction action);
 
     /**
-     * Получить объект отчётного периода по идентификатору периода
+     * Открывает периоды для одного подразделения, чтобы они соответствовали периодам ТерБанка
      *
-     * @param reportPeriodId идентификатор отчётного периода
-     * @return объект {@link ReportPeriod}
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
+     * @param departmentId идентифиактор подразделения
      */
-    ReportPeriod fetchReportPeriod(int reportPeriodId);
+    void openForNewDepartment(int departmentId);
 
     /**
      * Переоткрывает закрытый период
@@ -53,12 +51,29 @@ public interface PeriodService {
     String reopen(Integer departmentReportPeriodId);
 
     /**
+     * Закрыть период
+     *
+     * @param departmentReportPeriodId идентификатор периода для подразделения "Банк"
+     * @return uuid логгера
+     */
+    String close(Integer departmentReportPeriodId);
+
+    /**
      * Удалить отчетный период
      *
      * @param id идентификатор периода
      * @return uuid логера
      */
     String delete(Integer id);
+
+    /**
+     * Получить объект отчётного периода по идентификатору периода
+     *
+     * @param reportPeriodId идентификатор отчётного периода
+     * @return объект {@link ReportPeriod}
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
+     */
+    ReportPeriod fetchReportPeriod(int reportPeriodId);
 
     /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
@@ -78,15 +93,6 @@ public interface PeriodService {
      * @throws ActionException если дата сдачи отчетности не указана
      */
     void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException;
-
-    enum Operation {
-        FIND, // Поиск периода
-        OPEN, // Открытие периода
-        CLOSE, // Закрытие периода
-        DELETE, // Удаление периода
-        EDIT_DEADLINE, // Изменение срока сдачи отчетности в периоде
-        EDIT // Редактирование периода
-    }
 
     /**
      * Получение списка отчетных периодов для указанных подразделений
@@ -129,22 +135,6 @@ public interface PeriodService {
      * @return список корректирующих периодов
      */
     List<ReportPeriod> getCorrectPeriods(int departmentId);
-
-    /**
-     * Открыть Корректирующий период
-     *
-     * @param action данные по корректирующему периоду
-     * @return logs логер, при необходимости
-     */
-    String openCorrectionPeriod(OpenCorrectionPeriodAction action);
-
-    /**
-     * Получение отчетных периодов подразделения по списку идентификаторов подразделений
-     *
-     * @param departmentIds список идентификаторов подразделений
-     * @return список {@link DepartmentReportPeriod} или пустой список
-     */
-    List<DepartmentReportPeriod> getDRPByDepartmentIds(List<Integer> departmentIds);
 
     /**
      * Получение отчетного периода по коду записи справочника "Коды, определяющие налоговый (отчётный) период" и году

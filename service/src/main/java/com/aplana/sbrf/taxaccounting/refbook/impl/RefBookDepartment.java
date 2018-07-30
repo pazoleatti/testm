@@ -621,48 +621,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881
     private void createPeriods(int depId, DepartmentType newDepartmentType, int terrBankId) {
-        //1
-        if (newDepartmentType != DepartmentType.TERR_BANK) {
-            if (departmentService.getParentTB(depId) != null) {
-                //1А.1.1
-                List<DepartmentReportPeriod> listDRP =
-                        periodService.getDRPByDepartmentIds(Arrays.asList(terrBankId));
-                if (!listDRP.isEmpty()) {
-                    for (DepartmentReportPeriod drp : listDRP)
-                        //1А.1.1.1
-                        if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
-                            return;
-                    //1А.1.1.1А
-                    for (DepartmentReportPeriod drp : listDRP) {
-                        DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
-                        drpCopy.setReportPeriod(drp.getReportPeriod());
-                        drpCopy.setDepartmentId(depId);
-                        drpCopy.setIsActive(drp.isActive());
-                        drpCopy.setCorrectionDate(drp.getCorrectionDate());
-                        throw new UnsupportedOperationException();
-                    }
-                    return;
-                }
-                return;
-            }
-        }
-        //2
-        List<DepartmentReportPeriod> listDRP =
-                periodService.getDRPByDepartmentIds(Arrays.asList(0));
-        if (!listDRP.isEmpty()) {
-            for (DepartmentReportPeriod drp : listDRP)
-                //1А.1.1.1
-                if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
-                    return;
-            for (DepartmentReportPeriod drp : listDRP) {
-                DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
-                drpCopy.setReportPeriod(drp.getReportPeriod());
-                drpCopy.setDepartmentId(depId);
-                drpCopy.setIsActive(drp.isActive());
-                drpCopy.setCorrectionDate(drp.getCorrectionDate());
-                throw new UnsupportedOperationException();
-            }
-        }
+        throw new UnsupportedOperationException();
     }
 
     //Проверка использования
