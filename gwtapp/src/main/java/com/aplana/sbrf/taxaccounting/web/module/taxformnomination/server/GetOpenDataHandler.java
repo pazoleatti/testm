@@ -24,7 +24,7 @@ import java.util.Set;
  * @author Stanislav Yasinskiy
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 @Component("getNominationOpenDataHandler")
 public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction, GetOpenDataResult> {
 
@@ -46,14 +46,13 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         TAUser currUser = securityService.currentUserInfo().getUser();
 
         // Признак контролера
-        if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP) ||
-                currUser.hasRole(action.getTaxType(), TARole.F_ROLE_CONTROL_UNP)) {
+        if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP)) {
             result.setControlUNP(true);
             result.setCanEdit(true);
-        } else if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
+        } else if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_NS)) {
             result.setControlUNP(false);
             result.setCanEdit(true);
-        } else if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+        } else if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_OPER)) {
             result.setControlUNP(false);
             result.setCanEdit(false);
         }
@@ -63,15 +62,14 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         List<Department> departmentList = new ArrayList<Department>();
 
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
-        if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP) ||
-                currUser.hasRole(action.getTaxType(), TARole.F_ROLE_CONTROL_UNP)) {
+        if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP)) {
             // Все подразделения
             result.setDepartments(departmentService.listAll());
 
             for (Department dep : result.getDepartments()) {
                 avSet.add(dep.getId());
             }
-        } else if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
+        } else if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS)) {
             for (Department dep : departmentService.getBADepartments(currUser, action.getTaxType())) {
                 avSet.add(dep.getId());
             }

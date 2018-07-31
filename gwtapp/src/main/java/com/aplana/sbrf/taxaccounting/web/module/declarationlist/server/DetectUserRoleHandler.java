@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class DetectUserRoleHandler extends AbstractActionHandler<DetectUserRoleAction, DetectUserRoleResult> {
 
 	@Autowired
@@ -25,8 +25,8 @@ public class DetectUserRoleHandler extends AbstractActionHandler<DetectUserRoleA
 	@Override
 	public DetectUserRoleResult execute(DetectUserRoleAction action, ExecutionContext executionContext) throws ActionException {
 		DetectUserRoleResult result = new DetectUserRoleResult();
-		result.setControl(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS));
-		result.setHasRoleOperator(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.F_ROLE_OPER));
+		result.setControl(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS));
+		result.setHasRoleOperator(securityService.currentUserInfo().getUser().hasRole(action.getTaxType(), TARole.N_ROLE_OPER));
 		return result;
 	}
 

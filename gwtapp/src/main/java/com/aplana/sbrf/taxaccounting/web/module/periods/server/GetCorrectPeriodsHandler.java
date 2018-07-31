@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class GetCorrectPeriodsHandler extends AbstractActionHandler<GetCorrectPeriodsAction, GetCorrectPeriodsResult> {
 
     public GetCorrectPeriodsHandler() {

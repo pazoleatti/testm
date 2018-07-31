@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePeriodAction, CanRemovePeriodResult> {
 
 	public CanRemovePeriodHandler() {

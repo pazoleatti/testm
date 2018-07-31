@@ -26,7 +26,7 @@ import java.util.List;
  * @author Lenar Haziev
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDeclarationAction, GetCheckDeclarationResult> {
 
     private static final String WARN_MSG = "\"%s\" %s, \"%s\"%s, состояние - \"%s\"";

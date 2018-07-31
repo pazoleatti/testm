@@ -22,7 +22,7 @@ import static java.util.Arrays.asList;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepartmentTreeDataAction, GetDepartmentTreeDataResult> {
 
     @Autowired
@@ -49,15 +49,14 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
         TAUser currUser = securityService.currentUserInfo().getUser();
 
         if (!action.isOnlyPeriods()) {
-            if (!currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS,
-                    TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS)) {
+            if (!currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
                 // Не контролер, далее не загружаем
                 return result;
             }
 
             // Подразделения доступные пользователю
             Set<Integer> avSet = new HashSet<Integer>();
-            if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+            if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP)) {
                 // Все подразделения
                 result.setDepartments(departmentService.listAll());
 

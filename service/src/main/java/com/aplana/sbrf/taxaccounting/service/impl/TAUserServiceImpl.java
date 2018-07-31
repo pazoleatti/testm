@@ -118,7 +118,7 @@ public class TAUserServiceImpl implements TAUserService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
     public PagingResult<TAUserView> getUsersViewWithFilter(MembersFilterData filter) {
         return userDao.getUserViewByFilter(filter);
     }

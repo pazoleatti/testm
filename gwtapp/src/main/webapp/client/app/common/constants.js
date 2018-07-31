@@ -45,10 +45,6 @@
                 N_ROLE_CONTROL_NS: "N_ROLE_CONTROL_NS",
                 N_ROLE_CONF: "N_ROLE_CONF",
                 N_ROLE_ADMIN: "N_ROLE_ADMIN",
-                F_ROLE_OPER: "F_ROLE_OPER",
-                F_ROLE_CONTROL_UNP: "F_ROLE_CONTROL_UNP",
-                F_ROLE_CONTROL_NS: "F_ROLE_CONTROL_NS",
-                F_ROLE_CONF: "F_ROLE_CONF",
                 ROLE_ADMIN: "ROLE_ADMIN"
             },
             USER_ROLE_OBJECT: {

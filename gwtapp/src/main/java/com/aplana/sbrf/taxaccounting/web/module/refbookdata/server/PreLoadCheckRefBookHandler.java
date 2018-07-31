@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class PreLoadCheckRefBookHandler extends AbstractActionHandler<PreLoadCheckRefBookAction, PreLoadCheckRefBookResult> {
 
     @Autowired

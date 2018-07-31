@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<UpdateDepartmentDeadlineAction, UpdateDepartmentDeadlineResult> {
 
     @Autowired

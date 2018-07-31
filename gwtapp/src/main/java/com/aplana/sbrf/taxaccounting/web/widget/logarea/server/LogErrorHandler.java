@@ -20,7 +20,7 @@ import java.util.List;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONF', 'F_ROLE_CONF', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONF', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class LogErrorHandler extends AbstractActionHandler<LogErrorAction, LogErrorResult> {
 
     @Autowired

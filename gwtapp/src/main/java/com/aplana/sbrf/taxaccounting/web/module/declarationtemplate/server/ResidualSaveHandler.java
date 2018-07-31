@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF')")
 public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveAction, ResidualSaveResult> {
 
     @Autowired

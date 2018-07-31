@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction, ClosePeriodResult> {
 
 	public ClosePeriodHandler() {

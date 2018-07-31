@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetMembersResult> {
 
     @Autowired

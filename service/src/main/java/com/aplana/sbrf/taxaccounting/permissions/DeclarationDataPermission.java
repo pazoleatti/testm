@@ -456,7 +456,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
-            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS);
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
@@ -510,8 +510,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
             boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
 
-            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                    TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER);
+            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
 
             if (!canView || !hasRoles) {
                 logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
