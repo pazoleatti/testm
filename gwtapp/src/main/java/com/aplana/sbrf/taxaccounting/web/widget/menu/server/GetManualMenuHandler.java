@@ -44,21 +44,21 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
 
         // Руководство пользователя
         if (currentUser.hasRoles(TARole.ROLE_ADMIN,
-                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
+                TARole.N_ROLE_OPER,
+                TARole.N_ROLE_CONTROL_NS,
+                TARole.N_ROLE_CONTROL_UNP,
+                TARole.N_ROLE_CONF)) {
 
             MenuItem manualMenu = new MenuItem("");
 
             if (currentUser.hasRoles(TARole.ROLE_ADMIN,
-                    TARole.N_ROLE_OPER, TARole.F_ROLE_OPER,
-                    TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                    TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+                    TARole.N_ROLE_OPER,
+                    TARole.N_ROLE_CONTROL_NS,
+                    TARole.N_ROLE_CONTROL_UNP)) {
                 manualMenu.getSubMenu().add(new MenuItem("Руководство пользователя", "resources/help_ndfl.pdf"));
             }
 
-            if (currentUser.hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
+            if (currentUser.hasRole(TARole.N_ROLE_CONF)) {
                 manualMenu.getSubMenu().add(new MenuItem("Руководство настройщика макетов", "resources/help_conf.pdf"));
             }
 

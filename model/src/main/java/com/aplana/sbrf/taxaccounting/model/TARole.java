@@ -28,23 +28,6 @@ public class TARole implements Serializable {
      */
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
-    /**
-     * Алиас роли "Оператор (Сборы)"
-     */
-    public static final String F_ROLE_OPER = "F_ROLE_OPER";
-    /**
-     * Алиас роли "Контролёр УНП (Сборы)"
-     */
-    public static final String F_ROLE_CONTROL_UNP = "F_ROLE_CONTROL_UNP";
-    /**
-     * Алиас роли "Контролёр НС (Сборы)"
-     */
-    public static final String F_ROLE_CONTROL_NS = "F_ROLE_CONTROL_NS";
-    /**
-     * Алиас роли "Настройщик (Сборы)"
-     */
-    public static final String F_ROLE_CONF = "F_ROLE_CONF";
-
 	private static final long serialVersionUID = 1L;
 	
 	private int id;

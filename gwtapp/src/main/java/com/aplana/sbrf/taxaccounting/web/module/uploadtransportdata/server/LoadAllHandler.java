@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'ROLE_ADMIN')")
 public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAllResult> {
 
     @Autowired

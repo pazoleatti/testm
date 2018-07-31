@@ -49,26 +49,26 @@
                             $filter('translate')('taskList.title.lastStartDate'),
                             $filter('translate')('taskList.title.nextStartDate')],
                         colModel: [
-                            {name: 'id', index: 'id', width: 60, key: true},
-                            {name: 'name', index: 'task_name', width: 260, formatter: linkFileFormatter},
-                            {name: 'state', index: 'active', width: 200},
-                            {name: 'schedule', index: 'schedule', width: 175},
+                            {name: 'id', index: 'id', width: 40, key: true},
+                            {name: 'name', index: 'task_name', width: 440, formatter: linkFileFormatter},
+                            {name: 'state', index: 'active', width: 100},
+                            {name: 'schedule', index: 'schedule', width: 110},
                             {
                                 name: 'modificationDate',
                                 index: 'modification_date',
-                                width: 240,
+                                width: 160,
                                 formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'lastFireTime',
                                 index: 'last_fire_date',
-                                width: 240,
+                                width: 180,
                                 formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'nextFireTime',
                                 index: 'next_fire_time',
-                                width: 190,
+                                width: 180,
                                 formatter: $filter('dateFormatter')
                             }
                         ],

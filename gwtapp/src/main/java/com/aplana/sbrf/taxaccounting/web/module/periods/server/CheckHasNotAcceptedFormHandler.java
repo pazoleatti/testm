@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckHasNotAcceptedFormAction, CheckHasNotAcceptedFormResult> {
 
     private static final String FD_NOT_ACCEPTED = "Форма находится в состоянии отличном от \"Принята\": ";

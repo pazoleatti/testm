@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookValuesAction, GetRefBookValuesResult> {
 
     public GetRefBookValuesHandler() {

@@ -84,14 +84,16 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 ZipEntry entry;
 
                 while ((entry = zis.getNextEntry()) != null) {
-                    if (entry.getSize() == 0) {
-                        logger.error("Файл " + entry.getName() + " не должен быть пуст");
-                    } else {
-                        // Сохраняем в блоб и начинаем его обработку в зависимости от формата
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        IOUtils.copy(zis, baos);
-                        String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
-                        processFileByFormat(userInfo, fileName, entry.getName(), uuid, logger);
+                    if (!entry.isDirectory()) {
+                        if (entry.getSize() == 0) {
+                            logger.error("Файл " + entry.getName() + " не должен быть пуст");
+                        } else {
+                            // Сохраняем в блоб и начинаем его обработку в зависимости от формата
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            IOUtils.copy(zis, baos);
+                            String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName().substring(entry.getName().lastIndexOf("/") + 1));
+                            processFileByFormat(userInfo, fileName, entry.getName().substring(entry.getName().lastIndexOf("/") + 1 ), uuid, logger);
+                        }
                     }
                 }
             } catch (IOException e) {

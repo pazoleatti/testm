@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF')")
 public class GetChecksHandler extends AbstractActionHandler<GetChecksAction, GetChecksResult> {
 
 	@Autowired

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class OpenCorrectPeriodHandler extends AbstractActionHandler<OpenCorrectPeriodAction, OpenCorrectPeriodResult> {
 
     public OpenCorrectPeriodHandler() {

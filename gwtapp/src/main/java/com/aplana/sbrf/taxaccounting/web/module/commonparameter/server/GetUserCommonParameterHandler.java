@@ -13,7 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class GetUserCommonParameterHandler extends AbstractActionHandler<GetUserRoleCommonParameterAction, GetUserRoleCommonParameterResult> {
 
     @Autowired
@@ -27,7 +27,7 @@ public class GetUserCommonParameterHandler extends AbstractActionHandler<GetUser
     public GetUserRoleCommonParameterResult execute(GetUserRoleCommonParameterAction action, ExecutionContext context) throws ActionException {
         GetUserRoleCommonParameterResult result = new GetUserRoleCommonParameterResult();
         TAUser taUser = securityService.currentUserInfo().getUser();
-        result.setCanEdit(taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
+        result.setCanEdit(taUser.hasRole(TARole.N_ROLE_CONTROL_UNP));
         return result;
     }
 

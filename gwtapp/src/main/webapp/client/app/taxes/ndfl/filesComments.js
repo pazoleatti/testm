@@ -118,20 +118,16 @@
                  * @description Инициализация таблицы
                  **/
                 function initPage() {
-                    if ($shareData.declarationState !== APP_CONSTANTS.STATE.ACCEPTED.name) {
-                        $http({
-                            method: "POST",
-                            url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
-                        }).then(function (response) {
-                            $scope.editMode = response.data.declarationDataLocked;
-                            if (response.data.uuid) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
-                            }
-                            loadFiles();
-                        });
-                    } else {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
+                    }).then(function (response) {
+                        $scope.editMode = response.data.declarationDataLocked;
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         loadFiles();
-                    }
+                    });
                 }
 
 
@@ -142,8 +138,10 @@
                     if (file) {
                         Upload.upload({
                             url: 'controller/actions/declarationData/uploadFile',
-                            data: {uploader: file,
-                                    declarationDataId: $shareData.declarationDataId},
+                            data: {
+                                uploader: file,
+                                declarationDataId: $shareData.declarationDataId
+                            },
                             method: 'POST'
                         }).progress(function (e) {
                         }).then(function (response) {

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 @Component
 public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDeadlineDepartmentsAction, GetDeadlineDepartmentsResult> {
 
@@ -35,7 +35,7 @@ public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDead
 		List<Department> departments = new ArrayList<Department>();
 		GetDeadlineDepartmentsResult result = new GetDeadlineDepartmentsResult();
 		Department d = null;
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (userInfo.getUser().hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
 			switch (taxType) {
                 case NDFL:
 					departments.addAll(departmentService.getBADepartments(userInfo.getUser(), action.getTaxType()));

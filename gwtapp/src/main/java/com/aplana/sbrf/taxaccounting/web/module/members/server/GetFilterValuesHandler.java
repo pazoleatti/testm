@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValues, FilterValues> {
 
     @Autowired

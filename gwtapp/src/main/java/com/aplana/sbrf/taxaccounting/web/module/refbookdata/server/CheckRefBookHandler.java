@@ -45,7 +45,7 @@ public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookActio
         }
         result.setAvailable(refBook.isVisible());
         result.setVersioned(refBook.isVersioned());
-        result.setUploadAvailable(securityService.currentUserInfo().getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
+        result.setUploadAvailable(securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP));
         result.setEventScriptStatus(commonRefBookService.getEventScriptStatus(action.getRefBookId()));
         return result;
     }

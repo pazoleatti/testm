@@ -76,11 +76,11 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 		}
 
         TAUser currentUser = securityService.currentUserInfo().getUser();
-        if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)){ // Контроллер УНП
+        if (currentUser.hasRole(TARole.N_ROLE_CONTROL_UNP)){ // Контроллер УНП
             // Контроллер УНП может редактировать все справочники (даже "ОУКС")
             result.setReadOnly(refBook.isReadOnly() && !refBook.getId().equals(ORGANIZATION_REF_BOOL_ID));
         } else { // Оператор, Контролёр НС
-            if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS) && refBook.getRegionAttribute() != null){
+            if (currentUser.hasRole(TARole.N_ROLE_CONTROL_NS) && refBook.getRegionAttribute() != null){
                 /*
                  * контролер НС может редактировать данные справочника, сделано без фильтра
                  * так как при показе строки уже фильтруются

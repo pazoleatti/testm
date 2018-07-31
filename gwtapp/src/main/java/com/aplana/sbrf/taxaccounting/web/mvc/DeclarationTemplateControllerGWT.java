@@ -201,7 +201,7 @@ public class DeclarationTemplateControllerGWT {
      * @throws IOException IOException
      */
     private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONF)) {
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
             response.setCharacterEncoding(UTF_8);
             response.getWriter().printf("Ошибка доступа (недостаточно прав)");
