@@ -1,0 +1,19 @@
+LOAD DATA
+INFILE *
+APPEND
+CONTINUEIF NEXT(1:1) = '#'
+INTO TABLE "BLOB_DATA_TMP"
+FIELDS TERMINATED BY'|'
+OPTIONALLY ENCLOSED BY '[' AND ']'
+TRAILING NULLCOLS ( 
+ID char(36),
+NAME char(530),
+L_0 FILLER char,
+DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
+CREATION_DATE DATE "DD.MM.RR",
+DECLARATION_TEMPLATE_ID)
+begindata
+ 10d898c7-8db0-4df2-a4f2-3df135deab40|tb-person.groovy|templates/data/refbook/tb_person.groovy|19.07.2018||
+ 9538d273-51dd-4331-9c1c-510468b5ebee|person_tb.groovy|templates/data/refbook/person_tb.groovy|19.07.2018||
+ 352adf59-372b-4020-98fe-8960dd5bc972|refbook_declaration_type.groovy|templates/data/refbook/declaration_type.groovy|01.01.2016||
+ 884b9f2e-1678-4d69-9652-b036bba2f728|refbook_department.groovy|templates/data/refbook/person.groovy|01.01.2016||
