@@ -120,6 +120,8 @@ public class RefBook implements Serializable {
         TAXPAYER_STATUS(903),                        // Статус налогоплательщика
         PERSON(904),                                // Физ. лица
         ID_TAX_PAYER(905),                            // Идентификатор налогоплательщика
+        TB_PERSON(907),                    // Тербанки для ФЛ при первичной загрузке
+        PERSON_TB(908),                             // Список ТБ назначенных ФЛ
         DEDUCTION_TYPE(921),                        // Коды видов вычетов
         INCOME_CODE(922),                            // Коды видов доходов
         REGION(923),                                // Субъекты РФ

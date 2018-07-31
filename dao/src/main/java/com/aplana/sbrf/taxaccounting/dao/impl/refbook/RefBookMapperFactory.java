@@ -30,6 +30,8 @@ public class RefBookMapperFactory {
             return new PersonAddressMapper();
         } else if (RefBook.Id.TAXPAYER_STATUS.getId() == refBookId) {
             return new TaxPayerStatusMapper();
+        } else if (RefBook.Id.DEPARTMENT.getId() == refBookId) {
+            return new DepartmentMapper();
         }
         throw new IllegalArgumentException("Unknown mapper for refBook = " + refBookId);
     }
@@ -152,6 +154,16 @@ public class RefBookMapperFactory {
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
             result.setCode(rs.getString("code"));
+            return result;
+        }
+    }
+
+    public class DepartmentMapper<T> implements RowMapper<RefBookDepartment> {
+        @Override
+        public RefBookDepartment mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookDepartment result = new RefBookDepartment();
+            result.setId(resultSet.getInt("id"));
+            result.setName(resultSet.getString("name"));
             return result;
         }
     }

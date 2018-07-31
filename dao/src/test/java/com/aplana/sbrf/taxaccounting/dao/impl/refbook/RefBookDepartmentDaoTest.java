@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RefBookDepartmentDaoTest.xml"})
@@ -131,6 +133,24 @@ public class RefBookDepartmentDaoTest {
     public void testRemove() {
         refBookDepartmentDao.remove(1);
         departmentDao.getDepartment(1);
+    }
+
+    @Test
+    public void testGetRecordData() {
+        List<Long> recordIds = mock(List.class);
+        RefBookDepartmentDaoImpl refBookDepartmentDao = spy(new RefBookDepartmentDaoImpl());
+        RefBookSimpleDao refBookSimpleDao = mock(RefBookSimpleDaoImpl.class);
+        RefBookDao refBookDao = mock(RefBookDao.class);
+
+
+        RefBook refBook = mock(RefBook.class);
+        when(refBookDao.get(anyLong())).thenReturn(refBook);
+
+        refBookDepartmentDao.refBookSimpleDao = refBookSimpleDao;
+        refBookDepartmentDao.refBookDao = refBookDao;
+        refBookDepartmentDao.getRecordData(recordIds);
+
+        verify(refBookSimpleDao).getRecordData(refBook, recordIds);
     }
 
 }

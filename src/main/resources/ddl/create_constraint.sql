@@ -144,7 +144,7 @@ alter table declaration_data add constraint fk_declaration_data_state foreign ke
 alter table declaration_template_file add constraint fk_decl_templ_file_template foreign key (declaration_template_id) references declaration_template(id);
 alter table declaration_template_file add constraint fk_decl_templ_file_blob foreign key (blob_data_id) references blob_data(id);
 alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_perf foreign key (performer_dep_id) references department (id);
-alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_id foreign key (department_decl_type_id) references department_declaration_type (id) on delete cascade; 
+alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_id foreign key (department_decl_type_id) references department_declaration_type (id) on delete cascade;
 
 --checks
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
@@ -227,12 +227,17 @@ alter table ref_book_person add constraint pk_ref_book_person primary key (id);
 alter table ref_book_id_doc add constraint pk_ref_book_id_doc primary key (id);
 alter table ref_book_address add constraint pk_ref_book_address primary key (id);
 alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primary key (id);
+alter table ref_book_tb_person add constraint ref_book_tb_person_pk primary key (id);
+alter table ref_book_person_tb add constraint ref_book_person_tb_pk primary key (id);
 
 --foreign keys
 alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
+alter table ref_book_tb_person add constraint tb_person_fk_department foreign key (tb_department_id) references department (id);
+alter table ref_book_person_tb add constraint person_tb_fk_person foreign key (person_id) references ref_book_person(id) on delete cascade;
+alter table ref_book_person_tb add constraint person_tb_fk_department foreign key (tb_department_id) references department(id) on delete cascade;
 
 --checks
 alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
@@ -240,6 +245,8 @@ alter table ref_book_person add constraint chk_ref_book_person_old_st check (old
 alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_tax_payer add constraint rb_tax_payer_chk_status check (status in (-1, 0, 1, 2));
+alter table ref_book_tb_person add constraint chk_ref_book_tb_person_status check (status in (-1, 0, 1, 2));
+alter table ref_book_person_tb add constraint chk_ref_book_person_tb_status check (status in (-1, 0, 1, 2));
 
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_attrib_id foreign key (attribute_id) references ref_book_attribute (id);
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subrep_id foreign key (declaration_subreport_id) references declaration_subreport (id) on delete cascade;
