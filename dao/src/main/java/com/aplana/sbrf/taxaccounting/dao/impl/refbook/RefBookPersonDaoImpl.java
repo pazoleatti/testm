@@ -295,13 +295,19 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         if (pagingParams != null && StringUtils.isNotEmpty(pagingParams.getDirection())) {
             direction = pagingParams.getDirection();
         }
+        String hint = createHint(filter);
+
         String finalQuery = pagingParams != null ?
-                "select /*+ FIRST_ROWS */* from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
+                "select " + hint + "* from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
                 : baseSql;
         List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(finalQuery, params, mapper);
 
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", params, Integer.class);
         return new PagingResult<>(list, totalCount);
+    }
+
+    private String createHint(String filter) {
+        return (filter == null || filter.isEmpty()) ? "/*+ FIRST_ROWS */" : "/*+ PARALLEL(16) */";
     }
 
     @Override
