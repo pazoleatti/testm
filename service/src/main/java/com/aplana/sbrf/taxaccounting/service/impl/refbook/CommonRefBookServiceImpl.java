@@ -471,9 +471,8 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             params.put("exactSearch", exactSearch);
             params.put("sortAttribute", sortAttribute);
             params.put("direction", direction);
-            if (!CollectionUtils.isEmpty(extraParams)) {
-                params.put("extraParams", extraParams);
-            }
+            params.put("extraParams", extraParams);
+
 
             String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
                     LockData.LockObjects.REF_BOOK.name(), reportType.getName(), refBookId, version != null ? SDF_DD_MM_YYYY.get().format(version) : null, searchPattern,
