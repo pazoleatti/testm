@@ -105,6 +105,12 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        PagingResult<Map<String, RefBookValue>> records = refBookPersonDao.fetchPersonsAsMap(version, pagingParams, filter, sortAttribute);
+        return commonRefBookService.dereference(refBookPersonDao.getRefBook(), records);
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, RefBookPerson currentPerson, RefBookPerson original, List<RefBookPerson> newDuplicates, List<RefBookPerson> deletedDuplicates) {
         // TODO: вся эта дичь ниже взята из старой реализации, ее надо переписать, но аналитики не нашли время чтобы сделать правки в постановке и синхронизировать ее с реализацией

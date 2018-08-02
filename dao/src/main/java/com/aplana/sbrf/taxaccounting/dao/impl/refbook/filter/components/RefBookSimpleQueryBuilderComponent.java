@@ -437,7 +437,8 @@ public class RefBookSimpleQueryBuilderComponent {
             q.append(" WHERE frb.status = 0");
         }
         if (StringUtils.isNotEmpty(filter)) {
-            q.append((refBook.isReadOnly() ? " WHERE " : " AND (") + filter + ")\n");
+            q.append((refBook.isReadOnly() ? " WHERE " : " AND (") + filter);
+            q.append((refBook.isReadOnly() ? "\n" : ")\n"));
         }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)

@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHand
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.annotation.Nullable;
@@ -136,6 +138,14 @@ public interface RefBookPersonDao {
      * @return список ФЛ
      */
     PagingResult<RefBookPerson> getPersons(@Nullable Date version, @Nullable PagingParams pagingParams, @Nullable String filter, @Nullable RefBookAttribute sortAttribute);
+
+    PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+
+    /**
+     * Получить объект справочника Физические лица
+     * @return объект справочника
+     */
+    RefBook getRefBook();
 
     /**
      * Получает список версий ФЛ
