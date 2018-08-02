@@ -421,12 +421,10 @@ class Person extends AbstractScriptClass {
                     warnings << ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер")
                 }
             }
-            if (person.citizenship?.code == "643") {
-                // 2. Проверка разрешеннных символов в фамилии для граждан РФ
-                warnings << ScriptUtils.checkName(person.lastName, "Фамилия")
-                // 3. Проверка разрешеннных символов в имени для граждан РФ
-                warnings << ScriptUtils.checkName(person.firstName, "Имя")
-            }
+            // 2. Проверка разрешеннных символов в фамилии
+            warnings << ScriptUtils.checkLastName(person.lastName, person.citizenship.code)
+            // 3. Проверка разрешеннных символов в имени
+            warnings << ScriptUtils.checkFirstName(person.firstName, person.citizenship.code)
             // 4. Проверка корректности ИНН РФ
             def message = ScriptUtils.checkInn(person.inn)
             if (message) {

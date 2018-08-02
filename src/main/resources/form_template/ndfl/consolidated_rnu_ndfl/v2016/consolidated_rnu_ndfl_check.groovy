@@ -870,30 +870,30 @@ class Check extends AbstractScriptClass {
                 }
             }
 
-            if (ndflPerson.citizenship == "643") {
-                if (checkLastName) {
-                    String checkName = ScriptUtils.checkName(ndflPerson.lastName, "Фамилия")
-                    if (checkName != null) {
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
-                                checkName)
-                    }
-                }
-                if (checkFirstName) {
-                    String checkName = ScriptUtils.checkName(ndflPerson.firstName, "Имя")
-                    if (checkName != null) {
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
-                                checkName)
+            if (checkLastName) {
+                List<String> errorMessages = ScriptUtils.checkLastName(ndflPerson.lastName, ndflPerson.citizenship)
+                if (!errorMessages.isEmpty()) {
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+                    for (String message : errorMessages) {
+                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError, message)
                     }
                 }
             }
-            if (checkIdDocType && checkIdDocNumber) {
-                String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
-                if (checkDul != null) {
+            if (checkFirstName) {
+                String errorMessages = ScriptUtils.checkFirstName(ndflPerson.firstName, ndflPerson.citizenship)
+                if (!errorMessages.isEmpty()) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
-                            checkDul)
+                    for (String message : errorMessages) {
+                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError, message)
+                    }
+                }
+            }
+
+            if (checkIdDocType && checkIdDocNumber) {
+                String errorMsg = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
+                if (errorMsg != null) {
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError, errorMsg)
                 }
             }
 
