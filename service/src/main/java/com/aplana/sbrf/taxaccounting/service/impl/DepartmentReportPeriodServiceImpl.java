@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,11 +85,16 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
+        Assert.notEmpty(departmentIds);
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s; departmentIds: %s", departmentReportPeriod, departmentIds));
-        if (departmentIds == null || departmentIds.isEmpty()) {
-            throw new ServiceException(ERROR_BATCH_MESSAGE);
-        }
         departmentReportPeriodDao.create(departmentReportPeriod, departmentIds);
+    }
+
+    @Override
+    public void create(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
+        Assert.notEmpty(departmentReportPeriods);
+        LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriods.size: %s; departmentId: %s", departmentReportPeriods.size(), departmentId));
+        departmentReportPeriodDao.create(departmentReportPeriods, departmentId);
     }
 
     @Override

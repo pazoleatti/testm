@@ -43,8 +43,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
     @Override
     public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType, boolean isReport) {
         DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER,
-                TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_OPER)) {
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser())));
         } else {

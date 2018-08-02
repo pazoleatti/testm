@@ -45,10 +45,6 @@
                 N_ROLE_CONTROL_NS: "N_ROLE_CONTROL_NS",
                 N_ROLE_CONF: "N_ROLE_CONF",
                 N_ROLE_ADMIN: "N_ROLE_ADMIN",
-                F_ROLE_OPER: "F_ROLE_OPER",
-                F_ROLE_CONTROL_UNP: "F_ROLE_CONTROL_UNP",
-                F_ROLE_CONTROL_NS: "F_ROLE_CONTROL_NS",
-                F_ROLE_CONF: "F_ROLE_CONF",
                 ROLE_ADMIN: "ROLE_ADMIN"
             },
             USER_ROLE_OBJECT: {
@@ -258,7 +254,8 @@
             EVENTS: {
                 DEPARTMENT_SELECTED: "DEPARTMENT_SELECTED",
                 USER_TB_SELECT: "USER_TB_SELECT",
-                LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT"
+                LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT",
+                DEPARTMENT_AND_PERIOD_SELECTED: "DEPARTMENT_AND_PERIOD_SELECTED"
             },
             REFBOOK_ALIAS: {
                 BUSINESS_ID_ALIAS: "record_id",

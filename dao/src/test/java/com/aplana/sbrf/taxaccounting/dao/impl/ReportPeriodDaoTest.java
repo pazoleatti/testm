@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -201,5 +203,11 @@ public class ReportPeriodDaoTest {
     @Test
     public void getReportPeriodTypeById() {
 	    assertEquals(reportPeriodDao.getReportPeriodTypeById(21L).getCode(), "99");
+    }
+
+    @Test
+    public void test_FetchActiveByDepartment() {
+	    List<ReportPeriodResult> result = reportPeriodDao.fetchActiveByDepartment(1);
+	    Assert.assertThat(result.size(), is(3));
     }
 }

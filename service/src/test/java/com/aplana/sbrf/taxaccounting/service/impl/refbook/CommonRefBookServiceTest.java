@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
@@ -15,6 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +40,9 @@ public class CommonRefBookServiceTest {
 
     @Autowired
     private CommonRefBookService commonRefBookService;
+
+    @Autowired
+    private AsyncManager asyncManager;
 
     private static Method createSearchFilterMethod;
 
@@ -92,5 +102,17 @@ public class CommonRefBookServiceTest {
 
         createSearchFilterMethod.invoke(commonRefBookService, refBookId, extraParams, searchPattern, false);
         verify(commonRefBookService, times(1)).getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, false);
+    }
+
+    @Test
+    public void test_createReport() throws AsyncTaskException {
+        AsyncTaskType reportType = AsyncTaskType.EXCEL_REF_BOOK;
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+        RefBook refBook = mock(RefBook.class);
+
+        when(refBookDao.get(0L)).thenReturn(refBook);
+
+        commonRefBookService.createReport(userInfo, 0L, mock(Date.class), mock(PagingParams.class), "", false, new HashMap<String, String>(), AsyncTaskType.EXCEL_REF_BOOK);
+        verify(asyncManager).executeTask(anyString(), eq(reportType), eq(userInfo), any(Map.class), any(Logger.class), anyBoolean(), any(AbstractStartupAsyncTaskHandler.class));
     }
 }

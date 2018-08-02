@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class IsPeriodOpenHandler extends AbstractActionHandler<IsPeriodOpenAction, IsPeriodOpenResult> {
 
     @Autowired

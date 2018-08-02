@@ -80,6 +80,11 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     private List<PersonDocument> personDocumentList;
 
     /**
+     * Список назначенных подразделений на ФЛ
+     */
+    private List<PersonTb> personTbList;
+
+    /**
      * Адрес фл
      */
     private Address address;
@@ -110,8 +115,9 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     private boolean needUpdate = true;
 
     public NaturalPerson() {
-        this.personIdentityList = new ArrayList<PersonIdentifier>();
-        this.personDocumentList = new ArrayList<PersonDocument>();
+        this.personIdentityList = new ArrayList<>();
+        this.personDocumentList = new ArrayList<>();
+        this.personTbList = new ArrayList<>();
     }
 
     public Integer getNum() {
@@ -234,6 +240,14 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
     public void setPersonDocumentList(List<PersonDocument> personDocumentList) {
         this.personDocumentList = personDocumentList;
+    }
+
+    public List<PersonTb> getPersonTbList() {
+        return personTbList;
+    }
+
+    public void setPersonTbList(List<PersonTb> personTbList) {
+        this.personTbList = personTbList;
     }
 
     public Long getSourceId() {

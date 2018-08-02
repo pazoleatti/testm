@@ -1,17 +1,41 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.*;
+
 public class DeclarationTemplateServiceImplTest {
+
+    @InjectMocks
+    private DeclarationTemplateServiceImpl declarationTemplateService;
+
+    @Mock
+    private DeclarationTemplateDao declarationTemplateDao;
+
+    @Mock
+    private BlobDataService blobDataService;
+
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void validateDeclarationTemplate1() {
@@ -63,5 +87,17 @@ public class DeclarationTemplateServiceImplTest {
         Assert.assertEquals(logger.getEntries().get(4).getMessage(), "Отчет №\"5\". Нарушено требование к уникальности, уже существует отчет с псевдонимом \"alias4\" в данной версии макета!");
         Assert.assertEquals(logger.getEntries().get(5).getMessage(), "Отчет №\"6\". Значение для псевдонима отчета слишком велико (фактическое: 1000, максимальное: 128)");
         Assert.assertEquals(logger.getEntries().get(6).getMessage(), "Отчет №\"6\". Значение для имени отчета слишком велико (фактическое: 1010, максимальное: 1000)");
+    }
+
+    @Test
+    public void testDownloadXsd() {
+        String xsdId = "xsdId";
+        DeclarationTemplate declarationTemplate = mock(DeclarationTemplate.class);
+
+        when(declarationTemplate.getXsdId()).thenReturn(xsdId);
+        when(declarationTemplateDao.get(anyInt())).thenReturn(declarationTemplate);
+
+        declarationTemplateService.downloadXsd(eq(0));
+        verify(blobDataService).get(eq(xsdId));
     }
 }

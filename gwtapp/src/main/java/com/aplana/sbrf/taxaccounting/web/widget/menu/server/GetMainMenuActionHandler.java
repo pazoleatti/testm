@@ -61,16 +61,13 @@ public class GetMainMenuActionHandler extends
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
         // НАЛОГИ
-        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
-                TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
+        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
                 TARole.ROLE_ADMIN)) {
             // тут важен порядок, поэтому мы не можем просто пробежаться по значениям
             MenuItem taxMenu = new MenuItem("Налоги");
-            if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
-                    TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+            if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                 for (TaxType taxType : Arrays.asList(TaxType.NDFL)) {
-                    if (currentUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
-                            TARole.F_ROLE_OPER, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_UNP)) {
+                    if (currentUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                         MenuItem menu = new MenuItem(taxType.getName(), "", taxType.name());
                         taxMenu.getSubMenu().add(menu);
 
@@ -87,8 +84,7 @@ public class GetMainMenuActionHandler extends
                         menu.getSubMenu().add(
                                 new MenuItem("Назначение форм",
                                         "index.html#/taxes/declarationTypeAssignment"));
-                        if (currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+                        if (currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                             if (taxType.equals(TaxType.NDFL)) {
                                 menu.getSubMenu().add(new MenuItem("Отчетность", "index.html#/taxes/ndflReportJournal"));
                             }
@@ -101,16 +97,15 @@ public class GetMainMenuActionHandler extends
             menuItem.getSubMenu().add(new MenuItem("Загрузить файлы", "index.html#/taxes/service/uploadTransportData"));
             taxMenu.getSubMenu().add(menuItem);
 
-            if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
-                    TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+            if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                 taxMenu.getSubMenu().add(new MenuItem("Общие параметры", "index.html#/taxes/commonParams/editCommonParams"));
             }
             menuItems.add(taxMenu);
         }
 
         // НСИ
-        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
+                TARole.N_ROLE_CONTROL_UNP)) {
             MenuItem nsiMenuItem = new MenuItem("НСИ");
             nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", "index.html#/refbooks/refBookList"));
 
@@ -118,17 +113,17 @@ public class GetMainMenuActionHandler extends
         }
 
         // АДМИНИСТРИРОВАНИЕ
-        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.ROLE_ADMIN)) {
+        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
+                TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONF, TARole.ROLE_ADMIN)) {
 
             MenuItem adminMenuItem = new MenuItem("Администрирование");
-            if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                    TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
+            if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
+                    TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", "index.html#/administration/locks"));
                 adminMenuItem.getSubMenu().add(new MenuItem("Асинхронные задачи", "index.html#/administration/async"));
             }
 
-            if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
+            if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", "index.html#/administration/users"));
             }
 
@@ -137,7 +132,7 @@ public class GetMainMenuActionHandler extends
                 adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", "index.html#/administration/schedulerTaskList"));
             }
 
-            if (currentUser.hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
+            if (currentUser.hasRole(TARole.N_ROLE_CONF)) {
                 MenuItem templateMenu = new MenuItem("Настройки", "", null);
                 adminMenuItem.getSubMenu().add(templateMenu);
                 templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", "index.html#/administration/refBookConfList"));

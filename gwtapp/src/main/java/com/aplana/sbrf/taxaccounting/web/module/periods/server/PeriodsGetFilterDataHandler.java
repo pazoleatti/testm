@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
 
 	@Autowired
@@ -38,7 +38,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
         TaxType taxType = action.getTaxType();
         Set<Integer> ad = new HashSet<Integer>();
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (userInfo.getUser().hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
 	        res.setCanEdit(true);
             switch (taxType) {
                 case NDFL:
@@ -53,7 +53,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                 default:
                     break;
             }
-        } else if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_OPER, TARole.F_ROLE_CONTROL_NS)) {
+        } else if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS)) {
 	        res.setCanChangeDepartment(false);
 			res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
 			res.setSelectedDepartment(

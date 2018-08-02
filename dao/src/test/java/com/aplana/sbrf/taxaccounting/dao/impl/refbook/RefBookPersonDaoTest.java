@@ -14,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -41,11 +43,16 @@ public class RefBookPersonDaoTest {
 
     private static Date actualDate;
 
+    private static Method createHintMethod;
+
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws NoSuchMethodException {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2017, 6, 1);
         actualDate = calendar.getTime();
+        Class <? extends RefBookPersonDaoImpl> clazz = RefBookPersonDaoImpl.class;
+        createHintMethod = clazz.getDeclaredMethod("createHint", String.class);
+        createHintMethod.setAccessible(true);
     }
 
     @Test
@@ -58,5 +65,17 @@ public class RefBookPersonDaoTest {
     public void testFetchingOriginalWhereDuplicateVersionIsLater() {
         PagingResult<RefBookPerson> result = refBookPersonDao.getPersons(actualDate, null, "last_name like '%Сульжик%'", null);
         Assert.assertThat("Perhaps it is necessary to pay attention to the attributes of the version and status in the query", result.size(), is(1));
+    }
+
+    @Test
+    public void test_createHint_empty() throws InvocationTargetException, IllegalAccessException {
+        String result = (String) createHintMethod.invoke(refBookPersonDao, "");
+        Assert.assertThat(result, is("/*+ FIRST_ROWS */"));
+    }
+
+    @Test
+    public void test_createHint_filled() throws InvocationTargetException, IllegalAccessException {
+        String result = (String) createHintMethod.invoke(refBookPersonDao,"filter");
+        Assert.assertThat(result, is("/*+ PARALLEL(16) */"));
     }
 }

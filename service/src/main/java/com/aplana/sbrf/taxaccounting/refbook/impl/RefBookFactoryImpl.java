@@ -35,6 +35,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
             MARK_SIGNATORY_CODE.getId(),
             DOCUMENT_CODES.getId(),
             PERSON_ADDRESS.getId(),
+            TB_PERSON.getId(),
+            PERSON_TB.getId(),
             ID_DOC.getId(),
             TAXPAYER_STATUS.getId(),
             PERSON.getId(),

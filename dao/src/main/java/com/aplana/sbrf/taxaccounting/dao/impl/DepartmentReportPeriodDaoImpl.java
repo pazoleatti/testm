@@ -48,9 +48,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
-    @Autowired
-    private DBUtils dbUtils;
-
     @Autowired(required = false)
     private CacheManagerDecorator cacheManagerDecorator;
 
@@ -191,16 +188,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
      * @return список объектов типа <T> или пустой список
      */
     private <T> List<T> executeFetchByFilter(final DepartmentReportPeriodFilter filter, RowMapper<T> mapper) {
-        try {
-            return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, makeSqlWhereClause(filter)),
-                    new HashMap<String, Object>(2) {{
-                        put("yearStart", filter.getYearStart());
-                        put("yearEnd", filter.getYearEnd());
-                    }}, mapper);
-        } catch (DataAccessException e) {
-            LOG.error("", e);
-            throw new DaoException("", e);
-        }
+        return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, makeSqlWhereClause(filter)),
+                new HashMap<String, Object>(2) {{
+                    put("yearStart", filter.getYearStart());
+                    put("yearEnd", filter.getYearEnd());
+                }}, mapper);
     }
 
     @Override
@@ -210,17 +202,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     public List<Integer> fetchAllIdsByFilter(final DepartmentReportPeriodFilter filter) {
-        try {
-            return getNamedParameterJdbcTemplate().queryForList(
-                    String.format(QUERY_TEMPLATE_COMPOSITE_SORT_ID, makeSqlWhereClause(filter)),
-                    new HashMap<String, Object>(2) {{
-                        put("yearStart", filter.getYearStart());
-                        put("yearEnd", filter.getYearEnd());
-                    }}, Integer.class);
-        } catch (DataAccessException e) {
-            LOG.error("", e);
-            throw new DaoException("", e);
-        }
+        return getNamedParameterJdbcTemplate().queryForList(
+                String.format(QUERY_TEMPLATE_COMPOSITE_SORT_ID, makeSqlWhereClause(filter)),
+                new HashMap<String, Object>(2) {{
+                    put("yearStart", filter.getYearStart());
+                    put("yearEnd", filter.getYearEnd());
+                }}, Integer.class);
     }
 
     @Override
@@ -249,9 +236,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void create(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
-        final List<Long> ids = dbUtils.getNextIds("seq_department_report_period", departmentIds.size());
+        final List<Integer> ids = generateIds("seq_department_report_period", departmentIds.size(), Integer.class);
         getJdbcTemplate().batchUpdate("INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
                 " VALUES (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
             @Override
@@ -269,6 +255,38 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 return departmentIds.size();
             }
         });
+
+        for (Integer id : ids) {
+            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void create(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
+        final List<Integer> ids = generateIds("seq_department_report_period", departmentReportPeriods.size(), Integer.class);
+        getJdbcTemplate().batchUpdate("INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
+                " VALUES (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, ids.get(i).intValue());
+                ps.setInt(2, departmentId);
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriods.get(i);
+                ps.setInt(3, departmentReportPeriod.getReportPeriod().getId());
+                ps.setBoolean(4, departmentReportPeriod.isActive());
+                ps.setDate(5, departmentReportPeriod.getCorrectionDate() != null ?
+                        new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()) : null);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return departmentReportPeriods.size();
+            }
+        });
+
+        for (Integer id : ids) {
+            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
+        }
     }
 
     @Override
@@ -306,24 +324,23 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void delete(final List<Integer> ids) {
-        try {
-            getJdbcTemplate().batchUpdate("DELETE FROM department_report_period WHERE id = ?",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setInt(1, ids.get(i));
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return ids.size();
-                        }
+        getJdbcTemplate().batchUpdate("DELETE FROM department_report_period WHERE id = ?",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, ids.get(i));
                     }
-            );
-        } catch (DataAccessException e) {
-            LOG.error("", e);
+
+                    @Override
+                    public int getBatchSize() {
+                        return ids.size();
+                    }
+                }
+        );
+
+        for (Integer id : ids) {
+            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
         }
     }
 

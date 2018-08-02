@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
 public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<CheckHasCorrectionPeriodAction, CheckHasCorrectionPeriodResult> {
 
     @Autowired

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
 public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<DeleteDeclarationSourcesAction, DeleteDeclarationSourcesResult> {
 
     private static final String SOURCE_CANCEL_ERR =

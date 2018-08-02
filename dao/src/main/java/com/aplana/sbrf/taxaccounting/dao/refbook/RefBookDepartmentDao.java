@@ -59,6 +59,13 @@ public interface RefBookDepartmentDao {
     Map<String, RefBookValue> getRecordData(Long recordId);
 
     /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     *
+     * @param uniqRecordIds коды строк справочника
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds);
+
+    /**
      * Получение row_num записи по заданным параметрам
      * @param recordId
      * @param filter

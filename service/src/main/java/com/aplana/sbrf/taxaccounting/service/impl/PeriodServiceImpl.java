@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -24,12 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.singletonList;
 
@@ -111,9 +107,81 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#action.departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).OPEN_CORRECT)")
+    public String openCorrectionPeriod(OpenCorrectionPeriodAction action) {
+        LOG.info(String.format("PeriodServiceImpl.openCorrectionPeriod. departmentReportPeriodId: %s", action.getDepartmentReportPeriodId()));
+        DepartmentReportPeriod mainDrp = departmentReportPeriodDao.fetchOne(action.getDepartmentReportPeriodId());
+        DepartmentReportPeriod correctionPeriod = new DepartmentReportPeriod();
+        correctionPeriod.setReportPeriod(mainDrp.getReportPeriod());
+        correctionPeriod.setDepartmentId(mainDrp.getDepartmentId());
+        correctionPeriod.setCorrectionDate(SimpleDateUtils.toStartOfDay(action.getCorrectionDate()));
+        correctionPeriod.setIsActive(true);
+        try {
+            Logger logger = new Logger();
+            DepartmentReportPeriod drpLast = departmentReportPeriodService.fetchLast(correctionPeriod.getDepartmentId(), correctionPeriod.getReportPeriod().getId());
+            if (drpLast.getCorrectionDate() != null && drpLast.isActive()) {
+                throw new ServiceException("%s не может быть открыт, т.к уже открыт другой корректирующий период!",
+                        periodWithDescription(correctionPeriod));
+            }
+            if (departmentReportPeriodService.isLaterCorrectionPeriodExists(correctionPeriod)) {
+                throw new ServiceException("%s не может быть открыт, т.к. для него существует более поздние корректирующие периоды!",
+                        periodWithDescription(correctionPeriod));
+            }
+
+            open(correctionPeriod, logger);
+            return logEntryService.save(logger.getEntries());
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при открытии корректирующего периода \"%s:%s\" с периодом сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
+                    correctionPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    correctionPeriod.getReportPeriod().getName(),
+                    FastDateFormat.getInstance("dd.MM.yyyy").format(correctionPeriod.getCorrectionDate()),
+                    departmentDao.getDepartment(correctionPeriod.getDepartmentId()).getName());
+        }
+    }
+
+    @Override
+    public void openForNewDepartment(int departmentId) {
+        LOG.info(String.format("PeriodServiceImpl.openForNewDepartment. departmentId: %s", departmentId));
+        if (departmentDao.existDepartment(departmentId)) {
+            Department terBank = departmentDao.getParentTB(departmentId);
+            if (terBank != null) {
+                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+                filter.setDepartmentId(terBank.getId());
+                List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.fetchAllByFilter(filter);
+                departmentReportPeriodService.create(departmentReportPeriods, departmentId);
+            }
+        }
+    }
+
+    private void open(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
+        LOG.info(String.format("PeriodServiceImpl.open. departmentReportPeriod: %s", departmentReportPeriod));
+
+        DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodService.fetchOneByFilter(filterForSinglePeriod(departmentReportPeriod));
+        if (savedDepartmentReportPeriod != null) {
+            throw new ServiceException("%s уже существует и %s для подразделения \"%s\" и всех дочерних подразделений",
+                    periodWithDescription(savedDepartmentReportPeriod),
+                    savedDepartmentReportPeriod.isActive() ? "открыт" : "закрыт",
+                    departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
+        }
+
+        if (logger == null || !logger.containsLevel(LogLevel.ERROR)) {
+            List<Integer> departmentIds = departmentDao.fetchAllChildrenIds(departmentReportPeriod.getDepartmentId());
+            departmentReportPeriodService.create(departmentReportPeriod, departmentIds);
+
+            if (logger != null) {
+                logger.info("%s открыт для \"%s\" и всех дочерних подразделений",
+                        periodWithDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
+            }
+        }
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).REOPEN)")
     public String reopen(Integer departmentReportPeriodId) {
-        LOG.info(String.format("PeriodServiceImpl.close. departmentReportPeriodId: %s", departmentReportPeriodId));
+        LOG.info(String.format("PeriodServiceImpl.reopen. departmentReportPeriodId: %s", departmentReportPeriodId));
         Logger logger = new Logger();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         try {
@@ -190,47 +258,6 @@ public class PeriodServiceImpl implements PeriodService {
         }
     }
 
-    private void open(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
-        LOG.info(String.format("PeriodServiceImpl.open. departmentReportPeriod: %s", departmentReportPeriod));
-
-        DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodService.fetchOneByFilter(filterForSinglePeriod(departmentReportPeriod));
-        if (savedDepartmentReportPeriod != null) {
-            throw new ServiceException("%s уже существует и %s для подразделения \"%s\" и всех дочерних подразделений",
-                    periodWithDescription(savedDepartmentReportPeriod),
-                    savedDepartmentReportPeriod.isActive() ? "открыт" : "закрыт",
-                    departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
-        }
-
-        if (logger != null && !logger.containsLevel(LogLevel.ERROR)) {
-            List<Integer> departmentIds = departmentDao.fetchAllChildrenIds(departmentReportPeriod.getDepartmentId());
-            departmentReportPeriodService.create(departmentReportPeriod, departmentIds);
-
-            logger.info("%s открыт для \"%s\" и всех дочерних подразделений",
-                    periodWithDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
-        }
-    }
-
-    @Override
-    public ReportPeriod fetchReportPeriod(int reportPeriodId) {
-        return reportPeriodDao.fetchOne(reportPeriodId);
-    }
-
-    @Override
-    public boolean existForDepartment(int departmentId, int reportPeriodId) {
-        return departmentReportPeriodService.isExistsByReportPeriodIdAndDepartmentId(departmentId, reportPeriodId);
-    }
-
-    @Override
-    public Set<ReportPeriod> getOpenReportPeriodForUser(TAUser user) {
-        List<Integer> departments = departmentService.getTaxFormDepartments(user);
-        if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            return new LinkedHashSet<>(getOpenPeriodsByDepartments(departments, false));
-        } else {
-            return Collections.EMPTY_SET;
-        }
-    }
-
     @Override
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).DELETE)")
     public String delete(Integer departmentReportPeriodId) {
@@ -249,44 +276,6 @@ public class PeriodServiceImpl implements PeriodService {
                     departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
         }
     }
-
-    @Override
-    public ReportPeriodType getPeriodTypeById(Long id) {
-        return reportPeriodDao.getReportPeriodTypeById(id);
-    }
-
-    @Override
-    public void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
-        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-        TAUser userInfo = userService.getCurrentUser();
-        DepartmentReportPeriod period = departmentReportPeriodDao.fetchOne(filter.getId());
-        String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
-        List<Notification> notifications = new ArrayList<>();
-        if (filter.getDeadline() == null) {
-            throw new ActionException("Дата сдачи отчетности должна быть указана!");
-        }
-        List<Department> departments = new ArrayList<>();
-        if (filter.isWithChild()) {
-            departments.addAll(departmentService.getAllChildren(filter.getDepartmentId()));
-        } else {
-            departments.add(departmentDao.getDepartment(filter.getDepartmentId()));
-        }
-        for (Department department : departments) {
-            Notification notification = new Notification();
-            notification.setCreateDate(new Date());
-            notification.setDeadline(filter.getDeadline());
-            notification.setReportPeriodId(period.getReportPeriod().getId());
-            notification.setSenderDepartmentId(null);
-            notification.setReceiverDepartmentId(department.getId());
-            notification.setText(String.format(text,
-                    userInfo.getName(), departmentService.getParentsHierarchy(department.getId()), TaxTypeCase.fromCode(TaxType.NDFL.getCode()).getGenitive(),
-                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline())));
-
-            notifications.add(notification);
-        }
-        notificationService.create(notifications);
-    }
-
 
     private void delete(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
         List<Long> declarations = declarationDataSearchService.getDeclarationIds(declarationFilterForAllPeriods(departmentReportPeriod), DeclarationDataSearchOrdering.ID, true);
@@ -346,6 +335,63 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
+    public ReportPeriod fetchReportPeriod(int reportPeriodId) {
+        return reportPeriodDao.fetchOne(reportPeriodId);
+    }
+
+    @Override
+    public boolean existForDepartment(int departmentId, int reportPeriodId) {
+        return departmentReportPeriodService.isExistsByReportPeriodIdAndDepartmentId(departmentId, reportPeriodId);
+    }
+
+    @Override
+    public Set<ReportPeriod> getOpenReportPeriodForUser(TAUser user) {
+        List<Integer> departments = departmentService.getTaxFormDepartments(user);
+        if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+            return new LinkedHashSet<>(getOpenPeriodsByDepartments(departments, false));
+        } else {
+            return Collections.EMPTY_SET;
+        }
+    }
+
+    @Override
+    public ReportPeriodType getPeriodTypeById(Long id) {
+        return reportPeriodDao.getReportPeriodTypeById(id);
+    }
+
+    @Override
+    public void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        TAUser userInfo = userService.getCurrentUser();
+        DepartmentReportPeriod period = departmentReportPeriodDao.fetchOne(filter.getId());
+        String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
+        List<Notification> notifications = new ArrayList<>();
+        if (filter.getDeadline() == null) {
+            throw new ActionException("Дата сдачи отчетности должна быть указана!");
+        }
+        List<Department> departments = new ArrayList<>();
+        if (filter.isWithChild()) {
+            departments.addAll(departmentService.getAllChildren(filter.getDepartmentId()));
+        } else {
+            departments.add(departmentDao.getDepartment(filter.getDepartmentId()));
+        }
+        for (Department department : departments) {
+            Notification notification = new Notification();
+            notification.setCreateDate(new Date());
+            notification.setDeadline(filter.getDeadline());
+            notification.setReportPeriodId(period.getReportPeriod().getId());
+            notification.setSenderDepartmentId(null);
+            notification.setReceiverDepartmentId(department.getId());
+            notification.setText(String.format(text,
+                    userInfo.getName(), departmentService.getParentsHierarchy(department.getId()), TaxTypeCase.fromCode(TaxType.NDFL.getCode()).getGenitive(),
+                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline())));
+
+            notifications.add(notification);
+        }
+        notificationService.create(notifications);
+    }
+
+    @Override
     public List<ReportPeriod> getPeriodsByDepartments(List<Integer> departmentList) {
         return reportPeriodDao.fetchAllByDepartments(departmentList);
     }
@@ -361,54 +407,6 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#action.departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).OPEN_CORRECT)")
-    public String openCorrectionPeriod(OpenCorrectionPeriodAction action) {
-        LOG.info(String.format("PeriodServiceImpl.openCorrectionPeriod. departmentReportPeriodId: %s", action.getDepartmentReportPeriodId()));
-        DepartmentReportPeriod mainDrp = departmentReportPeriodDao.fetchOne(action.getDepartmentReportPeriodId());
-        DepartmentReportPeriod correctionPeriod = new DepartmentReportPeriod();
-        correctionPeriod.setReportPeriod(mainDrp.getReportPeriod());
-        correctionPeriod.setDepartmentId(mainDrp.getDepartmentId());
-        correctionPeriod.setCorrectionDate(SimpleDateUtils.toStartOfDay(action.getCorrectionDate()));
-        correctionPeriod.setIsActive(true);
-        try {
-            Logger logger = new Logger();
-            DepartmentReportPeriod drpLast = departmentReportPeriodService.fetchLast(correctionPeriod.getDepartmentId(), correctionPeriod.getReportPeriod().getId());
-            if (drpLast.getCorrectionDate() != null && drpLast.isActive()) {
-                throw new ServiceException("%s не может быть открыт, т.к уже открыт другой корректирующий период!",
-                        periodWithDescription(correctionPeriod));
-            }
-            if (departmentReportPeriodService.isLaterCorrectionPeriodExists(correctionPeriod)) {
-                throw new ServiceException("%s не может быть открыт, т.к. для него существует более поздние корректирующие периоды!",
-                        periodWithDescription(correctionPeriod));
-            }
-
-            open(correctionPeriod, logger);
-            return logEntryService.save(logger.getEntries());
-        } catch (ServiceException e) {
-            throw e;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при открытии корректирующего периода \"%s:%s\" с периодом сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
-                    correctionPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    correctionPeriod.getReportPeriod().getName(),
-                    FastDateFormat.getInstance("dd.MM.yyyy").format(correctionPeriod.getCorrectionDate()),
-                    departmentDao.getDepartment(correctionPeriod.getDepartmentId()).getName());
-        }
-    }
-
-    @Override
-    public List<DepartmentReportPeriod> getDRPByDepartmentIds(List<Integer> departmentIds) {
-        if (departmentIds == null || departmentIds.isEmpty()) {
-            return new ArrayList<>(0);
-        }
-
-        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setDepartmentIdList(departmentIds);
-
-        return departmentReportPeriodService.fetchAllByFilter(filter);
-    }
-
-    @Override
     public ReportPeriod getByDictCodeAndYear(String code, int year) {
         return reportPeriodDao.getByTaxTypedCodeYear(code, year);
     }
@@ -416,6 +414,11 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<ReportPeriodType> getPeriodType() {
         return reportPeriodDao.getPeriodType();
+    }
+
+    @Override
+    public List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId) {
+        return reportPeriodDao.fetchActiveByDepartment(departmentId);
     }
 
     private String periodDescription(DepartmentReportPeriod departmentReportPeriod) {

@@ -38,7 +38,7 @@ public abstract class DeclarationTemplatePermission extends AbstractPermission<D
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationTemplate targetDomainObject, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF);
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONF);
         }
     }
 

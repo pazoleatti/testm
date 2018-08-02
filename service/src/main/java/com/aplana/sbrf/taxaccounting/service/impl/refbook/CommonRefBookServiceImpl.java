@@ -374,6 +374,9 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     public ActionResult editRecord(TAUserInfo userInfo, long refBookId, long recordId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
+        Map<String, Object> scriptParams = new HashMap<>();
+        scriptParams.put("record", record);
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, scriptParams);
         Date versionFrom = record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS) ? record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue() : null;
         Date versionTo = record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS) ? record.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue() : null;
         record.remove(RefBook.RECORD_VERSION_FROM_ALIAS);
@@ -400,6 +403,9 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         Date versionFrom = null;
         Date versionTo = null;
 
+        Map<String, Object> scriptParams = new HashMap<>();
+        scriptParams.put("record", record);
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, scriptParams);
         if (refBook.isVersioned()) {
             versionFrom = record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS) ? record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue() : null;
             versionTo = record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS) ? record.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue() : null;
@@ -475,9 +481,8 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             params.put("exactSearch", exactSearch);
             params.put("sortAttribute", sortAttribute);
             params.put("direction", direction);
-            if (!CollectionUtils.isEmpty(extraParams)) {
-                params.put("extraParams", extraParams);
-            }
+            params.put("extraParams", extraParams);
+
 
             String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
                     LockData.LockObjects.REF_BOOK.name(), reportType.getName(), refBookId, version != null ? SDF_DD_MM_YYYY.get().format(version) : null, searchPattern,
