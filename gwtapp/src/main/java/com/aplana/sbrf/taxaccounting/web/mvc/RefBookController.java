@@ -135,21 +135,7 @@ public class RefBookController {
             @JsonMixins.JsonMixin(target = RefBook.class, mixinSource = JsonPredefinedMixins.RefBookMetaFilter.class)
     })
     public List<RefBook> fetchAllRefBooks(@RequestParam(required = false) final String filter) {
-        List<RefBook> refBooks = commonRefBookService.fetchAll();
-
-        if ((filter == null) || filter.isEmpty()) {
-            return refBooks;
-        }
-
-        // Условие фильтрации результата - по полю name
-        Predicate<RefBook> nameContainsFilter = new Predicate<RefBook>() {
-            @Override
-            public boolean apply(RefBook input) {
-                return input.getName().toUpperCase().contains(filter.toUpperCase());
-            }
-        };
-
-        return Lists.newArrayList(Iterables.filter(refBooks, nameContainsFilter));
+        return commonRefBookService.searchVisibleByName(filter);
     }
 
     /**

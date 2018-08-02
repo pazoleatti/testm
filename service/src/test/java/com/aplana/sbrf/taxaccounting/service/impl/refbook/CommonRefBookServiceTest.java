@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -26,16 +25,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("CommonRefBookServiceTest.xml")
 public class CommonRefBookServiceTest {
+
+    @Autowired
+    private RefBookDao refBookDao;
 
     @Autowired
     private RefBookSimpleDao refBookSimpleDao;
@@ -45,9 +43,6 @@ public class CommonRefBookServiceTest {
 
     @Autowired
     private AsyncManager asyncManager;
-
-    @Autowired
-    private RefBookDao refBookDao;
 
     private static Method createSearchFilterMethod;
 
@@ -59,9 +54,33 @@ public class CommonRefBookServiceTest {
     }
 
     @Test
+    public void testFetchAll() {
+        commonRefBookService.fetchAll();
+        verify(refBookDao).fetchAll();
+    }
+
+    @Test
+    public void testFetchVisible() {
+        commonRefBookService.fetchVisible();
+        verify(refBookDao).fetchAllVisible();
+    }
+
+    @Test
+    public void testFetchInvisible() {
+        commonRefBookService.fetchInvisible();
+        verify(refBookDao).fetchAllInvisible();
+    }
+
+    @Test
+    public void testSearchVisibleByName() {
+        commonRefBookService.searchVisibleByName(anyString());
+        verify(refBookDao).searchVisibleByName(anyString());
+    }
+
+    @Test
     public void testFetchAllRecords() {
         commonRefBookService.fetchAllRecords(0L, anyListOf(String.class), "", "", null);
-        Mockito.verify(refBookSimpleDao, Mockito.times(1)).getRecords(any(RefBook.class), any(RefBookAttribute.class), anyString(), any(PagingParams.class), anyListOf(String.class), anyString(), anyString());
+        verify(refBookSimpleDao, times(1)).getRecords(any(RefBook.class), any(RefBookAttribute.class), anyString(), any(PagingParams.class), anyListOf(String.class), anyString(), anyString());
     }
 
     @Test
@@ -77,12 +96,12 @@ public class CommonRefBookServiceTest {
 
 
         createSearchFilterMethod.invoke(commonRefBookService, refBookId, extraParams, searchPattern, false);
-        verify(commonRefBookService, Mockito.times(1)).getSearchQueryStatement(searchPattern, refBookId, false);
+        verify(commonRefBookService, times(1)).getSearchQueryStatement(searchPattern, refBookId, false);
 
         extraParams.put("A", "A");
 
         createSearchFilterMethod.invoke(commonRefBookService, refBookId, extraParams, searchPattern, false);
-        verify(commonRefBookService, Mockito.times(1)).getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, false);
+        verify(commonRefBookService, times(1)).getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, false);
     }
 
     @Test

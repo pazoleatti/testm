@@ -106,15 +106,49 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<RefBook> fetchAll(Boolean visible) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("visible", visible);
-        return getNamedParameterJdbcTemplate().query("SELECT id FROM ref_book WHERE (:visible is null or visible = :visible) ORDER BY NAME", params, new RowMapper<RefBook>() {
-            @Override
-            public RefBook mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return get(rs.getLong("id"));
-            }
-        });
+    public List<RefBook> fetchAll() {
+        return getJdbcTemplate().query(
+                "select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name, xsd_id " +
+                        "from ref_book " +
+                        "order by name",
+                new RefBookRowMapper()
+        );
+    }
+
+    @Override
+    public List<RefBook> fetchAllVisible() {
+        return fetchAllByVisibility(1);
+    }
+
+    @Override
+    public List<RefBook> fetchAllInvisible() {
+        return fetchAllByVisibility(0);
+    }
+
+    private List<RefBook> fetchAllByVisibility(int visible) {
+        return getJdbcTemplate().query(
+                "select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name, xsd_id " +
+                        "from ref_book " +
+                        "where visible = " + visible + " " +
+                        "order by name",
+                new RefBookRowMapper()
+        );
+    }
+
+    @Override
+    public List<RefBook> searchVisibleByName(String name) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(name)) {
+            return fetchAllVisible();
+        } else {
+            return getJdbcTemplate().query(
+                    "select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name, xsd_id " +
+                            "from ref_book " +
+                            "where visible = 1 " +
+                            "and lower(name) like '%" + name.toLowerCase() + "%' " +
+                            "order by name",
+                    new RefBookRowMapper()
+            );
+        }
     }
 
     @Override

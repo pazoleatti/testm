@@ -335,4 +335,12 @@
             update ref_book_attribute set format=7 where id=9083;
         </sql>
     </changeSet>
+
+    <changeSet id="3.1-apronin-10" author="apronin">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.1/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
