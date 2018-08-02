@@ -2110,12 +2110,10 @@ class Check extends AbstractScriptClass {
 
             def person = personByIdMap[prepayment.ndflPersonId]
 
-            if (person.status != "6") {
+            if (person.status != "6" && person.inp == ndflPersonFL.inp) {
                 def logErrorIfFieldFilled = { fieldValue, fieldName ->
                     if (fieldValue) {
-                        String errMsg = String.format("Значение гр. \"%s\" (%s) не должно быть заполнено для  \"Статуса НП\" (\"%s\") ",
-                                fieldName, fieldValue instanceof Date ? fieldValue.format("dd.MM.yyyy") : fieldValue, person.status
-                        )
+                        String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\".", person.inp)
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
                         logger.logCheck("%s. %s.",
                                 true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)
