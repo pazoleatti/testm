@@ -5,11 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы со справочником физ. лиц, для специфики по дубликатам.
@@ -98,6 +100,17 @@ public interface PersonService {
      * @return список версий ФЛ
      */
     PagingResult<RefBookPerson> getPersonVersions(Long recordId, PagingParams pagingParams);
+
+    /**
+     * Получает список ФЛ учитывая условия фильтрации и сортировки. Метод делает то же самое что и {@link com.aplana.sbrf.taxaccounting.service.PersonService#getPersons(java.util.Date, com.aplana.sbrf.taxaccounting.model.PagingParams, java.lang.String, com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute)}
+     * но возвращает объекты в виде мапы.
+     * @param version       версия для отбора записей
+     * @param pagingParams  параметры пэйджинга
+     * @param filter        условие отбора записей. Фактически кусок sql-запроса для where части
+     * @param sortAttribute атрибут, по которому будут отсортированы записи
+     * @return  список ФЛ
+     */
+    PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Сохраняет изменения списке дубликатов и оригинале ФЛ

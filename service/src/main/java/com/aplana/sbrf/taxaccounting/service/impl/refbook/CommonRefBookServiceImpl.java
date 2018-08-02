@@ -481,6 +481,9 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             params.put("exactSearch", exactSearch);
             params.put("sortAttribute", sortAttribute);
             params.put("direction", direction);
+            if (extraParams == null) {
+                extraParams = new HashMap<>();
+            }
             params.put("extraParams", extraParams);
 
 
@@ -689,18 +692,16 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     private String createSearchFilter(Long refBookId, Map<String, String> extraParams, String searchPattern, Boolean exactSearch) {
         String filter = "";
-        if (refBookId == RefBook.Id.PERSON.getId()) {
-            filter = personService.createSearchFilter(extraParams.get("FIRST_NAME"), extraParams.get("LAST_NAME"), searchPattern, exactSearch);
-        } else {
-            if (StringUtils.isNotEmpty(searchPattern) || !CollectionUtils.isEmpty(extraParams)) {
-                // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-                if (CollectionUtils.isEmpty(extraParams)) {
-                    filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
-                } else {
-                    filter = getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, exactSearch);
-                }
+
+        if (StringUtils.isNotEmpty(searchPattern) || !CollectionUtils.isEmpty(extraParams)) {
+            // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
+            if (CollectionUtils.isEmpty(extraParams)) {
+                filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
+            } else {
+                filter = getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, exactSearch);
             }
         }
+
         return filter;
     }
 }

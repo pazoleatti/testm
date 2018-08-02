@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -10,8 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
@@ -37,10 +36,6 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String POSTFIX = ".xlsm";
 
     @Autowired
-    private RefBookHelper refBookHelper;
-    @Autowired
-    private RefBookFactory refBookFactory;
-    @Autowired
     private CommonRefBookService commonRefBookService;
     @Autowired
     private BlobDataService blobDataService;
@@ -48,6 +43,10 @@ public class PrintingServiceImpl implements PrintingService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private RefBookPersonDao refBookPersonDao;
+    @Autowired
+    private PersonService personService;
 
     @Override
     public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
@@ -171,7 +170,12 @@ public class PrintingServiceImpl implements PrintingService {
             if (refBook.isHierarchic()) {
                 records = commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false);
             } else {
-                records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
+                if (refBookId == RefBook.Id.PERSON.getId()) {
+                    String filter = personService.createSearchFilter(extraParams.get("FIRST_NAME"), extraParams.get("LAST_NAME"), searchPattern, exactSearch);
+                    records = personService.fetchPersonsAsMap(version, null, filter, sortAttribute);
+                } else {
+                    records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
+                }
             }
 
             RefBookCSVReportBuilder refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, getAttributes(refBook), records, version, searchPattern, exactSearch, sortAttribute);
@@ -213,7 +217,13 @@ public class PrintingServiceImpl implements PrintingService {
                             PagingParams pagingParams = new PagingParams();
                             pagingParams.setPage(page);
                             pagingParams.setCount(BATCH_SIZE);
-                            currentBatch = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, direction);
+                            if (refBookId == RefBook.Id.PERSON.getId()) {
+                                String filter = personService.createSearchFilter(extraParams.get("FIRST_NAME"), extraParams.get("LAST_NAME"), searchPattern, exactSearch);
+                                currentBatch = personService.fetchPersonsAsMap(version, pagingParams, filter, sortAttribute);
+                            } else {
+                                currentBatch = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, direction);
+                            }
+
                             page++;
                             iterator = currentBatch.iterator();
                             return iterator.hasNext();

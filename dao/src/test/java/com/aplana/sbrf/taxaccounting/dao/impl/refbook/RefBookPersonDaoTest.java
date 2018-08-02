@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import static org.hamcrest.core.Is.is;
 
@@ -27,7 +28,7 @@ import static org.hamcrest.core.Is.is;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RefBookPersonDaoTest.xml"})
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RefBookPersonDaoTest {
 
     public static final long RUS_COUNTRY_ID = 262254399L;
@@ -78,4 +79,15 @@ public class RefBookPersonDaoTest {
         String result = (String) createHintMethod.invoke(refBookPersonDao,"filter");
         Assert.assertThat(result, is("/*+ PARALLEL(16) */"));
     }
+
+    @Test
+    public void test_getPersons() {
+        Calendar calendar = new GregorianCalendar();
+        calendar.set(2017, 0, 1);
+        Date version = calendar.getTime();
+        String filter = "middle_name like '%Сергеевич%'";
+        PagingResult<RefBookPerson> result = refBookPersonDao.getPersons(version, null, filter, null);
+        Assert.assertThat(result.size(), is(2));
+    }
+
 }

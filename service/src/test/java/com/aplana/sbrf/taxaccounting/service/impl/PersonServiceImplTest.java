@@ -1,7 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +17,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
+import java.util.Map;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("PersonServiceImplTest.xml")
@@ -20,6 +32,8 @@ public class PersonServiceImplTest {
     private PersonService personService;
     @Autowired
     private RefBookPersonDao refBookPersonDao;
+    @Autowired
+    private CommonRefBookService commonRefBookService;
 
     @Test
     public void testCreateSearchFilterLastNameEmptyFirstNameEmptySearchPatternEmptyApproxSearch() {
@@ -145,11 +159,25 @@ public class PersonServiceImplTest {
 
     @Test
     public void testGetPersons() {
-        Date version = Mockito.mock(Date.class);
+        Date version = mock(Date.class);
         personService.getPersons(null, version, null, "", "", "", false);
         Mockito.verify(refBookPersonDao, Mockito.times(1)).getPersons(version, null, "", null);
         personService.getPersons(0L, version, null, "", "", "", false);
         Mockito.verify(refBookPersonDao, Mockito.times(1)).getPersonVersions(0L, null);
+    }
+
+    @Test
+    public void test_fetchPersonsAsMap() {
+        Date version = mock(Date.class);
+        PagingResult<Map<String, RefBookValue>> records = mock(PagingResult.class);
+        PagingParams pagingParams = mock(PagingParams.class);
+        RefBookAttribute refBookAttribute = mock(RefBookAttribute.class);
+        RefBook refBook = mock(RefBook.class);
+        when(refBookPersonDao.fetchPersonsAsMap(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(records);
+        when(refBookPersonDao.getRefBook()).thenReturn(refBook);
+        personService.fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
+        Mockito.verify(refBookPersonDao).fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
+        Mockito.verify(commonRefBookService).dereference(refBook, records);
     }
 
 }

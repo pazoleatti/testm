@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -70,7 +71,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setLastName(rs.getString("last_name"));
             result.setMiddleName(rs.getString("middle_name"));
             result.setVersion(rs.getDate("version"));
-            result.setVersionEnd(rs.getDate("versionEnd"));
+            result.setVersionEnd(rs.getDate("record_version_to"));
             result.setInn(rs.getString("INN"));
             result.setInnForeign(rs.getString("INN_FOREIGN"));
             result.setSnils(rs.getString("SNILS"));
@@ -256,8 +257,8 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return new PagingResult<>(list, totalCount);
     }
 
-    private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status in (0,2) and record_id = p.record_id and version > p.version) as versionEnd from (\n" +
-            "  select frb.*, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
+    private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to from (\n" +
+            "  select frb.*, frb.version as record_version_from, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
             "  c.id as CITIZENSHIP_ID, c.code as CITIZENSHIP_CODE, c.name as CITIZENSHIP_NAME, \n" +
             "  asnu.id as SOURCE_ID_ID, asnu.name as SOURCE_ID_NAME, asnu.code as SOURCE_ID_CODE, asnu.priority as SOURCE_ID_PRIORITY, asnu.type as SOURCE_ID_TYPE,\n" +
             "  a.id as A_ID, a.REGION_CODE || ',' || a.POSTAL_CODE || ',' || a.DISTRICT || ',' || a.CITY || ',' || a.LOCALITY || ',' || a.STREET || ',' || a.HOUSE || ',' || a.BUILD || ',' || a.APPARTMENT as ADDRESS_ADDRESS_FULL\n" +
@@ -270,17 +271,26 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
     @Override
     public PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
+                (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
+
         MapSqlParameterSource params = new MapSqlParameterSource();
         if (version != null) {
             params.addValue("version", version);
         }
         if (pagingParams != null) {
             params.addValue("start", pagingParams.getStartIndex() + 1);
-            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-        }
+            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());        }
 
-        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
-                (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
+        String query = prepareStatement(pagingParams, filter, sortAttribute, baseSql);
+
+        List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(query, params, mapper);
+
+        int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", params, Integer.class);
+        return new PagingResult<>(list, totalCount);
+    }
+
+    private String prepareStatement(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String baseSql) {
 
         String sortColumnName = "id";
         if (sortAttribute != null) {
@@ -297,13 +307,33 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
         String hint = createHint(filter);
 
-        String finalQuery = pagingParams != null ?
+        return  pagingParams != null ?
                 "select " + hint + "* from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
                 : baseSql;
-        List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(finalQuery, params, mapper);
+    }
 
-        int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", params, Integer.class);
-        return new PagingResult<>(list, totalCount);
+
+    public PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+            String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
+                    (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            if (version != null) {
+                params.addValue("version", version);
+            }
+            if (pagingParams != null) {
+                params.addValue("start", pagingParams.getStartIndex() + 1);
+                params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());        }
+
+            String query = prepareStatement(pagingParams, filter, sortAttribute, baseSql);
+
+            RefBook refBook = getRefBook();
+
+            return new PagingResult<>(getNamedParameterJdbcTemplate().query(query, params, new RefBookValueMapper(refBook)));
+    }
+
+    public RefBook getRefBook() {
+        return refBookDao.get(RefBook.Id.PERSON.getId());
     }
 
     private String createHint(String filter) {
