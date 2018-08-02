@@ -26,7 +26,7 @@ public class InitTypeHandler extends AbstractActionHandler<InitTypeAction, InitT
     @Override
     public InitTypeResult execute(InitTypeAction action, ExecutionContext executionContext) throws ActionException {
         InitTypeResult result = new InitTypeResult();
-        result.setRefBookList(commonRefBookService.fetchAll(null));
+        result.setRefBookList(commonRefBookService.fetchAll());
         return result;
     }
 

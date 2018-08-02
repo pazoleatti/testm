@@ -88,22 +88,33 @@ public interface CommonRefBookService {
     RefBook getByAttribute(Long attributeId);
 
     /**
-     * Получает список справочников
+     * Возвращает все справочники.
      *
-     * @param visible признак того, что нужно получить только видимые справочники
-     *                true - только видимые
-     *                false - только невидимые
-     *                null - все
-     * @return список справочников
+     * @return список всех справочников
      */
-    List<RefBook> fetchAll(Boolean visible);
+    List<RefBook> fetchAll();
 
     /**
      * Возвращает все видимые справочники
      *
-     * @return все видимые справочники
+     * @return список видимых справочников
      */
-    List<RefBook> fetchAll();
+    List<RefBook> fetchVisible();
+
+    /**
+     * Возвращает все невидимые справочники.
+     *
+     * @return список невидимых справочников
+     */
+    List<RefBook> fetchInvisible();
+
+    /**
+     * Поиск видимых справочников по названию.
+     *
+     * @param name часть названия справочника
+     * @return искомые справочники
+     */
+    List<RefBook> searchVisibleByName(String name);
 
     /**
      * Метод возвращает строку для фильтрации справочника по

@@ -31,13 +31,26 @@ public interface RefBookDao {
 
     /**
      * Возвращает список всех справочников
-     *
-     * @param visible признак того, что нужно получить только видимые справочники
-     *                true - только видимые
-     *                false - только невидимые
-     *                null - все
      */
-    List<RefBook> fetchAll(Boolean visible);
+    List<RefBook> fetchAll();
+
+    /**
+     * Возвращает список всех видимых справочников
+     */
+    List<RefBook> fetchAllVisible();
+
+    /**
+     * Возвращает список всех невидимых справочников
+     */
+    List<RefBook> fetchAllInvisible();
+
+    /**
+     * Поиск видимых справочников по названию.
+     *
+     * @param name поисковая строка
+     * @return список искомых справочников
+     */
+    List<RefBook> searchVisibleByName(String name);
 
     /**
      * Возвращяет страницу данных в таблицу справочников из настройщика
@@ -640,7 +653,7 @@ public interface RefBookDao {
     /**
      * Получает данные записей справочника замапленные на сущности
      *
-     * @param q      объект с sql-запросом и его параметрами
+     * @param q       объект с sql-запросом и его параметрами
      * @param refBook справочник
      */
     <T extends RefBookSimple> List<T> getMappedRecordsData(QueryBuilder q, RefBook refBook);
@@ -749,5 +762,5 @@ public interface RefBookDao {
      */
     boolean isRefBookExist(long refBookId);
 
-    PagingResult<Map<String,RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction);
+    PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction);
 }

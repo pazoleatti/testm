@@ -219,7 +219,7 @@ public class RefBookServiceImpl implements RefBookService {
             try (OutputStream outputStream = new FileOutputStream(file);
                  ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)
             ) {
-                List<RefBook> refBooks = commonRefBookService.fetchAll();
+                List<RefBook> refBooks = commonRefBookService.fetchVisible();
                 for (RefBook refBook : refBooks) {
                     addFileToZip(refBook.getScriptId(), zos, refBook.getId() + "\\script.groovy");
                     addFileToZip(refBook.getXsdId(), zos, refBook.getId() + "\\schema.xsd");

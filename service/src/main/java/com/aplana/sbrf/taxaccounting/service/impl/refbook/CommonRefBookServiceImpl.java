@@ -69,13 +69,23 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    public List<RefBook> fetchAll(Boolean visible) {
-        return refBookDao.fetchAll(visible);
+    public List<RefBook> fetchAll() {
+        return refBookDao.fetchAll();
     }
 
     @Override
-    public List<RefBook> fetchAll() {
-        return fetchAll(true);
+    public List<RefBook> fetchVisible() {
+        return refBookDao.fetchAllVisible();
+    }
+
+    @Override
+    public List<RefBook> fetchInvisible() {
+        return refBookDao.fetchAllInvisible();
+    }
+
+    @Override
+    public List<RefBook> searchVisibleByName(String name) {
+        return refBookDao.searchVisibleByName(name);
     }
 
     @Override
