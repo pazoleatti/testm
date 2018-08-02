@@ -82,5 +82,5 @@ public interface TAUserDao extends PermissionDao {
      * @return список данных пользователя
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если возникли проблемы на уровне запроса к БД
      */
-    PagingResult<TAUserView> getUserViewByFilter(MembersFilterData filter);
+    PagingResult<TAUserView> getUsersViewWithFilter(MembersFilterData filter);
 }

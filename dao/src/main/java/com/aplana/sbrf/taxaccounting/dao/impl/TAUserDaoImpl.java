@@ -197,7 +197,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     }
 
     @Override
-    public PagingResult<TAUserView> getUserViewByFilter(MembersFilterData filter) {
+    public PagingResult<TAUserView> getUsersViewWithFilter(MembersFilterData filter) {
         StringBuilder sqlForCount = new StringBuilder("select count(*) from (");
         StringBuilder sql = new StringBuilder("select * from ( select rownum r, users.* from (\n");
         sql.append(sqlUserByFilter());

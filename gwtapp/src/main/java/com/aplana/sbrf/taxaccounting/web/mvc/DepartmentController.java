@@ -2,13 +2,15 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentName;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -24,6 +26,7 @@ public class DepartmentController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(Department.class, new RequestParamEditor(Department.class));
+        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
     }
 
     /**
@@ -47,5 +50,17 @@ public class DepartmentController {
     @GetMapping(value = "/rest/department/{departmentId}", params = "projection=fetchParentTB")
     public Department fetchParentTB(@PathVariable Integer departmentId) {
         return departmentService.getParentTB(departmentId);
+    }
+
+    /**
+     * Получение списка названий подразделений с поиском.
+     *
+     * @param name строка поиска
+     */
+    @GetMapping(value = "/rest/departments", params = "projection=name")
+    public JqgridPagedList<DepartmentName> fetchDepartmentNames(@RequestParam(required = false) String name,
+                                                                @RequestParam(required = false) PagingParams pagingParams) {
+        PagingResult<DepartmentName> departmentNames = departmentService.searchDepartmentNames(name, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(departmentNames, departmentNames.getTotalCount(), pagingParams);
     }
 }

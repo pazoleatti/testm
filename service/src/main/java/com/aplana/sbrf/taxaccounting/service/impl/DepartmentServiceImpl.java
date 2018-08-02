@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -199,7 +200,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Cacheable(value = CacheConstants.DEPARTMENT, key = "'user_departments_'+#tAUser.id")
-    public List<Integer> getTaxFormDepartments(TAUser tAUser) {TaxType taxType = TaxType.NDFL;
+    public List<Integer> getTaxFormDepartments(TAUser tAUser) {
+        TaxType taxType = TaxType.NDFL;
         List<Integer> retList = new ArrayList<>();
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
@@ -309,7 +311,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> fetchAllDepartmentByIds(List<Integer> ids){
+    public List<Department> fetchAllDepartmentByIds(List<Integer> ids) {
         return departmentDao.fetchAllDepartmentByIds(ids);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
+    public PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams) {
+        return departmentDao.searchDepartmentNames(name, pagingParams);
     }
 }

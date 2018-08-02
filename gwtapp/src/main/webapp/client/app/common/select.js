@@ -446,9 +446,19 @@
                 $scope.departmentsSelect = {};
 
                 /**
-                 * Инициализировать список с загрузкой всех подразделений через ajax
+                 * Инициализировать список с ajax-подгрузкой всех подразделений.
                  */
                 $scope.initSelectWithAllDepartments = function () {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, 'controller/rest/departments?projection=name', {}, {
+                        property: 'id',
+                        direction: 'asc'
+                    });
+                };
+
+                /**
+                 * Инициализировать список с загрузкой всех доступных пользователю подразделений через ajax
+                 */
+                $scope.initSelectWithAllAvailableDepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
                         property: "fullName",
                         direction: "asc"

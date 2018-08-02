@@ -593,20 +593,29 @@ button.btn-back-to-list {
   margin-right: 4px;
   float: right;
 }
-.grid-filter .form-group {
-  margin-bottom: 10px;
-}
 
-.grid-filter .form-group .form-group {
-  margin-bottom: 0;
-}
-
-.grid-filter .row {
-  margin-bottom: 0;
-}
-
-.grid-filter form {
-  margin: 0 0 8px;
+.grid-filter {
+  .form-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .form-group label {
+    margin: 0 0 1px;
+    padding: 0;
+  }
+  [class*='span'] {
+    min-height: 0;
+  }
+  .form-group .form-group {
+    margin-bottom: 0;
+  }
+  .row {
+    margin-bottom: 0;
+  }
+  form {
+    margin: 0 0 8px;
+  }
 }
 
 .filter-col, .header-col {

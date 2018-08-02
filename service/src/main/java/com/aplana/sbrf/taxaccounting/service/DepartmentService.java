@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -121,7 +118,7 @@ public interface DepartmentService {
      * Для роли "Контролер НС" только одно подразделение
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380723">Аналитика</a>
      *
-     * @param tAUser пользователь
+     * @param tAUser  пользователь
      * @param addRoot добавлять ли в список Контролеру УНП подразделение ПАО Сбербанк
      * @return список идентификаторов подразделений
      */
@@ -140,7 +137,7 @@ public interface DepartmentService {
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380670">Старая аналитика</a>
      * <a href = "https://conf.aplana.com/pages/viewpage.action?pageId=27177937">Новая аналитика</a>
      *
-     * @param tAUser      пользователь
+     * @param tAUser пользователь
      * @return
      */
     List<Integer> getTaxFormDepartments(TAUser tAUser);
@@ -156,6 +153,7 @@ public interface DepartmentService {
 
     /**
      * Выборка id подразделений для назначения подразделений-исполнителей
+     *
      * @param tAUser пользователь
      * @return Список id подразделений для назначения исполнителей
      */
@@ -222,4 +220,11 @@ public interface DepartmentService {
      */
     List<Department> fetchAllDepartmentByIds(List<Integer> ids);
 
+    /**
+     * Получение DTO всех подразделений.
+     *
+     * @param name поисковая строка
+     * @return список {@link DepartmentName}
+     */
+    PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams);
 }

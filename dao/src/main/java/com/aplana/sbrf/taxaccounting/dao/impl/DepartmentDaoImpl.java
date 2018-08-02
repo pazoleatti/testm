@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,12 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -512,5 +506,64 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "select * from department " + where,
                 new DepartmentJdbcMapper()
         );
+    }
+
+    @Override
+    public PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams) {
+
+        // Основной запрос
+        StringBuilder mainQuery = new StringBuilder("select id, shortname from department_fullpath");
+
+        // Добавляем поиск по имени
+        if (StringUtils.isNotBlank(name)) {
+            mainQuery.append(" where lower(shortname) like '%")
+                    .append(name.toLowerCase())
+                    .append("%'");
+        }
+
+        // Используем либо постраничный запрос, либо основной
+        StringBuilder query;
+        if (pagingParams != null) {
+            // Добавляем сортировку к основному запросу
+            if (StringUtils.isNotBlank(pagingParams.getProperty()) &&
+                    StringUtils.isNotBlank(pagingParams.getDirection())) {
+                mainQuery.append(" order by ")
+                        .append(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()))
+                        .append(" ")
+                        .append(pagingParams.getDirection());
+            }
+
+            query = new StringBuilder();
+            query.append("select * from ( select a.*, rownum rn from (")
+                    .append(mainQuery)
+                    .append(") a) where rn > ")
+                    .append(pagingParams.getStartIndex())
+                    .append("and rowNum <= ")
+                    .append(pagingParams.getCount());
+        } else {
+            query = mainQuery;
+        }
+
+        // Получаем результат из базы
+        List<DepartmentName> departmentNames = getJdbcTemplate().query(
+                query.toString(),
+                new RowMapper<DepartmentName>() {
+                    @Override
+                    public DepartmentName mapRow(ResultSet resultSet, int i) throws SQLException {
+                        DepartmentName department = new DepartmentName();
+                        department.setId(SqlUtils.getInteger(resultSet, "id"));
+                        department.setName(resultSet.getString("shortname"));
+                        return department;
+                    }
+                }
+        );
+
+        // Запрашиваем полное число найденных объектов
+        Integer count = getJdbcTemplate().queryForObject(
+                "select count(*) from(" + mainQuery + ")",
+                Integer.class
+        );
+
+        return new PagingResult<>(departmentNames, count);
     }
 }

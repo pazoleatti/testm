@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
@@ -255,4 +254,12 @@ public interface DepartmentDao extends PermissionDao {
      * @return список {@link Department} или пустой список
      */
     List<Department> fetchAllDepartmentByIds(Collection<Integer> ids);
+
+    /**
+     * Получение списка названий всех подразделений.
+     *
+     * @param name поисковая строка
+     * @return список {@link DepartmentName} с полным числом записей
+     */
+    PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams);
 }

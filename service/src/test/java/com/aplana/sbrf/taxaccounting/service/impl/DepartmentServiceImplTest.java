@@ -146,7 +146,7 @@ public class DepartmentServiceImplTest {
                     if ((depId.equals(root.getId()) && repId.equals(0)) ||
                             (depId.equals(departmentTB2.getId()) && repId.equals(0)) ||
                             (depId.equals(departmentOSB311.getId()) && repId.equals(0))
-                            ) {
+                    ) {
                         result.add(new DepartmentReportPeriod() {{
                             setDepartmentId(depId);
                         }});
@@ -459,5 +459,12 @@ public class DepartmentServiceImplTest {
         // test for ROLE_CONTROL
         taUser.getRoles().remove(0);
         // test for ROLE_OPER
+    }
+
+    @Test
+    public void testSearchDepartmentNames() {
+        PagingParams pagingParams = new PagingParams();
+        departmentService.searchDepartmentNames("Something", pagingParams);
+        verify(departmentDao).searchDepartmentNames("Something", pagingParams);
     }
 }

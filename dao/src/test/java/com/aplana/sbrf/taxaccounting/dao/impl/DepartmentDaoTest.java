@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentName;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -178,5 +181,23 @@ public class DepartmentDaoTest {
     @Test
     public void fetchAllTBIdsByPerformer() {
         assertEquals(Arrays.asList(2, 3), departmentDao.fetchAllTBIdsByPerformer(7));
+    }
+
+    @Test
+    public void testSearchDepartmentNames() {
+
+        PagingParams pagingParams = new PagingParams();
+
+        List<DepartmentName> searchNull = departmentDao.searchDepartmentNames(null, pagingParams);
+        assertThat(searchNull).hasSize(7);
+
+        List<DepartmentName> searchEmpty = departmentDao.searchDepartmentNames("", pagingParams);
+        assertThat(searchEmpty).hasSize(7);
+
+        List<DepartmentName> searchExisting = departmentDao.searchDepartmentNames("банк/тб", pagingParams);
+        assertThat(searchExisting).hasSize(3);
+
+        List<DepartmentName> searchNonexistent = departmentDao.searchDepartmentNames("Не банк", pagingParams);
+        assertThat(searchNonexistent).isEmpty();
     }
 }
