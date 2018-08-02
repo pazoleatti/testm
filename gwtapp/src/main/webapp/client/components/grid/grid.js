@@ -102,7 +102,8 @@
                     for (var idx = 0; idx < colModel.length; idx++) {
                         colSettings.colModel.push({
                             name: colModel[idx].name,
-                            width: colModel[idx].width
+                            width: colModel[idx].width,
+                            general:  colModel[idx].general
                         });
                     }
                     $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
@@ -1154,12 +1155,18 @@
                                 var tableWidth = table.width();
 
                                 var hasScroll = scope.gridParams.bdiv[0].scrollHeight > scope.gridParams.bdiv.height();
-                                if (gridWidth + (hasScroll ? 20 : 0) > tableWidth) {
+                                if (gridWidth + (hasScroll ? 20 : 0) !== tableWidth) {
                                     var colmodel = scope.grid.jqGrid('getGridParam', 'colModel');
 
                                     //На это изменение колонки не нужно реагироват при сохранении настроек грида
                                     scope.$ignoreColChanges = true;
-                                    scope.grid.jqGrid('setColWidth', colmodel.length - 1, table[0].grid.headers[colmodel.length - 1].width + gridWidth - tableWidth, false);
+                                    var generalColumn = colmodel.length - 1;
+                                    colmodel.forEach(function (column) {
+                                        if (column.general){
+                                            generalColumn = colmodel.indexOf(column);
+                                        }
+                                    });
+                                    scope.grid.jqGrid('setColWidth', generalColumn, table[0].grid.headers[generalColumn].width + gridWidth - tableWidth, false);
                                     scope.$ignoreColChanges = false;
                                 }
                             }
@@ -1594,6 +1601,7 @@
                                     }
                                 }
                             }
+                            fillLastColumn();
                         }
 
                         if (scope.gridOptions.grouping) {
