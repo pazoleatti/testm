@@ -566,14 +566,23 @@
                 /**
                  * @description Формирует список подразделений доступных для ведения периодов
                  */
-                $scope.initAllAvailableTBForPeriodManagementSelect = function (onDataLoadedCallback) {
+                $scope.initAllAvailableTBForPeriodManagementSelect = function (departmentModel) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(false, true);
                     RefBookValuesResource.querySource({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
-                        projection: "allAvailableForPeriodManagement"
+                        projection: "activeAvailableTB"
                     }, function (availableTBs) {
                         $scope.departmentsSelect.options.data.results = availableTBs;
-                        onDataLoadedCallback(availableTBs);
+                        // значение по-умолчанию будет подразделение пользователя
+                        var defaultDepartment = $scope.user.terBank && _.find(availableTBs, function (department) {
+                            return department.id === $scope.user.terBank.id;
+                        });
+                        // если подразделение пользователя не найдено, то первое попавшееся
+                        if (!defaultDepartment) {
+                            defaultDepartment = availableTBs[0];
+                        }
+                        departmentModel.department = defaultDepartment;
+                        departmentModel.defaultDepartment = defaultDepartment;
                     });
                 };
 

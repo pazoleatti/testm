@@ -32,7 +32,6 @@
             function ($scope, $filter, DepartmentReportPeriodResource, CommonParamResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal,
                       ValidationUtils, $dialogs, $q) {
 
-                var defaultDepartment = null;
                 $scope.yearMin = 2003;
                 $scope.yearMax = 2100;//TODO сообщения валидатора не обновляются если изменить параметр и вернутся на страницу
                 CommonParamResource.query({
@@ -42,18 +41,6 @@
                     $scope.yearMin = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MIN].value;
                     $scope.yearMax = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MAX].value;
                 });
-
-                $scope.onDepartmentsSelectLoaded = function (departments) {
-                    // значение по-умолчанию будет подразделение пользователя
-                    defaultDepartment = _.find(departments, function (department) {
-                        return department.id === $scope.user.terBank.id;
-                    });
-                    // если подразделение пользователя не найдено, то первое попавшееся
-                    if (!defaultDepartment) {
-                        defaultDepartment = departments[0];
-                    }
-                    $scope.searchFilter.params.department = defaultDepartment;
-                };
 
                 if (!$scope.searchFilter) {
                     $scope.searchFilter = {
@@ -174,7 +161,7 @@
                     $scope.searchFilter.params = {
                         yearStart: new Date().getFullYear(),
                         yearEnd: new Date().getFullYear(),
-                        department: defaultDepartment
+                        department: $scope.searchFilter.params.defaultDepartment
                     };
 
                     /* убираем надпись "Сброс" */

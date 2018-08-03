@@ -77,16 +77,8 @@ public interface RefBookDepartmentDataService {
     /**
      * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
      *
-     * @param user Пользователь
-     * @return Список значений справочника
-     */
-    List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
-
-    /**
-     * Возвращяет подразделения уровня ТБ, доступные для ведения периодов
-     *
-     * @param userInfo пользователь, для которого будет проверяться доступность подразделения
+     * @param user пользователь, для которого будет проверяться доступность подразделения
      * @return список подразделений
      */
-    List<RefBookDepartment> fetchAllAvailableForPeriodManagement(TAUserInfo userInfo);
+    List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
 }

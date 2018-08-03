@@ -134,24 +134,9 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
         return refBookDepartmentDataDao.fetchActiveDepartments(departmentsWithOpenPeriod, name, pagingParams);
     }
 
-    /**
-     * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
-     *
-     * @param user Пользователь
-     * @return Список значений справочника
-     */
     @Override
-    @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public List<RefBookDepartment> fetchActiveAvailableTB(TAUser user) {
-        List<Integer> tbDepartmentIds = departmentService.getTBDepartmentIds(user, TaxType.NDFL, false);
-        return refBookDepartmentDataDao.fetchDepartments(tbDepartmentIds);
-    }
-
-    @Override
-    public List<RefBookDepartment> fetchAllAvailableForPeriodManagement(TAUserInfo userInfo) {
-        TAUser user = userInfo.getUser();
-        if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+        if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER)) {
             return refBookDepartmentDataDao.fetchAllActiveByType(DepartmentType.TERR_BANK);
         } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
             Integer userTBId = departmentDao.getParentTBId(user.getDepartmentId());
