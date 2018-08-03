@@ -130,6 +130,8 @@ public final class ScriptUtils {
     public static final String SEPARATOR = "_";
     public static final String SNILS_REGEXP = "\\d{3}-\\d{3}-\\d{3}\\s\\d{2}";
     public static final String DUL_REGEXP = "[^№]+\\s[^N№]+";
+    // код страны - Россия
+    public static final String COUNTRY_CODE_RUSSIA = "643";
     public static String DATE_FORMAT = "dd.MM.yyyy";
 
     /**
@@ -2675,16 +2677,48 @@ public final class ScriptUtils {
         return null;
     }
 
-    public static String checkName(String value, String attrName) {
+    public static List<String> checkFirstName(String firstName, String citizenship) {
+        return checkName(firstName, citizenship, "Имя");
+    }
+
+    public static List<String> checkLastName(String lastName, String citizenship) {
+        return checkName(lastName, citizenship, "Фамилия");
+    }
+
+    /**
+     * Проверка допустимости имен и фамилий ФЛ.
+     *
+     * @param value       проверяемое имя или фамилия
+     * @param citizenship код страны гражданства
+     * @param attrName    что проверяем, для формирования сообщений об ошибке
+     * @return если проверка не пройдена - сообщение об ошибке, иначе null
+     */
+    private static List<String> checkName(String value, String citizenship, String attrName) {
+
+        List<String> errorMessages = new ArrayList<>();
+
         if (value != null && !value.isEmpty()) {
-            if (Arrays.asList(" ", "ь", "ъ", "-", ".", "'").contains(value.substring(0, 1).toLowerCase())) {
-                return "Значение гр. \"" + attrName + "\" (\"" + value + "\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме";
+            if (citizenship.equals(COUNTRY_CODE_RUSSIA)) {
+                // для российских проверяем на кириллицу
+                if (!checkFormat(value, "^[а-яА-ЯёЁ -]+")) {
+                    errorMessages.add("Значение параметра \"" + attrName + "\" (\"" + value +
+                            "\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы");
+                }
+            } else {
+                // для иностранцев может быть латиница
+                if (!checkFormat(value, "^[a-zA-Zа-яА-ЯёЁ '-]+")) {
+                    errorMessages.add("Значение параметра \"" + attrName + "\" (\"" + value +
+                            "\") содержит недопустимые символы. Значение может содержать только буквы русского (кириллица) или латинского алфавитов, пробелы, апострофы и дефисы");
+                }
             }
-            if (!checkFormat(value, "^[а-яА-ЯёЁ -]+")) {
-                return "Значение гр. \"" + attrName + "\" (\"" + value + "\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы";
+            // проверяем первый символ
+            String firstSymbol = value.substring(0, 1).toLowerCase();
+            if (Arrays.asList(" ", "ь", "ъ", "-").contains(firstSymbol)) {
+                errorMessages.add("Значение параметра \"" + attrName + "\" (\"" + value +
+                        "\") некорректно. Первый символ не может быть равен одному из значений: \"Ъ\", \"Ь\", дефис или пробел");
             }
         }
-        return null;
+        return errorMessages;
     }
 
     public static String checkDul(String code, String value, String attrName) {
@@ -2734,9 +2768,9 @@ public final class ScriptUtils {
         } else if (code.equals("27")) {
             format = "[^\\wА-яа-яЁё]*([А-ЯЁ][^\\wА-яа-яЁё]*){2}([0-9][^\\wА-яа-яЁё]*){6,7}";
             formatStr = "\"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)";
-        }else if (code.equals("91")){
+        } else if (code.equals("91")) {
             format = "^(I|i|V|v|X|x|L|l|C|c|У|у|Х|х|Л|л|С|с|1)*-[А-Я]{2} [0-9]{6}$";
-            if (checkFormat(value, format)){
+            if (checkFormat(value, format)) {
                 return "\"Значение гр. 11 ДУЛ Номер (\"" + value + "\") содержит реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является актуальным документом, удостоверяющим личность\"";
             }
         }
@@ -2841,6 +2875,7 @@ public final class ScriptUtils {
      * Мы используем версию 3 UUID - это значит что UUID генерируется на основе значения с использованием алгоритма MD5.
      * В этом методе из набора полей объекта дохода строится массив байтов. И из этого массива байтов вычисляется отпечаток,
      * который будет эквивалентен для одинаковых массивов байтов и различаться для разных массивов байтов.
+     *
      * @param income объект операции дохода
      * @return строковое представление UUID объекта дохода
      */

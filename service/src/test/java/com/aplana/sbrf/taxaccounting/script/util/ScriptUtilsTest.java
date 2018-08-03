@@ -23,6 +23,9 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.*;
+
+
 /**
  * Тесты для ScriptUtils
  *
@@ -399,38 +402,92 @@ public class ScriptUtilsTest {
     }
 
     @Test
-    public void checkName() {
-        Assert.assertEquals("Значение гр. \"name\" (\"-иван\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме", ScriptUtils.checkName("-иван", "name"));
-        Assert.assertEquals("Значение гр. \"name\" (\"Иbан\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы", ScriptUtils.checkName("Иbан", "name"));
-        Assert.assertNull(ScriptUtils.checkName("Иван", "name"));
-        Assert.assertNull(ScriptUtils.checkName("Ив-ан", "name"));
+    public void testCheckFirstName() {
+        // Проверка русских имен
+        List<String> checkSimpleRussianNameResult = ScriptUtils.checkFirstName("Иван", "643");
+        assertThat(checkSimpleRussianNameResult).isEmpty();
 
+        List<String> checkRussianNameWithHyphenResult = ScriptUtils.checkFirstName("Иван-да-Марья", "643");
+        assertThat(checkRussianNameWithHyphenResult).isEmpty();
+
+        List<String> checkRussianNameWithSpaceResult = ScriptUtils.checkFirstName("Иван Котлован", "643");
+        assertThat(checkRussianNameWithSpaceResult).isEmpty();
+
+        List<String> checkRussianNameWithApostropheResult = ScriptUtils.checkFirstName("Иван Д'Артаньян", "643");
+        assertThat(checkRussianNameWithApostropheResult)
+                .containsExactly("Значение параметра \"Имя\" (\"Иван Д'Артаньян\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы");
+
+        List<String> checkRussianNameWithDotResult = ScriptUtils.checkFirstName("Иван.Капкан", "643");
+        assertThat(checkRussianNameWithDotResult)
+                .containsExactly("Значение параметра \"Имя\" (\"Иван.Капкан\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы");
+
+        // Проверка иностранных имен
+        List<String> checkSimpleForeignNameResult = ScriptUtils.checkFirstName("John", "1");
+        assertThat(checkSimpleForeignNameResult).isEmpty();
+
+        List<String> checkForeignNameWithHyphenResult = ScriptUtils.checkFirstName("John-Mahjong", "1");
+        assertThat(checkForeignNameWithHyphenResult).isEmpty();
+
+        List<String> checkForeignNameWithSpaceResult = ScriptUtils.checkFirstName("John Photon", "1");
+        assertThat(checkForeignNameWithSpaceResult).isEmpty();
+
+        List<String> checkForeignNameWithApostropheResult = ScriptUtils.checkFirstName("Charles d'Artagnan", "1");
+        assertThat(checkForeignNameWithApostropheResult).isEmpty();
+
+        List<String> checkForeignNameWithDotResult = ScriptUtils.checkFirstName("John.von.Micron", "1");
+        assertThat(checkForeignNameWithDotResult)
+                .containsExactly("Значение параметра \"Имя\" (\"John.von.Micron\") содержит недопустимые символы. Значение может содержать только буквы русского (кириллица) или латинского алфавитов, пробелы, апострофы и дефисы");
+
+        // Проверка первых символов
+        List<String> checkFirstSymbolHyphenResult = ScriptUtils.checkFirstName("-Иван", "643");
+        assertThat(checkFirstSymbolHyphenResult)
+                .containsExactly("Значение параметра \"Имя\" (\"-Иван\") некорректно. Первый символ не может быть равен одному из значений: \"Ъ\", \"Ь\", дефис или пробел");
+
+        List<String> checkFirstSymbolSpaceResult = ScriptUtils.checkFirstName(" John", "1");
+        assertThat(checkFirstSymbolSpaceResult)
+                .containsExactly("Значение параметра \"Имя\" (\" John\") некорректно. Первый символ не может быть равен одному из значений: \"Ъ\", \"Ь\", дефис или пробел");
+
+        List<String> checkFirstSymbolHardSignResult = ScriptUtils.checkFirstName("ъИван", "643");
+        assertThat(checkFirstSymbolHardSignResult)
+                .containsExactly("Значение параметра \"Имя\" (\"ъИван\") некорректно. Первый символ не может быть равен одному из значений: \"Ъ\", \"Ь\", дефис или пробел");
+
+        List<String> checkFirstSymbolSoftSignResult = ScriptUtils.checkFirstName("Ьиван", "643");
+        assertThat(checkFirstSymbolSoftSignResult)
+                .containsExactly("Значение параметра \"Имя\" (\"Ьиван\") некорректно. Первый символ не может быть равен одному из значений: \"Ъ\", \"Ь\", дефис или пробел");
+
+        // Проверка ситуации, когда обе ошибки
+        List<String> checkBothErrorsNameResult = ScriptUtils.checkFirstName("-Иван.John", "1");
+        assertThat(checkBothErrorsNameResult).containsExactly(
+                "Значение параметра \"Имя\" (\"-Иван.John\") содержит недопустимые символы. Значение может содержать только буквы русского (кириллица) или латинского алфавитов, пробелы, апострофы и дефисы",
+                "Значение параметра \"Имя\" (\"-Иван.John\") некорректно. Первый символ не может быть равен одному из значений: \"Ъ\", \"Ь\", дефис или пробел"
+        );
     }
+
     @Test
     public void checkDul() {
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 01 12345\") не соответствует формату \"99 99 999999\", где 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("21", "00 01 12345", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 01 12345\") не соответствует формату \"99 99 999999\", где 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("21", "00 01 12345", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 00 000000\") не должно быть нулевым", ScriptUtils.checkDul("21", "00 00 000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("21", "80 00 010006", "dulNumber"));
 
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "АП 12345678", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап 1234567\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "Ап 1234567", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"GT 1234567\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "GT 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)", ScriptUtils.checkDul("07", "АП 12345678", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап 1234567\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)", ScriptUtils.checkDul("07", "Ап 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"GT 1234567\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)", ScriptUtils.checkDul("07", "GT 1234567", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 000000", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 0000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 0000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("07", "АП 1234567", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("07", "АП 123456", "dulNumber"));
 
 
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-012 12345678\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "АП-012 12345678", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап-012 1234567\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "Ап-012 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-012 12345678\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("18", "АП-012 12345678", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап-012 1234567\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("18", "Ап-012 1234567", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-000 0000000\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-000 0000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("18", "АП-012 1234567", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("18", "УУ-900 9999999", "dulNumber"));
 
 
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("24", "АП 12345678", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("24", "Ап 1234567", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"GT 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("24", "GT 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("24", "АП 12345678", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("24", "Ап 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"GT 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("24", "GT 1234567", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 0000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 0000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("24", "АП 1234567", "dulNumber"));
 
@@ -483,11 +540,11 @@ public class ScriptUtilsTest {
 
     @Test
     public void formatDocNumberTest() {
-        Assert.assertEquals("99 99 999999", ScriptUtils.formatDocNumber("21","9999999999"));
-        Assert.assertEquals("ББ 0999999", ScriptUtils.formatDocNumber("07","ББ0999999"));
-        Assert.assertEquals("ББ-999 9999999", ScriptUtils.formatDocNumber("18","ББ9999999999"));
-        Assert.assertEquals("ББ 9999999", ScriptUtils.formatDocNumber("24","ББ9999999"));
-        Assert.assertEquals("SSSSSSSSSSSSSSSSSSSSSSSSS", ScriptUtils.formatDocNumber("00","SSSSSSSSSSSSSSSSSSSSSSSSS"));
+        Assert.assertEquals("99 99 999999", ScriptUtils.formatDocNumber("21", "9999999999"));
+        Assert.assertEquals("ББ 0999999", ScriptUtils.formatDocNumber("07", "ББ0999999"));
+        Assert.assertEquals("ББ-999 9999999", ScriptUtils.formatDocNumber("18", "ББ9999999999"));
+        Assert.assertEquals("ББ 9999999", ScriptUtils.formatDocNumber("24", "ББ9999999"));
+        Assert.assertEquals("SSSSSSSSSSSSSSSSSSSSSSSSS", ScriptUtils.formatDocNumber("00", "SSSSSSSSSSSSSSSSSSSSSSSSS"));
     }
 
     @Test
