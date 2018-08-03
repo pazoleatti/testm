@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.apache.commons.logging.Log;
@@ -158,12 +157,12 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
-        return sourceDao.getSourcesInfo(declaration.getId());
+    public List<Relation> getDeclarationSourcesInfo(Long declarationDataId) {
+        return sourceDao.getSourcesInfo(declarationDataId);
     }
 
     @Override
-    public List<Relation> getDeclarationDestinationsInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
-        return sourceDao.getDestinationsInfo(declaration.getId());
+    public List<Relation> getDeclarationDestinationsInfo(Long declarationDataId) {
+        return sourceDao.getDestinationsInfo(declarationDataId);
     }
 }

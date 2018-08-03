@@ -176,20 +176,20 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void saveBatchTest2() {
+        departmentReportPeriodDao.create(new DepartmentReportPeriodBuidler().department(5).reportPeriodId(11).active(false).build());
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setReportPeriodIdList(asList(11, 12, 13));
         filter.setDepartmentId(5);
-        assertEquals(0, departmentReportPeriodDao.fetchAllByFilter(filter).size());
+        assertEquals(1, departmentReportPeriodDao.fetchAllByFilter(filter).size());
 
         List<DepartmentReportPeriod> departmentReportPeriods = new ArrayList<>();
-        departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(11).active(true).build());
         departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(11).active(false).build());
         departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(12).active(true).build());
         departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(13).active(true).build());
 
-        departmentReportPeriodDao.create(departmentReportPeriods, 5);
+        departmentReportPeriodDao.merge(departmentReportPeriods, 5);
 
-        assertEquals(4, departmentReportPeriodDao.fetchAllByFilter(filter).size());
+        assertEquals(3, departmentReportPeriodDao.fetchAllByFilter(filter).size());
     }
 
     @Test

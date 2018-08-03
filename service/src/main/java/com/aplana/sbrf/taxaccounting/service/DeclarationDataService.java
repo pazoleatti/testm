@@ -409,9 +409,8 @@ public interface DeclarationDataService {
      * @param declarationDataIds идентификаторы налоговых форм
      * @param note               причина
      * @param userInfo           информация о пользователе, выполняющем действие
-     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo);
+    void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo);
 
     /**
      * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена

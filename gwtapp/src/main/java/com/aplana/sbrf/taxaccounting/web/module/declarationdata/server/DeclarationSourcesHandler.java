@@ -50,8 +50,8 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
         List<Relation> relationList = new ArrayList<Relation>();
 
         //Получаем нф-источники
-        relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
-        relationList.addAll(sourceService.getDeclarationDestinationsInfo(declaration, true, false, null, userInfo, logger));
+        relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration.getId()));
+        relationList.addAll(sourceService.getDeclarationDestinationsInfo(declaration.getId()));
         result.setData(relationList);
         return result;
     }

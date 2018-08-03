@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -163,24 +162,16 @@ public interface SourceService {
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
      *
-     * @param declaration       декларациz-приемник
-     * @param light             true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction  ограничение по состоянию для созданных экземпляров
+     * @param declarationDataId идентификатор налоговой формы приемника
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction,
-                                             TAUserInfo userInfo, Logger logger);
+    List<Relation> getDeclarationSourcesInfo(Long declarationDataId);
 
     /**
-     * Возвращает список нф-приемников для указанной декларации (включая несозданные)
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
      *
-     * @param declaration       декларациz-источник
-     * @param light             true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction  ограничение по состоянию для созданных экземпляров
+     * @param declarationDataId идентификатор налоговой формы источника
      * @return список нф-источников
      */
-
-    List<Relation> getDeclarationDestinationsInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger);
+    List<Relation> getDeclarationDestinationsInfo(Long declarationDataId);
 }

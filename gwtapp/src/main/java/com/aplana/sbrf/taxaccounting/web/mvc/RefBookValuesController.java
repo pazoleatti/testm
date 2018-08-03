@@ -136,15 +136,7 @@ public class RefBookValuesController {
 
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeAvailableTB")
     public List<RefBookDepartment> fetchActiveAvailableTB() {
-        return refBookDepartmentDataService.fetchAllAvailableForPeriodManagement(securityService.currentUserInfo());
-    }
-
-    /**
-     * Возвращяет подразделения, доступные для ведения периодов текущему пользователю
-     */
-    @GetMapping(value = "rest/refBookValues/30", params = "projection=allAvailableForPeriodManagement")
-    public List<RefBookDepartment> fetchAllAvailableForPeriodManagement() {
-        return refBookDepartmentDataService.fetchAllAvailableForPeriodManagement(securityService.currentUserInfo());
+        return refBookDepartmentDataService.fetchActiveAvailableTB(securityService.currentUserInfo().getUser());
     }
 
     /**

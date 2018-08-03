@@ -11,11 +11,13 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.TAUserService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
@@ -42,6 +44,7 @@ class Person extends AbstractScriptClass {
     Date validDateFrom
     RefBookFactory refBookFactory
     RefBookAsnuService refBookAsnuService
+    TAUserService taUserServiceScript
     InputStream inputStream
     String fileName
     CommonRefBookService commonRefBookService
@@ -83,6 +86,9 @@ class Person extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentService")) {
             this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
+        }
+        if (scriptClass.getBinding().hasVariable("taUserServiceScript")) {
+            this.taUserServiceScript = (TAUserService) scriptClass.getProperty("taUserServiceScript")
         }
     }
 
@@ -129,6 +135,7 @@ class Person extends AbstractScriptClass {
         }
         List<NaturalPerson> parsedPersons = []
 
+        fillAsnuCache()
         parseXml(parsedPersons)
         def savedPersons = save(parsedPersons)
         checkPersons(savedPersons)
@@ -804,17 +811,23 @@ class Person extends AbstractScriptClass {
      */
     RefBookAsnu getAsnuByName(String name) {
         RefBookAsnu asnu = null
-        if (name.contains("«") || name.contains("»")) {
-            name = name.replace("«", "\"")
-            name = name.replace("»", "\"")
-        }
         if (name) {
-            asnu = asnuCache.get(name)
+            asnu = asnuCache.get(StringUtils.cleanString(name))
             if (!asnu) {
                 asnu = refBookAsnuService.fetchByName(name)
                 asnuCache.put(name, asnu)
             }
         }
         return asnu
+    }
+
+    /**
+     * Заполняет кэш АСНУ значениями из справочника. в качестве ключа используется обработаное имя АСНУ
+     */
+    void fillAsnuCache() {
+        List<RefBookAsnu> availableAsnu = refBookAsnuService.fetchAvailableAsnu(taUserServiceScript.getCurrentUserInfo())
+        for (RefBookAsnu asnu : availableAsnu){
+            asnuCache.put(StringUtils.cleanString(asnu.name), asnu)
+        }
     }
 }

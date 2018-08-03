@@ -20,7 +20,10 @@ import org.springframework.context.ApplicationContextAware;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -174,15 +177,17 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
                     return script;
                 }
             } else {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                try {
-                    String line = reader.readLine();
-                    if (line != null && line.equals("package " + packageName) && line.contains(file.getName().substring(0, file.getName().indexOf(".groovy")))
-                            || (packageName.equals("refbook." + file.getName().substring(0, file.getName().indexOf(".groovy")) + "_ref"))) {
-                        return file.getAbsolutePath();
+                if (file.getName().endsWith(".groovy")) {
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
+                    try {
+                        String line = reader.readLine();
+                        if (line != null && line.equals("package " + packageName) && line.contains(file.getName().substring(0, file.getName().indexOf(".groovy")))
+                                || packageName.equals("refbook." + file.getName().substring(0, file.getName().indexOf(".groovy")) + "_ref")) {
+                            return file.getAbsolutePath();
+                        }
+                    } finally {
+                        reader.close();
                     }
-                } finally {
-                    reader.close();
                 }
             }
         }

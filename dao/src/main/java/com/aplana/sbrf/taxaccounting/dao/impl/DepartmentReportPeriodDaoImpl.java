@@ -263,13 +263,20 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    public void create(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
+    public void merge(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
         final List<Integer> ids = generateIds("seq_department_report_period", departmentReportPeriods.size(), Integer.class);
-        getJdbcTemplate().batchUpdate("INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
-                " VALUES (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+        getJdbcTemplate().batchUpdate("MERGE INTO DEPARTMENT_REPORT_PERIOD dest " +
+                (isSupportOver() ?
+                        "USING (SELECT ? id, ? department_id, ? report_period_id, ? is_active, ? correction_date FROM DUAL) src " :
+                        "USING (SELECT cast(? as number) id, cast(? as number) department_id, cast(? as number) report_period_id, cast(? as number) is_active, ? correction_date FROM DUAL) src "
+                ) +
+                "on (dest.department_id = src.department_id and dest.report_period_id = src.report_period_id and decode(dest.correction_date, src.correction_date, 1, 0) = 1) " +
+                "WHEN NOT MATCHED THEN " +
+                " INSERT(id, department_id, report_period_id, is_active, correction_date)" +
+                " VALUES(src.id, src.department_id, src.report_period_id, src.is_active, src.correction_date)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, ids.get(i).intValue());
+                ps.setInt(1, ids.get(i));
                 ps.setInt(2, departmentId);
                 DepartmentReportPeriod departmentReportPeriod = departmentReportPeriods.get(i);
                 ps.setInt(3, departmentReportPeriod.getReportPeriod().getId());

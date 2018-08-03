@@ -7,6 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
@@ -59,6 +63,10 @@ public class DeclarationDataServiceImplTest {
     DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
     @Autowired
     BlobDataService blobDataService;
+    @Autowired
+    ReportPeriodService reportPeriodService;
+    @Autowired
+    RefBookFactory refBookFactory;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -240,7 +248,7 @@ public class DeclarationDataServiceImplTest {
         r1.setDeclarationState(State.ACCEPTED);
 
         sources.add(r1);
-        when(sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger)).thenReturn(sources);
+        when(sourceService.getDeclarationSourcesInfo(declarationData.getId())).thenReturn(sources);
 
         when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
         when(departmentService.getDepartment(2)).thenReturn(department);
@@ -458,16 +466,46 @@ public class DeclarationDataServiceImplTest {
 
         TAUser user = mock(TAUser.class);
         int userId = 1;
+        int departmentReportPeriodId = 0;
+        int departmentId = 0;
+        long reportPeriodTypeId = 0L;
+        DeclarationData declarationData = mock(DeclarationData.class);
+        DeclarationTemplate declarationTemplate = mock(DeclarationTemplate.class);
+        DeclarationType type = mock(DeclarationType.class);
+        DepartmentReportPeriod departmentReportPeriod = mock(DepartmentReportPeriod.class);
+        ReportPeriod reportPeriod = mock(ReportPeriod.class);
+        ReportPeriodType reportPeriodType = mock(ReportPeriodType.class);
+        RefBookDataProvider provider = mock(RefBookDataProvider.class);
+        TaxPeriod taxperiod = mock(TaxPeriod.class);
+        Department department = mock(Department.class);
+        Map<String, RefBookValue> asnu = mock(Map.class);
+        RefBookValue name = mock(RefBookValue.class);
+
         when(userInfo.getUser()).thenReturn(user);
         when(user.getId()).thenReturn(userId);
 
-        DeclarationData declarationData = mock(DeclarationData.class);
+
         when(declarationDataDao.get(declarationDataId)).thenReturn(declarationData);
-        DeclarationTemplate declarationTemplate = mock(DeclarationTemplate.class);
+
         when(declarationData.getDeclarationTemplateId()).thenReturn(100);
         when(declarationTemplateService.get(100)).thenReturn(declarationTemplate);
 
-        when(declarationTemplate.getDeclarationFormKind()).thenReturn(DeclarationFormKind.PRIMARY);
+        when(declarationTemplate.getType()).thenReturn(type);
+        when(type.getName()).thenReturn("declarationTypeName");
+        when(declarationData.getDepartmentReportPeriodId()).thenReturn(departmentReportPeriodId);
+        when(departmentReportPeriodService.fetchOne(departmentReportPeriodId)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriod.getReportPeriod()).thenReturn(reportPeriod);
+        when(reportPeriod.getDictTaxPeriodId()).thenReturn(reportPeriodTypeId);
+        when(reportPeriod.getTaxPeriod()).thenReturn(taxperiod);
+        when(periodService.getPeriodTypeById(reportPeriodTypeId)).thenReturn(reportPeriodType);
+        when(reportPeriodType.getName()).thenReturn("reportPeriodTypeName");
+        when(taxperiod.getYear()).thenReturn(2018);
+        when(refBookFactory.getDataProvider(RefBook.Id.ASNU.getId())).thenReturn(provider);
+        when(departmentReportPeriod.getDepartmentId()).thenReturn(departmentId);
+        when(departmentService.getDepartment(departmentId)).thenReturn(department);
+        when(department.getName()).thenReturn("departmentName");
+        when(provider.getRecordData(anyLong())).thenReturn(asnu);
+        when(asnu.get("NAME")).thenReturn(name);
 
         declarationDataService.cancel(logger, declarationDataId, note, userInfo);
 
