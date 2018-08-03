@@ -136,9 +136,9 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
 
     @Override
     public List<RefBookDepartment> fetchActiveAvailableTB(TAUser user) {
-        if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER)) {
+        if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             return refBookDepartmentDataDao.fetchAllActiveByType(DepartmentType.TERR_BANK);
-        } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
+        } else if (user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             Integer userTBId = departmentDao.getParentTBId(user.getDepartmentId());
             // Все ТБ, для которых подразделение пользователя назначено исполнителем.
             Set<Integer> TBIds = new HashSet<>(departmentDao.fetchAllTBIdsByPerformer(user.getDepartmentId()));
