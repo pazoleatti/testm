@@ -31,6 +31,7 @@ public class TaxEventDaoImpl extends AbstractDao implements TaxEventDao {
         return getJdbcTemplate().query("SELECT tax.* FROM VW_LOG_TABLE_CHANGE tax \n" +
                 "LEFT JOIN LOG_TABLE_CHANGE_PROCESSED ndfl ON ndfl.id = tax.id \n" +
                 "WHERE ndfl.id IS NULL " +
+                "ORDER BY tax.id asc " +
                 "FOR UPDATE SKIP LOCKED", new TaxEventMapper());
     }
 

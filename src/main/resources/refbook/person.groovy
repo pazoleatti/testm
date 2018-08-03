@@ -804,10 +804,6 @@ class Person extends AbstractScriptClass {
      */
     RefBookAsnu getAsnuByName(String name) {
         RefBookAsnu asnu = null
-        if (name.contains("«") || name.contains("»")) {
-            name = name.replace("«", "\"")
-            name = name.replace("»", "\"")
-        }
         if (name) {
             asnu = asnuCache.get(name)
             if (!asnu) {

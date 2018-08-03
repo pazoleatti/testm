@@ -83,7 +83,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).OPEN_DEPARTMENT_REPORT_PERIOD)")
     public String open(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo) {
-        LOG.info(String.format("PeriodServiceImpl.open. period: %s", departmentReportPeriod));
+        LOG.info(String.format("open period: %s", departmentReportPeriod));
         ReportPeriod reportPeriod = null;
         try {
             Logger logger = new Logger();
@@ -109,7 +109,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasPermission(#action.departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).OPEN_CORRECT)")
     public String openCorrectionPeriod(OpenCorrectionPeriodAction action) {
-        LOG.info(String.format("PeriodServiceImpl.openCorrectionPeriod. departmentReportPeriodId: %s", action.getDepartmentReportPeriodId()));
+        LOG.info(String.format("openCorrectionPeriod for departmentReportPeriodId: %s", action.getDepartmentReportPeriodId()));
         DepartmentReportPeriod mainDrp = departmentReportPeriodDao.fetchOne(action.getDepartmentReportPeriodId());
         DepartmentReportPeriod correctionPeriod = new DepartmentReportPeriod();
         correctionPeriod.setReportPeriod(mainDrp.getReportPeriod());
@@ -144,20 +144,20 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public void openForNewDepartment(int departmentId) {
-        LOG.info(String.format("PeriodServiceImpl.openForNewDepartment. departmentId: %s", departmentId));
+        LOG.info(String.format("openForNewDepartment, departmentId: %s", departmentId));
         if (departmentDao.existDepartment(departmentId)) {
             Department terBank = departmentDao.getParentTB(departmentId);
             if (terBank != null) {
                 DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
                 filter.setDepartmentId(terBank.getId());
                 List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.fetchAllByFilter(filter);
-                departmentReportPeriodService.create(departmentReportPeriods, departmentId);
+                departmentReportPeriodService.merge(departmentReportPeriods, departmentId);
             }
         }
     }
 
     private void open(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
-        LOG.info(String.format("PeriodServiceImpl.open. departmentReportPeriod: %s", departmentReportPeriod));
+        LOG.info(String.format("open departmentReportPeriod: %s", departmentReportPeriod));
 
         DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodService.fetchOneByFilter(filterForSinglePeriod(departmentReportPeriod));
         if (savedDepartmentReportPeriod != null) {
@@ -181,7 +181,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).REOPEN)")
     public String reopen(Integer departmentReportPeriodId) {
-        LOG.info(String.format("PeriodServiceImpl.reopen. departmentReportPeriodId: %s", departmentReportPeriodId));
+        LOG.info(String.format("reopen departmentReportPeriodId: %s", departmentReportPeriodId));
         Logger logger = new Logger();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         try {
@@ -227,7 +227,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).CLOSE)")
     public String close(Integer departmentReportPeriodId) {
-        LOG.info(String.format("PeriodServiceImpl.close. departmentReportPeriodId: %s", departmentReportPeriodId));
+        LOG.info(String.format("close departmentReportPeriodId: %s", departmentReportPeriodId));
         Logger logger = new Logger();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         try {
@@ -261,7 +261,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).DELETE)")
     public String delete(Integer departmentReportPeriodId) {
-        LOG.info(String.format("PeriodServiceImpl.delete. id: %s", departmentReportPeriodId));
+        LOG.info(String.format("delete id: %s", departmentReportPeriodId));
         Logger logger = new Logger();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         try {
