@@ -59,7 +59,7 @@ public interface DepartmentReportPeriodDao extends PermissionDao {
      * @param departmentReportPeriods список отчетных периодов
      * @param departmentId            ид подразделения
      */
-    void create(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId);
+    void merge(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId);
 
     /**
      * Открытие/закрытие отчетного периода подразделения

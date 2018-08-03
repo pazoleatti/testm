@@ -35,6 +35,7 @@ public class TaxEventProcessor {
     public void processTaxEvents() {
         List<TaxChangesEvent> newEvents = taxEventDao.getNewTaxEvents();
         if (!newEvents.isEmpty()) {
+            LOG.info("processTaxEvents started");
             boolean needToClearCache = false;
             for (TaxChangesEvent event : newEvents) {
                 if (event.getTableName().equals(TaxTableNames.DEPARTMENT.name()) ||
@@ -52,6 +53,7 @@ public class TaxEventProcessor {
             if (needToClearCache) {
                 cacheManagerDecorator.clearAll();
             }
+            LOG.info("processTaxEvents finished, " + newEvents.size() + " events processed");
         }
     }
 }
