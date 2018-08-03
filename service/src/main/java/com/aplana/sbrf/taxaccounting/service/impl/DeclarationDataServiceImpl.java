@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
@@ -1096,12 +1097,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public List<Relation> getDeclarationSourcesAndDestinations(TAUserInfo userInfo, long declarationDataId) {
         if (existDeclarationData(declarationDataId)) {
-            Logger logger = new Logger();
-            DeclarationData declaration = get(declarationDataId, userInfo);
-
             List<Relation> relationList = new ArrayList<Relation>();
-            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
-            relationList.addAll(sourceService.getDeclarationDestinationsInfo(declaration, true, false, null, userInfo, logger));
+            relationList.addAll(sourceService.getDeclarationSourcesInfo(declarationDataId));
+            relationList.addAll(sourceService.getDeclarationDestinationsInfo(declarationDataId));
             return relationList;
         } else {
             return Collections.emptyList();
@@ -1672,13 +1670,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancel by %s. id: %s; note: %s",
                 userInfo, declarationDataId, note));
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+        ReportPeriodType reportPeriodType = reportPeriodService.getPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+        Map<String, RefBookValue> asnu = provider.getRecordData(declarationData.getAsnuId());
+        String asnuClause = declarationTemplate.getType().getId() == DeclarationType.NDFL_PRIMARY ? String.format(", АСНУ: \"%s\"", asnu.get("NAME").getStringValue()) : "";
         try {
-            List<Long> receiversIdList = getReceiversAcceptedPrepared(declarationDataId, logger, userInfo);
-            if (receiversIdList.isEmpty()) {
-                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-
-                Map<String, Object> exchangeParams = new HashMap<>();
-                moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
+            Map<String, Object> exchangeParams = new HashMap<>();
+            moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
                 }
@@ -1689,18 +1691,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
                 declarationDataDao.setStatus(declarationDataId, declarationData.getState());
-                String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationDataId, State.CREATED.getTitle()).toString();
+
+                String message = String.format("Выполнена операция \"Возврат в Создана\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+                        declarationDataId,
+                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriodType.getName(),
+                        departmentReportPeriod.getCorrectionDate() != null ? sdf.get().format(departmentReportPeriod.getCorrectionDate()): "",
+                        department.getName(),
+                        declarationTemplate.getType().getName(),
+                        asnuClause);
+
                 logger.info(message);
-                sendNotification("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-            } else {
-                String message = getCheckReceiversErrorMessage(receiversIdList);
-                logger.error(message);
                 sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-            }
             logger.clear();
         } catch (Exception e) {
             logger.error(e);
-            sendNotification("Не выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+            String message = String.format("Ошибка выполнения операции \"Возврат в Создана\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+                    declarationDataId,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriodType.getName(),
+                    departmentReportPeriod.getCorrectionDate() != null ? sdf.get().format(departmentReportPeriod.getCorrectionDate()): "",
+                    department.getName(),
+                    declarationTemplate.getType().getName(),
+                    asnuClause);
+            logger.error(message);
+            sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
         } finally {
             lockDataService.unlock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
         }
@@ -1708,10 +1723,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    public ActionResult cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
+    public void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
-        final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
         for (Long declarationId : declarationDataIds) {
@@ -1720,7 +1734,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId(), declarationFullName);
                 if (lockData == null) {
                     cancel(logger, declarationId, note, userInfo);
-
                 } else {
                     DeclarationData declaration = get(declarationId, userInfo);
                     Department department = departmentService.getDepartment(declaration.getDepartmentId());
@@ -1731,20 +1744,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
             }
         }
-
-        result.setUuid(logEntryService.save(logger.getEntries()));
-
-        return result;
-    }
-
-    private String getCheckReceiversErrorMessage(List<Long> receivers) {
-        StringBuilder sb = new StringBuilder("Отмена принятия текущей формы невозможна. Формы-приёмники ");
-        for (Long receiver : receivers) {
-            sb.append(receiver).append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        sb.append(" имеют состояние, отличное от \"Создана\". Выполните \"Возврат в Создана\" для перечисленных форм и повторите операцию.");
-        return sb.toString();
     }
 
     @Override
@@ -1755,7 +1754,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.PRIMARY.getId()
                 || declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
-            List<Relation> relations = sourceService.getDeclarationDestinationsInfo(declarationData, true, false, null, userInfo, logger);
+            List<Relation> relations = sourceService.getDeclarationDestinationsInfo(declarationData.getId());
             for (Relation relation : relations) {
                 if (relation.isCreated() && !State.CREATED.equals(relation.getDeclarationState())) {
                     toReturn.add(relation.getDeclarationDataId());
@@ -2724,7 +2723,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Logger logger = new Logger();
                     Long personCount = 0L;
                     try {
-                        List<Relation> relationList = sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+                        List<Relation> relationList = sourceService.getDeclarationSourcesInfo(declarationData.getId());
                         for (Relation relation : relationList) {
                             if (relation.getDeclarationDataId() != null && State.ACCEPTED.equals(relation.getDeclarationState())) {
                                 personCount += ndflPersonDao.getNdflPersonCount(relation.getDeclarationDataId());
@@ -2761,7 +2760,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             consolidationOk = false;
         } else {
             //Проверка того, что консолидация вообще когда то выполнялась для всех источников
-            List<Relation> relations = sourceService.getDeclarationSourcesInfo(dd, true, false, null, userInfo, logger);
+            List<Relation> relations = sourceService.getDeclarationSourcesInfo(dd.getId());
             for (Relation relation : relations) {
                 if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getDeclarationDataId())) {
                     consolidationOk = false;

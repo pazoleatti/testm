@@ -234,7 +234,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
-        return sourceService.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction, userInfo, logger);
+        return sourceService.getDeclarationSourcesInfo(declaration.getId());
     }
 
     @Override

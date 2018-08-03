@@ -270,11 +270,7 @@
                             params: {
                                 reason: reason
                             }
-                        }).then(function (response) {
-                            if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
-                            }
-                        });
+                        })
                     });
                 };
 

@@ -369,9 +369,10 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/returnToCreated")
-    public ActionResult returnToCreatedDeclaration(@RequestBody List<Long> declarationDataIds, @RequestParam String reason) {
+    public ResponseEntity returnToCreatedDeclaration(@RequestBody List<Long> declarationDataIds, @RequestParam String reason) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.cancelDeclarationList(declarationDataIds, reason, userInfo);
+        declarationService.cancelDeclarationList(declarationDataIds, reason, userInfo);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
