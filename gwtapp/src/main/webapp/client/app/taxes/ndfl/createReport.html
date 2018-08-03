@@ -13,7 +13,7 @@
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
+                        <div style="width: 375px;" data-ng-controller="SelectDepartmentCtrl"
                              data-ui-select2="departmentsSelect.options"
                              data-ng-init="initActiveAvailableTBSelect(userTBDepartment)"
                              data-ng-model="reportData.department">
@@ -41,7 +41,7 @@
                 </td>
                 <td>
                     <div data-aplana-field >
-                        <div style="width: 355px;" data-ng-controller="SelectPeriodCtrl"
+                        <div style="width: 375px;" data-ng-controller="SelectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenDepartmentPeriods(reportData.department.id, selectedReportPeriod)"
                              data-ng-model="reportData.period"
@@ -70,7 +70,7 @@
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
+                        <div style="width: 375px;" data-ng-controller="SelectDeclarationTypeCtrl"
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-model="reportData.declarationType"
                              data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportData.period.id, reportData.department.id)"
@@ -100,7 +100,7 @@
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectFromArrayCtrl"
+                        <div style="width: 375px;" data-ng-controller="SelectFromArrayCtrl"
                              data-ui-select2="selectFromArray.options"
                              data-ng-model="reportData.negativeValuesAdjustment"
                              data-ng-init="init([APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT, APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT])">
