@@ -13,22 +13,9 @@
         .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData', '$http', '$logPanel', 'LogEntryResource', '$dialogs',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.title = $filter('translate')('reportPeriod.pils.openPeriod');
-                var defaultDepartment = null;
 
                 // Данные формы
                 $scope.form = {department: undefined, year: new Date().getFullYear(), dictPeriod: undefined};
-
-                $scope.onDepartmentsSelectLoaded = function (departments) {
-                    // значение по-умолчанию будет подразделение пользователя
-                    defaultDepartment = _.find(departments, function (department) {
-                        return department.id === $scope.user.terBank.id;
-                    });
-                    // если подразделение пользователя не найдено, то первое попавшееся
-                    if (!defaultDepartment) {
-                        defaultDepartment = departments[0];
-                    }
-                    $scope.form.department = defaultDepartment;
-                };
 
                 /**
                  * @description Обработчик кнопки "Создать"

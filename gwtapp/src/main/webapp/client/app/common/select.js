@@ -432,9 +432,9 @@
 
                 };
 
-                 // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
+                // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
                 $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId, latestPeriod) {
-                   $scope.initSelectWithOpenDepartmentPeriods(departmentId, latestPeriod);
+                    $scope.initSelectWithOpenDepartmentPeriods(departmentId, latestPeriod);
                 });
             }])
 
@@ -566,14 +566,23 @@
                 /**
                  * @description Формирует список подразделений доступных для ведения периодов
                  */
-                $scope.initAllAvailableTBForPeriodManagementSelect = function (onDataLoadedCallback) {
+                $scope.initAllAvailableTBForPeriodManagementSelect = function (departmentModel) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(false, true);
                     RefBookValuesResource.querySource({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
-                        projection: "allAvailableForPeriodManagement"
+                        projection: "activeAvailableTB"
                     }, function (availableTBs) {
                         $scope.departmentsSelect.options.data.results = availableTBs;
-                        onDataLoadedCallback(availableTBs);
+                        // значение по-умолчанию будет подразделение пользователя
+                        var defaultDepartment = $scope.user.terBank && _.find(availableTBs, function (department) {
+                            return department.id === $scope.user.terBank.id;
+                        });
+                        // если подразделение пользователя не найдено, то первое попавшееся
+                        if (!defaultDepartment) {
+                            defaultDepartment = availableTBs[0];
+                        }
+                        departmentModel.department = defaultDepartment;
+                        departmentModel.defaultDepartment = defaultDepartment;
                     });
                 };
 
@@ -666,23 +675,12 @@
         /**
          * Контроллер для выбора роли пользователя.
          */
-        .controller('SelectUserRolesCtrl', ['$scope', '$filter',
-            function ($scope, $filter) {
-                $scope.userRolesSelect = {
-                    // ручное заполнение опций select2
-                    options: {
-                        ajax: {
-                            url: 'controller/rest/roles',
-                            results: function (data) {
-                                return {results: data};
-                            }
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true
-                    }
-                };
+        .controller('SelectUserRolesCtrl', ['$scope', '$http', 'GetSelectOption',
+            function ($scope, $http, GetSelectOption) {
+                $scope.userRolesSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                $http.get('controller/rest/roles').success(function (data) {
+                    $scope.userRolesSelect.options.data.results = data;
+                });
             }
         ])
 

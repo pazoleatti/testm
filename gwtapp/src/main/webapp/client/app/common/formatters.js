@@ -284,25 +284,28 @@
          */
         .filter('joinObjectsPropFormatter', function () {
             return function (array, separator, path, checkDistinction) {
-                if (array && array.length > 0) {
-                    var nameArray = _.map(array, function (obj) {
-                        return _.deep(obj, path || 'name');
-                    });
-
-                    if (checkDistinction) {
-                        var distinctValues = [];
-                        angular.forEach(nameArray, function (value) {
-                            if (distinctValues.indexOf(value) === -1) {
-                                distinctValues.push(value);
-                            }
+                if (angular.isDefined(array)) {
+                    if (array && array.length > 0) {
+                        var nameArray = _.map(array, function (obj) {
+                            return _.deep(obj, path || 'name');
                         });
-                        nameArray = distinctValues;
-                    }
 
-                    return nameArray.join(separator || ', ');
+                        if (checkDistinction) {
+                            var distinctValues = [];
+                            angular.forEach(nameArray, function (value) {
+                                if (distinctValues.indexOf(value) === -1) {
+                                    distinctValues.push(value);
+                                }
+                            });
+                            nameArray = distinctValues;
+                        }
+
+                        return nameArray.join(separator || ', ');
+                    }
+                    return '';
                 }
 
-                return '';
+                return undefined;
             };
         })
 

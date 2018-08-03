@@ -1,12 +1,7 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
-import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.Department
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.PagingResult
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
@@ -16,13 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.script.service.CalendarService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
-import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 
 import java.util.regex.Matcher
@@ -2112,18 +2101,10 @@ class Check extends AbstractScriptClass {
             def person = personByIdMap[prepayment.ndflPersonId]
 
             if (person.status != "6" && person.inp == ndflPersonFL.inp) {
-                def logErrorIfFieldFilled = { fieldValue, fieldName ->
-                    if (fieldValue) {
-                        String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\".", person.inp)
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
-                        logger.logCheck("%s. %s.",
-                                true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)
-                    }
-                }
-                logErrorIfFieldFilled(prepayment.summ, P_SUMM)
-                logErrorIfFieldFilled(prepayment.notifNum, P_NOTIF_NUM)
-                logErrorIfFieldFilled(prepayment.notifDate, P_NOTIF_DATE)
-                logErrorIfFieldFilled(prepayment.notifSource, P_NOTIF_SOURCE)
+                String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\".", person.inp)
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
+                logger.logCheck("%s. %s.",
+                        true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)
             }
         }
 
