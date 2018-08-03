@@ -44,7 +44,7 @@
             <div title="{{::security.user.department.name}}">
                 {{security.user.department.name | truncateStringFormatter : 40}}
             </div>
-            <div title="{{::security.user.roles | joinObjectsPropFormatter : '; '}}">
+            <div title="{{::security.user.roles | joinObjectsPropFormatter : ';\n'}}">
                 {{security.user.name}}
             </div>
         </li>
