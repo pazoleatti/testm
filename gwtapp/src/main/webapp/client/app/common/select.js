@@ -432,9 +432,9 @@
 
                 };
 
-                 // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
+                // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
                 $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId, latestPeriod) {
-                   $scope.initSelectWithOpenDepartmentPeriods(departmentId, latestPeriod);
+                    $scope.initSelectWithOpenDepartmentPeriods(departmentId, latestPeriod);
                 });
             }])
 
@@ -666,23 +666,12 @@
         /**
          * Контроллер для выбора роли пользователя.
          */
-        .controller('SelectUserRolesCtrl', ['$scope', '$filter',
-            function ($scope, $filter) {
-                $scope.userRolesSelect = {
-                    // ручное заполнение опций select2
-                    options: {
-                        ajax: {
-                            url: 'controller/rest/roles',
-                            results: function (data) {
-                                return {results: data};
-                            }
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true
-                    }
-                };
+        .controller('SelectUserRolesCtrl', ['$scope', '$http', 'GetSelectOption',
+            function ($scope, $http, GetSelectOption) {
+                $scope.userRolesSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                $http.get('controller/rest/roles').success(function (data) {
+                    $scope.userRolesSelect.options.data.results = data;
+                });
             }
         ])
 
