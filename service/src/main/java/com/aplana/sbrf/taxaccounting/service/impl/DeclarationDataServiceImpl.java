@@ -1726,9 +1726,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
-        final Logger logger = new Logger();
 
         for (Long declarationId : declarationDataIds) {
+            final Logger logger = new Logger();
             if (existDeclarationData(declarationId)) {
                 String declarationFullName = getDeclarationFullName(declarationId, DeclarationDataReportType.TO_CREATE_DEC);
                 LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId(), declarationFullName);
