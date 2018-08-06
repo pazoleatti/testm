@@ -201,10 +201,9 @@ public class PeriodServiceImplTest {
         DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
+        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
-        DepartmentReportPeriod existPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).build();
-        when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(existPeriod);
+        when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(lastPeriod);
 
         try {
             periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
@@ -220,7 +219,7 @@ public class PeriodServiceImplTest {
         DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
-        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).active(true).build();
+        DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 11, 1)).active(true).build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
 
         try {
