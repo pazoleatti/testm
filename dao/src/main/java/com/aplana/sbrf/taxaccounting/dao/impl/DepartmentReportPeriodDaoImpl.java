@@ -66,11 +66,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     /**
      * Запрос выборки отчетных периодов подразделения с сортировкой по году и периоду сдаче корректировки(сначала некорректирующие)
      */
-    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date \n" +
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, rpt.code, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date \n" +
             " from \n" +
             " department_report_period drp \n" +
             " join report_period rp on drp.report_period_id = rp.id \n" +
             " join tax_period tp on rp.tax_period_id = tp.id \n" +
+            " join report_period_type rpt on rpt.id = rp.dict_tax_period_id\n" +
             " %s \n" +
             " order by tp.year, drp.correction_date NULLS FIRST";
 
@@ -115,6 +116,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             departmentReportPeriodJournalItem.setEndDate(reportPeriod.getEndDate());
             departmentReportPeriodJournalItem.setIsActive(!Objects.equals(SqlUtils.getInteger(rs, "is_active"), 0));
             departmentReportPeriodJournalItem.setCorrectionDate(rs.getDate("correction_date"));
+            departmentReportPeriodJournalItem.setCode(rs.getString("code"));
             return departmentReportPeriodJournalItem;
         }
     };

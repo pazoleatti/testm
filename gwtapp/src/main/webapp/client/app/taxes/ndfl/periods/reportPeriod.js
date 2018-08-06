@@ -68,7 +68,19 @@
                             $filter('translate')('reportPeriod.grid.correctionDate')
                         ],
                         colModel: [
-                            {name: 'name', index: 'name', sortable: false, width: 300},
+                            {
+                                name: 'name',
+                                index: 'name',
+                                sortable: false,
+                                width: 450,
+                                formatter: function (cellValue, options, row) {
+                                    return $filter("translate")("reportPeriod.grid.period.value", {
+                                        code: row.code,
+                                        periodName: row.name,
+                                        correction: row.correctionDate ? " (корректируюший)" : ""
+                                    });
+                                }
+                            },
                             {
                                 name: 'isActive',
                                 index: 'isActive',
