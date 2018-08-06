@@ -57,6 +57,19 @@
                 }
 
                 $scope.reportPeriodGrid = {
+                    init: function (ctrl) {
+                        ctrl.gridComplete = function () {
+                            var cm = $scope.reportPeriodGrid.options.colModel;
+                            var headers = $scope.reportPeriodGrid.ctrl.grid[0].grid.headers;
+                            for (var index = 1; index < headers.length; index++) {// index=0 - parent col
+                                var header = headers[index];
+                                var cmi = cm[index - 1], colName = cmi.name;
+                                if (!cmi.sortable && colName !== 'rn' && colName !== 'cb' && colName !== 'subgrid') {
+                                    $('div.ui-jqgrid-sortable', header.el).css({cursor: "default"});
+                                }
+                            }
+                        };
+                    },
                     ctrl: {},
                     value: [],
                     options: {
