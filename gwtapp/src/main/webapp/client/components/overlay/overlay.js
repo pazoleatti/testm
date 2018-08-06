@@ -101,6 +101,11 @@
                                     $injector.invoke(['$logPanel', function ($logPanel) {
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
                                     }]);
+                                    $injector.invoke(['$dialogs', function ($dialogs) {
+                                        $dialogs.errorDialog({
+                                            content: addMessage.exceptionCause[0].message
+                                        });
+                                    }]);
                                 } else {
                                     if (status === '403') {
                                         message = $filter('translate')(status);

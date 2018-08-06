@@ -221,50 +221,33 @@
                 /**
                  * @description Закрыть период
                  */
-                $scope.closePeriod = function () {
+                $scope.closePeriod = function (skipHasNotAcceptedCheck) {
                     $logPanel.close();
-                    // проверяем на наличие заблокированных форм на редактировании
-                    $scope.checkHasBlocked().then(function (response) {
-                        $scope.createLogPanel(response).then(function (response) {
-                            if (response) {
-                                $dialogs.errorDialog({
-                                    content: $filter('translate')('reportPeriod.error.closePeriod.hasBlocked.text')
-                                });
-                            } else {
-                                // проверка на наличие форм в статусе отличном от "Принята"
-                                $scope.checkHasNotAccepted().then(function (response) {
-                                    $scope.createLogPanel(response).then(function (response) {
-                                        if (response) {
-                                            $dialogs.confirmDialog({
-                                                title: $filter('translate')('reportPeriod.confirm.closePeriod.hasNotAccepted.title'),
-                                                content: $filter('translate')('reportPeriod.confirm.closePeriod.hasNotAccepted.text'),
-                                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                                okBtnClick: function () {
-                                                    doClosePeriod();
-                                                }
-                                            });
-                                        } else {
-                                            doClosePeriod();
-                                        }
-                                    });
-                                });
-                            }
-                        });
-                    });
-                };
-
-                function doClosePeriod() {
                     $http({
                         method: "POST",
-                        url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
+                        url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close",
+                        params: {
+                            skipHasNotAcceptedCheck: !!skipHasNotAcceptedCheck
+                        }
                     }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
-                            $scope.refreshGrid();
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                            if (response.data.warning) {
+                                $dialogs.confirmDialog({
+                                    title: $filter('translate')('reportPeriod.confirm.closePeriod'),
+                                    content: response.data.warning,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $scope.closePeriod(true);
+                                    }
+                                });
+                            } else {
+                                $scope.refreshGrid();
+                            }
                         }
                     });
-                }
+                };
 
                 /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенным налоговыми периодами
                  * @param permission
@@ -348,68 +331,6 @@
                     }).result.then(function () {
                         $scope.refreshGrid();
                     });
-                };
-
-                /**
-                 * @description Проверяет на наличие деклараций в статусе отличном от "Принята"
-                 */
-                $scope.checkHasNotAccepted = function () {
-                    $scope.checkHasNotAcceptedDefer = $q.defer();
-                    $http({
-                        method: "POST",
-                        url: "controller/rest/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "?projection=checkHasNotAccepted"
-                    }).then(function (logger) {
-                        if (logger.status === 200) {
-                            $scope.checkHasNotAcceptedDefer.resolve(logger.data);
-                        } else {
-                            $scope.checkHasNotAcceptedDefer.reject("Fail connect");
-                        }
-                    });
-                    return $scope.checkHasNotAcceptedDefer.promise;
-                };
-
-                /**
-                 * Формирует окно оповещений
-                 * @param uuid - идентификатор логов
-                 */
-                $scope.createLogPanel = function (uuid) {
-                    $scope.createLogPanelDefer = $q.defer();
-                    if (uuid) {
-                        LogEntryResource.query({
-                                uuid: uuid,
-                                projection: 'count'
-                            },
-                            function (data) {
-                                if ((data.ERROR + data.WARNING) !== 0) {
-                                    $logPanel.open('log-panel-container', uuid);
-                                    $scope.createLogPanelDefer.resolve(true);
-                                } else {
-                                    $scope.createLogPanelDefer.resolve(false);
-                                }
-                            });
-                    } else {
-                        $scope.createLogPanelDefer.resolve(false);
-                    }
-                    return $scope.createLogPanelDefer.promise;
-                };
-
-                /**
-                 * @description Проверяет на наличие деклараций на редактировании
-                 * @return признак блокировки периода формой
-                 */
-                $scope.checkHasBlocked = function () {
-                    $scope.checkHasBlockedDefer = $q.defer();
-                    $http({
-                        method: "POST",
-                        url: "controller/rest/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "?projection=checkHasBlockedDeclaration"
-                    }).then(function (logger) {
-                        if (logger.status === 200) {
-                            $scope.checkHasBlockedDefer.resolve(logger.data);
-                        } else {
-                            $scope.checkHasBlockedDefer.reject("Fail connect");
-                        }
-                    });
-                    return $scope.checkHasBlockedDefer.promise;
                 };
 
             }]);

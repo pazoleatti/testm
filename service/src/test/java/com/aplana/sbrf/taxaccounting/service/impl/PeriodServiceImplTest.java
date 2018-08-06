@@ -4,22 +4,22 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuidler;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
@@ -44,12 +44,14 @@ import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.mock.UserMockUtils.mockUser;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anySetOf;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -72,6 +74,8 @@ public class PeriodServiceImplTest {
     @Autowired
     DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
+    DeclarationDataSearchService declarationDataSearchService;
+    @Autowired
     DepartmentService departmentService;
     @Autowired
     DepartmentDao departmentDao;
@@ -81,6 +85,10 @@ public class PeriodServiceImplTest {
     ReportPeriodService reportPeriodService;
     @Autowired
     LogEntryService logEntryService;
+    @Autowired
+    DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    LockDataService lockDataService;
 
     @Captor
     private ArgumentCaptor<ArrayList<LogEntry>> logEntriesArgumentCaptor;
@@ -99,16 +107,29 @@ public class PeriodServiceImplTest {
         userInfo.setIp(LOCAL_IP);
         userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.N_ROLE_CONTROL_NS));
 
+        when(declarationDataSearchService.getDeclarationData(any(DeclarationDataFilter.class), any(DeclarationDataSearchOrdering.class), anyBoolean()))
+                .thenReturn(new ArrayList<DeclarationData>());
+
+        mockDecalrationTemplate();
         mockDepartments();
     }
 
-    void mockDepartments() {
+    private void mockDecalrationTemplate() {
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(1);
+        DeclarationType type = new DeclarationType();
+        type.setName("formName");
+        declarationTemplate.setType(type);
+        when(declarationTemplateService.get(1)).thenReturn(declarationTemplate);
+    }
+
+    private void mockDepartments() {
         when(departmentDao.fetchAllChildrenIds(1)).thenReturn(asList(1, 2, 3));
         Department department = new Department();
         department.setId(1);
         department.setName("dep1Name");
         when(departmentDao.getDepartment(1)).thenReturn(department);
-        when(departmentDao.getDepartment(1)).thenReturn(department);
+        when(departmentService.getDepartment(1)).thenReturn(department);
     }
 
     @Test
@@ -253,7 +274,7 @@ public class PeriodServiceImplTest {
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
 
-        periodService.close(123);
+        periodService.close(123, false);
 
         verify(departmentReportPeriodService, times(1)).updateActive(integerListArgumentCaptor.capture(), eq(1), eq(false));
         assertEquals(integerListArgumentCaptor.getValue(), asList(1, 2, 3));
@@ -269,12 +290,53 @@ public class PeriodServiceImplTest {
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
 
         try {
-            periodService.close(123);
+            periodService.close(123, false);
         } catch (ServiceException e) {
             verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
             assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, поскольку он уже закрыт", e.getMessage());
             throw e;
         }
+    }
+
+    @Test(expected = ServiceLoggerException.class)
+    public void closeHasBlockedForms() {
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+                .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
+        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1L);
+        declarationData.setDeclarationTemplateId(1);
+        declarationData.setDepartmentId(1);
+        when(declarationDataSearchService.getDeclarationData(any(DeclarationDataFilter.class), any(DeclarationDataSearchOrdering.class), anyBoolean()))
+                .thenReturn(singletonList(declarationData));
+
+        try {
+            periodService.close(123, false);
+        } catch (ServiceLoggerException e) {
+            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+            assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, т.к. в нём существуют заблокированные налоговые или отчетные формы. Перечень форм приведен в списке уведомлений", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test
+    public void closeHasNotAcceptedForms() {
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+                .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
+        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1L);
+        declarationData.setDeclarationTemplateId(1);
+        declarationData.setDepartmentId(1);
+        when(declarationDataSearchService.getDeclarationData(any(DeclarationDataFilter.class), any(DeclarationDataSearchOrdering.class), anyBoolean()))
+                .thenReturn(new ArrayList<DeclarationData>(), singletonList(declarationData), new ArrayList<DeclarationData>());
+        LockDataItem lockDataItem = new LockDataItem();
+        lockDataItem.setKey("DECLARATION_DATA_1");
+        when(lockDataService.fetchAllByKeySet(anySetOf(String.class))).thenReturn(singletonList(lockDataItem));
+
+        ClosePeriodResult result = periodService.close(123, false);
+        verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("В периоде \"2018:reportPeriodName\" существуют налоговые или отчетные формы в состоянии отличном от \"Принято\". Перечень форм приведен в списке уведомлений. Все равно закрыть период?", result.getWarning());
     }
 
     @Test(expected = ServiceException.class)
@@ -292,7 +354,7 @@ public class PeriodServiceImplTest {
         doThrow(new DaoException("123")).when(departmentReportPeriodService).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
 
         try {
-            periodService.close(123);
+            periodService.close(123, false);
         } catch (ServiceException e) {
             assertEquals("Ошибка при закрытии периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
             throw e;
@@ -338,7 +400,7 @@ public class PeriodServiceImplTest {
         try {
             periodService.reopen(123);
         } catch (ServiceException e) {
-            assertEquals("Ошибка при открытии периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
+            assertEquals("Ошибка при переоткрытии периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений. Обратитесь к администратору.", e.getMessage());
             throw e;
         }
     }

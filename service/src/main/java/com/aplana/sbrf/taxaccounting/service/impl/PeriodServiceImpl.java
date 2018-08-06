@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -79,6 +80,9 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
+
+    @Autowired
+    private LockDataService lockDataService;
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).OPEN_DEPARTMENT_REPORT_PERIOD)")
@@ -191,7 +195,7 @@ public class PeriodServiceImpl implements PeriodService {
             throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при открытии периода %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
+            throw new ServiceException("Ошибка при переоткрытии периода %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
                     periodDescription(departmentReportPeriod),
                     departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
         }
@@ -226,13 +230,11 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).CLOSE)")
-    public String close(Integer departmentReportPeriodId) {
+    public ClosePeriodResult close(Integer departmentReportPeriodId, boolean skipHasNotAcceptedCheck) {
         LOG.info(String.format("close departmentReportPeriodId: %s", departmentReportPeriodId));
-        Logger logger = new Logger();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         try {
-            close(departmentReportPeriod, logger);
-            return logEntryService.save(logger.getEntries());
+            return close(departmentReportPeriod, skipHasNotAcceptedCheck);
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -243,10 +245,28 @@ public class PeriodServiceImpl implements PeriodService {
         }
     }
 
-    private void close(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
+    private ClosePeriodResult close(DepartmentReportPeriod departmentReportPeriod, boolean skipHasNotAcceptedCheck) {
+        Logger logger = new Logger();
         if (!departmentReportPeriod.isActive()) {
             throw new ServiceException("Период %s не может быть закрыт для подразделения \"%s\" и всех дочерних подразделений, поскольку он уже закрыт",
                     periodDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
+        }
+
+        checkHasBlockedDeclaration(departmentReportPeriod, logger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException("Период %s не может быть закрыт для подразделения \"%s\" и всех дочерних подразделений, т.к. в нём существуют заблокированные налоговые или отчетные формы. Перечень форм приведен в списке уведомлений",
+                    logEntryService.save(logger.getEntries()),
+                    periodDescription(departmentReportPeriod),
+                    departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
+        }
+
+        if (!skipHasNotAcceptedCheck) {
+            checkHasNotAccepted(departmentReportPeriod, logger);
+            if (logger.containsLevel(LogLevel.WARNING)) {
+                return new ClosePeriodResult(logEntryService.save(logger.getEntries()),
+                        String.format("В периоде %s существуют налоговые или отчетные формы в состоянии отличном от \"Принято\". Перечень форм приведен в списке уведомлений. Все равно закрыть период?",
+                        periodDescription(departmentReportPeriod)));
+            }
         }
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -256,6 +276,7 @@ public class PeriodServiceImpl implements PeriodService {
             logger.info("Период %s закрыт для подразделения \"%s\" и всех дочерних подразделений",
                     periodDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
         }
+        return new ClosePeriodResult(logEntryService.save(logger.getEntries()));
     }
 
     @Override
@@ -332,6 +353,64 @@ public class PeriodServiceImpl implements PeriodService {
                 taxPeriodDao.delete(reportPeriod.getTaxPeriod().getId());
             }
         }
+    }
+
+    private void checkHasBlockedDeclaration(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
+        List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
+
+        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+        dataFilter.setDepartmentIds(departments);
+        dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+        dataFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
+        dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+
+        List<DeclarationData> declarations = declarationDataSearchService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
+
+        Map<String, DeclarationData> keysBlocker = new HashMap<>(declarations.size());
+        for (DeclarationData declarationData : declarations) {
+            keysBlocker.put("DECLARATION_DATA_" + declarationData.getId(), declarationData);
+        }
+        List<LockDataItem> lockDataItems = new ArrayList<>();
+
+        if (keysBlocker.size() > 0) {
+            lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
+        }
+
+        for (LockDataItem lockDataItem : lockDataItems) {
+            DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
+            DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            logger.error("Форма \"%s\" № %s, Подразделении: \"%s\", Период: \"%s\" заблокирована.",
+                    template.getType().getName(), dd.getId(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
+                    periodDescription(departmentReportPeriod));
+        }
+    }
+
+    private boolean checkHasNotAccepted(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
+        boolean result = false;
+        List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
+
+        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+        dataFilter.setDepartmentIds(departments);
+        dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+        dataFilter.setFormState(State.CREATED);
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            dataFilter.setCorrectionTag(true);
+            dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+        } else {
+            dataFilter.setCorrectionTag(false);
+        }
+
+        List<DeclarationData> declarations = declarationDataSearchService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
+        dataFilter.setFormState(State.PREPARED);
+        declarations.addAll(declarationDataSearchService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false));
+        for (DeclarationData dd : declarations) {
+            DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            logger.warn("Форма \"%s\" № %s существует в подразделении \"%s\" в периоде %s.",
+                    template.getType().getName(), dd.getId(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
+                    periodDescription(departmentReportPeriod));
+            result = true;
+        }
+        return result;
     }
 
     @Override

@@ -1,17 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.LockDataItem;
-import com.aplana.sbrf.taxaccounting.model.MessageGenerator;
-import com.aplana.sbrf.taxaccounting.model.State;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -26,11 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -144,92 +132,8 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public String checkHasNotAccepted(Integer id) {
-        Logger logger = new Logger();
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(id);
-        if (departmentReportPeriod == null) {
-            throw new ServiceException("Ошибка загрузки отчтетного периода подразделения с id " + id +
-                    ". Период не существует или не найден.");
-        }
-
-        List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
-
-        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
-        dataFilter.setDepartmentIds(departments);
-        dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-        dataFilter.setFormState(State.CREATED);
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            dataFilter.setCorrectionTag(true);
-            dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-        } else {
-            dataFilter.setCorrectionTag(false);
-        }
-
-        List<DeclarationData> declarations = declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
-        dataFilter.setFormState(State.PREPARED);
-        declarations.addAll(declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false));
-        for (DeclarationData dd : declarations) {
-            DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            String msg = MessageGenerator.getFDMsg("Форма находится в состоянии отличном от \"Принята\":", template.getType().getName(), template.getDeclarationFormKind().getTitle(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
-                    null, dd.getManuallyCreated(), departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    departmentReportPeriod.getCorrectionDate(), null);
-            logger.warn(msg);
-        }
-
-        return logEntryService.save(logger.getEntries());
-
-    }
-
-    @Override
     public DepartmentReportPeriod fetchOne(int id) {
         return departmentReportPeriodDao.fetchOne(id);
-    }
-
-    @Override
-    public String checkHasBlockedDeclaration(Integer id) {
-        Logger logger = new Logger();
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(id);
-        if (departmentReportPeriod == null) {
-            throw new ServiceException("Ошибка загрузки отчетного периода подразделения с id " + id +
-                    ". Период не существует или не найден.");
-        }
-
-        List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
-
-        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
-        dataFilter.setDepartmentIds(departments);
-        dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            dataFilter.setCorrectionTag(true);
-            dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-        } else {
-            dataFilter.setCorrectionTag(false);
-        }
-
-        List<DeclarationData> declarations = declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
-
-        Map<String, DeclarationData> keysBlocker = new HashMap<>(declarations.size());
-        for (DeclarationData declarationData : declarations) {
-            keysBlocker.put("DECLARATION_DATA_" + declarationData.getId(), declarationData);
-        }
-        List<LockDataItem> lockDataItems = new ArrayList<>();
-
-        if (keysBlocker.size() > 0) {
-            lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
-        }
-
-        for (LockDataItem lockDataItem : lockDataItems) {
-            DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
-            DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            String msg = MessageGenerator.getFDMsg("Форма № " + dd.getId() + " редактируется пользователем " + lockDataItem.getUser() + " ", template.getType().getName(), template.getDeclarationFormKind().getTitle(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
-                    null, dd.getManuallyCreated(), departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    departmentReportPeriod.getCorrectionDate(), null);
-            logger.error(msg);
-        }
-        return logEntryService.save(logger.getEntries());
     }
 
 }

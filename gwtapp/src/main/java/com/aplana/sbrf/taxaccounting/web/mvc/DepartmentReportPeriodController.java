@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
@@ -135,25 +136,15 @@ public class DepartmentReportPeriodController {
     }
 
     /**
-     * Проверка преиода подразделения на наличие непринятых деклараций
-     *
-     * @param departmentReportPeriodId - идентификатор проверяемого периода подразделения
-     * @return uuid идентификатор логера
-     */
-    @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasNotAccepted")
-    public String checkHasNotAccepted(@PathVariable Integer departmentReportPeriodId) {
-        return departmentReportPeriodService.checkHasNotAccepted(departmentReportPeriodId);
-    }
-
-    /**
      * Закрытие периода для подразделения
      *
-     * @param departmentReportPeriodId идентификатор закрываемого перода с подразделением "Банк"
-     * @return uuid идентификатор логера
+     * @param departmentReportPeriodId идентификатор закрываемого перода
+     * @param skipHasNotAcceptedCheck пропускает проверку наличия форм в состоянии отличном от "Принято"
+     * @return {@link ClosePeriodResult}
      */
     @PostMapping(value = "/actions/departmentReportPeriod/{departmentReportPeriodId}/close")
-    public String close(@PathVariable Integer departmentReportPeriodId) {
-        return periodService.close(departmentReportPeriodId);
+    public ClosePeriodResult close(@PathVariable Integer departmentReportPeriodId, @RequestParam boolean skipHasNotAcceptedCheck) {
+        return periodService.close(departmentReportPeriodId, skipHasNotAcceptedCheck);
     }
 
     /**
@@ -200,16 +191,5 @@ public class DepartmentReportPeriodController {
     @PostMapping(value = "actions/departmentReportPeriod/reopen")
     public String reopen(@RequestParam Integer departmentReportPeriodId) {
         return periodService.reopen(departmentReportPeriodId);
-    }
-
-    /**
-     * Проверка периода на наличие деклараций, находящихся на редактировании
-     *
-     * @param departmentReportPeriodId идентификатор проверяемого периода
-     * @return uuid идентификатор логера
-     */
-    @PostMapping(value = "rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasBlockedDeclaration")
-    public String checkHasBlockedDeclaration(@PathVariable Integer departmentReportPeriodId) {
-        return departmentReportPeriodService.checkHasBlockedDeclaration(departmentReportPeriodId);
     }
 }

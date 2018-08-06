@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
+import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import net.sf.jasperreports.web.actions.ActionException;
@@ -51,9 +52,10 @@ public interface PeriodService {
      * Закрыть период
      *
      * @param departmentReportPeriodId идентификатор периода для подразделения "Банк"
-     * @return uuid логгера
+     * @param skipHasNotAcceptedCheck пропускает проверку наличия форм в состоянии отличном от "Принято"
+     * @return {@link ClosePeriodResult}
      */
-    String close(Integer departmentReportPeriodId);
+    ClosePeriodResult close(Integer departmentReportPeriodId, boolean skipHasNotAcceptedCheck);
 
     /**
      * Удалить отчетный период

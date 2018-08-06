@@ -134,20 +134,4 @@ public interface DepartmentReportPeriodService {
      * @return список {@link DepartmentReportPeriodJournalItem} или пустой список
      */
     List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
-
-    /**
-     * Проверка периода на декларации, которые не в статусе "Принят"
-     *
-     * @param id параметры проверяемого периода
-     * @return uuid идентификатор логгера
-     */
-    String checkHasNotAccepted(Integer id);
-
-    /**
-     * Проверяет период на наличие деклараций, которые находятся на редактировании
-     *
-     * @param id идентификатор проверяемого периода
-     * @return uuid  идентификатор логера
-     */
-    String checkHasBlockedDeclaration(Integer id);
 }
