@@ -512,6 +512,7 @@
         "reportPeriod.grid.status.open": "Открыт",
         "reportPeriod.grid.status.close": "Закрыт",
         "reportPeriod.grid.period.value": "({{code}}) {{periodName}}{{correction}}",
+        "reportPeriod.grid.period.value.correction": " (корректирующий)",
         "reportPeriod.correctionPeriod": "Период корректировки",
         "reportPeriod.modal.year": "Год",
         "reportPeriod.modal.deadline": "Дата сдачи отчетности",

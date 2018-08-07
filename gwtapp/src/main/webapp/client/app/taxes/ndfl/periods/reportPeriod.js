@@ -90,7 +90,7 @@
                                     return $filter("translate")("reportPeriod.grid.period.value", {
                                         code: row.code,
                                         periodName: row.name,
-                                        correction: row.correctionDate ? " (корректируюший)" : ""
+                                        correction: row.correctionDate ? $filter("translate")("reportPeriod.grid.period.value.correction") : ""
                                     });
                                 }
                             },
