@@ -210,7 +210,7 @@
          */
         .filter('performersFormatter', ['$filter', function ($filter) {
             return function (cellValue, options) {
-                return $filter('joinObjectsPropFormatter')(cellValue, ', ', 'fullName');
+                return $filter('joinObjectsPropFormatter')(cellValue, ', ', 'fullName') || '';
             };
         }]);
 }());

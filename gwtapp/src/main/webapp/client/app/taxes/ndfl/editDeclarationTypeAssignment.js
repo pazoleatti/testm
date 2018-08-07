@@ -24,12 +24,12 @@
                 /**
                  * Список наименований подразделений
                  */
-                $scope.departmentNames = $filter('joinObjectsPropFormatter')($shareData.selectedAssignments, ', ', 'department.fullName', true);
+                $scope.departmentNames = $filter('joinObjectsPropFormatter')($shareData.selectedAssignments, ', ', 'department.fullName', true) || '';
 
                 /**
                  * Список видов форм
                  */
-                $scope.declarationTypes = $filter('joinObjectsPropFormatter')($shareData.selectedAssignments, ', ', 'name', true);
+                $scope.declarationTypes = $filter('joinObjectsPropFormatter')($shareData.selectedAssignments, ', ', 'name', true) || '';
 
                 /**
                  * Список подразделений
