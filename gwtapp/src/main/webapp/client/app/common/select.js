@@ -582,7 +582,6 @@
                             defaultDepartment = availableTBs[0];
                         }
                         departmentModel.department = defaultDepartment;
-                        departmentModel.defaultDepartment = defaultDepartment;
                     });
                 };
 

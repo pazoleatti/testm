@@ -32,6 +32,7 @@
             function ($scope, $filter, DepartmentReportPeriodResource, CommonParamResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal,
                       ValidationUtils, $dialogs, $q) {
 
+                var defaultDepartment = null;
                 $scope.yearMin = 2003;
                 $scope.yearMax = 2100;//TODO сообщения валидатора не обновляются если изменить параметр и вернутся на страницу
                 CommonParamResource.query({
@@ -126,6 +127,9 @@
 
                 $scope.$watch("searchFilter.params.department", function (newValue, oldValue) {
                     if (!!newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                        if (!defaultDepartment) {
+                            defaultDepartment = newValue;
+                        }
                         $scope.initGrid();
                     }
                 });
@@ -152,7 +156,6 @@
                         $scope.reportPeriodGrid.ctrl.refreshGridData($scope.periodGridData);
                     });
                 };
-
 
                 /**
                  * @description Обновление грида
@@ -186,7 +189,7 @@
                     $scope.searchFilter.params = {
                         yearStart: new Date().getFullYear(),
                         yearEnd: new Date().getFullYear(),
-                        department: $scope.searchFilter.params.defaultDepartment
+                        department: defaultDepartment
                     };
 
                     /* убираем надпись "Сброс" */
