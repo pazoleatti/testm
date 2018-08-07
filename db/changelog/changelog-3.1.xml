@@ -378,4 +378,312 @@
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 5</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-4" author="akorobko">
+        <sql>
+            drop sequence SEQ_DEPARTMENT;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-5" author="akorobko">
+        <sql>
+            drop sequence SEQ_DEPARTMENT_FORM_TYPE;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-6" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_COLUMN;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-7" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_DATA;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-8" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_DATA_NNN;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-9" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_DATA_SIGNER;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-10" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_SEARCH_RESULT;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-11" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_STYLE;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-12" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_TEMPLATE;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-13" author="akorobko">
+        <sql>
+            drop sequence SEQ_FORM_TYPE;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-14" author="akorobko">
+        <sql>
+            drop sequence SEQ_LOG_ENTRY;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-15" author="akorobko">
+        <sql>
+            drop sequence SEQ_LOG_QUERY;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-16" author="akorobko">
+        <sql>
+            drop sequence SEQ_LOG_QUERY_SESSION;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-17" author="akorobko">
+        <sql>
+            drop sequence SEQ_SEC_USER;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-18" author="akorobko">
+        <sql>
+            drop sequence SEQ_SEC_USER_ASNU_ID;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-19" author="akorobko">
+        <sql>
+            drop sequence SEQ_TASK_CONTEXT;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-20" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_KOL_LIC_TIP;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-21" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_OBYAZ_PLAT_SV;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-22" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_OSS_VNM;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-23" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_PERS_SV_STRAH_LIC;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-24" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_PRAV_TARIF3_1_427;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-25" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_PRAV_TARIF5_1_427;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-26" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_PRAV_TARIF7_1_427;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-27" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_RASH_OSS_ZAK;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-28" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_RASH_OSS_ZAK_RASH;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-29" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_RASH_VYPL;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-30" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SVED_OBUCH;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-31" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SVNP_PODPISANT;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-32" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_OPS_OMS;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-33" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_OPS_OMS_RASCH;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-34" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_PRIM_TARIF1_422;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-35" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_PRIM_TARIF2_425;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-36" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_PRIM_TARIF9_427;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-37" author="akorobko">
+        <sql>
+           drop sequence SEQ_RASCHSV_SV_REESTR_MDO;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-38" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_SUM_1TIP;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-39" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_VYPL;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-40" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_SV_VYPL_MK;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-41" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_UPL_PER;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-42" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_UPL_PREV_OSS;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-43" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_UPL_SV_PREV;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-44" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_VYPL_FIN_FB;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-45" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_VYPL_PRICHINA;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-46" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_VYPL_SV_DOP;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5294 Убрать неиспользуемые последовательности в БД -->
+    <changeSet id="3.1-akorobko-47" author="akorobko">
+        <sql>
+            drop sequence SEQ_RASCHSV_VYPL_SV_DOP_MT;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
