@@ -235,7 +235,9 @@
                             $shareData: function () {
                                 return {
                                     department: $scope.searchFilter.params.department,
-                                    isAdd: true
+                                    isAdd: true,
+                                    yearMin: $scope.yearMin,
+                                    yearMax: $scope.yearMax
                                 };
                             }
                         }
@@ -260,10 +262,12 @@
                     }).then(function (response) {
                         if (response.data.uuid) {
                             $logPanel.open('log-panel-container', response.data.uuid);
-                            if (response.data.warning) {
+                        }
+                        if (response.data.error) {
+                            if (!response.data.fatal) {
                                 $dialogs.confirmDialog({
                                     title: $filter('translate')('reportPeriod.confirm.closePeriod'),
-                                    content: response.data.warning,
+                                    content: response.data.error,
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
                                     okBtnClick: function () {
@@ -271,8 +275,10 @@
                                     }
                                 });
                             } else {
-                                $scope.refreshGrid();
+                                $dialogs.errorDialog({content: response.data.error});
                             }
+                        } else {
+                            $scope.refreshGrid();
                         }
                     });
                 };
@@ -298,23 +304,25 @@
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
-                            doDeletePeriod();
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/departmentReportPeriod/delete",
+                                params: {
+                                    departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
+                                }
+                            }).then(function (response) {
+                                if (response.data.uuid) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                                if (response.data.error) {
+                                    $dialogs.errorDialog({content: response.data.error});
+                                } else {
+                                    $scope.refreshGrid();
+                                }
+                            });
                         }
                     });
                 };
-
-                function doDeletePeriod() {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/departmentReportPeriod/delete",
-                        params: {
-                            departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
-                        }
-                    }).then(function (response) {
-                        $logPanel.open('log-panel-container', response.data);
-                        $scope.refreshGrid();
-                    });
-                }
 
                 /**
                  * @description Переоткрытие выбранного периода
@@ -332,10 +340,14 @@
                             departmentReportPeriodId: departmentReportPeriodId
                         }
                     }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
                         }
-                        $scope.refreshGrid();
+                        if (response.data.error) {
+                            $dialogs.errorDialog({content: response.data.error});
+                        } else {
+                            $scope.refreshGrid();
+                        }
                     });
                 }
 

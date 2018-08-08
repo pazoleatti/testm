@@ -12,6 +12,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReopenPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -46,6 +50,7 @@ import static com.aplana.sbrf.taxaccounting.mock.UserMockUtils.mockUser;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -146,7 +151,7 @@ public class PeriodServiceImplTest {
         assertEquals("Период \"2018:reportPeriodName\" открыт для \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void openExists() {
         DepartmentReportPeriodBuidler departmentReportPeriodBuilder = new DepartmentReportPeriodBuidler()
                 .department(1).year(2018).dictTaxPeriodId(1L);
@@ -156,13 +161,9 @@ public class PeriodServiceImplTest {
         when(reportPeriodService.fetchOrCreate(any(TaxPeriod.class), any(ReportPeriodType.class))).thenReturn(existDepartmentReportPeriod.getReportPeriod());
         when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(existDepartmentReportPeriod);
 
-        try {
-            periodService.open(departmentReportPeriodBuilder.build(), null);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Период \"2018:reportPeriodName\" уже существует и открыт для подразделения \"dep1Name\" и всех дочерних подразделений", e.getMessage());
-            throw e;
-        }
+        OpenPeriodResult result = periodService.open(departmentReportPeriodBuilder.build(), null);
+        verify(departmentReportPeriodService, never()).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
+        assertEquals("Период \"2018:reportPeriodName\" уже существует и открыт для подразделения \"dep1Name\" и всех дочерних подразделений", result.getError());
     }
 
     @Test(expected = ServiceException.class)
@@ -196,7 +197,7 @@ public class PeriodServiceImplTest {
         assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 открыт для \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void openCorrectionExists() {
         DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
@@ -205,16 +206,12 @@ public class PeriodServiceImplTest {
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
         when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(lastPeriod);
 
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 уже существует и закрыт для подразделения \"dep1Name\" и всех дочерних подразделений", e.getMessage());
-            throw e;
-        }
+        OpenPeriodResult result = periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
+        verify(departmentReportPeriodService, never()).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
+        assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 уже существует и закрыт для подразделения \"dep1Name\" и всех дочерних подразделений", result.getError());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void openCorrectionWhenOpenedCorrectionPeriodExists() {
         DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
@@ -222,16 +219,12 @@ public class PeriodServiceImplTest {
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 11, 1)).active(true).build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
 
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к уже открыт другой корректирующий период!", e.getMessage());
-            throw e;
-        }
+        OpenPeriodResult result = periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
+        verify(departmentReportPeriodService, never()).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
+        assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к уже открыт другой корректирующий период!", result.getError());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void openCorrectionWhenLaterCorrectionPeriodExists() {
         DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
@@ -240,13 +233,9 @@ public class PeriodServiceImplTest {
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
 
-        try {
-            periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
-            assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к. для него существует более поздние корректирующие периоды!", e.getMessage());
-            throw e;
-        }
+        OpenPeriodResult result = periodService.openCorrectionPeriod(new OpenCorrectionPeriodAction(123, new Date(2018 - 1900, 0, 1)));
+        verify(departmentReportPeriodService, never()).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
+        assertEquals("Корректирующий период \"2018:reportPeriodName\" с периодом сдачи корректировки 01.01.2018 не может быть открыт, т.к. для него существует более поздние корректирующие периоды!", result.getError());
     }
 
     @Test(expected = ServiceException.class)
@@ -282,22 +271,18 @@ public class PeriodServiceImplTest {
         assertEquals("Период \"2018:reportPeriodName\" закрыт для подразделения \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void closeClosed() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
 
-        try {
-            periodService.close(123, false);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, поскольку он уже закрыт", e.getMessage());
-            throw e;
-        }
+        ClosePeriodResult result = periodService.close(123, false);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, поскольку он уже закрыт", result.getError());
     }
 
-    @Test(expected = ServiceLoggerException.class)
+    @Test
     public void closeHasBlockedForms() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
@@ -309,13 +294,9 @@ public class PeriodServiceImplTest {
         when(declarationDataSearchService.getDeclarationData(any(DeclarationDataFilter.class), any(DeclarationDataSearchOrdering.class), anyBoolean()))
                 .thenReturn(singletonList(declarationData));
 
-        try {
-            periodService.close(123, false);
-        } catch (ServiceLoggerException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, т.к. в нём существуют заблокированные налоговые или отчетные формы. Перечень форм приведен в списке уведомлений", e.getMessage());
-            throw e;
-        }
+        ClosePeriodResult result = periodService.close(123, false);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Период \"2018:reportPeriodName\" не может быть закрыт для подразделения \"dep1Name\" и всех дочерних подразделений, т.к. в нём существуют заблокированные налоговые или отчетные формы. Перечень форм приведен в списке уведомлений", result.getError());
     }
 
     @Test
@@ -334,8 +315,9 @@ public class PeriodServiceImplTest {
         when(lockDataService.fetchAllByKeySet(anySetOf(String.class))).thenReturn(singletonList(lockDataItem));
 
         ClosePeriodResult result = periodService.close(123, false);
-        verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-        assertEquals("В периоде \"2018:reportPeriodName\" существуют налоговые или отчетные формы в состоянии отличном от \"Принято\". Перечень форм приведен в списке уведомлений. Все равно закрыть период?", result.getWarning());
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("В периоде \"2018:reportPeriodName\" существуют налоговые или отчетные формы в состоянии отличном от \"Принято\". Перечень форм приведен в списке уведомлений. Все равно закрыть период?", result.getError());
+        assertFalse(result.isFatal());
     }
 
     @Test(expected = ServiceException.class)
@@ -404,51 +386,39 @@ public class PeriodServiceImplTest {
         }
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void reopenOpened() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
 
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" уже открыт для подразделения \"dep1Name\" и всех дочерних подразделений", e.getMessage());
-            throw e;
-        }
+        ReopenPeriodResult result = periodService.reopen(123);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Период \"2018:reportPeriodName\" уже открыт для подразделения \"dep1Name\" и всех дочерних подразделений", result.getError());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void reopenWhenCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
 
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName\" не может быть переоткрыт, т.к. для него созданы корректирующие периоды!", e.getMessage());
-            throw e;
-        }
+        ReopenPeriodResult result = periodService.reopen(123);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Период \"2018:reportPeriodName\" не может быть переоткрыт, т.к. для него созданы корректирующие периоды!", result.getError());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void reopenWhenLaterCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(false).correctionDate(new Date(2018 - 1900, 0, 1)).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
 
-        try {
-            periodService.reopen(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Период \"2018:reportPeriodName (корр. 01.01.2018)\" не может быть переоткрыт, т.к. для него существуют более поздние корректирующие периоды!", e.getMessage());
-            throw e;
-        }
+        ReopenPeriodResult result = periodService.reopen(123);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Период \"2018:reportPeriodName (корр. 01.01.2018)\" не может быть переоткрыт, т.к. для него существуют более поздние корректирующие периоды!", result.getError());
     }
 
     @Test
@@ -494,36 +464,27 @@ public class PeriodServiceImplTest {
         }
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void deleteWhenCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
 
-        try {
-            periodService.delete(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Удаление периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений невозможно, т.к. для него существует корректирующий период.", e.getMessage());
-            throw e;
-        }
+        DeletePeriodResult result = periodService.delete(123);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Удаление периода \"2018:reportPeriodName\" для подразделения \"dep1Name\" и всех дочерних подразделений невозможно, т.к. для него существует корректирующий период.", result.getError());
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void deleteWhenLaterCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
                 .active(false).correctionDate(new Date(2018 - 1900, 0, 1)).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
 
-        try {
-            periodService.delete(123);
-        } catch (ServiceException e) {
-            verify(departmentReportPeriodService, times(0)).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
-            assertEquals("Удаление корректирующего периода \"2018:reportPeriodName (корр. 01.01.2018)\" для подразделения \"dep1Name\" и всех дочерних подразделений невозможно, т.к. для него существует более поздний корректирующий период.",
-                    e.getMessage());
-            throw e;
-        }
+        DeletePeriodResult result = periodService.delete(123);
+        verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
+        assertEquals("Удаление корректирующего периода \"2018:reportPeriodName (корр. 01.01.2018)\" для подразделения \"dep1Name\" и всех дочерних подразделений невозможно, т.к. для него существует более поздний корректирующий период.", result.getError());
     }
 }

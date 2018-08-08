@@ -37,8 +37,12 @@
                                 })
                             }
                         }).then(function (response) {
-                            if (response.data) {
-                                $logPanel.open('log-panel-container', response.data);
+                            if (response.data.uuid) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
+                            if (response.data.error) {
+                                $dialogs.errorDialog({content: response.data.error});
+                            } else {
                                 $modalInstance.close();
                             }
                         });

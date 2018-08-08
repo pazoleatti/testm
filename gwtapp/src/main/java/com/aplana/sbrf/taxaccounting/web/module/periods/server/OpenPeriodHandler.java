@@ -37,7 +37,7 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 		departmentReportPeriod.setDepartmentId(action.getDepartmentId());
 		departmentReportPeriod.setCorrectionDate(action.getCorrectPeriod());
 		OpenPeriodResult result = new OpenPeriodResult();
-        result.setUuid(reportPeriodService.open(departmentReportPeriod, securityService.currentUserInfo()));
+        result.setUuid(reportPeriodService.open(departmentReportPeriod, securityService.currentUserInfo()).getUuid());
 		return result;
 	}
 

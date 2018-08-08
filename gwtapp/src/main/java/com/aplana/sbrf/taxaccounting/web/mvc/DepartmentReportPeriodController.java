@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReopenPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
@@ -131,7 +134,7 @@ public class DepartmentReportPeriodController {
      * @return идентификатор uuid для логов
      */
     @PostMapping(value = "/actions/departmentReportPeriod/open")
-    public String open(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
+    public OpenPeriodResult open(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
         return periodService.open(departmentReportPeriod, securityService.currentUserInfo());
     }
 
@@ -151,10 +154,10 @@ public class DepartmentReportPeriodController {
      * Удаление периода для подразделения
      *
      * @param departmentReportPeriodId идентификатор удаляемого периода
-     * @return uuid идентификатор логера
+     * @return {@link DeletePeriodResult}
      */
     @PostMapping(value = "/actions/departmentReportPeriod/delete")
-    public String delete(@RequestParam Integer departmentReportPeriodId) {
+    public DeletePeriodResult delete(@RequestParam Integer departmentReportPeriodId) {
         return periodService.delete(departmentReportPeriodId);
     }
 
@@ -176,10 +179,10 @@ public class DepartmentReportPeriodController {
      * Открыть корректирующий период для подразделения
      *
      * @param action данные по корректирующему периоду
-     * @return uuid идентификатор логера
+     * @return {@link OpenPeriodResult}
      */
     @PostMapping(value = "actions/departmentReportPeriod/openCorrectPeriod")
-    public String openCorrectPeriod(@RequestParam OpenCorrectionPeriodAction action) {
+    public OpenPeriodResult openCorrectPeriod(@RequestParam OpenCorrectionPeriodAction action) {
         return periodService.openCorrectionPeriod(action);
     }
 
@@ -187,9 +190,10 @@ public class DepartmentReportPeriodController {
      * Переоткрывает закрытый период
      *
      * @param departmentReportPeriodId фильтр с данными о периоде и датой сдачи отчетности
+     * @return {@link ReopenPeriodResult}
      */
     @PostMapping(value = "actions/departmentReportPeriod/reopen")
-    public String reopen(@RequestParam Integer departmentReportPeriodId) {
+    public ReopenPeriodResult reopen(@RequestParam Integer departmentReportPeriodId) {
         return periodService.reopen(departmentReportPeriodId);
     }
 }

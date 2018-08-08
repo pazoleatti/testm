@@ -180,7 +180,7 @@ public class DepartmentDaoTest {
 
     @Test
     public void fetchAllTBIdsByPerformer() {
-        assertEquals(Arrays.asList(2, 3), departmentDao.fetchAllTBIdsByPerformer(7));
+        assertEquals(Arrays.asList(3), departmentDao.fetchAllTBIdsByPerformer(6));
     }
 
     @Test

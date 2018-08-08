@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReopenPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import net.sf.jasperreports.web.actions.ActionException;
@@ -21,17 +24,17 @@ public interface PeriodService {
      *
      * @param period   отчетный период подразделения, который необходимо открыть
      * @param userInfo пользователь запустивший операцию
-     * @return uuid логов
+     * @return {@link OpenPeriodResult}
      */
-    String open(DepartmentReportPeriod period, TAUserInfo userInfo);
+    OpenPeriodResult open(DepartmentReportPeriod period, TAUserInfo userInfo);
 
     /**
      * Открыть Корректирующий период
      *
      * @param action данные по корректирующему периоду
-     * @return logs логер, при необходимости
+     * @return {@link OpenPeriodResult}
      */
-    String openCorrectionPeriod(OpenCorrectionPeriodAction action);
+    OpenPeriodResult openCorrectionPeriod(OpenCorrectionPeriodAction action);
 
     /**
      * Открывает периоды для одного подразделения, чтобы они соответствовали периодам ТерБанка
@@ -44,9 +47,9 @@ public interface PeriodService {
      * Переоткрывает закрытый период
      *
      * @param departmentReportPeriodId период
-     * @return uuid логера
+     * @return {@link ReopenPeriodResult}
      */
-    String reopen(Integer departmentReportPeriodId);
+    ReopenPeriodResult reopen(Integer departmentReportPeriodId);
 
     /**
      * Закрыть период
@@ -61,9 +64,9 @@ public interface PeriodService {
      * Удалить отчетный период
      *
      * @param id идентификатор периода
-     * @return uuid логера
+     * @return {@link DeletePeriodResult}
      */
-    String delete(Integer id);
+    DeletePeriodResult delete(Integer id);
 
     /**
      * Получить объект отчётного периода по идентификатору периода

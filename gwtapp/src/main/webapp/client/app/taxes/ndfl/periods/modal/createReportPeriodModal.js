@@ -14,6 +14,9 @@
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.title = $filter('translate')('reportPeriod.pils.openPeriod');
 
+                $scope.yearMin = $shareData.yearMin;
+                $scope.yearMax = $shareData.yearMax;
+
                 // Данные формы
                 $scope.form = {department: undefined, year: new Date().getFullYear(), dictPeriod: undefined};
 
@@ -37,8 +40,12 @@
                             })
                         }
                     }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                        if (response.data.error) {
+                            $dialogs.errorDialog({content: response.data.error});
+                        } else {
                             $modalInstance.close($scope.form.year);
                         }
                     });

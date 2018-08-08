@@ -11,3 +11,4 @@ INSERT INTO department_decl_type_performer (department_decl_type_id, performer_d
 INSERT INTO department_decl_type_performer (department_decl_type_id, performer_dep_id) VALUES (6, 7);
 INSERT INTO department_decl_type_performer (department_decl_type_id, performer_dep_id) VALUES (5, 7);
 INSERT INTO department_decl_type_performer (department_decl_type_id, performer_dep_id) VALUES (4, 3);
+INSERT INTO department_decl_type_performer (department_decl_type_id, performer_dep_id) VALUES (7, 6);

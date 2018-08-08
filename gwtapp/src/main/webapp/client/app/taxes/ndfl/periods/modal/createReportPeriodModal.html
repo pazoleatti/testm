@@ -29,8 +29,8 @@
                                style="width: 75px"
                                id="period.reportPeriod.taxPeriod.year"
                                data-required
-                               max="2099"
-                               min="1900"
+                               data-ng-max="yearMax"
+                               data-ng-min="yearMin"
                         />
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
@@ -39,12 +39,10 @@
                             translate}}
                         </div>
                         <div data-aplana-validator data-key='min'>
-                            {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
-                            1900 + ' }'}}
+                            {{'common.validation.min.value' | translate:'{ minValue: ' + yearMin + ' }'}}
                         </div>
                         <div data-aplana-validator data-key='max'>
-                            {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
-                            2099 + ' }'}}
+                            {{'common.validation.max.value' | translate:'{ maxValue: ' + yearMax + ' }'}}
                         </div>
                     </div>
                 </td>
