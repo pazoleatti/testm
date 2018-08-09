@@ -703,4 +703,11 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5245 Изменить возможные значения поля format из справочника ref_book_attribute -->
+    <changeSet id="3.1-akorobko-48" author="akorobko">
+        <sql>
+            update ref_book_attribute set format=7 where id=9083;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
