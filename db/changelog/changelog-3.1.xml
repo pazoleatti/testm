@@ -731,4 +731,16 @@
             <where>id in (8, 12)</where>
         </update>
     </changeSet>
+
+    <!-- У файлов скриптов были ошибочные названия -->
+    <changeSet id="3.1-snazin-3" author="snazin">
+        <update tableName="blob_data">
+            <column name="name" value="id_doc.groovy"/>
+            <where>id = '375ba56a-2509-11e7-93ae-92361f002671'</where>
+        </update>
+        <update tableName="blob_data">
+            <column name="name" value="person.groovy"/>
+            <where>id = '884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
