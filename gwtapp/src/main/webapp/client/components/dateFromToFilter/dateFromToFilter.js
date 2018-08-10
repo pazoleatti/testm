@@ -27,6 +27,7 @@
                     labelWidth: "@"
                 },
                 link: function (scope, element, attributes) {
+                    element.addClass('date-from-to-filter');
                     scope.ngLabel = angular.isDefined(scope.ngLabel) ? scope.ngLabel : "title.dateFromFilterLabel";
                     // Изменение пропорций метки и поля
                     scope.labelGridClass = 'span3';
