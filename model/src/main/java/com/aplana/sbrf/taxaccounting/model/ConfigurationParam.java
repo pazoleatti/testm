@@ -33,6 +33,11 @@ public enum ConfigurationParam {
     ENCRYPT_DLL("Путь к библиотеке подписи", ConfigurationParamGroup.COMMON, true, true, 1),
 
     /**
+     * Путь к руководству
+     */
+    MANUAL_PATH("Путь к руководству пользователя и настройщика", ConfigurationParamGroup.COMMON, true, true, 1),
+
+    /**
      * Загрузка НФ
      */
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", ConfigurationParamGroup.FORM, true, true, 2),

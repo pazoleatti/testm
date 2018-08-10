@@ -158,13 +158,15 @@
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_USER)) {
                         $scope.treeManual.push({
                             name: $filter('translate')('menu.manuals.manualUser'),
-                            href: "resources/help_ndfl.pdf"
+                            href: "controller/rest/document?fileName=help_ndfl.pdf",
+                            target: "_blank"
                         });
                     }
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_DESIGNER)) {
                         $scope.treeManual.push({
                             name: $filter('translate')('menu.manuals.manualLayoutDesigner'),
-                            href: "resources/help_conf.pdf"
+                            href: "controller/rest/document?fileName=help_conf.pdf",
+                            target: "_blank"
                         });
                     }
                 }

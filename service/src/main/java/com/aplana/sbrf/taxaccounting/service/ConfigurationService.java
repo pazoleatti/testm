@@ -117,6 +117,14 @@ public interface ConfigurationService {
     PagingResult<Configuration> fetchCommonParams(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup, TAUserInfo userInfo);
 
     /**
+     * Возвращает общий параметр конфигурации по перечислению {@link ConfigurationParam}
+     *
+     * @param param перечисление {@link ConfigurationParam}
+     * @return параметр {@link Configuration} или null, если не найден
+     */
+    Configuration fetchByEnum(ConfigurationParam param);
+
+    /**
      * Возвращяет map вида код-параметр для определенного списка кодов
      *
      * @param codes список кодов параметров

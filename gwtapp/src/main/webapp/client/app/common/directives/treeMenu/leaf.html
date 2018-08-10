@@ -1,5 +1,5 @@
 <li>
     <a data-ng-click="leaf.onClick()" data-ng-if="leaf.onClick">{{leaf.name}}</a>
-    <a href="{{leaf.href}}" data-ng-if="!leaf.onClick && leaf.href">{{leaf.name}}</a>
+    <a href="{{leaf.href}}" data-ng-if="!leaf.onClick && leaf.href" target="{{leaf.target || '_self'}}">{{leaf.name}}</a>
     <a data-ng-if="!leaf.onClick && !leaf.href">{{leaf.name}}</a>
 </li>

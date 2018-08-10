@@ -539,6 +539,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    public Configuration fetchByEnum(ConfigurationParam param) {
+        return configurationDao.fetchByEnum(param);
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
             "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_GENERAL)")
     public Map<String, Configuration> fetchAllByCodes(List<String> codes, TAUserInfo userInfo) {
