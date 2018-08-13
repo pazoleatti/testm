@@ -3,18 +3,36 @@ package com.aplana.sbrf.taxaccounting.script.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
+import com.aplana.sbrf.taxaccounting.model.identification.Address;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.*;
+import static java.util.Arrays.asList;
 
 /**
  * @author Andrey Drunk
@@ -24,6 +42,8 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
     @Autowired
     private RefBookPersonDao refBookPersonDao;
+    @Autowired
+    private ConfigurationService configurationService;
 
     // ----------------------------- РНУ-НДФЛ  -----------------------------
 
@@ -139,11 +159,22 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
      * @return
      */
     public List<BaseWeightCalculator> getBaseCalculateList() {
+        Map<String, Configuration> configurations = configurationService.fetchAllByEnums(asList(
+                WEIGHT_LAST_NAME, WEIGHT_FIRST_NAME, WEIGHT_MIDDLE_NAME, WEIGHT_BIRTHDAY, WEIGHT_CITIZENSHIP, WEIGHT_INP,
+                WEIGHT_INN, WEIGHT_INN_FOREIGN, WEIGHT_SNILS, WEIGHT_TAX_PAYER_STATUS, WEIGHT_DUL, WEIGHT_ADDRESS, WEIGHT_ADDRESS_INO
+        ));
+        Map<String, Integer> weightsByCode = Maps.transformEntries(configurations, new Maps.EntryTransformer<String, Configuration, Integer>() {
+            @Override
+            public Integer transformEntry(String key, Configuration value) {
+                return Integer.valueOf(value.getValue());
+            }
+        });
 
-        List<BaseWeightCalculator> result = new ArrayList<BaseWeightCalculator>();
+
+        List<BaseWeightCalculator> result = new ArrayList<>();
 
         //Фамилия
-        result.add(new BaseWeightCalculator<IdentityPerson>("Фамилия", 5) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Фамилия", weightsByCode.get(WEIGHT_LAST_NAME.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getLastName(), b.getLastName());
@@ -151,7 +182,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Имя
-        result.add(new BaseWeightCalculator<IdentityPerson>("Имя", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Имя", weightsByCode.get(WEIGHT_FIRST_NAME.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getFirstName(), b.getFirstName());
@@ -159,7 +190,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Отчество
-        result.add(new BaseWeightCalculator<IdentityPerson>("Отчество", 5) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Отчество", weightsByCode.get(WEIGHT_MIDDLE_NAME.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getMiddleName(), b.getMiddleName());
@@ -167,7 +198,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Дата рождения
-        result.add(new BaseWeightCalculator<IdentityPerson>("Дата рождения", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Дата рождения", weightsByCode.get(WEIGHT_BIRTHDAY.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareDate(a.getBirthDate(), b.getBirthDate());
@@ -175,7 +206,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Гражданство
-        result.add(new BaseWeightCalculator<IdentityPerson>("Гражданство", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Гражданство", weightsByCode.get(WEIGHT_CITIZENSHIP.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareNumber(getIdOrNull(a.getCitizenship()), getIdOrNull(b.getCitizenship()));
@@ -183,7 +214,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Идентификатор физлица номер и код АСНУ
-        result.add(new BaseWeightCalculator<IdentityPerson>("Идентификатор физлица", 15) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Идентификатор физлица", weightsByCode.get(WEIGHT_INP.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
 
@@ -207,7 +238,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //ИНН в РФ
-        result.add(new BaseWeightCalculator<IdentityPerson>("ИНН в РФ", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("ИНН в РФ", weightsByCode.get(WEIGHT_INN.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getInn(), b.getInn());
@@ -215,7 +246,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //ИНН в стране гражданства
-        result.add(new BaseWeightCalculator<IdentityPerson>("ИНН Ино", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("ИНН Ино", weightsByCode.get(WEIGHT_INN_FOREIGN.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getInnForeign(), b.getInnForeign());
@@ -223,7 +254,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //СНИЛС
-        result.add(new BaseWeightCalculator<IdentityPerson>("СНИЛС", 15) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("СНИЛС", weightsByCode.get(WEIGHT_SNILS.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(prepareSnils(a.getSnils()), prepareSnils(b.getSnils()));
@@ -231,7 +262,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Статус налогоплательщика
-        result.add(new BaseWeightCalculator<IdentityPerson>("Статус налогоплательщика", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Статус налогоплательщика", weightsByCode.get(WEIGHT_TAX_PAYER_STATUS.name())) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
                 TaxpayerStatus a = personA.getTaxPayerStatus();
@@ -248,7 +279,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Документ вид документа и код
-        result.add(new BaseWeightCalculator<IdentityPerson>("ДУЛ", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("ДУЛ", weightsByCode.get(WEIGHT_DUL.name())) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 //Запись первичной НФ
@@ -271,7 +302,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Адрес в РФ
-        result.add(new BaseWeightCalculator<IdentityPerson>("Адрес в РФ", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Адрес в РФ", weightsByCode.get(WEIGHT_ADDRESS.name())) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
 
@@ -335,7 +366,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Адрес ино
-        result.add(new BaseWeightCalculator<IdentityPerson>("Адрес ино", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Адрес ино", weightsByCode.get(WEIGHT_ADDRESS_INO.name())) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
 

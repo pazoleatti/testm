@@ -759,4 +759,72 @@
 	order by d_child.id,drp_parent.report_period_id,drp_parent.correction_date nulls first) a
         </sql>
     </changeSet>
+
+    <changeSet id="3.1-dnovikov-10" author="dnovikov">
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_LAST_NAME"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="5"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_FIRST_NAME"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="10"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_MIDDLE_NAME"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="5"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_BIRTHDAY"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="10"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_CITIZENSHIP"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="1"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_INP"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="15"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_INN"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="10"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_INN_FOREIGN"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="10"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_SNILS"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="15"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_TAX_PAYER_STATUS"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="1"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_DUL"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="10"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_ADDRESS"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="1"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="WEIGHT_ADDRESS_INO"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="1"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

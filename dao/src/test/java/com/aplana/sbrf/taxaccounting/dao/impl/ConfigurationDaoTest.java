@@ -43,6 +43,13 @@ public class ConfigurationDaoTest {
     }
 
     @Test
+    public void fetchAllByEnums() {
+        List<Configuration> configurations = dao.fetchAllByEnums(asList(ConfigurationParam.KEY_FILE, ConfigurationParam.SBERBANK_INN));
+        assertNotNull(configurations);
+        assertEquals(2, configurations.size());
+    }
+
+    @Test
     public void fetchAllAsModel() {
         ConfigurationParamModel model = dao.fetchAllAsModel();
         assertEquals(9, model.size());

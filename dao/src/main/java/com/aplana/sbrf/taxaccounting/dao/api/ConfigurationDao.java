@@ -26,10 +26,10 @@ public interface ConfigurationDao {
     /**
      * Возвращает общий параметр конфигурации по перечислению {@link ConfigurationParam}
      *
-     * @param codes коллекция кодов запрашиваемых параметров
+     * @param params коллекция запрашиваемых параметров
      * @return список параметров {@link Configuration} или null, если не найден
      */
-    List<Configuration> fetchAllByCodes(Collection<String> codes);
+    List<Configuration> fetchAllByEnums(Collection<ConfigurationParam> params);
 
     /**
      * Возвращает все параметры в виде модели {@link ConfigurationParamModel}

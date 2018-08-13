@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -114,9 +116,15 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public List<Configuration> fetchAllByCodes(Collection<String> codes) {
+    public List<Configuration> fetchAllByEnums(Collection<ConfigurationParam> params) {
         try {
             MapSqlParameterSource sqlParams = new MapSqlParameterSource();
+            Collection<String> codes = Collections2.transform(params, new Function<ConfigurationParam, String>() {
+                @Override
+                public String apply(ConfigurationParam input) {
+                    return input.name();
+                }
+            });
             sqlParams.addValue("codes", codes);
             return getNamedParameterJdbcTemplate().query("SELECT code, department_id, value FROM configuration WHERE code in (:codes)",
                     sqlParams, configurationRowMapper);

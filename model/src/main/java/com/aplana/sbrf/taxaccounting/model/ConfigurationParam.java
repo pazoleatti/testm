@@ -54,7 +54,20 @@ public enum ConfigurationParam {
     ENABLE_IMPORT_PERSON("Загружать справочник ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
     CONSOLIDATION_DATA_SELECTION_DEPTH("Горизонт отбора данных консолидации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
     REPORT_PERIOD_YEAR_MIN("Минимальное значение отчетного года", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
-    REPORT_PERIOD_YEAR_MAX("Максимальное значение отчетного года", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
+    REPORT_PERIOD_YEAR_MAX("Максимальное значение отчетного года", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_LAST_NAME("Вес для идентификации поля Фамилия", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_FIRST_NAME("Вес для идентификации поля Имя", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_MIDDLE_NAME("Вес для идентификации поля Отчество", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_BIRTHDAY("Вес для идентификации поля Дата рождения", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_CITIZENSHIP("Вес для идентификации поля Гражданство", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_INP("Вес для идентификации поля ИНП", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_INN("Вес для идентификации поля ИНН в РФ", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_INN_FOREIGN("Вес для идентификации поля ИНН в стране гражданства", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_SNILS("Вес для идентификации поля СНИЛС", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_TAX_PAYER_STATUS("Вес для идентификации поля Статус налогоплательщика", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_DUL("Вес для идентификации поля ДУЛ", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_ADDRESS("Вес для идентификации поля Адрес в РФ", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    WEIGHT_ADDRESS_INO("Вес для идентификации поля Адрес в стране регистрации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
 
     private String caption;
     private ConfigurationParamGroup group;

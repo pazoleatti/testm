@@ -127,11 +127,16 @@ public interface ConfigurationService {
     /**
      * Возвращяет map вида код-параметр для определенного списка кодов
      *
-     * @param codes список кодов параметров
+     * @param params список параметров
      * @param userInfo пользователь
      * @return map в виде код-параметр
      */
-    Map<String, Configuration> fetchAllByCodes(List<String> codes, TAUserInfo userInfo);
+    Map<String, Configuration> fetchAllByEnums(List<ConfigurationParam> params, TAUserInfo userInfo);
+
+    /**
+     * То же что {@link #fetchAllByEnums(List, TAUserInfo)}, но без проверки прав
+     */
+    Map<String, Configuration> fetchAllByEnums(List<ConfigurationParam> params);
 
     /**
      * Создание конфигурацинного параметра

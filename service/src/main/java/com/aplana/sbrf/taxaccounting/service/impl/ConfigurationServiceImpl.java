@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,8 +27,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.*;
 import static java.util.Arrays.asList;
 
 @Service("configurationService")
@@ -74,6 +84,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
     private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE = "Для параметра \"Горизонт отбора данных для консолидации, годы\" должно быть указано целое количество лет от 1 до 99";
     private static final String REPORT_PERIOD_YEAR_ERROR = "Для параметра \"%s\" должно быть указано значение от 0001 до 9999";
+    private static final String NEGATIVE_INTEGER_ERROR = "Для параметра \"%s\" должно быть указано целое число ≥ 0";
     private static final String REPORT_PERIOD_YEAR_MIN_HIGHER_MAX_ERROR = "Минимальное значение отчетного года\" должно быть не больше \"Максимального значения отчетного года";
     private static final String REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR = "Максимальное значение отчетного года\" должно быть не меньше \"Минимального значения отчетного года";
 
@@ -104,6 +115,21 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.getCaption(), COMMON_PARAM_DEPARTMENT_ID, CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MIN));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MAX));
+        // Веса идентификации
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_LAST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "5"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_FIRST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_MIDDLE_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "5"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_BIRTHDAY.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_CITIZENSHIP.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_INP.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "15"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_INN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_INN_FOREIGN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_SNILS.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "15"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_TAX_PAYER_STATUS.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_DUL.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS_INO.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
+
         return defaultCommonConfig;
     }
 
@@ -546,8 +572,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
             "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_GENERAL)")
-    public Map<String, Configuration> fetchAllByCodes(List<String> codes, TAUserInfo userInfo) {
-        List<Configuration> configurations = configurationDao.fetchAllByCodes(codes);
+    public Map<String, Configuration> fetchAllByEnums(List<ConfigurationParam> params, TAUserInfo userInfo) {
+        return fetchAllByEnums(params);
+    }
+
+    public Map<String, Configuration> fetchAllByEnums(List<ConfigurationParam> params) {
+        List<Configuration> configurations = configurationDao.fetchAllByEnums(params);
         return Maps.uniqueIndex(configurations, new Function<Configuration, String>() {
             @Override
             public String apply(Configuration configuration) {
@@ -742,6 +772,38 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else if (config.getCode().equals(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.name()) ||
                 config.getCode().equals(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.name())) {
             checkReportPeriodYear(config, logger);
+        } else if (isIdentificationWeightParam(config)) {
+            checkIdentificationWeightParam(config, logger);
+        }
+    }
+
+    private boolean isIdentificationWeightParam(Configuration config) {
+        List<ConfigurationParam> params = Arrays.asList(WEIGHT_LAST_NAME, WEIGHT_FIRST_NAME, WEIGHT_MIDDLE_NAME, WEIGHT_BIRTHDAY, WEIGHT_CITIZENSHIP, WEIGHT_INP,
+                WEIGHT_INN, WEIGHT_INN_FOREIGN, WEIGHT_SNILS, WEIGHT_TAX_PAYER_STATUS, WEIGHT_DUL, WEIGHT_ADDRESS, WEIGHT_ADDRESS_INO);
+        for (ConfigurationParam param : params) {
+            if (config.getCode().equalsIgnoreCase(param.name())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Проверка параметра веса идентификации
+     *
+     * @param configuration значение параметра
+     * @param logger логгер
+     */
+    private void checkIdentificationWeightParam(Configuration configuration, Logger logger) {
+        boolean formatError = false;
+        Integer intValue = null;
+        try {
+            intValue = Integer.valueOf(configuration.getValue());
+        } catch (NumberFormatException e) {
+            formatError = true;
+        }
+        if (formatError || intValue < 0) {
+            logger.error(NEGATIVE_INTEGER_ERROR, configuration.getDescription());
         }
     }
 
