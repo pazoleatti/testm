@@ -743,4 +743,20 @@
             <where>id = '884b9f2e-1678-4d69-9652-b036bba2f728'</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5334 Создание недостающих связей между новыми подразделениями и периодами -->
+    <changeSet id="3.1-akorobko-49" author="akorobko">
+        <sql>
+	insert into department_report_period(id,department_id,report_period_id,is_active,correction_date)
+	select seq_department_report_period.nextval,id,report_period_id,is_active,correction_date from (
+	select d_child.id,drp_parent.report_period_id,drp_parent.is_active,drp_parent.correction_date from department_child_view dcv
+	join department d_parent on dcv.parent_id=d_parent.id and d_parent.type=2
+	join department_report_period drp_parent on drp_parent.department_id=d_parent.id
+	join department d_child on dcv.id=d_child.id
+	where not exists (select * from department_report_period drp_child 
+			where drp_child.department_id=d_child.id and drp_child.report_period_id=drp_parent.report_period_id and 
+				(drp_child.correction_date=drp_parent.correction_date or (drp_child.correction_date is null and drp_parent.correction_date is null)))
+	order by d_child.id,drp_parent.report_period_id,drp_parent.correction_date nulls first) a
+        </sql>
+    </changeSet>
 </databaseChangeLog>
