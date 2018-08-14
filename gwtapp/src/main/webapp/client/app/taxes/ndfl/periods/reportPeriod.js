@@ -37,7 +37,7 @@
                 $scope.yearMax = 2100;//TODO сообщения валидатора не обновляются если изменить параметр и вернутся на страницу
                 CommonParamResource.query({
                     codes: [APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MIN, APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MAX],
-                    projection: "allByCodes"
+                    projection: "allByEnums"
                 }, function (configurationsByCode) {
                     $scope.yearMin = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MIN].value;
                     $scope.yearMax = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.REPORT_PERIOD_YEAR_MAX].value;
