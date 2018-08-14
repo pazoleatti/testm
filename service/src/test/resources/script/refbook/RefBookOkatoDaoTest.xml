@@ -8,6 +8,10 @@
 
     <import resource="classpath:script/testScriptSupportContext.xml"/>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ConfigurationService"/>
+    </bean>
+
     <jdbc:initialize-database ignore-failures="DROPS">
         <jdbc:script location="classpath:data/RefBookOkatoData.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>

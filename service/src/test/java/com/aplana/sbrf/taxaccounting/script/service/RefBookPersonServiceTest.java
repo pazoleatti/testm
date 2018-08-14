@@ -2,12 +2,18 @@ package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.identification.DocType;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,12 +25,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Andrey Drunk
@@ -51,8 +63,31 @@ public class RefBookPersonServiceTest {
     @Before
     public void init() {
         RefBookPersonDao refBookPersonDao = mock(RefBookPersonDao.class);
+        ConfigurationService configurationService = mock(ConfigurationService.class);
         //when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(getList());
         ReflectionTestUtils.setField(personService, "refBookPersonDao", refBookPersonDao);
+        ReflectionTestUtils.setField(personService, "configurationService", configurationService);
+
+        List<Configuration> defaultCommonConfig = new ArrayList<>();
+        defaultCommonConfig.add(new Configuration(WEIGHT_LAST_NAME.name(), 0, "5"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_FIRST_NAME.name(), 0, "10"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_MIDDLE_NAME.name(), 0, "5"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_BIRTHDAY.name(), 0, "10"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_CITIZENSHIP.name(), 0, "1"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_INP.name(), 0, "15"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_INN.name(), 0, "10"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_INN_FOREIGN.name(), 0, "10"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_SNILS.name(), 0, "15"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_TAX_PAYER_STATUS.name(), 0, "1"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_DUL.name(), 0, "10"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_ADDRESS.name(), 0, "1"));
+        defaultCommonConfig.add(new Configuration(WEIGHT_ADDRESS_INO.name(), 0, "1"));
+        Map<String, Configuration> map = new HashMap<>();
+        for (Configuration configuration : defaultCommonConfig) {
+            map.put(configuration.getCode(), configuration);
+        }
+
+        when(configurationService.fetchAllByEnums(anyListOf(ConfigurationParam.class))).thenReturn(map);
     }
 
     @Test

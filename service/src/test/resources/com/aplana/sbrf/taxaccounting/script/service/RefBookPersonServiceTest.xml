@@ -16,6 +16,10 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory"/>
     </bean>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ConfigurationService"/>
+    </bean>
+
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/RefBookPersonServiceTest.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
