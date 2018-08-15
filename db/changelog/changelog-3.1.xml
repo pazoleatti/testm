@@ -753,8 +753,8 @@
 	join department d_parent on dcv.parent_id=d_parent.id and d_parent.type=2
 	join department_report_period drp_parent on drp_parent.department_id=d_parent.id
 	join department d_child on dcv.id=d_child.id
-	where not exists (select * from department_report_period drp_child 
-			where drp_child.department_id=d_child.id and drp_child.report_period_id=drp_parent.report_period_id and 
+	where not exists (select * from department_report_period drp_child
+			where drp_child.department_id=d_child.id and drp_child.report_period_id=drp_parent.report_period_id and
 				(drp_child.correction_date=drp_parent.correction_date or (drp_child.correction_date is null and drp_parent.correction_date is null)))
 	order by d_child.id,drp_parent.report_period_id,drp_parent.correction_date nulls first) a
         </sql>
@@ -846,5 +846,31 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+    </changeSet>
+
+    <!-- Обновление записей о статусах и ID для дубликатов, задача https://jira.aplana.com/browse/SBRFNDFL-5346 -->
+    <changeSet id="3.1-snazin-5" author="snazin">
+        <sql>
+            update ref_book_person
+            set status = old_status
+            where (old_id is not null) and (old_status is not null) and (status = -1)
+        </sql>
+        <sql>
+            update ref_book_person
+            set old_id = record_id
+            where old_id is null
+        </sql>
+        <rollback>
+            <sql>
+                update ref_book_person
+                set old_id = null
+                where old_id = record_id
+            </sql>
+            <sql>
+                update ref_book_person
+                set status = -1
+                where (old_id is not null) and (status = old_status)
+            </sql>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
