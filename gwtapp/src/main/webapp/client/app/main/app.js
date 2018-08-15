@@ -592,6 +592,7 @@
         "ndflFL.title.id": "Идентификатор строки\n Гр. 23",
         "ndflFL.title.modifiedDate": "Дата и время редактирования\n Гр. 24",
         "ndflFL.title.modifiedBy": "Обновил\n Гр. 25",
+        "ndflFL.title.asnu" : "АСНУ\n Гр. 26",
 
         "incomesAndTax.title.numberpp": "№ п/п\n Гр. 1",
         "incomesAndTax.title.inp": "ИНП\nГр. 2",
@@ -620,6 +621,8 @@
         "incomesAndTax.title.id": "Идентификатор строки\n Гр. 25",
         "incomesAndTax.title.modifiedDate": "Дата и время редактирования\n Гр. 26",
         "incomesAndTax.title.modifiedBy": "Обновил\n Гр. 27",
+        "incomesAndTax.title.asnu": "АСНУ\n Гр. 28",
+
 
         "incomesAndTax.edit.title": "Редактирование сведений о доходах и НДФЛ, №строки= {{rowNum}}, ID операции = {{operationId}}",
         "incomesAndTax.edit.cancel.header": "Отмена редактирования строки",
@@ -683,6 +686,7 @@
         "ndflDeduction.title.id": "Идентификатор строки\n Гр. 17",
         "ndflDeduction.title.modifiedDate": "Дата и время редактирования\n Гр. 18",
         "ndflDeduction.title.modifiedBy": "Обновил\n Гр. 19",
+        "ndflDeduction.title.asnu": "АСНУ\n Гр. 20",
 
         "ndlfPrepayment.title.numberpp": "№ п/п\n Гр. 1",
         "ndlfPrepayment.title.inp": "ИНП\n Гр. 2",
@@ -694,6 +698,9 @@
         "ndlfPrepayment.title.id": "Идентификатор строки\n Гр. 8",
         "ndlfPrepayment.title.modifiedDate": "Дата и время редактирования\n Гр. 9",
         "ndlfPrepayment.title.modifiedBy": "Обновил\n Гр. 10",
+        "ndlfPrepayment.title.asnu": "АСНУ\n Гр. 11",
+
+
 
         "createReport.period": "Период",
         "createReport.department": "Подразделение",

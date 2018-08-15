@@ -22,14 +22,14 @@ public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
     /**
      * Получение всех значений справочника
      *
-     * @return Список значений справочника
+     * @return Список значений справочника отсортированых по названию по убыванию
      */
     @Override
     public List<RefBookAsnu> fetchAll() {
         //Выбирются записи с положительным значением id, т.к. есть фиктивные записи с id=-1
         return getJdbcTemplate().query("select id, code, name, type, priority " +
                         "from ref_book_asnu " +
-                        "where id > 0",
+                        "where id > 0 order by name asc",
                 new RefBookAsnuRowMapper());
     }
 

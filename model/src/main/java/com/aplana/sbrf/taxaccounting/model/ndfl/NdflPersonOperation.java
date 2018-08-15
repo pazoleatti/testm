@@ -29,6 +29,16 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
      */
     protected Long ndflPersonId;
 
+    /**
+     * Наименование АСНУ источника
+     */
+    protected String asnu;
+
+    /**
+     * Ссылка на справочник АСНУ
+     */
+    protected Long asnuId;
+
     public Long getNdflPersonId() {
         return ndflPersonId;
     }
@@ -68,4 +78,20 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
     public abstract String[] getColumns();
 
     public abstract String[] getFields();
+
+    public String getAsnu() {
+        return asnu;
+    }
+
+    public void setAsnu(String asnu) {
+        this.asnu = asnu;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
+    }
 }

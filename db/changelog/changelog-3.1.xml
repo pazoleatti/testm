@@ -753,8 +753,8 @@
 	join department d_parent on dcv.parent_id=d_parent.id and d_parent.type=2
 	join department_report_period drp_parent on drp_parent.department_id=d_parent.id
 	join department d_child on dcv.id=d_child.id
-	where not exists (select * from department_report_period drp_child 
-			where drp_child.department_id=d_child.id and drp_child.report_period_id=drp_parent.report_period_id and 
+	where not exists (select * from department_report_period drp_child
+			where drp_child.department_id=d_child.id and drp_child.report_period_id=drp_parent.report_period_id and
 				(drp_child.correction_date=drp_parent.correction_date or (drp_child.correction_date is null and drp_parent.correction_date is null)))
 	order by d_child.id,drp_parent.report_period_id,drp_parent.correction_date nulls first) a
         </sql>
@@ -848,4 +848,91 @@
 	values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name, b.razd);
         </sql>
     </changeSet>
+
+    <!--start https://jira.aplana.com/browse/SBRFNDFL-5299 Реализовать добавление в РНУ колонки с АСНУ и фильтра по этой колонке-->
+    <changeSet id="3.1-apronin-12" author="apronin">
+        <addColumn tableName="ndfl_person">
+            <column name="asnu_id" type="number(18)"/>
+        </addColumn>
+        <addColumn tableName="ndfl_person_deduction">
+            <column name="asnu_id" type="number(18)"/>
+        </addColumn>
+        <addColumn tableName="ndfl_person_income">
+            <column name="asnu_id" type="number(18)"/>
+        </addColumn>
+        <addColumn tableName="ndfl_person_prepayment">
+            <column name="asnu_id" type="number(18)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="3.1-apronin-13" author="apronin">
+        <sql>update (select np.ID as np_id, np.DECLARATION_DATA_ID as np_dd_id, np.ASNU_ID as np_asnu, dd.ID as dd_id, dd.ASNU_ID as dd_asnu
+                from NDFL_PERSON np
+                    left join DECLARATION_DATA dd on np.DECLARATION_DATA_ID = dd.ID
+                where dd.DECLARATION_TEMPLATE_ID = (select dt.ID from DECLARATION_TEMPLATE dt where dt.DECLARATION_TYPE_ID = 100)) sub
+            set sub.np_asnu = sub.dd_asnu
+            where sub.dd_id = sub.np_dd_id
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-14" author="apronin">
+        <sql>
+            update (select npd.ASNU_ID as npd_asnu, dd.ASNU_ID as dd_asnu, dd.ID as dd_id, np.DECLARATION_DATA_ID as np_dd_id, npd.NDFL_PERSON_ID as npd_np_id, np.ID as np_id
+                from NDFL_PERSON_DEDUCTION npd
+                    left join NDFL_PERSON np on npd.NDFL_PERSON_ID = np.ID
+                    left join DECLARATION_DATA dd on np.DECLARATION_DATA_ID = dd.ID
+                where dd.DECLARATION_TEMPLATE_ID = (select dt.ID from DECLARATION_TEMPLATE dt where dt.DECLARATION_TYPE_ID = 100)) sub
+            set sub.npd_asnu = sub.dd_asnu
+            where sub.dd_id = sub.np_dd_id and sub.npd_np_id = sub.np_id;
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-15" author="apronin">
+        <sql>
+            update (select npi.ASNU_ID as npi_asnu, dd.ASNU_ID as dd_asnu, dd.ID as dd_id, np.DECLARATION_DATA_ID as np_dd_id, npi.NDFL_PERSON_ID as npi_np_id, np.ID as np_id
+                from NDFL_PERSON_INCOME npi
+                    left join NDFL_PERSON np on npi.NDFL_PERSON_ID = np.ID
+                    left join DECLARATION_DATA dd on np.DECLARATION_DATA_ID = dd.ID
+                where dd.DECLARATION_TEMPLATE_ID = (select dt.ID from DECLARATION_TEMPLATE dt where dt.DECLARATION_TYPE_ID = 100)) sub
+            set sub.npi_asnu = sub.dd_asnu
+            where sub.dd_id = sub.np_dd_id and sub.npi_np_id = sub.np_id
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-16" author="apronin">
+        <sql>
+            update (select npp.ASNU_ID as npp_asnu, dd.ASNU_ID as dd_asnu, dd.ID as dd_id, np.DECLARATION_DATA_ID as np_dd_id, npp.NDFL_PERSON_ID as npp_np_id, np.ID as np_id
+            from NDFL_PERSON_PREPAYMENT npp
+            left join NDFL_PERSON np on npp.NDFL_PERSON_ID = np.ID
+            left join DECLARATION_DATA dd on np.DECLARATION_DATA_ID = dd.ID
+            where dd.DECLARATION_TEMPLATE_ID = (select dt.ID from DECLARATION_TEMPLATE dt where dt.DECLARATION_TYPE_ID = 100)) sub
+            set sub.npp_asnu = sub.dd_asnu
+            where sub.dd_id = sub.np_dd_id and sub.npp_np_id = sub.np_id
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-17" author="apronin">
+        <sql>
+            update (
+            select npi.ASNU_ID as npi_asnu, npi.SOURCE_ID as npi_source, npi.ID as npi_id
+            from NDFL_PERSON_INCOME npi
+            where npi.SOURCE_ID is not null ) sub
+            set sub.npi_asnu = (select outer_npi.ASNU_ID from NDFL_PERSON_INCOME outer_npi where outer_npi.id = sub.npi_source)
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-18" author="apronin">
+        <sql>
+            update (
+            select npd.ASNU_ID as npd_asnu, npd.SOURCE_ID as npd_source, npd.ID as npd_id
+            from NDFL_PERSON_DEDUCTION npd
+            where npd.SOURCE_ID is not null) sub
+            set sub.npd_asnu = (select outer_npd.ASNU_ID from NDFL_PERSON_DEDUCTION outer_npd where outer_npd.id = sub.npd_source)
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-19" author="apronin">
+        <sql>
+            update (
+            select npp.ASNU_ID as npp_asnu, npp.SOURCE_ID as npp_source, npp.ID as npp_id
+            from NDFL_PERSON_PREPAYMENT npp
+            where npp.SOURCE_ID is not null) sub
+            set sub.npp_asnu = (select outer_npp.ASNU_ID from NDFL_PERSON_PREPAYMENT outer_npp where outer_npp.id = sub.npp_source)
+        </sql>
+    </changeSet>
+    <!--end https://jira.aplana.com/browse/SBRFNDFL-5299 Реализовать добавление в РНУ колонки с АСНУ и фильтра по этой колонке-->
 </databaseChangeLog>

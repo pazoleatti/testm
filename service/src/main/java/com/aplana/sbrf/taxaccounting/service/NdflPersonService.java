@@ -3,14 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -70,6 +63,7 @@ public interface NdflPersonService {
 
     /**
      * Получает название ДУЛ для ФЛ по его коду
+     *
      * @param idDocType Документ удостоверяющий личность.Код (Графа 10)
      * @return название ДУЛ
      */

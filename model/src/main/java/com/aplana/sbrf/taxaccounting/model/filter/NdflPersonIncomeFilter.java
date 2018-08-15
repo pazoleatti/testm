@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
 import com.aplana.sbrf.taxaccounting.model.URM;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 
 import java.util.Collections;
 import java.util.Date;
@@ -110,6 +111,10 @@ public class NdflPersonIncomeFilter {
      */
     private String modifiedBy;
 
+    /**
+     * АСНУ
+     */
+    private List<RefBookAsnu> asnu;
 
     public NdflFilter getNdflFilter() {
         return ndflFilter;
@@ -301,5 +306,13 @@ public class NdflPersonIncomeFilter {
 
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public List<RefBookAsnu> getAsnu() {
+        return asnu;
+    }
+
+    public void setAsnu(List<RefBookAsnu> asnu) {
+        this.asnu = asnu;
     }
 }

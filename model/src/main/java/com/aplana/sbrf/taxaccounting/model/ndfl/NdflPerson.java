@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -14,7 +13,7 @@ import java.util.List;
  *
  * @author Andrey Drunk
  */
-public class NdflPerson extends IdentityObject<Long> {
+public class NdflPerson extends NdflData<Long> {
 
     // №пп
     private Long rowNum;
@@ -115,6 +114,8 @@ public class NdflPerson extends IdentityObject<Long> {
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
     private String modifiedBy;
 
+    private Long asnuId;
+
     public NdflPerson(List<NdflPersonIncome> incomes, List<NdflPersonDeduction> deductions, List<NdflPersonPrepayment> prepayments) {
         super();
         this.incomes = incomes;
@@ -136,7 +137,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public static final String[] COLUMNS = {"id", "declaration_data_id", "person_id", "row_num", "inp", "snils",
             "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign",
             "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality",
-            "street", "house", "building", "flat", "country_code", "address", "additional_data", "modified_date", "modified_by"};
+            "street", "house", "building", "flat", "country_code", "address", "additional_data", "modified_date", "modified_by", "asnu_id"};
 
     /**
      * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
@@ -144,7 +145,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public static final String[] FIELDS = {"id", "declarationDataId", "personId", "rowNum", "inp", "snils", "lastName",
             "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber",
             "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat",
-            "countryCode", "address", "additionalData", "modifiedDate", "modifiedBy"};
+            "countryCode", "address", "additionalData", "modifiedDate", "modifiedBy", "asnuId"};
 
     public Long getDeclarationDataId() {
         return declarationDataId;
@@ -408,6 +409,14 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
     }
 
     @Override

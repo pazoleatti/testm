@@ -1251,6 +1251,7 @@ public class NdflPersonDaoTest {
         person.setCountryCode("643");
         person.setAddress("");
         person.setAdditionalData("");
+        person.setAsnuId(1L);
 
 
         List<NdflPersonIncome> ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
@@ -1285,6 +1286,7 @@ public class NdflPersonDaoTest {
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
         personIncome.setSourceId(112233L);
+        personIncome.setAsnuId(1L);
         return personIncome;
     }
 
@@ -1309,6 +1311,7 @@ public class NdflPersonDaoTest {
         personDeduction.setPeriodCurrDate(toDate("01.01.2016"));
         personDeduction.setPeriodCurrSumm(new BigDecimal("999999.99"));
         personDeduction.setSourceId(112233L);
+        personDeduction.setAsnuId(1L);
 
         return personDeduction;
     }
@@ -1323,6 +1326,7 @@ public class NdflPersonDaoTest {
         personPrepayment.setNotifDate(toDate("01.01.2016"));
         personPrepayment.setNotifSource("AAA");
         personPrepayment.setSourceId(112233L);
+        personPrepayment.setAsnuId(1L);
 
         return personPrepayment;
     }

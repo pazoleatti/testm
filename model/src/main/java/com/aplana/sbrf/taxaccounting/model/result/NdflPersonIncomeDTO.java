@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
 import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflData;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class NdflPersonIncomeDTO {
+public class NdflPersonIncomeDTO extends NdflData<Long> {
 
     /**
      * Ссылка на физлицо
@@ -94,8 +95,6 @@ public class NdflPersonIncomeDTO {
     protected String rowNum;
 
     private String inp;
-
-    private Long id;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
     @JsonDeserialize(using = ISODateDeserializer.class)
@@ -333,14 +332,6 @@ public class NdflPersonIncomeDTO {
 
     public void setInp(String inp) {
         this.inp = inp;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Date getModifiedDate() {

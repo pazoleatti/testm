@@ -30,9 +30,9 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     public static final String TABLE_NAME = "ndfl_person_prepayment";
     public static final String SEQ = "seq_ndfl_person_prepayment";
     public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "summ", "notif_num",
-            "notif_date", "notif_source", "source_id", "modified_date", "modified_by"};
+            "notif_date", "notif_source", "source_id", "modified_date", "modified_by", "asnu_id"};
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "summ", "notifNum",
-            "notifDate", "notifSource", "sourceId", "modifiedDate", "modifiedBy"};
+            "notifDate", "notifSource", "sourceId", "modifiedDate", "modifiedBy", "asnuId"};
 
     @Override
     public String getTableName() {

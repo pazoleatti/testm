@@ -86,7 +86,8 @@
                             $filter('translate')('incomesAndTax.title.taxSumm'),
                             $filter('translate')('incomesAndTax.title.id'),
                             $filter('translate')('incomesAndTax.title.modifiedDate'),
-                            $filter('translate')('incomesAndTax.title.modifiedBy')],
+                            $filter('translate')('incomesAndTax.title.modifiedBy'),
+                            $filter('translate')('incomesAndTax.title.asnu')],
                         colModel: [
                             {name: 'rowNum', index: 'rowNum', width: 75},
                             {name: 'inp', index: 'inp', width: 100},
@@ -134,7 +135,8 @@
                             {name: 'taxSumm', index: 'taxSumm', width: 215},
                             {name: 'id', index: 'id', width: 170, key: true},
                             {name: 'modifiedDate', index: 'modifiedDate', width: 215, formatter: $filter('dateTimeFormatter')},
-                            {name: 'modifiedBy', index: 'modifiedBy', width: 300}
+                            {name: 'modifiedBy', index: 'modifiedBy', width: 300},
+                            {name: 'asnu', index: 'asnu', width: 300}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,

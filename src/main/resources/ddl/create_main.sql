@@ -982,7 +982,8 @@ create table ndfl_person (
   address             varchar2(255 char),
   additional_data     varchar2(4000 char),
   modified_date        date,
-  modified_by          varchar2(255 char)
+  modified_by          varchar2(255 char),
+  asnu_id             number(18)
 );
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
@@ -1047,7 +1048,8 @@ create table ndfl_person_income
   payment_number        varchar2(20 char),
   tax_summ              number(10),
   modified_date          date,
-  modified_by            varchar2(255 char)
+  modified_by            varchar2(255 char),
+  asnu_id               number(18)
 );
 
 
@@ -1100,7 +1102,8 @@ create table ndfl_person_deduction
   period_curr_date date,
   period_curr_summ number(22, 2),
   modified_date     date,
-  modified_by       varchar2(255 char)
+  modified_by       varchar2(255 char),
+  asnu_id           number(18)
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
@@ -1136,8 +1139,9 @@ create table ndfl_person_prepayment
   notif_num      varchar2(20 char),
   notif_date     date,
   notif_source   varchar2(20 char),
-  modified_date   date,
-  modified_by     varchar2(255 char)
+  modified_date  date,
+  modified_by    varchar2(255 char),
+  asnu_id        number(18)
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';

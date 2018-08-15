@@ -203,6 +203,21 @@
                            title="{{searchFilter.params.income.modifiedBy}}"/>
                 </div>
             </div>
+            <!--АСНУ-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.nameAsnu' | translate}}</label>
+                </div>
+                <div class="span8">
+                    <div data-aplana-field>
+                        <div data-ng-controller="SelectAsnuCtrl" style="width: 100%;"
+                             data-ui-select2="asnuSelect.options"
+                             data-ng-model="searchFilter.params.income.asnu"
+                             data-ng-init="initMultipleSelectAsnu()">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

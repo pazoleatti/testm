@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * Модель для параметров Фильтра вкладки Реквизиты страницу РНУ НДФЛ
@@ -118,6 +121,11 @@ public class NdflPersonFilter {
      * Обновил
      */
     private String modifiedBy;
+
+    /**
+     * АСНУ
+     */
+    private List<RefBookAsnu> asnu;
 
 
     public String getInp() {
@@ -336,6 +344,14 @@ public class NdflPersonFilter {
         this.modifiedBy = modifiedBy;
     }
 
+    public List<RefBookAsnu> getAsnu() {
+        return asnu;
+    }
+
+    public void setAsnu(List<RefBookAsnu> asnu) {
+        this.asnu = asnu;
+    }
+
     @Override
     public String toString() {
         return "NdflPersonFilter{" +
@@ -366,6 +382,7 @@ public class NdflPersonFilter {
                 ", modifiedDateFrom=" + modifiedDateFrom +
                 ", modifiedDateTo=" + modifiedDateTo +
                 ", modifiedBy='" + modifiedBy + '\'' +
+                ", asnu='" + asnu + "\'" +
                 '}';
     }
 }

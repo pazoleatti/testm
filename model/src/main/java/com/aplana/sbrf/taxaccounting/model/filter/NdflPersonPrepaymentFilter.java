@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * Модель для параметров Фильтра вкладки "Сведения о доходах в виде авансовых платежей" страницу РНУ НДФЛ
@@ -47,6 +50,11 @@ public class NdflPersonPrepaymentFilter {
      * Обновил
      */
     private String modifiedBy;
+
+    /**
+     * АСНУ
+     */
+    private List<RefBookAsnu> asnu;
 
     public String getOperationId() {
         return operationId;
@@ -126,5 +134,13 @@ public class NdflPersonPrepaymentFilter {
 
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public List<RefBookAsnu> getAsnu() {
+        return asnu;
+    }
+
+    public void setAsnu(List<RefBookAsnu> asnu) {
+        this.asnu = asnu;
     }
 }

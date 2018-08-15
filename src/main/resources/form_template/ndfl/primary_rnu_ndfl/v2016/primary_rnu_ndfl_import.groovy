@@ -818,6 +818,7 @@ class Import extends AbstractScriptClass {
         ndflPerson.building = row.cell(21).toString(20)
         ndflPerson.flat = row.cell(22).toString(8)
         ndflPerson.snils = row.cell(23).toString(14)
+        ndflPerson.asnuId = declarationData.asnuId
 
         if (!row.isEmpty(24..45)) {
             ndflPerson.incomes.add(createIncome(row, incomeImportId))
@@ -863,6 +864,7 @@ class Import extends AbstractScriptClass {
         personIncome.paymentNumber = row.cell(44).toString(20)
         personIncome.taxSumm = row.cell(45).toLong(20)
         personIncome.id = importId
+        personIncome.asnuId = declarationData.asnuId
         if (personIncome.operationId != null && operationsGrouped.containsKey(personIncome.operationId)) {
             operationsGrouped.get(personIncome.operationId).add(personIncome)
         } else if (personIncome.operationId != null) {
@@ -888,6 +890,7 @@ class Import extends AbstractScriptClass {
         personDeduction.periodCurrDate = row.cell(58).toDate()
         personDeduction.periodCurrSumm = row.cell(59).toBigDecimal(20, 2)
         personDeduction.id = importId
+        personDeduction.asnuId = declarationData.asnuId
         if (personDeduction.operationId != null && operationsGrouped.containsKey(personDeduction.operationId)) {
             operationsGrouped.get(personDeduction.operationId).add(personDeduction)
         } else if (personDeduction.operationId != null){
@@ -904,6 +907,7 @@ class Import extends AbstractScriptClass {
         personPrepayment.notifDate = row.cell(63).toDate()
         personPrepayment.notifSource = row.cell(64).toString(4)
         personPrepayment.id = importId
+        personPrepayment.asnuId = declarationData.asnuId
         if (personPrepayment.operationId != null && operationsGrouped.containsKey(personPrepayment.operationId)) {
             operationsGrouped.get(personPrepayment.operationId).add(personPrepayment)
         } else if (personPrepayment.operationId != null) {
