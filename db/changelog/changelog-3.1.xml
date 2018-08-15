@@ -827,4 +827,24 @@
             <column name="value" value="1"/>
         </insert>
     </changeSet>
+
+    <!-- Добавление новых полей к справочнику физ. лиц в рамках задачи https://jira.aplana.com/browse/SBRFNDFL-5346 -->
+    <changeSet id="3.1-snazin-4" author="snazin">
+        <addColumn tableName="ref_book_person">
+            <column name="report_doc"
+                    type="number(18)"
+                    remarks="Ссылка на ДУЛ, который должен включаться в отчетность">
+                <constraints references="ref_book_id_doc(id)"
+                             foreignKeyName="fk_ref_book_person_report_doc"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="ref_book_person">
+            <column name="vip"
+                    type="number(1)"
+                    defaultValueNumeric="0"
+                    remarks="Признак, показывающий, является ли ФЛ VIP-ом (0 - Не VIP, 1 - VIP)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
