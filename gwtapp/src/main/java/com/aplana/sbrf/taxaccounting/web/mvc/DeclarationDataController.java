@@ -592,7 +592,7 @@ public class DeclarationDataController {
                             DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
                             DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
                             DeclarationDataPermission.CREATE,
-                            DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
+                            DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS, DeclarationDataPermission.IDENTIFY);
                     item.setPermissions(declaration.getPermissions());
                 }
             }
