@@ -828,7 +828,7 @@
         </insert>
     </changeSet>
 
-    <!-- Добавление новых полей к справочнику физ. лиц в рамках задачи https://jira.aplana.com/browse/SBRFNDFL-5346 -->
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5346 Добавление новых полей к справочнику физ. лиц -->
     <changeSet id="3.1-snazin-4" author="snazin">
         <addColumn tableName="ref_book_person">
             <column name="report_doc"
@@ -848,7 +848,7 @@
         </addColumn>
     </changeSet>
 
-    <!-- Обновление записей о статусах и ID для дубликатов, задача https://jira.aplana.com/browse/SBRFNDFL-5346 -->
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.а -->
     <changeSet id="3.1-snazin-5" author="snazin">
         <sql>
             update ref_book_person
@@ -872,5 +872,57 @@
                 where (old_id is not null) and (status = old_status)
             </sql>
         </rollback>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.b -->
+    <changeSet id="3.1-snazin-6" author="snazin">
+        <comment>Выставлено inc_rep = 0, если в нём значение, отличное от (0, 1). Добавлено ограничение на это поле.</comment>
+        <update tableName="ref_book_id_doc">
+            <column name="inc_rep" value="0"/>
+            <where>(inc_rep &lt; 0) or (inc_rep &gt; 1)</where>
+        </update>
+        <sql>
+            alter table ref_book_id_doc
+            add constraint chk_ref_book_id_doc_inc_rep check (inc_rep in (0, 1))
+        </sql>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.b -->
+    <changeSet id="3.1-snazin-7" author="snazin">
+        <comment>Если для одного ФЛ было несколько ДУЛ с inc_rep = 1, оставляем только на одном последнем</comment>
+        <sql>
+            update ref_book_id_doc
+            set inc_rep = 0
+            where id in (
+                select id
+                from (
+                    select
+                        r.id,
+                        r.inc_rep,
+                        row_number() over (partition by person_id order by inc_rep desc, version desc, id desc) as rn,
+                        sum(inc_rep) over (partition by person_id) as inc_rep_sm
+                    from ref_book_id_doc r
+                )
+                where inc_rep_sm > 1 and rn > 1 and inc_rep > 0
+            )
+        </sql>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.b -->
+    <changeSet id="3.1-snazin-8" author="snazin">
+        <comment>Заполнено поле report_doc в таблице ref_book_person данными из ref_book_id_doc</comment>
+        <sql>
+            update ref_book_person person
+            set person.report_doc = (
+                select doc.id
+                from ref_book_id_doc doc
+                where (doc.person_id = person.id) and (doc.inc_rep = 1)
+            )
+            where exists (
+                select 1
+                from ref_book_id_doc doc
+                where (doc.person_id = person.id) and (doc.inc_rep = 1)
+            )
+        </sql>
     </changeSet>
 </databaseChangeLog>
