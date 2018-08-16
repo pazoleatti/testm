@@ -167,7 +167,7 @@ public class PeriodServiceImpl implements PeriodService {
         LOG.info(String.format("openForNewDepartment, departmentId: %s", departmentId));
         if (departmentDao.existDepartment(departmentId)) {
             Department terBank = departmentDao.getParentTB(departmentId);
-            if (terBank != null) {
+            if (terBank != null && terBank.getId() != departmentId) {
                 DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
                 filter.setDepartmentId(terBank.getId());
                 List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.fetchAllByFilter(filter);

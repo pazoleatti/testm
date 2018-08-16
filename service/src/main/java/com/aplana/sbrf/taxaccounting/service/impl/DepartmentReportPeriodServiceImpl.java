@@ -80,9 +80,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     public void merge(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
-        Assert.notEmpty(departmentReportPeriods);
-        LOG.info(String.format("DepartmentReportPeriodServiceImpl.merge. departmentReportPeriods.size: %s; departmentId: %s", departmentReportPeriods.size(), departmentId));
-        departmentReportPeriodDao.merge(departmentReportPeriods, departmentId);
+        if (departmentReportPeriods != null && !departmentReportPeriods.isEmpty()) {
+            LOG.info(String.format("DepartmentReportPeriodServiceImpl.merge. departmentReportPeriods.size: %s; departmentId: %s", departmentReportPeriods.size(), departmentId));
+            departmentReportPeriodDao.merge(departmentReportPeriods, departmentId);
+        }
     }
 
     @Override
