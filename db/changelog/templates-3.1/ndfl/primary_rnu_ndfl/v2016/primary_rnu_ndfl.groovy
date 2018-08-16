@@ -953,6 +953,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         ndflPerson.countryCode = toString((GPathResult) node.getProperty('@КодСтрИно'))
         ndflPerson.address = toString((GPathResult) node.getProperty('@АдресИно'))
         ndflPerson.additionalData = toString((GPathResult) node.getProperty('@ДопИнф'))
+        ndflPerson.asnuId = declarationData.asnuId
         return ndflPerson
     }
 
@@ -995,6 +996,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.paymentDate = toDate((GPathResult) node.getProperty('@ПлПоручДат'))
         personIncome.paymentNumber = toString((GPathResult) node.getProperty('@ПлатПоручНом'))
         personIncome.taxSumm = toLong((GPathResult) node.getProperty('@НалПерСумм'))
+        personIncome.asnuId = declarationData.asnuId
 
         // Спр5 Код вида дохода (Необязательное поле)
         if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
@@ -1034,6 +1036,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personDeduction.periodPrevSumm = toBigDecimal((GPathResult) node.getProperty('@СумПредВыч'))
         personDeduction.periodCurrDate = toDate((GPathResult) node.getProperty('@ДатаТекВыч'))
         personDeduction.periodCurrSumm = toBigDecimal((GPathResult) node.getProperty('@СумТекВыч'))
+        personDeduction.asnuId = declarationData.asnuId
 
         if (!deductionTypeList.contains(personDeduction.typeCode)) {
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [fio, ndflPerson.inp, personDeduction.operationId])
@@ -1057,6 +1060,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personPrepayment.notifNum = toString((GPathResult) node.getProperty('@УведНом'))
         personPrepayment.notifDate = toDate((GPathResult) node.getProperty('@УведДата'))
         personPrepayment.notifSource = toString((GPathResult) node.getProperty('@УведИФНС'))
+        personPrepayment.asnuId = declarationData.asnuId
         return personPrepayment;
     }
 

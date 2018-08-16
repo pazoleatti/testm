@@ -934,5 +934,35 @@
             set sub.npp_asnu = (select outer_npp.ASNU_ID from NDFL_PERSON_PREPAYMENT outer_npp where outer_npp.id = sub.npp_source)
         </sql>
     </changeSet>
+    <changeSet id="3.1-apronin-20" author="apronin">
+        <sql>
+            comment on column ndfl_person.asnu_id
+            is 'Идентификатор АСНУ';
+        </sql>
+        <sql>
+            comment on column ndfl_person_income.asnu_id
+            is 'Идентификатор АСНУ';
+        </sql>
+        <sql>
+            comment on column ndfl_person_deduction.asnu_id
+            is 'Идентификатор АСНУ';
+        </sql>
+        <sql>
+            comment on column ndfl_person_prepayment.asnu_id
+            is 'Идентификатор АСНУ';
+        </sql>
+    </changeSet>
+    <changeSet id="3.1-apronin-21" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+    </changeSet>
+    <changeSet id="3.1-apronin-22" author="apronin">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+        </update>
+    </changeSet>
     <!--end https://jira.aplana.com/browse/SBRFNDFL-5299 Реализовать добавление в РНУ колонки с АСНУ и фильтра по этой колонке-->
 </databaseChangeLog>
