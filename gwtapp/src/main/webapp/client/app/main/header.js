@@ -99,6 +99,9 @@
 
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
                         $scope.treeNsi = [{
+                            name: $filter('translate')('menu.nsi.registryFL'),
+                            href: $state.href('registryFL')
+                        }, {
                             name: $filter('translate')('menu.nsi.refbooks'),
                             href: $state.href('refBookList')
                         }];

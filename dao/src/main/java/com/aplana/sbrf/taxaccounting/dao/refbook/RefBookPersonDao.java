@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -128,31 +127,19 @@ public interface RefBookPersonDao {
     PagingResult<RefBookPerson> getDuplicates(Long personId, PagingParams pagingParams);
 
     /**
-     * Получает список ФЛ актуальных на указанную дату с учитыванием пэйджинга, фильтрации и сортировки
-     * Все или отдельные параметры могут быть null, тогда они не учитываются при отборе записей
+     * Получает список ФЛ всех версий.
      *
-     * @param version       версия, на которую будут отобраны записи
-     * @param pagingParams  параметры пэйджинга
-     * @param filter        фильтр для отбора записей. Фактически кусок SQL-запроса для WHERE части
-     * @param sortAttribute атрибут, по которому записи будут отсортированы
+     * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
-    PagingResult<RefBookPerson> getPersons(@Nullable Date version, @Nullable PagingParams pagingParams, @Nullable String filter, @Nullable RefBookAttribute sortAttribute);
+    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams);
 
     PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Получить объект справочника Физические лица
+     *
      * @return объект справочника
      */
     RefBook getRefBook();
-
-    /**
-     * Получает список версий ФЛ
-     *
-     * @param recordId     идентификатор группы версий ФЛ (фактически идентификатор ФЛ)
-     * @param pagingParams параметры пэйджинга
-     * @return список версий ФЛ
-     */
-    PagingResult<RefBookPerson> getPersonVersions(long recordId, PagingParams pagingParams);
 }

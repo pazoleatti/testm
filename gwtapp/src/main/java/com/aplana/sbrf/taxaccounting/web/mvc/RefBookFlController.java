@@ -46,24 +46,12 @@ public class RefBookFlController {
     /**
      * Получение списка записей справочника
      *
-     * @param recordId      Идентификатор группы версий записи справочника
-     * @param version       Дата актуальности для выборки записей справочника
-     * @param pagingParams  Параметры пейджинга
-     * @param firstName     Строка с фильтром по имени ФЛ
-     * @param lastName      Строка с фильтром по фамилии ФЛ
-     * @param searchPattern Строка с запросом поиска по справочнику
-     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param pagingParams параметры постраничной выдачи
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookFL")
-    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam(required = false) Long recordId,
-                                                              @RequestParam(required = false) Date version,
-                                                              @RequestParam(required = false) String firstName,
-                                                              @RequestParam(required = false) String lastName,
-                                                              @RequestParam(required = false) String searchPattern,
-                                                              @RequestParam(required = false) boolean exactSearch,
-                                                              @RequestParam PagingParams pagingParams) {
-        PagingResult<RefBookPerson> records = personService.getPersons(recordId, version, pagingParams, firstName, lastName, searchPattern, exactSearch);
+    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam PagingParams pagingParams) {
+        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 

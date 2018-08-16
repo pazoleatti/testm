@@ -64,44 +64,10 @@ public class PersonServiceImpl implements PersonService {
         return refBookPersonDao.getDuplicates(personId, pagingParams);
     }
 
-    /**
-     * Подготавливает введенный текст для использования в SQL-запросе
-     *
-     * @param searchPattern текст для поиска
-     * @return обработанный текст - исключены лишние пробелы, кавычки и т.д
-     */
-    public String prepareForQuery(String searchPattern) {
-        return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(searchPattern).toLowerCase().replaceAll("\'", "\\\\\'");
-    }
-
     @Override
-    @PreAuthorize("isAuthenticated()")
-    public PagingResult<RefBookPerson> getPersons(Long recordId, Date version, PagingParams pagingParams, String firstName, String lastName, String searchPattern, boolean exactSearch) {
-        Long refBookId = RefBook.Id.PERSON.getId();
-        RefBookAttribute sortAttribute = pagingParams != null && StringUtils.isNotEmpty(pagingParams.getProperty()) ?
-                commonRefBookService.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
-        PagingResult<RefBookPerson> records;
-        if (recordId == null) {
-            String filter = createSearchFilter(firstName, lastName, searchPattern, exactSearch);
-            // Отбираем все записи справочника
-            records = getPersons(version, pagingParams, filter, sortAttribute);
-        } else {
-            // Отбираем все версии записи правочника
-            records = getPersonVersions(recordId, pagingParams);
-        }
-        return records;
-    }
-
-    @Override
-    @PreAuthorize("isAuthenticated()")
-    public PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookPersonDao.getPersons(version, pagingParams, filter, sortAttribute);
-    }
-
-    @Override
-    @PreAuthorize("isAuthenticated()")
-    public PagingResult<RefBookPerson> getPersonVersions(Long recordId, PagingParams pagingParams) {
-        return refBookPersonDao.getPersonVersions(recordId, pagingParams);
+    // TODO Написать сюда @PreAuthorize
+    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams) {
+        return refBookPersonDao.getPersons(pagingParams);
     }
 
     @Override
@@ -282,7 +248,8 @@ public class PersonServiceImpl implements PersonService {
             Date birthDate = null;
             try {
                 birthDate = formatter.get().parse(prepared);
-            } catch (ParseException ignore) {}
+            } catch (ParseException ignore) {
+            }
             filter += ("(TO_CHAR(RECORD_ID) :searchPattern or " +
                     (StringUtils.isEmpty(lastName) ? "LOWER(LAST_NAME) :searchPattern or " : "") +
                     (StringUtils.isEmpty(firstName) ? "LOWER(FIRST_NAME) :searchPattern or " : "") +
@@ -302,5 +269,15 @@ public class PersonServiceImpl implements PersonService {
         }
 
         return filter;
+    }
+
+    /**
+     * Подготавливает введенный текст для использования в SQL-запросе
+     *
+     * @param searchPattern текст для поиска
+     * @return обработанный текст - исключены лишние пробелы, кавычки и т.д
+     */
+    private String prepareForQuery(String searchPattern) {
+        return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(searchPattern).toLowerCase().replaceAll("\'", "\\\\\'");
     }
 }

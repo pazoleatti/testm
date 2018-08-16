@@ -67,43 +67,14 @@ public interface PersonService {
     PagingResult<RefBookPerson> getDuplicates(Long personId, PagingParams pagingParams);
 
     /**
-     * Получает список ФЛ с возможностью самостоятельно сформировать sql-условие по входящим параметрам фильтрации
-     *
-     * @param recordId      идентификатор группы версий (в терминах системы, это Идентификатор ФЛ). Используется для отбора версий конкретного ФЛ
-     * @param version       версия для отбора записей
-     * @param pagingParams  параметры пэйджинга
-     * @param firstName     имя ФЛ
-     * @param lastName      фамилия ФЛ
-     * @param searchPattern условие для полнотекстового поиска
-     * @param exactSearch   условие для полнотекстового поиска с точным совпадением
+     * Получает список ФЛ.
+     * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
-    PagingResult<RefBookPerson> getPersons(Long recordId, Date version, PagingParams pagingParams, String firstName, String lastName, String searchPattern, boolean exactSearch);
+    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams);
 
     /**
-     * Получает список ФЛ учитывая условия фильтрации и сортировки. Копия метода из провайдера справочника, переделанная для лучшей производительности
-     * Все или отдельные параметры могут быть null, тогда они не учитываются при отборе записей
-     *
-     * @param version       версия для отбора записей
-     * @param pagingParams  параметры пэйджинга
-     * @param filter        условие отбора записей. Фактически кусок sql-запроса для where части
-     * @param sortAttribute атрибут, по которому будут отсортированы записи
-     * @return список ФЛ
-     */
-    PagingResult<RefBookPerson> getPersons(@Nullable Date version, @Nullable PagingParams pagingParams, @Nullable String filter, @Nullable RefBookAttribute sortAttribute);
-
-    /**
-     * Получает список версий конкретного ФЛ
-     *
-     * @param recordId     идентификатор группы записей (в терминах системы, это Идентификатор ФЛ)
-     * @param pagingParams параметры пэйджинга
-     * @return список версий ФЛ
-     */
-    PagingResult<RefBookPerson> getPersonVersions(Long recordId, PagingParams pagingParams);
-
-    /**
-     * Получает список ФЛ учитывая условия фильтрации и сортировки. Метод делает то же самое что и {@link com.aplana.sbrf.taxaccounting.service.PersonService#getPersons(java.util.Date, com.aplana.sbrf.taxaccounting.model.PagingParams, java.lang.String, com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute)}
-     * но возвращает объекты в виде мапы.
+     * Получает список ФЛ учитывая условия фильтрации и сортировки. Метод возвращает объекты в виде мапы.
      * @param version       версия для отбора записей
      * @param pagingParams  параметры пэйджинга
      * @param filter        условие отбора записей. Фактически кусок sql-запроса для where части
