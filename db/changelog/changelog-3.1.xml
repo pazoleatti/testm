@@ -965,4 +965,177 @@
         </update>
     </changeSet>
     <!--end https://jira.aplana.com/browse/SBRFNDFL-5299 Реализовать добавление в РНУ колонки с АСНУ и фильтра по этой колонке-->
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-51" author="akorobko">
+        <sql>
+            create table tmp_depart(name varchar2(510 char),dep_id number(9));
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-52" author="akorobko">
+        <sql>
+            create table tmp_dep_params
+							(
+							row_num integer,
+							titname varchar2(510 char),
+							kpp varchar2(100 char),
+							oktmo varchar2(100 char),
+							tax_end varchar2(100 char),
+							start_date varchar2(10 char),
+							end_date varchar2(10 char),
+							place varchar2(100 char),
+							phone varchar2(100 char),
+							sign varchar2(100 char),
+							surname varchar2(100 char),
+							name varchar2(100 char),
+							lastname varchar2(100 char),
+							docname varchar2(100 char),
+							record_id number(9)
+							);
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-53" author="akorobko">
+        <sql splitStatements="false">
+            begin
+	insert into TMP_DEPART (name) values ( 'Байкальский банк');
+	insert into TMP_DEPART (name) values ( 'Волго-Вятский банк');
+	insert into TMP_DEPART (name) values ( 'Дальневосточный банк');
+	insert into TMP_DEPART (name) values ('Западно-Сибирский банк');
+	insert into TMP_DEPART (name) values ( 'Западно-Уральский банк');
+	insert into TMP_DEPART (name) values ( 'Московский банк');
+	insert into TMP_DEPART (name) values ('Поволжский банк');
+	insert into TMP_DEPART (name) values ( 'Северный банк');
+	insert into TMP_DEPART (name) values ( 'Северо-Западный банк');
+	insert into TMP_DEPART (name) values ( 'Сибирский банк');
+	insert into TMP_DEPART (name) values ( 'Среднерусский банк');
+	insert into TMP_DEPART (name) values ( 'Уральский банк');
+	insert into TMP_DEPART (name) values ('Центральный аппарат');
+	insert into TMP_DEPART (name) values ('Центрально-Черноземный банк');
+	insert into TMP_DEPART (name) values ('Юго-Западный банк');
+
+	-- определяем id подразделений
+	merge into tmp_depart t
+	using (
+	select t.name,d.id dep_id
+	  from tmp_depart t left join department d on upper(replace(d.name,'ё','е'))=upper(t.name)
+	      ) v
+	on (t.name=v.name)
+	when matched then update set t.dep_id=v.dep_id;
+	commit;
+            end;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-54" author="akorobko">
+        <sql>
+	-- чтобы  убедиться, что все подразделения нашлись
+	alter table tmp_depart modify dep_id not null;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-55" author="akorobko">
+        <loadData encoding="UTF-8"
+                  file="csv/ref_book_ndfl_detail_v12_utf8.csv"
+                  separator=";"
+                  tableName="tmp_dep_params">
+            <column name="row_num" type="numeric"/>
+            <column name="titname" type="string"/>
+            <column name="kpp" type="string"/>
+            <column name="oktmo" type="string"/>
+            <column name="tax_end" type="string"/>
+            <column name="start_date" type="string"/>
+            <column name="end_date" type="string"/>
+            <column name="place" type="string"/>
+            <column name="phone" type="string"/>
+            <column name="sign" type="string"/>
+            <column name="surname" type="string"/>
+            <column name="name" type="string"/>
+            <column name="lastname" type="string"/>
+            <column name="docname" type="string"/>
+        </loadData>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-56" author="akorobko">
+        <sql splitStatements="false">
+	declare 
+	v_task_name varchar2(128):='fill_ref_dep_params block #1 - deleting';  
+	begin
+	delete from ref_book_ndfl_detail;
+	delete from ref_book_ndfl;
+
+	v_task_name:='fill_ref_dep_params block #2 - update tmp_dep_params';  		
+	update tmp_dep_params set record_id=seq_ref_book_record_row_id.nextval;
+	
+	v_task_name:='fill_ref_dep_params block #3 - insert into ref_book_ndfl';  	
+	insert into ref_book_ndfl(department_id,version,record_id,status,id)
+	select a.*,seq_ref_book_record_row_id.nextval,0,seq_ref_book_record.nextval
+	from (select distinct d.dep_id,to_date(t.start_date,'dd.mm.yyyy') as version from tmp_dep_params t join tmp_depart d on upper(d.name)=trim(upper(replace(t.titname,'ё','е')))) a;
+	
+	v_task_name:='fill_ref_dep_params block #4 - insert into ref_book_ndfl_detail real data';  	
+	insert into ref_book_ndfl_detail(id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
+									tax_organ_code,kpp,present_place,name,oktmo,phone, 
+									signatory_id,signatory_surname,signatory_firstname,signatory_lastname,approve_doc_name)
+	with a as (
+	select t.record_id,to_date(t.start_date,'dd.mm.yyyy') as version,0 as status,n.id ref_book_ndfl_id,t.row_num as row_ord,d.dep_id as department_id,
+           t.tax_end as tax_organ_code,t.kpp,pp.id as present_place,t.titname as name,o.mx_id as oktmo,t.phone,
+		   s.mx_id as signatory_id,t.surname as signatory_surname,t.name as signatory_firstname,t.lastname as signatory_lastname,t.docname as doc_name
+	from tmp_dep_params t 
+	join tmp_depart d on (upper(d.name)=trim(upper(replace(t.titname,'ё','е'))))
+	join ref_book_ndfl n on (n.department_id=d.dep_id and n.version=to_date(t.start_date,'dd.mm.yyyy'))
+	left join ref_book_present_place pp on (pp.code=t.place and pp.status=0)
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+			   from ref_book_oktmo where status=0) o on (o.code=t.oktmo)
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+			   from ref_book_signatory_mark where status=0) s on (s.code=t.sign)
+	) 
+	select seq_ref_book_record.nextval as id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
+           tax_organ_code,kpp,present_place,name,oktmo,phone,
+		   signatory_id,signatory_surname,signatory_firstname,signatory_lastname,doc_name
+	from a;
+	
+	v_task_name:='fill_ref_dep_params block #5 - insert into ref_book_ndfl_detail pseudo data';  	
+	insert into ref_book_ndfl_detail(id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
+									tax_organ_code,kpp,present_place,name,oktmo,phone, 
+									signatory_id,signatory_surname,signatory_firstname,signatory_lastname,approve_doc_name)
+	with a as (
+	select t.record_id,to_date(trim(t.end_date),'dd.mm.yyyy')+1 as version,2 as status,n.id ref_book_ndfl_id,t.row_num as row_ord,d.dep_id as department_id,
+           t.tax_end as tax_organ_code,t.kpp,pp.id as present_place,t.titname as name,o.mx_id as oktmo,t.phone,
+		   s.mx_id as signatory_id,t.surname as signatory_surname,t.name as signatory_firstname,t.lastname as signatory_lastname,t.docname as doc_name
+	from tmp_dep_params t 
+	join tmp_depart d on (upper(d.name)=trim(upper(replace(t.titname,'ё','е'))))
+	join ref_book_ndfl n on (n.department_id=d.dep_id and n.version=to_date(t.start_date,'dd.mm.yyyy'))
+	left join ref_book_present_place pp on (pp.code=t.place and pp.status=0)
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+			   from ref_book_oktmo where status=0) o on (o.code=t.oktmo)
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+			   from ref_book_signatory_mark where status=0) s on (s.code=t.sign)
+	) 
+	select seq_ref_book_record.nextval as id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
+           tax_organ_code,kpp,present_place,name,oktmo,phone,
+		   signatory_id,signatory_surname,signatory_firstname,signatory_lastname,doc_name
+	from a where version is not null;
+	end;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-57" author="akorobko">
+        <sql>
+            drop table tmp_depart;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
+    <changeSet id="3.1-akorobko-58" author="akorobko">
+        <sql>
+            drop table tmp_dep_params;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
