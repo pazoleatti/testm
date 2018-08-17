@@ -19,11 +19,6 @@ import java.util.List;
 @Repository
 public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
 
-    /**
-     * Получение всех значений справочника
-     *
-     * @return Список значений справочника отсортированых по названию по убыванию
-     */
     @Override
     public List<RefBookAsnu> fetchAll() {
         //Выбирются записи с положительным значением id, т.к. есть фиктивные записи с id=-1
@@ -33,12 +28,6 @@ public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
                 new RefBookAsnuRowMapper());
     }
 
-    /**
-     * Получение значений справочника по идентификаторам
-     *
-     * @param ids Идентификаторы
-     * @return Список значений справочника
-     */
     @Override
     public List<RefBookAsnu> fetchByIds(List<Long> ids) {
         return getNamedParameterJdbcTemplate().query("select id, code, name, type, priority " +
