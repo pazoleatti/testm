@@ -484,42 +484,7 @@ class Calculate extends AbstractScriptClass {
 
         List<NdflPerson> ndflPersonsToPersistList = new ArrayList<>(ndflPersonsToPersistGroupedByRefBookPersonId.values())
 
-        Collections.sort(ndflPersonsToPersistList, new Comparator<NdflPerson>() {
-            @Override
-            int compare(NdflPerson o1, NdflPerson o2) {
-                int lastNameComp = compareValues(o1.lastName, o2.lastName, RnuNdflStringComparator.INSTANCE)
-                if (lastNameComp != 0) {
-                    return lastNameComp
-                }
-
-                int firstNameComp = compareValues(o1.firstName, o2.firstName, RnuNdflStringComparator.INSTANCE)
-                if (firstNameComp != 0) {
-                    return firstNameComp
-                }
-
-                int middleNameComp = compareValues(o1.middleName, o2.middleName, RnuNdflStringComparator.INSTANCE)
-                if (middleNameComp != 0) {
-                    return middleNameComp
-                }
-
-                int innComp = compareValues(o1.innNp, o2.innNp, RnuNdflStringComparator.INSTANCE)
-                if (innComp != 0) {
-                    return innComp
-                }
-
-                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, RnuNdflStringComparator.INSTANCE)
-                if (innForeignComp != 0) {
-                    return innForeignComp
-                }
-
-                int birthDayComp = compareValues(o1.birthDay, o2.birthDay, null)
-                if (birthDayComp != 0) {
-                    return birthDayComp
-                }
-
-                return compareValues(o1.idDocNumber, o2.idDocNumber, RnuNdflStringComparator.INSTANCE)
-            }
-        })
+        Collections.sort(ndflPersonsToPersistList, NdflPerson.getComparator())
 
         //noinspection GroovyAssignabilityCheck
         logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
@@ -577,63 +542,13 @@ class Calculate extends AbstractScriptClass {
         BigDecimal deductionRowNum = new BigDecimal("0")
         BigDecimal prepaymentRowNum = new BigDecimal("0")
         for (NdflPerson ndflPerson : ndflPersonsToPersistList) {
-            Collections.sort(ndflPerson.incomes, new Comparator<NdflPersonIncome>() {
-                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
-                    int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.inp)), operationDates.get(new Pair(o2.operationId, ndflPerson.inp)), null)
-                    if (operationDateComp != 0) {
-                        return operationDateComp
-                    }
-
-                    int operationIdComp = compareValues(o1.operationId, o2.operationId, RnuNdflStringComparator.INSTANCE)
-                    if (operationIdComp != 0) {
-                        return operationIdComp
-                    }
-
-                    int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null)
-                    if (actionDateComp != 0) {
-                        return actionDateComp
-                    }
-
-                    return compareValues(getRowType(o1), getRowType(o2), null)
-                }
-
-            })
+            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(operationDates, ndflPerson))
 
             List<String> operationIdOrderList = ndflPerson.incomes.operationId
 
-            Collections.sort(ndflPerson.deductions, new Comparator<NdflPersonDeduction>() {
-                @Override
-                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
-                    int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null)
-                    if (incomeAccruedComp != 0) {
-                        return incomeAccruedComp
-                    }
+            Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(operationIdOrderList))
 
-                    int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
-                        @Override
-                        int compare(String s1, String s2) {
-                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
-                        }
-                    })
-                    if (operationIdComp != 0) {
-                        return operationIdComp
-                    }
-
-                    return compareValues(o1.periodCurrDate, o2.periodCurrDate, null)
-                }
-            })
-
-            Collections.sort(ndflPerson.prepayments, new Comparator<NdflPersonPrepayment>() {
-                @Override
-                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
-                    return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
-                        @Override
-                        int compare(String s1, String s2) {
-                            return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2)
-                        }
-                    })
-                }
-            })
+            Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(operationIdOrderList))
 
             for (NdflPersonIncome income : ndflPerson.incomes) {
                 incomeRowNum = incomeRowNum.add(new BigDecimal("1"))

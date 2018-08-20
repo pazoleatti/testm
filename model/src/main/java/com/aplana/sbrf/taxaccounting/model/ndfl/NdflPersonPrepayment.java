@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
+import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
+
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Andrey Drunk
@@ -57,6 +61,7 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     public BigDecimal getSumm() {
         return summ;
     }
+
     public void setSumm(BigDecimal summ) {
         this.summ = summ;
     }
@@ -110,4 +115,19 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
                 ", notifSource='" + notifSource + '\'' +
                 '}';
     }
+
+    public static Comparator<NdflPersonPrepayment> getComparator(final List<String> operationIdOrderList) {
+        return new NdflComparator<NdflPersonPrepayment>() {
+            @Override
+            public int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                return compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                    @Override
+                    public int compare(String s1, String s2) {
+                        return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2);
+                    }
+                });
+            }
+        };
+    }
+
 }

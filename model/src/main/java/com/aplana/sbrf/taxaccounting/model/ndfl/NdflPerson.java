@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
+import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
+import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Данные о физическом лице - получателе дохода
@@ -451,4 +450,44 @@ public class NdflPerson extends NdflData<Long> {
                 .append("additionalData", additionalData)
                 .toString();
     }
+
+    public static Comparator<NdflPerson> getComparator(){
+        return new NdflComparator<NdflPerson>() {
+            @Override
+            public int compare(NdflPerson o1, NdflPerson o2) {
+                int lastNameComp = compareValues(o1.lastName, o2.lastName, RnuNdflStringComparator.INSTANCE);
+                if (lastNameComp != 0) {
+                    return lastNameComp;
+                }
+
+                int firstNameComp = compareValues(o1.firstName, o2.firstName, RnuNdflStringComparator.INSTANCE);
+                if (firstNameComp != 0) {
+                    return firstNameComp;
+                }
+
+                int middleNameComp = compareValues(o1.middleName, o2.middleName, RnuNdflStringComparator.INSTANCE);
+                if (middleNameComp != 0) {
+                    return middleNameComp;
+                }
+
+                int innComp = compareValues(o1.innNp, o2.innNp, RnuNdflStringComparator.INSTANCE);
+                if (innComp != 0) {
+                    return innComp;
+                }
+
+                int innForeignComp = compareValues(o1.innForeign, o2.innForeign, RnuNdflStringComparator.INSTANCE);
+                if (innForeignComp != 0) {
+                    return innForeignComp;
+                }
+
+                int birthDayComp = compareValues(o1.birthDay, o2.birthDay, null);
+                if (birthDayComp != 0) {
+                    return birthDayComp;
+                }
+
+                return compareValues(o1.idDocNumber, o2.idDocNumber, RnuNdflStringComparator.INSTANCE);
+            }
+        };
+    }
+
 }

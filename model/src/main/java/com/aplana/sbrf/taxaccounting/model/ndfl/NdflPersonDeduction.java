@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
+import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
+
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Стандартные, социальные и имущественные налоговые вычеты (Раздел 3)
@@ -225,5 +229,29 @@ public class NdflPersonDeduction extends NdflPersonOperation {
                 ", periodCurrDate=" + periodCurrDate +
                 ", periodCurrSumm=" + periodCurrSumm +
                 '}';
+    }
+
+    public static Comparator<NdflPersonDeduction> getComparator(final List<String> operationIdOrderList){
+        return new NdflComparator<NdflPersonDeduction>() {
+            @Override
+            public int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null);
+                if (incomeAccruedComp != 0) {
+                    return incomeAccruedComp;
+                }
+
+                int operationIdComp = compareValues(o1.operationId, o2.operationId, new Comparator<String>() {
+                    @Override
+                    public int compare(String s1, String s2) {
+                        return operationIdOrderList.indexOf(s1) - operationIdOrderList.indexOf(s2);
+                    }
+                });
+                if (operationIdComp != 0) {
+                    return operationIdComp;
+                }
+
+                return compareValues(o1.periodCurrDate, o2.periodCurrDate, null);
+            }
+        };
     }
 }

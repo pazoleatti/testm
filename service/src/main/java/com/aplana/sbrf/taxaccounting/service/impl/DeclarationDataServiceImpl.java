@@ -23,6 +23,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -70,6 +73,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -3651,6 +3655,74 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+
+        List<NdflPersonIncome> ndflPersonIncomes = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(personIncome.getNdflPersonId());
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personIncome.getNdflPersonId());
+        Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = new HashMap<>();
+        BigDecimal minRowNum = null;
+
+        for (NdflPersonIncome income : ndflPersonIncomes) {
+            if (minRowNum == null) {
+                minRowNum = income.getRowNum();
+            } else {
+                if (minRowNum.compareTo(income.getRowNum()) > 0) {
+                    minRowNum = income.getRowNum();
+                }
+            }
+            Pair operationAndInpKey = new Pair(income.getOperationId(), ndflPerson.getInp());
+            List<NdflPersonIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey);
+            if (operationAndInpGroup == null) {
+                operationAndInpGroup = new ArrayList<>();
+            }
+            operationAndInpGroup.add(income);
+            incomesGroupedByOperationAndInp.put(operationAndInpKey, operationAndInpGroup);
+        }
+        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
+        Map<Pair<String, String>, Date> operationDates = new HashMap<>();
+
+        for (Map.Entry<Pair<String, String>, List<NdflPersonIncome>> entry : incomesGroupedByOperationAndInp.entrySet()) {
+            Pair<String, String> key = entry.getKey();
+            List<NdflPersonIncome> group = entry.getValue();
+            List<Date> incomeAccruedDates = new ArrayList<>();
+            List<Date> incomePayoutDates = new ArrayList<>();
+            List<Date> paymentDates = new ArrayList<>();
+
+            for (NdflPersonIncome item : group) {
+                if (item.getIncomeAccruedDate() != null) {
+                    incomeAccruedDates.add(item.getIncomeAccruedDate());
+                }
+                if (item.getIncomePayoutDate() != null) {
+                    incomePayoutDates.add(item.getIncomePayoutDate());
+                }
+                if (item.getPaymentDate() != null) {
+                    paymentDates.add(item.getPaymentDate());
+                }
+            }
+
+            if (!incomeAccruedDates.isEmpty()) {
+                Collections.sort(incomeAccruedDates);
+                operationDates.put(key, incomeAccruedDates.get(0));
+                continue;
+            }
+            if (!incomePayoutDates.isEmpty()) {
+                Collections.sort(incomePayoutDates);
+                operationDates.put(key, incomePayoutDates.get(0));
+                continue;
+            }
+            if (!paymentDates.isEmpty()) {
+                Collections.sort(paymentDates);
+                operationDates.put(key, paymentDates.get(0));
+                continue;
+            }
+        }
+
+        BigDecimal incomeRowNum = minRowNum;
+        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(operationDates, ndflPerson));
+        for (NdflPersonIncome income : ndflPerson.getIncomes()) {
+            income.setRowNum(incomeRowNum);
+            incomeRowNum = incomeRowNum != null ? incomeRowNum.add(new BigDecimal("1")) : null;
+        }
+        ndflPersonDao.updateIncomes(ndflPerson.getIncomes());
     }
 
     @Override
@@ -3660,6 +3732,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+        List<NdflPersonDeduction> ndflPersonDeductions = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(personDeduction.getNdflPersonId());
+
+        BigDecimal minRowNum = !ndflPersonDeductions.isEmpty() ? ndflPersonDeductions.get(0).getRowNum() : null;
+        Set<String> operationIdOrderList = new HashSet<>();
+        for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductions){
+            operationIdOrderList.add(ndflPersonDeduction.getOperationId());
+            if (minRowNum == null) {
+                minRowNum = ndflPersonDeduction.getRowNum();
+            } else {
+                if (minRowNum.compareTo(ndflPersonDeduction.getRowNum()) > 0) {
+                    minRowNum = ndflPersonDeduction.getRowNum();
+                }
+            }
+        }
+
+        Collections.sort(ndflPersonDeductions, NdflPersonDeduction.getComparator(new ArrayList<>(operationIdOrderList)));
+
+        BigDecimal deductionRowNum = minRowNum;
+        for (NdflPersonDeduction deduction : ndflPersonDeductions) {
+            deduction.setRowNum(deductionRowNum);
+            deductionRowNum = deductionRowNum != null ? deductionRowNum.add(new BigDecimal("1")) : null;
+        }
+        ndflPersonDao.updateDeductions(ndflPersonDeductions);
     }
 
     @Override
@@ -3669,6 +3764,32 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+        List<NdflPersonPrepayment> ndflPersonPrepayments = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(personPrepayment.getNdflPersonId());
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId());
+
+        BigDecimal minRowNum = !ndflPersonPrepayments.isEmpty() ? ndflPersonPrepayments.get(0).getRowNum() : null;
+        Set<String> operationIdOrderList = new HashSet<>();
+        for (NdflPersonIncome income : ndflPerson.getIncomes()){
+            operationIdOrderList.add(income.getOperationId());
+        }
+        for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepayments){
+            if (minRowNum == null) {
+                minRowNum = ndflPersonPrepayment.getRowNum();
+            } else {
+                if (minRowNum.compareTo(ndflPersonPrepayment.getRowNum()) > 0) {
+                    minRowNum = ndflPersonPrepayment.getRowNum();
+                }
+            }
+        }
+
+        Collections.sort(ndflPersonPrepayments, NdflPersonPrepayment.getComparator(new ArrayList<>(operationIdOrderList)));
+
+        BigDecimal prepaymentRowNum = minRowNum;
+        for (NdflPersonPrepayment prepayment : ndflPersonPrepayments) {
+            prepayment.setRowNum(prepaymentRowNum);
+            prepaymentRowNum = prepaymentRowNum != null ? prepaymentRowNum.add(new BigDecimal("1")) : null;
+        }
+        ndflPersonDao.updatePrepayments(ndflPersonPrepayments);
     }
 
     private String getDeclarationDescription(long declarationDataId) {

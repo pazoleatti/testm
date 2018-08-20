@@ -2078,7 +2078,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "INCOME_ACCRUED_SUMM = :incomeAccruedSumm, INCOME_TYPE = :incomeType, INCOME_PAYOUT_DATE = :incomePayoutDate, INCOME_PAYOUT_SUMM = :incomePayoutSumm, " +
                 "TAX_BASE = :taxBase, TOTAL_DEDUCTIONS_SUMM = :totalDeductionsSumm, TAX_RATE = :taxRate, CALCULATED_TAX = :calculatedTax, WITHHOLDING_TAX = :withholdingTax, " +
                 "TAX_DATE = :taxDate, NOT_HOLDING_TAX = :notHoldingTax, OVERHOLDING_TAX = :overholdingTax, REFOUND_TAX = :refoundTax, TAX_TRANSFER_DATE = :taxTransferDate," +
-                "TAX_SUMM = :taxSumm, PAYMENT_DATE = :paymentDate, PAYMENT_NUMBER = :paymentNumber, MODIFIED_DATE = sysdate, MODIFIED_BY = :user WHERE id = :id";
+                "TAX_SUMM = :taxSumm, PAYMENT_DATE = :paymentDate, PAYMENT_NUMBER = :paymentNumber, MODIFIED_DATE = :modifyDate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("kpp", personIncome.getKpp());
         params.addValue("oktmo", personIncome.getOktmo());
@@ -2103,6 +2103,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("paymentNumber", personIncome.getPaymentNumber());
         params.addValue("user", taUserInfo.getUser().getName() + " (" + taUserInfo.getUser().getLogin() + ")");
         params.addValue("id", personIncome.getId());
+        params.addValue("modifyDate", Calendar.getInstance(TimeZone.getTimeZone("GMT+3")).getTime());
 
         getNamedParameterJdbcTemplate().update(sql, params);
     }
@@ -2112,7 +2113,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String sql = "UPDATE ndfl_person_deduction SET TYPE_CODE = :typeCode, NOTIF_TYPE = :notifType, NOTIF_NUM = :notifNum, NOTIF_SUMM = :notifSumm, " +
                 "NOTIF_SOURCE = :notifSource, NOTIF_DATE = :notifDate, INCOME_CODE = :incomeCode, INCOME_SUMM = :incomeSumm, INCOME_ACCRUED = :incomeAccrued, " +
                 "PERIOD_PREV_DATE = :periodPrevDate, PERIOD_PREV_SUMM = :periodPrevSumm, PERIOD_CURR_DATE = :periodCurrDate, PERIOD_CURR_SUMM = :periodCurrSumm, " +
-                "MODIFIED_DATE = sysdate, MODIFIED_BY = :user WHERE id = :id";
+                "MODIFIED_DATE = :modifyDate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("typeCode", personDeduction.getTypeCode());
         params.addValue("notifType", personDeduction.getNotifType());
@@ -2129,6 +2130,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("periodCurrSumm", personDeduction.getPeriodCurrSumm());
         params.addValue("user", taUserInfo.getUser().getName() + " (" + taUserInfo.getUser().getLogin() + ")");
         params.addValue("id", personDeduction.getId());
+        params.addValue("modifyDate", Calendar.getInstance(TimeZone.getTimeZone("GMT+3")).getTime());
 
         getNamedParameterJdbcTemplate().update(sql, params);
     }
@@ -2136,7 +2138,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public void updateOneNdflPrepayment(NdflPersonPrepaymentDTO personPrepayment, TAUserInfo taUserInfo) {
         String sql = "UPDATE ndfl_person_prepayment SET SUMM = :summ, NOTIF_NUM = :notifNum, NOTIF_SOURCE = :notifSource, " +
-                "NOTIF_DATE = :notifDate, MODIFIED_DATE = sysdate, MODIFIED_BY = :user WHERE id = :id";
+                "NOTIF_DATE = :notifDate, MODIFIED_DATE = :modifyDate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("summ", personPrepayment.getSumm());
         params.addValue("notifNum", personPrepayment.getNotifNum());
@@ -2144,6 +2146,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("notifDate", personPrepayment.getNotifDate());
         params.addValue("user", taUserInfo.getUser().getName() + " (" + taUserInfo.getUser().getLogin() + ")");
         params.addValue("id", personPrepayment.getId());
+        params.addValue("modifyDate", Calendar.getInstance(TimeZone.getTimeZone("GMT+3")).getTime());
 
         getNamedParameterJdbcTemplate().update(sql, params);
 

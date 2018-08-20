@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 
+import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
+import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Сведения о доходах физического лица
@@ -321,5 +327,56 @@ public class NdflPersonIncome extends NdflPersonOperation {
                 ", paymentNumber='" + paymentNumber + '\'' +
                 ", taxSumm=" + taxSumm +
                 '}';
+    }
+
+    public static Comparator<NdflPersonIncome> getComparator(final Map<Pair<String, String>, Date> operationDates, final NdflPerson ndflPerson){
+        return new NdflComparator<NdflPersonIncome>() {
+            @Override
+            public int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.getInp())), operationDates.get(new Pair(o2.operationId, ndflPerson.getInp())), null);
+                if (operationDateComp != 0) {
+                    return operationDateComp;
+                }
+
+                int operationIdComp = compareValues(o1.operationId, o2.operationId, RnuNdflStringComparator.INSTANCE);
+                if (operationIdComp != 0) {
+                    return operationIdComp;
+                }
+
+                int actionDateComp = compareValues(getActionDate(o1), getActionDate(o2), null);
+                if (actionDateComp != 0) {
+                    return actionDateComp;
+                }
+
+                return compareValues(getRowType(o1), getRowType(o2), null);
+            }
+
+            /**
+             * Получить дату действия
+             * @param income объект строки дохода
+             * @return  вычисленная дата действия
+             */
+            Date getActionDate(NdflPersonIncome income) {
+                if (income.taxDate != null) {
+                    return income.taxDate;
+                } else {
+                    return income.paymentDate;
+                }
+            }
+
+            /**
+             * Получить тип строки дохода
+             * @param income объект строки дохода
+             * @return  значение типа
+             */
+            Integer getRowType(NdflPersonIncome income) {
+                if (income.incomeAccruedDate != null) {
+                    return 100;
+                } else if (income.incomePayoutDate != null) {
+                    return 200;
+                }
+                return 300;
+            }
+        };
     }
 }
