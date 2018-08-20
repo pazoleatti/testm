@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import org.apache.commons.lang3.time.DateUtils
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -1797,24 +1798,26 @@ class Check extends AbstractScriptClass {
                     // 3. "Графа 7" ≥ "Графа 7" проверяемой строки
                     // 4. Если найдено несколько строк, то брать одну строку, у которой значение "Граф 7" является минимальной.
                     // При этом если найдено несколько строк с одинаковыми значениями минимальной даты, то брать строку, созданную первой
-                    def nextMinIncomePayoutOfPerson = allIncomesOfPerson.findAll {
-                        it != ndflPersonIncome && it.incomeType != "02" && it.incomeType != "14" &&
-                                it.incomePayoutDate >= ndflPersonIncome.incomePayoutDate
-                    }.min { it.incomePayoutDate }
+                    def nextMinIncomePayoutOfPerson = {
+                        return allIncomesOfPerson.findAll {
+                            it != ndflPersonIncome && it.incomeType != "02" && it.incomeType != "14" &&
+                                    it.incomePayoutDate >= ndflPersonIncome.incomePayoutDate
+                        }.min { it.incomePayoutDate }
+                    }
 
                     dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             def checkedIncome = ndflPersonIncome
                             // для пп 4 и 11 используется nextMinIncomePayoutOfPerson для проверки
                             if ("02" in dateConditionData.incomeTypes || "14" in dateConditionData.incomeTypes) {
-                                checkedIncome = nextMinIncomePayoutOfPerson
+                                checkedIncome = nextMinIncomePayoutOfPerson()
                             }
                             if (checkedIncome != null && !dateConditionData.checker.check(checkedIncome, allIncomesOfOperation)) {
                                 String errMsg = String.format(dateConditionData.conditionMessage,
-                                        C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : "",
-                                        C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""
+                                        C_TAX_TRANSFER_DATE, checkedIncome.taxTransferDate ? ScriptUtils.formatDate(checkedIncome.taxTransferDate) : "",
+                                        C_INCOME_PAYOUT_DATE, checkedIncome.incomePayoutDate ? ScriptUtils.formatDate(checkedIncome.incomePayoutDate) : ""
                                 )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, checkedIncome.rowNum ?: "")
                                 logger.logCheck("%s. %s.",
                                         declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
                                         LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
@@ -2504,10 +2507,10 @@ class Check extends AbstractScriptClass {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
-            int offset = 30
-            Date workingDayPlus30 = dateConditionWorkDay.getWorkDay(checkedIncome.incomePayoutDate, offset)
+            Date incomePayoutPlus30CalendarDays = DateUtils.addDays(checkedIncome.incomePayoutDate, 30)
+            Date incomePayoutPlus30CalendarDaysWorkingDay = dateConditionWorkDay.getWorkDay(incomePayoutPlus30CalendarDays, 0)
 
-            return checkedIncome.taxTransferDate <= workingDayPlus30;
+            return checkedIncome.taxTransferDate <= incomePayoutPlus30CalendarDaysWorkingDay
         }
     }
 
@@ -2518,10 +2521,10 @@ class Check extends AbstractScriptClass {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
-            int offset = 30
-            Date workingDayPlus30 = dateConditionWorkDay.getWorkDay(checkedIncome.incomePayoutDate, offset)
+            Date incomePayoutPlus30CalendarDays = DateUtils.addDays(checkedIncome.incomePayoutDate, 30)
+            Date incomePayoutPlus30CalendarDaysWorkingDay = dateConditionWorkDay.getWorkDay(incomePayoutPlus30CalendarDays, 0)
 
-            return checkedIncome.taxTransferDate == workingDayPlus30;
+            return checkedIncome.taxTransferDate.equals(incomePayoutPlus30CalendarDaysWorkingDay)
         }
     }
 
