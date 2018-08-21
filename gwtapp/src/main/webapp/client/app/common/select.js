@@ -414,11 +414,14 @@
                 $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, periodObject) {
                     if (typeof(departmentId) !== 'undefined' && departmentId != null) {
                         $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatterWithCorrectionDate');
+                        $scope.periodSelect.options.data = function () {
+                            return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
+                        };
                         ReportPeriodResource.query({
                             projection: "forDepartment",
                             departmentId: departmentId
                         }, function (data) {
-                            $scope.periodSelect.options.data.results = data;
+                            $scope.results = data;
                             if (periodObject && data && data.length > 0) {
                                 periodObject.period = data[0];
                                 angular.forEach(data, function (period) {
