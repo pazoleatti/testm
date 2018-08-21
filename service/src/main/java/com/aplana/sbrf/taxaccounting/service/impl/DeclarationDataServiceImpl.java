@@ -22,10 +22,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -57,6 +54,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -3658,6 +3656,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         List<NdflPersonIncome> ndflPersonIncomes = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(personIncome.getNdflPersonId());
         NdflPerson ndflPerson = ndflPersonDao.fetchOne(personIncome.getNdflPersonId());
+        ndflPersonDao.updateIncomes(sortNndflPersonIncome(ndflPersonIncomes, ndflPerson));
+    }
+
+    private List<NdflPersonIncome> sortNndflPersonIncome(List<NdflPersonIncome> ndflPersonIncomes, NdflPerson ndflPerson){
         Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = new HashMap<>();
         BigDecimal minRowNum = null;
 
@@ -3717,12 +3719,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         BigDecimal incomeRowNum = minRowNum;
-        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(operationDates, ndflPerson));
-        for (NdflPersonIncome income : ndflPerson.getIncomes()) {
+        Collections.sort(ndflPersonIncomes, NdflPersonIncome.getComparator(operationDates, ndflPerson));
+        for (NdflPersonIncome income : ndflPersonIncomes) {
             income.setRowNum(incomeRowNum);
             incomeRowNum = incomeRowNum != null ? incomeRowNum.add(new BigDecimal("1")) : null;
         }
-        ndflPersonDao.updateIncomes(ndflPerson.getIncomes());
+        return ndflPersonIncomes;
     }
 
     @Override
@@ -3733,11 +3735,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
         List<NdflPersonDeduction> ndflPersonDeductions = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(personDeduction.getNdflPersonId());
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personDeduction.getNdflPersonId());
 
         BigDecimal minRowNum = !ndflPersonDeductions.isEmpty() ? ndflPersonDeductions.get(0).getRowNum() : null;
         Set<String> operationIdOrderList = new HashSet<>();
+        for (NdflPersonIncome income : ndflPerson.getIncomes()){
+            operationIdOrderList.add(income.getOperationId());
+        }
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductions){
-            operationIdOrderList.add(ndflPersonDeduction.getOperationId());
             if (minRowNum == null) {
                 minRowNum = ndflPersonDeduction.getRowNum();
             } else {
