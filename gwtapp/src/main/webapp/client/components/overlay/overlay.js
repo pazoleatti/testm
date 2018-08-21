@@ -332,6 +332,7 @@
                                     });
                                 }]);
                             }
+                            return $q.reject();
                         }
                         if (response.config && angular.isDefined(response.config.params)) {
                             //Если в запросе нет параметра nooverlay, то показываем overlay
