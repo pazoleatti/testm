@@ -1646,6 +1646,33 @@
                             });
                         }
 
+                        var getPagerSelector = function () {
+                            return element.find(".ui-pg-selbox");
+                        };
+
+                        var pageSizeInput = angular.element(
+                            "<label class='ui-page-size-label'></label>" +
+                            "<input id='page_size_input' class='ui-page-size-input' type='text'/>");
+                        pageSizeInput.val(gridConfig.rowNum);
+                        pageSizeInput.keyup(function ($event) {
+                            if ($event.keyCode === 13) {
+                                var newRowNum = Number(this.value);
+                                if (newRowNum > 0) {
+                                    var $selects = getPagerSelector();
+                                    var $firstOption = $selects.find("option:nth-child(1)");
+                                    $firstOption.text(newRowNum);
+                                    $firstOption.val(newRowNum);
+                                    $selects.first().val(newRowNum);
+                                    $selects.first().trigger("change");
+                                    this.blur();
+                                } else {
+                                    this.value = getPagerSelector().first().val();
+                                }
+                            }
+                        });
+                        getPagerSelector().first().after(pageSizeInput);
+                        getPagerSelector().hide();
+
                         $timeout(function () {
                             fillHeight();
                             fillLastColumn();
