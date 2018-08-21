@@ -108,7 +108,6 @@
                                 formatter: $filter('dateFormatter')
                             }
                         ],
-                        viewrecords: true,
                         hidegrid: false,
                         groupConfig: {
                             level: 1,
