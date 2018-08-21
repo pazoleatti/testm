@@ -1657,7 +1657,7 @@
                         pageSizeInput.keyup(function ($event) {
                             if ($event.keyCode === 13) {
                                 var newRowNum = Number(this.value);
-                                if (newRowNum > 0) {
+                                if (newRowNum > 0 && newRowNum <= 300) {
                                     var $selects = getPagerSelector();
                                     var $firstOption = $selects.find("option:nth-child(1)");
                                     $firstOption.text(newRowNum);
