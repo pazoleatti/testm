@@ -332,6 +332,7 @@
                                     });
                                 }]);
                             }
+                            Overlay.processResponse();
                             return $q.reject();
                         }
                         if (response.config && angular.isDefined(response.config.params)) {
