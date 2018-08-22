@@ -21,7 +21,6 @@ public class CompatibilityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         response.addHeader("X-UA-Compatible", "IE=edge,chrome=1");
-        response.setHeader("isCustomPage", "true");
         HttpSession session = httpServletRequest.getSession();
         try {
             MDC.put("processId", "SID=" + session.getId() + " ");
