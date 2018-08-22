@@ -1,21 +1,28 @@
 <div class="modal-body" style="min-height: 350px">
-    <div>
-        <label style="margin-bottom: 0;">
-            <input class="cbox" type="checkbox" data-ng-model="gridFilter.showSources" data-ng-change="updateGridData()"/>
-            <span>{{::'sources.checkbox.sources' | translate}}</span>
-        </label>
-        <label style="margin-bottom: 0;">
-            <input class="cbox" type="checkbox" data-ng-model="gridFilter.showDestinations" data-ng-change="updateGridData()"/>
-            <span>{{::'sources.checkbox.destinations' | translate}}</span>
-        </label>
-    </div>
-    <div style="height: 400px;">
-        <div class="flex-grid" data-aplana-grid style="height: 100%;"
-             data-grid-options="sourcesGrid.options"
-             data-grid-ctrl="sourcesGrid.ctrl"
-             data-ng-model="sourcesGrid.value"
-             data-grid-hide-legend="false"
-             id="sourcesTable">
+    <div class="form-horizontal">
+        <div class="top-block">
+            <label style="margin-bottom: 0;">
+                <input class="cbox" type="checkbox" data-ng-model="gridFilter.showSources"
+                       data-ng-change="updateGridData()"/>
+                <span>{{::'sources.checkbox.sources' | translate}}</span>
+            </label>
+            <label style="margin-bottom: 0;">
+                <input class="cbox" type="checkbox" data-ng-model="gridFilter.showDestinations"
+                       data-ng-change="updateGridData()"/>
+                <span>{{::'sources.checkbox.destinations' | translate}}</span>
+            </label>
+        </div>
+        <div style="height: 400px;">
+            <div class="flex-grid" data-aplana-grid style="height: 100%;"
+                 data-grid-fill-space="true"
+                 data-grid-fill-space-container-selector=".modal-body"
+                 data-grid-fill-space-container-selector-top=".top-block"
+                 data-grid-options="sourcesGrid.options"
+                 data-grid-ctrl="sourcesGrid.ctrl"
+                 data-ng-model="sourcesGrid.value"
+                 data-grid-hide-legend="false"
+                 id="sourcesTable">
+            </div>
         </div>
     </div>
 </div>

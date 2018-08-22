@@ -68,22 +68,22 @@
                             {
                                 name: 'srcOrDest',
                                 index: 'srcOrDest',
-                                width: 150,
+                                width: 90,
                                 sortable: false,
                                 formatter: $filter('sourceFormatter')
                             },
                             {
                                 name: 'declarationDataId',
                                 index: 'declarationDataId',
-                                width: 106,
+                                width: 80,
                                 sortable: false,
                                 formatter: $filter('declarationDataIdFormatter')
                             },
-                            {name: 'fullDepartmentName', index: 'fullDepartmentName', width: 113, sortable: false},
+                            {name: 'fullDepartmentName', index: 'fullDepartmentName', width: 113, sortable: false, general: true},
                             {
                                 name: 'correctionDate',
                                 index: 'correctionDate',
-                                width: 144,
+                                width: 106,
                                 sortable: false,
                                 formatter: $filter('dateFormatter')
                             },
@@ -96,11 +96,11 @@
                             },
                             {name: 'declarationTypeName', index: 'declarationTypeName', width: 203, sortable: false},
                             {name: 'year', index: 'year', width: 40, sortable: false},
-                            {name: 'periodName', index: 'periodName', width: 70, sortable: false},
+                            {name: 'periodName', index: 'periodName', width: 110, sortable: false},
                             {
                                 name: 'declarationState',
                                 index: 'declarationState',
-                                width: 126,
+                                width: 110,
                                 sortable: false,
                                 formatter: $filter('declarationStateFormatter')
                             }
