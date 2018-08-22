@@ -630,7 +630,7 @@
                                         </aggregation>
                                     </aggregations>
                                     <force>true</force>
-                                    <nocompress>false</nocompress>
+                                    <nocompress>true</nocompress>
                                     <nosuffix>true</nosuffix>
                                     <jswarn>false</jswarn>
                                     <encoding>UTF-8</encoding>

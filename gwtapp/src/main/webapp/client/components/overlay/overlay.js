@@ -267,10 +267,10 @@
                 }]
             };
         }])
-        .factory('_OverlayHttpInterceptor', [
-            '$q',
-            'Overlay',
-            function ($q, Overlay) {
+        .factory('_OverlayHttpInterceptor', ['$q', 'Overlay', '$window', '$injector', '$filter',
+            function ($q, Overlay, $window, $injector, $filter) {
+                var expireDialogOpened = false, expireDialogCanceled = false;
+
                 //notice:
                 //Если использовать $http в этом interceptor, то для того, чтобы
                 //избежать circular dependency используем $inject.invoke
@@ -300,6 +300,41 @@
 
                     // On response success
                     response: function (response) {
+                        var invalidHeader = ('true' === response.headers('isLoginPage')) ||
+                            ('true' !== response.headers('isCustomPage'));
+                        //У нас есть два вида кэшей - сгенеренные градлом в templates.js и приличные кэши запросов,
+                        //которые ведет ангуляр. В первос случае в кэше лежит просто строка, а в втором весь запрос
+                        //в виде массива [status, response, headers]
+                        //На нужно отловить запросы не из кэша или из кеша, но не из templates.js
+                        var nonCached = !(angular.isDefined(response.config.cache) &&
+                            angular.isObject(response.config.cache) && angular.isDefined(response.config.cache.info()));
+                        var cachedRequest = !nonCached && angular.isArray(response.config.cache.get(response.config.url));
+
+                        if (response.headers()['content-type'] && response.headers()['content-type'].indexOf("text/html") !== -1
+                            && invalidHeader && (nonCached || cachedRequest)) {
+                            if (!expireDialogOpened && !expireDialogCanceled) {
+                                expireDialogOpened = true;
+
+                                $injector.invoke(['$dialogs', function ($dialogs) {
+                                    $dialogs.confirmDialog({
+                                        title: $filter('translate')('authorization.expire.dialog.title'),
+                                        content: $filter('translate')('authorization.expire.dialog.message'),
+                                        okBtnCaption: $filter('translate')('authorization.expire.dialog.reload'),
+                                        cancelBtnCaption: $filter('translate')('button.close'),
+                                        okBtnClick: function () {
+                                            $window.location.reload();
+                                        },
+                                        cancelBtnClick: function () {
+                                            expireDialogOpened = false;
+                                            expireDialogCanceled = true;
+                                            return false;
+                                        }
+                                    });
+                                }]);
+                            }
+                            Overlay.processResponse();
+                            return $q.reject();
+                        }
                         if (response.config && angular.isDefined(response.config.params)) {
                             //Если в запросе нет параметра nooverlay, то показываем overlay
                             if (true !== response.config.params.nooverlay) {
