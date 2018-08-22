@@ -756,67 +756,16 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         Collections.sort(ndflPersonCache, NdflPerson.getComparator())
-
-        // Доходы сгруппированные по идОперации и ИНП. Будут использоваться для вычисления доп полей сортировки
-        Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = [:]
-
-        for (NdflPerson ndflPerson : ndflPersonCache) {
-            for (NdflPersonIncome income : ndflPerson.incomes) {
-                Pair<String, String> operationAndInpKey = new Pair(income.operationId, ndflPerson.inp)
-                List<NdflPersonIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey)
-                if (operationAndInpGroup == null) {
-                    incomesGroupedByOperationAndInp.put(operationAndInpKey, [income])
-                } else {
-                    operationAndInpGroup << income
-                }
-            }
-        }
-
-        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
-        Map<Pair<String, String>, Date> operationDates = [:]
-
-        for (Map.Entry<Pair<String, String>, List<NdflPersonIncome>> entry : incomesGroupedByOperationAndInp.entrySet()) {
-            Pair<String, String> key = entry.getKey();
-            List<NdflPersonIncome> group = entry.getValue();
-            List<Date> incomeAccruedDates = group.incomeAccruedDate
-            incomeAccruedDates.removeAll([null])
-            if (!incomeAccruedDates.isEmpty()) {
-                Collections.sort(incomeAccruedDates)
-                operationDates.put(key, incomeAccruedDates.get(0))
-                continue
-            }
-
-            List<Date> incomePayoutDates = group.incomePayoutDate
-            incomePayoutDates.removeAll([null])
-            if (!incomePayoutDates.isEmpty()) {
-                Collections.sort(incomePayoutDates)
-                operationDates.put(key, incomePayoutDates.get(0))
-                continue
-            }
-
-            List<Date> paymentDates = group.paymentDate
-            paymentDates.removeAll([null])
-            if (!paymentDates.isEmpty()) {
-                Collections.sort(paymentDates)
-                operationDates.put(key, paymentDates.get(0))
-                continue
-            }
-
-            operationDates.put(key, null)
-        }
-
         Long personRowNum = 0L
         BigDecimal incomeRowNum = new BigDecimal("0")
         BigDecimal deductionRowNum = new BigDecimal("0")
         BigDecimal prepaymentRowNum = new BigDecimal("0")
         for (NdflPerson ndflPerson : ndflPersonCache) {
-            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(operationDates, ndflPerson))
+            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
 
-            List<String> operationIdOrderList = ndflPerson.incomes.operationId
+            Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
 
-            Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(operationIdOrderList))
-
-            Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(operationIdOrderList))
+            Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
 
             for (NdflPersonIncome income : ndflPerson.incomes) {
                 incomeRowNum = incomeRowNum.add(new BigDecimal("1"))

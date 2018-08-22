@@ -451,7 +451,12 @@ public class NdflPerson extends NdflData<Long> {
                 .toString();
     }
 
-    public static Comparator<NdflPerson> getComparator(){
+    /**
+     * Возвращает компаратор для сортировки физических лиц
+     *
+     * @return объект {@link NdflComparator} для сортировки {@link NdflPerson}
+     */
+    public static Comparator<NdflPerson> getComparator() {
         return new NdflComparator<NdflPerson>() {
             @Override
             public int compare(NdflPerson o1, NdflPerson o2) {

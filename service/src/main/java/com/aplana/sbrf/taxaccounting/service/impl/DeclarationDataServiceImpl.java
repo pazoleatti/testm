@@ -54,7 +54,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -3653,78 +3652,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-
-        List<NdflPersonIncome> ndflPersonIncomes = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(personIncome.getNdflPersonId());
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personIncome.getNdflPersonId());
-        ndflPersonDao.updateIncomes(sortNndflPersonIncome(ndflPersonIncomes, ndflPerson));
-    }
-
-    private List<NdflPersonIncome> sortNndflPersonIncome(List<NdflPersonIncome> ndflPersonIncomes, NdflPerson ndflPerson){
-        Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = new HashMap<>();
-        BigDecimal minRowNum = null;
-
-        for (NdflPersonIncome income : ndflPersonIncomes) {
-            if (minRowNum == null) {
-                minRowNum = income.getRowNum();
-            } else {
-                if (minRowNum.compareTo(income.getRowNum()) > 0) {
-                    minRowNum = income.getRowNum();
-                }
-            }
-            Pair operationAndInpKey = new Pair(income.getOperationId(), ndflPerson.getInp());
-            List<NdflPersonIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey);
-            if (operationAndInpGroup == null) {
-                operationAndInpGroup = new ArrayList<>();
-            }
-            operationAndInpGroup.add(income);
-            incomesGroupedByOperationAndInp.put(operationAndInpKey, operationAndInpGroup);
-        }
-        // Вычисленные даты операции для сортировки и сгруппированные по идОперации и ИНП
-        Map<Pair<String, String>, Date> operationDates = new HashMap<>();
-
-        for (Map.Entry<Pair<String, String>, List<NdflPersonIncome>> entry : incomesGroupedByOperationAndInp.entrySet()) {
-            Pair<String, String> key = entry.getKey();
-            List<NdflPersonIncome> group = entry.getValue();
-            List<Date> incomeAccruedDates = new ArrayList<>();
-            List<Date> incomePayoutDates = new ArrayList<>();
-            List<Date> paymentDates = new ArrayList<>();
-
-            for (NdflPersonIncome item : group) {
-                if (item.getIncomeAccruedDate() != null) {
-                    incomeAccruedDates.add(item.getIncomeAccruedDate());
-                }
-                if (item.getIncomePayoutDate() != null) {
-                    incomePayoutDates.add(item.getIncomePayoutDate());
-                }
-                if (item.getPaymentDate() != null) {
-                    paymentDates.add(item.getPaymentDate());
-                }
-            }
-
-            if (!incomeAccruedDates.isEmpty()) {
-                Collections.sort(incomeAccruedDates);
-                operationDates.put(key, incomeAccruedDates.get(0));
-                continue;
-            }
-            if (!incomePayoutDates.isEmpty()) {
-                Collections.sort(incomePayoutDates);
-                operationDates.put(key, incomePayoutDates.get(0));
-                continue;
-            }
-            if (!paymentDates.isEmpty()) {
-                Collections.sort(paymentDates);
-                operationDates.put(key, paymentDates.get(0));
-                continue;
-            }
-        }
-
-        BigDecimal incomeRowNum = minRowNum;
-        Collections.sort(ndflPersonIncomes, NdflPersonIncome.getComparator(operationDates, ndflPerson));
-        for (NdflPersonIncome income : ndflPersonIncomes) {
-            income.setRowNum(incomeRowNum);
-            incomeRowNum = incomeRowNum != null ? incomeRowNum.add(new BigDecimal("1")) : null;
-        }
-        return ndflPersonIncomes;
+        ndflPersonDao.updateIncomes(NdflPersonIncome.sortAndUpdateRowNum(ndflPersonDao.fetchOne(personIncome.getNdflPersonId())));
     }
 
     @Override
@@ -3734,32 +3662,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        List<NdflPersonDeduction> ndflPersonDeductions = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(personDeduction.getNdflPersonId());
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personDeduction.getNdflPersonId());
-
-        BigDecimal minRowNum = !ndflPersonDeductions.isEmpty() ? ndflPersonDeductions.get(0).getRowNum() : null;
-        Set<String> operationIdOrderList = new HashSet<>();
-        for (NdflPersonIncome income : ndflPerson.getIncomes()){
-            operationIdOrderList.add(income.getOperationId());
-        }
-        for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductions){
-            if (minRowNum == null) {
-                minRowNum = ndflPersonDeduction.getRowNum();
-            } else {
-                if (minRowNum.compareTo(ndflPersonDeduction.getRowNum()) > 0) {
-                    minRowNum = ndflPersonDeduction.getRowNum();
-                }
-            }
-        }
-
-        Collections.sort(ndflPersonDeductions, NdflPersonDeduction.getComparator(new ArrayList<>(operationIdOrderList)));
-
-        BigDecimal deductionRowNum = minRowNum;
-        for (NdflPersonDeduction deduction : ndflPersonDeductions) {
-            deduction.setRowNum(deductionRowNum);
-            deductionRowNum = deductionRowNum != null ? deductionRowNum.add(new BigDecimal("1")) : null;
-        }
-        ndflPersonDao.updateDeductions(ndflPersonDeductions);
+        ndflPersonDao.updateDeductions(NdflPersonDeduction.sortAndUpdateRowNum(ndflPersonDao.fetchOne(personDeduction.getNdflPersonId())));
     }
 
     @Override
@@ -3769,32 +3672,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        List<NdflPersonPrepayment> ndflPersonPrepayments = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(personPrepayment.getNdflPersonId());
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId());
-
-        BigDecimal minRowNum = !ndflPersonPrepayments.isEmpty() ? ndflPersonPrepayments.get(0).getRowNum() : null;
-        Set<String> operationIdOrderList = new HashSet<>();
-        for (NdflPersonIncome income : ndflPerson.getIncomes()){
-            operationIdOrderList.add(income.getOperationId());
-        }
-        for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepayments){
-            if (minRowNum == null) {
-                minRowNum = ndflPersonPrepayment.getRowNum();
-            } else {
-                if (minRowNum.compareTo(ndflPersonPrepayment.getRowNum()) > 0) {
-                    minRowNum = ndflPersonPrepayment.getRowNum();
-                }
-            }
-        }
-
-        Collections.sort(ndflPersonPrepayments, NdflPersonPrepayment.getComparator(new ArrayList<>(operationIdOrderList)));
-
-        BigDecimal prepaymentRowNum = minRowNum;
-        for (NdflPersonPrepayment prepayment : ndflPersonPrepayments) {
-            prepayment.setRowNum(prepaymentRowNum);
-            prepaymentRowNum = prepaymentRowNum != null ? prepaymentRowNum.add(new BigDecimal("1")) : null;
-        }
-        ndflPersonDao.updatePrepayments(ndflPersonPrepayments);
+        ndflPersonDao.updatePrepayments(NdflPersonPrepayment.sortAndUpdateRowNum(ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId())));
     }
 
     private String getDeclarationDescription(long declarationDataId) {

@@ -268,8 +268,15 @@ class Import extends AbstractScriptClass {
             List<NdflPersonIncome> incomesForUpdate = []
             List<NdflPersonDeduction> deductionsForUpdate = []
             List<NdflPersonPrepayment> prepaymentsForUpdate = []
+
+            Collections.sort(ndflPersons, NdflPerson.getComparator())
+
             for (NdflPerson ndflPerson : ndflPersons) {
                 ndflPerson.rowNum = ++personRowNum
+                Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
+                Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
+                Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
+
                 if (needPersonUpdate(ndflPerson)) {
                     NdflPerson persistedPerson = null
                     // Проверяем обновлялись ли уже у этого физлица реквизиты

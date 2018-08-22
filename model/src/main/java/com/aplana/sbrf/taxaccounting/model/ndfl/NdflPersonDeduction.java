@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Стандартные, социальные и имущественные налоговые вычеты (Раздел 3)
@@ -231,10 +229,18 @@ public class NdflPersonDeduction extends NdflPersonOperation {
                 '}';
     }
 
-    public static Comparator<NdflPersonDeduction> getComparator(final List<String> operationIdOrderList){
+    /**
+     * Получение компаратора для сортировки сведений о налоговых вычетах физического лица {@link NdflPersonDeduction}
+     *
+     * @param ndflPerson физическое лицо
+     * @param <T>        тип объекта {@link NdflPerson} или его наследник
+     * @return компаратор {@link NdflComparator} для сортировки {@link NdflPersonDeduction}
+     */
+    public static <T extends NdflPerson> Comparator<NdflPersonDeduction> getComparator(final T ndflPerson){
         return new NdflComparator<NdflPersonDeduction>() {
             @Override
             public int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                final List<String> operationIdOrderList = getOperationIdOrderList(ndflPerson);
                 int incomeAccruedComp = compareValues(o1.incomeAccrued, o2.incomeAccrued, null);
                 if (incomeAccruedComp != 0) {
                     return incomeAccruedComp;
@@ -252,6 +258,37 @@ public class NdflPersonDeduction extends NdflPersonOperation {
 
                 return compareValues(o1.periodCurrDate, o2.periodCurrDate, null);
             }
+
+            /**
+             * Получение списка идентификаторов операций для сведений о доходах физического лица (Раздел 2) {@link NdflPersonIncome#operationId}
+             *
+             * @param ndflPerson физическое лицо
+             * @return список идентификаторов операций свединий о доходах ФЛ (Раздел 2) в порядке их следования в ndflPerson.incomes
+             */
+            private List<String> getOperationIdOrderList(T ndflPerson){
+                Set<String> operationIdOrderList = new LinkedHashSet<>();
+                for (NdflPersonIncome income : ndflPerson.getIncomes()){
+                    operationIdOrderList.add(income.getOperationId());
+                }
+                return new ArrayList<>(operationIdOrderList);
+            }
         };
+    }
+
+    /**
+     * Сортировка списка объектов {@link NdflPersonDeduction} на основе компаратора с обновлением номеров строк. Начало нумерации
+     * начинается с минимального номера строки из {@link NdflPerson#getIncomes()} или 1
+     *
+     * @param ndflPerson объект {@link NdflPerson}, содержащий {@link List<NdflPersonDeduction>}
+     * @return отсортированный список {@link List<NdflPersonDeduction>} с номерами строк, идущими по возрастанию порядка сортировки
+     */
+    public static List<NdflPersonDeduction> sortAndUpdateRowNum(NdflPerson ndflPerson) {
+        Collections.sort(ndflPerson.getDeductions(), getComparator(ndflPerson));
+        BigDecimal deductionRowNum = getMinRowNum(ndflPerson.getDeductions());
+        for (NdflPersonDeduction deduction : ndflPerson.getDeductions()) {
+            deduction.setRowNum(deductionRowNum);
+            deductionRowNum = deductionRowNum != null ? deductionRowNum.add(new BigDecimal("1")) : null;
+        }
+        return ndflPerson.getDeductions();
     }
 }

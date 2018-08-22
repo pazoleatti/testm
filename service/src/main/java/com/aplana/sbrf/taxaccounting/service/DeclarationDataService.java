@@ -809,7 +809,7 @@ public interface DeclarationDataService {
     void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger);
 
     /**
-     * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
+     * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ) и производит пересортировку данных
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
      * @param taUserInfo        пользователь, выполняющий изменения
@@ -818,7 +818,7 @@ public interface DeclarationDataService {
     void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome);
 
     /**
-     * Обновляет данные строки для раздела 3 (Сведения о вычетах)
+     * Обновляет данные строки для раздела 3 (Сведения о вычетах) и производит пересортировку данных
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
      * @param taUserInfo        пользователь, выполняющий изменения
@@ -827,7 +827,7 @@ public interface DeclarationDataService {
     void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction);
 
     /**
-     * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
+     * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей) и производит пересортировку данных
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
      * @param taUserInfo        пользователь, выполняющий изменения

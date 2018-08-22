@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author Andrey Drunk
@@ -93,5 +94,28 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    /**
+     * Получение минимального номера строки {@link NdflPersonOperation#rowNum}
+     *
+     * @param operations список операций
+     * @param <T>        тип НДФЛ операции
+     * @return минимальное значение номера строки {@link NdflPersonOperation#rowNum} или 1
+     */
+    protected static <T extends NdflPersonOperation> BigDecimal getMinRowNum(List<T> operations) {
+
+        BigDecimal minRowNum = !operations.isEmpty() ? operations.get(0).getRowNum() : new BigDecimal(1);
+
+        for (NdflPersonOperation operation : operations) {
+            if (minRowNum == null) {
+                minRowNum = operation.getRowNum();
+            } else {
+                if (minRowNum.compareTo(operation.getRowNum()) > 0) {
+                    minRowNum = operation.getRowNum();
+                }
+            }
+        }
+        return minRowNum;
     }
 }

@@ -2,16 +2,15 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 
 import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
-import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Сведения о доходах физического лица
+ *
  * @author Andrey Drunk
  */
 public class NdflPersonIncome extends NdflPersonOperation {
@@ -329,10 +328,18 @@ public class NdflPersonIncome extends NdflPersonOperation {
                 '}';
     }
 
-    public static Comparator<NdflPersonIncome> getComparator(final Map<Pair<String, String>, Date> operationDates, final NdflPerson ndflPerson){
+    /**
+     * Получение компаратора для сортировки сведений о доходах физического лица {@link NdflPersonIncome}
+     *
+     * @param ndflPerson физическое лицо
+     * @param <T>        тип объекта {@link NdflPerson} или его наследник
+     * @return компаратор {@link NdflComparator} для сортировки {@link NdflPersonIncome}
+     */
+    public static <T extends NdflPerson> Comparator<NdflPersonIncome> getComparator(final T ndflPerson) {
         return new NdflComparator<NdflPersonIncome>() {
             @Override
             public int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                Map<Pair<String, String>, Date> operationDates = getOperationDates();
                 int operationDateComp = compareValues(operationDates.get(new Pair(o1.operationId, ndflPerson.getInp())), operationDates.get(new Pair(o2.operationId, ndflPerson.getInp())), null);
                 if (operationDateComp != 0) {
                     return operationDateComp;
@@ -353,10 +360,11 @@ public class NdflPersonIncome extends NdflPersonOperation {
 
             /**
              * Получить дату действия
+             *
              * @param income объект строки дохода
-             * @return  вычисленная дата действия
+             * @return вычисленная дата действия
              */
-            Date getActionDate(NdflPersonIncome income) {
+            private Date getActionDate(NdflPersonIncome income) {
                 if (income.taxDate != null) {
                     return income.taxDate;
                 } else {
@@ -366,10 +374,11 @@ public class NdflPersonIncome extends NdflPersonOperation {
 
             /**
              * Получить тип строки дохода
+             *
              * @param income объект строки дохода
-             * @return  значение типа
+             * @return значение типа
              */
-            Integer getRowType(NdflPersonIncome income) {
+            private Integer getRowType(NdflPersonIncome income) {
                 if (income.incomeAccruedDate != null) {
                     return 100;
                 } else if (income.incomePayoutDate != null) {
@@ -377,6 +386,84 @@ public class NdflPersonIncome extends NdflPersonOperation {
                 }
                 return 300;
             }
+
+            /**
+             * Получить мапу дат операций для каждой пары К = (идентификатор операции, Уникальный код клиента)
+             *
+             * @return ассоциативный массив дат операций по Map<K,V>, где V - дата операции или {@code null}
+             */
+            private Map<Pair<String, String>, Date> getOperationDates() {
+                Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = new HashMap<>();
+
+
+                for (NdflPersonIncome income : ndflPerson.getIncomes()) {
+                    Pair operationAndInpKey = new Pair(income.getOperationId(), ndflPerson.getInp());
+                    List<NdflPersonIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey);
+                    if (operationAndInpGroup == null) {
+                        operationAndInpGroup = new ArrayList<>();
+                    }
+                    operationAndInpGroup.add(income);
+                    incomesGroupedByOperationAndInp.put(operationAndInpKey, operationAndInpGroup);
+                }
+
+                Map<Pair<String, String>, Date> operationDates = new HashMap<>();
+
+                for (Map.Entry<Pair<String, String>, List<NdflPersonIncome>> entry : incomesGroupedByOperationAndInp.entrySet()) {
+                    Pair<String, String> key = entry.getKey();
+                    List<NdflPersonIncome> group = entry.getValue();
+                    List<Date> incomeAccruedDates = new ArrayList<>();
+                    List<Date> incomePayoutDates = new ArrayList<>();
+                    List<Date> paymentDates = new ArrayList<>();
+
+                    for (NdflPersonIncome item : group) {
+                        if (item.getIncomeAccruedDate() != null) {
+                            incomeAccruedDates.add(item.getIncomeAccruedDate());
+                        }
+                        if (item.getIncomePayoutDate() != null) {
+                            incomePayoutDates.add(item.getIncomePayoutDate());
+                        }
+                        if (item.getPaymentDate() != null) {
+                            paymentDates.add(item.getPaymentDate());
+                        }
+                    }
+
+                    if (!incomeAccruedDates.isEmpty()) {
+                        Collections.sort(incomeAccruedDates);
+                        operationDates.put(key, incomeAccruedDates.get(0));
+                        continue;
+                    }
+                    if (!incomePayoutDates.isEmpty()) {
+                        Collections.sort(incomePayoutDates);
+                        operationDates.put(key, incomePayoutDates.get(0));
+                        continue;
+                    }
+                    if (!paymentDates.isEmpty()) {
+                        Collections.sort(paymentDates);
+                        operationDates.put(key, paymentDates.get(0));
+                        continue;
+                    }
+
+                    operationDates.put(key, null);
+                }
+                return operationDates;
+            }
         };
+    }
+
+    /**
+     * Сортировка списка объектов {@link NdflPersonIncome} на основе компаратора с обновлением номеров строк. Начало нумерации
+     * начинается с минимального номера строки из {@link NdflPerson#getIncomes()} или 1
+     *
+     * @param ndflPerson объект {@link NdflPerson}, содержащий {@link List<NdflPersonIncome>}
+     * @return отсортированный список {@link List<NdflPersonIncome>} с номерами строк, идущими по возрастанию порядка сортировки
+     */
+    public static List<NdflPersonIncome> sortAndUpdateRowNum(NdflPerson ndflPerson) {
+        Collections.sort(ndflPerson.getIncomes(), getComparator(ndflPerson));
+        BigDecimal rowNum = getMinRowNum(ndflPerson.getIncomes());
+        for (NdflPersonIncome income : ndflPerson.getIncomes()) {
+            income.setRowNum(rowNum);
+            rowNum = rowNum != null ? rowNum.add(new BigDecimal("1")) : null;
+        }
+        return ndflPerson.getIncomes();
     }
 }
