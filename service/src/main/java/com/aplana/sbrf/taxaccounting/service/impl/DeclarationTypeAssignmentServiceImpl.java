@@ -211,18 +211,19 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
 
         // Поиск периодов ПАО "Сбербанк"
         DepartmentReportPeriodFilter filterAll = new DepartmentReportPeriodFilter();
-        filterAll.setDepartmentIdList(Arrays.asList(Department.ROOT_DEPARTMENT_ID));
-        List<DepartmentReportPeriod> bankDrpList = departmentReportPeriodService.fetchAllByFilter(filterAll);
+        Department depTB = departmentService.getParentTB(depId);
+        filterAll.setDepartmentIdList(Arrays.asList(depTB.getId()));
+        List<DepartmentReportPeriod> tbDrpList = departmentReportPeriodService.fetchAllByFilter(filterAll);
 
         // Список отчетных периодов подразделения для добавления заданному подразделению
         // Строится на основе списка периодов ПАО "Сбербанк", из него исключаются те периоды,
         // которые уже есть у заданного подразделения
-        List<DepartmentReportPeriod> drpForCreate = new LinkedList<>(bankDrpList);
+        List<DepartmentReportPeriod> drpForCreate = new LinkedList<>(tbDrpList);
 
         // Удаление периодов, имеющихся у заданного подразеления. Чтобы не создавалось то, что уже существует
         // Перебираются все периоды ПАО "Сбербанк", если у заданного подразделения находится равный ему период,
         // то он удаляется из списка периодов для создания
-        for (DepartmentReportPeriod bankDrp : bankDrpList) {
+        for (DepartmentReportPeriod bankDrp : tbDrpList) {
             for (DepartmentReportPeriod depDrp : depDrpList) {
                 if (periodsAreEqual(depDrp, bankDrp)) {
                     drpForCreate.remove(bankDrp);
