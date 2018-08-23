@@ -87,13 +87,16 @@
                         ],
                         colModel: [
                             {
-                                name: 'oldId'
+                                name: 'oldId',
+                                formatter: $filter('personIdFormatter')
                             },
                             {
-                                name: ''
+                                name: 'vip',
+                                formatter: $filter('vipFormatter')
                             },
                             {
-                                name: 'lastName'
+                                name: 'lastName',
+                                formatter: $filter('personLinkFormatter')
                             },
                             {
                                 name: 'firstName'
@@ -102,43 +105,56 @@
                                 name: 'middleName'
                             },
                             {
-                                name: 'birthDate'
+                                name: 'birthDate',
+                                formatter: $filter('dateFormatter')
                             },
                             {
-                                name: ''
+                                name: 'docName',
+                                formatter: $filter('permissiveFormatter')
                             },
                             {
-                                name: ''
+                                name: 'docNumber',
+                                formatter: $filter('permissiveFormatter')
                             },
                             {
-                                name: 'citizenship.name'
+                                name: 'citizenship',
+                                formatter: $filter('citizenshipFormatter')
                             },
                             {
-                                name: 'taxpayerState.code'
+                                name: 'taxpayerState',
+                                formatter: $filter('codeFormatter')
                             },
                             {
-                                name: 'inn'
+                                name: 'inn',
+                                formatter: $filter('permissiveFormatter')
                             },
                             {
-                                name: 'innForeign'
+                                name: 'innForeign',
+                                formatter: $filter('permissiveFormatter')
                             },
                             {
-                                name: 'snils'
+                                name: 'snils',
+                                formatter: $filter('permissiveFormatter')
                             },
                             {
-                                name: ''
+                                name: 'address',
+                                formatter: $filter('russianAddressFormatter')
                             },
                             {
-                                name: ''
+                                name: 'address',
+                                formatter: $filter('foreignAddressFormatter')
                             },
                             {
-                                name: ''
+                                name: 'source',
+                                formatter: $filter('nameFormatter')
                             },
                             {
-                                name: ''
+                                name: 'version',
+                                formatter: $filter('dateFormatter')
                             },
                             {
-                                name: ''
+                                name: 'versionEnd',
+                                formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'id'

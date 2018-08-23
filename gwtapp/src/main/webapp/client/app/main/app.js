@@ -894,6 +894,11 @@
         "refBook.fl.table.title.versionEnd": "Окончание действия",
         "refBook.fl.table.title.versionId": "ИД версии",
 
+        "refBook.fl.label.permissionDenied": "<i>Доступ ограничен</i>",
+        "refBook.fl.label.vip": "VIP",
+        "refBook.fl.label.notVip": "Не VIP",
+        "refBook.fl.label.duplicate": "(Дубл.)",
+
         "refBook.fl.title.id": "Идентификатор ФЛ",
         "refBook.fl.title.inn": "ИНН в Российской федерации",
         "refBook.fl.title.innForeign": "ИНН в стране гражданства",

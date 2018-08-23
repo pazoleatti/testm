@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.StringUtils;
@@ -46,12 +47,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setFirstName(rs.getString("first_name"));
             result.setLastName(rs.getString("last_name"));
             result.setMiddleName(rs.getString("middle_name"));
-            result.setInn(rs.getString("INN"));
-            result.setInnForeign(rs.getString("INN_FOREIGN"));
-            result.setSnils(rs.getString("SNILS"));
+            result.setInn(Permissive.of(rs.getString("INN")));
+            result.setInnForeign(Permissive.of(rs.getString("INN_FOREIGN")));
+            result.setSnils(Permissive.of(rs.getString("SNILS")));
             result.setBirthDate(rs.getDate("BIRTH_DATE"));
             result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
-            result.setDocNumber(rs.getString("docNumber"));
+            result.setDocNumber(Permissive.of(rs.getString("docNumber")));
             return result;
         }
     };
@@ -70,11 +71,11 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setMiddleName(rs.getString("middle_name"));
             result.setVersion(rs.getDate("version"));
             result.setVersionEnd(rs.getDate("record_version_to"));
-            result.setInn(rs.getString("INN"));
-            result.setInnForeign(rs.getString("INN_FOREIGN"));
-            result.setSnils(rs.getString("SNILS"));
+            result.setInn(Permissive.of(rs.getString("INN")));
+            result.setInnForeign(Permissive.of(rs.getString("INN_FOREIGN")));
+            result.setSnils(Permissive.of(rs.getString("SNILS")));
             result.setBirthDate(rs.getDate("BIRTH_DATE"));
-            result.setInn(rs.getString("INN"));
+            result.setInn(Permissive.of(rs.getString("INN")));
             result.setBirthPlace(rs.getString("BIRTH_PLACE"));
             result.setEmployee(SqlUtils.getInteger(rs, "EMPLOYEE"));
             result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
@@ -94,7 +95,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             RefBookAddress address = new RefBookAddress();
             // Заполняем только id, т.к все остальное получим как конкатенацию строк прямо из БД
             address.setId(SqlUtils.getLong(rs, "A_ID"));
-            result.setAddress(address);
+            result.setAddress(Permissive.of(address));
             result.setAddressAsText(rs.getString("ADDRESS_ADDRESS_FULL"));
 
             RefBookAsnu asnu = new RefBookAsnu();
@@ -115,14 +116,98 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setId(rs.getLong("id"));
             result.setRecordId(rs.getLong("record_id"));
             result.setOldId(rs.getLong("old_id"));
+            result.setVip(rs.getBoolean("vip"));
             result.setFirstName(rs.getString("first_name"));
             result.setLastName(rs.getString("last_name"));
             result.setMiddleName(rs.getString("middle_name"));
-            result.setInn(rs.getString("inn"));
-            result.setInnForeign(rs.getString("inn_foreign"));
-            result.setSnils(rs.getString("snils"));
             result.setBirthDate(rs.getDate("birth_date"));
             result.setBirthPlace(rs.getString("birth_place"));
+            result.setVersion(rs.getDate("version"));
+            result.setVersionEnd(rs.getDate("version_to"));
+
+            // TODO: Здесь должна быть проверка по правам запрашивающего, некоторым ролям доступны ВИПы
+            if ((result.isVip() != null) && result.isVip()) {
+                result.setDocName(Permissive.<String>forbidden());
+                result.setDocNumber(Permissive.<String>forbidden());
+                result.setInn(Permissive.<String>forbidden());
+                result.setInnForeign(Permissive.<String>forbidden());
+                result.setSnils(Permissive.<String>forbidden());
+                result.setAddress(Permissive.<RefBookAddress>forbidden());
+            } else {
+                result.setDocName(Permissive.of(rs.getString("doc_name")));
+                result.setDocNumber(Permissive.of(rs.getString("doc_number")));
+                result.setInn(Permissive.of(rs.getString("inn")));
+                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+                result.setSnils(Permissive.of(rs.getString("snils")));
+
+                Long addressId = SqlUtils.getLong(rs, "address_id");
+                if (addressId == null) {
+                    result.setAddress(Permissive.<RefBookAddress>of(null));
+                } else {
+                    RefBookAddress address = new RefBookAddress();
+                    address.setId(rs.getLong("address_id"));
+                    address.setAddressType(rs.getInt("address_type"));
+                    address.setPostalCode(rs.getString("postal_code"));
+                    address.setRegionCode(rs.getString("region_code"));
+                    address.setDistrict(rs.getString("district"));
+                    address.setCity(rs.getString("city"));
+                    address.setLocality(rs.getString("locality"));
+                    address.setStreet(rs.getString("street"));
+                    address.setBuild(rs.getString("building"));
+                    address.setHouse(rs.getString("house"));
+                    address.setAppartment(rs.getString("apartment"));
+                    address.setAddress(rs.getString("address"));
+
+                    Long countryId = SqlUtils.getLong(rs, "address_country_id");
+                    if (countryId == null) {
+                        address.setCountry(null);
+                    } else {
+                        RefBookCountry country = new RefBookCountry();
+                        country.setId(countryId);
+                        country.setCode(rs.getString("address_country_code"));
+                        country.setName(rs.getString("address_country_name"));
+                        address.setCountry(country);
+                    }
+
+                    result.setAddress(Permissive.of(address));
+                }
+            }
+
+            Long countryId = SqlUtils.getLong(rs, "citizenship_country_id");
+            if (countryId == null) {
+                result.setCitizenship(null);
+            } else {
+                RefBookCountry citizenship = new RefBookCountry();
+                citizenship.setId(countryId);
+                citizenship.setCode(rs.getString("citizenship_country_code"));
+                citizenship.setName(rs.getString("citizenship_country_name"));
+                result.setCitizenship(citizenship);
+            }
+
+            Long stateId = SqlUtils.getLong(rs, "state_id");
+            if (stateId == null) {
+                result.setTaxpayerState(null);
+            } else {
+                RefBookTaxpayerState taxpayerState = new RefBookTaxpayerState();
+                taxpayerState.setId(stateId);
+                taxpayerState.setCode(rs.getString("state_code"));
+                taxpayerState.setName(rs.getString("state_name"));
+                result.setTaxpayerState(taxpayerState);
+            }
+
+            Long asnuId = SqlUtils.getLong(rs, "asnu_id");
+            if (asnuId == null) {
+                result.setSource(null);
+            } else {
+                RefBookAsnu asnu = new RefBookAsnu();
+                asnu.setId(asnuId);
+                asnu.setCode(rs.getString("asnu_code"));
+                asnu.setName(rs.getString("asnu_name"));
+                asnu.setType(rs.getString("asnu_type"));
+                asnu.setPriority(rs.getInt("asnu_priority"));
+                result.setSource(asnu);
+            }
+
             return result;
         }
     };
@@ -278,13 +363,40 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     @Override
     public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams) {
 
-        String personQuery = "select * " +
-                "from ref_book_person";
+        String personQuery = "" +
+                "select person.id, person.record_id, person.old_id, person.last_name, person.first_name, " +
+                "       person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, " +
+                "       person.inn_foreign, person.snils, person.version, " +
+                "       (   select min(version) - interval '1' day " +
+                "           from ref_book_person p " +
+                "           where status in (0, 2) " +
+                "               and p.version > person.version " +
+                "               and p.record_id = person.record_id " +
+                "       ) as version_to, " +
+                "       doc_type.name doc_name, doc.doc_number, " +
+                "       citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, " +
+                "       citizenship_country.name citizenship_country_name, " +
+                "       state.id state_id, state.code state_code, state.name state_name, " +
+                "       address.id address_id, address.address_type, address.postal_code, address.region_code, " +
+                "       address.district, address.city, address.locality, address.street, address.house, " +
+                "       address.build building, address.appartment apartment, address.address, " +
+                "       address_country.id address_country_id, address_country.code address_country_code, " +
+                "       address_country.name address_country_name, " +
+                "       asnu.id asnu_id, asnu.code asnu_code, asnu.name asnu_name, asnu.type asnu_type, asnu.priority asnu_priority " +
+                "from ref_book_person person " +
+                "left join ref_book_id_doc doc on doc.id = person.report_doc " +
+                "left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id " +
+                "left join ref_book_country citizenship_country on citizenship_country.id = person.citizenship " +
+                "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state " +
+                "left join ref_book_address address on address.id = person.address " +
+                "left join ref_book_country address_country on address_country.id = address.country_id " +
+                "left join ref_book_asnu asnu on asnu.id = person.source_id";
 
         int startIndex = pagingParams.getStartIndex();
         int endIndex = startIndex + pagingParams.getCount();
 
-        String pagedPersonQuery = "select * " +
+        String pagedPersonQuery = "" +
+                "select * " +
                 "from ( " +
                 "   select rownum rnum, a.* " +
                 "   from (" + personQuery + ") a " +

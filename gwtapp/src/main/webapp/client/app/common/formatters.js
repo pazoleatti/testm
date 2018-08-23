@@ -25,12 +25,12 @@
                 }
             };
         }])
-    /**
-     * @description Фильтр даты без года
-     *
-     * @param value - значение, которое необходимо отформатировать
-     * @return Дата в формате 'dd.MM'
-     */
+        /**
+         * @description Фильтр даты без года
+         *
+         * @param value - значение, которое необходимо отформатировать
+         * @return Дата в формате 'dd.MM'
+         */
         .filter('dateWithoutYearFormatter', ['$filter', function ($filter) {
             return function (value) {
                 if (!value) {
@@ -369,15 +369,34 @@
         })
 
         /**
-         * @description Форматтер для получения данных об адресе физ. лица в нужном формате
-         * @param person запись из справочника физических лиц
+         * @description Форматтер для адресов физ. лиц
+         * @param address объект адреса ФЛ
          */
         .filter('personAddressFormatter', function () {
-            return function (personAddress) {
-                return personAddress ? (personAddress.regionCode ? personAddress.regionCode : "" ) + ", " + (personAddress.postalCode ? personAddress.postalCode : "" ) + ", " +
-                    (personAddress.district ? personAddress.district : "" ) + ", " + (personAddress.city ? personAddress.city : "" ) + ", " + (personAddress.locality ? personAddress.locality : "" ) + ", " +
-                    (personAddress.street ? personAddress.street : "" ) + ", " + (personAddress.house ? personAddress.house : "" ) + ", " + (personAddress.build ? personAddress.build : "" ) + ", " +
-                    (personAddress.appartment ? personAddress.appartment : "" ) + ", " : "";
+            return function (address) {
+                if (!address) return '';
+
+                var values = [];
+                // Для российских адресов
+                if (address.addressType === 0) {
+                    // Формируем список полей в нужном порядке
+                    var fields = ['postalCode', 'regionCode', 'district', 'city', 'locality', 'street', 'house', 'build', 'appartment'];
+                    // Добавляем значения непустых полей
+                    fields.forEach(function (field) {
+                        if (address[field]) {
+                            values.push(address[field]);
+                        }
+                    });
+                    // Для зарубежных адресов нужны только название страны и строковый адрес
+                } else if (address.addressType === 1) {
+                    if (address.country && address.country.name) {
+                        values.push(address.country.name);
+                    }
+                    if (address.address) {
+                        values.push(address.address);
+                    }
+                }
+                return values.join(', ');
             };
         })
         /**
@@ -394,5 +413,88 @@
                 return $filter('dateFormatter')(value);
             };
         }])
+
+        .filter('permissiveFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                }
+                if (!data.value) return '';
+                return data.value;
+            };
+        }])
+
+        .filter('vipFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (value) {
+                    return $filter('translate')('refBook.fl.label.vip');
+                } else if (value === false) {
+                    return $filter('translate')('refBook.fl.label.notVip');
+                } else {
+                    return '';
+                }
+            }
+        }])
+
+        .filter('personIdFormatter', ['$filter', function ($filter) {
+            return function (oldId, options, person) {
+                if (oldId && person.recordId) {
+                    if (oldId === person.recordId) {
+                        return oldId;
+                    } else {
+                        return oldId + ' ' + $filter('translate')('refBook.fl.label.duplicate');
+                    }
+                } else {
+                    return '';
+                }
+            }
+        }])
+
+        .filter('russianAddressFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                }
+                if (data.value && data.value.addressType === 1) {
+                    return '';
+                }
+                return $filter('personAddressFormatter')(data.value);
+            }
+        }])
+
+        .filter('foreignAddressFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                }
+                if (data.value && data.value.addressType === 0) {
+                    return '';
+                }
+                return $filter('personAddressFormatter')(data.value);
+            }
+        }])
+
+        .filter('personLinkFormatter', function () {
+            return function (name, options, person) {
+                if (person.recordId) {
+                    return '<a href="/' + person.recordId + '">' + name + '</a>';
+                } else {
+                    return name;
+                }
+            }
+        })
+
+        .filter('citizenshipFormatter', function () {
+            return function (value) {
+                if (value && value.code && value.name) {
+                    return '(' + value.code + ') ' + value.name;
+                } else {
+                    return '';
+                }
+            }
+        })
     ;
 }());
