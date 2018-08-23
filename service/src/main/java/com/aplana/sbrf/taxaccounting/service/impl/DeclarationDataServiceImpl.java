@@ -3652,7 +3652,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        ndflPersonDao.updateIncomes(NdflPersonIncome.sortAndUpdateRowNum(ndflPersonDao.fetchOne(personIncome.getNdflPersonId())));
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personIncome.getNdflPersonId());
+        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(ndflPerson));
+        ndflPersonDao.updateIncomes(updateRowNum(ndflPerson.getIncomes()));
     }
 
     @Override
@@ -3662,7 +3664,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        ndflPersonDao.updateDeductions(NdflPersonDeduction.sortAndUpdateRowNum(ndflPersonDao.fetchOne(personDeduction.getNdflPersonId())));
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personDeduction.getNdflPersonId());
+        Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
+        ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
     }
 
     @Override
@@ -3672,7 +3676,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        ndflPersonDao.updatePrepayments(NdflPersonPrepayment.sortAndUpdateRowNum(ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId())));
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId());
+        Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
+        ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
     }
 
     private String getDeclarationDescription(long declarationDataId) {
@@ -3831,5 +3837,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declarationData = get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         return declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS);
+    }
+
+    /**
+     * Обновление номеров строк операций. Начало нумерации
+     * начинается с минимального номера строки из {@link NdflPerson#getIncomes()} или 1
+     *
+     * @param operations упорядоченный список операций{@link List<NdflPersonOperation>}
+     * @return упорядоченный список {@link List<NdflPersonOperation>} с номерами строк, идущими по возрастанию,
+     * начиная с минимального номера строки во входном списке или с 1, если номера не были проинициализированы
+     */
+    <T extends NdflPersonOperation> List<T> updateRowNum(List<T> operations) {
+        BigDecimal rowNum = NdflPersonOperation.getMinRowNum(operations);
+        for (T operation: operations) {
+            operation.setRowNum(rowNum);
+            rowNum = rowNum != null ? rowNum.add(new BigDecimal("1")) : null;
+        }
+        return operations;
     }
 }

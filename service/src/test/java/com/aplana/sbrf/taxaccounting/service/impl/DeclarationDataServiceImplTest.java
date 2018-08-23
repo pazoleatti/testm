@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -28,6 +30,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -511,5 +514,97 @@ public class DeclarationDataServiceImplTest {
 
         verify(declarationDataDao).setStatus(eq(declarationDataId), any(State.class));
 
+    }
+
+    @Test
+    public void testNdflSortAndUpdateRowNum1() {
+        Calendar instance = Calendar.getInstance();
+
+        NdflPersonIncome income1 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 1);
+        income1.setOperationId("1");
+        income1.setPaymentDate(instance.getTime());
+        income1.setRowNum(new BigDecimal("1"));
+
+        NdflPersonIncome income2 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 3);
+        income2.setOperationId("2");
+        income2.setIncomeAccruedDate(instance.getTime());
+        income2.setRowNum(new BigDecimal("2"));
+
+        NdflPersonIncome income3 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 2);
+        income3.setOperationId("3");
+        income3.setPaymentDate(instance.getTime());
+        income3.setRowNum(new BigDecimal("3"));
+
+        NdflPersonIncome income4 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 2);
+        income4.setOperationId("3");
+        income4.setIncomeAccruedDate(instance.getTime());
+        income4.setRowNum(new BigDecimal("4"));
+
+        NdflPerson ndflPerson = new NdflPerson();
+        ndflPerson.setInp("qqq");
+        ndflPerson.setIncomes(new ArrayList<>(Arrays.asList(income1, income2, income3, income4)));
+
+        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(ndflPerson));
+        ndflPerson.setIncomes(declarationDataService.updateRowNum(ndflPerson.getIncomes()));
+
+        assertEquals("1", ndflPerson.getIncomes().get(0).getOperationId());
+        assertEquals("3", ndflPerson.getIncomes().get(1).getOperationId());
+        assertEquals("3", ndflPerson.getIncomes().get(2).getOperationId());
+        assertEquals("2", ndflPerson.getIncomes().get(3).getOperationId());
+
+        assertEquals(new BigDecimal("1"), ndflPerson.getIncomes().get(0).getRowNum());
+        assertEquals(new BigDecimal("2"), ndflPerson.getIncomes().get(1).getRowNum());
+        assertEquals(new BigDecimal("3"), ndflPerson.getIncomes().get(2).getRowNum());
+        assertEquals(new BigDecimal("4"), ndflPerson.getIncomes().get(3).getRowNum());
+    }
+
+    @Test
+    public void testNdflSortAndUpdateRowNum2() {
+        Calendar instance = Calendar.getInstance();
+
+        NdflPersonIncome income1 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 1);
+        income1.setOperationId("1");
+        income1.setPaymentDate(instance.getTime());
+        income1.setRowNum(new BigDecimal("5"));
+
+        NdflPersonIncome income2 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 3);
+        income2.setOperationId("2");
+        income2.setIncomeAccruedDate(instance.getTime());
+        income2.setRowNum(new BigDecimal("6"));
+
+        NdflPersonIncome income3 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 2);
+        income3.setOperationId("3");
+        income3.setPaymentDate(instance.getTime());
+        income3.setRowNum(new BigDecimal("7"));
+
+        NdflPersonIncome income4 = new NdflPersonIncome();
+        instance.set(2010, Calendar.JANUARY, 2);
+        income4.setOperationId("3");
+        income4.setIncomeAccruedDate(instance.getTime());
+        income4.setRowNum(new BigDecimal("8"));
+
+        NdflPerson ndflPerson = new NdflPerson();
+        ndflPerson.setInp("qqq");
+        ndflPerson.setIncomes(new ArrayList<>(Arrays.asList(income1, income3, income2, income4)));
+
+        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(ndflPerson));
+        ndflPerson.setIncomes(declarationDataService.updateRowNum(ndflPerson.getIncomes()));
+
+        assertEquals("1", ndflPerson.getIncomes().get(0).getOperationId());
+        assertEquals("3", ndflPerson.getIncomes().get(1).getOperationId());
+        assertEquals("3", ndflPerson.getIncomes().get(2).getOperationId());
+        assertEquals("2", ndflPerson.getIncomes().get(3).getOperationId());
+
+        assertEquals(new BigDecimal("5"), ndflPerson.getIncomes().get(0).getRowNum());
+        assertEquals(new BigDecimal("6"), ndflPerson.getIncomes().get(1).getRowNum());
+        assertEquals(new BigDecimal("7"), ndflPerson.getIncomes().get(2).getRowNum());
+        assertEquals(new BigDecimal("8"), ndflPerson.getIncomes().get(3).getRowNum());
     }
 }

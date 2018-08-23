@@ -149,23 +149,4 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
             }
         };
     }
-
-    /**
-     * Сортировка списка объектов {@link NdflPersonPrepayment} на основе компаратора с обновлением номеров строк. Начало нумерации
-     * начинается с минимального номера строки из {@link NdflPerson#getPrepayments()} или 1
-     *
-     * @param ndflPerson объект {@link NdflPerson}, содержащий {@link List<NdflPersonPrepayment>}
-     * @return отсортированный список {@link List<NdflPersonPrepayment>} с номерами строк, идущими по возрастанию порядка сортировки
-     */
-    public static List<NdflPersonPrepayment> sortAndUpdateRowNum(NdflPerson ndflPerson) {
-        Collections.sort(ndflPerson.getPrepayments(), getComparator(ndflPerson));
-        BigDecimal deductionRowNum = getMinRowNum(ndflPerson.getPrepayments());
-        for (NdflPersonDeduction deduction : ndflPerson.getDeductions()) {
-            deduction.setRowNum(deductionRowNum);
-            deductionRowNum = deductionRowNum != null ? deductionRowNum.add(new BigDecimal("1")) : null;
-        }
-        return ndflPerson.getPrepayments();
-    }
-
-
 }

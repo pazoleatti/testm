@@ -449,21 +449,4 @@ public class NdflPersonIncome extends NdflPersonOperation {
             }
         };
     }
-
-    /**
-     * Сортировка списка объектов {@link NdflPersonIncome} на основе компаратора с обновлением номеров строк. Начало нумерации
-     * начинается с минимального номера строки из {@link NdflPerson#getIncomes()} или 1
-     *
-     * @param ndflPerson объект {@link NdflPerson}, содержащий {@link List<NdflPersonIncome>}
-     * @return отсортированный список {@link List<NdflPersonIncome>} с номерами строк, идущими по возрастанию порядка сортировки
-     */
-    public static List<NdflPersonIncome> sortAndUpdateRowNum(NdflPerson ndflPerson) {
-        Collections.sort(ndflPerson.getIncomes(), getComparator(ndflPerson));
-        BigDecimal rowNum = getMinRowNum(ndflPerson.getIncomes());
-        for (NdflPersonIncome income : ndflPerson.getIncomes()) {
-            income.setRowNum(rowNum);
-            rowNum = rowNum != null ? rowNum.add(new BigDecimal("1")) : null;
-        }
-        return ndflPerson.getIncomes();
-    }
 }

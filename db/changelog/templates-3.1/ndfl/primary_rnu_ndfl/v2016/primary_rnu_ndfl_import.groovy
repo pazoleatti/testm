@@ -232,6 +232,14 @@ class Import extends AbstractScriptClass {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
+
+        Collections.sort(ndflPersons, NdflPerson.getComparator())
+        for (NdflPerson ndflPerson : ndflPersons) {
+                Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
+                Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
+                Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
+        }
+
         // Если в НФ нет данных, то создаем новые из ТФ
         if (ndflPersonService.findNdflPersonCountByParameters(declarationData.id, [:]) == 0) {
             transformOperationId()
@@ -269,13 +277,8 @@ class Import extends AbstractScriptClass {
             List<NdflPersonDeduction> deductionsForUpdate = []
             List<NdflPersonPrepayment> prepaymentsForUpdate = []
 
-            Collections.sort(ndflPersons, NdflPerson.getComparator())
-
             for (NdflPerson ndflPerson : ndflPersons) {
                 ndflPerson.rowNum = ++personRowNum
-                Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
-                Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
-                Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
 
                 if (needPersonUpdate(ndflPerson)) {
                     NdflPerson persistedPerson = null
@@ -1233,8 +1236,20 @@ class Import extends AbstractScriptClass {
 
     void updatePersonsRowNum(List<NdflPerson> persons) {
         long rowNum = 0
+        long incomeRowNum = 0
+        long deductionRowNum = 0
+        long prepaymentRowNum = 0
         for (def person : persons) {
             person.rowNum = ++rowNum
+            for (def income : person.incomes){
+                income.rowNum = ++incomeRowNum
+            }
+            for (def deduction : person.deductions){
+                deduction.rowNum = ++deductionRowNum
+            }
+            for (def prepayment : person.prepayments){
+                prepayment.rowNum = ++prepaymentRowNum
+            }
         }
     }
 

@@ -1178,4 +1178,16 @@
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5356 Добавить сортировку строк разделов ПНФ при загрузке файлов и КНФ после редактирования -->
+    <changeSet id="3.1-apronin-25" author="apronin">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

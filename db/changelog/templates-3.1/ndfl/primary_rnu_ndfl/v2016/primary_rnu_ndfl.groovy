@@ -1975,7 +1975,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_22.setCellValue(np.snils != null ? np.snils : "")
                 // Заполнение данными из раздела "Сведения о доходах"
                 Cell cell_23 = row.createCell(23);
-                cell_23.setCellStyle(centeredStyle)
+                cell_23.setCellStyle(textCenteredStyle)
                 Cell cell_24 = row.createCell(24);
                 cell_24.setCellStyle(centeredStyle)
                 Cell cell_25 = row.createCell(25);
@@ -2096,7 +2096,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_50 = row.createCell(50);
                 cell_50.setCellStyle(numberCenteredStyle)
                 Cell cell_51 = row.createCell(51);
-                cell_51.setCellStyle(centeredStyle)
+                cell_51.setCellStyle(textCenteredStyle)
                 Cell cell_52 = row.createCell(52);
                 cell_52.setCellStyle(centeredStyleDate)
                 Cell cell_53 = row.createCell(53);
@@ -2148,7 +2148,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell0Value.append("_")
                 // Заполнение данными из раздела "Сведения об авансах"
                 Cell cell_59 = row.createCell(59);
-                cell_59.setCellStyle(centeredStyle)
+                cell_59.setCellStyle(textCenteredStyle)
                 Cell cell_60 = row.createCell(60);
                 cell_60.setCellStyle(numberCenteredStyle)
                 Cell cell_61 = row.createCell(61);

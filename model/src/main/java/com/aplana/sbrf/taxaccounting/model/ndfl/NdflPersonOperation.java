@@ -103,7 +103,7 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
      * @param <T>        тип НДФЛ операции
      * @return минимальное значение номера строки {@link NdflPersonOperation#rowNum} или 1
      */
-    protected static <T extends NdflPersonOperation> BigDecimal getMinRowNum(List<T> operations) {
+    public static <T extends NdflPersonOperation> BigDecimal getMinRowNum(List<T> operations) {
 
         BigDecimal minRowNum = !operations.isEmpty() ? operations.get(0).getRowNum() : new BigDecimal(1);
 
