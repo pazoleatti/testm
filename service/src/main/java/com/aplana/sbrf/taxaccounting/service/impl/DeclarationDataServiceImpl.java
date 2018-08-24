@@ -28,6 +28,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.permissions.AbstractPermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
@@ -58,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -808,16 +810,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final Logger logger = new Logger();
 
         for (final Long declarationDataId : declarationDataIds) {
+            DeclarationData declarationData = declarationDataDao.get(declarationDataId);
             if (existDeclarationData(declarationDataId)) {
-                final String prefix = String.format("Постановка операции \"Расчет налоговой формы\" для формы № %d в очередь на исполнение: ", declarationDataId);
+                final String prefix = String.format("Постановка операции \"Идентфикация ФЛ\" для формы № %d в очередь на исполнение: ", declarationDataId);
                 try {
                     if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
                             new TargetIdAndLogger(declarationDataId, logger),
-                            "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", permission)) {
+                            "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", permission) &&
+                    checkLockForm(declarationDataId, ddReportType,logger)) {
                         try {
                             preCalculationCheck(logger, declarationDataId, userInfo);
                         } catch (Exception e) {
-                            logger.error(prefix + "Налоговая форма не может быть рассчитана");
+                            logger.error(prefix + "Физические лица в налоговой форме не могут быть идентифицированы");
                         }
                         final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                         Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
@@ -851,6 +855,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 }
                             });
                         }
+                    } else {
+                        if (logger.getEntries().size() != 0) {
+                            Notification notification = new Notification();
+                            notification.setUserId(userService.getCurrentUser().getId());
+                            notification.setCreateDate(new Date());
+                            notification.setText(logger.getEntries().get(logger.getEntries().size() - 1).getMessage());
+                            notification.setLogId(logEntryService.save(Collections.singletonList(logger.getEntries().get(logger.getEntries().size() - 1))));
+                            notification.setReportId(null);
+                            notification.setNotificationType(NotificationType.DEFAULT);
+                            notificationService.create(Collections.singletonList(notification));
+                        }
                     }
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
@@ -862,6 +877,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
+    }
+
+    private boolean checkLockForm(Long declarationDataId, DeclarationDataReportType ddReportType, Logger logger) {
+        if (lockDataService.isLockExists(generateAsyncTaskKey(declarationDataId, null), false)){
+            TAUserInfo taUserInfo = new TAUserInfo();
+            taUserInfo.setUser(userService.getCurrentUser());
+            DeclarationData declarationData = get(declarationDataId, taUserInfo);
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+            Department department = departmentService.getDepartment(declarationData.getDepartmentId());
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, null));
+            TAUser taUser = userService.getUser(lock.getUserId());
+            logger.error("Форма №: %d, Период: \"%s, %s %s\", Подразделение: \"%s\" заблокирована пользователем %s (%s)",
+                    declarationDataId,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    departmentReportPeriod.getReportPeriod().getName(),
+                    departmentReportPeriod.getCorrectionDate() != null ? String.format("корр. %s", new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate())) : "",
+                    department.getName(),
+                    taUser.getName(),
+                    taUser.getLogin()
+                    );
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -1400,10 +1438,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo) {
+        Logger localLogger = new Logger();
         declarationDataScriptingService.executeScript(userInfo,
-                declarationDataDao.get(declarationDataId), FormDataEvent.PRE_CALCULATION_CHECK, logger, null);
+                declarationDataDao.get(declarationDataId), FormDataEvent.PRE_CALCULATION_CHECK, localLogger, null);
         // Проверяем ошибки
-        if (logger.containsLevel(LogLevel.ERROR)) {
+        if (localLogger.containsLevel(LogLevel.ERROR)) {
+            logger.getEntries().addAll(localLogger.getEntries());
             throw new ServiceLoggerException(
                     "Найдены ошибки при выполнении расчета налоговой формы",
                     logEntryService.save(logger.getEntries()));

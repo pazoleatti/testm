@@ -26,7 +26,7 @@ public enum AsyncTaskType {
     EXCEL_REF_BOOK(0, "XLSX", "Формирование отчета справочника \"%s\" в XLSX-формате", 23L),
     CSV_REF_BOOK(1, "CSV", "Формирование отчета справочника \"%s\" в CSV-формате", 24L),
     TEST(-1, "TEST", "Тестовая задача %s", -1L),
-    IDENTIFY_PERSON(1, "IDENTIFY_PERSON", "Расчет НФ. %s", 8L),
+    IDENTIFY_PERSON(1, "IDENTIFY_PERSON", "Идентификация ФЛ %s", 8L),
     CONSOLIDATE(1, "CONSOLIDATE", "Расчет НФ. %s", 9L),
     UPDATE_PERSONS_DATA(34, "UPDATE_PERSONS_DATA", "Обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\"", 34L),
     CREATE_APPLICATION_2(36, "CREATE_APPLICATION_2","Формирование файла Приложения 2 для декларации по налогу на прибыль за %s год", 36L),

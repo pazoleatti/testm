@@ -1400,7 +1400,7 @@ class Calculate extends AbstractScriptClass {
                 SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException) ExceptionUtils.getThrowableList(e).get(i)
                 if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
                     e.printStackTrace()
-                    logger.error("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении расчета налоговой формы номер: ${declarationData.id}. Записи справочника \"Физические лица\" используются при идентификации физических лиц в расчете другой налоговой формы. Выполните операцию позднее.")
+                    logger.error("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении операции \"Идентификация ФЛ\" для налоговой формы №: ${declarationData.id}. Записи справочника \"Физические лица\" используются при выполнении операции \"Идентификация ФЛ\" для другой налоговой формы. Выполните операцию позднее.")
                     return
                 }
             }

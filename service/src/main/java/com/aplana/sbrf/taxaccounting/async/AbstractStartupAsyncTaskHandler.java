@@ -6,28 +6,29 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
-import java.util.Map;
-
 /**
  * Обработчик для разных этапов в ходе постановки в очередь асинхронной задачи. Выполняет логику, специфичную для разных типов асинхронных задач
+ *
  * @author dloshkarev
  */
-public abstract class AbstractStartupAsyncTaskHandler  {
+public abstract class AbstractStartupAsyncTaskHandler {
 
     /**
      * Создание блокировки на объекте выполнения задачи
-     * @param lockKey ключ блокировки, по которому она будет установлена
+     *
+     * @param lockKey  ключ блокировки, по которому она будет установлена
      * @param taskType тип асинхронной задачи, которая будет выполнена
-     * @param user пользователь, который инициировал операцию
+     * @param user     пользователь, который инициировал операцию
      * @return null, если была установлена новая блокировка, иначе возвращается ранее установленная блокировка на этом объъекте
      */
     protected abstract LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user);
 
     /**
      * Проверока существования асинронных задач, выполнение которым мешает постановке в очередь текущей задачи
+     *
      * @param taskType тип асинхронной задачи, которая будет выполнена
-     * @param user пользователь, который инициировал операцию
-     * @param logger логгер с сообщениями о ходе выполнения операции
+     * @param user     пользователь, который инициировал операцию
+     * @param logger   логгер с сообщениями о ходе выполнения операции
      * @return задачи существуют?
      */
     protected boolean checkExistTasks(AsyncTaskType taskType, TAUserInfo user, Logger logger) {
@@ -43,8 +44,9 @@ public abstract class AbstractStartupAsyncTaskHandler  {
 
     /**
      * Выполняет специфичную логику связанную с отменой найденных задач, мешающих постановке в очередь текущей асинхронной задаче
+     *
      * @param taskType тип асинхронной задачи, которая будет выполнена
-     * @param user пользователь, который инициировал операцию
+     * @param user     пользователь, который инициировал операцию
      */
     protected void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
 
@@ -52,11 +54,21 @@ public abstract class AbstractStartupAsyncTaskHandler  {
 
     /**
      * Выполняет логику после постановки задачи в очередь
+     *
      * @param taskData данные выполняемой задачи
-     * @param logger логгер с сообщениями о ходе выполнения операции
+     * @param logger   логгер с сообщениями о ходе выполнения операции
      */
     protected void postTaskScheduling(AsyncTaskData taskData, Logger logger) {
-        String message = String.format(AsyncTask.CREATE_TASK, taskData.getDescription());
+        // в будущем все сообщения будут соответствовать одному шаблону
+        String template;
+        switch (taskData.getType()) {
+            case IDENTIFY_PERSON:
+                template = AsyncTask.CREATE_IDETNTIFY_TASK;
+                break;
+            default:
+                template = AsyncTask.CREATE_TASK;
+        }
+        String message = String.format(template, taskData.getDescription());
         logger.info(message.replaceAll("\"\"", "\""));
     }
 }

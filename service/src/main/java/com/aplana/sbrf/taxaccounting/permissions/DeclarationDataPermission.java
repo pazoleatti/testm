@@ -36,6 +36,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     @Autowired
     protected DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
+    private static final String KIND_ERROR = "операция \"%s\" не допустима для форм типа %s";
+    private static final String ACTIVE_ERROR = "период формы закрыт";
+    private static final String STATE_ERROR = "операция \"%s\" не допустима для форм в состоянии \"%s\"";
+    private static final String CREDENTIAL_ERROR = "недостаточно прав (обратитесь к администратору)";
+
     /**
      * Право на создание декларации вручную
      */
@@ -106,73 +111,29 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     }
 
     /**
-     * Добавляет в логгер ошибку о недопустимом типе формы
+     * Добавляет в логгер ошибку о недопустимости выполнения операции
      *
      * @param departmentReportPeriod отчетный период подразделения
      * @param operationName          название операции
      * @param declarationData        налоговая форма
-     * @param declarationFormKind    тип налоговой формы
+     * @param reason                 причина  недопустимости выполнения операции
      * @param logger                 объект для логгирования информации
      */
-    protected void logFormKindError(DepartmentReportPeriod departmentReportPeriod, String operationName,
-                                    DeclarationData declarationData, DeclarationFormKind declarationFormKind, Logger logger) {
+    protected void logError(DepartmentReportPeriod departmentReportPeriod, String operationName,
+                            DeclarationData declarationData, String reason, Logger logger) {
         if (logger != null) {
             Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-            logger.error("Операция \"%s\" не выполнена для формы № %d, период: \"%s\", " +
-                            "подразделение \"%s\". %s не допустима для форм типа \"%s\".",
+            logger.error("Не выполнена операция \"%s\" для налоговой формы: № %d, Период: \"%s, %s %s\", Подразделение: \"%s\". " +
+                            "Причина: %s.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    departmentReportPeriod.getReportPeriod().getName(),
+                    departmentReportPeriod.getCorrectionDate() != null ? "корр. " + departmentReportPeriod.getCorrectionDate() : "",
                     department.getName(),
-                    operationName,
-                    declarationFormKind.getTitle());
+                    reason);
         }
 
-    }
-
-    /**
-     * Добавляет в логгер ошибку о закрытом периоде
-     *
-     * @param departmentReportPeriod отчетный период подразделения
-     * @param operationName          название операции
-     * @param declarationData        налоговая форма
-     * @param logger                 объект для логгирования информации
-     */
-    protected void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String operationName,
-                                  DeclarationData declarationData, Logger logger) {
-        if (logger != null) {
-            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-            logger.error("Операция \"%s\" не выполнена для формы № %d, период: \"%s\"," +
-                            " подразделение \"%s\". Период формы закрыт.",
-                    operationName,
-                    declarationData.getId(),
-                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
-                    department.getName());
-        }
-
-    }
-
-    /**
-     * Добавляет в логгер ошибку о недопустимом состоянии
-     *
-     * @param departmentReportPeriod отчетный период подразделения
-     * @param operationName          название операции
-     * @param declarationData        налоговая форма
-     * @param logger                 объект для логгирования информации
-     */
-    protected void logStateError(DepartmentReportPeriod departmentReportPeriod, String operationName,
-                                 DeclarationData declarationData, Logger logger) {
-        if (logger != null) {
-            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-            logger.error("Операция \"%s\" не выполнена для формы № %d,  период: \"%s\", " +
-                            "подразделение: \"%s\". %s не допустима для форм в состоянии \"%s\".",
-                    operationName,
-                    declarationData.getId(),
-                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
-                    department.getName(),
-                    operationName,
-                    declarationData.getState().getTitle());
-        }
     }
 
     /**
@@ -495,15 +456,15 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (!declarationKind.equals(DeclarationFormKind.PRIMARY)) {
-                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationKind, logger);
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(KIND_ERROR, OPERATION_NAME, declarationKind), logger);
                 return false;
             }
             if (!departmentReportPeriod.isActive()) {
-                logPeriodError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ACTIVE_ERROR, logger);
                 return false;
             }
             if (!(targetDomainObject.getState().equals(State.CREATED) || targetDomainObject.getState().equals(State.PREPARED))) {
-                logStateError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                 return false;
             }
             TAUser taUser = taUserService.getUser(user.getUsername());
@@ -513,7 +474,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
 
             if (!canView || !hasRoles) {
-                logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, CREDENTIAL_ERROR, logger);
                 return false;
             }
 
