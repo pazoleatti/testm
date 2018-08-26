@@ -204,6 +204,10 @@ class Import extends AbstractScriptClass {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
+        if (allValues.size() == 0){
+            logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
+            return
+        }
 
         int TABLE_DATA_START_INDEX = 3
         int rowIndex = TABLE_DATA_START_INDEX
