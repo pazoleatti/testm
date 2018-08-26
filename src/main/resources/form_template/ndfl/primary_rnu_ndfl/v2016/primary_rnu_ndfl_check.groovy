@@ -2034,7 +2034,7 @@ class Check extends AbstractScriptClass {
             def person = personByIdMap[prepayment.ndflPersonId]
 
             if (person.status != "6" && person.inp == ndflPersonFL.inp) {
-                String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\".", person.inp)
+                String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\"", person.inp)
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
                 logger.logCheck("%s. %s.",
                         true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)

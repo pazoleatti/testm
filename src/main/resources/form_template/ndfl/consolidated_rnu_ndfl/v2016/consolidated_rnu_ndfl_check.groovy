@@ -2079,21 +2079,11 @@ class Check extends AbstractScriptClass {
 
             def person = personByIdMap[prepayment.ndflPersonId]
 
-            if (person.status != "6") {
-                def logErrorIfFieldFilled = { fieldName, fieldValue ->
-                    if (fieldValue) {
-                        String errMsg = String.format("Значение гр. \"%s\" (%s) не должно быть заполнено для  \"Статуса НП\" (\"%s\") ",
-                                fieldName, fieldValue instanceof Date ? fieldValue.format("dd.MM.yyyy") : fieldValue, person.status
-                        )
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
-                        logger.logCheck("%s. %s.",
-                                true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)
-                    }
-                }
-                logErrorIfFieldFilled(prepayment.summ, P_SUMM)
-                logErrorIfFieldFilled(prepayment.notifNum, P_NOTIF_NUM)
-                logErrorIfFieldFilled(prepayment.notifDate, P_NOTIF_DATE)
-                logErrorIfFieldFilled(prepayment.notifSource, P_NOTIF_SOURCE)
+            if (person.status != "6" && person.inp == ndflPersonFL.inp) {
+                String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\"", person.inp)
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
+                logger.logCheck("%s. %s.",
+                        true, LOG_TYPE_SECTION4, fioAndInpAndOperId, pathError, errMsg)
             }
         }
 
