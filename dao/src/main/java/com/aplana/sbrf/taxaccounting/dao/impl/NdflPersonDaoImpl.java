@@ -156,7 +156,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String alias = pagingParams.getProperty().equals("inp") ? "np." : "outer_npi.";
+        String alias = "";
+        switch (pagingParams.getProperty()) {
+            case "inp": {
+                alias = "np.";
+                break;
+            }
+            case "name": {
+                alias = "rba.";
+                break;
+            }
+            default: {
+                alias = "outer_npi.";
+            }
+        }
 
         String query = queryBuilder.toString();
 
@@ -211,7 +224,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personIncome.setId(SqlUtils.getLong(rs, "id"));
                         personIncome.setModifiedDate(rs.getTimestamp("modified_date"));
                         personIncome.setModifiedBy(rs.getString("modified_by"));
-                        personIncome.setAsnu(rs.getString("asnu_name"));
+                        personIncome.setAsnuName(rs.getString("asnu_name"));
                         return personIncome;
                     }
                 });
@@ -270,7 +283,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String alias = pagingParams.getProperty().equals("inp") ? "np." : "outer_npd.";
+        String alias = "";
+        switch (pagingParams.getProperty()) {
+            case "inp": {
+                alias = "np.";
+                break;
+            }
+            case "name": {
+                alias = "rba.";
+                break;
+            }
+            default: {
+                alias = "outer_npd.";
+            }
+        }
 
         String query = queryBuilder.toString();
 
@@ -318,7 +344,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personDeduction.setId(SqlUtils.getLong(rs, "id"));
                         personDeduction.setModifiedDate(rs.getTimestamp("modified_date"));
                         personDeduction.setModifiedBy(rs.getString("modified_by"));
-                        personDeduction.setAsnu(rs.getString("asnu_name"));
+                        personDeduction.setAsnuName(rs.getString("asnu_name"));
                         return personDeduction;
                     }
                 });
@@ -377,7 +403,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String alias = pagingParams.getProperty().equals("inp") ? "np." : "outer_npp.";
+        String alias = "";
+        switch (pagingParams.getProperty()) {
+            case "inp": {
+                alias = "np.";
+                break;
+            }
+            case "name": {
+                alias = "rba.";
+                break;
+            }
+            default: {
+                alias = "outer_npp.";
+            }
+        }
 
         String query = queryBuilder.toString();
 
@@ -413,7 +452,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personPrepayment.setId(SqlUtils.getLong(rs, "id"));
                         personPrepayment.setModifiedDate(rs.getTimestamp("modified_date"));
                         personPrepayment.setModifiedBy(rs.getString("modified_by"));
-                        personPrepayment.setAsnu(rs.getString("asnu_name"));
+                        personPrepayment.setAsnuName(rs.getString("asnu_name"));
                         return personPrepayment;
                     }
                 });
@@ -740,11 +779,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
+        String alias = "";
+        switch (pagingParams.getProperty()) {
+            case "name": {
+                alias = "rba.";
+                break;
+            }
+            default: {
+                alias = "np.";
+            }
+        }
         String query = queryBuilder.toString();
 
         queryBuilder.insert(0, "select * from (select a.*, rownum rn from (");
         String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rownum <= :count",
-                "np.".concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
+                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
                 pagingParams.getDirection())
                 .toString();
 
@@ -1936,7 +1985,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             person.setModifiedDate(rs.getTimestamp("modified_date"));
             person.setModifiedBy(rs.getString("modified_by"));
-            person.setAsnu(rs.getString("asnu_name"));
+            person.setAsnuName(rs.getString("asnu_name"));
             return person;
         }
     }

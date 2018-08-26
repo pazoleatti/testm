@@ -13,13 +13,13 @@ public abstract class NdflData<idType extends Number> extends IdentityObject<idT
     /**
      * Наименование АСНУ
      */
-    private String asnu;
+    private String asnuName;
 
-    public String getAsnu() {
-        return asnu;
+    public String getAsnuName() {
+        return asnuName;
     }
 
-    public void setAsnu(String asnu) {
-        this.asnu = asnu;
+    public void setAsnuName(String asnuName) {
+        this.asnuName = asnuName;
     }
 }
