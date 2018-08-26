@@ -31,6 +31,7 @@ class Import extends AbstractScriptClass {
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
     final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику \"%s\""
+    final String EMPTY_REQUIRED_FIELD = "Строка %s. Значение гр. %s не указано."
     final String C_INCOME_CODE = "Код дохода"
     final String R_INCOME_CODE = "Коды видов доходов"
     final String C_TYPE_CODE = "Код вычета"
@@ -1013,9 +1014,87 @@ class Import extends AbstractScriptClass {
  */
     void checkPersons(List<NdflPerson> persons) {
         if (persons) {
+            checkPersonFields(persons)
+            checkRequiredOperationFields(persons)
             checkPersonIncomeDates(persons)
             checkOperationId(persons)
             checkReferences(persons)
+        }
+    }
+
+    /**
+     * Проверка заполненности обязательных граф раздела 1 "Реквизиты ФЛ"
+     * @param persons список ФЛ
+     */
+    void checkPersonFields(List<NdflPerson> persons){
+        def aliasList = ["inp", "lastName", "firstName", "birthDay", "citizenship", "idDocType", "idDocNumber", "status", "regionCode", "postIndex"]
+        def aliasNameList = [INP, LAST_NAME, FIRST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS, REGION_CODE, POST_INDEX]
+        for (def person : persons){
+            List<String> emptyFields = new ArrayList()
+            for (int i=0; i < aliasList.size(); i++) {
+                if (person[aliasList[i]] == null || (person[aliasList[i]]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank((String) person[aliasList[i]]))) {
+                    emptyFields.add(aliasNameList[i])
+                }
+            }
+            if (emptyFields.size() != 0){
+                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [(person as NdflPersonExt).fio, person.inp])
+                logger.errorExp(EMPTY_REQUIRED_FIELD, "Не указан обязательный реквизит ФЛ", fioAndInp, person.rowIndex, collectionToString(emptyFields))
+            }
+
+        }
+    }
+
+    void checkRequiredOperationFields(def persons){
+        for (def person: persons) {
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [(person as NdflPersonExt).fio, person.inp])
+            checkRequiredFieldsIncome(person.incomes, fioAndInp)
+            checkRequiredFieldsDeduction(person.deductions, fioAndInp)
+            checkRequiredFieldsPrepayment(person.prepayments, fioAndInp)
+        }
+    }
+
+    void checkRequiredFieldsIncome(def incomes, def fioAndInp){
+        for (NdflPersonIncome income : incomes){
+            checkRequiderFields(income, ["kpp", "oktmo"], [KPP, OKTMO], fioAndInp)
+        }
+    }
+
+    void checkRequiredFieldsDeduction(def deductions, def fioAndInp) {
+        for (NdflPersonDeduction deduction : deductions) {
+            checkRequiderFields(deduction,
+                    ["typeCode", "notifType", "notifDate", "notifNum", "notifSource", "operationId", "incomeAccrued", "incomeCode", "incomeSumm", "periodCurrDate", "periodCurrSumm"],
+                    [TYPE_CODE, NOTIF_TYPE, NOTIF_DATE, NOTIF_NUM, NOTIF_SOURCE, DEDUCTION_OPERATION_ID, INCOME_ACCRUED, INCOME_CODE, INCOME_SUMM, PERIOD_CURR_DATE, PERIOD_CURR_SUMM],
+                    fioAndInp)
+        }
+    }
+
+    void checkRequiredFieldsPrepayment(def prepayments, def fioAndInp){
+        for (NdflPersonIncome prepayment : prepayments){
+            checkRequiderFields(prepayment,
+                    ["operationId", "summ", "notifDate", "notifNum", "notifSource"],
+                    [PREPAYMENT_OPERATION_ID, PREPAYMENT_SUMM, PREPAYMENT_NOTIF_DATE, PREPAYMENT_NOTIF_NUM, PREPAYMENT_NOTIF_SOURCE],
+                    fioAndInp)
+        }
+
+    }
+
+    /**
+     * Проверка заполнености обязательных полей
+     *
+     * @param operation строка из 2, 3, или 4 раздела
+     * @param aliasList список названий полей операции, которые необходимо проверить
+     * @param aliasNameList список названий граф операций, которые необходимо проверить
+     * @param fioAndInp ФИО и ИНП ФЛ
+     */
+    void checkRequiderFields(def operation, List aliasList, List aliasNameList, def fioAndInp){
+        List<String> emptyFields = new ArrayList()
+        for (int i=0; i < aliasList.size(); i++) {
+            if (operation[aliasList[i]] == null || (operation[aliasList[i]]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank((String) operation[aliasList[i]]))) {
+                emptyFields.add(aliasNameList[i])
+            }
+        }
+        if (emptyFields.size() != 0) {
+            logger.errorExp(EMPTY_REQUIRED_FIELD, "Отсутствие значения в графе не соответствует алгоритму заполнения РНУ НДФЛ", fioAndInp, operation.rowIndex, collectionToString(emptyFields))
         }
     }
 
@@ -1158,6 +1237,22 @@ class Import extends AbstractScriptClass {
         }
     }
 
+    /**
+     * Получение строки значений коллекции, разделенных запятыми.
+     *
+     * @param collection коллекция значенией
+     * @return строка вида "а, б, в"
+     */
+    private String collectionToString(def collection){
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < collection.size(); i++){
+            builder.append("\"" + collection.get(i) + "\"")
+            if (collection.size() != i+1 ){
+                builder.append(', ')
+            }
+        }
+        return builder.toString()
+    }
 /**
  * Отвечает за проверки, что реквизиты были изменены для всех строк ТФ (Excel),
  * связанных с одной строкой Раздела 1, ранее загруженной в ПНФ
