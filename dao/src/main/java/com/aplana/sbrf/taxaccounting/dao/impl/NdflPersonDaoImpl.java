@@ -2018,6 +2018,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setModifiedDate(rs.getTimestamp("modified_date"));
             personDeduction.setModifiedBy(rs.getString("modified_by"));
             personDeduction.setAsnu(rs.getString("asnu_name"));
+            personDeduction.setAsnuId(rs.getLong("asnu_id"));
             return personDeduction;
         }
     }
@@ -2042,6 +2043,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setModifiedDate(rs.getTimestamp("modified_date"));
             personPrepayment.setModifiedBy(rs.getString("modified_by"));
             personPrepayment.setAsnu(rs.getString("asnu_name"));
+            personPrepayment.setAsnuId(rs.getLong("asnu_id"));
             return personPrepayment;
         }
     }
