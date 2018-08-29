@@ -6,18 +6,23 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.PersonService;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Date;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 
@@ -26,11 +31,20 @@ import static org.mockito.Mockito.*;
 public class PersonServiceImplTest {
 
     @Autowired
-    private PersonService personService;
+    private PersonServiceImpl personService;
     @Autowired
     private RefBookPersonDao refBookPersonDao;
     @Autowired
     private CommonRefBookService commonRefBookService;
+
+    private static Method resolvePersonMethod;
+
+    @BeforeClass
+    public static void initClass() throws NoSuchMethodException {
+        Class<? extends PersonServiceImpl> clazz = PersonServiceImpl.class;
+        resolvePersonMethod = clazz.getDeclaredMethod("resolveVersion", List.class, Date.class);
+        resolvePersonMethod.setAccessible(true);
+    }
 
     @Test
     public void test_createSearchFilter_LastNameEmptyFirstNameEmptySearchPatternEmptyApproxSearch() {
@@ -172,5 +186,142 @@ public class PersonServiceImplTest {
         personService.fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
         verify(refBookPersonDao).fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
         verify(commonRefBookService).dereference(refBook, records);
+    }
+
+    @Test
+    public void test_fetchDuplicates() {
+        Long id = 1L;
+        Date actualDate = mock(Date.class);
+        PagingParams pagingParams = mock(PagingParams.class);
+
+        personService.fetchDuplicates(id, actualDate, pagingParams);
+
+        verify(refBookPersonDao).fetchDuplicates(id, pagingParams);
+    }
+
+    @Test
+    public void test_fetchOriginal() {
+        Long id = 1L;
+        Date actualDate = mock(Date.class);
+
+        personService.fetchOriginal(id, actualDate);
+
+        verify(refBookPersonDao).fetchOriginal(id);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void test_fetchPerson() {
+        Long id = 1L;
+
+        personService.fetchPerson(id);
+
+        verify(refBookPersonDao).fetchOriginal(id);
+    }
+
+    @Test
+    public void test_resolvePersonMethod_whenActualVersionPresentAndBoundedActualVersion() throws InvocationTargetException, IllegalAccessException {
+        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson4 = mock(RegistryPerson.class);
+        when(registryPerson1.getVersion()).thenReturn(new Date(10L));
+        when(registryPerson2.getVersion()).thenReturn(new Date(20L));
+        when(registryPerson3.getVersion()).thenReturn(new Date(30L));
+        when(registryPerson4.getVersion()).thenReturn(new Date(40L));
+        when(registryPerson1.getState()).thenReturn(0);
+        when(registryPerson2.getState()).thenReturn(0);
+        when(registryPerson3.getState()).thenReturn(0);
+        when(registryPerson4.getState()).thenReturn(2);
+        List<RegistryPerson> persons = new ArrayList<>();
+        persons.add(registryPerson1);
+        persons.add(registryPerson2);
+        persons.add(registryPerson3);
+        persons.add(registryPerson4);
+        Collections.sort(persons, new VersionComparator());
+        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+
+        assertThat(new Date(20L), is(equalTo(result.getVersion())));
+    }
+
+    @Test
+    public void test_resolvePersonMethod_whenActualVersionPresentAndBoundedDummyVersion() throws InvocationTargetException, IllegalAccessException {
+        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+
+        when(registryPerson1.getVersion()).thenReturn(new Date(10L));
+        when(registryPerson2.getVersion()).thenReturn(new Date(20L));
+        when(registryPerson3.getVersion()).thenReturn(new Date(30L));
+
+        when(registryPerson1.getState()).thenReturn(0);
+        when(registryPerson2.getState()).thenReturn(0);
+        when(registryPerson3.getState()).thenReturn(2);
+
+        List<RegistryPerson> persons = new ArrayList<>();
+        persons.add(registryPerson1);
+        persons.add(registryPerson2);
+        persons.add(registryPerson3);
+
+        Collections.sort(persons, new VersionComparator());
+        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+
+        assertThat(new Date(20L), is(equalTo(result.getVersion())));
+    }
+
+    @Test
+    public void test_resolvePersonMethod_whenAllVersionsAfterActual() throws InvocationTargetException, IllegalAccessException {
+        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+
+        when(registryPerson1.getVersion()).thenReturn(new Date(30L));
+        when(registryPerson2.getVersion()).thenReturn(new Date(40L));
+        when(registryPerson3.getVersion()).thenReturn(new Date(50L));
+
+        when(registryPerson1.getState()).thenReturn(0);
+        when(registryPerson2.getState()).thenReturn(0);
+        when(registryPerson3.getState()).thenReturn(2);
+
+        List<RegistryPerson> persons = new ArrayList<>();
+        persons.add(registryPerson1);
+        persons.add(registryPerson2);
+        persons.add(registryPerson3);
+
+        Collections.sort(persons, new VersionComparator());
+        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+
+        assertThat(new Date(30L), is(equalTo(result.getVersion())));
+    }
+
+    @Test
+    public void test_resolvePersonMethod_whenAllVersionsBeforeActual() throws InvocationTargetException, IllegalAccessException {
+        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
+        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+
+        when(registryPerson1.getVersion()).thenReturn(new Date(5L));
+        when(registryPerson2.getVersion()).thenReturn(new Date(10L));
+        when(registryPerson3.getVersion()).thenReturn(new Date(20L));
+
+        when(registryPerson1.getState()).thenReturn(0);
+        when(registryPerson2.getState()).thenReturn(0);
+        when(registryPerson3.getState()).thenReturn(2);
+
+        List<RegistryPerson> persons = new ArrayList<>();
+        persons.add(registryPerson1);
+        persons.add(registryPerson2);
+        persons.add(registryPerson3);
+
+        Collections.sort(persons, new VersionComparator());
+        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+
+        assertThat(new Date(10L), is(equalTo(result.getVersion())));
+    }
+
+    private static class VersionComparator implements Comparator<RegistryPerson> {
+        @Override
+        public int compare(RegistryPerson o1, RegistryPerson o2) {
+            return o2.getVersion().compareTo(o1.getVersion());
+        }
     }
 }

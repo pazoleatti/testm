@@ -6,9 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +44,10 @@ public interface PersonService {
     /**
      * Получение оригинала ФЛ
      *
-     * @param personId Идентификатор ФЛ (RECORD_ID)
+     * @param id идентификатор версии ФЛ (ID)
      * @return оригинал ФЛ
      */
-    RefBookPerson getOriginal(Long personId);
+    RegistryPerson fetchOriginal(Long id, Date actualDate);
 
     /**
      * Возвращает серию + номер ДУЛ ФЛ
@@ -58,13 +58,13 @@ public interface PersonService {
     String getPersonDocNumber(long personId);
 
     /**
-     * Получение списка дубликатов ФЛ по идентификатору ФЛ
+     * Получение списка дубликатов ФЛ по идентификатору версии ФЛ
      *
-     * @param personId     Идентификатор ФЛ (RECORD_ID)
-     * @param pagingParams Параметры пейджинга
+     * @param personId     идентификатор версии ФЛ (ID)
+     * @param pagingParams параметры пейджинга
      * @return Страница списка дубликатов ФЛ
      */
-    PagingResult<RefBookPerson> getDuplicates(Long personId, PagingParams pagingParams);
+    PagingResult<RegistryPerson> fetchDuplicates(Long personId, Date actualDate, PagingParams pagingParams);
 
     /**
      * Получает список ФЛ.
@@ -103,4 +103,19 @@ public interface PersonService {
      * @return              часть sql запроса в виде строки
      */
     String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch);
+
+    /**
+     * Получает версию физлица из реестра ФЛ и инициализирует ее ссылочными справочными значениями
+     * @param id    идентификатор версии Физлица
+     * @return  объект версии ФЛ
+     */
+    RegistryPerson fetchPerson(Long id);
+
+    /**
+     * Получить список значений справочника ссылающихся на физлицо, для всех версий физлица, в т.ч. и дубликатов
+     * @param recordId  идентификатор Физлица
+     * @param refBookId идентификатор справочника
+     * @return  список значений справочника
+     */
+    PagingResult<Map<String, RefBookValue>> fetchReferencesList(Long recordId, Long refBookId, PagingParams pagingParams);
 }

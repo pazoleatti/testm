@@ -477,16 +477,6 @@
             }
         }])
 
-        .filter('personLinkFormatter', function () {
-            return function (name, options, person) {
-                if (person.recordId) {
-                    return '<a href="/' + person.recordId + '">' + name + '</a>';
-                } else {
-                    return name;
-                }
-            }
-        })
-
         .filter('citizenshipFormatter', function () {
             return function (value) {
                 if (value && value.code && value.name) {
@@ -496,5 +486,132 @@
                 }
             }
         })
+
+        /**
+         * Фильтр кода ДУЛ
+         */
+        .filter('idDocCodeFormatter', function() {
+            return function (value) {
+                if (value) {
+                    return "(" + value.referenceObject.CODE.value + ") " + value.referenceObject.NAME.value;
+                }
+                return ''
+            }
+        })
+
+        /**
+         *  Фильтр для простых справочных значений: строк и чисел
+         */
+        .filter('simpleRefBookValueFormatter', function() {
+            return function (value) {
+                if (value) {
+                    return value.value
+                }
+                return ''
+            }
+        })
+
+        /**
+         * @description Фильтр ДУЛ
+         */
+        .filter('idDocFormatter', function () {
+            return function (value) {
+                if (value) {
+                    return value.DOC_NUMBER.value + " - " + "(" + value.DOC_ID.referenceObject.CODE.value + ") " + value.DOC_ID.referenceObject.NAME.value
+                }
+                return ''
+            };
+        })
+
+        /**
+         * Фильтр ОКСМ
+         */
+        .filter('countryFormatter', function () {
+            return function (value) {
+                if(value) {
+                    return "(" + value.CODE.value + ") " + value.NAME.value
+                }
+                return ''
+            };
+        })
+
+        /**
+         * Фильтр АСНУ
+         */
+        .filter('asnuFormatter', function () {
+            return function (value) {
+                if (value) {
+                    return "(" + value.CODE.value + ") " + value.NAME.value
+                }
+                return ''
+            };
+        })
+
+        /**
+         * Фильтр для статуса налогоплательщика
+         */
+        .filter('taxPayerStateFormatter', function () {
+            return function (value) {
+                if (value) {
+                    return "(" + value.CODE.value + ") " + value.NAME.value
+                }
+                return ''
+            };
+        })
+
+        /**
+         * Фильтр для оригинала физлица
+         */
+        .filter('originalFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (value) {
+                    var date = $filter('dateFormatter')(value.birthDate);
+                    return "(" + value.recordId + ") " + value.lastName + " " + value.firstName + " " + value.middleName + ", " + date
+                }
+                return ''
+            };
+        }])
+
+        /**
+         * Фильтр для простых значений - не требующих специального форматирования: строк и чисел - с учетом прав доступа
+         */
+        .filter('simplePermissiveFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (!value) return '';
+                if (value.permission === false) {
+                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                }
+                if(!value.value) {
+                    return ''
+                }
+                return value.value;
+            };
+        }])
+
+        /**
+         * Фильтр типа документа
+         */
+        .filter('idDocTypeFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (!value) return '';
+                if (value.permission === false) {
+                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                }
+                return value.value.DOC_ID.referenceObject.NAME.value;
+            };
+        }])
+
+        /**
+         * Фильтр серии и номера документа
+         */
+        .filter('idDocNumberFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                if (!value) return '';
+                if (value.permission === false) {
+                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                }
+                return value.value.DOC_NUMBER.value;
+            };
+        }])
     ;
 }());

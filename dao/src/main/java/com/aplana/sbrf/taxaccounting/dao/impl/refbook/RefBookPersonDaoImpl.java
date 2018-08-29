@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
@@ -34,6 +35,8 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookDao refBookDao;
     @Autowired
     RefBookMapperFactory refBookMapperFactory;
+    @Autowired
+    private RefBookSimpleDao refBookSimpleDao;
 
     /**
      * Облегченный маппер только с основными полями
@@ -56,7 +59,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             return result;
         }
     };
-
     /**
      * Маппер с полным набором полей
      */
@@ -206,6 +208,108 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 asnu.setType(rs.getString("asnu_type"));
                 asnu.setPriority(rs.getInt("asnu_priority"));
                 result.setSource(asnu);
+            }
+
+            return result;
+        }
+    };
+
+
+    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_MAPPER = new RowMapper<RegistryPerson>() {
+        @Override
+        public RegistryPerson mapRow(ResultSet rs, int i) throws SQLException {
+            RegistryPerson result = new RegistryPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setOldId(rs.getLong("old_id"));
+            result.setVersion(rs.getDate("version"));
+            result.setRecordVersionTo(rs.getDate("record_version_to"));
+            result.setLastName(rs.getString("last_name"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("birth_date"));
+            result.setVip(rs.getBoolean("vip"));
+            Map<String, RefBookValue> source = new HashMap<>();
+            source.put("SOURCE_ID", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("SOURCE_ID")));
+            result.setSource(source);
+
+            if ((result.getVip() != null) && result.getVip()) {
+                result.setCitizenship(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setInn(Permissive.<String>forbidden());
+                result.setInnForeign(Permissive.<String>forbidden());
+                result.setSnils(Permissive.<String>forbidden());
+                result.setTaxPayerState(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setAddress(Permissive.<Map<String, RefBookValue>>forbidden());
+            } else {
+                Map<String, RefBookValue> citizenship = new HashMap<>();
+                citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
+                result.setCitizenship(Permissive.of(citizenship));
+
+                Map<String, RefBookValue> reportDoc = new HashMap<>();
+                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+                result.setReportDoc(Permissive.of(reportDoc));
+
+                result.setInn(Permissive.of(rs.getString("inn")));
+                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+                result.setSnils(Permissive.of(rs.getString("snils")));
+
+                Map<String, RefBookValue> taxPayerState = new HashMap<>();
+                taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
+                result.setTaxPayerState(Permissive.of(taxPayerState));
+
+                Map<String, RefBookValue> address = new HashMap<>();
+                address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
+                result.setAddress(Permissive.of(address));
+            }
+
+            return result;
+        }
+    };
+
+    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_ORIGINAL_MAPPER = new RowMapper<RegistryPerson>() {
+        @Override
+        public RegistryPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RegistryPerson result = new RegistryPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setLastName(rs.getString("last_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("BIRTH_DATE"));
+            result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
+            result.setVersion(rs.getDate("VERSION"));
+            result.setState(rs.getInt("STATUS"));
+            return result;
+        }
+    };
+
+    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_DUPLICATE_MAPPER = new RowMapper<RegistryPerson>() {
+        @Override
+        public RegistryPerson mapRow(ResultSet rs, int i) throws SQLException {
+            RegistryPerson result = new RegistryPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setOldId(rs.getLong("old_id"));
+            result.setVersion(rs.getDate("version"));
+            result.setState(rs.getInt("status"));
+            result.setLastName(rs.getString("last_name"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("birth_date"));
+            result.setVip(rs.getBoolean("vip"));
+
+            if ((result.getVip() != null) && result.getVip()) {
+                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setInn(Permissive.<String>forbidden());
+                result.setSnils(Permissive.<String>forbidden());
+            } else {
+                Map<String, RefBookValue> reportDoc = new HashMap<>();
+                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+                result.setReportDoc(Permissive.of(reportDoc));
+
+                result.setInn(Permissive.of(rs.getString("inn")));
+                result.setSnils(Permissive.of(rs.getString("snils")));
             }
 
             return result;
@@ -511,12 +615,38 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public RefBookPerson getOriginal(Long recordId) {
+    public List<RegistryPerson> fetchOriginal(Long id) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("recordId", recordId);
+        params.addValue("id", id);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject("select p.*, (select doc_number from REF_BOOK_ID_DOC where person_id = p.id and inc_rep = 1 and rownum = 1) as docNumber \n" +
-                    "from ref_book_person p where p.record_id = :recordId and p.old_id is null and p.status = 0", params, PERSON_MAPPER_LIGHT);
+            return getNamedParameterJdbcTemplate().query("select * from ref_book_person where old_id = record_id and record_id = (select record_id from ref_book_person where id = :id and old_id <> record_id) and status in (0,2) order by version desc", params, REGISTRY_CARD_PERSON_ORIGINAL_MAPPER);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("endIndex", pagingParams.getStartIndex() + pagingParams.getCount());
+        try {
+            return getNamedParameterJdbcTemplate().query("SELECT * FROM (SELECT r.*, row_number() over (order by id asc) as rn FROM (\n" +
+                    "SELECT * from ref_book_person WHERE old_id <> record_id and record_id = (SELECT record_id from ref_book_person WHERE id = :id) and status in (0,2) order by version desc\n" +
+                    ") r ) WHERE rn between :startIndex and :endIndex", params, REGISTRY_CARD_PERSON_DUPLICATE_MAPPER);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public RegistryPerson fetchPersonWithVersionInfo(Long id) {
+        String sql = "select * from (select rbp.*, lead(version, 1) over (order by version asc) as record_version_to, row_number() over (order by version asc) as rn " +
+                "from ref_book_person rbp where rbp.record_id = (select record_id from ref_book_person where id = :id) and rbp.version >= (select version from ref_book_person where id = :id and status in (0, 2))) r where rn = 1";
+        MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, REGISTRY_CARD_PERSON_MAPPER);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

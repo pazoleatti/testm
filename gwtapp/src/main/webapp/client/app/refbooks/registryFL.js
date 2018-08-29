@@ -4,7 +4,7 @@
     /**
      * @description Модуль для страницы "Реестр Физических лиц"
      */
-    angular.module('app.registryFL', ['app.rest'])
+    angular.module('app.registryFL', ['app.rest', 'app.formatters', 'ui.router'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('registryFL', {
                 url: '/refbooks/registryFL',
@@ -164,6 +164,16 @@
                         rowList: APP_CONSTANTS.COMMON.PAGINATION
                     }
                 };
-            }
-        ])
+            }])
+
+        /**
+         * @description Форматтер для поля 'Фамилия' для перехода на карточку ФЛ
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('personLinkFormatter', function () {
+            return function (cellValue, options) {
+                return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "'>" + cellValue + "</a>";
+            };
+        })
 }());

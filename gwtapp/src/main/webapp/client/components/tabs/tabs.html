@@ -36,7 +36,10 @@
             <button title="Закрыть" class="close" data-ng-hide="!tab.close"
                     data-ng-click="ctrl.closeTabByIndex($index)">&times;</button>
 
-            <a data-ng-click="ctrl.activateTabByIndex($index)">
+            <a data-ng-click="" data-ng-if="tab.disabled">
+                <span>{{tab.getTitle()}}</span>
+            </a>
+            <a data-ng-click="ctrl.activateTabByIndex($index)" data-ng-if="!tab.disabled">
                 <span>{{tab.getTitle()}}</span>
             </a>
         </li>

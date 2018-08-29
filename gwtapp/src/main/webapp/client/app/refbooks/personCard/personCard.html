@@ -1,0 +1,80 @@
+<form class="flex-column" data-aplana-submit-valid="save()" novalidate>
+    <div>
+        <div class="content-header pull-left" data-ng-show="mode == 'VIEW'">
+            <a href="index.html#/refbooks/registryFL">{{::'move_back' | translate}}</a>
+            <h1>{{'— (' + person.recordId + ') ' + person.lastName + ' ' + person.firstName + ' ' + person.middleName +
+                ', ' + (person.birthDate | dateFormatter) + (person.recordId !== person.oldId ?', дубликат':'')}}</h1>
+        </div>
+        <div class="content-header pull-left" data-ng-show="mode == 'EDIT'">
+            <h1>{{'Редактирование - (' + person.recordId + ') ' + person.lastName + ' ' + person.firstName + ' ' +
+                person.middleName + ', ' + (person.birthDate | dateFormatter)}}</h1>
+        </div>
+        <div class="pull-right" style="margin: 5px 10px 10px 0;" data-ng-show="mode == 'VIEW'">
+            <!--TODO убрать  data-ng-disabled="true" когда доделаем редактирование-->
+            <button type="button" class="btn btn-default"
+                    data-ng-disabled="true"
+                    data-ng-click="doEdit()">
+                <span>{{:: 'refBook.fl.card.button.edit' | translate}}</span>
+            </button>
+        </div>
+        <div class="pull-right" style="margin: 5px 10px 10px 0;" data-ng-show="mode == 'EDIT'">
+            <button type="submit" class="btn btn-default iconed-btn">
+                <span>{{:: 'refBook.fl.card.button.save' | translate}}</span>
+                <span class="btn-icon-ok"></span>
+            </button>
+            <button type="button" class="btn btn-default-nonBg iconed-btn" id="cancelButton"
+                    style="border: 1px solid #279238">
+                <span>{{:: 'refBook.fl.card.button.cancel' | translate}}</span>
+                <span class="btn-icon-noneBg-close"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="info-wrapper" >
+        <div class="row-fluid" style="width: 800px" data-ng-show="mode == 'VIEW'">
+            <div class="span3">
+                {{::'refBook.fl.card.label.version' | translate}}{{person.id}}
+            </div>
+            <div class="span3">
+                {{::'refBook.fl.card.label.versionFrom' | translate}}{{person.version | dateFormatter}}
+            </div>
+            <div class="span3" >
+                {{::'refBook.fl.card.label.versionTo' | translate}}{{person.recordVersionTo | dateFormatter}}
+            </div>
+        </div>
+        <div class="row-fluid" style="width: 800px" data-ng-show="mode == 'EDIT'">
+            <div class="span1" style="padding-top: 2px">
+                {{::'refBook.fl.card.label.version' | translate}}
+            </div>
+            <div class="span2" style="padding-top: 2px">
+                {{person.id}}
+            </div>
+            <div class="span1">
+                <label class="control-label">{{::'refBook.fl.cardEdit.label.versionFrom' | translate}}</label>
+            </div>
+            <div class="span2">
+                <span data-aplana-field>
+                    <span data-aplana-datepicker
+                          data-max-date="person.recordVersionTo"
+                          data-ng-model="person.version">
+                    </span>
+                </span>
+            </div>
+            <div class="span1">
+                <label class="control-label">-</label>
+            </div>
+            <div class="span2">
+                <span data-aplana-field>
+                    <span data-aplana-datepicker
+                          data-ng-model="person.recordVersionTo">
+                    </span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div id="person_reg_tabs" class="tab-wrapper flex-fill" style="overflow: visible;"
+         data-aplana-tabs="personRegTabsCtrl"
+         data-tab-model="personRegTabs">
+    </div>
+</form>

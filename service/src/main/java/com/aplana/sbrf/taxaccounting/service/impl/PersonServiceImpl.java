@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -41,6 +43,8 @@ public class PersonServiceImpl implements PersonService {
     private RefBookFactory refBookFactory;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private RefBookDao refBookDao;
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -50,8 +54,9 @@ public class PersonServiceImpl implements PersonService {
     };
 
     @Override
-    public RefBookPerson getOriginal(Long personId) {
-        return refBookPersonDao.getOriginal(personId);
+    public RegistryPerson fetchOriginal(Long id, Date actualDate) {
+        List<RegistryPerson> versions = refBookPersonDao.fetchOriginal(id);
+        return resolveVersion(versions, actualDate);
     }
 
     @Override
@@ -60,8 +65,34 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public PagingResult<RefBookPerson> getDuplicates(Long personId, PagingParams pagingParams) {
-        return refBookPersonDao.getDuplicates(personId, pagingParams);
+    public PagingResult<RegistryPerson> fetchDuplicates(Long id, Date actualDate, PagingParams pagingParams) {
+        List<RegistryPerson> toReturnData = new ArrayList<>();
+        List<RegistryPerson> candidates = refBookPersonDao.fetchDuplicates(id, pagingParams);
+        Map<Long, List<RegistryPerson>> candidatesGroupedByOldId = new HashMap<>();
+        for(RegistryPerson candidate : candidates) {
+            List<RegistryPerson> group = candidatesGroupedByOldId.get(candidate.getOldId());
+            if (group == null) {
+                group = new ArrayList<>();
+                group.add(candidate);
+                candidatesGroupedByOldId.put(candidate.getOldId(), group);
+            } else {
+                group.add(candidate);
+            }
+        }
+        for(List<RegistryPerson> groupContent: candidatesGroupedByOldId.values()) {
+            RegistryPerson person = resolveVersion(groupContent, actualDate);
+            RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
+            if(person.getReportDoc().hasPermission()) {
+                PagingResult<Map<String, RefBookValue>> idDocs = refBookDao.getRecordsWithVersionInfo(refBookIdDoc, null, null, "frb.id = " + person.getReportDoc().value().get("REPORT_DOC"), null, "asc");
+                if (!idDocs.isEmpty()) {
+                    person.setReportDoc(Permissive.of(commonRefBookService.dereference(refBookIdDoc, idDocs).get(0)));
+                } else {
+                    person.setReportDoc(Permissive.<Map<String, RefBookValue>>of(null));
+                }
+            }
+            toReturnData.add(person);
+        }
+        return new PagingResult<>(toReturnData, toReturnData.size());
     }
 
     @Override
@@ -271,6 +302,73 @@ public class PersonServiceImpl implements PersonService {
         return filter;
     }
 
+    @Override
+    public RegistryPerson fetchPerson(Long id) {
+        RegistryPerson person = refBookPersonDao.fetchPersonWithVersionInfo(id);
+        RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
+        RefBook refBookCountry = refBookDao.get(RefBook.Id.COUNTRY.getId());
+        RefBook refBookTaxPayerState = refBookDao.get(RefBook.Id.TAXPAYER_STATUS.getId());
+        RefBook refBookAsnu = refBookDao.get(RefBook.Id.ASNU.getId());
+        RefBook refBookAddress = refBookDao.get(RefBook.Id.PERSON_ADDRESS.getId());
+
+        if (person.getTaxPayerState().hasPermission()) {
+            PagingResult<Map<String, RefBookValue>> refBookTaxPayerStates = refBookDao.getRecordsWithVersionInfo(refBookTaxPayerState, null, null, "frb.id = " + person.getTaxPayerState().value().get("TAXPAYER_STATE").getReferenceValue(), null, "asc");
+            if (!refBookTaxPayerStates.isEmpty()) {
+                person.setTaxPayerState(Permissive.of(commonRefBookService.dereference(refBookTaxPayerState, refBookTaxPayerStates).get(0)));
+            } else {
+                person.setTaxPayerState(Permissive.<Map<String, RefBookValue>>of(null));
+            }
+        }
+
+        if (person.getCitizenship().hasPermission()) {
+            PagingResult<Map<String, RefBookValue>> citizenships = refBookDao.getRecordsWithVersionInfo(refBookCountry, null, null, "frb.id = " + person.getCitizenship().value().get("CITIZENSHIP").getReferenceValue(), null, "asc");
+            if (!citizenships.isEmpty()) {
+                person.setCitizenship(Permissive.of(commonRefBookService.dereference(refBookCountry, citizenships).get(0)));
+            } else {
+                person.setCitizenship(Permissive.<Map<String, RefBookValue>>of(null));
+            }
+        }
+
+        PagingResult<Map<String, RefBookValue>> sources = refBookDao.getRecordsWithVersionInfo(refBookAsnu, null, null, "frb.id = " + person.getSource().get("SOURCE_ID").getReferenceValue(), null, "asc");
+        if (!sources.isEmpty()) {
+            person.setSource(commonRefBookService.dereference(refBookAsnu, sources).get(0));
+        } else {
+            person.setSource(null);
+        }
+
+        if (person.getAddress().hasPermission()) {
+            PagingResult<Map<String, RefBookValue>> addresses = refBookDao.getRecordsWithVersionInfo(refBookAddress, null, null, "frb.id = " + person.getAddress().value().get("ADDRESS").getReferenceValue(), null, "asc");
+            if (!addresses.isEmpty()) {
+                person.setAddress(Permissive.of(commonRefBookService.dereference(refBookAddress, addresses).get(0)));
+            } else {
+                person.setAddress(Permissive.<Map<String, RefBookValue>>of(null));
+            }
+        }
+
+        if(person.getReportDoc().hasPermission()) {
+            PagingResult<Map<String, RefBookValue>> idDocs = refBookDao.getRecordsWithVersionInfo(refBookIdDoc, null, null, "frb.id = " + person.getReportDoc().value().get("REPORT_DOC"), null, "asc");
+            if (!idDocs.isEmpty()) {
+                person.setReportDoc(Permissive.of(commonRefBookService.dereference(refBookIdDoc, idDocs).get(0)));
+            } else {
+                person.setReportDoc(Permissive.<Map<String, RefBookValue>>of(null));
+            }
+        }
+        return person;
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> fetchReferencesList(Long recordId, Long refBookId, PagingParams pagingParams) {
+        RefBook actualRefBook = refBookDao.get(refBookId);
+        RefBook refBookPerson = refBookDao.get(RefBook.Id.PERSON.getId());
+        PagingResult<Map<String, RefBookValue>> persons = refBookDao.getRecords(refBookPerson.getId(), refBookPerson.getTableName(), pagingParams, null, null, "record_id = " + recordId);
+        Long[] versionIds = new Long[persons.size()];
+        for (int i = 0; i < persons.size(); i++) {
+            versionIds[i] = persons.get(i).get("id").getNumberValue().longValue();
+        }
+        PagingResult<Map<String, RefBookValue>> result = refBookDao.getRecords(refBookId, actualRefBook.getTableName(), pagingParams, null, null, "person_id in (" + StringUtils.join(versionIds, ", ") + ")");
+        return commonRefBookService.dereference(actualRefBook, result);
+    }
+
     /**
      * Подготавливает введенный текст для использования в SQL-запросе
      *
@@ -280,4 +378,33 @@ public class PersonServiceImpl implements PersonService {
     private String prepareForQuery(String searchPattern) {
         return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(searchPattern).toLowerCase().replaceAll("\'", "\\\\\'");
     }
+
+    /**
+     * Выбирает версию из списка версий по следующему правилу:
+     * 1. Если есть актуальная версия, выбирает эту версию.
+     * 2. Если нет актуальной версии, тогда:
+     * a. Если все версии старше актуальной даты выбирает наименьшую
+     * b. Если все версии младше актуальной даты выбирает наибольшую
+     * Список версий ФЛ должен быть отсортирован по дате версии по убыванию
+     * @param descSortedRecords список версий ФЛ отсортированный по дате версии по убыванию
+     * @param actualDate        актуальная дата по которой выбирается фверсия ФЛ
+     * @return  Выбранная версия физлица
+     */
+    private RegistryPerson resolveVersion(List<RegistryPerson> descSortedRecords, Date actualDate) {
+        RegistryPerson toReturn = null;
+        for (RegistryPerson record : descSortedRecords) {
+            if (record.getVersion().compareTo(actualDate) <= 0) {
+                if (record.getState() == 0) {
+                    toReturn = record;
+                    return toReturn;
+                }
+            } else {
+                if (record.getState() == 0) {
+                    toReturn = record;
+                }
+            }
+        }
+        return toReturn;
+    }
+
 }

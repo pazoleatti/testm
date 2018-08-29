@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHand
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Date;
@@ -87,11 +84,18 @@ public interface RefBookPersonDao {
 
     /**
      * Получение оригинала ФЛ
-     *
-     * @param personId Идентификатор ФЛ (RECORD_ID)
-     * @return оригинал ФЛ
+     * @param id идентификатро версии ФЛ
+     * @return Оригинал ФЛ
      */
-    RefBookPerson getOriginal(Long personId);
+    List<RegistryPerson> fetchOriginal(Long id);
+
+    /**
+     * Получение дубликатов ФЛ
+     * @param id            идентификатор версии ФЛ
+     * @param pagingParams  параметры пейджинга
+     * @return  список дубликатов ФЛ
+     */
+    List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams);
 
     /**
      * Получает список идентификаторов ФЛ, являющихся дуликатами указанных ФЛ
@@ -142,4 +146,11 @@ public interface RefBookPersonDao {
      * @return объект справочника
      */
     RefBook getRefBook();
+
+    /**
+     * Получает версию физлица c информацией о дате начала и конца версии
+     * @param id    идентификатор версии
+     * @return  объект версии ФЛ
+     */
+    RegistryPerson fetchPersonWithVersionInfo(Long id);
 }
