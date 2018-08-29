@@ -356,8 +356,8 @@
         /**
          * Контроллер для выбора периода
          */
-        .controller('SelectPeriodCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'ReportPeriodResource',
-            function ($scope, APP_CONSTANTS, GetSelectOption, ReportPeriodResource) {
+        .controller('SelectPeriodCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'ReportPeriodResource', '$filter',
+            function ($scope, APP_CONSTANTS, GetSelectOption, ReportPeriodResource, $filter) {
                 $scope.periodSelect = {};
 
                 /**
@@ -425,6 +425,7 @@
                             if (periodObject && data && data.length > 0) {
                                 periodObject.period = data[0];
                                 angular.forEach(data, function (period) {
+                                    period.text = $filter('periodFormatterWithCorrectionDate')(period);
                                     if (Date.parse(periodObject.period.endDate) <= Date.parse(period.endDate)) {
                                         periodObject.period = period;
                                     }
