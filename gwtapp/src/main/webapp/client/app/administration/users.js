@@ -63,7 +63,7 @@
                         requestParameters: function () {
                             return {
                                 filter: $scope.filterParams()
-                            }
+                            };
                         },
                         colNames: [
                             $filter('translate')('users.title.name'),
@@ -109,6 +109,7 @@
                                 classes: 'grid-cell-white-space'
                             }
                         ],
+                        viewrecords: true,
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION
                     }
