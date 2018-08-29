@@ -126,7 +126,7 @@
         .filter('personLinkFormatters', function () {
                 return function (cellValue, options, data) {
                     if (data.personId) {
-                        return "<a href='index.html#/personRegistry/personCard/" + data.personId + "'>" + cellValue + "</a>";
+                        return "<a href='index.html#/personRegistry/personCard/" + data.personId + "' target='_blank'>" + cellValue + "</a>";
                     }
                     return cellValue;
                 }

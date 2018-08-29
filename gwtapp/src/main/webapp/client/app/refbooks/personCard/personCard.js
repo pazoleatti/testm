@@ -311,13 +311,15 @@
                  * @description Получение оригинала Физлица
                  */
                 $scope.$watch("duplicatesTab.active", function (newValue, oldValue) {
-                    if (newValue && !oldValue) {
-                        $http({
-                            method: "GET",
-                            url: "controller/actions/refBookFL/fetchOriginal/" + $scope.person.id
-                        }).success(function (response) {
-                            $scope.original = response
-                        });
+                    if ($scope.person.oldId !== $scope.person.recordId) {
+                        if (newValue && !oldValue) {
+                            $http({
+                                method: "GET",
+                                url: "controller/actions/refBookFL/fetchOriginal/" + $scope.person.id
+                            }).success(function (response) {
+                                $scope.original = response
+                            });
+                        }
                     }
                 });
 
@@ -369,22 +371,24 @@
                  * Получение списка дубликатов для ФЛ
                  */
                 $scope.fetchDuplicates = function (ctrl) {
-                    var page = ctrl.getGrid().jqGrid('getGridParam', 'page');
-                    var rows = ctrl.getGrid().jqGrid('getGridParam', 'rowNum');
-                    $http({
-                        method: "GET",
-                        url: "controller/actions/refBookFL/fetchDuplicates/" + $scope.person.id,
-                        params: {
-                            pagingParams: JSON.stringify({
-                                page: page,
-                                count: rows,
-                                startIndex: page === 1 ? 0 : rows * (page - 1)
-                            })
-                        }
-                    }).success(function (response) {
-                        $scope.duplicates = response.rows;
-                        $scope.duplicatesGrid.ctrl.refreshGridData($scope.duplicates);
-                    });
+                    if ($scope.person.oldId === $scope.person.recordId) {
+                        var page = ctrl.getGrid().jqGrid('getGridParam', 'page');
+                        var rows = ctrl.getGrid().jqGrid('getGridParam', 'rowNum');
+                        $http({
+                            method: "GET",
+                            url: "controller/actions/refBookFL/fetchDuplicates/" + $scope.person.id,
+                            params: {
+                                pagingParams: JSON.stringify({
+                                    page: page,
+                                    count: rows,
+                                    startIndex: page === 1 ? 0 : rows * (page - 1)
+                                })
+                            }
+                        }).success(function (response) {
+                            $scope.duplicates = response.rows;
+                            $scope.duplicatesGrid.ctrl.refreshGridData($scope.duplicates);
+                        });
+                    }
                 };
 
                 /**

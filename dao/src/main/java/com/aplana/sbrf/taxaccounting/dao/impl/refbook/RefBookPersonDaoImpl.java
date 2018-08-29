@@ -619,7 +619,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         try {
-            return getNamedParameterJdbcTemplate().query("select * from ref_book_person where old_id = record_id and record_id = (select record_id from ref_book_person where id = :id and old_id <> record_id) and status in (0,2) order by version desc", params, REGISTRY_CARD_PERSON_ORIGINAL_MAPPER);
+            return getNamedParameterJdbcTemplate().query("select * from ref_book_person where old_id = record_id and record_id = (select record_id from ref_book_person where id = :id) and status in (0,2) order by version desc", params, REGISTRY_CARD_PERSON_ORIGINAL_MAPPER);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
@@ -642,8 +642,13 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
     @Override
     public RegistryPerson fetchPersonWithVersionInfo(Long id) {
-        String sql = "select * from (select rbp.*, lead(version, 1) over (order by version asc) as record_version_to, row_number() over (order by version asc) as rn " +
-                "from ref_book_person rbp where rbp.record_id = (select record_id from ref_book_person where id = :id) and rbp.version >= (select version from ref_book_person where id = :id and status in (0, 2))) r where rn = 1";
+        String sql = "SELECT r.*, row_number() over (order by id asc) as rn FROM (" +
+                "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM REF_BOOK_PERSON WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to " +
+                "FROM (" +
+                " SELECT frb.* FROM REF_BOOK_PERSON frb " +
+                " WHERE id = :id " +
+                " ) p " +
+                ") r";
         MapSqlParameterSource params = new MapSqlParameterSource("id", id);
         try {
             return getNamedParameterJdbcTemplate().queryForObject(sql, params, REGISTRY_CARD_PERSON_MAPPER);
