@@ -14,8 +14,10 @@
                         <span data-aplana-field>
                             <span data-aplana-datepicker
                                   data-ng-model="record.startDate"
-                                  data-ng-required="true"></span>
+                                  data-ng-required="true"
+                                  data-ui-validate="{versionDate : 'isVersionDatesValid($value, record.endDate)'}"></span>
                             <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
+                            <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>
                         </span>
                 </div>
                 <div class="span0" style="width: 20px;">
@@ -27,7 +29,9 @@
                 <div data-ng-if="mode === 'CREATE' || mode === 'EDIT'" class="span0" style="width: 120px;">
                         <span data-aplana-field>
                             <span data-aplana-datepicker
-                                  data-ng-model="record.endDate"></span>
+                                  data-ng-model="record.endDate"
+                                  data-ui-validate="{versionDate : 'isVersionDatesValid(record.startDate, $value)'}"></span>
+                            <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>
                         </span>
                 </div>
             </div>
@@ -131,11 +135,15 @@
                                        data-ui-validate="{kppValidator : 'isKppValid($value)'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        data-ng-required="true"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
+                                    translate}}
+                                </div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
-                                <div data-aplana-validator data-key="kppValidator">{{::'departmentConfig.modal.field.kpp.validator' | translate}}</div>
+                                <div data-aplana-validator data-key="kppValidator">
+                                    {{::'departmentConfig.modal.field.kpp.validator' | translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -175,7 +183,9 @@
                                        data-ng-pattern="patterns.number"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        data-ng-required="true"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
+                                    translate}}
+                                </div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
@@ -316,8 +326,12 @@
                                        data-ng-pattern="patterns.number"
                                        data-ui-validate="{kppValidator : 'isKppValid($value)'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
-                                <div data-aplana-validator data-key="kppValidator">{{::'departmentConfig.modal.field.kpp.validator' | translate}}</div>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key="kppValidator">
+                                    {{::'departmentConfig.modal.field.kpp.validator' | translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -336,7 +350,9 @@
                                        maxlength="9"
                                        data-ng-pattern="patterns.number"
                                        placeholder="{{'filter.placeholder.search' | translate}}"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
+                                    translate}}
+                                </div>
                             </div>
                         </div>
                     </div>

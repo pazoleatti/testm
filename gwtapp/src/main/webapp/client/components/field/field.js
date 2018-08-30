@@ -259,7 +259,7 @@
                                             var height = (bounds.height) ? bounds.height :
                                                 (bounds.bottom ? bounds.bottom - bounds.top : 0);
                                             hint.css('position', 'fixed');
-                                            hint.css('left', bounds.left);
+                                            //hint.css('left', bounds.left);
 
                                             //Если модальное окно, то проверить выход за границы
                                             if (isInModal) {

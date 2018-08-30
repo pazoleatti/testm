@@ -16,16 +16,23 @@
                         updateDepartmentConfig();
                     }
                 };
-
+                // Необходимость заполнения фамилии и имени в зависимости от значения поля "признак подписанта"
                 $scope.isNameRequiredBySignatoryMark = function ($value) {
                     return !$scope.record.signatoryMark || $scope.record.signatoryMark.code !== '2' || !!$value;
                 };
-
+                // Валидация КПП полей
                 $scope.isKppValid = function ($value) {
                     var set = ["01", "02", "03", "05", "31", "32", "43", "45"];
                     return !$value || $value.length >= 6 && set.indexOf($value.substring(4, 6)) !== -1
                 };
-
+                // Валидация дат актуальности
+                $scope.isVersionDatesValid = function(dateFrom, dateTo) {
+                    return dateFrom == null || dateTo == null || toDate(dateFrom)< toDate(dateTo);
+                };
+                function toDate(value) {
+                    return typeof value === 'string' ? new Date(value) : value;
+                }
+                // Создание записи настроек подразделений
                 function createDepartmentConfig() {
                     $logPanel.close();
                     $http({
@@ -49,7 +56,7 @@
                         }
                     });
                 }
-
+                // Изменение записи настроек подразделений
                 function updateDepartmentConfig() {
                     $logPanel.close();
                     $http({
@@ -73,7 +80,7 @@
                         }
                     });
                 }
-
+                // Вход в режим редактирования
                 $scope.edit = function () {
                     $scope.mode = 'EDIT';
                     $modalInstance.updateTitle($filter('translate')('departmentConfig.modal.edit.title'));

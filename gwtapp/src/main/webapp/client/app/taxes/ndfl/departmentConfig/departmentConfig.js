@@ -37,7 +37,7 @@
                     }
                 }
 
-                function filterParamsEquals(params1, params2) {
+                function isFilterParamsEquals(params1, params2) {
                     return params1.department.id === params2.department.id &&
                         params1.relevance.id === params2.relevance.id &&
                         params1.relevanceDate === params2.relevanceDate &&
@@ -47,7 +47,7 @@
                 }
 
                 $scope.searchFilter.isClearByFilterParams = function () {
-                    $scope.searchFilter.isClear = $scope.searchFilter.params.department && !filterParamsEquals($scope.searchFilter.params, getDefaultFilterParams());
+                    $scope.searchFilter.isClear = $scope.searchFilter.params.department && !isFilterParamsEquals($scope.searchFilter.params, getDefaultFilterParams());
                 };
 
                 $scope.searchFilter.resetFilterParams = function () {
@@ -240,7 +240,7 @@
                     }
                 };
 
-                // Проверка прав
+                // Проверка прав для выделенных строк таблицы
                 $scope.checkPermissionForSelectedItems = function (permission) {
                     var selectedItems = $scope.departmentConfigGrid.value;
                     if (selectedItems && selectedItems.length > 0) {
