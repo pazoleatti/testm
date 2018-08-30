@@ -1455,4 +1455,12 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5370 Реализовать изменения в алгоритме идентификации ФЛ -->
+    <changeSet id="3.1-ytrofimov-15" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

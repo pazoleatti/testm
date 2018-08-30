@@ -31,9 +31,6 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     private RefBookCountry citizenship;
     //Место жительства
     private Permissive<RefBookAddress> address;
-    //Признак, показывающий, является ли ФЛ сотрудником Сбербанка
-    private Integer employee;
-    private RefBookAddress address;
     //Система-источник: ссылка на справочник кодов АС НУ
     private RefBookAsnu source;
     //Старый идентификатор ФЛ
