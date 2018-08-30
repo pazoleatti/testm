@@ -1287,4 +1287,12 @@
             alter table ref_book_ndfL_detail drop column TYPE;
         </sql>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5508 Ошибка при загрузке ТФ-excel -->
+    <changeSet id="3.1-apronin-30" author="apronin">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

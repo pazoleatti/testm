@@ -1073,7 +1073,7 @@ class Import extends AbstractScriptClass {
     }
 
     void checkRequiredFieldsPrepayment(def prepayments, def fioAndInp){
-        for (NdflPersonIncome prepayment : prepayments){
+        for (NdflPersonPrepayment prepayment : prepayments){
             checkRequiderFields(prepayment,
                     ["operationId", "summ", "notifDate", "notifNum", "notifSource"],
                     [PREPAYMENT_OPERATION_ID, PREPAYMENT_SUMM, PREPAYMENT_NOTIF_DATE, PREPAYMENT_NOTIF_NUM, PREPAYMENT_NOTIF_SOURCE],
