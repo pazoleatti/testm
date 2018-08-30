@@ -949,4 +949,12 @@
         </sql>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5404 Изменить алгоритм первичной загрузки ФЛ с учетом изменений в Реестре ФЛ -->
+    <changeSet id="3.1-snazin-10" author="snazin">
+        <update tableName="blob_data">
+            <column name="data"
+                    valueBlobFile="templates-3.1/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
