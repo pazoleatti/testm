@@ -15,7 +15,7 @@
                         <td>
                             <div data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initAllAvailableTBForPeriodManagementSelect(searchFilter.params)"
+                                 data-ng-init="initAvailableTBSelect(searchFilter.params)"
                                  data-ng-model="searchFilter.params.department"
                                  class="span8">
                             </div>
@@ -25,7 +25,7 @@
 
                         <!--Период, с-->
                         <td>
-                            <label class="control-label" for="searchfilter_params_yearstart" style="white-space: nowrap;">
+                            <label class="control-label" for="searchfilter_params_yearstart" style="white-space: nowrap; margin-left: 20px;">
                                 {{::'reportPeriod.filter.periodFrom' | translate}}
                             </label>
                         </td>
