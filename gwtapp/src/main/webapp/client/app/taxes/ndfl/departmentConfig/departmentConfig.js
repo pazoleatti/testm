@@ -112,67 +112,60 @@
                             $filter('translate')('departmentConfig.header.reorgInn')
                         ],
                         colModel: [
-                            {name: 'id', index: 'id', hidden: true, key: true, sortable: false},
-                            {name: 'rowOrd', index: 'rowOrd', width: 55, sortable: false},
+                            {name: 'id', index: 'id', hidden: true, key: true},
+                            {name: 'rowOrd', index: 'row_Ord', width: 55},
                             {
                                 name: 'startDate',
-                                index: 'startDate',
+                                index: 'version',
                                 width: 100,
-                                formatter: $filter('dateFormatter'),
-                                sortable: false
+                                formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'endDate',
-                                index: 'endDate',
+                                index: 'version_end',
                                 width: 120,
-                                formatter: $filter('dateFormatter'),
-                                sortable: false
+                                formatter: $filter('dateFormatter')
                             },
-                            {name: 'department.name', index: 'department.name', width: 170, sortable: false},
-                            {name: 'kpp', index: 'kpp', width: 75, sortable: false},
+                            {name: 'department.name', index: 'department_id', width: 170},
+                            {name: 'kpp', index: 'kpp', width: 75},
                             {
                                 name: 'oktmo',
                                 index: 'oktmo',
                                 width: 250,
-                                sortable: false,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'taxOrganCode', index: 'taxOrganCode', width: 85, sortable: false},
+                            {name: 'taxOrganCode', index: 'tax_organ_code', width: 85},
                             {
                                 name: 'presentPlace',
-                                index: 'presentPlace',
+                                index: 'present_Place',
                                 width: 210,
-                                sortable: false,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'name', index: 'name', width: 150, sortable: false},
-                            {name: 'phone', index: 'phone', width: 120, sortable: false},
+                            {name: 'name', index: 'name', width: 150},
+                            {name: 'phone', index: 'phone', width: 120},
                             {
                                 name: 'signatoryMark',
-                                index: 'signatoryMark',
+                                index: 'signatory_id',
                                 width: 210,
-                                sortable: false,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'signatorySurName', index: 'signatorySurName', width: 110, sortable: false},
-                            {name: 'signatoryFirstName', index: 'signatoryFirstName', width: 110, sortable: false},
-                            {name: 'signatoryLastName', index: 'signatoryLastName', width: 130, sortable: false},
+                            {name: 'signatorySurName', index: 'signatory_surName', width: 110},
+                            {name: 'signatoryFirstName', index: 'signatory_firstName', width: 110},
+                            {name: 'signatoryLastName', index: 'signatory_lastName', width: 130},
                             {
                                 name: 'approveDocName',
-                                index: 'approveDocName',
+                                index: 'approve_Doc_Name',
                                 width: 165,
-                                classes: 'grid-cell-white-space',
-                                sortable: false
+                                classes: 'grid-cell-white-space'
                             },
                             {
                                 name: 'reorganization',
-                                index: 'reorganization',
+                                index: 'reorg_form_code',
                                 width: 200,
-                                sortable: false,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'reorgKpp', index: 'reorgKpp', width: 150, sortable: false},
-                            {name: 'reorgInn', index: 'reorgInn', width: 150, sortable: false}
+                            {name: 'reorgKpp', index: 'reorg_Kpp', width: 150},
+                            {name: 'reorgInn', index: 'reorg_Inn', width: 150}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,

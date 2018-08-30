@@ -60,8 +60,13 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         }
         RefBook refBook = commonRefBookService.get(NDFL_DETAIL.getId());
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
+        RefBookAttribute sortAttribute = null;
+        // См. код с составлением запросов, там сортировка доделана если такого атрибута нет
+        if (pagingParams.getProperty() != null && refBook.hasAttribute(pagingParams.getProperty())) {
+            sortAttribute = refBook.getAttribute(pagingParams.getProperty());
+        }
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(
-                action.getRelevanceDate(), pagingParams, departmentConfigFilter.toString(), refBook.getAttribute("OKTMO"));
+                action.getRelevanceDate(), pagingParams, departmentConfigFilter.toString(), sortAttribute);
         return new PagingResult<>(convertToDepartmentConfigs(records), records.getTotalCount());
     }
 
@@ -286,8 +291,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         result.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
         result.setRecordId(record.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue().longValue());
         RefBookRecordVersion version = provider.getRecordVersionInfo(result.getId());
-        if (record.get(RefBook.RECORD_SORT_ALIAS) != null) {
-            result.setRowOrd(record.get(RefBook.RECORD_SORT_ALIAS).getNumberValue().intValue());
+        if (record.get(DepartmentConfigDetailAliases.ROW_ORD.name()) != null) {
+            result.setRowOrd(record.get(DepartmentConfigDetailAliases.ROW_ORD.name()).getNumberValue().intValue());
         }
         result.setStartDate(version.getVersionStart());
         result.setEndDate(version.getVersionEnd());
@@ -367,6 +372,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
      * Константы соответствующие названиям аттрибутов в справочнике настроек подразделений
      */
     public enum DepartmentConfigDetailAliases {
+        ROW_ORD,
         DEPARTMENT_ID,
         TAX_ORGAN_CODE,
         KPP,
