@@ -38,6 +38,7 @@ public class RefBook implements Serializable {
     /**
      * Соотношение основной и табличной части настроек подразделений с типом налога
      */
+    @Deprecated
     public enum WithTable {
         NDFL(TaxType.NDFL, 950L, 951L);
 
@@ -133,6 +134,7 @@ public class RefBook implements Serializable {
         HARD_WORK(939),                                // Коды классов условий труда
         KBK(940),                                   // Классификатор доходов бюджетов Российской Федерации
         PERSON_CATEGORY(941),                        // Категорий застрахованных лиц
+        @Deprecated
         NDFL(950),                                    // Настройки подразделений по НДФЛ
         NDFL_DETAIL(951),                            // Настройки подразделений по НДФЛ (таблица)
         NDFL_REFERENCES(964);                            // Ограничение доступа по АСНУ
@@ -165,7 +167,6 @@ public class RefBook implements Serializable {
         ASNU("REF_BOOK_ASNU"),
         PERSON("REF_BOOK_PERSON"),
         REGION("REF_BOOK_REGION"),
-        NDFL("REF_BOOK_NDFL"),
         NDFL_DETAIL("REF_BOOK_NDFL_DETAIL"),
         FOND("REF_BOOK_FOND"),
         FOND_DETAIL("REF_BOOK_FOND_DETAIL"),

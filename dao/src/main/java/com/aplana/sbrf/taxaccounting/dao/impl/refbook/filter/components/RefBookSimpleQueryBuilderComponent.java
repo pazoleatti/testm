@@ -633,7 +633,9 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
         }
 
-        if (sortAttribute != null) {
+        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId() && sortAttribute != null && pagingParams != null) {
+            ps.appendQuery(" ORDER BY frb.kpp, a_sort.code, frb.tax_organ_code");
+        } else if (sortAttribute != null) {
             String tableAlias = "frb";
             if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                 sortAttribute = sortAttribute.getRefBookAttribute();

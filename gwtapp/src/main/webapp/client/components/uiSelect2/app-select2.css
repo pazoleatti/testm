@@ -1,5 +1,9 @@
 /*CBR select2*/
 
+.select2-container {
+    width: 100%;
+}
+
 .select2-container .select2-choice {
     line-height: 24px;
     padding: 0 0 0 6px;

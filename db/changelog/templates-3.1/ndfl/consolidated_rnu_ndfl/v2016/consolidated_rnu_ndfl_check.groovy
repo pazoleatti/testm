@@ -741,8 +741,7 @@ class Check extends AbstractScriptClass {
         long time = System.currentTimeMillis();
         long timeTotal = time
         // Параметры подразделения
-        Map<String, RefBookValue> mapRefBookNdfl = getRefBookNdfl()
-        Map<String, List<String>> mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
+        Map<String, List<String>> mapRefBookNdflDetail = getRefBookNdflDetail()
 
         logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -3032,27 +3031,12 @@ class Check extends AbstractScriptClass {
     }
     //>------------------< CHECK DATA UTILS >----------------------<
 
-/**
- * Получить параметры для конкретного тербанка
- * @return
- */
-    Map<String, RefBookValue> getRefBookNdfl() {
-        def departmentId = declarationData.departmentId
-        PagingResult<Map<String, RefBookValue>> departmentParamList = getProvider(RefBook.Id.NDFL.id).getRecords(getReportPeriodEndDate(), null, "DEPARTMENT_ID = $departmentId", null)
-        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            departmentParamException(departmentId, declarationData.reportPeriodId)
-        }
-        return departmentParamList?.get(0)
-    }
-
-/**
- * Получить параметры подразделения
- * @param departmentParamId
- * @return
- */
-    Map<String, List<String>> getRefBookNdflDetail(def departmentParamId) {
+    /**
+     * Получить параметры подразделения
+     */
+    Map<String, List<String>> getRefBookNdflDetail() {
         Map<String, List<String>> mapNdflDetail = [:]
-        def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
+        def filter = "DEPARTMENT_ID = " + declarationData.departmentId
         PagingResult<Map<String, RefBookValue>> departmentParamTableList = getProvider(RefBook.Id.NDFL_DETAIL.id).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)

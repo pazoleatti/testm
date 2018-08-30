@@ -32,6 +32,12 @@ public class RefBookMapperFactory {
             return new TaxPayerStatusMapper();
         } else if (RefBook.Id.DEPARTMENT.getId() == refBookId) {
             return new DepartmentMapper();
+        } else if (RefBook.Id.PRESENT_PLACE.getId() == refBookId) {
+            return new PresentPlaceMapper();
+        } else if (RefBook.Id.MARK_SIGNATORY_CODE.getId() == refBookId) {
+            return new SignatoryMarkMapper();
+        } else if (RefBook.Id.REORGANIZATION.getId() == refBookId) {
+            return new ReorganizationMapper();
         }
         throw new IllegalArgumentException("Unknown mapper for refBook = " + refBookId);
     }
@@ -163,6 +169,39 @@ public class RefBookMapperFactory {
         public RefBookDepartment mapRow(ResultSet resultSet, int i) throws SQLException {
             RefBookDepartment result = new RefBookDepartment();
             result.setId(resultSet.getInt("id"));
+            result.setName(resultSet.getString("name"));
+            return result;
+        }
+    }
+
+    public class PresentPlaceMapper<T> implements RowMapper<RefBookPresentPlace> {
+        @Override
+        public RefBookPresentPlace mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookPresentPlace result = new RefBookPresentPlace();
+            result.setId(resultSet.getLong("id"));
+            result.setCode(resultSet.getString("code"));
+            result.setName(resultSet.getString("name"));
+            return result;
+        }
+    }
+
+    public class SignatoryMarkMapper<T> implements RowMapper<RefBookSignatoryMark> {
+        @Override
+        public RefBookSignatoryMark mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookSignatoryMark result = new RefBookSignatoryMark();
+            result.setId(resultSet.getLong("id"));
+            result.setCode(resultSet.getString("code"));
+            result.setName(resultSet.getString("name"));
+            return result;
+        }
+    }
+
+    public class ReorganizationMapper<T> implements RowMapper<RefBookReorganization> {
+        @Override
+        public RefBookReorganization mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookReorganization result = new RefBookReorganization();
+            result.setId(resultSet.getLong("id"));
+            result.setCode(resultSet.getString("code"));
             result.setName(resultSet.getString("name"));
             return result;
         }

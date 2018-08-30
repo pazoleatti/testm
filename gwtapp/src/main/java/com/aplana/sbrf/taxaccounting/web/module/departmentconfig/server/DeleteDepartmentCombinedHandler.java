@@ -67,53 +67,7 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
     @Override
     public DeleteDepartmentCombinedResult execute(DeleteDepartmentCombinedAction action, ExecutionContext executionContext)
             throws ActionException {
-        DeleteDepartmentCombinedResult result = new DeleteDepartmentCombinedResult();
-        DepartmentCombined depCombined = action.getDepartmentCombined();
-
-        if (depCombined != null
-                && depCombined.getDepartmentId() != null
-                && !depCombined.getDepartmentId().isEmpty()
-                && action.getTaxType() != null
-                && action.getReportPeriodId() != null) {
-
-            Long refBookId = null;
-            switch (action.getTaxType()) {
-                case NDFL:
-                    refBookId = RefBook.Id.NDFL.getId();
-                    break;
-            }
-            RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
-            ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
-            Logger logger = new Logger();
-            logger.setTaUserInfo(securityService.currentUserInfo());
-
-            RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
-            List<Long> deleteList = new ArrayList<Long>();
-            deleteList.add(recordVersion.getRecordId());
-
-            if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {
-                provider.deleteRecordVersions(logger, deleteList, false);
-            } else {
-                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(), -1), deleteList);
-            }
-
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                if (recordVersion.getVersionEnd() == null)
-                    logger.info(String.format(SUCCESS_INFO_SHORT, sdf.get().format(period.getCalendarStartDate())));
-                else
-                    logger.info(String.format(SUCCESS_INFO, sdf.get().format(period.getCalendarStartDate()), sdf.get().format(recordVersion.getVersionEnd())));
-            }
-
-            if (action.getOldUUID() == null) {
-                result.setUuid(logEntryService.save(logger.getEntries()));
-            } else {
-                result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
-            }
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                result.setHasError(true);
-            }
-        }
-        return result;
+        throw new UnsupportedOperationException();
     }
 
     @Override

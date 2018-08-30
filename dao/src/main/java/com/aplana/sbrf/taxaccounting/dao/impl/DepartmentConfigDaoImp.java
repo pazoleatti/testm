@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -14,12 +17,21 @@ import java.util.List;
 @Repository
 public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentConfigDao {
 
-    private RowMapper<Pair<String, String>> kppOktmoPairsRowMapper = new RowMapper<Pair<String, String>>() {
+    private RowMapper<DepartmentConfig> rowMapper = new RowMapper<DepartmentConfig>() {
         @Override
-        public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Pair<>(rs.getString("kpp"), rs.getString("oktmo"));
+        public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
+            DepartmentConfig departmentConfig = new DepartmentConfig();
+            RefBookDepartment department = new RefBookDepartment();
+            department.setId(rs.getInt("department_id"));
+            departmentConfig.setDepartment(department);
+            return departmentConfig;
         }
     };
+
+    @Override
+    public SecuredEntity getSecuredEntity(long id) {
+        return getJdbcTemplate().queryForObject("select department_id from ref_book_ndfl_detail where id = ?", rowMapper, id);
+    }
 
     @Override
     public List<Pair<String, String>> fetchKppOktmoPairs(List<Integer> departmentIds, Date relevanceDate) {
@@ -41,6 +53,11 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                         "  AND (version_end IS NULL OR :relevanceDate <= version_end)) " +
                         ") rbnd " +
                         "JOIN ref_book_oktmo oktmo ON oktmo.id = rbnd.oktmo ",
-                params, kppOktmoPairsRowMapper);
+                params, new RowMapper<Pair<String, String>>() {
+                    @Override
+                    public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Pair<>(rs.getString("kpp"), rs.getString("oktmo"));
+                    }
+                });
     }
 }

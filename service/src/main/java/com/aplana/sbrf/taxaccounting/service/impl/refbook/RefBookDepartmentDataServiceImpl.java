@@ -38,6 +38,11 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
         this.departmentDao = departmentDao;
     }
 
+    @Override
+    public RefBookDepartment fetch(Integer id) {
+        return refBookDepartmentDataDao.fetchDepartmentById(id);
+    }
+
     /**
      * Получение подразделения пользователя
      *

@@ -819,43 +819,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<Integer> findDeclarationDataIdByTypeStatusReportPeriod(Integer reportPeriodId, Long ndflId,
-                                                                       Integer declarationTypeId, Integer departmentType,
-                                                                       Boolean reportPeriodStatus, Integer declarationState) {
-        Integer isActive = reportPeriodStatus ? 1 : 0;
-        String sql = "SELECT distinct dd.id " +
-                " FROM \n" +
-                "  ref_book_ndfl n \n" +
-                "  JOIN ref_book_ndfl_detail nd ON nd.ref_book_ndfl_id = n.id\n" +
-                "  JOIN ref_book_oktmo ro ON ro.id = nd.oktmo\n" +
-                "  JOIN ndfl_person_income npi ON (npi.oktmo = ro.code AND npi.kpp = nd.kpp)\n" +
-                "  JOIN ndfl_person np ON np.id = npi.ndfl_person_id\n" +
-                "  JOIN declaration_data dd ON dd.id = np.declaration_data_id\n" +
-                "  JOIN declaration_template dt ON dt.id = dd.declaration_template_id\n" +
-                "  JOIN department_report_period drp ON drp.id = dd.department_report_period_id\n" +
-                "  JOIN department d ON d.id = drp.department_id\n" +
-                " WHERE \n" +
-                "  n.id = :ndflId\n" +
-                "  AND dt.declaration_type_id = :declarationTypeId\n" +
-                "  AND drp.report_period_id = :reportPeriodId\n" +
-                "  AND d.type = :departmentType\n" +
-                "  AND drp.is_active = :isActive\n" +
-                "  AND dd.state = :declarationState";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("reportPeriodId", reportPeriodId)
-                .addValue("ndflId", ndflId)
-                .addValue("declarationTypeId", declarationTypeId)
-                .addValue("departmentType", departmentType)
-                .addValue("isActive", isActive)
-                .addValue("declarationState", declarationState);
-        try {
-            return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>();
-        }
-    }
-
-    @Override
     public boolean existDeclarationData(long declarationDataId) {
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("declarationDataId", declarationDataId);
@@ -920,12 +883,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "where dd.id = :declarationDataId " +
                 "and (npi.kpp, npi.oktmo) " +
                 "not in (" +
-                "select rnd.kpp, ro.code " +
-                "from ref_book_ndfl_detail rnd " +
-                "join ref_book_oktmo ro on ro.id = rnd.oktmo " +
-                "where rnd.version <= rp.end_date)";
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("declarationDataId", declarationDataId);
+                "   select rnd.kpp, ro.code " +
+                "   from (select t.*, lead(t.version) over(partition by t.record_id order by version) - interval '1' DAY version_end from ref_book_ndfl_detail t) rnd " +
+                "   join ref_book_oktmo ro on ro.id = rnd.oktmo " +
+                "   where rnd.version <= rp.end_date AND (rnd.version_end IS NULL OR rp.end_date <= rnd.version_end)" +
+                ")";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Pair<String, String>>() {
                 @Override

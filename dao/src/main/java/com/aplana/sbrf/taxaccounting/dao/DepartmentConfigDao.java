@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Дао для работы с настройками подразделений
  */
-public interface DepartmentConfigDao {
+public interface DepartmentConfigDao extends PermissionDao {
 
     /**
      * Возвращяет пары КПП и ОКТМО из настроек подразделений по определенным подразделениям

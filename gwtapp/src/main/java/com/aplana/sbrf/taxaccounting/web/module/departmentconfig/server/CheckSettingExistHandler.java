@@ -36,23 +36,7 @@ public class CheckSettingExistHandler extends AbstractActionHandler<CheckSetting
     public CheckSettingExistResult execute(CheckSettingExistAction action, ExecutionContext executionContext) throws ActionException {
         CheckSettingExistResult result = new CheckSettingExistResult();
 
-        Long refBookId = null;
-        switch (action.getTaxType()) {
-            case NDFL:
-                refBookId = RefBook.Id.NDFL.getId();
-                break;
-        }
-
-        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
-        ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
-        List<Long> existSettings = provider.getUniqueRecordIds(period.getCalendarStartDate(), filter);
-        if (existSettings == null || existSettings.isEmpty()) {
-            result.setSettingsExist(false);
-        } else {
-            result.setSettingsExist(true);
-        }
-        return result;
+        throw new UnsupportedOperationException();
     }
 
     @Override

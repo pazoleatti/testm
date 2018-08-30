@@ -195,6 +195,15 @@ a.collapse-link {
   width: 100%;
 }
 
+.block-title {
+  font-weight: bold;
+  color: #269238;
+  border-bottom: thin dashed;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
 .accordion-heading a.accordion-toggle.collapsed,
 a.collapse-link.collapsed {
   background: url('../img/arrow-double.png') no-repeat;
@@ -1102,7 +1111,7 @@ button.btn.btn-default.ng-binding {
 }
 
 /*================hint-style============*/
-.error {
+.modal .error {
   position: relative;;
   .help-bottom-popup {
     position: absolute !important;
@@ -1661,6 +1670,11 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   display: flex;
   flex-flow: column;
   height: 100%;
+}
+
+.flex-row {
+  display: flex;
+  width: 100%;
 }
 
 .flex-fill {

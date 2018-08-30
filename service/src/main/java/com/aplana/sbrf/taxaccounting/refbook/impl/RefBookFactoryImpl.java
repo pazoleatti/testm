@@ -53,7 +53,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
             PERIOD_CODE.getId(),
             KBK.getId(),
             PERSON_CATEGORY.getId(),
-            NDFL.getId(),
             NDFL_DETAIL.getId(),
             NDFL_REFERENCES.getId(),
             INCOME_KIND.getId(),

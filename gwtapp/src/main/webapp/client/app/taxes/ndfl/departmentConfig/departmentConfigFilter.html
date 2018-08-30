@@ -1,32 +1,112 @@
-<div class="grid-filter">
-    <form class="form-horizontal info-wrapper" role="form" novalidate>
-        <div class="row">
-            <div class="row-fluid form-group">
-                <div class="span1">
-                    <label class="control-label">{{::'departmentConfig.filter.label.department' | translate}}:</label>
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter">
+        <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="(!searchFilter.isClear ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate">
+            <form class="form-horizontal info-wrapper flex-row" role="form" data-aplana-submit-valid="submitSearch()" novalidate>
+                <div class="flex-fill flex-row" style="margin-right: 60px;">
+                    <div style="flex: 5;">
+                        <div class="form-group">
+                            <div style="flex: 0 145px;">
+                                <label class="control-label">
+                                    {{::'departmentConfig.filter.label.department' | translate}}:</label>
+                            </div>
+                            <div class="flex-fill" style="margin-left: 10px;"
+                                 data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initAvailableTBSelect(searchFilter.params)"
+                                 data-ng-model="searchFilter.params.department">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div style="flex: 0 145px;">
+                                <label class="control-label">
+                                    {{::'departmentConfig.filter.label.relevance' | translate}}:</label>
+                            </div>
+                            <div class="flex-fill" style="margin-left: 10px;"
+                                 data-ng-controller="SelectFromArrayCtrl"
+                                 data-ui-select2="selectFromArray.options"
+                                 data-ng-change="onRelevanceChange()"
+                                 data-ng-model="searchFilter.params.relevance"
+                                 data-ng-init="init([APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.DATE, APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL])">
+                            </div>
+                            <div style="flex: 0 130px; margin-left: 10px;">
+                                <div data-aplana-datepicker
+                                     data-ng-disabled="relevanceDateDisabled"
+                                     data-ng-model="searchFilter.params.relevanceDate"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex: 2; margin-left: 10px;">
+                        <div class="form-group">
+                            <div style="flex: 0 50px;">
+                                <label class="control-label">
+                                    {{::'departmentConfig.filter.label.kpp' | translate}}:</label>
+                            </div>
+                            <div class="flex-fill" style="margin-left: 10px;">
+                                <div data-aplana-field>
+                                    <input class="form-control"
+                                           data-ng-model="searchFilter.params.kpp" type="text"
+                                           maxlength="9"
+                                           data-ng-pattern="patterns.number"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"/>
+                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex: 2; margin-left: 10px;">
+                        <div class="form-group">
+                            <div style="flex: 0 50px;">
+                                <label class="control-label">
+                                    {{::'departmentConfig.filter.label.oktmo' | translate}}:</label>
+                            </div>
+                            <div class="flex-fill" style="margin-left: 10px;">
+                                <div data-aplana-field>
+                                    <input class="form-control"
+                                           data-ng-model="searchFilter.params.oktmo" type="text"
+                                           maxlength="11"
+                                           data-ng-pattern="patterns.number"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"/>
+                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex: 2; margin-left: 10px;">
+                        <div class="form-group">
+                            <div style="flex: 0 50px;">
+                                <label class="control-label">
+                                    {{::'departmentConfig.filter.label.taxOrganCode' | translate}}:</label>
+                            </div>
+                            <div class="flex-fill" style="margin-left: 10px;">
+                                <div data-aplana-field>
+                                    <input class="form-control"
+                                           maxlength="4"
+                                           data-ng-pattern="patterns.number"
+                                           data-ng-model="searchFilter.params.taxOrganCode" type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"/>
+                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div data-ng-controller="SelectDepartmentCtrl"
-                     data-ui-select2="departmentsSelect.options"
-                     data-ng-init="initAvailableTBSelect()"
-                     data-ng-model="searchFilter.params.department"
-                     class="span2"></div>
-                <div class="span1">
-                    <label class="control-label">{{::'departmentConfig.filter.label.period' | translate}}:</label>
-                </div>
-                <div data-ng-controller="SelectPeriodCtrl"
-                     data-ui-select2="periodSelect.options"
-                     data-ng-init="initEmptySelect()"
-                     data-ng-model="searchFilter.params.period"
-                     class="span2"></div>
-                <div class="span1">
+                <div class="vertical-btn-group" style="flex: 0 0 100px; padding-left: 20px">
+                    <!--Кнопка Найти-->
+                    <button type="submit"
+                            class="btn btn-default"
+                            id="searchButton">
+                        <span data-translate-once="common.button.search"></span>
+                    </button>
+                    <!--Кнопка Сбросить-->
                     <button type="button"
                             class="btn btn-default"
-                            data-ng-click="refreshGrid(1)"
-                            data-ng-disabled="disableSearchButton">
-                        <span data-translate-once="departmentConfig.filter.btn.search"></span>
+                            id="clearButton"
+                            data-ng-click="resetFilter()">
+                        <span data-translate-once="common.button.clear"></span>
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>

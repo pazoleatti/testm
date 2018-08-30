@@ -288,7 +288,7 @@ public class RefBookSimpleDataProviderHelper {
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteRecordVersions(refBook.getTableName(), Arrays.asList(result.getRecordId()), false);
+                refBookDao.deleteRecordVersions(refBook.getTableName(), Arrays.asList(result.getRecordId()), refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
             }
         }
         return true;

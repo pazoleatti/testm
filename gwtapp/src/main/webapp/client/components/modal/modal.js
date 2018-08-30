@@ -305,6 +305,9 @@ angular.module('aplana.modal', ['aplana.utils'])
                         templateAndResolvePromise.then(function resolveSuccess(tplAndVars) {
 
                             var modalScope = (modalOptions.scope || $rootScope).$new();
+                            modalInstance.updateTitle = function (title) {
+                                modalScope.title = title;
+                            };
                             modalScope.$close = modalInstance.close;
                             modalScope.$dismiss = modalInstance.dismiss;
                             modalScope.title = modalOptions.title;

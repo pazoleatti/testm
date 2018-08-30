@@ -21,12 +21,8 @@ import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.*
-
-import java.text.DecimalFormat
 
 new Report6Ndfl(this).run()
 
@@ -202,12 +198,6 @@ class Report6Ndfl extends AbstractScriptClass {
     // Признак лица, подписавшего документ
     final long REF_BOOK_MARK_SIGNATORY_CODE_ID = RefBook.Id.MARK_SIGNATORY_CODE.id
 
-    // Настройки подразделений по НДФЛ
-    final long REF_BOOK_NDFL_ID = RefBook.Id.NDFL.id
-
-    // Настройки подразделений по НДФЛ (таблица)
-    final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
-
     final long REF_BOOK_OKTMO_ID = 96
     final long REPORT_PERIOD_TYPE_ID = 8
 
@@ -219,13 +209,7 @@ class Report6Ndfl extends AbstractScriptClass {
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
 
-    // значение подразделения из справочника
-    Map<String, RefBookValue> departmentParam = null
-
-    // Кэш подразделений из справочника
-    Map<Integer, Map<String, RefBookValue>> departmentCache = [:]
-
-    Map<Long, List<Map<String, RefBookValue>>> departmentParamTableListCache = [:]
+    Map<Integer, List<Map<String, RefBookValue>>> departmentConfigsCache = [:]
 
     // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
@@ -253,9 +237,7 @@ class Report6Ndfl extends AbstractScriptClass {
         def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
         // Получим код НО пром из справочника "Общие параметры"
         def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
-
-        def departmentParam = getDepartmentParam(declarationData.departmentId)
-        def departmentParamIncomeRow = getDepartmentParamDetails(declarationData.kpp, declarationData.oktmo)
+        def departmentParamIncomeRow = getDepartmentConfigByKppAndOktmo(declarationData.kpp, declarationData.oktmo)
 
         // Код периода
         def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
@@ -781,8 +763,7 @@ class Report6Ndfl extends AbstractScriptClass {
 
     List<PairKppOktmo> getPairKppOktmoList() {
         List<PairKppOktmo> pairKppOktmoList = []
-        departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod, false)
-        String depName = departmentService.get((Integer) departmentParam.DEPARTMENT_ID.value).name
+        String depName = department.name
         def reportPeriod = departmentReportPeriod.reportPeriod
         def otchetGod = reportPeriod.taxPeriod.year
         if (departmentReportPeriod.correctionDate != null) {
@@ -853,20 +834,15 @@ class Report6Ndfl extends AbstractScriptClass {
             // Поиск дочерних подразделений. Поскольку могут существовать пары КПП+ОКТМО в ref_book_ndfl_detail ссылающиеся
             // только на обособленные подразделения тербанка
             def referencesOktmoList = []
-            Map<String, RefBookValue> departmentParam
-            List<Map<String, RefBookValue>> departmentParamTableList = []
-            departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod, false)
-            if (departmentParam != null) {
-                departmentParamTableList.addAll(getDepartmentParamTableList((Long) departmentParam?.id.value, departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod, false))
-                referencesOktmoList.addAll(departmentParamTableList.OKTMO?.value)
-            }
+            List<Map<String, RefBookValue>> departmentConfigs = getDepartmentConfigs()
+            referencesOktmoList.addAll(departmentConfigs.OKTMO?.value)
             referencesOktmoList.removeAll([null])
             if (referencesOktmoList.isEmpty()) {
                 logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", DeclarationType.NDFL_6_NAME, depName, "$otchetGod ${reportPeriod.name}")
                 return
             }
             Map<Long, Map<String, RefBookValue>> oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
-            departmentParamTableList.each { Map<String, RefBookValue> dep ->
+            departmentConfigs.each { Map<String, RefBookValue> dep ->
                 ScriptUtils.checkInterrupted()
                 if (dep.OKTMO?.value != null) {
                     Map<String, RefBookValue> oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
@@ -912,8 +888,7 @@ class Report6Ndfl extends AbstractScriptClass {
         def reportPeriod = departmentReportPeriod.reportPeriod
         def otchetGod = reportPeriod.taxPeriod.year
         String strCorrPeriod = getCorrectionDateExpression(departmentReportPeriod)
-        departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod, false)
-        String depName = departmentService.get((Integer) departmentParam.DEPARTMENT_ID.value).name
+        String depName = department.name
         // Список физлиц для каждой пары КПП и ОКТМО
         Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = [:]
 
@@ -1074,46 +1049,17 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     // Получить список детали подразделения из справочника для некорректировочного периода
-    List<Map<String, RefBookValue>> getDepartmentParamTableList(Long departmentParamId, Integer departmentId, ReportPeriod reportPeriod, boolean throwIfEmpty) {
-        if (!departmentParamTableListCache.containsKey(departmentParamId)) {
-            String filter = "REF_BOOK_NDFL_ID = $departmentParamId".toString()
-            departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(reportPeriod.endDate, null, filter, null)
+    List<Map<String, RefBookValue>> getDepartmentConfigs() {
+        def throwIfEmpty = false
+        if (!departmentConfigsCache.containsKey(department.id)) {
+            String filter = "DEPARTMENT_ID = $department.id".toString()
+            departmentParamTableList = getProvider(RefBook.Id.NDFL_DETAIL.id).getRecords(departmentReportPeriod.reportPeriod.endDate, null, filter, null)
             if ((departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) && throwIfEmpty) {
-                departmentParamException(departmentId, reportPeriod)
+                departmentParamException(department.id, departmentReportPeriod.reportPeriod)
             }
-            departmentParamTableListCache.put(departmentParamId, departmentParamTableList)
+            departmentConfigsCache.put(department.id, departmentParamTableList)
         }
-        return departmentParamTableListCache.get(departmentParamId)
-    }
-
-    Map<String, RefBookValue> getDepartmentParam(Integer departmentId, ReportPeriod reportPeriod, boolean throwIfEmpty) {
-        if (!departmentCache.containsKey(departmentId)) {
-            PagingResult<Map<String, RefBookValue>> departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(reportPeriod.endDate, null, "DEPARTMENT_ID = $departmentId", null)
-            if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-                if (throwIfEmpty) {
-                    departmentParamException(departmentId, reportPeriod)
-                } else {
-                    return null
-                }
-            }
-            departmentCache.put(departmentId, departmentParamList?.get(departmentParamList.size() - 1))
-        }
-        return departmentCache.get(departmentId)
-    }
-
-    /**
-     * Получить настройки подразделения
-     * @return
-     */
-    def getDepartmentParam(Integer departmentId) {
-        if (departmentParam == null) {
-            PagingResult<Map<String, RefBookValue>> departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(reportPeriod.endDate, null, "DEPARTMENT_ID = $departmentId".toString(), null)
-            if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-                departmentParamException(departmentId, reportPeriod)
-            }
-            departmentParam = departmentParamList?.get(departmentParamList.size() - 1)
-        }
-        return departmentParam
+        return departmentConfigsCache.get(department.id)
     }
 
     /**
@@ -1122,18 +1068,9 @@ class Report6Ndfl extends AbstractScriptClass {
      * @param reportPeriodId
      * @return
      */
-    Map<String, RefBookValue> getDepartmentParamDetails(String kpp, String oktmo) {
-        List<Map<String, RefBookValue>> departmentParamRowList = []
-        PagingResult<Map<String, RefBookValue>> oktmoReferenceList = getProvider(REF_BOOK_OKTMO_ID).getRecords(reportPeriod.endDate, null, "CODE = '$oktmo'".toString(), null)
-        Long oktmoReference = (Long) oktmoReferenceList.get(oktmoReferenceList.size() - 1).id.value
-
-        PagingResult<Map<String, RefBookValue>> departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(reportPeriod.endDate, null, "DEPARTMENT_ID = ${declarationData.departmentId}".toString(), null)
-        if (departmentParamList != null && departmentParamList.size() > 0) {
-            Map<String, RefBookValue> departmentParamRow = departmentParamList.get(0)
-            if (departmentParamRow != null) {
-                departmentParamRowList.addAll(getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(reportPeriod.endDate, null, "REF_BOOK_NDFL_ID = ${departmentParamRow.id} and OKTMO = $oktmoReference AND KPP = '$kpp'".toString(), null))
-            }
-        }
+    Map<String, RefBookValue> getDepartmentConfigByKppAndOktmo(String kpp, String oktmo) {
+        String filter = "DEPARTMENT_ID = ${department.id} and OKTMO.CODE = '$oktmo' AND KPP = '$kpp'".toString()
+        List<Map<String, RefBookValue>> departmentParamRowList = getProvider(RefBook.Id.NDFL_DETAIL.id).getRecords(reportPeriod.endDate, null, filter, null)
 
         if (departmentParamRowList == null || departmentParamRowList.isEmpty()) {
             departmentParamException(declarationData.departmentId, reportPeriod)

@@ -345,7 +345,7 @@
          */
         .filter('codeNameFormatter', function () {
             return function (record) {
-                return record ? record.code + ": " + record.name : "";
+                return record ? "(" + record.code + ") " + record.name : "";
             };
         })
 
@@ -392,6 +392,15 @@
                     return APP_CONSTANTS.DATE_ZERO.AS_STRING;
                 }
                 return $filter('dateFormatter')(value);
+            };
+        }])
+
+        /**
+         * @description Возвращяет прочерк если значение не задано
+         */
+        .filter('dashIfEmptyFormatter', ['$filter', function ($filter) {
+            return function (value, filterName) {
+                return value ? $filter(filterName)(value) : '-';
             };
         }])
     ;

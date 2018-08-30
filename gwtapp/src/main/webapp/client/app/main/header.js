@@ -51,7 +51,7 @@
                         });
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
+                            href: $state.href('departmentConfig')
                         });
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.declarationTypeAssignment'),

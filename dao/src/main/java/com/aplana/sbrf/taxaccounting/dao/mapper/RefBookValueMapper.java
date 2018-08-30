@@ -33,6 +33,9 @@ public class RefBookValueMapper extends RefBookAbstractValueMapper {
     protected Map<String, RefBookValue> createResult(ResultSet rs) throws SQLException {
         Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
         result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS)));
+        if (SqlUtils.isExistColumn(rs, RefBook.RECORD_SORT_ALIAS)) {
+            result.put(RefBook.RECORD_SORT_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.RECORD_SORT_ALIAS)));
+        }
         if (this.refBook.isVersioned() && this.refBook.getId() != RefBook.Id.DEPARTMENT.getId()) {
             result.put(RefBook.BUSINESS_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.BUSINESS_ID_ALIAS)));
         }

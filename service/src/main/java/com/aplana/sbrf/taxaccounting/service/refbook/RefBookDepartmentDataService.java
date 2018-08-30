@@ -12,6 +12,15 @@ import java.util.List;
  * Сервис для работы со справочником Подразделения
  */
 public interface RefBookDepartmentDataService {
+
+    /**
+     * Получение значения справочника по идентификатору
+     *
+     * @param id идентификатор подразделения
+     * @return значение справочника
+     */
+    RefBookDepartment fetch(Integer id);
+
     /**
      * Получение подразделения пользователя
      *

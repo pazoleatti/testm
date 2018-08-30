@@ -4,10 +4,47 @@
     </div>
     <div class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto">
         <div id="departmentConfigTop">
+            <!--Выгрузка-->
+            <div style="float: right; padding-top: 10px">
+                <img src='resources/img/unload-white-16.png'>
+                <span data-ng-click="exportDepartmentConfig()">{{'departmentConfig.export.excel' | translate}}</span>
+            </div>
+            <!--Фильтр-->
             <span data-ng-include="'client/app/taxes/ndfl/departmentConfig/departmentConfigFilter.html'"></span>
-        </div>
-        <div align="right">
-            {{versionLabelInfo}}
+            <div class="button_panel" style="padding: 10px 12px 0;">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Создать-->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="createDepartmentConfig()">
+                            <span data-translate-once="button.create"></span>
+                        </button>
+                    </span>
+                    <!--Открыть-->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="openDepartmentConfig()"
+                                data-ng-disabled="departmentConfigGrid.value.length != 1">
+                            <span data-translate-once="button.open"></span>
+                        </button>
+                    </span>
+                    <!--Удалить-->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="deleteDepartmentConfig()"
+                                data-ng-disabled="departmentConfigGrid.value.length === 0">
+                            <span data-translate-once="button.delete"></span>
+                        </button>
+                    </span>
+                    <!--Загрузить-->
+                    <span style="float: right;">
+                        <button type="file" class="btn btn-default" data-ng-click="importDepartmentConfig($file)"
+                                data-ng-disabled="true">
+                            <span data-translate-once="departmentConfig.import.excel"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="container-grid box-shadow-block flex-fill flex-column">
             <div class="flex-grid flex-fill"

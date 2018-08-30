@@ -273,7 +273,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                             // для настроек подразделений только удаляем ненужные фиктивные версии (как это делается в crossVersionsProcessing)
                             for (CheckCrossVersionsResult checkCrossVersionsResult : checkCrossVersionsResults) {
                                 if (checkCrossVersionsResult.getResult() == CrossResult.NEED_DELETE) {
-                                    refBookDao.deleteRecordVersions(getRefBook().getTableName(), singletonList(checkCrossVersionsResult.getRecordId()), false);
+                                    refBookDao.deleteRecordVersions(getRefBook().getTableName(), singletonList(checkCrossVersionsResult.getRecordId()), refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
                                 }
                             }
                         }
@@ -478,7 +478,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                     if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                         //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
                         Long previousVersionEnd = dao.findRecord(getRefBook(), recordId, versionFrom);
-                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), Arrays.asList(previousVersionEnd), false);
+                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), Arrays.asList(previousVersionEnd), refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
                     }
 
                     boolean delayedUpdate = false;
@@ -508,14 +508,14 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                                 refBookDao.updateVersionRelevancePeriod(getRefBook().getTableName(), relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                             } else {
                                 //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
-                                refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
+                                refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
                             }
                         }
                     }
 
                     if (!relatedVersions.isEmpty() && versionTo == null) {
                         //Удаляем фиктивную запись - теперь у версии нет конца
-                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
+                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
                     }
 
                     if (delayedUpdate) {
@@ -670,10 +670,10 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             //Ищем все ссылки на запись справочника без учета периода
             //Deprecated: helper.checkUsages(refBook, uniqueRecordIds, null, null, null, logger, "Удаление невозможно, обнаружено использование элемента справочника!");
             if (refBook.isVersioned()) {
-                List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
+                List<Long> fakeVersionIds = dao.getRelatedVersions(getRefBook(), uniqueRecordIds);
                 uniqueRecordIds.addAll(fakeVersionIds);
             }
-            refBookDao.deleteRecordVersions(getRefBook().getTableName(), uniqueRecordIds, false);
+            refBookDao.deleteRecordVersions(getRefBook().getTableName(), uniqueRecordIds, refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);

@@ -673,25 +673,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         ConfigurationParamModel model = configurationService.fetchAllByDepartment(department.getId(), logger.getTaUserInfo());
         if (!model.isEmpty())
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
-
-        //11 точка запроса
-        Map<Integer, Map<String, Object>> records =
-                refBookDepartmentDao.isVersionUsedInRefBooks(
-                        Arrays.asList(RefBook.Id.NDFL.getId()),
-                        Arrays.asList((long) department.getId())
-                );
-        for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()) {
-            TaxType taxType = TaxType.NDFL;
-            Date startDate = (Date) entry.getValue().get(RefBookDepartmentDao.VERSION_START_ALIAS);
-            String rpName =
-                    refBookDepartmentDao.getReportPeriodNameByDate(taxType, startDate);
-            logger.error(
-                    DFT_RELATION,
-                    departmentService.getDepartment(department.getId()).getName(),
-                    taxType.getName(),
-                    rpName,
-                    SDF_YYYY.get().format(startDate));
-        }
     }
 
     private void deleteDRPs(int depId) {

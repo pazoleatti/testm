@@ -24,9 +24,6 @@
          */
             .controller('CommonFilterCtrl', ['$scope', '$webStorage', '$rootScope',
                 function ($scope, $webStorage, $rootScope) {
-                    // Фильтр по умолчанию свернут
-                    $scope.searchFilter.hideExtendedFilter = true;
-
                     // Триггер показа инфозаписей "Сброс"
                     $scope.searchFilter.isClear = false;
 
@@ -85,7 +82,9 @@
 
                     // Если следует выводить надпись "сброс", то isClear становится true
                     $scope.updateHideExtended = function () {
-                        $scope.searchFilter.hideExtendedFilter = !$scope.searchFilter.isClear;
+                        if (angular.isUndefined($scope.searchFilter.hideExtendedFilter)) {
+                            $scope.searchFilter.hideExtendedFilter = !$scope.searchFilter.isClear;
+                        }
                     };
 
                     $scope.fillAjaxFilter = function () {

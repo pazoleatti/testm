@@ -81,7 +81,10 @@
                 INCOME_CODE: 922,
                 PERSON_ADDRESS: 901,
                 TAXPAYER_STATUS: 903,
-                PERIOD_CODE: 8
+                PERIOD_CODE: 8,
+                PRESENT_PLACE: 924,
+                SIGNATORY_MARK: 35,
+                REORGANIZATION: 928
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -253,7 +256,6 @@
             },
             EVENTS: {
                 DEPARTMENT_SELECTED: "DEPARTMENT_SELECTED",
-                USER_TB_SELECT: "USER_TB_SELECT",
                 LAST_PERIOD_SELECT: "LAST_PERIOD_SELECT",
                 DEPARTMENT_AND_PERIOD_SELECTED: "DEPARTMENT_AND_PERIOD_SELECTED"
             },
@@ -271,6 +273,10 @@
                 CURRENT_TB: {id: 1, name: "Данные текущего ТБ", enumName: "CURRENT_TB"},
                 OTHERS_TB: {id: 2, name: "Данные других ТБ", enumName: "OTHERS_TB"},
                 NONE_TB: {id: 3, name: "Данные, не указанные ни для одного ТБ", enumName: "NONE_TB"}
+            },
+            DEPARTMENT_CONFIG_RELEVANCE_SELECT: {
+                DATE: {id: 1, name: "На дату"},
+                ALL: {id: 2, name: "Все настройки"}
             }
         });
 }());

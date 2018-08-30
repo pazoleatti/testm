@@ -419,21 +419,6 @@ public interface DeclarationService {
     List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName);
 
     /**
-     * Найти id деклараций для периода, вида декларации, вида подразделения, статусу
-     *
-     * @param reportPeriodId
-     * @param ndflId                       id подразделения в шапке справочника подразделений
-     * @param declarationTypeId            вид декларации
-     * @param departmentType               вид подразделения
-     * @param departmentReportPeriodStatus статус
-     * @param declarationState             статус декларации
-     * @return
-     */
-    List<Integer> findDeclarationDataIdByTypeStatusReportPeriod(Integer reportPeriodId, Long ndflId,
-                                                                Integer declarationTypeId, Integer departmentType,
-                                                                Boolean departmentReportPeriodStatus, Integer declarationState);
-
-    /**
      * Найти все формы всех подразделений в активном периоде по виду и периоду
      *
      * @param declarationTypeId

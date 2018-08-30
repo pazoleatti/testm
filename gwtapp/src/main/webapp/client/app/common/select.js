@@ -514,81 +514,38 @@
                         }
                     });
                 };
-                /**
-                 * Инициализировать список с загрузкой действующих доступных ТБ для создания отчётности через ajax
-                 * @param userTBDepartment Объект из scope, по которому проставляется ТБ пользователя
-                 */
-                $scope.initActiveAvailableTBSelect = function (userTBDepartment) {
-                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true);
-                    RefBookValuesResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
-                        projection: "activeAvailableTB"
-                    }, function (availableTBs) {
-                        $scope.departmentsSelect.options.data.results = availableTBs;
-                        // получаем тербанк пользователя
-                        DepartmentResource.query({
-                                departmentId: $rootScope.user.department.id,
-                                projection: 'fetchParentTB'
-                            }, function (userTB) {
-                                // находим в списке тербанков тербанк пользователя и инициируем событие для выделения этого тербанка в выпадающем списке
-                                angular.forEach(availableTBs, function (department) {
-                                    if (userTB.id === department.id) {
-                                        userTBDepartment.department = department;
-                                    }
-                                });
-                            }
-                        );
-                    });
-                };
 
                 /**
-                 * @description Инициализировать список с загрузкой действующих доступных ТБ для фильтрации настроек подразделений
+                 * @description Инициализировать список с загрузкой действующих доступных ТБ
                  */
-                $scope.initAvailableTBSelect = function () {
-                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "fullNameFormatter");
-                    RefBookValuesResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
-                        projection: "activeAvailableTB"
-                    }, function (availableTBs) {
-                        $scope.departmentsSelect.options.data.results = availableTBs;
-                        // получаем тербанк пользователя
-                        DepartmentResource.query({
-                                departmentId: $rootScope.user.department.id,
-                                projection: 'fetchParentTB'
-                            }, function (userTB) {
-                                // находим в списке тербанков тербанк пользователя и инициируем событие для выделения этого тербанка в выпадающем списке
-                                angular.forEach(availableTBs, function (department) {
-                                    if (userTB.id === department.id) {
-                                        $scope.$emit(APP_CONSTANTS.EVENTS.USER_TB_SELECT, department);
-                                    }
-                                });
-                            }
-                        );
-                    });
-                };
-
-                /**
-                 * @description Формирует список подразделений доступных для ведения периодов
-                 */
-                $scope.initAllAvailableTBForPeriodManagementSelect = function (departmentModel) {
+                $scope.initAvailableTBSelect = function (departmentModel) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(false, true);
-                    RefBookValuesResource.querySource({
+                    loadActiveAvailableTBs(departmentModel);
+                };
+
+                function loadActiveAvailableTBs(departmentModel) {
+                    RefBookValuesResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
                         projection: "activeAvailableTB"
                     }, function (availableTBs) {
                         $scope.departmentsSelect.options.data.results = availableTBs;
-                        // значение по-умолчанию будет подразделение пользователя
-                        var defaultDepartment = $scope.user.terBank && _.find(availableTBs, function (department) {
-                            return department.id === $scope.user.terBank.id;
-                        });
-                        // если подразделение пользователя не найдено, то первое попавшееся
-                        if (!defaultDepartment) {
-                            defaultDepartment = availableTBs[0];
+                        if (departmentModel) {
+                            departmentModel.department = getUserTB(availableTBs);
                         }
-                        departmentModel.department = defaultDepartment;
                     });
-                };
+                }
 
+                function getUserTB(departments) {
+                    // значение по-умолчанию будет подразделение пользователя
+                    var defaultDepartment = $scope.user.terBank && _.find(departments, function (department) {
+                        return department.id === $scope.user.terBank.id;
+                    });
+                    // если подразделение пользователя не найдено, то первое попавшееся
+                    if (!defaultDepartment) {
+                        defaultDepartment = departments[0];
+                    }
+                    return defaultDepartment;
+                }
             }
         ])
 
@@ -698,11 +655,21 @@
                 $scope.refBookConfig = {};
                 // ОКТМО
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO] = {
+                    sort: {
+                        property: "CODE",
+                        direction: "asc"
+                    },
                     filter: {
                         columns: ["NAME", "CODE"]
                     },
                     formatter: "codeNameFormatter"
                 };
+                // Коды места представления расчета
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PRESENT_PLACE] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // ОКТМО
+                $scope.refBookConfig[APP_CONSTANTS.SIGNATORY_MARK] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // ОКТМО
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.REORGANIZATION] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
                     filter: {
