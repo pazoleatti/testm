@@ -1296,4 +1296,14 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
 			   from ref_book_oktmo where status=0 and code='92626101') and kpp='164645006' and status=2);
         </sql>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5415 Реализовать изменения в алгоритме идентификации по хранимым процедурам-->
+    <changeSet id="3.1-akorobko-60" author="akorobko">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body8.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
