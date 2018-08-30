@@ -1271,4 +1271,20 @@
             <where>declaration_type_id = 103</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-2158 Реализовать работу с обновленными настройками подразделений-->
+    <changeSet id="3.1-dnovikov-17" author="dnovikov">
+        <sql>
+            alter table ref_book_ndfL_detail drop column OBLIGATION;
+        </sql>
+        <sql>
+            alter table ref_book_ndfL_detail drop column OKVED;
+        </sql>
+        <sql>
+            alter table ref_book_ndfL_detail drop column REGION;
+        </sql>
+        <sql>
+            alter table ref_book_ndfL_detail drop column TYPE;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
