@@ -547,7 +547,9 @@ public class RefBookSimpleQueryBuilderComponent {
     @Deprecated
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute, List<String> columns,
                                                    String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersion) {
-        ps.appendQuery("SELECT /*+ FIRST_ROWS */* FROM (");
+        ps.appendQuery("SELECT ")
+                .appendQuery(refBook.getId() != RefBook.Id.NDFL_DETAIL.getId() ? "/*+ FIRST_ROWS */" : "")
+                .appendQuery(" * FROM (");
         if (onlyId) {
             ps.appendQuery("SELECT ")
                     .appendQuery(RefBook.RECORD_ID_ALIAS)
