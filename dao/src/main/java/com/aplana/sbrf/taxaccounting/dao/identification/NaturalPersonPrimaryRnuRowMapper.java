@@ -5,11 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.identification.Address;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
-import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -66,6 +64,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
             person.getPersonDocumentList().add(personDocument);
+            person.setPersonDocument(personDocument);
         }
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));

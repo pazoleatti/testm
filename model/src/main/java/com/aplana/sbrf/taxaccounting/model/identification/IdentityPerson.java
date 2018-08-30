@@ -31,8 +31,6 @@ public interface IdentityPerson {
 
     Address getAddress();
 
-    Integer getEmployee();
-
     //поле для хранения веса записи
     Double getWeight();
 

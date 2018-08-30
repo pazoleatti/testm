@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,30 +34,25 @@ public interface RefBookPersonService {
     List<BaseWeightCalculator> getBaseCalculateList();
 
 
-    /**
-     * @param version
-     */
-    void fillRecordVersions(Date version);
+    void fillRecordVersions();
 
     /**
      * Найти всех ФЛ по определяющим параметрам
      *
      * @param declarationDataId идентификатор НФ
      * @param asnuId            идентификатор АСНУ загрузившей данные
-     * @param version           версия записи
      * @return
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
      *
      * @param declarationDataId
      * @param asnuId            идентификатор АСНУ загрузившей данные
-     * @param version           версия записи
      * @return
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти данные о ФЛ в ПНФ

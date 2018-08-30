@@ -75,6 +75,11 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     private List<PersonIdentifier> personIdentityList;
 
     /**
+     * ДУЛ включаемый в отчетность
+     */
+    private PersonDocument reportDoc;
+
+    /**
      * Список документов ФЛ
      */
     private List<PersonDocument> personDocumentList;
@@ -88,8 +93,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
      * Адрес фл
      */
     private Address address;
-
-    private Integer employee;
 
     /**
      * Источник (АСНУ)
@@ -113,6 +116,8 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
      * Флаг указывающий на то что запись в справочнике не надо обновлять
      */
     private boolean needUpdate = true;
+
+    private Long oldId;
 
     public NaturalPerson() {
         this.personIdentityList = new ArrayList<>();
@@ -217,15 +222,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
         this.address = address;
     }
 
-    public Integer getEmployee() {
-        return employee;
-    }
-
-
-    public void setEmployee(Integer employee) {
-        this.employee = employee;
-    }
-
     public List<PersonIdentifier> getPersonIdentityList() {
         return personIdentityList;
     }
@@ -275,30 +271,12 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
         return null;
     }
 
-    /**
-     * Получить документ ФЛ, данный метод используется при работе с ФЛ из первичных форм, так как там может быть не более одного документа
-     *
-     * @return докумен ФЛ
-     */
-    public PersonDocument getPersonDocument() {
-        if (personDocumentList != null && !personDocumentList.isEmpty()) {
-            return personDocumentList.get(0);
-        }
-        return null;
+    public void setPersonDocument(PersonDocument personDocument) {
+        this.reportDoc = personDocument;
     }
 
-    /**
-     * Возращяет главный ({@link PersonDocument#incRep} = 1) документ ФЛ
-     */
     public PersonDocument getMajorDocument() {
-        if (personDocumentList != null && !personDocumentList.isEmpty()) {
-            for (PersonDocument document : personDocumentList) {
-                if (document.getIncRep() == 1) {
-                    return document;
-                }
-            }
-        }
-        return null;
+        return reportDoc;
     }
 
     /**
@@ -350,9 +328,15 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
                 .append("personIdentityList", personIdentityList)
                 .append("personDocumentList", personDocumentList)
                 .append("address", address)
-                .append("employee", employee)
                 .append("weight", weight)
                 .toString();
     }
 
+    public Long getOldId() {
+        return oldId;
+    }
+
+    public void setOldId(Long oldId) {
+        this.oldId = oldId;
+    }
 }

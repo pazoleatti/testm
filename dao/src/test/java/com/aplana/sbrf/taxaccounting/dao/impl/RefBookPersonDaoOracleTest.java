@@ -91,17 +91,17 @@ public class RefBookPersonDaoOracleTest {
 
         Date version = new Date();
 
-        refBookPersonDao.fillRecordVersions(version);
+        refBookPersonDao.fillRecordVersions();
 
         int size = 0;
 
-        Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
+        Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, new NaturalPersonRefbookHandler());
 
         size += updateRecords.size();
 
         System.out.println("   updateRecords=" + updateRecords);
 
-        Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
+        Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, 1L, new NaturalPersonRefbookHandler());
 
         size += checkRecords.size();
 
