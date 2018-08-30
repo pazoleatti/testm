@@ -132,7 +132,7 @@
                                        data-ng-model="record.kpp"
                                        maxlength="9"
                                        data-ng-pattern="patterns.number"
-                                       data-ui-validate="{kppValidator : 'isKppValid($value)'}"
+                                       data-ui-validate="{kppValidator : 'isKppValid($value)', length: '!$value || $value.length === 9'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        data-ng-required="true"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
@@ -142,7 +142,10 @@
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key="kppValidator">
-                                    {{::'departmentConfig.modal.field.kpp.validator' | translate}}
+                                    {{::'departmentConfig.modal.field.kpp.validation.digits' | translate}}
+                                </div>
+                                <div data-aplana-validator data-key="length">
+                                    {{::'common.validation.length' | translate:'{length: 9}'}}
                                 </div>
                             </div>
                         </div>
@@ -181,6 +184,7 @@
                                        data-ng-model="record.taxOrganCode"
                                        maxlength="4"
                                        data-ng-pattern="patterns.number"
+                                       data-ui-validate="{length: '!$value || $value.length === 4'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        data-ng-required="true"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
@@ -189,7 +193,9 @@
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
-                            </div>
+                                <div data-aplana-validator data-key="length">
+                                    {{::'common.validation.length' | translate:'{length: 4}'}}
+                                </div></div>
                         </div>
                     </div>
                 </div>
@@ -324,13 +330,16 @@
                                        data-ng-model="record.reorgKpp"
                                        maxlength="9"
                                        data-ng-pattern="patterns.number"
-                                       data-ui-validate="{kppValidator : 'isKppValid($value)'}"
+                                       data-ui-validate="{kppValidator : 'isKppValid($value)', length: '!$value || $value.length === 9'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key="kppValidator">
-                                    {{::'departmentConfig.modal.field.kpp.validator' | translate}}
+                                    {{::'departmentConfig.modal.field.kpp.validation.digits' | translate}}
+                                </div>
+                                <div data-aplana-validator data-key="length">
+                                    {{::'common.validation.length' | translate:'{length: 9}'}}
                                 </div>
                             </div>
                         </div>
@@ -349,9 +358,13 @@
                                        data-ng-model="record.reorgInn"
                                        maxlength="9"
                                        data-ng-pattern="patterns.number"
+                                       data-ui-validate="{kppValidator : 'isKppValid($value)', length: '!$value || $value.length === 9'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
                                     translate}}
+                                </div>
+                                <div data-aplana-validator data-key="length">
+                                    {{::'common.validation.length' | translate:'{length: 9}'}}
                                 </div>
                             </div>
                         </div>

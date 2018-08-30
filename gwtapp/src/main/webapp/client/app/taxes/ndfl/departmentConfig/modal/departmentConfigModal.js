@@ -23,7 +23,7 @@
                 // Валидация КПП полей
                 $scope.isKppValid = function ($value) {
                     var set = ["01", "02", "03", "05", "31", "32", "43", "45"];
-                    return !$value || $value.length >= 6 && set.indexOf($value.substring(4, 6)) !== -1
+                    return !$value || $value.length !== 9 || set.indexOf($value.substring(4, 6)) !== -1
                 };
                 // Валидация дат актуальности
                 $scope.isVersionDatesValid = function(dateFrom, dateTo) {

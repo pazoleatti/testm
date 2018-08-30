@@ -102,6 +102,7 @@
         "common.validation.interval.year": "Интервал периода поиска указан неверно!",
         "common.validation.year": "Значение поля \"Год\" должно соответствовать формату \"ХХХХ\"",
         "common.validation.dateInterval": "Значение поля должно входить в интервал дат от 01.01.1900 до 31.12.2099.",
+        "common.validation.length": "Значение должно состоять из {{length}} символов",
 
         "pager.firstPage": "Первая страница",
         "pager.prevPage": "Предыдущая страница",
@@ -591,7 +592,7 @@
         "departmentConfig.modal.field.reorgInn.label": "ИНН реорганизованной организации",
         "departmentConfig.dialog.delete.confirmMessage": "Вы подтверждаете удаление настройки подразделения",
 
-        "departmentConfig.modal.field.kpp.validator": "5-6 разряды КПП должны принимать одно из следующих значений: \"01\", \"02\", \"03\", \"31\", \"32\", \"43\", \"45\"",
+        "departmentConfig.modal.field.kpp.validation.digits": "5-6 разряды КПП должны принимать одно из следующих значений: \"01\", \"02\", \"03\", \"31\", \"32\", \"43\", \"45\"",
 
         "ndflFL.title.numberpp": "№ п/п\n Гр. 1",
         "ndflFL.title.inp": "ИНП\n Гр. 2",
