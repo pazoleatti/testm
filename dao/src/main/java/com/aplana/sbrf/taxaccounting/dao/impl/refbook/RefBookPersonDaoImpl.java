@@ -78,7 +78,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setBirthDate(rs.getDate("BIRTH_DATE"));
             result.setInn(rs.getString("INN"));
             result.setBirthPlace(rs.getString("BIRTH_PLACE"));
-            result.setEmployee(SqlUtils.getInteger(rs, "EMPLOYEE"));
             result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
 
             RefBookTaxpayerState taxpayerState = new RefBookTaxpayerState();
@@ -118,14 +117,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void fillRecordVersions(Date version) {
-        //long time = System.currentTimeMillis();
-        getJdbcTemplate().update("call person_pkg.FillRecordVersions(?)", version);
-        //System.out.println("fillRecordVersions (" + (System.currentTimeMillis() - time) + " ms)");
+    public void fillRecordVersions() {
+        getJdbcTemplate().update("call person_pkg.FillRecordVersions()");
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForUpd");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -136,7 +133,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForCheck");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC), new SqlParameter("p_asnu", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();

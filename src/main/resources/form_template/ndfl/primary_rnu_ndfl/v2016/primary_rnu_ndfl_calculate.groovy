@@ -4,6 +4,9 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.IdentityObject
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.Address
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent
@@ -14,28 +17,32 @@ import com.aplana.sbrf.taxaccounting.model.identification.Country
 import com.aplana.sbrf.taxaccounting.model.identification.DocType
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
-import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier
+import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
 import com.aplana.sbrf.taxaccounting.model.identification.RefBookObject
 import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
-import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo
+import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
-import com.aplana.sbrf.taxaccounting.script.service.*
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.PersonService
+import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService
+import com.aplana.sbrf.taxaccounting.script.service.RefBookService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
+import org.apache.commons.lang3.exception.ExceptionUtils
 
 import java.sql.SQLSyntaxErrorException
 
@@ -203,12 +210,12 @@ class Calculate extends AbstractScriptClass {
 
                     //Заполнени временной таблицы версий
                     time = System.currentTimeMillis();
-                    refBookPersonService.fillRecordVersions(getRefBookPersonVersionTo());
+                    refBookPersonService.fillRecordVersions();
                     logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time));
 
                     // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
                     time = System.currentTimeMillis();
-                    Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
+                    Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, createRefbookHandler());
                     logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     time = System.currentTimeMillis();
@@ -216,7 +223,7 @@ class Calculate extends AbstractScriptClass {
                     logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time));
 
                     time = System.currentTimeMillis();
-                    Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
+                    Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, createRefbookHandler());
                     logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     time = System.currentTimeMillis();
@@ -233,21 +240,6 @@ class Calculate extends AbstractScriptClass {
         })
         // Формирование pdf-отчета формы
         // declarationService.createPdfReport(logger, declarationData, userInfo)
-    }
-
-    Date getRefBookPersonVersionTo() {
-        if (refBookPersonVersionTo == null) {
-            Calendar localCalendar = Calendar.getInstance();
-            localCalendar.set(Calendar.MONTH, 0);
-            localCalendar.set(Calendar.DATE, 1);
-            localCalendar.set(Calendar.HOUR_OF_DAY, 0);
-            localCalendar.set(Calendar.MINUTE, 0);
-            localCalendar.set(Calendar.SECOND, 0);
-            localCalendar.set(Calendar.MILLISECOND, 0);
-            localCalendar.add(Calendar.YEAR, 100);
-            refBookPersonVersionTo = localCalendar.getTime();
-        }
-        return refBookPersonVersionTo;
     }
 
     // Вывод информации о количестве обработынных физлиц всего и уникальных
@@ -565,7 +557,7 @@ class Calculate extends AbstractScriptClass {
                     addressList.add(address);
                 }
 
-                PersonDocument personDocument = person.getPersonDocument();
+                PersonDocument personDocument = person.getMajorDocument();
                 if (personDocument != null && personDocument.docType != null) {
                     personDocument.documentNumber = performDocNumber(personDocument)
                     documentList.add(personDocument);
@@ -593,6 +585,8 @@ class Calculate extends AbstractScriptClass {
                 mapPersonDocumentAttr(personDocument)
             });
 
+            addReportDocsToPersons(documentList)
+
             //insert identifiers batch
             insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), identifierList, { PersonIdentifier personIdentifier ->
                 mapPersonIdentifierAttr(personIdentifier)
@@ -609,12 +603,15 @@ class Calculate extends AbstractScriptClass {
                 updatePrimaryToRefBookPersonReferences(entry.getValue());
             }
 
-            //Выводим информацию о созданных записях
             for (NaturalPerson person : insertPersonList) {
                 Long recordId = refBookService.getNumberValue(RefBook.Id.PERSON.id, person.getId(), "record_id").longValue()
-                String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", recordId, person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
-                logger.info(noticeMsg);
-                createCnt++;
+                person.setOldId(recordId)
+                Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(person)
+                refBookPersonValues.put("OLD_ID", new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+                getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, person.getId(), null, null, refBookPersonValues)
+                String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", recordId, person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""))
+                logger.info(noticeMsg)
+                createCnt++
             }
         }
 
@@ -750,21 +747,6 @@ class Calculate extends AbstractScriptClass {
                     updatePersonReferenceList.add(primaryPerson);
                     continue;
                 }
-                /*
-               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
-               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
-               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
-              */
-                if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
-                    Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
-                    refBookPerson.setVersion(getReportPeriodStartDate())
-                    fillSystemAliases(downgradePerson, refBookPerson);
-                    updatePersonReferenceList.add(primaryPerson);
-                    updatePersonList.add(downgradePerson);
-                    continue
-                } else {
-                    refBookPerson.setVersion(null)
-                }
 
                 //person
                 Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
@@ -791,7 +773,7 @@ class Calculate extends AbstractScriptClass {
                 }
 
                 //documents
-                PersonDocument primaryPersonDocument = primaryPerson.getPersonDocument();
+                PersonDocument primaryPersonDocument = primaryPerson.getMajorDocument();
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
                     PersonDocument personDocument = BaseWeightCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
@@ -1040,7 +1022,6 @@ class Calculate extends AbstractScriptClass {
         putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), null, attributeChangeListener);
         putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, null, attributeChangeListener);
         putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId(), null, attributeChangeListener);
-        putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), null, attributeChangeListener);
         putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), { Long val -> findCountryRecordId(val) }, attributeChangeListener);
         putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), { Long val -> findTaxpayerStatusById(val) }, attributeChangeListener);
         putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId, { Long val -> findAsnuCodeById(val) }, attributeChangeListener);
@@ -1075,10 +1056,10 @@ class Calculate extends AbstractScriptClass {
         putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate());
         putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
         putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId());
-        putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
         putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId);
+        putValue(values, "REPORT_DOC", RefBookAttributeType.REFERENCE, person.getMajorDocument()?.getId())
         return values;
     }
 
@@ -1406,5 +1387,29 @@ class Calculate extends AbstractScriptClass {
             }
             throw e;
         }
+    }
+
+    /**
+     * Для документов, включаемых в отчетность, добавляем взаимную ссылку в REF_BOOK_PERSON
+     */
+    void addReportDocsToPersons(List<PersonDocument> documents) {
+        documents.each { document ->
+            if (document.isIncludeReport() && document.naturalPerson) {
+                addDocToItsPerson(document)
+            }
+        }
+    }
+
+    void addDocToItsPerson(PersonDocument document) {
+        Long personId = document.naturalPerson.id
+        setPersonReportDoc(personId, document.id)
+    }
+
+    void setPersonReportDoc(Long personId, Long documentId) {
+        def personProvider = getProvider(RefBook.Id.PERSON.id)
+
+        Map<String, RefBookValue> personFields = personProvider.getRecordData(personId)
+        personFields.put('REPORT_DOC', new RefBookValue(RefBookAttributeType.NUMBER, documentId))
+        personProvider.updateRecordVersionWithoutLock(logger, personId, null, null, personFields)
     }
 }

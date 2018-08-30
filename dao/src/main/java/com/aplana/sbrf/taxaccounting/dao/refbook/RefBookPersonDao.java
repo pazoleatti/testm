@@ -29,10 +29,7 @@ public interface RefBookPersonDao {
      */
     void clearRnuNdflPerson(Long declarationDataId);
 
-    /**
-     * @param version
-     */
-    void fillRecordVersions(Date version);
+    void fillRecordVersions();
 
     /**
      * Найти всех ФЛ по определяющим параметрам
@@ -42,7 +39,7 @@ public interface RefBookPersonDao {
      * @param version           версия записи
      * @return
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
@@ -52,7 +49,7 @@ public interface RefBookPersonDao {
      * @param version           версия записи
      * @return
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти данные о ФЛ в ПНФ

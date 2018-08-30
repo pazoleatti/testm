@@ -30,8 +30,6 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     private RefBookCountry citizenship;
     //Место жительства
     private RefBookAddress address;
-    //Признак, показывающий, является ли ФЛ сотрудником Сбербанка
-    private Integer employee;
     //Система-источник: ссылка на справочник кодов АС НУ
     private RefBookAsnu source;
     //Старый идентификатор ФЛ
@@ -129,14 +127,6 @@ public class RefBookPerson extends RefBookVersioned<Long> {
 
     public void setAddress(RefBookAddress address) {
         this.address = address;
-    }
-
-    public Integer getEmployee() {
-        return employee;
-    }
-
-    public void setEmployee(Integer employee) {
-        this.employee = employee;
     }
 
     public RefBookAsnu getSource() {
