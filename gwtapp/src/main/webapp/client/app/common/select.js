@@ -666,9 +666,9 @@
                 };
                 // Коды места представления расчета
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PRESENT_PLACE] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
-                // ОКТМО
-                $scope.refBookConfig[APP_CONSTANTS.SIGNATORY_MARK] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
-                // ОКТМО
+                // Признак лица, подписавшего документ
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.SIGNATORY_MARK] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // Коды форм реорганизации (ликвидации) организации
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.REORGANIZATION] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
@@ -811,5 +811,22 @@
                     $scope.selectFromArray.options.data.results = values;
                 };
             }
-        ]);
+        ])
+
+        /**
+         * Контроллер для карточки реестра ФЛ
+         */
+        .controller('SelectIdDocController', ['$scope', 'GetSelectOption',
+            function ($scope, GetSelectOption) {
+                $scope.init = function(values, person) {
+                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, values, false, 'idDocFormatter');
+                    $scope.selectedDocs.options.data.results = values;
+                    angular.forEach(values, function(value) {
+                        if (value.id.value === person.mainDoc.id.value) {
+                            person.mainDoc = value
+                        }
+                    })
+                };
+            }])
+    ;
 }());

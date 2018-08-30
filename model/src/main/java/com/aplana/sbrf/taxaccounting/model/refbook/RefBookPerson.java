@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 /**
  * Физические лица
- *
- * @author dloshkarev
  */
 public class RefBookPerson extends RefBookVersioned<Long> {
     //Имя
@@ -15,11 +16,11 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     //Отчество
     private String middleName;
     //ИНН в РФ
-    private String inn;
+    private Permissive<String> inn;
     //ИНН в стране гражданства
-    private String innForeign;
+    private Permissive<String> innForeign;
     //СНИЛС
-    private String snils;
+    private Permissive<String> snils;
     //Статус налогоплательщика
     private RefBookTaxpayerState taxpayerState;
     //Дата рождения
@@ -29,19 +30,24 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     //Гражданство
     private RefBookCountry citizenship;
     //Место жительства
-    private RefBookAddress address;
-    //Признак, показывающий, является ли ФЛ сотрудником Сбербанка
-    private Integer employee;
+    private Permissive<RefBookAddress> address;
     //Система-источник: ссылка на справочник кодов АС НУ
     private RefBookAsnu source;
     //Старый идентификатор ФЛ
     private Long oldId;
+    //Признак, является ли ФЛ VIP-ом
+    private Boolean vip;
 
-    /** Вспомогательные поля для улучшения производительности. Заполняются не во всех случаях*/
+    /*
+     * Вспомогательные поля для улучшения производительности. Заполняются не во всех случаях
+     */
     //Адрес как текст, используется чтобы сразу получать данные из бд одним запросои без запросом на каждую запись
     private String addressAsText;
+    //Название ДУЛ
+    private Permissive<String> docName;
     //Серия и номер ДУЛ
-    private String docNumber;
+    private Permissive<String> docNumber;
+
 
     public String getFirstName() {
         return firstName;
@@ -68,26 +74,26 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     }
 
     public String getInn() {
-        return inn;
+        return inn.value();
     }
 
-    public void setInn(String inn) {
+    public void setInn(Permissive<String> inn) {
         this.inn = inn;
     }
 
     public String getInnForeign() {
-        return innForeign;
+        return innForeign.value();
     }
 
-    public void setInnForeign(String innForeign) {
+    public void setInnForeign(Permissive<String> innForeign) {
         this.innForeign = innForeign;
     }
 
     public String getSnils() {
-        return snils;
+        return snils.value();
     }
 
-    public void setSnils(String snils) {
+    public void setSnils(Permissive<String> snils) {
         this.snils = snils;
     }
 
@@ -124,19 +130,11 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     }
 
     public RefBookAddress getAddress() {
-        return address;
+        return address.value();
     }
 
-    public void setAddress(RefBookAddress address) {
+    public void setAddress(Permissive<RefBookAddress> address) {
         this.address = address;
-    }
-
-    public Integer getEmployee() {
-        return employee;
-    }
-
-    public void setEmployee(Integer employee) {
-        this.employee = employee;
     }
 
     public RefBookAsnu getSource() {
@@ -163,13 +161,61 @@ public class RefBookPerson extends RefBookVersioned<Long> {
         this.oldId = oldId;
     }
 
-    public String getDocNumber() {
-        return docNumber;
+    public String getDocName() {
+        return docName.value();
     }
 
-    public void setDocNumber(String docNumber) {
+    public void setDocName(Permissive<String> docName) {
+        this.docName = docName;
+    }
+
+    public String getDocNumber() {
+        return docNumber.value();
+    }
+
+    public void setDocNumber(Permissive<String> docNumber) {
         this.docNumber = docNumber;
     }
 
+    public Boolean isVip() {
+        return vip;
+    }
 
+    public void setVip(Boolean vip) {
+        this.vip = vip;
+    }
+
+    /*
+     * Набор методов для сериализации объекта в JSON
+     */
+
+    @JsonProperty("inn")
+    public Permissive<String> getInnForJson() {
+        return inn;
+    }
+
+    @JsonProperty("innForeign")
+    public Permissive<String> getInnForeignForJson() {
+        return innForeign;
+    }
+
+    @JsonProperty("snils")
+    public Permissive<String> getSnilsForJson() {
+        return snils;
+    }
+
+    @JsonProperty("address")
+    public Permissive<RefBookAddress> getAddressForJson() {
+        return address;
+    }
+
+    @JsonProperty("docName")
+    public Permissive<String> getDocNameForJson() {
+        return docName;
+    }
+
+    @JsonProperty("docNumber")
+    public Permissive<String> getDocNumberForJson() {
+        return docNumber;
+    }
 }

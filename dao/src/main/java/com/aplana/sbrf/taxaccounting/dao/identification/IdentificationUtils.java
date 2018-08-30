@@ -1,16 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.identification.Country;
 import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -78,7 +76,7 @@ public class IdentificationUtils {
         sb.append(emptyIfNull(naturalPerson.getFirstName())).append(" ");
         sb.append(emptyIfNull(naturalPerson.getMiddleName())).append(", ");
 
-        PersonDocument personDocument = naturalPerson.getPersonDocument();
+        PersonDocument personDocument = naturalPerson.getMajorDocument();
 
         if (personDocument != null) {
 

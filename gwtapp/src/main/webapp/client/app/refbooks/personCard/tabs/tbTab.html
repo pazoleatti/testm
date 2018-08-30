@@ -1,0 +1,18 @@
+<form data-ng-controller="regPersonTbCtrl">
+    <div >
+        <div class="person-card" style="margin-top: 10px; margin-bottom: 10px;">
+            {{::'refBook.fl.card.tabs.title.terbanks' | translate}}
+        </div>
+        <div style="margin-left: 20px; width: 553px">
+            <div class="flex-grid" data-aplana-grid style="height: 100%;"
+                 data-ng-if="tbTab.active"
+                 data-grid-fill-space="false"
+                 data-grid-options="tbListGrid.options"
+                 data-grid-ctrl="tbListGrid.ctrl"
+                 data-ng-model="tbListGrid.value"
+                 data-init-grid="fetchTb(ctrl)"
+                 id = "tbListGrid">
+            </div>
+        </div>
+    </div>
+</form>

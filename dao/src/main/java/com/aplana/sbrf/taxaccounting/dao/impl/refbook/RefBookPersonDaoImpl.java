@@ -6,8 +6,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +27,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-/**
- * @author Andrey Drunk
- */
+
 @Repository
 public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDao {
 
@@ -35,11 +35,13 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookDao refBookDao;
     @Autowired
     RefBookMapperFactory refBookMapperFactory;
+    @Autowired
+    private RefBookSimpleDao refBookSimpleDao;
 
     /**
      * Облегченный маппер только с основными полями
      */
-    private static RowMapper<RefBookPerson> lightMapper = new RowMapper<RefBookPerson>() {
+    private static final RowMapper<RefBookPerson> PERSON_MAPPER_LIGHT = new RowMapper<RefBookPerson>() {
         @Override
         public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
             RefBookPerson result = new RefBookPerson();
@@ -48,20 +50,19 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setFirstName(rs.getString("first_name"));
             result.setLastName(rs.getString("last_name"));
             result.setMiddleName(rs.getString("middle_name"));
-            result.setInn(rs.getString("INN"));
-            result.setInnForeign(rs.getString("INN_FOREIGN"));
-            result.setSnils(rs.getString("SNILS"));
+            result.setInn(Permissive.of(rs.getString("INN")));
+            result.setInnForeign(Permissive.of(rs.getString("INN_FOREIGN")));
+            result.setSnils(Permissive.of(rs.getString("SNILS")));
             result.setBirthDate(rs.getDate("BIRTH_DATE"));
             result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
-            result.setDocNumber(rs.getString("docNumber"));
+            result.setDocNumber(Permissive.of(rs.getString("docNumber")));
             return result;
         }
     };
-
     /**
      * Маппер с полным набором полей
      */
-    private static RowMapper<RefBookPerson> mapper = new RowMapper<RefBookPerson>() {
+    private static final RowMapper<RefBookPerson> PERSON_MAPPER = new RowMapper<RefBookPerson>() {
         @Override
         public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
             RefBookPerson result = new RefBookPerson();
@@ -72,13 +73,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setMiddleName(rs.getString("middle_name"));
             result.setVersion(rs.getDate("version"));
             result.setVersionEnd(rs.getDate("record_version_to"));
-            result.setInn(rs.getString("INN"));
-            result.setInnForeign(rs.getString("INN_FOREIGN"));
-            result.setSnils(rs.getString("SNILS"));
+            result.setInn(Permissive.of(rs.getString("INN")));
+            result.setInnForeign(Permissive.of(rs.getString("INN_FOREIGN")));
+            result.setSnils(Permissive.of(rs.getString("SNILS")));
             result.setBirthDate(rs.getDate("BIRTH_DATE"));
-            result.setInn(rs.getString("INN"));
+            result.setInn(Permissive.of(rs.getString("INN")));
             result.setBirthPlace(rs.getString("BIRTH_PLACE"));
-            result.setEmployee(SqlUtils.getInteger(rs, "EMPLOYEE"));
             result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
 
             RefBookTaxpayerState taxpayerState = new RefBookTaxpayerState();
@@ -96,7 +96,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             RefBookAddress address = new RefBookAddress();
             // Заполняем только id, т.к все остальное получим как конкатенацию строк прямо из БД
             address.setId(SqlUtils.getLong(rs, "A_ID"));
-            result.setAddress(address);
+            result.setAddress(Permissive.of(address));
             result.setAddressAsText(rs.getString("ADDRESS_ADDRESS_FULL"));
 
             RefBookAsnu asnu = new RefBookAsnu();
@@ -110,6 +110,211 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
     };
 
+    private static final RowMapper<RefBookPerson> PERSON_MAPPER_NEW = new RowMapper<RefBookPerson>() {
+        @Override
+        public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RefBookPerson result = new RefBookPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setOldId(rs.getLong("old_id"));
+            result.setVip(rs.getBoolean("vip"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setLastName(rs.getString("last_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("birth_date"));
+            result.setBirthPlace(rs.getString("birth_place"));
+            result.setVersion(rs.getDate("version"));
+            result.setVersionEnd(rs.getDate("version_to"));
+
+            // TODO: Здесь должна быть проверка по правам запрашивающего, некоторым ролям доступны ВИПы
+            if ((result.isVip() != null) && result.isVip()) {
+                result.setDocName(Permissive.<String>forbidden());
+                result.setDocNumber(Permissive.<String>forbidden());
+                result.setInn(Permissive.<String>forbidden());
+                result.setInnForeign(Permissive.<String>forbidden());
+                result.setSnils(Permissive.<String>forbidden());
+                result.setAddress(Permissive.<RefBookAddress>forbidden());
+            } else {
+                result.setDocName(Permissive.of(rs.getString("doc_name")));
+                result.setDocNumber(Permissive.of(rs.getString("doc_number")));
+                result.setInn(Permissive.of(rs.getString("inn")));
+                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+                result.setSnils(Permissive.of(rs.getString("snils")));
+
+                Long addressId = SqlUtils.getLong(rs, "address_id");
+                if (addressId == null) {
+                    result.setAddress(Permissive.<RefBookAddress>of(null));
+                } else {
+                    RefBookAddress address = new RefBookAddress();
+                    address.setId(rs.getLong("address_id"));
+                    address.setAddressType(rs.getInt("address_type"));
+                    address.setPostalCode(rs.getString("postal_code"));
+                    address.setRegionCode(rs.getString("region_code"));
+                    address.setDistrict(rs.getString("district"));
+                    address.setCity(rs.getString("city"));
+                    address.setLocality(rs.getString("locality"));
+                    address.setStreet(rs.getString("street"));
+                    address.setBuild(rs.getString("building"));
+                    address.setHouse(rs.getString("house"));
+                    address.setAppartment(rs.getString("apartment"));
+                    address.setAddress(rs.getString("address"));
+
+                    Long countryId = SqlUtils.getLong(rs, "address_country_id");
+                    if (countryId == null) {
+                        address.setCountry(null);
+                    } else {
+                        RefBookCountry country = new RefBookCountry();
+                        country.setId(countryId);
+                        country.setCode(rs.getString("address_country_code"));
+                        country.setName(rs.getString("address_country_name"));
+                        address.setCountry(country);
+                    }
+
+                    result.setAddress(Permissive.of(address));
+                }
+            }
+
+            Long countryId = SqlUtils.getLong(rs, "citizenship_country_id");
+            if (countryId == null) {
+                result.setCitizenship(null);
+            } else {
+                RefBookCountry citizenship = new RefBookCountry();
+                citizenship.setId(countryId);
+                citizenship.setCode(rs.getString("citizenship_country_code"));
+                citizenship.setName(rs.getString("citizenship_country_name"));
+                result.setCitizenship(citizenship);
+            }
+
+            Long stateId = SqlUtils.getLong(rs, "state_id");
+            if (stateId == null) {
+                result.setTaxpayerState(null);
+            } else {
+                RefBookTaxpayerState taxpayerState = new RefBookTaxpayerState();
+                taxpayerState.setId(stateId);
+                taxpayerState.setCode(rs.getString("state_code"));
+                taxpayerState.setName(rs.getString("state_name"));
+                result.setTaxpayerState(taxpayerState);
+            }
+
+            Long asnuId = SqlUtils.getLong(rs, "asnu_id");
+            if (asnuId == null) {
+                result.setSource(null);
+            } else {
+                RefBookAsnu asnu = new RefBookAsnu();
+                asnu.setId(asnuId);
+                asnu.setCode(rs.getString("asnu_code"));
+                asnu.setName(rs.getString("asnu_name"));
+                asnu.setType(rs.getString("asnu_type"));
+                asnu.setPriority(rs.getInt("asnu_priority"));
+                result.setSource(asnu);
+            }
+
+            return result;
+        }
+    };
+
+
+    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_MAPPER = new RowMapper<RegistryPerson>() {
+        @Override
+        public RegistryPerson mapRow(ResultSet rs, int i) throws SQLException {
+            RegistryPerson result = new RegistryPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setOldId(rs.getLong("old_id"));
+            result.setVersion(rs.getDate("version"));
+            result.setRecordVersionTo(rs.getDate("record_version_to"));
+            result.setLastName(rs.getString("last_name"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("birth_date"));
+            result.setVip(rs.getBoolean("vip"));
+            Map<String, RefBookValue> source = new HashMap<>();
+            source.put("SOURCE_ID", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("SOURCE_ID")));
+            result.setSource(source);
+
+            if ((result.getVip() != null) && result.getVip()) {
+                result.setCitizenship(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setInn(Permissive.<String>forbidden());
+                result.setInnForeign(Permissive.<String>forbidden());
+                result.setSnils(Permissive.<String>forbidden());
+                result.setTaxPayerState(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setAddress(Permissive.<Map<String, RefBookValue>>forbidden());
+            } else {
+                Map<String, RefBookValue> citizenship = new HashMap<>();
+                citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
+                result.setCitizenship(Permissive.of(citizenship));
+
+                Map<String, RefBookValue> reportDoc = new HashMap<>();
+                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+                result.setReportDoc(Permissive.of(reportDoc));
+
+                result.setInn(Permissive.of(rs.getString("inn")));
+                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+                result.setSnils(Permissive.of(rs.getString("snils")));
+
+                Map<String, RefBookValue> taxPayerState = new HashMap<>();
+                taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
+                result.setTaxPayerState(Permissive.of(taxPayerState));
+
+                Map<String, RefBookValue> address = new HashMap<>();
+                address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
+                result.setAddress(Permissive.of(address));
+            }
+
+            return result;
+        }
+    };
+
+    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_ORIGINAL_MAPPER = new RowMapper<RegistryPerson>() {
+        @Override
+        public RegistryPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RegistryPerson result = new RegistryPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setLastName(rs.getString("last_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("BIRTH_DATE"));
+            result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
+            result.setVersion(rs.getDate("VERSION"));
+            result.setState(rs.getInt("STATUS"));
+            return result;
+        }
+    };
+
+    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_DUPLICATE_MAPPER = new RowMapper<RegistryPerson>() {
+        @Override
+        public RegistryPerson mapRow(ResultSet rs, int i) throws SQLException {
+            RegistryPerson result = new RegistryPerson();
+            result.setId(rs.getLong("id"));
+            result.setRecordId(rs.getLong("record_id"));
+            result.setOldId(rs.getLong("old_id"));
+            result.setVersion(rs.getDate("version"));
+            result.setState(rs.getInt("status"));
+            result.setLastName(rs.getString("last_name"));
+            result.setFirstName(rs.getString("first_name"));
+            result.setMiddleName(rs.getString("middle_name"));
+            result.setBirthDate(rs.getDate("birth_date"));
+            result.setVip(rs.getBoolean("vip"));
+
+            if ((result.getVip() != null) && result.getVip()) {
+                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
+                result.setInn(Permissive.<String>forbidden());
+                result.setSnils(Permissive.<String>forbidden());
+            } else {
+                Map<String, RefBookValue> reportDoc = new HashMap<>();
+                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+                result.setReportDoc(Permissive.of(reportDoc));
+
+                result.setInn(Permissive.of(rs.getString("inn")));
+                result.setSnils(Permissive.of(rs.getString("snils")));
+            }
+
+            return result;
+        }
+    };
+
     @Override
     public void clearRnuNdflPerson(Long declarationDataId) {
         HashMap<String, Object> values = new HashMap<String, Object>();
@@ -118,14 +323,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void fillRecordVersions(Date version) {
-        //long time = System.currentTimeMillis();
-        getJdbcTemplate().update("call person_pkg.FillRecordVersions(?)", version);
-        //System.out.println("fillRecordVersions (" + (System.currentTimeMillis() - time) + " ms)");
+    public void fillRecordVersions() {
+        getJdbcTemplate().update("call person_pkg.FillRecordVersions()");
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForUpd");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -136,7 +339,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForCheck");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC), new SqlParameter("p_asnu", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -251,11 +454,63 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 ") v on v.version = rbp.version and v.old_id = rbp.old_id and old_status = 0";
         List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(
                 "select * from (select r.*, row_number() over (order by id) as rn from (\n" + baseSql + ") r)\n where rn between :start and :end",
-                params, lightMapper);
+                params, PERSON_MAPPER_LIGHT);
 
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", params, Integer.class);
         return new PagingResult<>(list, totalCount);
     }
+
+
+    @Override
+    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams) {
+
+        String personQuery = "" +
+                "select person.id, person.record_id, person.old_id, person.last_name, person.first_name, " +
+                "       person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, " +
+                "       person.inn_foreign, person.snils, person.version, " +
+                "       (   select min(version) - interval '1' day " +
+                "           from ref_book_person p " +
+                "           where status in (0, 2) " +
+                "               and p.version > person.version " +
+                "               and p.record_id = person.record_id " +
+                "       ) as version_to, " +
+                "       doc_type.name doc_name, doc.doc_number, " +
+                "       citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, " +
+                "       citizenship_country.name citizenship_country_name, " +
+                "       state.id state_id, state.code state_code, state.name state_name, " +
+                "       address.id address_id, address.address_type, address.postal_code, address.region_code, " +
+                "       address.district, address.city, address.locality, address.street, address.house, " +
+                "       address.build building, address.appartment apartment, address.address, " +
+                "       address_country.id address_country_id, address_country.code address_country_code, " +
+                "       address_country.name address_country_name, " +
+                "       asnu.id asnu_id, asnu.code asnu_code, asnu.name asnu_name, asnu.type asnu_type, asnu.priority asnu_priority " +
+                "from ref_book_person person " +
+                "left join ref_book_id_doc doc on doc.id = person.report_doc " +
+                "left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id " +
+                "left join ref_book_country citizenship_country on citizenship_country.id = person.citizenship " +
+                "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state " +
+                "left join ref_book_address address on address.id = person.address " +
+                "left join ref_book_country address_country on address_country.id = address.country_id " +
+                "left join ref_book_asnu asnu on asnu.id = person.source_id";
+
+        int startIndex = pagingParams.getStartIndex();
+        int endIndex = startIndex + pagingParams.getCount();
+
+        String pagedPersonQuery = "" +
+                "select * " +
+                "from ( " +
+                "   select rownum rnum, a.* " +
+                "   from (" + personQuery + ") a " +
+                "   where rownum <= " + endIndex +
+                ") " +
+                "where rnum > " + startIndex;
+
+        List<RefBookPerson> persons = getJdbcTemplate().query(pagedPersonQuery, PERSON_MAPPER_NEW);
+        Integer count = getJdbcTemplate().queryForObject("select count(*) from (" + personQuery + ")", Integer.class);
+
+        return new PagingResult<>(persons, count);
+    }
+
 
     private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to from (\n" +
             "  select frb.*, frb.version as record_version_from, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
@@ -269,8 +524,9 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             "  left join REF_BOOK_ASNU asnu on asnu.id = frb.SOURCE_ID \n" +
             "  where frb.status = 0%s) p ";
 
-    @Override
-    public PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+
+    // TODO Выпилить, оставляю для примера
+    private PagingResult<RefBookPerson> getPersons(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
                 (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
 
@@ -280,11 +536,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
         if (pagingParams != null) {
             params.addValue("start", pagingParams.getStartIndex() + 1);
-            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());        }
+            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+        }
 
         String query = prepareStatement(pagingParams, filter, sortAttribute, baseSql);
 
-        List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(query, params, mapper);
+        List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(query, params, PERSON_MAPPER);
 
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", params, Integer.class);
         return new PagingResult<>(list, totalCount);
@@ -305,43 +562,41 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         if (pagingParams != null && StringUtils.isNotEmpty(pagingParams.getDirection())) {
             direction = pagingParams.getDirection();
         }
-        String hint = createHint(filter);
+        String hint = (filter == null || filter.isEmpty()) ? "/*+ FIRST_ROWS */" : "/*+ PARALLEL(16) */";
 
-        return  pagingParams != null ?
+        return pagingParams != null ?
                 "select " + hint + "* from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
                 : baseSql;
     }
 
 
     public PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-            String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
-                    (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
+        String baseSql = String.format(PERSON_SQL, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
+                (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
 
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            if (version != null) {
-                params.addValue("version", version);
-            }
-            if (pagingParams != null) {
-                params.addValue("start", pagingParams.getStartIndex() + 1);
-                params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());        }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        if (version != null) {
+            params.addValue("version", version);
+        }
+        if (pagingParams != null) {
+            params.addValue("start", pagingParams.getStartIndex() + 1);
+            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+        }
 
-            String query = prepareStatement(pagingParams, filter, sortAttribute, baseSql);
+        String query = prepareStatement(pagingParams, filter, sortAttribute, baseSql);
 
-            RefBook refBook = getRefBook();
+        RefBook refBook = getRefBook();
 
-            return new PagingResult<>(getNamedParameterJdbcTemplate().query(query, params, new RefBookValueMapper(refBook)));
+        return new PagingResult<>(getNamedParameterJdbcTemplate().query(query, params, new RefBookValueMapper(refBook)));
     }
 
     public RefBook getRefBook() {
         return refBookDao.get(RefBook.Id.PERSON.getId());
     }
 
-    private String createHint(String filter) {
-        return (filter == null || filter.isEmpty()) ? "/*+ FIRST_ROWS */" : "/*+ PARALLEL(16) */";
-    }
 
-    @Override
-    public PagingResult<RefBookPerson> getPersonVersions(long recordId, PagingParams pagingParams) {
+    // TODO Выпилить, оставляю для примера
+    private PagingResult<RefBookPerson> getPersonVersions(long recordId, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("recordId", recordId);
         params.addValue("start", pagingParams.getStartIndex() + 1);
@@ -350,19 +605,50 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         String baseSql = String.format(PERSON_SQL, " and frb.record_id = :recordId");
         List<RefBookPerson> list = getNamedParameterJdbcTemplate().query(
                 "select * from (select r.*, row_number() over (order by version) as rn from (\n" + baseSql + ") r)\n where rn between :start and :end",
-                params, mapper);
+                params, PERSON_MAPPER);
 
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", params, Integer.class);
         return new PagingResult<>(list, totalCount);
     }
 
     @Override
-    public RefBookPerson getOriginal(Long recordId) {
+    public List<RegistryPerson> fetchOriginal(Long id) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("recordId", recordId);
+        params.addValue("id", id);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject("select p.*, (select doc_number from REF_BOOK_ID_DOC where person_id = p.id and inc_rep = 1 and rownum = 1) as docNumber \n" +
-                    "from ref_book_person p where p.record_id = :recordId and p.old_id is null and p.status = 0", params, lightMapper);
+            return getNamedParameterJdbcTemplate().query("select * from ref_book_person where old_id = record_id and record_id = (select record_id from ref_book_person where id = :id) and status in (0,2) order by version desc", params, REGISTRY_CARD_PERSON_ORIGINAL_MAPPER);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("endIndex", pagingParams.getStartIndex() + pagingParams.getCount());
+        try {
+            return getNamedParameterJdbcTemplate().query("SELECT * FROM (SELECT r.*, row_number() over (order by id asc) as rn FROM (\n" +
+                    "SELECT * from ref_book_person WHERE old_id <> record_id and record_id = (SELECT record_id from ref_book_person WHERE id = :id) and status in (0,2) order by version desc\n" +
+                    ") r ) WHERE rn between :startIndex and :endIndex", params, REGISTRY_CARD_PERSON_DUPLICATE_MAPPER);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public RegistryPerson fetchPersonWithVersionInfo(Long id) {
+        String sql = "SELECT r.*, row_number() over (order by id asc) as rn FROM (" +
+                "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM REF_BOOK_PERSON WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to " +
+                "FROM (" +
+                " SELECT frb.* FROM REF_BOOK_PERSON frb " +
+                " WHERE id = :id " +
+                " ) p " +
+                ") r";
+        MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, REGISTRY_CARD_PERSON_MAPPER);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

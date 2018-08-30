@@ -62,15 +62,15 @@
                     }
                 });
 
-                $scope.onRelevanceChange = function () {
-                    if ($scope.searchFilter.params.relevance.id === APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL.id) {
+                $scope.$watch("searchFilter.params.relevance", function () {
+                    if ($scope.searchFilter.params.relevance && $scope.searchFilter.params.relevance.id === APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL.id) {
                         $scope.relevanceDateDisabled = true;
                         $scope.searchFilter.params.relevanceDate = null;
                     } else {
                         $scope.relevanceDateDisabled = false;
                         $scope.searchFilter.params.relevanceDate = new Date().format("yyyy-mm-dd");
                     }
-                };
+                });
 
                 $scope.departmentConfigGrid = {
                     ctrl: {},
@@ -130,12 +130,30 @@
                             },
                             {name: 'department.name', index: 'department.name', width: 170, sortable: false},
                             {name: 'kpp', index: 'kpp', width: 75, sortable: false},
-                            {name: 'oktmo.code', index: 'oktmo.code', width: 80, sortable: false},
+                            {
+                                name: 'oktmo',
+                                index: 'oktmo',
+                                width: 250,
+                                sortable: false,
+                                formatter: $filter('codeNameFormatter')
+                            },
                             {name: 'taxOrganCode', index: 'taxOrganCode', width: 85, sortable: false},
-                            {name: 'presentPlace.name', index: 'presentPlace.name', width: 110, sortable: false},
+                            {
+                                name: 'presentPlace',
+                                index: 'presentPlace',
+                                width: 210,
+                                sortable: false,
+                                formatter: $filter('codeNameFormatter')
+                            },
                             {name: 'name', index: 'name', width: 150, sortable: false},
                             {name: 'phone', index: 'phone', width: 120, sortable: false},
-                            {name: 'signatoryMark.name', index: 'signatoryMark.name', width: 90, sortable: false},
+                            {
+                                name: 'signatoryMark',
+                                index: 'signatoryMark',
+                                width: 210,
+                                sortable: false,
+                                formatter: $filter('codeNameFormatter')
+                            },
                             {name: 'signatorySurName', index: 'signatorySurName', width: 110, sortable: false},
                             {name: 'signatoryFirstName', index: 'signatoryFirstName', width: 110, sortable: false},
                             {name: 'signatoryLastName', index: 'signatoryLastName', width: 130, sortable: false},
@@ -146,7 +164,13 @@
                                 classes: 'grid-cell-white-space',
                                 sortable: false
                             },
-                            {name: 'reorganization.code', index: 'reorganization.code', width: 120, sortable: false},
+                            {
+                                name: 'reorganization',
+                                index: 'reorganization',
+                                width: 200,
+                                sortable: false,
+                                formatter: $filter('codeNameFormatter')
+                            },
                             {name: 'reorgKpp', index: 'reorgKpp', width: 150, sortable: false},
                             {name: 'reorgInn', index: 'reorgInn', width: 150, sortable: false}
                         ],

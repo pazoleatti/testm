@@ -335,6 +335,10 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
   margin-bottom: 20px;
 }
 
+.form-group-view {
+  margin-bottom: 10px;
+}
+
 .form-group .input-group {
   margin-bottom: 0;
 }
@@ -1310,6 +1314,7 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 
 .log-normal-message {
   color: darkgreen;
+  white-space: pre-wrap;
 }
 
 .log-warning-message {
@@ -1636,6 +1641,18 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   margin: 0;
 }
 
+.person-card {
+  display: block;
+  padding: 0;
+  margin: 0 20px 20px 20px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 40px;
+  color: #279238;
+  border: 0;
+  border-bottom: 1px dashed #279238;
+}
+
 /* исправление ситуации, когда в гриде нет данных и из-за этого не отображается горизонтальная полоса прокрутки */
 .ui-jqgrid tr.jqgfirstrow td {
   height: 1px !important;
@@ -1723,6 +1740,15 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
 .field-content {
   height: 100%;
+}
+
+.person-card-data {
+  font-weight: bold;
+  margin-left: 0.5% !important;
+}
+
+.person-card-left-column-label {
+  text-align: right; min-width: 190px; max-width: 190px
 }
 
 /*Размеры таблицы будут вычисляться через flexbox: header и footer - фиксированы, content - занимает всю остальную область.

@@ -4,13 +4,9 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHand
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +25,7 @@ public interface RefBookPersonDao {
      */
     void clearRnuNdflPerson(Long declarationDataId);
 
-    /**
-     * @param version
-     */
-    void fillRecordVersions(Date version);
+    void fillRecordVersions();
 
     /**
      * Найти всех ФЛ по определяющим параметрам
@@ -42,7 +35,7 @@ public interface RefBookPersonDao {
      * @param version           версия записи
      * @return
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
@@ -52,7 +45,7 @@ public interface RefBookPersonDao {
      * @param version           версия записи
      * @return
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти данные о ФЛ в ПНФ
@@ -88,11 +81,18 @@ public interface RefBookPersonDao {
 
     /**
      * Получение оригинала ФЛ
-     *
-     * @param personId Идентификатор ФЛ (RECORD_ID)
-     * @return оригинал ФЛ
+     * @param id идентификатро версии ФЛ
+     * @return Оригинал ФЛ
      */
-    RefBookPerson getOriginal(Long personId);
+    List<RegistryPerson> fetchOriginal(Long id);
+
+    /**
+     * Получение дубликатов ФЛ
+     * @param id            идентификатор версии ФЛ
+     * @param pagingParams  параметры пейджинга
+     * @return  список дубликатов ФЛ
+     */
+    List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams);
 
     /**
      * Получает список идентификаторов ФЛ, являющихся дуликатами указанных ФЛ
@@ -128,31 +128,26 @@ public interface RefBookPersonDao {
     PagingResult<RefBookPerson> getDuplicates(Long personId, PagingParams pagingParams);
 
     /**
-     * Получает список ФЛ актуальных на указанную дату с учитыванием пэйджинга, фильтрации и сортировки
-     * Все или отдельные параметры могут быть null, тогда они не учитываются при отборе записей
+     * Получает список ФЛ всех версий.
      *
-     * @param version       версия, на которую будут отобраны записи
-     * @param pagingParams  параметры пэйджинга
-     * @param filter        фильтр для отбора записей. Фактически кусок SQL-запроса для WHERE части
-     * @param sortAttribute атрибут, по которому записи будут отсортированы
+     * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
-    PagingResult<RefBookPerson> getPersons(@Nullable Date version, @Nullable PagingParams pagingParams, @Nullable String filter, @Nullable RefBookAttribute sortAttribute);
+    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams);
 
     PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Получить объект справочника Физические лица
+     *
      * @return объект справочника
      */
     RefBook getRefBook();
 
     /**
-     * Получает список версий ФЛ
-     *
-     * @param recordId     идентификатор группы версий ФЛ (фактически идентификатор ФЛ)
-     * @param pagingParams параметры пэйджинга
-     * @return список версий ФЛ
+     * Получает версию физлица c информацией о дате начала и конца версии
+     * @param id    идентификатор версии
+     * @return  объект версии ФЛ
      */
-    PagingResult<RefBookPerson> getPersonVersions(long recordId, PagingParams pagingParams);
+    RegistryPerson fetchPersonWithVersionInfo(Long id);
 }

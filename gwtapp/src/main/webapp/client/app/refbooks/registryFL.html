@@ -1,0 +1,30 @@
+<div class="flex-column">
+    <div class="content-header">
+        <h1>{{::'refBook.fl.title' | translate}}</h1>
+    </div>
+    <div id="usersGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
+        <div id="usersGridTop">
+            <!-- Кнопка выгрузки в Excel -->
+            <div style="float: right; padding-top: 10px">
+                <img src='resources/img/unload-white-16.png'>
+                <a>{{'refBook.fl.button.download.title' | translate}}</a>
+            </div>
+            <!-- Панель фильтра -->
+            <div>
+                <span data-ng-include="'client/app/refbooks/registryFLFilter.html'"></span>
+            </div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="flex-grid flex-fill"
+             data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector="#usersGridContainer"
+             data-grid-fill-space-container-selector-top="#usersGridTop"
+             data-grid-options="flGrid.options"
+             data-grid-ctrl="flGrid.ctrl"
+             data-ng-model="flGrid.value"
+             id="usersTable">
+        </div>
+    </div>
+</div>

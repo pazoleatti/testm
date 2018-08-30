@@ -183,7 +183,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
             //additional
-            person.setEmployee(SqlUtils.getInteger(rs, "employee"));
             person.setSourceId(SqlUtils.getLong(rs, "source_id"));
             person.setRecordId(SqlUtils.getLong(rs, "record_id"));
 

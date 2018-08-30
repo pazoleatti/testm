@@ -1,16 +1,9 @@
 package com.aplana.sbrf.taxaccounting.script.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.identification.Address;
-import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
-import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
-import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus;
+import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
@@ -23,13 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.*;
 import static java.util.Arrays.asList;
@@ -54,18 +41,18 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
-    public void fillRecordVersions(Date version) {
-        refBookPersonDao.fillRecordVersions(version);
+    public void fillRecordVersions() {
+        refBookPersonDao.fillRecordVersions();
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonHandler);
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, asnuId, naturalPersonHandler);
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonHandler);
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, asnuId, naturalPersonHandler);
     }
 
     @Override
@@ -115,23 +102,43 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 IdentityPerson identificatedPerson = personDataList.get(0);
 
                 if (identificatedPerson != null) {
-                    StringBuffer msg = new StringBuffer();
-
-                    msg.append("Для ФЛ " + IdentificationUtils.buildNotice(identificationData.getNaturalPerson()) + " сходных записей найдено: " + personDataList.size()).append(" ");
                     DecimalFormat df = new DecimalFormat("0.00");
-                    for (IdentityPerson applicablePersonData : personDataList) {
-                        msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeight()) + ")").append("]");
-                    }
                     if (identificatedPerson.getWeight() > treshold) {
+                        StringBuilder msg = new StringBuilder();
                         //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
                         if (personDataList.size() > 1) {
-                            msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeight()) + ")]");
-                            logger.info(msg.toString());
+                            NaturalPerson declarationDataPerson = identificationData.getNaturalPerson();
+                            msg.append("Раздел 1 Строка")
+                                    .append(declarationDataPerson.getNum())
+                                    .append(". ")
+                                    .append("Для физического лица ")
+                                    .append(buildFio(declarationDataPerson))
+                                    .append(", ")
+                                    .append(declarationDataPerson.getMajorDocument().getDocType().getName())
+                                    .append(" № ")
+                                    .append(declarationDataPerson.getMajorDocument().getDocumentNumber())
+                                    .append(" Найдены записи в реестре ФЛ:\n");
+                            for (NaturalPerson refBookPerson : personDataList) {
+                                msg.append("Идентификатор ФЛ: ")
+                                        .append(refBookPerson.getRecordId())
+                                        .append(", ФИО: ")
+                                        .append(buildFio(refBookPerson))
+                                        .append(" (схожесть: ")
+                                        .append(df.format(refBookPerson.getWeight()))
+                                        .append(")\n");
+                            }
+                            msg.append("Выбрана запись с параметрами  Идентификатор ФЛ: ")
+                                    .append(identificatedPerson.getRecordId())
+                                    .append(", ФИО: ")
+                                    .append(buildFio((identificatedPerson)))
+                                    .append(" (схожесть: ")
+                                    .append(df.format(identificatedPerson.getWeight()))
+                                    .append(")");
+                            logger.infoExp(msg.toString(), "", String.format("%s, ИНП: %s", buildFio(declarationDataPerson), declarationDataPerson.getPersonIdentifier().getInp()));
                         }
 
                         return (NaturalPerson) identificatedPerson;
                     } else {
-                        //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
                         return null;
                     }
                 } else {
@@ -141,7 +148,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 return null;
             }
         } else {
-            //logger.info("Для ФЛ " + buildNotice(personData) + " сходных записей не найдено");
             return null;
         }
     }
@@ -287,7 +293,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 //Запись справочника физлиц
                 NaturalPerson refBookPerson = (NaturalPerson) b;
 
-                PersonDocument primaryPersonDocument = primaryPerson.getPersonDocument();
+                PersonDocument primaryPersonDocument = primaryPerson.getMajorDocument();
 
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
@@ -390,6 +396,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         return result;
     }
 
+    private String buildFio(IdentityPerson person) {
+        String lastname = person.getLastName() != null ? person.getLastName() + " " : "";
+        String firstname = person.getFirstName() != null ? person.getFirstName() + " " : "";
+        String middlename = person.getMiddleName() != null ? person.getMiddleName() : "";
+        return lastname + firstname + middlename;
+    }
 
     private class PersonDataComparator implements Comparator<IdentityPerson> {
         @Override

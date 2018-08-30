@@ -1287,8 +1287,10 @@ create table ref_book_person
   birth_date     date,
   birth_place    varchar2(255 char),
   citizenship    number(18),
+  report_doc     number(18),
   address        number(18),
   employee       number(1) default 2,
+  vip            number(1) default 0 not null,
   record_id      number(18) not null,
   version        date not null,
   status         number(1) default 0 not null,
@@ -1309,8 +1311,10 @@ comment on column ref_book_person.taxpayer_state is 'Статус налогоп
 comment on column ref_book_person.birth_date is 'Дата рождения';
 comment on column ref_book_person.birth_place is 'Место рождения';
 comment on column ref_book_person.citizenship is 'Гражданство';
+comment on column ref_book_person.report_doc is 'Ссылка на ДУЛ, который должен включаться в отчетность';
 comment on column ref_book_person.address is 'Место жительства';
 comment on column ref_book_person.employee is 'Признак, показывающий, является ли ФЛ сотрудником Сбербанка. Возможные значения: 1 - является; 2 - не является';
+comment on column ref_book_person.vip is 'Признак, показывающий, является ли ФЛ VIP-ом (0 - Не VIP, 1 - VIP)';
 comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';

@@ -84,7 +84,7 @@
                         colModel: [
                             {name: 'rowNum', index: 'rowNum', width: 75, key: true},
                             {name: 'inp', index: 'inp', width: 100},
-                            {name: 'lastName', index: 'lastName', width: 130},
+                            {name: 'lastName', index: 'lastName', width: 130, formatter: $filter('personLinkFormatters')},
                             {name: 'firstName', index: 'firstName', width: 110},
                             {name: 'middleName', index: 'middleName', width: 130},
                             {
@@ -123,5 +123,15 @@
                         multiselect: true
                     }
                 };
-            }]);
+            }])
+
+        .filter('personLinkFormatters', function () {
+                return function (cellValue, options, data) {
+                    if (data.personId) {
+                        return "<a href='index.html#/personRegistry/personCard/" + data.personId + "' target='_blank'>" + cellValue + "</a>";
+                    }
+                    return cellValue;
+                }
+            }
+        );
 }());
