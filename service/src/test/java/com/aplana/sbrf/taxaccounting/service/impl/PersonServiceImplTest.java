@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -170,8 +171,8 @@ public class PersonServiceImplTest {
 
     @Test
     public void test_getPersons() {
-        personService.getPersons(any(PagingParams.class));
-        verify(refBookPersonDao).getPersons(any(PagingParams.class));
+        personService.getPersons(any(PagingParams.class), any(RefBookPersonFilter.class));
+        verify(refBookPersonDao).getPersons(any(PagingParams.class), any(RefBookPersonFilter.class));
     }
 
     @Test

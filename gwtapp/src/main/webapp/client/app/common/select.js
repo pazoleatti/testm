@@ -645,6 +645,16 @@
         ])
 
         /**
+         * Контроллер для выбора признака активности пользователя.
+         */
+        .controller('SelectShowVersionsCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var attributes = [APP_CONSTANTS.SHOW_VERSIONS.BY_DATE, APP_CONSTANTS.SHOW_VERSIONS.ALL];
+                $scope.versionSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, attributes);
+            }
+        ])
+
+        /**
          * Универсальный контроллер для выбора из любого справочника
          */
         .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http', "$filter", "APP_CONSTANTS",

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -71,7 +72,7 @@ public interface PersonService {
      * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
-    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams);
+    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
      * Получает список ФЛ учитывая условия фильтрации и сортировки. Метод возвращает объекты в виде мапы.

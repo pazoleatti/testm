@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -96,9 +97,8 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    // TODO Написать сюда @PreAuthorize
-    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams) {
-        return refBookPersonDao.getPersons(pagingParams);
+    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
+        return refBookPersonDao.getPersons(pagingParams, filter);
     }
 
     @Override

@@ -83,6 +83,10 @@
                 YES: {id: 1, name: "Да"},
                 NO: {id: 2, name: "Нет"}
             },
+            SHOW_VERSIONS: {
+                BY_DATE: {id: 1, name: "На дату"},
+                ALL: {id: 2, name: "Все версии"}
+            },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},
                 REFUSED: {id: 21123800, knd: 1166006, name: 'Отклонен'},

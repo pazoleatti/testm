@@ -328,6 +328,9 @@
         "title.reasonForReturn": "Причина возврата:",
         "title.indicateReasonForReturn": "Укажите причину возврата",
         "title.creatingReport": "Создание отчетности по НДФЛ",
+        "title.terBank": "Тербанк",
+        "title.importance": "Важность",
+        "title.region": "Регион",
 
         "title.amountCalcIncome": "Начислено",
         "title.amountPaymentIncome": "Выплачено",
@@ -910,8 +913,25 @@
         "refBook.button.originalAndDuplicate": "Назначить оригинал/дубли",
         "refBook.checkbox.search": "Искать по точному совпадению",
 
+        // Реестр ФЛ
         "refBook.fl.title": "НДФЛ - Реестр Физических лиц",
         "refBook.fl.button.download.title": "Выгрузить в Excel",
+
+        "refBook.fl.filter.title.fl": "Реквизиты физического лица",
+        "refBook.fl.filter.title.russianAddress": "Адрес в Российской Федерации",
+        "refBook.fl.filter.title.foreignAddress": "Адрес за пределами Российской Федерации",
+        "refBook.fl.filter.title.versions": "Параметры отображения версий",
+        "refBook.fl.filter.label.documentType": "Тип ДУЛ",
+        "refBook.fl.filter.label.documentNumber": "Серия и № ДУЛ",
+        "refBook.fl.filter.label.citizenship": "Гражданство",
+        "refBook.fl.filter.label.status": "Статус НП",
+        "refBook.fl.filter.label.sourceSystem": "Система-источник",
+        "refBook.fl.filter.label.id": "ИД ФЛ",
+        "refBook.fl.filter.label.locality": "Нас. пункт",
+        "refBook.fl.filter.label.country": "Страна проживания",
+        "refBook.fl.filter.label.versions": "Отображать версии",
+        "refBook.fl.filter.label.duplicates": "Дубликаты",
+
         "refBook.fl.table.title.id": "ИД ФЛ",
         "refBook.fl.table.title.importance": "Важность",
         "refBook.fl.table.title.documentType": "Тип ДУЛ",
@@ -928,10 +948,10 @@
         "refBook.fl.table.title.versionEnd": "Окончание действия",
         "refBook.fl.table.title.versionId": "ИД версии",
 
-        "refBook.fl.label.permissionDenied": "<i>Доступ ограничен</i>",
-        "refBook.fl.label.vip": "VIP",
-        "refBook.fl.label.notVip": "Не VIP",
-        "refBook.fl.label.duplicate": "(Дубл.)",
+        "refBook.fl.table.label.permissionDenied": "<i>Доступ ограничен</i>",
+        "refBook.fl.table.label.vip": "VIP",
+        "refBook.fl.table.label.notVip": "Не VIP",
+        "refBook.fl.table.label.duplicate": "(Дубл.)",
 
         "refBook.fl.card.label.version": "Версия: ",
         "refBook.fl.card.label.versionFrom": "Действует с: ",
@@ -998,6 +1018,7 @@
         "refBook.fl.card.button.cancel": "Отмена",
         "refBook.fl.card.tabs.lable.idDoc": "Документы, удостоверяющие личность (ДУЛ)",
 
+        // Старый справочник ФЛ
         "refBook.fl.title.id": "Идентификатор ФЛ",
         "refBook.fl.title.inn": "ИНН в Российской федерации",
         "refBook.fl.title.innForeign": "ИНН в стране гражданства",

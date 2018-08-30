@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.StringUtils;
@@ -462,7 +463,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
 
     @Override
-    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams) {
+    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
 
         String personQuery = "" +
                 "select person.id, person.record_id, person.old_id, person.last_name, person.first_name, " +
@@ -491,7 +492,44 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state " +
                 "left join ref_book_address address on address.id = person.address " +
                 "left join ref_book_country address_country on address_country.id = address.country_id " +
-                "left join ref_book_asnu asnu on asnu.id = person.source_id";
+                "left join ref_book_asnu asnu on asnu.id = person.source_id ";
+
+        MapSqlParameterSource queryParams = new MapSqlParameterSource();
+        String filterQuery = "" +
+                "where person.status = 0 ";
+
+        if (filter.getId() != null) {
+            filterQuery = filterQuery + "and person.record_id like '%" + filter.getId() + "%' ";
+        }
+        if (filter.getLastName() != null) {
+            filterQuery = filterQuery + "and lower(person.last_name) like '%" + filter.getLastName().toLowerCase() + "%' ";
+        }
+        if (filter.getFirstName() != null) {
+            filterQuery = filterQuery + "and lower(person.first_name) like '%" + filter.getFirstName().toLowerCase() + "%' ";
+        }
+        if (filter.getMiddleName() != null) {
+            filterQuery = filterQuery + "and lower(person.middle_name) like '%" + filter.getMiddleName().toLowerCase() + "%' ";
+        }
+        if (filter.getBirthDateFrom() != null) {
+            filterQuery = filterQuery + "and birth_date >= :birth_date_from ";
+            queryParams.addValue("birth_date_from", filter.getBirthDateFrom());
+        }
+        if (filter.getBirthDateTo() != null) {
+            filterQuery = filterQuery + "and birth_date <= :birth_date_to ";
+            queryParams.addValue("birth_date_to", filter.getBirthDateTo());
+        }
+
+        String filteredPersonQuery = personQuery + filterQuery;
+
+        if (filter.isAllVersions() != null && filter.getVersionDate() != null && !filter.isAllVersions()) {
+            filteredPersonQuery = "" +
+                    "select * " +
+                    "from (" + filteredPersonQuery + ") " +
+                    "where version <= :version_date and (version_to > :version_date or version_to is null)";
+            queryParams.addValue("version_date", filter.getVersionDate());
+        }
+
+        String sortParams = generateSortParams(pagingParams);
 
         int startIndex = pagingParams.getStartIndex();
         int endIndex = startIndex + pagingParams.getCount();
@@ -500,17 +538,58 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "select * " +
                 "from ( " +
                 "   select rownum rnum, a.* " +
-                "   from (" + personQuery + ") a " +
+                "   from (" + filteredPersonQuery + sortParams + ") a " +
                 "   where rownum <= " + endIndex +
                 ") " +
                 "where rnum > " + startIndex;
 
-        List<RefBookPerson> persons = getJdbcTemplate().query(pagedPersonQuery, PERSON_MAPPER_NEW);
-        Integer count = getJdbcTemplate().queryForObject("select count(*) from (" + personQuery + ")", Integer.class);
+        List<RefBookPerson> persons = getNamedParameterJdbcTemplate().query(pagedPersonQuery, queryParams, PERSON_MAPPER_NEW);
+        Integer count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + filteredPersonQuery + ")", queryParams, Integer.class);
 
         return new PagingResult<>(persons, count);
     }
 
+    private String generateSortParams(PagingParams pagingParams) {
+        String result = "";
+        String sortProperty = pagingParams.getProperty();
+        if (StringUtils.isNotEmpty(sortProperty)) {
+            String dbField = personDbFieldBySortProperty().get(sortProperty);
+            if (StringUtils.isNotEmpty(dbField)) {
+                result = result + "order by " + dbField;
+
+                String sortDirection = pagingParams.getDirection();
+                if (StringUtils.isNotEmpty(sortDirection)) {
+                    result = result + " " + sortDirection;
+                }
+            }
+        }
+        return result;
+    }
+
+    private static Map<String, String> personDbFieldBySortProperty() {
+        Map<String, String> result = new HashMap<>();
+
+        result.put("oldId", "old_id");
+        result.put("vip", "vip");
+        result.put("lastName", "last_name");
+        result.put("firstName", "first_name");
+        result.put("middleName", "middle_name");
+        result.put("birthDate", "birth_date");
+        result.put("docName", "vip desc, doc_name");
+        result.put("docNumber", "vip desc, doc_number");
+        result.put("citizenship", "citizenship_country_code");
+        result.put("taxpayerState", "state_code");
+        result.put("inn", "vip desc, inn");
+        result.put("innForeign", "vip desc, inn_foreign");
+        result.put("snils", "vip desc, snils");
+        result.put("address", "vip desc, postal_code");
+        result.put("source", "asnu_name");
+        result.put("version", "version");
+        result.put("versionEnd", "version_to");
+        result.put("id", "id");
+
+        return result;
+    }
 
     private final String PERSON_SQL = "select p.*, (select min(version) - interval '1' day from ref_book_person where status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to from (\n" +
             "  select frb.*, frb.version as record_version_from, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +

@@ -230,6 +230,20 @@
             }
         }])
 
+        .filter('versionsVisibilityFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (versionsVisibility) {
+                if (versionsVisibility && versionsVisibility.id !== undefined) {
+                    switch (versionsVisibility.id) {
+                        case APP_CONSTANTS.SHOW_VERSIONS.BY_DATE.id:
+                            return false;
+                        case APP_CONSTANTS.SHOW_VERSIONS.ALL.id:
+                            return true;
+                    }
+                }
+                return undefined;
+            }
+        }])
+
         /**
          * @description Преобразует значение признака активности периода в текст (Открыт/Закрыт/Не задано)
          * @param value признак активности периода
@@ -427,7 +441,7 @@
             return function (data) {
                 if (!data) return '';
                 if (data.permission === false) {
-                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 if (!data.value) return '';
                 return data.value;
@@ -437,9 +451,9 @@
         .filter('vipFormatter', ['$filter', function ($filter) {
             return function (value) {
                 if (value) {
-                    return $filter('translate')('refBook.fl.label.vip');
+                    return $filter('translate')('refBook.fl.table.label.vip');
                 } else if (value === false) {
-                    return $filter('translate')('refBook.fl.label.notVip');
+                    return $filter('translate')('refBook.fl.table.label.notVip');
                 } else {
                     return '';
                 }
@@ -452,7 +466,7 @@
                     if (oldId === person.recordId) {
                         return oldId;
                     } else {
-                        return oldId + ' ' + $filter('translate')('refBook.fl.label.duplicate');
+                        return oldId + ' ' + $filter('translate')('refBook.fl.table.label.duplicate');
                     }
                 } else {
                     return '';
@@ -464,7 +478,7 @@
             return function (data) {
                 if (!data) return '';
                 if (data.permission === false) {
-                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 if (data.value && data.value.addressType === 1) {
                     return '';
@@ -477,7 +491,7 @@
             return function (data) {
                 if (!data) return '';
                 if (data.permission === false) {
-                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 if (data.value && data.value.addressType === 0) {
                     return '';

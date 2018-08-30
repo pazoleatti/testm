@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
@@ -133,7 +134,7 @@ public interface RefBookPersonDao {
      * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
-    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams);
+    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
     PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 

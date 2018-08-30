@@ -30,25 +30,36 @@
                     $scope.flGrid.ctrl.refreshGrid(page);
                 };
 
-                /**
-                 * Инициализация объекта фильтра.
-                 */
+                $scope.filterParamsInitialState = function () {
+                    return {
+                        allVersions: APP_CONSTANTS.SHOW_VERSIONS.BY_DATE,
+                        versionDate: new Date()
+                    }
+                };
+
                 $scope.searchFilter = {
-                    params: {}
+                    params: $scope.filterParamsInitialState(),
+                    resetFilterParams: function () {
+                        $scope.searchFilter.params = $scope.filterParamsInitialState();
+                    }
                 };
 
                 /**
                  * Строковое представление содержимого фильтра.
                  * @returns {string} содержимое фильтра в виде JSON-строки
                  */
-                // $scope.filterParams = function () {
-                //     return JSON.stringify({
-                //         departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
-                //         roleIds: $filter('idExtractor')($scope.searchFilter.params.roles),
-                //         active: $filter('activityAttributeFormatter')($scope.searchFilter.params.active),
-                //         userName: $scope.searchFilter.params.userName
-                //     });
-                // };
+                $scope.filterRequestParam = function () {
+                    return JSON.stringify({
+                        id: $scope.searchFilter.params.id,
+                        lastName: $scope.searchFilter.params.lastName,
+                        firstName: $scope.searchFilter.params.firstName,
+                        middleName: $scope.searchFilter.params.middleName,
+                        birthDateFrom: $scope.searchFilter.params.birthDateFrom,
+                        birthDateTo: $scope.searchFilter.params.birthDateTo,
+                        allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
+                        versionDate: $scope.searchFilter.params.versionDate
+                    });
+                };
 
                 /**
                  * Инициализация таблицы пользователей
@@ -59,11 +70,11 @@
                     options: {
                         datatype: "angularResource",
                         angularResource: RefBookFLResource,
-                        // requestParameters: function () {
-                        //     return {
-                        //         filter: $scope.filterParams()
-                        //     }
-                        // },
+                        requestParameters: function () {
+                            return {
+                                filter: $scope.filterRequestParam()
+                            }
+                        },
                         colNames: [
                             $filter('translate')('refBook.fl.table.title.id'),
                             $filter('translate')('refBook.fl.table.title.importance'),
@@ -160,8 +171,9 @@
                                 name: 'id'
                             }
                         ],
-                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
-                        rowList: APP_CONSTANTS.COMMON.PAGINATION
+                        rowNum: 100,
+                        rowList: [5, 10, 50, 100, 200, 300],
+                        viewrecords: true
                     }
                 };
             }])

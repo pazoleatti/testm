@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
@@ -45,6 +46,7 @@ public class RefBookFlController {
         dateFormat.setLenient(false);
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(RefBookPersonFilter.class, new RequestParamEditor(RefBookPersonFilter.class));
     }
 
     /**
@@ -54,8 +56,9 @@ public class RefBookFlController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookFL")
-    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam PagingParams pagingParams) {
-        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams);
+    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam RefBookPersonFilter filter,
+                                                              @RequestParam PagingParams pagingParams) {
+        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
