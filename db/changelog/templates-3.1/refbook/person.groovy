@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.*
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.formatDate
+
 /**
  * Cкрипт справочника "Физические лица" (id = 904).
  * ref_book_id = 904
@@ -137,9 +138,9 @@ class Person extends AbstractScriptClass {
 
         fillAsnuCache()
         parseXml(parsedPersons)
-        def savedPersons = save(parsedPersons)
+        List<NaturalPerson> savedPersons = save(parsedPersons)
         checkPersons(savedPersons)
-        for (def person : savedPersons) {
+        for (NaturalPerson person : savedPersons) {
             logger.info("Создана новая запись в справочнике Физические лица: " +
                     "$person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}")
         }
@@ -332,13 +333,13 @@ class Person extends AbstractScriptClass {
             for (def person : persons) {
                 person.address != null && addressesToCreate.add(person.address)
 
-                for (def identifier : person.personIdentityList) {
+                for (PersonIdentifier identifier : person.personIdentityList) {
                     if (identifier.asnu != null && identifier.inp) {
                         identifiersToCreate.add(identifier)
                     }
                 }
 
-                for (def document : person.personDocumentList) {
+                for (PersonDocument document : person.personDocumentList) {
                     if (document.docType != null && document.documentNumber) {
                         documentsToCreate.add(document)
                     }
@@ -356,6 +357,8 @@ class Person extends AbstractScriptClass {
             insertBatchRecords(RefBook.Id.PERSON.getId(), persons, this.&mapPersonAttr)
 
             insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentsToCreate, this.&mapPersonDocumentAttr)
+
+            addReportDocsToPersons(documentsToCreate)
 
             insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), identifiersToCreate, this.&mapPersonIdentifierAttr)
 
@@ -465,33 +468,43 @@ class Person extends AbstractScriptClass {
         return value
     }
 
-    void insertBatchRecords(Long refBookId, List<? extends IdentityObject> identityObjects, Closure refBookMapper) {
-        if (identityObjects) {
-            String refBookName = getProvider(refBookId).refBook.name
-            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjects.size()}")
+    /**
+     * Метод универсального сохранения записей справочника в БД.
+     * @param refBookId id справочника
+     * @param records записи для сохранения
+     * @param makeRecordMap функция-маппер записи на таблицу в БД
+     */
+    void insertBatchRecords(Long refBookId, List<? extends IdentityObject> records, Closure makeRecordMap) {
+        if (records) {
+            def refBookProvider = getProvider(refBookId)
 
-            identityObjects.collate(1000).each { identityObjectSubList ->
+            String refBookName = refBookProvider.refBook.name
+            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${records.size()}")
+
+            // Работаем по 1000 записей
+            records.collate(1000).each { recordsPortion ->
                 checkInterrupted()
-                if (identityObjectSubList != null && !identityObjectSubList.isEmpty()) {
+                if (recordsPortion != null && !recordsPortion.isEmpty()) {
 
-                    List<RefBookRecord> recordList = []
-                    for (IdentityObject identityObject : identityObjectSubList) {
+                    // Переводим объекты в подготовленный для сохранения в базу формат
+                    List<RefBookRecord> preparedRecords = []
+                    recordsPortion.each { record ->
                         checkInterrupted()
-
-                        Map<String, RefBookValue> values = refBookMapper(identityObject)
-                        recordList.add(createRefBookRecord(values))
+                        // мапа из полей объекта
+                        Map<String, RefBookValue> recordMap = makeRecordMap(record)
+                        // спецобъект для сохранения в базу
+                        def preparedRecord = createRefBookRecord(recordMap)
+                        preparedRecords.add(preparedRecord)
                     }
 
-                    //создание записей справочника
-                    List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, versionFrom, null, recordList)
+                    // Сохраняем записи в базу. Метод называется "create" по историческим причинам.
+                    List<Long> ids = refBookProvider.createRecordVersionWithoutLock(logger, versionFrom, null, preparedRecords)
 
-                    //установка id
-                    for (int i = 0; i < identityObjectSubList.size(); i++) {
+                    // Устанавливаем id сохраненным объектам, они используются в сохранении связанных объектов
+                    recordsPortion.eachWithIndex { record, int i ->
                         checkInterrupted()
-
-                        Long id = generatedIds.get(i)
-                        IdentityObject identityObject = identityObjectSubList.get(i)
-                        identityObject.setId(id)
+                        Long id = ids.get(i)
+                        record.setId(id)
                     }
                 }
             }
@@ -571,6 +584,30 @@ class Person extends AbstractScriptClass {
         putValue(values, "RECORD_ID", NUMBER, null)
         record.setValues(values)
         return record
+    }
+
+    /**
+     * Для документов, включаемых в отчетность, добавляем взаимную ссылку в REF_BOOK_PERSON
+     */
+    void addReportDocsToPersons(List<PersonDocument> documents) {
+        documents.each { document ->
+            if (document.isIncludeReport() && document.naturalPerson) {
+                addDocToItsPerson(document)
+            }
+        }
+    }
+
+    void addDocToItsPerson(PersonDocument document) {
+        Long personId = document.naturalPerson.id
+        setPersonReportDoc(personId, document.id)
+    }
+
+    void setPersonReportDoc(Long personId, Long documentId) {
+        def personProvider = getProvider(RefBook.Id.PERSON.id)
+
+        Map<String, RefBookValue> personFields = personProvider.getRecordData(personId)
+        personFields.put('REPORT_DOC', new RefBookValue(NUMBER, documentId))
+        personProvider.updateRecordVersionWithoutLock(logger, personId, null, null, personFields)
     }
 
     /**
@@ -826,7 +863,7 @@ class Person extends AbstractScriptClass {
      */
     void fillAsnuCache() {
         List<RefBookAsnu> availableAsnu = refBookAsnuService.fetchAvailableAsnu(taUserServiceScript.getCurrentUserInfo())
-        for (RefBookAsnu asnu : availableAsnu){
+        for (RefBookAsnu asnu : availableAsnu) {
             asnuCache.put(StringUtils.cleanString(asnu.name), asnu)
         }
     }

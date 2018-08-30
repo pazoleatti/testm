@@ -1,0 +1,260 @@
+<form data-ng-controller="regPersonCtrl">
+    <div>
+        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.person' |
+            translate}}
+        </div>
+        <div class="row-fluid">
+            <div class="span6">
+                <div class="row-fluid form-group-view">
+                    <span class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.personId' | translate}}</span>
+                    <span class="span8 person-card-data">{{person.recordId}}</span>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <span class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.lastName' | translate}}</span>
+                    <span class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.lastName}}</span>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <span class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.firstName' | translate}}</span>
+                    <span class="span8 person-card-data"
+                          data-ng-if="mode == 'VIEW'">{{person.firstName}}</span>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <span class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.middleName' | translate}}</span>
+                    <span class="span8 person-card-data"
+                          data-ng-if="mode == 'VIEW'">{{person.middleName}}</span>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.birthDate' | translate}}
+                    </div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW'">{{person.birthDate | dateFormatter}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.reportDoc' | translate}}
+                    </div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.reportDoc.permission">
+                        {{person.reportDoc.value ? (person.reportDoc.value |
+                        idDocFormatter) : ""}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.reportDoc.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                    <div data-ng-controller="SelectIdDocController" data-ng-if="mode == 'EDIT'">
+                        <div>
+                            <div data-ui-select2="selectedDocs.options"
+                                 aplana-input-outer-width="400"
+                                 data-ng-init="init(person.idDocs)"
+                                 data-ng-model="person.reportDoc">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.taxPayerState' |
+                        translate}}
+                    </div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.taxPayerState.permission">
+                        {{person.taxPayerState.value ? (person.taxPayerState.value |
+                        taxPayerStateFormatter) : ""}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.taxPayerState.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.source' | translate}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.source ? (person.source |
+                        asnuFormatter) : ""}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.vip' | translate}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.vip | vipFormatter}}</div>
+                </div>
+            </div>
+
+            <div class="span6">
+                <div class="row-fluid form-group-view">
+                    <span class="span4" style="text-align: right">{{::'refBook.fl.card.label.oldId' | translate}}</span>
+                    <span class="span8 person-card-data">{{person.oldId}}</span>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <span class="span4"
+                          style="text-align: right">{{::'refBook.fl.card.label.citizenship' | translate}}</span>
+                    <span class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.citizenship.permission">{{person.citizenship.value ? (person.citizenship.value | countryFormatter) : " "}}</span>
+                    <span class="span8" style="font-style: italic" data-ng-if="!person.citizenship.permission">{{::'refBook.fl.card.label.permissionDenied' | translate}}</span>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.inn' | translate}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.inn.permission">
+                        {{person.inn.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.inn.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4"
+                         style="text-align: right">{{::'refBook.fl.card.label.innForeign' | translate}}
+                    </div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.innForeign.permission">{{person.innForeign.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.innForeign.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.snils' | translate}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.snils.permission">
+                        {{person.snils.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.snils.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.address' |
+            translate}}
+        </div>
+        <div class="row-fluid">
+            <div class="span3">
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.region' | translate}}</div>
+                    <div class="span4 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.REGION_CODE.value}}
+                    </div>
+                    <div class="span4" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.postalCode' | translate}}
+                    </div>
+                    <div class="span4 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.POSTAL_CODE.value}}
+                    </div>
+                    <div class="span4" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div class="span2">
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.district' | translate}}
+                    </div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.DISTRICT.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.city' | translate}}</div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.CITY.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div class="span2">
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.locality' | translate}}
+                    </div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.LOCALITY.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.street' | translate}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.STREET.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div class="span2">
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.house' | translate}}</div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.HOUSE.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.appartment' | translate}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.APPARTMENT.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div class="span3">
+                <div class="row-fluid form-group-view">
+                    <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.building' | translate}}
+                    </div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.BUILDING.value}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">
+            {{::'refBook.fl.card.label.addressForeign' |
+            translate}}
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="row-fluid form-group-view">
+                    <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.residenceCountry' |
+                        translate}}
+                    </div>
+                    <div class="span8 person-card-data"
+                         data-ng-if="mode == 'VIEW' && person.address.permission">
+                        {{person.address.value.COUNTRY_ID.referenceObject |
+                        countryFormatter}}
+                    </div>
+                    <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                        {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="row-fluid tab-column-left">
+                        <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.residenceAddress' |
+                            translate}}
+                        </div>
+                        <div class="span8 person-card-data"
+                             data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.ADDRESS.value}}
+                        </div>
+                        <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
+                            {{::'refBook.fl.card.label.permissionDenied' | translate}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

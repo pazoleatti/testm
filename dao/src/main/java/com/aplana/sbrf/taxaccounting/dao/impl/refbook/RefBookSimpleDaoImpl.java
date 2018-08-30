@@ -437,7 +437,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
                 aggregateUniqueAttributesAndValues(attributes, record);
 
         if (recordsGroupsUniqueAttributesValues.isEmpty()) {
-            return new ArrayList<Pair<Long, String>>();
+            return new ArrayList<>();
         }
 
         PreparedStatementData ps = queryBuilder.psGetMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record,
@@ -445,9 +445,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
         List<Pair<Long, String>> result = getNamedParameterJdbcTemplate().query(ps.getQueryString(), ps.getNamedParams(),
                 new RowMapper<Pair<Long, String>>() {
-                    
                     public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Long, String>(SqlUtils.getLong(rs, "id"), rs.getString("name"));
+                        return new Pair<>(SqlUtils.getLong(rs, "id"), rs.getString("name"));
                     }
                 });
 
@@ -750,6 +749,13 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
             recordParameters.addValue("recordId", record.getRecordId());
             recordParameters.addValue("version", new java.sql.Date(version.getTime()));
             recordParameters.addValue("status", status.getId());
+
+            // Костыль. Первичное значение OLD_ID должно быть равно RECORD_ID
+            // TODO: Придумать нормальную реализацию для этой ситуации
+            if (refBook.getId().equals(RefBook.Id.PERSON.getId())) {
+                Long oldId = record.getRecordId();
+                record.getValues().put("OLD_ID", new RefBookValue(RefBookAttributeType.NUMBER, oldId));
+            }
 
             for (RefBookAttribute attribute : refBook.getAttributes()) {
                 Object recordValue = getValueAsObjectFromRecordByAttribute(record, attribute);

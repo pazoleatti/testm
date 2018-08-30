@@ -1,0 +1,39 @@
+<form data-ng-controller="regPersonIdDocCtrl">
+    <div >
+        <div class="person-card" style="margin-top: 10px; margin-bottom: 10px;">
+            {{::'refBook.fl.card.tabs.lable.idDoc' | translate}}
+        </div>
+        <div class="row">
+            <div class="pull-left">
+                <div class="row-fluid" style="margin-left: 20px">
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="addIdDoc()"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.add' | translate}}</span>
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="editIdDoc()"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.edit' | translate}}</span>
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="deleteIdDoc()"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 20px; width: 624px">
+            <div class="flex-grid ng-cloak" data-aplana-grid style="height: 100%;"
+                 data-ng-if="idDocTab.active"
+                 data-grid-fill-space="false"
+                 data-grid-options="idDocsGrid.options"
+                 data-grid-ctrl="idDocsGrid.ctrl"
+                 data-ng-model="idDocsGrid.value"
+                 data-init-grid="fetchIdDocs(ctrl)"
+                 id = "idDocsGrid">
+            </div>
+        </div>
+    </div>
+</form>

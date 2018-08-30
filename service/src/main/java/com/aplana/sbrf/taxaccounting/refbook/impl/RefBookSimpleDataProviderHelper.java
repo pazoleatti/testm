@@ -27,7 +27,8 @@ import java.util.*;
 @Component
 @Transactional
 public class RefBookSimpleDataProviderHelper {
-    private static final String UNIQ_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде действия записи! Проверяемая запись справочника: %s";
+
+    private static final String UNIQUE_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде действия записи! Проверяемая запись справочника: %s";
     private static final String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
@@ -181,7 +182,7 @@ public class RefBookSimpleDataProviderHelper {
 
         // Строка с информацией о проверяемой строке - значения атрибутов в виде строки
         String strRecord = refBookHelper.refBookRecordToString(refBook, record);
-        return String.format(UNIQ_ERROR_MSG, attrNames.toString(), strRecord);
+        return String.format(UNIQUE_ERROR_MSG, attrNames.toString(), strRecord);
     }
 
     private void checkReferences(RefBook refBook, List<RefBookAttribute> attributes, List<RefBookRecord> records, Date versionFrom, Logger logger) {
@@ -311,89 +312,18 @@ public class RefBookSimpleDataProviderHelper {
         }
     }
 
-    @Deprecated
-        // пока нет ни иерархичных справочников, ни использования универсальной структуры
-    void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
-        //Проверка использования
-        /*if (refBook.isHierarchic()) {
-            //Поиск среди дочерних элементов
-            for (Long uniqueRecordId : uniqueRecordIds) {
-                List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBook.getId(), uniqueRecordId, versionFrom);
-                if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                    for (Pair<Date, Date> versions : childrenVersions) {
-                        if (logger != null) {
-                            String msg = "Существует дочерняя запись";
-                            if (refBook.isVersioned()) {
-                                msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
-                                        (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
-                            }
-                            logger.error(msg);
-                        }
-                    }
-                    throw new ServiceException(errorMsg);
-                }
-            }
-        }*/
-
-        //boolean used = false;
-
-        // 2017-03-17 неактуально, так как проверяются только справочники в универсальной структуре хранения
-        //Проверка использования в справочниках
-		/*List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-                RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
-                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
-        for (String refBookMsg : refBooks) {
-            logger.error(refBookMsg);
-            used = true;
-        }*/
-
-        // 2017-03-17 неактуально, так как таблица FORM_DATA у нас не используется
-        //Проверка использования в нф
-        /*List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
-        for (FormLink form : forms) {
-            //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            //if (refBook.getId() == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
-                //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
-                //formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
-                //        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
-                *//*
-                reportService.delete(form.getFormDataId(), null);
-                List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
-                for (ReportType interruptedType : interruptedReportTypes) {
-                    List<String> taskKeyList = new ArrayList<String>();
-                    if (ReportType.CSV.equals(interruptedType) || ReportType.EXCEL.equals(interruptedType)) {
-                        taskKeyList.addAll(formDataService.generateReportKeys(interruptedType, form.getFormDataId(), null));
-                    } else {
-                        taskKeyList.add(formDataService.generateTaskKey(form.getFormDataId(), interruptedType));
-                    }
-                    for(String key: taskKeyList) {
-                        LockData lockData = lockService.getLock(key);
-                        if (lockData != null) {
-                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true, cause);
-                        }
-                    }
-                }*//*
-            //} else {
-                logger.error(form.getMsg());
-                used = true;
-            //}
-        }*/
-
-        // 2017-03-17 неактуально, запрос обращается к универсальной структуре
-        //Проверка использования в настройках подразделений
-        /*List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-                RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
-                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
-        for (String configMsg : configs) {
-            logger.error(configMsg);
-            used = true;
-        }
-
-        if (used) {
-            throw new ServiceException(errorMsg);
-        }*/
-    }
-
+    /**
+     * Сохраняет записи справочника в базу.
+     *
+     * @param refBook                   объект справочника
+     * @param versionFrom               дата начала версии
+     * @param versionTo                 дата окончания версии
+     * @param records                   сохраняемые записи
+     * @param countIds                  количество ID записей, которые нужно создать
+     * @param excludedVersionEndRecords список из ID записей, которым не нужно проставлять дату окончания версии
+     * @param logger                    логгер
+     * @return список ID сохраненных записей
+     */
     List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, int countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(DBUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
@@ -409,7 +339,9 @@ public class RefBookSimpleDataProviderHelper {
                 }
                 if (versionTo == null) {
                     if (nextVersion != null && logger != null) {
-                        logger.infoIfNotExist("Установлена дата окончания актуальности версии " + formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1)) + " в связи с наличием следующей версии");
+                        logger.infoIfNotExist("Установлена дата окончания актуальности версии " +
+                                formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1)) +
+                                " в связи с наличием следующей версии");
                     }
                 } else {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {

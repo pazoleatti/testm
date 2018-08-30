@@ -233,6 +233,7 @@ alter table ref_book_person_tb add constraint ref_book_person_tb_pk primary key 
 --foreign keys
 alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
+alter table ref_book_person add constraint fk_ref_book_person_report_doc foreign key (report_doc) references ref_book_id_doc(id);
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
 alter table ref_book_tb_person add constraint tb_person_fk_department foreign key (tb_department_id) references department (id);

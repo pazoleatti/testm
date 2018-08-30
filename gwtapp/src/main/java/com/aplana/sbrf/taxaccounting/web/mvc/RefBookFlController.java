@@ -3,7 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Контроллер для работы с записями справочника "Физические лица"
@@ -46,37 +50,68 @@ public class RefBookFlController {
     /**
      * Получение списка записей справочника
      *
-     * @param recordId      Идентификатор группы версий записи справочника
-     * @param version       Дата актуальности для выборки записей справочника
-     * @param pagingParams  Параметры пейджинга
-     * @param firstName     Строка с фильтром по имени ФЛ
-     * @param lastName      Строка с фильтром по фамилии ФЛ
-     * @param searchPattern Строка с запросом поиска по справочнику
-     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @param pagingParams параметры постраничной выдачи
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookFL")
-    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam(required = false) Long recordId,
-                                                              @RequestParam(required = false) Date version,
-                                                              @RequestParam(required = false) String firstName,
-                                                              @RequestParam(required = false) String lastName,
-                                                              @RequestParam(required = false) String searchPattern,
-                                                              @RequestParam(required = false) boolean exactSearch,
-                                                              @RequestParam PagingParams pagingParams) {
-        PagingResult<RefBookPerson> records = personService.getPersons(recordId, version, pagingParams, firstName, lastName, searchPattern, exactSearch);
+    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam PagingParams pagingParams) {
+        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
     /**
+     * Получение списка ДУЛ для всех версий физлица, в т.ч. и дубликатов
+     * @param personId      идентификатор ФЛ
+     * @param pagingParams  параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @GetMapping(value = "/actions/refBookFL/fetchIdDocs/{personId}")
+    public JqgridPagedList<Map<String, RefBookValue>> fetchIdDocs(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
+        PagingResult<Map<String, RefBookValue>> resultData = personService.fetchReferencesList(personId, RefBook.Id.ID_DOC.getId(), pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(resultData, resultData.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение списка ИНП для всех версий физлица, в т.ч. и дубликатов
+     * @param personId      идентификатор ФЛ
+     * @param pagingParams  параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @GetMapping(value = "/actions/refBookFL/fetchInp/{personId}")
+    public JqgridPagedList<Map<String, RefBookValue>> fetchInp(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
+        PagingResult<Map<String, RefBookValue>> resultData = personService.fetchReferencesList(personId, RefBook.Id.ID_TAX_PAYER.getId(), pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(resultData, resultData.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение списка Тербанков для всех версий физлица, в т.ч. и дубликатов
+     * @param personId      идентификатор ФЛ
+     * @param pagingParams  параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @GetMapping(value = "/actions/refBookFL/fetchTb/{personId}")
+    public JqgridPagedList<Map<String, RefBookValue>> fetchTb(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
+        PagingResult<Map<String, RefBookValue>> resultData = personService.fetchReferencesList(personId, RefBook.Id.PERSON_TB.getId(), pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(resultData, resultData.getTotalCount(), pagingParams);
+    }
+
+    /**
      * Получение оригинала ФЛ
-     * TODO: из-за особенностей реализации старого этот метод всегда возвращает null. С Гришей решили пока оставлять как было
-     *
-     * @param personId Идентификатор ФЛ (RECORD_ID)
      * @return оригинал ФЛ
      */
-    @GetMapping(value = "/actions/refBookFL/fetchOriginal/{personId}")
-    public RefBookPerson fetchOriginal(@PathVariable Long personId) {
-        return personService.getOriginal(personId);
+    @GetMapping(value = "/actions/refBookFL/fetchOriginal/{id}")
+    public RegistryPerson fetchOriginal(@PathVariable Long id) {
+        return personService.fetchOriginal(id, new Date());
+    }
+
+    /**
+     * Получение оригинала ФЛ
+     * @param id идентификатор версии
+     * @return объект версии ФЛ
+     */
+    @GetMapping(value = "/rest/personRegistry/fetch/{id}")
+    public RegistryPerson fetchPerson(@PathVariable Long id) {
+        return personService.fetchPerson(id);
     }
 
     /**
@@ -87,8 +122,8 @@ public class RefBookFlController {
      * @return Страница списка дубликатов ФЛ
      */
     @GetMapping(value = "/actions/refBookFL/fetchDuplicates/{personId}")
-    public JqgridPagedList<RefBookPerson> fetchDuplicates(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
-        PagingResult<RefBookPerson> duplicates = personService.getDuplicates(personId, pagingParams);
+    public JqgridPagedList<RegistryPerson> fetchDuplicates(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
+        PagingResult<RegistryPerson> duplicates = personService.fetchDuplicates(personId, new Date(), pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(duplicates, duplicates.getTotalCount(), pagingParams);
     }
 

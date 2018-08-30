@@ -434,5 +434,14 @@
                     method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Версия записи реестра ФЛ
+         */
+        .factory('PersonCardResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/personRegistry/fetch/:id', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

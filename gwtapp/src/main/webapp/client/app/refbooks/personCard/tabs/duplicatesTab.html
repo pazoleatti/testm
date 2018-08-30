@@ -1,0 +1,52 @@
+<form data-ng-controller="regPersonDuplicatesCtrl">
+    <div>
+        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.original' |
+            translate}}
+        </div>
+        <div style="padding-left: 20px">
+            <a href="index.html#/personRegistry/personCard/{{original.id}}">{{original | originalFormatter}}</a>
+        </div>
+        <div class="row">
+            <div class="pull-left">
+                <div class="row-fluid" style="margin-left: 20px">
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.choose' | translate}}</span>
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.duplicates' |
+            translate}}
+        </div>
+        <div class="row">
+            <div class="pull-left">
+                <div class="row-fluid" style="margin-left: 20px">
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.add' | translate}}</span>
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 20px; width: 1203px">
+            <div class="flex-grid" data-aplana-grid style="height: 100%;"
+                 data-ng-if="duplicatesTab.active"
+                 data-grid-fill-space="false"
+                 data-grid-options="duplicatesGrid.options"
+                 data-grid-ctrl="duplicatesGrid.ctrl"
+                 data-ng-model="duyplicatesGrid.value"
+                 data-init-grid="fetchDuplicates(ctrl)"
+                 id = "duplicatesGrid">
+            </div>
+        </div>
+    </div>
+</form>

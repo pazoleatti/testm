@@ -148,8 +148,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds) {
-        return dao.getRecordData(getRefBook(), uniqRecordIds);
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqueRecordIds) {
+        return dao.getRecordData(getRefBook(), uniqueRecordIds);
     }
 
     @Override
@@ -211,7 +211,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException(CURRENT_USER_NOT_SET);
         }
-        List<String> lockedObjects = new ArrayList<String>();
+        List<String> lockedObjects = new ArrayList<>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = commonRefBookService.generateTaskKey(getRefBook().getId());
         if (lockRefBook(getRefBook(), userId, lockKey)) {
@@ -242,7 +242,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             if (!getRefBook().isVersioned() && versionFrom == null) {
                 versionFrom = new Date(0);
             }
-            List<Long> excludedVersionEndRecords = new ArrayList<Long>();
+            List<Long> excludedVersionEndRecords = new ArrayList<>();
 
             int countIds = 0;
             for (RefBookRecord record : records) {
@@ -297,7 +297,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException(CURRENT_USER_NOT_SET);
         }
-        List<String> lockedObjects = new ArrayList<String>();
+        List<String> lockedObjects = new ArrayList<>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = commonRefBookService.generateTaskKey(getRefBook().getId());
         if (lockRefBook(getRefBook(), userId, lockKey)) {
@@ -399,7 +399,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             //Получаем идентификатор записи справочника без учета версий
             Long recordId = dao.getRecordId(getRefBook(), uniqueRecordId);
 
-
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
             refBookRecord.setRecordId(recordId);
@@ -408,26 +407,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
             //Проверка корректности
             helper.checkCorrectness(logger, getRefBook(), uniqueRecordId, versionFrom, Arrays.asList(refBookRecord));
-/*
-            if (getRefBook().isHierarchic()) {
-                RefBookValue oldParent = dao.getValue(uniqueRecordId, getRefBook().getAttribute(RefBook.RECORD_PARENT_ID_ALIAS));
-                RefBookValue newParent = records.get(RefBook.RECORD_PARENT_ID_ALIAS);
-                //Проверка зацикливания
-                if (!newParent.equals(oldParent) &&
-                        refBookDao.hasLoops(uniqueRecordId, newParent.getReferenceValue())) {
-                    //Цикл найден, формируем сообщение
-                    String parentRecordName = refBookDao.buildUniqueRecordName(getRefBook(),
-                            refBookDao.getUniqueAttributeValues(getRefBookId(), newParent.getReferenceValue()));
-                    String recordName = refBookDao.buildUniqueRecordName(getRefBook(),
-                            refBookDao.getUniqueAttributeValues(getRefBookId(), uniqueRecordId));
-                    if (getRefBook().isVersioned()) {
-                        throw new ServiceException("Версия " + parentRecordName + " не может быть указана как родительская, т.к. входит в структуру дочерних элементов версии " + recordName);
-                    } else {
-                        throw new ServiceException("Запись " + parentRecordName + " не может быть указана как родительская, т.к. входит в структуру дочерних элементов записей " + recordName);
-                    }
-                }
-            }
-*/
+
             RefBookRecordVersion previousVersion = null;
             if (getRefBook().isVersioned() && !(versionFrom == null && versionTo == null)) {
                 //Получаем информацию о границах версии
@@ -457,22 +437,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                     }
                 }
 
-                //Deprecated:
-            /*
-            boolean isValuesChanged = checkValuesChanged(uniqueRecordId, record);
-            if (isValuesChanged) {
-                //Если значения атрибутов изменились, то проверяем все использования записи, без учета периода
-                helper.checkUsages(getRefBook(), Arrays.asList(uniqueRecordId), versionFrom, versionTo, null, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
-            }*/
-
                 //Обновление периода актуальности
                 if (isRelevancePeriodChanged) {
-
-                    //Deprecated:
-				/*if (!isValuesChanged) {
-                    //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
-                    helper.checkUsages(getRefBook(), Arrays.asList(uniqueRecordId), versionFrom, versionTo, false, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
-                }*/
 
                     List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
                     if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
@@ -686,22 +652,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
     }
 
-    /*
-        private void checkChildren(List<Long> uniqueRecordIds) {
-            //Если есть дочерние элементы - удалять нельзя
-            List<Date> parentVersions = refBookDao.hasChildren(getRefBookId(), uniqueRecordIds);
-            if (parentVersions != null && !parentVersions.isEmpty()) {
-                StringBuilder versions = new StringBuilder();
-                for (int i=0; i<parentVersions.size(); i++) {
-                    versions.append(formatter.get().format(parentVersions.fetchOne(i)));
-                    if (i < parentVersions.size() - 1) {
-                        versions.append(", ");
-                    }
-                }
-                throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
-            }
-        }
-    */
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         checkIfRefBookIsEditable();

@@ -1,0 +1,18 @@
+<form data-ng-controller="regPersonChangelogCtrl">
+    <div>
+        <div class="person-card" style="margin-top: 10px; margin-bottom: 10px;">
+            {{::'refBook.fl.card.tabs.title.changelog' | translate}}
+        </div>
+        <div style="margin-left: 20px; width: 1203px">
+            <div class="flex-grid" data-aplana-grid style="height: 100%;"
+                 data-ng-if="changelogTab.active"
+                 data-grid-fill-space="false"
+                 data-grid-options="changelogGrid.options"
+                 data-grid-ctrl="changelogGrid.ctrl"
+                 data-ng-model="changelogGrid.value"
+                 data-init-grid="changelog"
+                 id = "changelogGrid">
+            </div>
+        </div>
+    </div>
+</form>

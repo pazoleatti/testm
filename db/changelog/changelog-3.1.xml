@@ -1064,59 +1064,59 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
     <changeSet id="3.1-akorobko-56" author="akorobko">
         <sql splitStatements="false">
-	declare 
-	v_task_name varchar2(128):='fill_ref_dep_params block #1 - deleting';  
+	declare
+	v_task_name varchar2(128):='fill_ref_dep_params block #1 - deleting';
 	begin
 	delete from ref_book_ndfl_detail;
 	delete from ref_book_ndfl;
 
-	v_task_name:='fill_ref_dep_params block #2 - update tmp_dep_params';  		
+	v_task_name:='fill_ref_dep_params block #2 - update tmp_dep_params';
 	update tmp_dep_params set record_id=seq_ref_book_record_row_id.nextval;
-	
-	v_task_name:='fill_ref_dep_params block #3 - insert into ref_book_ndfl';  	
+
+	v_task_name:='fill_ref_dep_params block #3 - insert into ref_book_ndfl';
 	insert into ref_book_ndfl(department_id,version,record_id,status,id)
 	select a.*,seq_ref_book_record_row_id.nextval,0,seq_ref_book_record.nextval
 	from (select distinct d.dep_id,to_date(t.start_date,'dd.mm.yyyy') as version from tmp_dep_params t join tmp_depart d on upper(d.name)=trim(upper(replace(t.titname,'ё','е')))) a;
-	
-	v_task_name:='fill_ref_dep_params block #4 - insert into ref_book_ndfl_detail real data';  	
+
+	v_task_name:='fill_ref_dep_params block #4 - insert into ref_book_ndfl_detail real data';
 	insert into ref_book_ndfl_detail(id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
-									tax_organ_code,kpp,present_place,name,oktmo,phone, 
+									tax_organ_code,kpp,present_place,name,oktmo,phone,
 									signatory_id,signatory_surname,signatory_firstname,signatory_lastname,approve_doc_name)
 	with a as (
 	select t.record_id,to_date(t.start_date,'dd.mm.yyyy') as version,0 as status,n.id ref_book_ndfl_id,t.row_num as row_ord,d.dep_id as department_id,
            t.tax_end as tax_organ_code,t.kpp,pp.id as present_place,t.titname as name,o.mx_id as oktmo,t.phone,
 		   s.mx_id as signatory_id,t.surname as signatory_surname,t.name as signatory_firstname,t.lastname as signatory_lastname,t.docname as doc_name
-	from tmp_dep_params t 
+	from tmp_dep_params t
 	join tmp_depart d on (upper(d.name)=trim(upper(replace(t.titname,'ё','е'))))
 	join ref_book_ndfl n on (n.department_id=d.dep_id and n.version=to_date(t.start_date,'dd.mm.yyyy'))
 	left join ref_book_present_place pp on (pp.code=t.place and pp.status=0)
-	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id
 			   from ref_book_oktmo where status=0) o on (o.code=t.oktmo)
-	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id
 			   from ref_book_signatory_mark where status=0) s on (s.code=t.sign)
-	) 
+	)
 	select seq_ref_book_record.nextval as id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
            tax_organ_code,kpp,present_place,name,oktmo,phone,
 		   signatory_id,signatory_surname,signatory_firstname,signatory_lastname,doc_name
 	from a;
-	
-	v_task_name:='fill_ref_dep_params block #5 - insert into ref_book_ndfl_detail pseudo data';  	
+
+	v_task_name:='fill_ref_dep_params block #5 - insert into ref_book_ndfl_detail pseudo data';
 	insert into ref_book_ndfl_detail(id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
-									tax_organ_code,kpp,present_place,name,oktmo,phone, 
+									tax_organ_code,kpp,present_place,name,oktmo,phone,
 									signatory_id,signatory_surname,signatory_firstname,signatory_lastname,approve_doc_name)
 	with a as (
 	select t.record_id,to_date(trim(t.end_date),'dd.mm.yyyy')+1 as version,2 as status,n.id ref_book_ndfl_id,t.row_num as row_ord,d.dep_id as department_id,
            t.tax_end as tax_organ_code,t.kpp,pp.id as present_place,t.titname as name,o.mx_id as oktmo,t.phone,
 		   s.mx_id as signatory_id,t.surname as signatory_surname,t.name as signatory_firstname,t.lastname as signatory_lastname,t.docname as doc_name
-	from tmp_dep_params t 
+	from tmp_dep_params t
 	join tmp_depart d on (upper(d.name)=trim(upper(replace(t.titname,'ё','е'))))
 	join ref_book_ndfl n on (n.department_id=d.dep_id and n.version=to_date(t.start_date,'dd.mm.yyyy'))
 	left join ref_book_present_place pp on (pp.code=t.place and pp.status=0)
-	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id
 			   from ref_book_oktmo where status=0) o on (o.code=t.oktmo)
-	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+	left join (select distinct code,last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id
 			   from ref_book_signatory_mark where status=0) s on (s.code=t.sign)
-	) 
+	)
 	select seq_ref_book_record.nextval as id,record_id,version,status,ref_book_ndfl_id,row_ord,department_id,
            tax_organ_code,kpp,present_place,name,oktmo,phone,
 		   signatory_id,signatory_surname,signatory_firstname,signatory_lastname,doc_name
@@ -1130,6 +1130,136 @@
         <sql>
             drop table tmp_depart;
         </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5346 Добавление новых полей к справочнику физ. лиц -->
+    <changeSet id="3.1-snazin-4" author="snazin">
+        <addColumn tableName="ref_book_person">
+            <column name="report_doc"
+                    type="number(18)"
+                    remarks="Ссылка на ДУЛ, который должен включаться в отчетность">
+                <constraints references="ref_book_id_doc(id)"
+                             foreignKeyName="fk_ref_book_person_report_doc"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="ref_book_person">
+            <column name="vip"
+                    type="number(1)"
+                    defaultValueNumeric="0"
+                    remarks="Признак, показывающий, является ли ФЛ VIP-ом (0 - Не VIP, 1 - VIP)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.а -->
+    <changeSet id="3.1-snazin-5" author="snazin">
+        <sql>
+            update ref_book_person
+            set status = old_status
+            where (old_id is not null) and (old_status is not null) and (status = -1)
+        </sql>
+        <sql>
+            update ref_book_person
+            set old_id = record_id
+            where old_id is null
+        </sql>
+        <rollback>
+            <sql>
+                update ref_book_person
+                set old_id = null
+                where old_id = record_id
+            </sql>
+            <sql>
+                update ref_book_person
+                set status = -1
+                where (old_id is not null) and (status = old_status)
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.b -->
+    <changeSet id="3.1-snazin-6" author="snazin">
+        <comment>Выставлено inc_rep = 0, если в нём значение, отличное от (0, 1). Добавлено ограничение на это поле.</comment>
+        <update tableName="ref_book_id_doc">
+            <column name="inc_rep" value="0"/>
+            <where>(inc_rep &lt; 0) or (inc_rep &gt; 1)</where>
+        </update>
+        <sql>
+            alter table ref_book_id_doc
+            add constraint chk_ref_book_id_doc_inc_rep check (inc_rep in (0, 1))
+        </sql>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.b -->
+    <changeSet id="3.1-snazin-7" author="snazin">
+        <comment>Если для одного ФЛ было несколько ДУЛ с inc_rep = 1, оставляем только на одном последнем</comment>
+        <sql>
+            update ref_book_id_doc
+            set inc_rep = 0
+            where id in (
+            select id
+            from (
+            select
+            r.id,
+            r.inc_rep,
+            row_number() over (partition by person_id order by inc_rep desc, version desc, id desc) as rn,
+            sum(inc_rep) over (partition by person_id) as inc_rep_sm
+            from ref_book_id_doc r
+            )
+            where inc_rep_sm > 1 and rn > 1 and inc_rep > 0
+            )
+        </sql>
+    </changeSet>
+
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=40019337 "На что обратить внимание", пункт 2.b -->
+    <changeSet id="3.1-snazin-8" author="snazin">
+        <comment>Заполнено поле report_doc в таблице ref_book_person данными из ref_book_id_doc</comment>
+        <sql>
+            update ref_book_person person
+            set person.report_doc = (
+            select doc.id
+            from ref_book_id_doc doc
+            where (doc.person_id = person.id) and (doc.inc_rep = 1)
+            )
+            where exists (
+            select 1
+            from ref_book_id_doc doc
+            where (doc.person_id = person.id) and (doc.inc_rep = 1)
+            )
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5346 Добавление новых полей к справочнику физ. лиц -->
+    <changeSet id="3.1-snazin-9" author="snazin">
+        <comment>Добавлен check на поле ref_book_person.vip</comment>
+        <sql>
+            alter table ref_book_person
+            add constraint chk_ref_book_person_vip check (vip in (0, 1))
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3466 -->
+    <changeSet id="3.1-ytrofimov-13" author="ytrofimov">
+        <sql>
+            delete from ref_book_attribute where alias='EMPLOYEE' and ref_book_id=904
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3466 -->
+    <changeSet id="3.1-ytrofimov-14" author="ytrofimov">
+        <sql>
+            update ref_book set visible = 0 where id in (901, 902, 904, 905)
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5404 Изменить алгоритм первичной загрузки ФЛ с учетом изменений в Реестре ФЛ -->
+    <changeSet id="3.1-snazin-10" author="snazin">
+        <update tableName="blob_data">
+            <column name="data"
+                    valueBlobFile="templates-3.1/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
     </changeSet>
 
     <!--https://jira.aplana.com/browse/SBRFNDFL-5111 Обновить в системе настройки подразделений, актуальные на 01.07.2018-->
@@ -1292,7 +1422,7 @@
     <changeSet id="3.1-akorobko-59" author="akorobko">
         <sql>
             delete from ref_book_ndfl_detail where id in (
-select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id 
+select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) over(partition by code order by version rows between unbounded preceding and unbounded following) as mx_id
 			   from ref_book_oktmo where status=0 and code='92626101') and kpp='164645006' and status=2);
         </sql>
     </changeSet>
