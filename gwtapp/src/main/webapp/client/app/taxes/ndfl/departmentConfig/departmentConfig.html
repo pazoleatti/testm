@@ -16,7 +16,8 @@
                     <!--Создать-->
                     <span>
                         <button type="button" class="btn btn-default"
-                                data-ng-click="createDepartmentConfig()">
+                                data-ng-click="createDepartmentConfig()"
+                                data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.CREATE_DEPARTMENT_CONFIG)">
                             <span data-translate-once="button.create"></span>
                         </button>
                     </span>
@@ -32,7 +33,7 @@
                     <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-click="deleteDepartmentConfig()"
-                                data-ng-disabled="departmentConfigGrid.value.length === 0">
+                                data-ng-disabled="departmentConfigGrid.value.length === 0 || !checkPermissionForSelectedItems(APP_CONSTANTS.DEPARTMENT_CONFIG_PERMISSION.DELETE)">
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>

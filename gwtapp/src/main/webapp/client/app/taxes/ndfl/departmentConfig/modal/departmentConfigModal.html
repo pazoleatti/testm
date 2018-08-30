@@ -367,7 +367,8 @@
             <span data-translate-once="button.save"></span>
             <span class="btn-icon-ok"></span>
         </button>
-        <button type="button" class="btn btn-default iconed-btn" ng-show="mode === 'VIEW'" ng-click="edit()">
+        <button type="button" class="btn btn-default iconed-btn" ng-show="mode === 'VIEW'" ng-click="edit()"
+                data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.DEPARTMENT_CONFIG_PERMISSION.UPDATE)">
             <span data-translate-once="button.edit"></span>
             <span class="btn-icon-ok"></span>
         </button>

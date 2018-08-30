@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -33,6 +35,8 @@ public class DepartmentConfigController {
     private DepartmentConfigService departmentConfigService;
     @Autowired
     private SecurityService securityService;
+    @Autowired
+    private DepartmentConfigPermissionSetter departmentConfigPermissionSetter;
 
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
@@ -56,11 +60,21 @@ public class DepartmentConfigController {
             return new JqgridPagedList<>();
         }
         PagingResult<DepartmentConfig> result = departmentConfigService.fetchDepartmentConfigs(filter, pagingParams);
+
+        setDepartmentConfigsPermission(result);
+
         return JqgridPagedResourceAssembler.buildPagedList(
                 result,
                 result.getTotalCount(),
                 pagingParams
         );
+    }
+
+    private void setDepartmentConfigsPermission(PagingResult<DepartmentConfig> departmentConfigs) {
+        for (DepartmentConfig departmentConfig : departmentConfigs) {//noinspection unchecked
+            departmentConfigPermissionSetter.setPermissions(departmentConfig,
+                    DepartmentConfigPermission.UPDATE, DepartmentConfigPermission.DELETE);
+        }
     }
 
     /**

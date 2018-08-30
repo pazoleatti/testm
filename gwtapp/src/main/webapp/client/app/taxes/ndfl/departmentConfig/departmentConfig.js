@@ -18,8 +18,8 @@
             });
         }])
 
-        .controller('departmentConfigCtrl', ['$scope', '$filter', '$rootScope', 'APP_CONSTANTS', 'DepartmentConfigResource', '$http', '$aplanaModal', '$dialogs', '$logPanel',
-            function ($scope, $filter, $rootScope, APP_CONSTANTS, DepartmentConfigResource, $http, $aplanaModal, $dialogs, $logPanel) {
+        .controller('departmentConfigCtrl', ['$scope', '$filter', '$rootScope', 'APP_CONSTANTS', 'DepartmentConfigResource', '$http', '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker',
+            function ($scope, $filter, $rootScope, APP_CONSTANTS, DepartmentConfigResource, $http, $aplanaModal, $dialogs, $logPanel, PermissionChecker) {
                 var defaultDepartment = undefined;
                 $scope.searchFilter = {
                     params: getDefaultFilterParams(),
@@ -237,6 +237,18 @@
                 $scope.importDepartmentConfig = function (file) {
                     if (file) {
                         // TODO
+                    }
+                };
+
+                // Проверка прав
+                $scope.checkPermissionForSelectedItems = function (permission) {
+                    var selectedItems = $scope.departmentConfigGrid.value;
+                    if (selectedItems && selectedItems.length > 0) {
+                        return selectedItems.every(function (item) {
+                            return PermissionChecker.check(item, permission);
+                        });
+                    } else {
+                        return false;
                     }
                 };
             }])

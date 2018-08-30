@@ -37,7 +37,8 @@
                 EDIT_DECLARATION_TYPES_ASSIGNMENT: 1 << 22,
                 OPEN_DEPARTMENT_REPORT_PERIOD: 1 << 23,
                 VIEW_TAXES_SERVICE: 1 << 25,
-                VIEW_TAXES_CREATE_APPLICATION_2: 1 << 26
+                VIEW_TAXES_CREATE_APPLICATION_2: 1 << 26,
+                CREATE_DEPARTMENT_CONFIG: 1 << 27
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",
@@ -277,6 +278,10 @@
             DEPARTMENT_CONFIG_RELEVANCE_SELECT: {
                 DATE: {id: 1, name: "На дату"},
                 ALL: {id: 2, name: "Все настройки"}
+            },
+            DEPARTMENT_CONFIG_PERMISSION: {
+                UPDATE: 1 << 2,
+                DELETE: 1 << 3
             }
         });
 }());

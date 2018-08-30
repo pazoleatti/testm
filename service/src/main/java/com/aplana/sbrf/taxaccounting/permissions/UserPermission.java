@@ -142,6 +142,11 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> VIEW_TAXES_CREATE_APPLICATION_2 = new ViewTaxesCreateApplication2Permission(1 << 26);
 
+    /**
+     * Право "Ведение периодов > Открыть период"
+     */
+    public static final Permission<TAUser> CREATE_DEPARTMENT_CONFIG = new CreateDepartmentConfigPermission(1 << 27);
+
     public UserPermission(long mask) {
         super(mask);
     }
@@ -554,6 +559,19 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP);
+        }
+    }
+
+
+    public static final class CreateDepartmentConfigPermission extends UserPermission {
+
+        public CreateDepartmentConfigPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 }
