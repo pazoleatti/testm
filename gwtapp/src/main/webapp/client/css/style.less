@@ -204,6 +204,16 @@ a.collapse-link {
   margin-bottom: 5px;
 }
 
+.tab-block-title {
+  display: block;
+  padding: 0;
+  margin: 0 20px 5px 20px;
+  font-weight: bold;
+  color: #279238;
+  border: 0;
+  border-bottom: 1px dashed;
+}
+
 .accordion-heading a.accordion-toggle.collapsed,
 a.collapse-link.collapsed {
   background: url('../img/arrow-double.png') no-repeat;
@@ -336,7 +346,7 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 }
 
 .form-group-view {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .form-group .input-group {
@@ -1640,17 +1650,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   margin: 0;
 }
 
-.person-card {
-  display: block;
-  padding: 0;
-  margin: 0 20px 20px 20px;
-  font-size: 12px;
-  font-weight: bold;
-  line-height: 40px;
-  color: #279238;
-  border: 0;
-  border-bottom: 1px dashed #279238;
-}
+
 
 /* исправление ситуации, когда в гриде нет данных и из-за этого не отображается горизонтальная полоса прокрутки */
 .ui-jqgrid tr.jqgfirstrow td {
