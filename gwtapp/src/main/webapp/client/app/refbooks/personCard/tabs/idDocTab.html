@@ -1,6 +1,6 @@
 <form data-ng-controller="regPersonIdDocCtrl">
-    <div >
-        <div class="person-card" style="margin-top: 10px; margin-bottom: 10px;">
+    <div style="height: 100%;">
+        <div class="tab-block-title" style="margin-top: 10px; margin-bottom: 10px;">
             {{::'refBook.fl.card.tabs.lable.idDoc' | translate}}
         </div>
         <div class="row">
@@ -25,14 +25,14 @@
             </div>
         </div>
         <div style="margin-left: 20px; width: 624px">
-            <div class="flex-grid ng-cloak" data-aplana-grid style="height: 100%;"
+            <div class="ng-cloak" data-aplana-grid
                  data-ng-if="idDocTab.active"
                  data-grid-fill-space="false"
                  data-grid-options="idDocsGrid.options"
                  data-grid-ctrl="idDocsGrid.ctrl"
                  data-ng-model="idDocsGrid.value"
                  data-init-grid="fetchIdDocs(ctrl)"
-                 id = "idDocsGrid">
+                 id="idDocsGrid">
             </div>
         </div>
     </div>

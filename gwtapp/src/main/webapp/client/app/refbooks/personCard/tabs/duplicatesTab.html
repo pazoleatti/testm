@@ -1,6 +1,6 @@
 <form data-ng-controller="regPersonDuplicatesCtrl">
-    <div>
-        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.original' |
+    <div style="height: 100%;">
+        <div class="tab-block-title" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.original' |
             translate}}
         </div>
         <div style="padding-left: 20px">
@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        <div class="person-card" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.duplicates' |
+        <div class="tab-block-title" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.duplicates' |
             translate}}
         </div>
         <div class="row">
@@ -38,7 +38,7 @@
             </div>
         </div>
         <div style="margin-left: 20px; width: 1203px">
-            <div class="flex-grid" data-aplana-grid style="height: 100%;"
+            <div data-aplana-grid
                  data-ng-if="duplicatesTab.active"
                  data-grid-fill-space="false"
                  data-grid-options="duplicatesGrid.options"
