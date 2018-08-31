@@ -1402,7 +1402,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
     final int RNU_NDFL_DECLARATION_TYPE = 101
 
-    Map<Long, List<Map<String, RefBookValue>>> departmentConfigsCache = [:]
+    Map<Integer, List<Map<String, RefBookValue>>> departmentConfigsCache = [:]
 
     def createForm() {
         try {
