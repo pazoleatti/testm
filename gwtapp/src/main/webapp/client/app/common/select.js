@@ -768,7 +768,7 @@
                     }
 
                     if(refBookId === APP_CONSTANTS.REFBOOK.DEPARTMENT) {
-                        $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=pageActiveAvailableTB", {}, {
+                        $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
                             property: "fullName",
                             direction: "asc"
                         }, "fullNameFormatter");
