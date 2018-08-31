@@ -547,8 +547,8 @@
 
         "departmentConfig.title": "НДФЛ - Настройки подразделений",
         "departmentConfig.label.version": "Период действия настроек с {0} по {1}",
-        "departmentConfig.export.excel": "Выгрузить в xlsx",
-        "departmentConfig.import.excel": "Загрузить",
+        "departmentConfig.export.excel": "Выгрузить в Excel",
+        "departmentConfig.import.excel": "Загрузить из Excel",
         "departmentConfig.filter.label.department": "Тербанк",
         "departmentConfig.filter.label.relevance": "Отображать настройки",
         "departmentConfig.filter.label.kpp": "КПП",
@@ -790,7 +790,7 @@
         "async.title.stateDate": "Дата изменения состояния",
 
         "users.title": "Список пользователей",
-        "users.link.download.label": "Выгрузить в xlsx",
+        "users.link.download.label": "Выгрузить в Excel",
         "users.link.download.title": "Отобразить печатное представление документа",
         "users.filter.department": "Подразделение",
         "users.filter.role": "Роль",

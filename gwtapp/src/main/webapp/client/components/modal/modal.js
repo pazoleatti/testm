@@ -168,30 +168,7 @@ angular.module('aplana.modal', ['aplana.utils'])
                         });
                     }
                     $timeout(function () {
-                        var dragging = false;
-                        var mouseStartPos = {};
-                        var modalStartPos = {};
-                        modalHeader.on('mousedown', function (e) {
-                            dragging = true;
-                            mouseStartPos.x = e.clientX;
-                            mouseStartPos.y = e.clientY;
-                            modalStartPos.left = modalDomElement[0].offsetLeft;
-                            modalStartPos.top = modalDomElement[0].offsetTop;
-                            e.preventDefault();
-                        });
-                        $document.on('mouseup', function (e) {
-                            dragging = false;
-                            e.preventDefault();
-                        });
-                        $document.on('mousemove', function (e) {
-                            if (dragging) {
-                                modalDomElement.css("left", (modalStartPos.left - (mouseStartPos.x - e.clientX)) + "px");
-                                modalDomElement.css("top", (modalStartPos.top - (mouseStartPos.y - e.clientY)) + "px");
-                                e.preventDefault();
-                            }
-                        });
-
-                        //modalDomElement.draggable({handle: ".modal-header", containment: "document", cursor: 'move'});
+                        modalDomElement.draggable({handle: ".modal-header", containment: "document", cursor: 'move'});
                         modalDomElement.css("left", ($(document).width() - modalDomElement.width()) / 2);
                         modalDomElement.css("top", ($(document).height() - modalDomElement.height()) / 2);
                         modalDomElement.css("display", "block");
