@@ -1241,7 +1241,7 @@ class Check extends AbstractScriptClass {
         Map<Long, Map<String, List<NdflPersonPrepayment>>> prepaymentsByPersonIdAndOperationId =
                 ndflPersonPrepaymentList.groupBy({ NdflPersonPrepayment it -> it.ndflPersonId }, { NdflPersonPrepayment it -> it.operationId })
 
-        Map<Long, List<NdflPersonIncome>> incomesByPersonIdForCol16Sec2Check = null
+        Map<String, List<NdflPersonIncome>> incomesByPersonIdForCol16Sec2Check = null
 
         ndflPersonIncomeCache.each { Map.Entry<Long, List<NdflPersonIncome>> item ->
 
@@ -1565,13 +1565,10 @@ class Check extends AbstractScriptClass {
                         }
                         // ∑ Р.4.Гр.4
                         BigDecimal var3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
-                        if (!((var1 - (var2 - var3)).abs() < 1)) {
-                            String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") по операции \"ID операции\" (\"%s\") должно быть равно сумме произведений " +
-                                    "значений гр. \"%s\" и гр. \"%s\" (\"%s\") с округлением до целого числа - сумма значений гр. \"%s\" (\"%s\")",
-                                    C_CALCULATED_TAX, var1,
-                                    ndflPersonIncome.operationId,
-                                    C_TAX_BASE, C_TAX_RATE, var2,
-                                    P_SUMM, var3
+                        BigDecimal ВычисленноеЗначениеНалога = var2 - var3
+                        if (!((var1 - ВычисленноеЗначениеНалога).abs() < 1)) {
+                            String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                                    var1, ВычисленноеЗначениеНалога
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
@@ -1579,15 +1576,13 @@ class Check extends AbstractScriptClass {
                                     LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else {
-                        def curPersonId = personsCache.get(ndflPersonIncome.ndflPersonId).personId
                         if (ndflPersonIncome.incomeCode == "1010") {
                             // условие | Р.2.Гр.16 - ОКРУГЛ (Р.2.Гр.13 x Р.2.Гр.14/100) | < 1
                             // ОКРУГЛ (Р.2.Гр.13 x Р.2.Гр.14/100)
-                            BigDecimal var2 = ScriptUtils.round(((ndflPersonIncome.taxBase ?: 0) * (ndflPersonIncome.taxRate ?: 0)) / 100, 0)
-                            if (!((ndflPersonIncome.calculatedTax - var2).abs() < 1)) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме произведений значений гр. \"%s\" и гр. \"%s\" (\"%s\") с округлением до целого числа",
-                                        C_CALCULATED_TAX, ndflPersonIncome.calculatedTax,
-                                        C_TAX_BASE, C_TAX_RATE, var2
+                            BigDecimal ВычисленноеЗначениеНалога = ScriptUtils.round(((ndflPersonIncome.taxBase ?: 0) * (ndflPersonIncome.taxRate ?: 0)) / 100, 0)
+                            if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
+                                String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                                        ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.logCheck("%s. %s.",
@@ -1595,14 +1590,15 @@ class Check extends AbstractScriptClass {
                                         LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                             }
                         } else {
+                            def groupKey = { NdflPersonIncome income -> personsCache.get(income.ndflPersonId).inp + "_" + income.kpp + "_" + income.oktmo }
                             // Группы сортировки, вычисляем 1 раз для всех строк
                             if (incomesByPersonIdForCol16Sec2Check == null) {
                                 // отбираем все строки формы с заполненной графой 16 и у которых одновременно: 1) Р.2.Гр.14 = «13». 2) Р.2.Гр.4 ≠ «1010».
-                                // группируем по personId (справочника ФЛ)
+                                // затем группирует по инп, кпп и октмо
                                 incomesByPersonIdForCol16Sec2Check = ndflPersonIncomeList.findAll {
                                     it.calculatedTax != null && it.taxRate == 13 && it.incomeCode != "1010"
                                 }.groupBy {
-                                    personsCache.get(it.ndflPersonId).personId
+                                    groupKey(it)
                                 }
                                 // сортируем внутри каждой группы
                                 incomesByPersonIdForCol16Sec2Check.each { k, v ->
@@ -1612,46 +1608,49 @@ class Check extends AbstractScriptClass {
                                     })
                                 }
                             }
-                            // "S1" = ∑ Р.2.Гр.13 с первой строки группы сортировки по проверяемую строку включительно.
-                            // Суммируются только строки, для которых значение Р.2.Гр.10 не пустое.
-                            BigDecimal s1 = 0
-                            for (def income : incomesByPersonIdForCol16Sec2Check.get(curPersonId)) {
-                                s1 += income.taxBase ?: 0
-                                if (income == ndflPersonIncome) {
-                                    break
-                                }
-                            }
-                            // ∑ Р.2.Гр.16 с первой строки группы сортировки до проверяемой строки (проверяемая строка не включается).
-                            // Суммируются только строки, для которых значение Р.2.Гр.16 не пустое.
-                            BigDecimal s2 = 0
-                            for (def income : incomesByPersonIdForCol16Sec2Check.get(curPersonId)) {
-                                if (income == ndflPersonIncome) {
-                                    break
-                                }
-                                s2 += income.calculatedTax ?: 0
-                            }
-                            // "S3" = ∑ Р.4.Гр.4 по операции, указанной в проверяемой строке
-                            BigDecimal s3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ } ?: 0
-                            // ОКРУГЛ (S1 x Р.2.Гр.14 / 100)
-                            BigDecimal var1 = ScriptUtils.round(s1 * (ndflPersonIncome.taxRate ?: 0) / 100)
-                            // где ВычисленноеЗначениеНалога = ОКРУГЛ (S1 x Р.2.Гр.14 / 100) - S2 - S3
-                            BigDecimal ВычисленноеЗначениеНалога = var1 - s2 - s3
+                            def groupIncomes = incomesByPersonIdForCol16Sec2Check.get(groupKey(ndflPersonIncome))
+                            def groupPrepayments = ndflPersonPrepaymentList.findAll { it.operationId in groupIncomes.operationId }
+                            BigDecimal АвансовыеПлатежиПоГруппе = (BigDecimal) groupPrepayments.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
+                            BigDecimal taxBaseSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income -> income.taxBase ?: 0 } ?: 0
+                            BigDecimal calculatedTaxSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income -> income.calculatedTax ?: 0 } ?: 0
+                            BigDecimal ОбщаяДельта = (ScriptUtils.round(taxBaseSum * 13 / 100) - АвансовыеПлатежиПоГруппе - calculatedTaxSum)
+                                    .abs()
 
-                            // Для КНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | < 1
-                            if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
-                                String errMsg = String.format("Значение гр. \"%s\" должно быть равно выражению: Сумма произведений значений гр. \"%s\" и гр. \"%s\"" +
-                                        " (\"%s\") по всем операциям ФЛ кроме кода дохода (\"1010\") с округлением до целого числа - сумма значений гр. \"%s\"" +
-                                        " (\"%s\") за предыдущие операции ФЛ кроме кода дохода (\"1010\") – сумма значений гр. \"%s\" (\"%s\") по операции \"ID операции\" (\"%s\")",
-                                        C_CALCULATED_TAX,
-                                        C_TAX_BASE,
-                                        C_TAX_RATE, var1,
-                                        C_CALCULATED_TAX, s2,
-                                        P_SUMM, s3, ndflPersonIncome.operationId
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                            if (ОбщаяДельта >= 1) {
+                                // "S1" = ∑ Р.2.Гр.13 с первой строки группы сортировки по проверяемую строку включительно.
+                                // Суммируются только строки, для которых значение Р.2.Гр.10 не пустое.
+                                BigDecimal s1 = 0
+                                for (def income : groupIncomes) {
+                                    s1 += income.taxBase ?: 0
+                                    if (income == ndflPersonIncome) {
+                                        break
+                                    }
+                                }
+                                // ∑ Р.2.Гр.16 с первой строки группы сортировки до проверяемой строки (проверяемая строка не включается).
+                                // Суммируются только строки, для которых значение Р.2.Гр.16 не пустое.
+                                BigDecimal s2 = 0
+                                for (def income : groupIncomes) {
+                                    if (income == ndflPersonIncome) {
+                                        break
+                                    }
+                                    s2 += income.calculatedTax ?: 0
+                                }
+                                // "S3" = ∑ Р.4.Гр.4 по операции, указанной в проверяемой строке
+                                BigDecimal s3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
+                                // ОКРУГЛ (S1 x Р.2.Гр.14 / 100)
+                                BigDecimal var1 = ScriptUtils.round(s1 * (ndflPersonIncome.taxRate ?: 0) / 100)
+                                // где ВычисленноеЗначениеНалога = ОКРУГЛ (S1 x Р.2.Гр.14 / 100) - S2 - S3
+                                BigDecimal ВычисленноеЗначениеНалога = var1 - s2 - s3
+
+                                // Для КНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | < 1
+                                if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
+                                    String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                                            ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога)
+                                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                                    logger.logCheck("%s. %s.",
+                                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                            LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                                }
                             }
                         }
                     }
