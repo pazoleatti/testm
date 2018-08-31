@@ -752,7 +752,7 @@
                                     method: "GET",
                                     url: "controller/rest/refBook/" + refBookId + "/record/" + newValue.id.value
                                 }).success(function (record) {
-                                    $scope.record[attributeAlias].value = record
+                                    $scope.record[attributeAlias].value = record;
                                 });
                             }
                         });
@@ -767,14 +767,21 @@
                         });
                     }
 
-                    $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
-                    $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(false, true, "controller/rest/refBook/" + refBookId + "/records",
-                        $scope.config.filter,
-                        filter ? filter : '',
-                        $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
-                        $scope.config.formatter,
-                        "searchPattern"
-                    );
+                    if(refBookId === APP_CONSTANTS.REFBOOK.DEPARTMENT) {
+                        $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=pageActiveAvailableTB", {}, {
+                            property: "fullName",
+                            direction: "asc"
+                        }, "fullNameFormatter");
+                    } else {
+                        $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
+                        $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(false, true, "controller/rest/refBook/" + refBookId + "/records",
+                            $scope.config.filter,
+                            filter ? filter : '',
+                            $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
+                            $scope.config.formatter,
+                            "searchPattern"
+                        );
+                    }
                 };
             }
         ])

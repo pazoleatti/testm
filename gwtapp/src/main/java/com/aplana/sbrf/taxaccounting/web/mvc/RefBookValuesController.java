@@ -140,6 +140,18 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
+     *
+     * @return Страница значений справочника
+     */
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=pageActiveAvailableTB")
+    public JqgridPagedList<RefBookDepartment> fetchPageActiveAvailable(@RequestParam PagingParams pagingParams) {
+        List<RefBookDepartment> refBookDepartments = refBookDepartmentDataService.fetchActiveAvailableTB(securityService.currentUserInfo().getUser());
+        PagingResult<RefBookDepartment> departments = new PagingResult<>(refBookDepartments);
+        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+    }
+
+    /**
      * Получение всех значений справочника Виды форм
      *
      * @return Значения справочника
