@@ -1503,4 +1503,13 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 5</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5404 Изменить алгоритм первичной загрузки ФЛ с учетом изменений в Реестре ФЛ -->
+    <changeSet id="3.1-snazin-11" author="snazin">
+        <update tableName="blob_data">
+            <column name="data"
+                    valueBlobFile="templates-3.1/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

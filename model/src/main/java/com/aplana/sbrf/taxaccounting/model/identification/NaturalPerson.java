@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -77,12 +78,12 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     /**
      * ДУЛ включаемый в отчетность
      */
-    private PersonDocument reportDoc;
+    private PersonDocument majorDocument;
 
     /**
      * Список документов ФЛ
      */
-    private List<PersonDocument> personDocumentList;
+    private List<PersonDocument> documents;
 
     /**
      * Список назначенных подразделений на ФЛ
@@ -121,7 +122,7 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
     public NaturalPerson() {
         this.personIdentityList = new ArrayList<>();
-        this.personDocumentList = new ArrayList<>();
+        this.documents = new ArrayList<>();
         this.personTbList = new ArrayList<>();
     }
 
@@ -230,12 +231,26 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
         this.personIdentityList = personIdentityList;
     }
 
+    /**
+     * @deprecated Используйте {@link #getDocuments()}, но учтите, что он возвращает unmodifiableList
+     */
     public List<PersonDocument> getPersonDocumentList() {
-        return personDocumentList;
+        return documents;
     }
 
-    public void setPersonDocumentList(List<PersonDocument> personDocumentList) {
-        this.personDocumentList = personDocumentList;
+    public List<PersonDocument> getDocuments() {
+        return Collections.unmodifiableList(documents);
+    }
+
+    public PersonDocument getMajorDocument() {
+        return majorDocument;
+    }
+
+    public void addDocument(PersonDocument document) {
+        documents.add(document);
+        if (document.isIncludeReport()) {
+            majorDocument = document;
+        }
     }
 
     public List<PersonTb> getPersonTbList() {
@@ -260,23 +275,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
     public void setSource(RefBookAsnu source) {
         this.source = source;
-    }
-
-    public PersonDocument getIncludeReportDocument() {
-        for (PersonDocument document : personDocumentList) {
-            if (document.isIncludeReport()) {
-                return document;
-            }
-        }
-        return null;
-    }
-
-    public void setPersonDocument(PersonDocument personDocument) {
-        this.reportDoc = personDocument;
-    }
-
-    public PersonDocument getMajorDocument() {
-        return reportDoc;
     }
 
     /**
@@ -326,7 +324,7 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
                 .append("citizenship", citizenship)
                 .append("birthDate", birthDate)
                 .append("personIdentityList", personIdentityList)
-                .append("personDocumentList", personDocumentList)
+                .append("documents", documents)
                 .append("address", address)
                 .append("weight", weight)
                 .toString();

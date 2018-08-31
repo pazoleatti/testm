@@ -94,7 +94,7 @@ class Person extends AbstractScriptClass {
     }
 
     @Override
-    public void run() {
+    void run() {
         switch (formDataEvent) {
             case FormDataEvent.SAVE:
                 save()
@@ -134,15 +134,15 @@ class Person extends AbstractScriptClass {
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
-        List<NaturalPerson> parsedPersons = []
 
         fillAsnuCache()
-        parseXml(parsedPersons)
+        List<NaturalPerson> parsedPersons = parseXml()
         List<NaturalPerson> savedPersons = save(parsedPersons)
         checkPersons(savedPersons)
         for (NaturalPerson person : savedPersons) {
             logger.info("Создана новая запись в справочнике Физические лица: " +
-                    "$person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}")
+                    "$person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, " +
+                    "${person.majorDocument?.documentNumber ?: "(документ не определен)"}")
         }
         logger.info("Обработано записей из файла ${infPartCount}. В справочнике ФЛ создано ${savedPersons.size()} записей")
     }
@@ -171,7 +171,8 @@ class Person extends AbstractScriptClass {
         }
     }
 
-    void parseXml(List<NaturalPerson> persons) {
+    List<NaturalPerson> parseXml() {
+        List<NaturalPerson> persons = []
         XMLStreamReader reader = null
         try {
             XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
@@ -196,7 +197,8 @@ class Person extends AbstractScriptClass {
                         if ('АнкетДаннФЛ' == tag) {
                             parsePersonInfo(reader, person)
                         } else if ('УдЛичнФЛ' == tag) {
-                            person.personDocumentList.add(parseDocumentInfo(reader, person))
+                            PersonDocument document = parseDocumentInfo(reader, person)
+                            person.addDocument(document)
                         } else if ('СисИсточ' == tag) {
                             person.personIdentityList.add(parsePersonIdentifier(reader, person))
                         }
@@ -215,6 +217,7 @@ class Person extends AbstractScriptClass {
         } finally {
             reader?.close()
         }
+        return persons
     }
 
     /**
@@ -339,7 +342,7 @@ class Person extends AbstractScriptClass {
                     }
                 }
 
-                for (PersonDocument document : person.personDocumentList) {
+                for (PersonDocument document : person.documents) {
                     if (document.docType != null && document.documentNumber) {
                         documentsToCreate.add(document)
                     }
@@ -358,7 +361,7 @@ class Person extends AbstractScriptClass {
 
             insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentsToCreate, this.&mapPersonDocumentAttr)
 
-            addReportDocsToPersons(documentsToCreate)
+            findReportDocsAndUpdateTheirPersons(documentsToCreate)
 
             insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), identifiersToCreate, this.&mapPersonIdentifierAttr)
 
@@ -384,7 +387,7 @@ class Person extends AbstractScriptClass {
                 logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
                         " невозможно определить систему-источник. Атрибут \"Система-источник\" не был заполнен.")
             }
-            for (def document : person.personDocumentList) {
+            for (def document : person.documents) {
                 def docTypeCode = (document as PersonDocumentExt).docTypeCode
                 if (docTypeCode && document.docType == null) {
                     logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
@@ -414,7 +417,7 @@ class Person extends AbstractScriptClass {
             checkFilled((person as NaturalPersonExt).birthDateStr, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ДатаРожд")
             checkFilled((person as NaturalPersonExt).citizenshipCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.Гражд")
             checkFilled((person as NaturalPersonExt).taxPayerStatusCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.СтатусФЛ")
-            for (def document : person.personDocumentList) {
+            for (def document : person.documents) {
                 checkFilled((document as PersonDocumentExt).docTypeCode, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛВид")
                 checkFilled(document.documentNumber, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛНом")
                 checkFilled((document as PersonDocumentExt).incRepStr, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛГл")
@@ -426,24 +429,24 @@ class Person extends AbstractScriptClass {
             // 4.b Проверки данных ФЛ
             List<String> warnings = []
             // 1. Проверка корректности формата ДУЛ
-            for (def document : person.personDocumentList) {
+            for (def document : person.documents) {
                 if (document.docType && document.documentNumber) {
-                    warnings << ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер")
+                    warnings.add(ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер"))
                 }
             }
             // 2. Проверка разрешеннных символов в фамилии
-            warnings << ScriptUtils.checkLastName(person.lastName, person.citizenship.code)
+            warnings.addAll(ScriptUtils.checkLastName(person.lastName, person.citizenship.code))
             // 3. Проверка разрешеннных символов в имени
-            warnings << ScriptUtils.checkFirstName(person.firstName, person.citizenship.code)
+            warnings.addAll(ScriptUtils.checkFirstName(person.firstName, person.citizenship.code))
             // 4. Проверка корректности ИНН РФ
             def message = ScriptUtils.checkInn(person.inn)
             if (message) {
-                warnings << "Указан некорректный ИНН РФ. $message"
+                warnings.add("Указан некорректный ИНН РФ. $message")
             }
             // 5. Проверка наличия ИНП для указанных систем-источников
             for (def identifier : person.personIdentityList) {
                 if (!identifier.inp) {
-                    warnings << "В файле загрузки для системы-источника (${(identifier as PersonIdentifierExt).asnuName}) не указан элемент ИНП"
+                    warnings.add("В файле загрузки для системы-источника (${(identifier as PersonIdentifierExt).asnuName}) не указан элемент ИНП")
                 }
             }
             // 6. Проверка, что среди ДУЛ имеется ДУЛ с признаком "главный ДУЛ"
@@ -536,10 +539,9 @@ class Person extends AbstractScriptClass {
         putValue(values, "INN", STRING, person.getInn())
         putValue(values, "INN_FOREIGN", STRING, person.getInnForeign())
         putValue(values, "SNILS", STRING, person.getSnils())
-        putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate())
+        putValue(values, "BIRTH_DATE", DATE, person.getBirthDate())
         putValue(values, "BIRTH_PLACE", STRING, null)
         putValue(values, "ADDRESS", REFERENCE, person.getAddress()?.getId())
-        putValue(values, "EMPLOYEE", NUMBER, person.getEmployee() ?: 2)
         putValue(values, "CITIZENSHIP", REFERENCE, person.getCitizenship()?.getId())
         putValue(values, "TAXPAYER_STATE", REFERENCE, person.getTaxPayerStatus()?.getId())
         putValue(values, "SOURCE_ID", REFERENCE, person.source?.id)
@@ -589,7 +591,7 @@ class Person extends AbstractScriptClass {
     /**
      * Для документов, включаемых в отчетность, добавляем взаимную ссылку в REF_BOOK_PERSON
      */
-    void addReportDocsToPersons(List<PersonDocument> documents) {
+    void findReportDocsAndUpdateTheirPersons(List<PersonDocument> documents) {
         documents.each { document ->
             if (document.isIncludeReport() && document.naturalPerson) {
                 addDocToItsPerson(document)
@@ -599,10 +601,10 @@ class Person extends AbstractScriptClass {
 
     void addDocToItsPerson(PersonDocument document) {
         Long personId = document.naturalPerson.id
-        setPersonReportDoc(personId, document.id)
+        updatePersonReportDoc(personId, document.id)
     }
 
-    void setPersonReportDoc(Long personId, Long documentId) {
+    void updatePersonReportDoc(Long personId, Long documentId) {
         def personProvider = getProvider(RefBook.Id.PERSON.id)
 
         Map<String, RefBookValue> personFields = personProvider.getRecordData(personId)
@@ -682,7 +684,7 @@ class Person extends AbstractScriptClass {
         putOrUpdate(values, "PERSON_ID", REFERENCE, uniqueRecordId)
         putOrUpdate(values, "DOC_NUMBER", STRING, oldRefDul?.DOC_NUMBER?.stringValue)
         putOrUpdate(values, "ISSUED_BY", STRING, oldRefDul?.ISSUED_BY?.stringValue)
-        putOrUpdate(values, "ISSUED_DATE", RefBookAttributeType.DATE, oldRefDul?.ISSUED_DATE?.dateValue)
+        putOrUpdate(values, "ISSUED_DATE", DATE, oldRefDul?.ISSUED_DATE?.dateValue)
         //Признак включения в отчет, при создании ставиться 1, при обновлении надо выбрать с минимальным приоритетом
         putOrUpdate(values, "INC_REP", NUMBER, 1)
         putOrUpdate(values, "DOC_ID", REFERENCE, oldRefDul?.DOC_ID?.referenceValue)

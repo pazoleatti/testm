@@ -63,8 +63,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             personDocument.setNaturalPerson(person);
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
-            person.getPersonDocumentList().add(personDocument);
-            person.setPersonDocument(personDocument);
+            person.addDocument(personDocument);
         }
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
