@@ -548,7 +548,7 @@
         "departmentConfig.title": "НДФЛ - Настройки подразделений",
         "departmentConfig.label.version": "Период действия настроек с {0} по {1}",
         "departmentConfig.export.excel": "Выгрузить в Excel",
-        "departmentConfig.import.excel": "Загрузить",
+        "departmentConfig.import.excel": "Загрузить из Excel",
         "departmentConfig.filter.label.department": "Тербанк",
         "departmentConfig.filter.label.relevance": "Отображать настройки",
         "departmentConfig.filter.label.kpp": "КПП",
