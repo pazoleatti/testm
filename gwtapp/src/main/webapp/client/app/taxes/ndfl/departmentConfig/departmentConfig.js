@@ -169,6 +169,8 @@
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                        sortname: "version",
+                        sortorder: "asc",
                         viewrecords: true,
                         disableAutoLoad: true,
                         hidegrid: false,
