@@ -99,11 +99,13 @@
                         colModel: [
                             {
                                 name: 'oldId',
-                                formatter: $filter('personIdFormatter')
+                                formatter: $filter('personIdFormatter'),
+                                width: 120
                             },
                             {
                                 name: 'vip',
-                                formatter: $filter('vipFormatter')
+                                formatter: $filter('vipFormatter'),
+                                width: 80
                             },
                             {
                                 name: 'lastName',
@@ -117,11 +119,13 @@
                             },
                             {
                                 name: 'birthDate',
-                                formatter: $filter('dateFormatter')
+                                formatter: $filter('dateFormatter'),
+                                width: 80
                             },
                             {
                                 name: 'docName',
-                                formatter: $filter('permissiveFormatter')
+                                formatter: $filter('permissiveFormatter'),
+                                width: 250
                             },
                             {
                                 name: 'docNumber',
@@ -133,11 +137,13 @@
                             },
                             {
                                 name: 'taxpayerState',
-                                formatter: $filter('codeFormatter')
+                                formatter: $filter('codeFormatter'),
+                                width: 50
                             },
                             {
                                 name: 'inn',
-                                formatter: $filter('permissiveFormatter')
+                                formatter: $filter('permissiveFormatter'),
+                                width: 110
                             },
                             {
                                 name: 'innForeign',
@@ -145,15 +151,18 @@
                             },
                             {
                                 name: 'snils',
-                                formatter: $filter('permissiveFormatter')
+                                formatter: $filter('permissiveFormatter'),
+                                width: 110
                             },
                             {
                                 name: 'address',
-                                formatter: $filter('russianAddressFormatter')
+                                formatter: $filter('russianAddressFormatter'),
+                                width: 400
                             },
                             {
                                 name: 'address',
-                                formatter: $filter('foreignAddressFormatter')
+                                formatter: $filter('foreignAddressFormatter'),
+                                width: 300
                             },
                             {
                                 name: 'source',
@@ -161,11 +170,13 @@
                             },
                             {
                                 name: 'version',
-                                formatter: $filter('dateFormatter')
+                                formatter: $filter('dateFormatter'),
+                                width: 80
                             },
                             {
                                 name: 'versionEnd',
-                                formatter: $filter('dateFormatter')
+                                formatter: $filter('dateFormatter'),
+                                width: 80
                             },
                             {
                                 name: 'id'

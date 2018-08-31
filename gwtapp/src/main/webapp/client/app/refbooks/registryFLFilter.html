@@ -93,7 +93,8 @@
                                              data-ui-select2="versionSelect.options"
                                              data-ng-model="searchFilter.params.allVersions">
                                         </div>
-                                        <div class="span5 offset2">
+                                        <div class="span5 offset2"
+                                             data-ng-if="searchFilter.params.allVersions == APP_CONSTANTS.SHOW_VERSIONS.BY_DATE">
                                             <div data-aplana-datepicker
                                                  data-ng-model="searchFilter.params.versionDate">
                                             </div>

@@ -499,7 +499,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "where person.status = 0 ";
 
         if (filter.getId() != null) {
-            filterQuery = filterQuery + "and person.record_id like '%" + filter.getId() + "%' ";
+            filterQuery = filterQuery + "and person.old_id like '%" + filter.getId() + "%' ";
         }
         if (filter.getLastName() != null) {
             filterQuery = filterQuery + "and lower(person.last_name) like '%" + filter.getLastName().toLowerCase() + "%' ";
@@ -525,7 +525,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             filteredPersonQuery = "" +
                     "select * " +
                     "from (" + filteredPersonQuery + ") " +
-                    "where version <= :version_date and (version_to > :version_date or version_to is null)";
+                    "where version <= :version_date and (version_to >= :version_date or version_to is null)";
             queryParams.addValue("version_date", filter.getVersionDate());
         }
 
