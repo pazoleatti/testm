@@ -14,19 +14,6 @@
                         <div data-aplana-collapse data-label="'refBook.fl.filter.title.fl' | translate">
                             <div class="ndfl-subfilter row-fluid">
                                 <div class="span4">
-                                    <!--ИД ФЛ-->
-                                    <div class="row-fluid form-group">
-                                        <div class="span4">
-                                            <label class="control-label">{{::'refBook.fl.filter.label.id' | translate}}:</label>
-                                        </div>
-                                        <div class="span8">
-                                            <input data-ng-model="searchFilter.params.id"
-                                                   type="text"
-                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                   class="form-control"
-                                                   title="{{searchFilter.params.id}}"/>
-                                        </div>
-                                    </div>
                                     <!--Фамилия-->
                                     <div class="row-fluid form-group">
                                         <div class="span4">
@@ -75,6 +62,36 @@
                                                 ng-to-param="birthDateTo"
                                                 ng-label="title.dateOfBirthFrom">
                                         </date-from-to-filter>
+                                    </div>
+                                </div>
+                                <div class="span4">
+                                    <!--Серия и № ДУЛ-->
+                                    <div class="row-fluid form-group">
+                                        <div class="span4">
+                                            <label class="control-label">{{::'refBook.fl.filter.label.documentNumber' | translate}}:</label>
+                                        </div>
+                                        <div class="span8">
+                                            <input data-ng-model="searchFilter.params.documentNumber"
+                                                   type="text"
+                                                   placeholder="{{'filter.placeholder.search' | translate}}"
+                                                   class="form-control"
+                                                   title="{{searchFilter.params.documentNumber}}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span4">
+                                    <!--ИД ФЛ-->
+                                    <div class="row-fluid form-group">
+                                        <div class="span4">
+                                            <label class="control-label">{{::'refBook.fl.filter.label.id' | translate}}:</label>
+                                        </div>
+                                        <div class="span8">
+                                            <input data-ng-model="searchFilter.params.id"
+                                                   type="text"
+                                                   placeholder="{{'filter.placeholder.search' | translate}}"
+                                                   class="form-control"
+                                                   title="{{searchFilter.params.id}}"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

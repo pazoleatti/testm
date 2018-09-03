@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.filter.refbook;
 
 import java.util.Date;
+import java.util.List;
 
 public class RefBookPersonFilter {
 
@@ -10,7 +11,7 @@ public class RefBookPersonFilter {
     private Date birthDateFrom;
     private Date birthDateTo;
     private Long terBankId;
-    private Long documentTypeId;
+    private List<Long> documentTypes;
     private String documentNumber;
     private Long citizenshipCountryId;
     private Long taxpayerStateId;
@@ -85,12 +86,12 @@ public class RefBookPersonFilter {
         this.terBankId = terBankId;
     }
 
-    public Long getDocumentTypeId() {
-        return documentTypeId;
+    public List<Long> getDocumentTypes() {
+        return documentTypes;
     }
 
-    public void setDocumentTypeId(Long documentTypeId) {
-        this.documentTypeId = documentTypeId;
+    public void setDocumentTypes(List<Long> documentTypes) {
+        this.documentTypes = documentTypes;
     }
 
     public String getDocumentNumber() {
@@ -125,11 +126,11 @@ public class RefBookPersonFilter {
         this.sourceId = sourceId;
     }
 
-    public String  getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(String  id) {
+    public void setId(String id) {
         this.id = id;
     }
 

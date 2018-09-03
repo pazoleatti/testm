@@ -15,14 +15,10 @@ import java.util.Set;
 
 /**
  * Интерфейс DAO для работы со справочником физлиц
- *
- * @author Andrey Drunk
  */
 public interface RefBookPersonDao {
     /**
      * Очищает в NDFL_PERSON столбец PERSON_ID по declarationDataId
-     *
-     * @param declarationDataId
      */
     void clearRnuNdflPerson(Long declarationDataId);
 
@@ -33,27 +29,18 @@ public interface RefBookPersonDao {
      *
      * @param declarationDataId идентификатор НФ
      * @param asnuId            идентификатор АСНУ загрузившей данные
-     * @param version           версия записи
-     * @return
      */
     Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
      *
-     * @param declarationDataId
-     * @param asnuId            идентификатор АСНУ загрузившей данные
-     * @param version           версия записи
-     * @return
+     * @param asnuId идентификатор АСНУ загрузившей данные
      */
     Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти данные о ФЛ в ПНФ
-     *
-     * @param declarationDataId
-     * @param naturalPersonRowMapper
-     * @return
      */
     List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper);
 
@@ -67,9 +54,6 @@ public interface RefBookPersonDao {
 
     /**
      * Меняем родителя (RECORD_ID) у дубликатов
-     *
-     * @param recordIds
-     * @param originalId
      */
     void changeRecordId(List<Long> recordIds, Long originalId);
 
@@ -82,6 +66,7 @@ public interface RefBookPersonDao {
 
     /**
      * Получение оригинала ФЛ
+     *
      * @param id идентификатро версии ФЛ
      * @return Оригинал ФЛ
      */
@@ -89,9 +74,10 @@ public interface RefBookPersonDao {
 
     /**
      * Получение дубликатов ФЛ
-     * @param id            идентификатор версии ФЛ
-     * @param pagingParams  параметры пейджинга
-     * @return  список дубликатов ФЛ
+     *
+     * @param id           идентификатор версии ФЛ
+     * @param pagingParams параметры пейджинга
+     * @return список дубликатов ФЛ
      */
     List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams);
 
@@ -120,19 +106,11 @@ public interface RefBookPersonDao {
     String getPersonDocNumber(long personId);
 
     /**
-     * Получение списка дубликатов ФЛ по идентификатору ФЛ
-     *
-     * @param personId     Идентификатор ФЛ (RECORD_ID). Если
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка дубликатов ФЛ
-     */
-    PagingResult<RefBookPerson> getDuplicates(Long personId, PagingParams pagingParams);
-
-    /**
-     * Получает список ФЛ всех версий.
+     * Получает список ФЛ с пагинацией и фильтрацией.
      *
      * @param pagingParams параметры постраничной выдачи и сортировки
-     * @return список ФЛ
+     * @param filter       параметры фильтрации результатов
+     * @return страница списка ФЛ, подходящих под фильтр
      */
     PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
@@ -147,8 +125,9 @@ public interface RefBookPersonDao {
 
     /**
      * Получает версию физлица c информацией о дате начала и конца версии
-     * @param id    идентификатор версии
-     * @return  объект версии ФЛ
+     *
+     * @param id идентификатор версии
+     * @return объект версии ФЛ
      */
     RegistryPerson fetchPersonWithVersionInfo(Long id);
 }

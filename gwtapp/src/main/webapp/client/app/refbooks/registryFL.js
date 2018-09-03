@@ -56,6 +56,7 @@
                         middleName: $scope.searchFilter.params.middleName,
                         birthDateFrom: $scope.searchFilter.params.birthDateFrom,
                         birthDateTo: $scope.searchFilter.params.birthDateTo,
+                        documentNumber: $scope.searchFilter.params.documentNumber,
                         allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
                         versionDate: $scope.searchFilter.params.versionDate
                     });
