@@ -1512,4 +1512,11 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
             <where>id in (select script_id from ref_book r where r.id = 904)</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-2158 Реализовать работу с обновленными настройками подразделений-->
+    <changeSet id="3.1-dnovikov-22" author="dnovikov">
+        <sql>
+            delete from ref_book_attribute where id in (9512);
+        </sql>
+    </changeSet>
 </databaseChangeLog>

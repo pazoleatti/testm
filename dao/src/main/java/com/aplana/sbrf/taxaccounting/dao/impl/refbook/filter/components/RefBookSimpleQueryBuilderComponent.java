@@ -583,6 +583,9 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(attribute.getAlias());
             }
         }
+        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
+            ps.appendQuery(", frb.row_ord");
+        }
         ps.appendQuery(" FROM ");
         if (refBook.isVersioned()) {
             ps.appendQuery(" t, ");
@@ -650,7 +653,7 @@ public class RefBookSimpleQueryBuilderComponent {
         if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId() && pagingParams != null) {
             if (sortAttribute == null) {
                 // Для сортировки по датам версии
-                ps.appendQuery(" ORDER BY frb.").appendQuery(!StringUtils.isEmpty(pagingParams.getProperty()) ? pagingParams.getProperty() : "version")
+                ps.appendQuery(" ORDER BY frb.").appendQuery(!StringUtils.isEmpty(pagingParams.getProperty()) ? pagingParams.getProperty() : "row_ord")
                         .appendQuery(" ").appendQuery(pagingParams.getDirection());
             } else {
                 String tableAlias = "frb";
