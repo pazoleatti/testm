@@ -583,6 +583,9 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(attribute.getAlias());
             }
         }
+        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
+            ps.appendQuery(", frb.row_ord");
+        }
         ps.appendQuery(" FROM ");
         if (refBook.isVersioned()) {
             ps.appendQuery(" t, ");
