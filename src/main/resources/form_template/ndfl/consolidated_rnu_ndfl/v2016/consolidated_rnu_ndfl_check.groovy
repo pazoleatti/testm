@@ -1561,7 +1561,7 @@ class Check extends AbstractScriptClass {
                         BigDecimal var1 = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.calculatedTax ?: 0 }
                         // ∑ ОКРУГЛ(Р.2.Гр.13 x Р.2.Гр.14/100)
                         BigDecimal var2 = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income ->
-                            ScriptUtils.round((income.taxBase ?: 0) * (income.taxRate ?: 0) / 100)
+                            income.calculatedTax != null ? ScriptUtils.round((income.taxBase ?: 0) * (income.taxRate ?: 0) / 100) : 0
                         }
                         // ∑ Р.4.Гр.4
                         BigDecimal var3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
@@ -1611,7 +1611,9 @@ class Check extends AbstractScriptClass {
                             def groupIncomes = incomesByPersonIdForCol16Sec2Check.get(groupKey(ndflPersonIncome))
                             def groupPrepayments = ndflPersonPrepaymentList.findAll { it.operationId in groupIncomes.operationId }
                             BigDecimal АвансовыеПлатежиПоГруппе = (BigDecimal) groupPrepayments.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
-                            BigDecimal taxBaseSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income -> income.taxBase ?: 0 } ?: 0
+                            BigDecimal taxBaseSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income ->
+                                income.calculatedTax != null && income.taxBase ? income.taxBase : 0
+                            } ?: 0
                             BigDecimal calculatedTaxSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income -> income.calculatedTax ?: 0 } ?: 0
                             BigDecimal ОбщаяДельта = (ScriptUtils.round(taxBaseSum * 13 / 100) - АвансовыеПлатежиПоГруппе - calculatedTaxSum)
                                     .abs()
