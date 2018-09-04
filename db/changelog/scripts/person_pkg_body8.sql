@@ -45,6 +45,8 @@ package body person_pkg as
                person.record_id,
                person.source_id,
                person.old_id,
+               person.report_doc,
+               person.vip,
                tax.id as book_id_tax_payer_id,
                tax.version as tax_version,
                tax.status as tax_status,
@@ -58,6 +60,12 @@ package body person_pkg as
                doc.doc_id,
                doc.doc_number,
                doc.inc_rep,
+               tb.id as ref_book_person_tb_id,
+               tb.version as tb_version,
+               tb.status as tb_status,
+               tb.record_id as tb_record_id,
+               tb.tb_department_id,
+               tb.import_date,
                addr.id as ref_book_address_id,
                addr.version as addr_version,
                addr.status as addr_status,
@@ -98,8 +106,9 @@ package body person_pkg as
                 and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
                 and fv.record_id=fv.old_id
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
-                     left join ref_book_id_tax_payer tax on (tax.person_id=person.id and tax.status=0)
-                     left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
+                     left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
+                     left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id) and doc.status=0)
+                     left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                     
                      left join ref_book_address addr on (addr.id=person.address and addr.status=0);
 
     return v_ref;
@@ -129,6 +138,8 @@ package body person_pkg as
              person.record_id,
              person.source_id,
              person.old_id,
+             person.report_doc,
+             person.vip,
              tax.id as book_id_tax_payer_id,
              tax.version as tax_version,
              tax.status as tax_status,
@@ -142,6 +153,12 @@ package body person_pkg as
              doc.doc_id,
              doc.doc_number,
              doc.inc_rep,
+             tb.id as ref_book_person_tb_id,
+             tb.version as tb_version,
+             tb.status as tb_status,
+             tb.record_id as tb_record_id,
+             tb.tb_department_id,
+             tb.import_date,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
              addr.status as addr_status,
@@ -163,8 +180,9 @@ package body person_pkg as
                                                            replace(lower(nvl(person.middle_name,'empty')),' ','') = replace(lower(t.middle_name),' ','') and
                                                            person.birth_date=t.birth_day
                                                                )
-                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id) and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
+                           left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                     
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
@@ -190,6 +208,8 @@ package body person_pkg as
              person.record_id,
              person.source_id,
              person.old_id,
+             person.report_doc,
+             person.vip,
              tax.id as book_id_tax_payer_id,
              tax.version as tax_version,
              tax.status as tax_status,
@@ -203,6 +223,12 @@ package body person_pkg as
              doc.doc_id,
              doc.doc_number,
              doc.inc_rep,
+             tb.id as ref_book_person_tb_id,
+             tb.version as tb_version,
+             tb.status as tb_status,
+             tb.record_id as tb_record_id,
+             tb.tb_department_id,
+             tb.import_date,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
              addr.status as addr_status,
@@ -220,8 +246,9 @@ package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t join ref_book_person person on (replace(replace(nvl(person.snils,'empty'),' ',''),'-','') = replace(replace(t.snils, ' ', ''), '-', ''))
-                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id) and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
+                           left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                                                
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
@@ -247,6 +274,8 @@ package body person_pkg as
              person.record_id,
              person.source_id,
              person.old_id,
+             person.report_doc,
+             person.vip,
              tax.id as book_id_tax_payer_id,
              tax.version as tax_version,
              tax.status as tax_status,
@@ -260,6 +289,12 @@ package body person_pkg as
              doc.doc_id,
              doc.doc_number,
              doc.inc_rep,
+             tb.id as ref_book_person_tb_id,
+             tb.version as tb_version,
+             tb.status as tb_status,
+             tb.record_id as tb_record_id,
+             tb.tb_department_id,
+             tb.import_date,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
              addr.status as addr_status,
@@ -277,8 +312,9 @@ package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t join ref_book_person person on (replace(nvl(person.inn,'empty'),' ','') = replace(t.inn_np,' ',''))
-                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id) and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
+                           left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                                                
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
@@ -304,6 +340,8 @@ package body person_pkg as
              person.record_id,
              person.source_id,
              person.old_id,
+             person.report_doc,
+             person.vip,
              tax.id as book_id_tax_payer_id,
              tax.version as tax_version,
              tax.status as tax_status,
@@ -317,6 +355,12 @@ package body person_pkg as
              doc.doc_id,
              doc.doc_number,
              doc.inc_rep,
+             tb.id as ref_book_person_tb_id,
+             tb.version as tb_version,
+             tb.status as tb_status,
+             tb.record_id as tb_record_id,
+             tb.tb_department_id,
+             tb.import_date,             
              addr.id as ref_book_address_id,
              addr.version as addr_version,
              addr.status as addr_status,
@@ -334,8 +378,9 @@ package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t join ref_book_person person on (replace(nvl(person.inn_foreign,'empty'),' ','') = replace(t.inn_foreign,' ',''))
-                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id) and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
+                           left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                                                
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
@@ -361,6 +406,8 @@ package body person_pkg as
              person.record_id,
              person.source_id,
              person.old_id,
+             person.report_doc,
+             person.vip,             
              tax.id as book_id_tax_payer_id,
              tax.version as tax_version,
              tax.status as tax_status,
@@ -374,6 +421,12 @@ package body person_pkg as
              doc.doc_id,
              doc.doc_number,
              doc.inc_rep,
+             tb.id as ref_book_person_tb_id,
+             tb.version as tb_version,
+             tb.status as tb_status,
+             tb.record_id as tb_record_id,
+             tb.tb_department_id,
+             tb.import_date,             
              addr.id as ref_book_address_id,
              addr.version as addr_version,
              addr.status as addr_status,
@@ -394,7 +447,8 @@ package body person_pkg as
                            left join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace(lower(doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') = regexp_replace(lower(t.id_doc_number),'[^0-9A-Za-zА-Яа-я]','') and doc.status=0)
                            join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id)
                            join ref_book_person person on (person.id = a.id)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
+                           left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                                                
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
@@ -420,6 +474,8 @@ package body person_pkg as
              person.record_id,
              person.source_id,
              person.old_id,
+             person.report_doc,
+             person.vip,             
              tax.id as book_id_tax_payer_id,
              tax.version as tax_version,
              tax.status as tax_status,
@@ -433,6 +489,12 @@ package body person_pkg as
              doc.doc_id,
              doc.doc_number,
              doc.inc_rep,
+             tb.id as ref_book_person_tb_id,
+             tb.version as tb_version,
+             tb.status as tb_status,
+             tb.record_id as tb_record_id,
+             tb.tb_department_id,
+             tb.import_date,             
              addr.id as ref_book_address_id,
              addr.version as addr_version,
              addr.status as addr_status,
@@ -452,8 +514,9 @@ package body person_pkg as
         from ndfl_person t join ref_book_id_tax_payer tax on (tax.as_nu = p_asnu and lower(tax.inp)=lower(t.inp) and tax.status=0)
                            join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = tax.person_id)
                            join ref_book_person person on (person.id=a.id)
+                           left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id) and doc.status=0)
+                           left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                                                
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
-                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
