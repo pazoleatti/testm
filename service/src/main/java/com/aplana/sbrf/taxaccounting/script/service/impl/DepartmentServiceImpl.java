@@ -83,5 +83,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department getParentTB(int departmentId) {
         return departmentDao.getDepartmentTB(departmentId);
     }
+
+    @Override
+    public List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId) {
+        return departmentDao.fetchAllTBIdsByPerformer(performerDepartmentId);
+    }
 }
 

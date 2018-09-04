@@ -415,7 +415,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         Assert.assertNotNull(attrChangeListener.getMessages().get("INC_REP"));
         Assert.assertTrue(attrChangeListener.isUpdate());
-        Assert.assertEquals(attrChangeListener.getMessages().get("INC_REP"), "0->1");
+        Assert.assertEquals(attrChangeListener.getMessages().get("INC_REP"), "0 -> 1");
 
         //System.out.println(attrChangeListener.getMessages().get("INC_REP"));
 

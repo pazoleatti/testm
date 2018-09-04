@@ -246,6 +246,10 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
         return majorDocument;
     }
 
+    public void setMajorDocument(PersonDocument majorDocument) {
+        this.majorDocument = majorDocument;
+    }
+
     public void addDocument(PersonDocument document) {
         documents.add(document);
         if (document.isIncludeReport()) {

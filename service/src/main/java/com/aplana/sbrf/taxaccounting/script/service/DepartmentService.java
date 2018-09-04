@@ -93,4 +93,12 @@ public interface DepartmentService {
      * @return родительский территориальный банк
      */
     Department getParentTB(int departmentId);
+
+    /**
+     * Получить список ID Территориальных банков подразделений, исполнителем (без дочерних) макетов форм которых является заданное подразделение
+     *
+     * @param performerDepartmentId ID подразделения, которое является исполнителем
+     * @return список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     */
+    List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId);
 }

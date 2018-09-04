@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
+import org.apache.commons.collections4.map.HashedMap;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,6 +23,11 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
      * Карта для создания идкнтификаторов ФЛ
      */
     private Map<Long, Map<Long, PersonIdentifier>> identitiesMap;
+
+    /**
+     * Карта для создания ТБ ФЛ
+     */
+    private Map<Long, Map<Long, PersonTb>> personTbMap;
 
     /**
      * Карта для создания документов ФЛ
@@ -48,9 +54,10 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
      */
     public NaturalPersonRefbookHandler() {
         super();
-        refbookPersonTempMap = new HashMap<Long, NaturalPerson>();
-        identitiesMap = new HashMap<Long, Map<Long, PersonIdentifier>>();
-        documentsMap = new HashMap<Long, Map<Long, PersonDocument>>();
+        refbookPersonTempMap = new HashMap<>();
+        identitiesMap = new HashMap<>();
+        documentsMap = new HashMap<>();
+        personTbMap = new HashedMap<>();
     }
 
     @Override
@@ -65,7 +72,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         Map<Long, NaturalPerson> similarityPersonMap = map.get(primaryPersonId);
 
         if (similarityPersonMap == null) {
-            similarityPersonMap = new HashMap<Long, NaturalPerson>();
+            similarityPersonMap = new HashMap<>();
             map.put(primaryPersonId, similarityPersonMap);
         }
 
@@ -82,20 +89,23 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         //Добавляем документы физлица
         addPersonDocument(rs, naturalPerson);
 
+        // инициализируем ДУЛ включаемый в отчетность
+        initReportDoc(rs, naturalPerson);
+
         //Добавляем идентификаторы
         addPersonIdentifier(rs, naturalPerson);
+
+        // добавляем Тербанки
+        addPersonTb(rs, naturalPerson);
 
         //Адрес
         Address address = buildAddress(rs);
         naturalPerson.setAddress(address);
 
-        //System.out.println(rowNum + ", primaryPersonId=" + primaryPersonId + ", [" + naturalPerson + "][" + Arrays.toString(naturalPerson.getPersonDocumentList().toArray()) + "][" + Arrays.toString(naturalPerson.getPersonIdentityList().toArray()) + "][" + address + "]");
-
     }
 
     private void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
 
-        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
         Long refBookPersonId = naturalPerson.getId();
         Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
         Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
@@ -122,7 +132,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     }
 
     private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
-        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
         Long refBookPersonId = naturalPerson.getId();
         Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
         Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
@@ -149,6 +158,36 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             personDocument.setNaturalPerson(naturalPerson);
             pesonDocumentMap.put(docId, personDocument);
             naturalPerson.getPersonDocumentList().add(personDocument);
+        }
+    }
+
+    private void initReportDoc(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+        Long reportDocId = rs.getLong("report_doc");
+        PersonDocument personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
+        naturalPerson.setMajorDocument(personDocument);
+    }
+
+    private void addPersonTb(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+        Long refBookPersonId = naturalPerson.getId();
+        Long personTbId = SqlUtils.getLong(rs, "ref_book_person_tb_id");
+        Map<Long, PersonTb> tbMap = personTbMap.get(refBookPersonId);
+        Integer tbStatus = SqlUtils.getInteger(rs, "tb_status");
+
+        if (tbMap == null) {
+            tbMap = new HashMap<>();
+            personTbMap.put(refBookPersonId, tbMap);
+        }
+
+        if (personTbId != null && !tbMap.containsKey(personTbId) && tbStatus == 0) {
+            PersonTb personTb = new PersonTb();
+            personTb.setId(personTbId);
+            personTb.setRecordId(SqlUtils.getLong(rs, "tb_record_id"));
+            personTb.setStatus(tbStatus);
+            personTb.setVersion(rs.getDate("tb_version"));
+            personTb.setTbDepartmentId(rs.getInt("tb_department_id"));
+            personTb.setImportDate(rs.getDate("import_date"));
+            personTb.setNaturalPerson(naturalPerson);
+            naturalPerson.getPersonTbList().add(personTb);
         }
     }
 
