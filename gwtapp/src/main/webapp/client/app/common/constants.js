@@ -62,7 +62,8 @@
                 PERIOD_CODE: 8,
                 PRESENT_PLACE: 924,
                 SIGNATORY_MARK: 35,
-                REORGANIZATION: 928
+                REORGANIZATION: 928,
+                DOC_TYPE: 360
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

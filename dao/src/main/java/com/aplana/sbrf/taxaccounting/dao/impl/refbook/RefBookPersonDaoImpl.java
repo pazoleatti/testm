@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -391,37 +392,73 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state \n" +
                 "left join ref_book_address address on address.id = person.address \n" +
                 "left join ref_book_country address_country on address_country.id = address.country_id \n" +
-                "left join ref_book_asnu asnu on asnu.id = person.source_id ";
+                "left join ref_book_asnu asnu on asnu.id = person.source_id \n";
 
         MapSqlParameterSource queryParams = new MapSqlParameterSource();
         String filterQuery = "" +
-                "where person.status = 0 ";
+                "where person.status = 0 \n";
 
         if (filter != null) {
             // TODO вместо !null должно использоваться StringUtils.notEmpty
             if (filter.getId() != null) {
-                filterQuery = filterQuery + "and person.old_id like '%" + filter.getId() + "%' ";
+                filterQuery = filterQuery + "and person.old_id like '%" + filter.getId() + "%' \n";
             }
             if (filter.getLastName() != null) {
-                filterQuery = filterQuery + "and lower(person.last_name) like '%" + filter.getLastName().toLowerCase() + "%' ";
+                filterQuery = filterQuery + "and lower(person.last_name) like '%" + filter.getLastName().toLowerCase() + "%' \n";
             }
             if (filter.getFirstName() != null) {
-                filterQuery = filterQuery + "and lower(person.first_name) like '%" + filter.getFirstName().toLowerCase() + "%' ";
+                filterQuery = filterQuery + "and lower(person.first_name) like '%" + filter.getFirstName().toLowerCase() + "%' \n";
             }
             if (filter.getMiddleName() != null) {
-                filterQuery = filterQuery + "and lower(person.middle_name) like '%" + filter.getMiddleName().toLowerCase() + "%' ";
+                filterQuery = filterQuery + "and lower(person.middle_name) like '%" + filter.getMiddleName().toLowerCase() + "%' \n";
             }
             if (filter.getBirthDateFrom() != null) {
-                filterQuery = filterQuery + "and birth_date >= :birth_date_from ";
+                filterQuery = filterQuery + "and birth_date >= :birth_date_from \n";
                 queryParams.addValue("birth_date_from", filter.getBirthDateFrom());
             }
             if (filter.getBirthDateTo() != null) {
-                filterQuery = filterQuery + "and birth_date <= :birth_date_to ";
+                filterQuery = filterQuery + "and birth_date <= :birth_date_to \n";
                 queryParams.addValue("birth_date_to", filter.getBirthDateTo());
             }
-            if (filter.getDocumentNumber() != null) {
-                String filtered = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
-                filterQuery = filterQuery + "and regexp_replace(lower(doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') like '%" + filtered + "%' ";
+            List<Long> documentTypes = filter.getDocumentTypes();
+            if (documentTypes != null && !documentTypes.isEmpty() && filter.getDocumentNumber() != null) {
+                String filterDocNumber = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
+                String docTypesString = Joiner.on(", ").join(documentTypes);
+                filterQuery = filterQuery + "" +
+                        "and person.record_id in ( \n" +
+                        "   select record_id \n" +
+                        "   from ref_book_person p \n" +
+                        "   where p.id in ( \n" +
+                        "       select d.person_id \n" +
+                        "       from ref_book_id_doc d \n" +
+                        "       where regexp_replace(lower(d.doc_number),'[^0-9A-Za-zА-Яа-я]','') like '%" + filterDocNumber + "%' \n" +
+                        "           and d.doc_id in (" + docTypesString + ") \n" +
+                        "    ) \n" +
+                        ") \n";
+            } else if (documentTypes != null && !documentTypes.isEmpty()) {
+                String docTypesString = Joiner.on(", ").join(documentTypes);
+                filterQuery = filterQuery + "" +
+                        "and person.record_id in ( \n" +
+                        "    select record_id \n" +
+                        "    from ref_book_person p \n" +
+                        "    where p.id in ( \n" +
+                        "        select d.person_id \n" +
+                        "        from ref_book_id_doc d \n" +
+                        "        where d.doc_id in (" + docTypesString + ") \n" +
+                        "    ) \n" +
+                        ") \n";
+            } else if (filter.getDocumentNumber() != null) {
+                String filterDocNumber = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
+                filterQuery = filterQuery + "" +
+                        "and person.record_id in ( \n" +
+                        "    select record_id \n" +
+                        "    from ref_book_person p \n" +
+                        "    where p.id in ( \n" +
+                        "        select d.person_id \n" +
+                        "        from ref_book_id_doc d \n" +
+                        "        where regexp_replace(lower(d.doc_number),'[^0-9A-Za-zА-Яа-я]','') like '%" + filterDocNumber + "%' \n" +
+                        "    ) \n" +
+                        ") \n";
             }
         }
 
@@ -457,9 +494,9 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                         "from ( \n" +
                         "   select rownum rnum, a.* \n" +
                         "   from (" + finalQuery + ") a " +
-                        "   where rownum <= \n" + endIndex +
-                        ") " +
-                        "where rnum > " + startIndex;
+                    "   where rownum <= " + endIndex +
+                    ") " +
+                    "where rnum > " + startIndex;
             }
         } else {
             finalQuery = filteredPersonQuery;

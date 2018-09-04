@@ -354,7 +354,7 @@
         })
 
         /**
-         * @description Форматтер для получения наименования записи в формате "код: наименование"
+         * @description Форматтер для получения наименования записи в формате "(код) наименование"
          * @param record запись из справочника
          */
         .filter('codeNameFormatter', function () {
@@ -500,20 +500,10 @@
             }
         }])
 
-        .filter('citizenshipFormatter', function () {
-            return function (value) {
-                if (value && value.code && value.name) {
-                    return '(' + value.code + ') ' + value.name;
-                } else {
-                    return '';
-                }
-            }
-        })
-
         /**
          * Фильтр кода ДУЛ
          */
-        .filter('idDocCodeFormatter', function() {
+        .filter('idDocCodeFormatter', function () {
             return function (value) {
                 if (value) {
                     return "(" + value.referenceObject.CODE.value + ") " + value.referenceObject.NAME.value;
@@ -525,7 +515,7 @@
         /**
          *  Фильтр для простых справочных значений: строк и чисел
          */
-        .filter('simpleRefBookValueFormatter', function() {
+        .filter('simpleRefBookValueFormatter', function () {
             return function (value) {
                 if (value) {
                     return value.value
@@ -551,7 +541,7 @@
          */
         .filter('countryFormatter', function () {
             return function (value) {
-                if(value) {
+                if (value) {
                     return "(" + value.CODE.value + ") " + value.NAME.value
                 }
                 return ''
@@ -604,7 +594,7 @@
                 if (value.permission === false) {
                     return $filter('translate')('refBook.fl.label.permissionDenied');
                 }
-                if(!value.value) {
+                if (!value.value) {
                     return ''
                 }
                 return value.value;

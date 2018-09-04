@@ -952,6 +952,7 @@
         "refBook.fl.table.label.vip": "VIP",
         "refBook.fl.table.label.notVip": "Не VIP",
         "refBook.fl.table.label.duplicate": "(Дубл.)",
+        "refBook.fl.table.label.undefined": "Не заполнено",
 
         "refBook.fl.card.label.version": "Версия: ",
         "refBook.fl.card.label.versionFrom": "Действует с: ",

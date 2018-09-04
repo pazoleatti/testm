@@ -687,6 +687,12 @@
                     },
                     formatter: "codeNameFormatter"
                 };
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = {
+                    filter: {
+                        columns: ["NAME", "CODE"]
+                    },
+                    formatter: "codeNameFormatter"
+                };
                 // Физические лица
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON] = {
                     // TODO: этот справочник слишком сложный и в таком виде нормальный поиск по нему невозможен - нужен отдельный виджет. По крайней мере можно использовать новое апи для этого справочника, чтобы быстрее получать записи
@@ -767,14 +773,15 @@
                         });
                     }
 
-                    if(refBookId === APP_CONSTANTS.REFBOOK.DEPARTMENT) {
+                    if (refBookId === APP_CONSTANTS.REFBOOK.DEPARTMENT) {
                         $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
                             property: "fullName",
                             direction: "asc"
                         }, "fullNameFormatter");
                     } else {
                         $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
-                        $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(false, true, "controller/rest/refBook/" + refBookId + "/records",
+                        var isMultiple = (refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE);
+                        $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(isMultiple, true, "controller/rest/refBook/" + refBookId + "/records",
                             $scope.config.filter,
                             filter ? filter : '',
                             $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
@@ -835,10 +842,10 @@
          */
         .controller('SelectIdDocController', ['$scope', 'GetSelectOption',
             function ($scope, GetSelectOption) {
-                $scope.init = function(values, person) {
+                $scope.init = function (values, person) {
                     $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, values, false, 'idDocFormatter');
                     $scope.selectedDocs.options.data.results = values;
-                    angular.forEach(values, function(value) {
+                    angular.forEach(values, function (value) {
                         if (value.id.value === person.mainDoc.id.value) {
                             person.mainDoc = value
                         }

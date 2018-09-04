@@ -56,6 +56,7 @@
                         middleName: $scope.searchFilter.params.middleName,
                         birthDateFrom: $scope.searchFilter.params.birthDateFrom,
                         birthDateTo: $scope.searchFilter.params.birthDateTo,
+                        documentTypes: $filter('idExtractor')($scope.searchFilter.params.documentTypes),
                         documentNumber: $scope.searchFilter.params.documentNumber,
                         allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
                         versionDate: $scope.searchFilter.params.versionDate
@@ -134,7 +135,7 @@
                             },
                             {
                                 name: 'citizenship',
-                                formatter: $filter('citizenshipFormatter')
+                                formatter: $filter('codeNameFormatter')
                             },
                             {
                                 name: 'taxpayerState',
@@ -167,7 +168,7 @@
                             },
                             {
                                 name: 'source',
-                                formatter: $filter('nameFormatter')
+                                formatter: $filter('codeNameFormatter')
                             },
                             {
                                 name: 'version',
@@ -213,9 +214,13 @@
          * @param cellValue Значение ячейки
          * @param options Данные таблицы
          */
-        .filter('personLinkFormatter', function () {
+        .filter('personLinkFormatter', ['$filter', function ($filter) {
             return function (cellValue, options) {
-                return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "'>" + cellValue + "</a>";
+                var value = cellValue;
+                if (!cellValue) {
+                    value = $filter('translate')('refBook.fl.table.label.undefined');
+                }
+                return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "'>" + value + "</a>";
             };
-        })
+        }])
 }());
