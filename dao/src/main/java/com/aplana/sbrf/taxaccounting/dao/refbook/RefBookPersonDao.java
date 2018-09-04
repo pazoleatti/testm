@@ -114,6 +114,11 @@ public interface RefBookPersonDao {
      */
     PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
+    /**
+     * Возвращяет кол-во ФЛ по фильтру
+     */
+    int getPersonsCount(RefBookPersonFilter filter);
+
     PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**

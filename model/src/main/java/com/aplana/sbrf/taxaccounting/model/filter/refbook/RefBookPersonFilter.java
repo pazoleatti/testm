@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model.filter.refbook;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class RefBookPersonFilter {
+public class RefBookPersonFilter implements Serializable {
 
     private String lastName;
     private String firstName;

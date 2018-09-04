@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
@@ -13,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
@@ -46,6 +51,10 @@ public class PersonServiceImpl implements PersonService {
     private LogEntryService logEntryService;
     @Autowired
     private RefBookDao refBookDao;
+    @Autowired
+    private LockDataService lockDataService;
+    @Autowired
+    private AsyncManager asyncManager;
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -70,7 +79,7 @@ public class PersonServiceImpl implements PersonService {
         List<RegistryPerson> toReturnData = new ArrayList<>();
         List<RegistryPerson> candidates = refBookPersonDao.fetchDuplicates(id, pagingParams);
         Map<Long, List<RegistryPerson>> candidatesGroupedByOldId = new HashMap<>();
-        for(RegistryPerson candidate : candidates) {
+        for (RegistryPerson candidate : candidates) {
             List<RegistryPerson> group = candidatesGroupedByOldId.get(candidate.getOldId());
             if (group == null) {
                 group = new ArrayList<>();
@@ -80,10 +89,10 @@ public class PersonServiceImpl implements PersonService {
                 group.add(candidate);
             }
         }
-        for(List<RegistryPerson> groupContent: candidatesGroupedByOldId.values()) {
+        for (List<RegistryPerson> groupContent : candidatesGroupedByOldId.values()) {
             RegistryPerson person = resolveVersion(groupContent, actualDate);
             RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
-            if(person.getReportDoc().hasPermission()) {
+            if (person.getReportDoc().hasPermission()) {
                 PagingResult<Map<String, RefBookValue>> idDocs = refBookDao.getRecordsWithVersionInfo(refBookIdDoc, null, null, "frb.id = " + person.getReportDoc().value().get("REPORT_DOC"), null, "asc");
                 if (!idDocs.isEmpty()) {
                     person.setReportDoc(Permissive.of(commonRefBookService.dereference(refBookIdDoc, idDocs).get(0)));
@@ -99,6 +108,11 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
         return refBookPersonDao.getPersons(pagingParams, filter);
+    }
+
+    @Override
+    public int getPersonsCount(RefBookPersonFilter filter) {
+        return refBookPersonDao.getPersonsCount(filter);
     }
 
     @Override
@@ -345,7 +359,7 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-        if(person.getReportDoc().hasPermission()) {
+        if (person.getReportDoc().hasPermission()) {
             PagingResult<Map<String, RefBookValue>> idDocs = refBookDao.getRecordsWithVersionInfo(refBookIdDoc, null, null, "frb.id = " + person.getReportDoc().value().get("REPORT_DOC"), null, "asc");
             if (!idDocs.isEmpty()) {
                 person.setReportDoc(Permissive.of(commonRefBookService.dereference(refBookIdDoc, idDocs).get(0)));
@@ -369,6 +383,27 @@ public class PersonServiceImpl implements PersonService {
         return commonRefBookService.dereference(actualRefBook, result);
     }
 
+    @Override
+    public ActionResult createTaskToCreateExcel(RefBookPersonFilter filter, PagingParams pagingParams, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+        ActionResult result = new ActionResult();
+        AsyncTaskType taskType = AsyncTaskType.EXCEL_PERSONS;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("personsFilter", filter);
+        params.put("pagingParams", pagingParams);
+
+        String keyTask = "EXCEL_PERSONS_" + System.currentTimeMillis();
+        asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+            @Override
+            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+            }
+        });
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
     /**
      * Подготавливает введенный текст для использования в SQL-запросе
      *
@@ -386,9 +421,10 @@ public class PersonServiceImpl implements PersonService {
      * a. Если все версии старше актуальной даты выбирает наименьшую
      * b. Если все версии младше актуальной даты выбирает наибольшую
      * Список версий ФЛ должен быть отсортирован по дате версии по убыванию
+     *
      * @param descSortedRecords список версий ФЛ отсортированный по дате версии по убыванию
      * @param actualDate        актуальная дата по которой выбирается фверсия ФЛ
-     * @return  Выбранная версия физлица
+     * @return Выбранная версия физлица
      */
     private RegistryPerson resolveVersion(List<RegistryPerson> descSortedRecords, Date actualDate) {
         RegistryPerson toReturn = null;

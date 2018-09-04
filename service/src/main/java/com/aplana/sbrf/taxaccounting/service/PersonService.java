@@ -69,18 +69,25 @@ public interface PersonService {
 
     /**
      * Получает список ФЛ.
+     *
      * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
     PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
+     * Возвращяет кол-во ФЛ по фильтру
+     */
+    int getPersonsCount(RefBookPersonFilter filter);
+
+    /**
      * Получает список ФЛ учитывая условия фильтрации и сортировки. Метод возвращает объекты в виде мапы.
+     *
      * @param version       версия для отбора записей
      * @param pagingParams  параметры пэйджинга
      * @param filter        условие отбора записей. Фактически кусок sql-запроса для where части
      * @param sortAttribute атрибут, по которому будут отсортированы записи
-     * @return  список ФЛ
+     * @return список ФЛ
      */
     PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
@@ -97,26 +104,39 @@ public interface PersonService {
 
     /**
      * Создает фильтр поиска
+     *
      * @param firstName     значение имени
      * @param lastName      значение фамилии
      * @param searchPattern строка для по всем полям
      * @param exactSearch   искать по точному совпадению
-     * @return              часть sql запроса в виде строки
+     * @return часть sql запроса в виде строки
      */
     String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch);
 
     /**
      * Получает версию физлица из реестра ФЛ и инициализирует ее ссылочными справочными значениями
-     * @param id    идентификатор версии Физлица
-     * @return  объект версии ФЛ
+     *
+     * @param id идентификатор версии Физлица
+     * @return объект версии ФЛ
      */
     RegistryPerson fetchPerson(Long id);
 
     /**
      * Получить список значений справочника ссылающихся на физлицо, для всех версий физлица, в т.ч. и дубликатов
+     *
      * @param recordId  идентификатор Физлица
      * @param refBookId идентификатор справочника
-     * @return  список значений справочника
+     * @return список значений справочника
      */
     PagingResult<Map<String, RefBookValue>> fetchReferencesList(Long recordId, Long refBookId, PagingParams pagingParams);
+
+    /**
+     * Создаёт ассинхронную задачу на формирование Excel ФЛ по фильтру
+     *
+     * @param filter       фильтр по ФЛ
+     * @param pagingParams параметры сортировки
+     * @param userInfo     пользователь запустивший операцию
+     * @return результат создания задачи
+     */
+    ActionResult createTaskToCreateExcel(RefBookPersonFilter filter, PagingParams pagingParams, TAUserInfo userInfo);
 }

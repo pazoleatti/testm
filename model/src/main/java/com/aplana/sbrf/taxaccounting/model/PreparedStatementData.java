@@ -26,10 +26,15 @@ public class PreparedStatementData {
 	public PreparedStatementData(){
 	}
 
-	public PreparedStatementData(String query, Object... params) {
-		this.query.append(query);
-		this.params.add(params);
-	}
+    public PreparedStatementData(String query, Object... params) {
+        this.query.append(query);
+        this.params.add(params);
+    }
+
+    public PreparedStatementData(String query, MapSqlParameterSource namedParams) {
+        this.query.append(query);
+        this.namedParams = namedParams;
+    }
 
     public void setQuery(StringBuilder query){
         this.query = query;

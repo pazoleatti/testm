@@ -130,7 +130,7 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     }
 
     public RefBookAddress getAddress() {
-        return address.value();
+        return address == null ? null : address.value();
     }
 
     public void setAddress(Permissive<RefBookAddress> address) {

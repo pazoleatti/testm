@@ -23,4 +23,12 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService" />
     </bean>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LockDataService" />
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.async.AsyncManager" />
+    </bean>
+
 </beans>

@@ -1,32 +1,56 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.PersonService;
+import com.aplana.sbrf.taxaccounting.service.PrintingService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.persons.PersonsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -170,12 +194,7 @@ public class PrintingServiceImpl implements PrintingService {
             if (refBook.isHierarchic()) {
                 records = commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false);
             } else {
-                if (refBookId == RefBook.Id.PERSON.getId()) {
-                    String filter = personService.createSearchFilter(extraParams.get("FIRST_NAME"), extraParams.get("LAST_NAME"), searchPattern, exactSearch);
-                    records = personService.fetchPersonsAsMap(version, null, filter, sortAttribute);
-                } else {
-                    records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
-                }
+                records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
             }
 
             RefBookCSVReportBuilder refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, getAttributes(refBook), records, version, searchPattern, exactSearch, sortAttribute);
@@ -248,6 +267,23 @@ public class PrintingServiceImpl implements PrintingService {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при формировании отчета по справочнику.");
+        } finally {
+            cleanTmp(reportPath);
+        }
+    }
+
+    @Override
+    public String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams) {
+        pagingParams.setCount(-1);// выбираем все записи выбираем
+        List<RefBookPerson> persons = personService.getPersons(pagingParams, filter);
+        PersonsReportBuilder reportBuilder = new PersonsReportBuilder(persons, filter);
+        String reportPath = null;
+        try {
+            reportPath = reportBuilder.createReport();
+            return blobDataService.create(reportPath, "Физические_лица_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsx");
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
         } finally {
             cleanTmp(reportPath);
         }

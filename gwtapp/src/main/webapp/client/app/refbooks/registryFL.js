@@ -23,8 +23,8 @@
         /**
          * @description Контроллер страницы "Реестр Физических лиц"
          */
-        .controller('registryFLCtrl', ['$scope', '$filter', '$window', 'RefBookFLResource', 'APP_CONSTANTS',
-            function ($scope, $filter, $window, RefBookFLResource, APP_CONSTANTS) {
+        .controller('registryFLCtrl', ['$scope', '$filter', '$window', 'RefBookFLResource', 'APP_CONSTANTS', '$http', '$logPanel',
+            function ($scope, $filter, $window, RefBookFLResource, APP_CONSTANTS, $http, $logPanel) {
 
                 $scope.refreshGrid = function (page) {
                     $scope.flGrid.ctrl.refreshGrid(page);
@@ -187,6 +187,24 @@
                         rowList: [5, 10, 50, 100, 200, 300],
                         viewrecords: true
                     }
+                };
+
+                $scope.createPersonsExcel = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBookFL/export/excel",
+                        params: {
+                            filter: $scope.filterRequestParam(),
+                            pagingParams: JSON.stringify({
+                                property: $scope.flGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
+                                direction: $scope.flGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
+                            })
+                        }
+                    }).success(function (response) {
+                        if (response.uuid) {
+                            $logPanel.open('log-panel-container', response.uuid);
+                        }
+                    });
                 };
             }])
 

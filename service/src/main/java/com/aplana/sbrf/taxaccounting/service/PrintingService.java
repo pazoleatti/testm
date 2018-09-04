@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
@@ -67,4 +69,12 @@ public interface PrintingService {
      */
     String generateRefBookExcel(long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams,
                                 RefBookAttribute sortAttribute, String direction, LockStateLogger stateLogger);
+
+    /**
+     * Формирует excel-отчет реестра ФЛ
+     *
+     * @param filter фильтр на ФЛ
+     * @return uuid на блоб файла
+     */
+    String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams);
 }

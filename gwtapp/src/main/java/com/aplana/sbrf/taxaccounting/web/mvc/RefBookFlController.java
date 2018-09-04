@@ -151,4 +151,9 @@ public class RefBookFlController {
         return personService.saveOriginalAndDuplicates(securityService.currentUserInfo(), data.getCurrentPerson(),
                 data.getOriginal(), data.getNewDuplicates(), data.getDeletedDuplicates());
     }
+
+    @PostMapping(value = "/actions/refBookFL/export/excel")
+    public ActionResult exportPersonsToExcel(@RequestParam RefBookPersonFilter filter, @RequestParam PagingParams pagingParams) {
+        return personService.createTaskToCreateExcel(filter, pagingParams, securityService.currentUserInfo());
+    }
 }

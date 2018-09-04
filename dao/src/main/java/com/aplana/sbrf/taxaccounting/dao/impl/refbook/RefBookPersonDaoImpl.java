@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -360,9 +361,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
     }
 
-    @Override
-    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
-
+    private PreparedStatementData generatePersonsByFilterQuery(RefBookPersonFilter filter) {
         // Используем параллельный запрос для ускорения работы, с разрешения БД-разработчиков.
         String personQuery = "" +
                 "select /*+ parallel(person,8) first_rows(1)*/ \n" +
@@ -436,6 +435,14 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             queryParams.addValue("version_date", filter.getVersionDate());
         }
 
+        return new PreparedStatementData(filteredPersonQuery, queryParams);
+    }
+
+    @Override
+    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
+        PreparedStatementData psData = generatePersonsByFilterQuery(filter);
+
+        String filteredPersonQuery = psData.getQuery().toString();
         String finalQuery;
         if (pagingParams != null) {
             String sortParams = generateSortParams(pagingParams);
@@ -443,22 +450,31 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             int startIndex = pagingParams.getStartIndex();
             int endIndex = startIndex + pagingParams.getCount();
 
-            finalQuery = "" +
-                    "select * \n" +
-                    "from ( \n" +
-                    "   select rownum rnum, a.* \n" +
-                    "   from (" + filteredPersonQuery + sortParams + ") a " +
-                    "   where rownum <= \n" + endIndex +
-                    ") " +
-                    "where rnum > " + startIndex;
+            finalQuery = filteredPersonQuery + sortParams;
+            if (pagingParams.getCount() != -1) {
+                finalQuery = "" +
+                        "select * \n" +
+                        "from ( \n" +
+                        "   select rownum rnum, a.* \n" +
+                        "   from (" + finalQuery + ") a " +
+                        "   where rownum <= \n" + endIndex +
+                        ") " +
+                        "where rnum > " + startIndex;
+            }
         } else {
             finalQuery = filteredPersonQuery;
         }
 
-        List<RefBookPerson> persons = getNamedParameterJdbcTemplate().query(finalQuery, queryParams, PERSON_MAPPER);
-        Integer count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + filteredPersonQuery + ")", queryParams, Integer.class);
+        List<RefBookPerson> persons = getNamedParameterJdbcTemplate().query(finalQuery, psData.getNamedParams(), PERSON_MAPPER);
+        Integer count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + filteredPersonQuery + ")", psData.getNamedParams(), Integer.class);
 
         return new PagingResult<>(persons, count);
+    }
+
+    @Override
+    public int getPersonsCount(RefBookPersonFilter filter) {
+        PreparedStatementData psData = generatePersonsByFilterQuery(filter);
+        return getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + psData.getQuery().toString() + ")", psData.getNamedParams(), Integer.class);
     }
 
     private String generateSortParams(PagingParams pagingParams) {
