@@ -384,6 +384,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EXPORT_PERSONS)")
     public ActionResult createTaskToCreateExcel(RefBookPersonFilter filter, PagingParams pagingParams, TAUserInfo userInfo) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();

@@ -120,7 +120,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 return taskData;
             } catch (Exception e) {
                 LOG.error("Async task creation has been failed!", e);
-                throw new AsyncTaskException(e);
+                throw new AsyncTaskException(e.getMessage(), e);
             }
         } else {
             throw new AsyncTaskException("Cannot execute task. Lock doesn't exists.");
