@@ -187,6 +187,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             personTb.setTbDepartmentId(rs.getInt("tb_department_id"));
             personTb.setImportDate(rs.getDate("import_date"));
             personTb.setNaturalPerson(naturalPerson);
+            tbMap.put(personTbId, personTb);
             naturalPerson.getPersonTbList().add(personTb);
         }
     }
