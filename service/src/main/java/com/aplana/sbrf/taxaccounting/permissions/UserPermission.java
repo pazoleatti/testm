@@ -143,9 +143,14 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
     public static final Permission<TAUser> VIEW_TAXES_CREATE_APPLICATION_2 = new ViewTaxesCreateApplication2Permission(1 << 26);
 
     /**
-     * Право "Ведение периодов > Открыть период"
+     * Право на создание записи настроек подразделений
      */
     public static final Permission<TAUser> CREATE_DEPARTMENT_CONFIG = new CreateDepartmentConfigPermission(1 << 27);
+
+    /**
+     * Право на выгрузку реестра ФЛ
+     */
+    public static final Permission<TAUser> EXPORT_PERSONS = new ExportPersonsPermission(1 << 28);
 
     public UserPermission(long mask) {
         super(mask);
@@ -562,7 +567,6 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
     }
 
-
     public static final class CreateDepartmentConfigPermission extends UserPermission {
 
         public CreateDepartmentConfigPermission(long mask) {
@@ -572,6 +576,18 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+        }
+    }
+
+    public static final class ExportPersonsPermission extends UserPermission {
+
+        public ExportPersonsPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 }

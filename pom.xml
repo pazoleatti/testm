@@ -17,7 +17,6 @@
         <module>gwtapp</module>
         <module>dynacache-spring</module>
         <module>fonts</module>
-        <module>gwt-widget</module>
         <module>script-test</module>
         <module>schematron</module>
     </modules>
@@ -26,8 +25,6 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwt.version>2.5.1</gwt.version>
-        <gwtp.version>1.0</gwtp.version>
         <jetty.version>6.1H.22</jetty.version>
         <springframework.version>4.3.0.RELEASE</springframework.version>
         <springsecurity.version>3.2.3.RELEASE</springsecurity.version>
@@ -47,64 +44,6 @@
 
     <dependencyManagement>
         <dependencies>
-
-            <!-- GWT -->
-            <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-user</artifactId>
-                <version>${gwt.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-servlet</artifactId>
-                <version>${gwt.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-
-            <!-- GIN -->
-            <dependency>
-                <groupId>com.google.gwt.inject</groupId>
-                <artifactId>gin</artifactId>
-                <version>2.0.0</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- GWT Platform -->
-            <dependency>
-                <groupId>com.gwtplatform</groupId>
-                <artifactId>gwtp-mvp-client</artifactId>
-                <version>${gwtp.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.gwtplatform</groupId>
-                <artifactId>gwtp-dispatch-client</artifactId>
-                <version>${gwtp.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.gwtplatform</groupId>
-                <artifactId>gwtp-dispatch-server-spring</artifactId>
-                <version>${gwtp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.gwtplatform</groupId>
-                <artifactId>gwtp-processors</artifactId>
-                <version>${gwtp.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.gwtplatform</groupId>
-                <artifactId>gwtp-build-tools</artifactId>
-                <version>${gwtp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.gwtplatform</groupId>
-                <artifactId>gwtp-tester</artifactId>
-                <version>${gwtp.version}</version>
-            </dependency>
-
             <!-- Jetty -->
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
@@ -551,16 +490,6 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <version>${gwt.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-eclipse-plugin</artifactId>
-                    <version>2.9</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

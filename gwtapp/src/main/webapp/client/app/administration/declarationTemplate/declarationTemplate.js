@@ -122,6 +122,7 @@
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {
+                            file.msClose();
                             if (response.data && response.data.uuid) {
                                 $logPanel.open('log-panel-container', response.data.uuid);
                                 if (response.data.success) {

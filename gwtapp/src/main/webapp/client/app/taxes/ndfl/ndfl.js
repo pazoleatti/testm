@@ -656,6 +656,7 @@
                             params: {force: !!force}
                         }).progress(function (e) {
                         }).then(function (response) {
+                            file.msClose();
                             if (response.data.uuid && response.data.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.data.uuid);
                             } else {

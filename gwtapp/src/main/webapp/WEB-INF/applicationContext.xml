@@ -9,18 +9,6 @@
 
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.main.api.server"/>
 
-    <bean class="com.aplana.sbrf.taxaccounting.web.main.entry.server.MainServerModule"/>
-
-    <bean id="logger" class="com.gwtplatform.dispatch.server.spring.LoggerFactoryBean">
-        <constructor-arg>
-            <bean class="java.util.logging.Logger" factory-method="getAnonymousLogger">
-                <property name="level">
-                    <value>FINEST</value>
-                </property>
-            </bean>
-        </constructor-arg>
-    </bean>
-
     <!--Спринговая реализация для запросов на загрузку файлов.
     Получает файловый ресурс из запроса, позволяя инъктить его в метод-->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">

@@ -13,8 +13,6 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -45,6 +43,8 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
  */
 @RestController
 public class DeclarationDataController {
+    public static final int DEFAULT_IMAGE_RESOLUTION = 150;
+
     private DeclarationDataService declarationService;
     private SecurityService securityService;
     private ReportService reportService;
@@ -208,7 +208,7 @@ public class DeclarationDataController {
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         OutputStream out = response.getOutputStream();
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
-                pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
+                pageId, "png", DEFAULT_IMAGE_RESOLUTION);
         IOUtils.closeQuietly(pdfData);
         IOUtils.closeQuietly(out);
     }
@@ -430,7 +430,7 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      * @param action
-     * @return модель {@link CheckDeclarationDataResult}, в которой содержаться данные о результате проверки декларации
+     * @return модель , в которой содержаться данные о результате проверки декларации
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/check", produces = MediaType.APPLICATION_JSON_VALUE)
     public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestBody CheckDeclarationDataAction action) {

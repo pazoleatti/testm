@@ -7,17 +7,27 @@ import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Абстрактная реализация асинхронной задачи.
@@ -125,12 +135,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
             throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskName));
         }
         if (taskTypeData.getTaskLimit() != 0 && taskTypeData.getTaskLimit() < value) {
-            Logger logger = new Logger();
-            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-            throw new AsyncTaskException(new ServiceLoggerException(AsyncTask.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
+            throw new ServiceException(AsyncTask.CHECK_TASK,
                     taskName,
-                    String.format(msg, taskTypeData.getTaskLimit())));
+                    String.format(msg, taskTypeData.getTaskLimit()));
         } else if (taskTypeData.getShortQueueLimit() == 0 || taskTypeData.getShortQueueLimit() >= value) {
             return AsyncQueue.SHORT;
         }
@@ -239,6 +246,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     /**
      * Сбор текстов ошибок из логгера
+     *
      * @param logger внутренний логгер
      * @return сборный текст ошибок из логгера
      */

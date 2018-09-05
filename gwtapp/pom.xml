@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>gwt-widget</artifactId>
+            <artifactId>fonts</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -105,61 +105,10 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
 
-        <!-- GWT -->
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-servlet</artifactId>
-        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.0.1</version>
-        </dependency>
-
-        <!-- Зависимость на gwt-dev нужна для переопределения генератора прокси для удаленных сервисов. -->
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-            <version>${gwt.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- GWT DI dependencies -->
-        <dependency>
-            <groupId>com.google.gwt.inject</groupId>
-            <artifactId>gin</artifactId>
-        </dependency>
-
-        <!-- GWTP -->
-        <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-mvp-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-dispatch-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-dispatch-server</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-dispatch-server-spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-dispatch-shared</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-processors</artifactId>
         </dependency>
 
         <!-- Jackson -->
@@ -215,11 +164,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.gwtplatform</groupId>
-            <artifactId>gwtp-tester</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
@@ -250,45 +194,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <configuration>
-                    <logLevel>INFO</logLevel>
-                    <hostedWebapp>${webappDirectory}</hostedWebapp>
-                    <copyWebapp>true</copyWebapp>
-                    <runTarget>Main.jsp</runTarget>
-                    <modules>
-                        <module>com.aplana.sbrf.taxaccounting.web.main.Main</module>
-                    </modules>
-                    <compileSourcesArtifacts>
-                        <compileSourcesArtifact>${project.groupId}:model</compileSourcesArtifact>
-                    </compileSourcesArtifacts>
-                    <extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m</extraJvmArgs>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <useProjectReferences>false</useProjectReferences>
-                    <additionalBuildcommands>
-                        <buildcommand>com.google.gwt.eclipse.core.gwtProjectValidator</buildcommand>
-                    </additionalBuildcommands>
-                    <additionalProjectnatures>
-                        <projectnature>com.google.gwt.eclipse.core.gwtNature</projectnature>
-                    </additionalProjectnatures>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.gwtplatform</groupId>
-                        <artifactId>gwtp-build-tools</artifactId>
-                        <version>${gwtp.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
             <plugin>
                 <groupId>org.lesscss</groupId>
                 <artifactId>lesscss-maven-plugin</artifactId>
@@ -472,22 +377,6 @@
                     </resource>
                 </resources>
                 <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>gwt-maven-plugin</artifactId>
-                        <configuration>
-                            <optimizationLevel>9</optimizationLevel>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>compile</goal>
-                                    <goal>test</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>

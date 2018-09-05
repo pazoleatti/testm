@@ -113,7 +113,7 @@
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
-		<welcome-file>Main.jsp</welcome-file>
+		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
 	<resource-ref>
