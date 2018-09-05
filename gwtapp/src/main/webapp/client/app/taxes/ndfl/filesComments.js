@@ -145,6 +145,7 @@
                             method: 'POST'
                         }).progress(function (e) {
                         }).then(function (response) {
+                            file.msClose();
                             if (response.data && response.data.uuid) {
                                 var newFile = [{
                                     uuid: response.data.uuid,

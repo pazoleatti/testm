@@ -20,6 +20,7 @@
                         data: {declarationTemplateId: $scope.declarationTemplate.id, uploader: file}
                     }).progress(function (e) {
                     }).then(function (response) {
+                        file.msClose();
                         var uuid = response.data;
                         if (uuid) {
                             $scope.declarationTemplate.xsdId = uuid;
