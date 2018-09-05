@@ -38,7 +38,8 @@
                 OPEN_DEPARTMENT_REPORT_PERIOD: 1 << 23,
                 VIEW_TAXES_SERVICE: 1 << 25,
                 VIEW_TAXES_CREATE_APPLICATION_2: 1 << 26,
-                CREATE_DEPARTMENT_CONFIG: 1 << 27
+                CREATE_DEPARTMENT_CONFIG: 1 << 27,
+                EXPORT_PERSONS: 1 << 28
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

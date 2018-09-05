@@ -748,6 +748,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getShortQueueLimit() >= asyncParam.getTaskLimit()) {
             logger.error(ASYNC_PARAM_INTERVAL_ERROR, asyncParam.getName(), asyncParam.getTaskLimit(), asyncParam.getShortQueueLimit());
         }
+        if (AsyncTaskType.EXCEL_PERSONS.getId() == asyncParam.getId()) {
+            if (asyncParam.getTaskLimit() == null || asyncParam.getTaskLimit() > 1_000_000) {
+                logger.error("Количество выгружаемых в файл Excel строк не может быть более 1 000 000");
+            }
+        }
 
     }
 

@@ -196,7 +196,7 @@ public class ConfigurationController {
      * @return uuid идентификатор логгера с результатом сохранения параметра
      */
     @PostMapping(value = "/rest/commonParam/update")
-    public String updateCommonParam(@RequestParam Configuration commonParam) {
+    public String updateCommonParam(@RequestBody Configuration commonParam) {
         return configurationService.updateCommonParam(commonParam, securityService.currentUserInfo());
     }
 
@@ -207,7 +207,7 @@ public class ConfigurationController {
      * @return uuid идентификатор логгера с результатом сохранения параметра
      */
     @PostMapping(value = "/rest/asyncParam/update")
-    public String updateAsyncParam(@RequestParam AsyncTaskTypeData asyncParam) {
+    public String updateAsyncParam(@RequestBody AsyncTaskTypeData asyncParam) {
         return configurationService.updateAsyncParam(asyncParam, securityService.currentUserInfo());
     }
 
@@ -218,7 +218,7 @@ public class ConfigurationController {
      * @return uuid идентификатор логгера с результатом сохранения параметра
      */
     @PostMapping(value = "/rest/emailParam/update")
-    public String updateEmailParam(@RequestParam Configuration emailParam) {
+    public String updateEmailParam(@RequestBody Configuration emailParam) {
         return configurationService.updateEmailParam(emailParam, securityService.currentUserInfo());
     }
 

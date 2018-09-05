@@ -5,10 +5,12 @@
     <div class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto">
         <div id="departmentConfigTop">
             <!--Выгрузка-->
+            <!--TODO пока скрыта
             <div style="float: right; padding-top: 10px">
                 <img src='resources/img/unload-white-16.png'>
-                <span data-ng-click="exportDepartmentConfig()">{{'departmentConfig.export.excel' | translate}}</span>
+                <a data-ng-click="exportDepartmentConfig()">{{'departmentConfig.export.excel' | translate}}</a>
             </div>
+            -->
             <!--Фильтр-->
             <span data-ng-include="'client/app/taxes/ndfl/departmentConfig/departmentConfigFilter.html'"></span>
             <div class="button_panel" style="padding: 10px 12px 0;">

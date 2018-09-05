@@ -61,12 +61,10 @@
                                 $http({
                                     method: "POST",
                                     url: "controller/rest/commonParam/" + ($scope.isCreate ? "create" : "update"),
-                                    params: {
-                                        commonParam: JSON.stringify({
-                                            code: $scope.commonParam.param.code,
-                                            description: $scope.commonParam.param.description,
-                                            value: $scope.commonParam.value
-                                        })
+                                    data: {
+                                        code: $scope.commonParam.param.code,
+                                        description: $scope.commonParam.param.description,
+                                        value: $scope.commonParam.value
                                     }
                                 }).then(function (logger) {
                                     if (logger.data) {
@@ -87,14 +85,12 @@
                                 $http({
                                     method: "POST",
                                     url: "controller/rest/asyncParam/update",
-                                    params: {
-                                        asyncParam: JSON.stringify({
-                                            id: $scope.asyncParam.param.id,
-                                            name: $scope.asyncParam.param.name,
-                                            taskLimit: $scope.asyncParam.taskLimit ? Math.floor($scope.asyncParam.taskLimit) : null,
-                                            shortQueueLimit: $scope.asyncParam.shortQueueLimit ? Math.floor($scope.asyncParam.shortQueueLimit) : null,
-                                            handlerClassName: $scope.asyncParam.handlerClassName
-                                        })
+                                    data: {
+                                        id: $scope.asyncParam.param.id,
+                                        name: $scope.asyncParam.param.name,
+                                        taskLimit: $scope.asyncParam.taskLimit ? Math.floor($scope.asyncParam.taskLimit) : null,
+                                        shortQueueLimit: $scope.asyncParam.shortQueueLimit ? Math.floor($scope.asyncParam.shortQueueLimit) : null,
+                                        handlerClassName: $scope.asyncParam.handlerClassName
                                     }
                                 }).then(function (logger) {
                                     if (logger.data) {
@@ -114,12 +110,10 @@
                                 $http({
                                     method: "POST",
                                     url: "controller/rest/emailParam/update",
-                                    params: {
-                                        emailParam: JSON.stringify({
-                                            id: $scope.emailParam.id,
-                                            code: $scope.emailParam.code,
-                                            value: $scope.emailParam.value
-                                        })
+                                    data: {
+                                        id: $scope.emailParam.id,
+                                        code: $scope.emailParam.code,
+                                        value: $scope.emailParam.value
                                     }
                                 }).then(function (logger) {
                                     if (logger.data) {
@@ -213,7 +207,7 @@
                             return checkAccessQDefer.promise;
                         }
                         // проверка введеного значения на количество цифр до разделителя
-                        if (truncate($scope.asyncParam.taskLimit, 18) !== Number($scope.asyncParam.taskLimit)){
+                        if (truncate($scope.asyncParam.taskLimit, 18) !== Number($scope.asyncParam.taskLimit)) {
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
                                     taskTitle: $scope.asyncParam.param.name,
@@ -238,7 +232,7 @@
                             return checkAccessQDefer.promise;
                         }
                         // проверка введеного значения на количество цифр до разделителя
-                        if (truncate($scope.asyncParam.shortQueueLimit, 18) !== Number($scope.asyncParam.shortQueueLimit)){
+                        if (truncate($scope.asyncParam.shortQueueLimit, 18) !== Number($scope.asyncParam.shortQueueLimit)) {
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
                                     taskTitle: $scope.asyncParam.param.name,
@@ -276,7 +270,7 @@
                             return checkAccessQDefer.promise;
                         }
                         checkAccessQDefer.resolve(true);
-                    } else if ($scope.emailParamTabActive){
+                    } else if ($scope.emailParamTabActive) {
                         checkAccessQDefer.resolve(true);
                     }
                     return checkAccessQDefer.promise;
