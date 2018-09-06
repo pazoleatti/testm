@@ -810,7 +810,7 @@ class Check extends AbstractScriptClass {
                 }
             }
             if (checkFirstName) {
-                String errorMessages = ScriptUtils.checkFirstName(ndflPerson.firstName, ndflPerson.citizenship)
+                List<String> errorMessages = ScriptUtils.checkFirstName(ndflPerson.firstName, ndflPerson.citizenship)
                 if (!errorMessages.isEmpty()) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     for (String message : errorMessages) {

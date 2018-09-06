@@ -1512,6 +1512,7 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
                  splitStatements="false"/>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5374 Реализовать выгрузку ФЛ в эксель данных реестра ФЛ-->
      <changeSet id="3.1-dnovikov-24" author="dnovikov">
         <insert tableName="async_task_type">
             <column name="id" value="37"/>
@@ -1539,5 +1540,12 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
                  path="/scripts/person_pkg_body8.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="3.1-dnovikov-25" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
+        </update>
     </changeSet>
 </databaseChangeLog>
