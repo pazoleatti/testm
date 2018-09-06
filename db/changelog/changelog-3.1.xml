@@ -1512,17 +1512,7 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
                  splitStatements="false"/>
     </changeSet>
 
-    <!--https://jira.aplana.com/browse/SBRFNDFL-5415 Реализовать изменения в алгоритме идентификации по хранимым процедурам-->
-    <changeSet id="3.1-akorobko-62" author="akorobko">
-        <sqlFile dbms="oracle"
-                 encoding="utf8"
-                 endDelimiter=""
-                 path="/scripts/person_pkg_body8.sql"
-                 relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="3.1-dnovikov-24" author="dnovikov">
+     <changeSet id="3.1-dnovikov-24" author="dnovikov">
         <insert tableName="async_task_type">
             <column name="id" value="37"/>
             <column name="name" value="Выгрузка файла данных Реестра физических лиц в XLSX-формате"/>
