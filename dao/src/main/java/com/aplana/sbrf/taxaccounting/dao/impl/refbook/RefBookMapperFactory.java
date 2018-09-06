@@ -147,7 +147,7 @@ public class RefBookMapperFactory {
             result.setStreet(rs.getString("STREET"));
             result.setHouse(rs.getString("HOUSE"));
             result.setBuild(rs.getString("BUILD"));
-            result.setAppartment(rs.getString("APPARTMENT"));
+            result.setApartment(rs.getString("APPARTMENT"));
             return result;
         }
     }

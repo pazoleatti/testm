@@ -77,7 +77,7 @@ public class PersonsExcelReportBuilderTest {
         address.setStreet("street");
         address.setHouse("house");
         address.setBuild("build");
-        address.setAppartment("appartment");
+        address.setApartment("appartment");
 
         RefBookCountry country = new RefBookCountry();
         country.setCode("countryCode");

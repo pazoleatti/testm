@@ -691,7 +691,11 @@
                     filter: {
                         columns: ["NAME", "CODE"]
                     },
-                    formatter: "codeNameFormatter"
+                    formatter: "codeNameFormatter",
+                    sort: {
+                        property: "CODE",
+                        direction: "asc"
+                    }
                 };
                 // Физические лица
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON] = {
@@ -712,7 +716,7 @@
                         direction: "asc"
                     },
                     filter: {
-                        columns: ["REGION_CODE, POSTAL_CODE, DISTRICT, CITY, LOCALITY, STREET, HOUSE, BUILD, APPARTMENT"]
+                        columns: ["REGION_CODE, POSTAL_CODE, DISTRICT, CITY, LOCALITY, STREET, HOUSE, BUILD, APARTMENT"]
                     },
                     formatter: "personAddressFormatter"
                 };

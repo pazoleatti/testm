@@ -133,7 +133,7 @@ public class ReportPerson {
             addIfNotEmpty(values, address.getStreet());
             addIfNotEmpty(values, address.getHouse());
             addIfNotEmpty(values, address.getBuild());
-            addIfNotEmpty(values, address.getAppartment());
+            addIfNotEmpty(values, address.getApartment());
         } else {
             if (address.getCountry() != null) {
                 addIfNotEmpty(values, address.getCountry().getName());
