@@ -140,11 +140,11 @@ class Person extends AbstractScriptClass {
         List<NaturalPerson> savedPersons = save(parsedPersons)
         checkPersons(savedPersons)
         for (NaturalPerson person : savedPersons) {
-            logger.info("Создана новая запись в справочнике Физические лица: " +
+            logger.info("Создана новая запись в Реестре физических лиц: " +
                     "$person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, " +
                     "${person.majorDocument?.documentNumber ?: "(документ не определен)"}")
         }
-        logger.info("Обработано записей из файла ${infPartCount}. В справочнике ФЛ создано ${savedPersons.size()} записей")
+        logger.info("Обработано записей из файла ${infPartCount}. В Реестре ФЛ создано ${savedPersons.size()} записей")
     }
 
     /****************************************************************************************************************

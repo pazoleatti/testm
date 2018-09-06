@@ -358,7 +358,7 @@ class Calculate extends AbstractScriptClass {
                 logger.error("В Разделе 1 первичной формы ${declarationDataPerson.declarationDataId} для ФЛ:" +
                         "${declarationDataPerson.lastName + " " + declarationDataPerson.firstName + " " + (declarationDataPerson.middleName ?: "")}" +
                         ", ИНП: ${declarationDataPerson.inp}, строка: ${declarationDataPerson.rowNum} не установлена " +
-                        "ссылка на запись справочника \"Физические лица\". Выполните операцию идентификации формы " +
+                        "ссылка на запись Реестра физических лиц. Выполните операцию идентификации формы " +
                         "${declarationDataPerson.declarationDataId}")
                 continue
             }

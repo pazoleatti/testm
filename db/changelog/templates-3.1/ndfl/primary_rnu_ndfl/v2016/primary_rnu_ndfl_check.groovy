@@ -248,7 +248,7 @@ class Check extends AbstractScriptClass {
                 Map<Long, Map<String, RefBookValue>> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
-                logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)");
+                logForDebug("Проверки на соответствие справочникам / Выгрузка реестра физических лиц (" + (System.currentTimeMillis() - time) + " мс)");
 
                 ScriptUtils.checkInterrupted();
 
@@ -432,7 +432,7 @@ class Check extends AbstractScriptClass {
             // Спр10 Наличие связи с "Физическое лицо"
             if (ndflPerson.personId == null || ndflPerson.personId == 0) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.errorExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
+                logger.errorExp("%s. %s.", "Отсутствует связь с Реестром физических лиц", fioAndInp, pathError,
                         "Не удалось установить связь со справочником \"$R_PERSON\"")
             } else {
                 def personRecord = personMap.get(ndflPerson.recordId)
@@ -440,27 +440,27 @@ class Check extends AbstractScriptClass {
                 if (!personRecord) {
                     //TODO turn_to_error
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.errorExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
+                    logger.errorExp("%s. %s.", "Отсутствует связь с Реестром физических лиц", fioAndInp, pathError,
                             "Не удалось установить связь со справочником \"$R_PERSON\"")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
                     if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.get(RF_LAST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "ФИО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Фамилия", ndflPerson.lastName ?: "", R_PERSON))
                     }
 
                     // Спр11 Имя (Обязательное поле)
                     if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.toLowerCase().equals(personRecord.get(RF_FIRST_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "ФИО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Имя", ndflPerson.firstName ?: "", R_PERSON))
                     }
 
                     // Спр11 Отчество (Необязательное поле)
                     if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.toLowerCase().equals(personRecord.get(RF_MIDDLE_NAME).value.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "ФИО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Отчество", ndflPerson.middleName ?: "", R_PERSON))
                     }
 
@@ -475,7 +475,7 @@ class Check extends AbstractScriptClass {
                         }
                         if (!(ndflPerson.inp == personRecord.get(RF_SNILS)?.value || inpList?.contains(ndflPerson.inp))) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                            logger.warnExp("%s. %s.", "ИНП не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                            logger.warnExp("%s. %s.", "ИНП не соответствует Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: "", R_PERSON))
                         }
                     } else {
@@ -485,14 +485,14 @@ class Check extends AbstractScriptClass {
                         if (!ndflPerson.inp.equals(recordId)) {
                             //TODO turn_to_error
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                            logger.warnExp("%s. %s.", "ИНП не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                            logger.warnExp("%s. %s.", "ИНП не соответствует Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: "", R_PERSON))
                         }
                     }
                     // Спр13 Дата рождения (Обязательное поле)
                     if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson?.birthDay.equals(personRecord.get(RF_BIRTH_DATE).getDateValue())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Дата рождения не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Дата рождения не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Дата рождения", ndflPerson.birthDay ? ScriptUtils.formatDate(ndflPerson.birthDay) : "", R_PERSON))
                     }
 
@@ -500,21 +500,21 @@ class Check extends AbstractScriptClass {
                     def citizenship = citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP).value)
                     if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Код гражданства не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Код гражданства не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_CITIZENSHIP, ndflPerson.citizenship ?: "", R_PERSON))
                     }
 
                     // Спр15 ИНН.В Российской федерации (Необязательное поле)
                     if (ndflPerson.innNp != null && !ndflPerson.innNp.equals(personRecord.get(RF_INN).value)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "ИНН в РФ не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "ИНН в РФ не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "ИНН в РФ", ndflPerson.innNp ?: "", R_PERSON))
                     }
 
                     // Спр16 ИНН.В стране гражданства (Необязательное поле)
                     if (ndflPerson.innForeign != null && !ndflPerson.innForeign.equals(personRecord.get(RF_INN_FOREIGN).value)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "ИНН в ИНО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "ИНН в ИНО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "ИНН в ИНО", ndflPerson.innForeign ?: "", R_PERSON))
                     }
 
@@ -531,12 +531,12 @@ class Check extends AbstractScriptClass {
                         }
                         if (ndflPerson.idDocType != null && !personDocTypeList.contains(ndflPerson.idDocType)) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                            logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
+                            logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код", ndflPerson.idDocType ?: "", R_PERSON))
                         }
                         if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase())) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                            logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
+                            logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
                         }
                     } else {
@@ -553,13 +553,13 @@ class Check extends AbstractScriptClass {
 
                         if (dulRecordValues == null) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                            logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
+                            logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код\" (\"${ndflPerson.idDocType ?: ""}\"), \"ДУЛ Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
                         } else {
                             int incRep = dulRecordValues.get(RF_INC_REP).getNumberValue().intValue()
                             if (incRep != 1) {
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                                logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
+                                logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                         "\"ДУЛ Номер\" не включается в отчетность")
                             }
                         }
@@ -569,7 +569,7 @@ class Check extends AbstractScriptClass {
                     def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
                     if (ndflPerson.status != null && !ndflPerson.status.equals(taxpayerStatus)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: "", R_PERSON))
                     }
                 }

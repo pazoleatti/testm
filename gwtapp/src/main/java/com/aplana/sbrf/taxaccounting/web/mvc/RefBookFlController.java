@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Контроллер для работы с записями справочника "Физические лица"
+ * Контроллер для работы с записями реестра физических лиц
  */
 @RestController
 public class RefBookFlController {

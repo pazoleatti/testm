@@ -592,11 +592,11 @@ class Calculate extends AbstractScriptClass {
                 }
 
                 for (Integer departmentTb : departmentTbByCurrentPerformer) {
-                        PersonTb personTb = new PersonTb()
-                        personTb.naturalPerson = person
-                        personTb.tbDepartmentId = departmentTb
-                        personTb.importDate = getDeclarationDataCreationDate()
-                        personTbList.add(personTb)
+                    PersonTb personTb = new PersonTb()
+                    personTb.naturalPerson = person
+                    personTb.tbDepartmentId = departmentTb
+                    personTb.importDate = getDeclarationDataCreationDate()
+                    personTbList.add(personTb)
                 }
 
             }
@@ -1420,7 +1420,9 @@ class Calculate extends AbstractScriptClass {
                 SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException) ExceptionUtils.getThrowableList(e).get(i)
                 if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
                     e.printStackTrace()
-                    logger.error("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении операции \"Идентификация ФЛ\" для налоговой формы №: ${declarationData.id}. Записи справочника \"Физические лица\" используются при выполнении операции \"Идентификация ФЛ\" для другой налоговой формы. Выполните операцию позднее.")
+                    logger.error("Невозможно выполнить обновление записей Реестра физических лиц при выполнении операции \"Идентификация ФЛ\" " +
+                            "для налоговой формы №: ${declarationData.id}. Записи Реестра физических лиц используются при выполнении операции \"Идентификация ФЛ\" " +
+                            "для другой налоговой формы. Выполните операцию позднее.")
                     return
                 }
             }
