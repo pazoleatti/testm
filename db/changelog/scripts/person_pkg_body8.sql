@@ -190,7 +190,7 @@ package body person_pkg as
          and person.status=0 and person.record_id=person.old_id
       union
        /*по СНИЛСУ*/
-      select t.id as person_id,
+      select /*+ use_hash(t person)*/ t.id as person_id,
              person.id as ref_book_person_id,
              person.version as person_version,
              person.status as person_status,
@@ -256,7 +256,7 @@ package body person_pkg as
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ИННу*/
-      select t.id as person_id,
+      select /*+ use_hash(t person)*/ t.id as person_id,
              person.id as ref_book_person_id,
              person.version as person_version,
              person.status as person_status,
@@ -322,7 +322,7 @@ package body person_pkg as
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ИННу иностранного государства*/
-      select t.id as person_id,
+      select /*+ use_hash(t person)*/ t.id as person_id,
              person.id as ref_book_person_id,
              person.version as person_version,
              person.status as person_status,
@@ -388,7 +388,7 @@ package body person_pkg as
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ДУЛ*/
-      select t.id as person_id,
+      select /*+ use_hash(a person)*/ t.id as person_id,
              person.id as ref_book_person_id,
              person.version as person_version,
              person.status as person_status,
