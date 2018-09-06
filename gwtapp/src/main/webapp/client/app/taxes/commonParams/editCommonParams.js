@@ -21,9 +21,7 @@
                     $http({
                         method: "POST",
                         url: "controller/rest/commonParam/update",
-                        params: {
-                            commonParam: $scope.parameter
-                        }
+                        data: $scope.parameter
                     }).then(function (response) {
                         if (response.data) {
                             LogEntryResource.query({
