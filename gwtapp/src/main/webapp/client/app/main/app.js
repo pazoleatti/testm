@@ -1267,7 +1267,7 @@
                     $rootScope.revision = data.versionInfoProperties.revision;
                     $rootScope.serverName = data.serverInfo.serverName;
                     $rootScope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
-                    $rootScope.aboutHref = "Main.jsp" + $rootScope.gwtMode + "#!about";
+                    $rootScope.aboutHref = "";
                 }
             );
 

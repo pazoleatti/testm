@@ -1572,4 +1572,14 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3466 Реализовать Реестр ФЛ-->
+    <changeSet id="3.1-ytrofimov-17" author="ytrofimov">
+        <sql>
+            alter table ref_book_person drop column EMPLOYEE
+        </sql>
+        <sql>
+            alter table ref_book_person drop column OLD_STATUS
+        </sql>
+    </changeSet>
 </databaseChangeLog>

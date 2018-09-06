@@ -2,7 +2,7 @@
     <div>
         <div class="content-header pull-left" data-ng-show="mode == 'VIEW'">
             <a href="index.html#/refbooks/registryFL">{{::'move_back' | translate}}</a>
-            <h1>{{'— (' + person.recordId + ') ' + person.lastName + ' ' + person.firstName + ' ' + person.middleName +
+            <h1>{{'— (' + person.recordId + ')' + (person.lastName ? ' ' + person.lastName:"") + (person.firstName ? ' ' + person.firstName :"") + (person.middleName ? ' ' + person.middleName :"" ) +
                 ', ' + (person.birthDate | dateFormatter) + (person.recordId !== person.oldId ?', дубликат':'')}}</h1>
         </div>
         <div class="content-header pull-left" data-ng-show="mode == 'EDIT'">

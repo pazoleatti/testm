@@ -152,7 +152,7 @@
                                 href: "controller/actions/declarationTemplate/downloadAll"
                             }, {
                                 name: $filter('translate')('menu.administration.settings.importingScripts'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"
+                                href: $state.href('scriptExecution')
                             }]
                         });
                     }
