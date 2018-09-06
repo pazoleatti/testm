@@ -49,7 +49,7 @@ public class ConfigurationController {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(Configuration.class, new RequestParamEditor(Configuration.class));
         binder.registerCustomEditor(AsyncTaskTypeData.class, new RequestParamEditor(AsyncTaskTypeData.class));
-        binder.registerCustomEditor(AsyncTaskTypeData.class, new RequestParamEditor(ConfigurationParam.class));
+        binder.registerCustomEditor(ConfigurationParam.class, new RequestParamEditor(ConfigurationParam.class));
     }
 
     /**
