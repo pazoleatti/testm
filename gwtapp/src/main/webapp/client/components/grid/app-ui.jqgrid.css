@@ -352,6 +352,7 @@ background-position: -40px 0;*/
     position: relative;
     padding: 0 0 0 7px;
     border-bottom-color: #9d9d9d;
+    overflow: visible;
 }
 
 /*

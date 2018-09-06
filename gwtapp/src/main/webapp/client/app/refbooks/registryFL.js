@@ -23,24 +23,27 @@
         /**
          * @description Контроллер страницы "Реестр Физических лиц"
          */
-        .controller('registryFLCtrl', ['$scope', '$filter', '$window', 'RefBookFLResource', 'APP_CONSTANTS', '$http', '$logPanel',
-            function ($scope, $filter, $window, RefBookFLResource, APP_CONSTANTS, $http, $logPanel) {
+        .controller('registryFLCtrl', ['$scope', '$filter', '$window', 'RefBookFLResource', 'APP_CONSTANTS', '$http', '$logPanel', '$state',
+            function ($scope, $filter, $window, RefBookFLResource, APP_CONSTANTS, $http, $logPanel, $state) {
 
                 $scope.refreshGrid = function (page) {
                     $scope.flGrid.ctrl.refreshGrid(page);
                 };
 
-                $scope.filterParamsInitialState = function () {
+                function getDefaultFilterParams() {
                     return {
                         allVersions: APP_CONSTANTS.SHOW_VERSIONS.BY_DATE,
-                        versionDate: new Date()
+                        versionDate: new Date().format("yyyy-mm-dd")
                     }
-                };
+                }
 
                 $scope.searchFilter = {
-                    params: $scope.filterParamsInitialState(),
+                    params: getDefaultFilterParams(),
                     resetFilterParams: function () {
-                        $scope.searchFilter.params = $scope.filterParamsInitialState();
+                        $scope.searchFilter.params = getDefaultFilterParams();
+                    },
+                    isClearByFilterParams: function () {
+                        $scope.searchFilter.isClear = JSON.stringify($scope.searchFilter.params) !== JSON.stringify(getDefaultFilterParams());
                     }
                 };
 
@@ -72,6 +75,9 @@
                     options: {
                         datatype: "angularResource",
                         angularResource: RefBookFLResource,
+                        ondblClickRow: function (rowId) {
+                            $state.go("personCard", {id: rowId});
+                        },
                         requestParameters: function () {
                             return {
                                 filter: $scope.filterRequestParam()
@@ -207,6 +213,12 @@
                         }
                     });
                 };
+
+                $scope.$watch("searchFilter.params.versionDate", function (newVal, oldVal) {
+                    if (!newVal) {
+                        $scope.searchFilter.params.versionDate = oldVal;
+                    }
+                });
             }])
 
         /**
