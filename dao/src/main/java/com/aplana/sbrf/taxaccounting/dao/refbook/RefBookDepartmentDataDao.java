@@ -65,4 +65,10 @@ public interface RefBookDepartmentDataDao {
      * @return список подразделений
      */
     List<RefBookDepartment> fetchAllActiveByType(DepartmentType type);
+
+    /**
+     * Возвращяет полное наименование (путь) подразделения, от корневого (банк, ид=0) до самого подразделения,
+     * напрмер, "Банк/Байкальский банк"
+     */
+    String fetchFullName(Integer departmentId);
 }
