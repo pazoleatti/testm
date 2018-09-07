@@ -407,7 +407,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("performerDepartmentId", performerDepartmentId);
-        String sql = "SELECT parent_tb.id\n" +
+        String sql = "SELECT DISTINCT * FROM (SELECT parent_tb.id\n" +
                 "FROM DEPARTMENT_CHILD_VIEW v\n" +
                 "join department parent_tb on parent_tb.id = v.parent_id AND parent_tb.type = 2 and parent_tb.is_active = 1\n" +
                 "WHERE v.id IN (\n" +
@@ -415,7 +415,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "  FROM department_declaration_type ddt\n" +
                 "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
                 "  WHERE ddtp.performer_dep_id = :performerDepartmentId\n" +
-                ") ORDER BY parent_tb.name";
+                ") ORDER BY parent_tb.name)";
         return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
     }
 
