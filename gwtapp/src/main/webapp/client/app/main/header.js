@@ -150,9 +150,6 @@
                             }, {
                                 name: $filter('translate')('menu.administration.settings.exportLayouts'),
                                 href: "controller/actions/declarationTemplate/downloadAll"
-                            }, {
-                                name: $filter('translate')('menu.administration.settings.importingScripts'),
-                                href: $state.href('scriptExecution')
                             }]
                         });
                     }

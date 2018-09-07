@@ -26,7 +26,7 @@ public class RefBookAddress extends RefBookSimple<Long> {
     //Номер корпуса (строения)
     private String build;
     //Номер квартиры
-    private String appartment;
+    private String apartment;
     //Страна проживания
     private RefBookCountry country;
     //Адрес
@@ -104,12 +104,12 @@ public class RefBookAddress extends RefBookSimple<Long> {
         this.build = build;
     }
 
-    public String getAppartment() {
-        return appartment;
+    public String getApartment() {
+        return apartment;
     }
 
-    public void setAppartment(String appartment) {
-        this.appartment = appartment;
+    public void setApartment(String apartment) {
+        this.apartment = apartment;
     }
 
     public RefBookCountry getCountry() {

@@ -316,7 +316,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
     public PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams) {
         return departmentDao.searchDepartmentNames(name, pagingParams);
     }

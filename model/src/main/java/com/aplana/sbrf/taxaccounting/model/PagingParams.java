@@ -31,6 +31,11 @@ public class PagingParams implements Serializable {
     public PagingParams() {
     }
 
+    public PagingParams(String property, String direction) {
+        this.property = property;
+        this.direction = direction;
+    }
+
     @Deprecated
     // Убрано поле startIndex, поэтому вместо этого конструктора лучше использовать статический метод getInstance
     public PagingParams(int startIndex, int count) {
@@ -40,9 +45,6 @@ public class PagingParams implements Serializable {
 
     /**
      * Возвращает новый экземпляр PagingParams
-     * @param page
-     * @param count
-     * @return
      */
     public static PagingParams getInstance(int page, int count) {
         PagingParams toReturn = new PagingParams();
@@ -115,16 +117,6 @@ public class PagingParams implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("PagingParams [count=");
-        builder.append(count);
-        builder.append(", page=");
-        builder.append(page);
-        builder.append(", property=");
-        builder.append(property);
-        builder.append(", direction=");
-        builder.append(direction);
-        builder.append("]");
-        return builder.toString();
+        return "PagingParams [count=" + count + ", page=" + page + ", property=" + property + ", direction=" + direction + "]";
     }
 }
