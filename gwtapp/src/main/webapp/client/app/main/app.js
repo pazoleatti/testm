@@ -152,7 +152,6 @@
         "menu.administration.settings.refbooks": "Справочники",
         "menu.administration.settings.resetCache": "Сбросить кэш",
         "menu.administration.settings.exportLayouts": "Экспорт макетов",
-        "menu.administration.settings.importingScripts": "Импорт скриптов",
         "menu.manuals.manualUser": "Руководство пользователя",
         "menu.manuals.manualLayoutDesigner": "Руководство настройщика макетов",
         "move_back": "Назад",
