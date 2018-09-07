@@ -21,7 +21,7 @@ public class Address extends RefBookObject {
     private String street;
     private String house;
     private String build;
-    private String appartment;
+    private String apartment;
 
     /**
      * Адрес вне РФ
@@ -104,11 +104,11 @@ public class Address extends RefBookObject {
     }
 
     public String getAppartment() {
-        return appartment;
+        return apartment;
     }
 
     public void setAppartment(String appartment) {
-        this.appartment = appartment;
+        this.apartment = appartment;
     }
 
     public Country getCountry() {
@@ -148,7 +148,7 @@ public class Address extends RefBookObject {
                 .append("street", street)
                 .append("house", house)
                 .append("build", build)
-                .append("appartment", appartment)
+                .append("appartment", apartment)
                 .append("country", country)
                 .append("countryCode", countryCode)
                 .append("addressIno", addressIno)

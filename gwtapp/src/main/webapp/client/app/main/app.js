@@ -985,7 +985,7 @@
         "refBook.fl.card.label.postalCode": "Индекс: ",
         "refBook.fl.card.label.city": "Город: ",
         "refBook.fl.card.label.street": "Улица: ",
-        "refBook.fl.card.label.appartment": "Квартира: ",
+        "refBook.fl.card.label.apartment": "Квартира: ",
         "refBook.fl.card.label.residenceCountry": "Страна проживания: ",
         "refBook.fl.card.label.residenceAddress": "Адрес в стране проживания: ",
         "refBook.fl.card.label.permissionDenied": "Доступ ограничен",

@@ -31,6 +31,8 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     private RefBookCountry citizenship;
     //Место жительства
     private Permissive<RefBookAddress> address;
+    //Зарубежный адрес
+    private Permissive<RefBookAddress> foreignAddress;
     //Система-источник: ссылка на справочник кодов АС НУ
     private RefBookAsnu source;
     //Старый идентификатор ФЛ
@@ -41,8 +43,6 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     /*
      * Вспомогательные поля для улучшения производительности. Заполняются не во всех случаях
      */
-    //Адрес как текст, используется чтобы сразу получать данные из бд одним запросои без запросом на каждую запись
-    private String addressAsText;
     //Название ДУЛ
     private Permissive<String> docName;
     //Серия и номер ДУЛ
@@ -137,20 +137,20 @@ public class RefBookPerson extends RefBookVersioned<Long> {
         this.address = address;
     }
 
+    public void setForeignAddress(Permissive<RefBookAddress> foreignAddress) {
+        this.foreignAddress = foreignAddress;
+    }
+
+    public RefBookAddress getForeignAddress() {
+        return foreignAddress == null ? null : foreignAddress.value();
+    }
+
     public RefBookAsnu getSource() {
         return source;
     }
 
     public void setSource(RefBookAsnu source) {
         this.source = source;
-    }
-
-    public String getAddressAsText() {
-        return addressAsText;
-    }
-
-    public void setAddressAsText(String addressAsText) {
-        this.addressAsText = addressAsText;
     }
 
     public Long getOldId() {
@@ -207,6 +207,11 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     @JsonProperty("address")
     public Permissive<RefBookAddress> getAddressForJson() {
         return address;
+    }
+
+    @JsonProperty("foreignAddress")
+    public Permissive<RefBookAddress> getForeignAddressForJson() {
+        return foreignAddress;
     }
 
     @JsonProperty("docName")

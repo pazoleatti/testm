@@ -391,28 +391,18 @@
                 if (!address) return '';
 
                 var values = [];
-                // Для российских адресов
-                if (address.addressType === 0) {
-                    // Формируем список полей в нужном порядке
-                    var fields = ['postalCode', 'regionCode', 'district', 'city', 'locality', 'street', 'house', 'build', 'appartment'];
-                    // Добавляем значения непустых полей
-                    fields.forEach(function (field) {
-                        if (address[field]) {
-                            values.push(address[field]);
-                        }
-                    });
-                    // Для зарубежных адресов нужны только название страны и строковый адрес
-                } else if (address.addressType === 1) {
-                    if (address.country && address.country.name) {
-                        values.push(address.country.name);
+                // Формируем список полей в нужном порядке
+                var fields = ['postalCode', 'regionCode', 'district', 'city', 'locality', 'street', 'house', 'build', 'apartment'];
+                // Добавляем значения непустых полей
+                fields.forEach(function (field) {
+                    if (address[field]) {
+                        values.push(address[field]);
                     }
-                    if (address.address) {
-                        values.push(address.address);
-                    }
-                }
+                });
                 return values.join(', ');
             };
         })
+
         /**
          * @description Фильтр даты. Если значение даты будет равно '1901-01-01', то отображаться будет '00.00.0000'
          *
@@ -480,23 +470,28 @@
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
-                if (data.value && data.value.addressType === 1) {
-                    return '';
-                }
                 return $filter('personAddressFormatter')(data.value);
             }
         }])
 
         .filter('foreignAddressFormatter', ['$filter', function ($filter) {
             return function (data) {
+                console.log(data);
                 if (!data) return '';
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
-                if (data.value && data.value.addressType === 0) {
-                    return '';
+                if (!data.value) return '';
+                var foreignAddress = data.value;
+                var values = [];
+                if (foreignAddress.country) {
+                    var country = $filter('codeNameFormatter')(foreignAddress.country);
+                    values.push(country);
                 }
-                return $filter('personAddressFormatter')(data.value);
+                if (foreignAddress.address) {
+                    values.push(foreignAddress.address);
+                }
+                return values.join(', ');
             }
         }])
 

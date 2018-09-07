@@ -168,7 +168,7 @@
                                 width: 400
                             },
                             {
-                                name: 'address',
+                                name: 'foreignAddress',
                                 formatter: $filter('foreignAddressFormatter'),
                                 width: 300
                             },

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SortDirection;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -39,6 +40,8 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookMapperFactory refBookMapperFactory;
 
 
+    private static final String DEFAULT_SORT_PROPERTY = "id";
+
     private static final RowMapper<RefBookPerson> PERSON_MAPPER = new RowMapper<RefBookPerson>() {
         @Override
         public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -63,6 +66,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 result.setInnForeign(Permissive.<String>forbidden());
                 result.setSnils(Permissive.<String>forbidden());
                 result.setAddress(Permissive.<RefBookAddress>forbidden());
+                result.setForeignAddress(Permissive.<RefBookAddress>forbidden());
             } else {
                 result.setDocName(Permissive.of(rs.getString("doc_name")));
                 result.setDocNumber(Permissive.of(rs.getString("doc_number")));
@@ -73,10 +77,17 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 Long addressId = SqlUtils.getLong(rs, "address_id");
                 if (addressId == null) {
                     result.setAddress(Permissive.<RefBookAddress>of(null));
+                    result.setForeignAddress(Permissive.<RefBookAddress>of(null));
                 } else {
                     RefBookAddress address = new RefBookAddress();
+                    RefBookAddress foreignAddress = new RefBookAddress();
+
                     address.setId(rs.getLong("address_id"));
+                    foreignAddress.setId(rs.getLong("address_id"));
+
                     address.setAddressType(rs.getInt("address_type"));
+                    foreignAddress.setAddressType(rs.getInt("address_type"));
+
                     address.setPostalCode(rs.getString("postal_code"));
                     address.setRegionCode(rs.getString("region_code"));
                     address.setDistrict(rs.getString("district"));
@@ -85,21 +96,26 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                     address.setStreet(rs.getString("street"));
                     address.setBuild(rs.getString("building"));
                     address.setHouse(rs.getString("house"));
-                    address.setAppartment(rs.getString("apartment"));
+                    address.setApartment(rs.getString("apartment"));
+
                     address.setAddress(rs.getString("address"));
+                    foreignAddress.setAddress(rs.getString("address"));
 
                     Long countryId = SqlUtils.getLong(rs, "address_country_id");
                     if (countryId == null) {
                         address.setCountry(null);
+                        foreignAddress.setCountry(null);
                     } else {
                         RefBookCountry country = new RefBookCountry();
                         country.setId(countryId);
                         country.setCode(rs.getString("address_country_code"));
                         country.setName(rs.getString("address_country_name"));
                         address.setCountry(country);
+                        foreignAddress.setCountry(country);
                     }
 
                     result.setAddress(Permissive.of(address));
+                    result.setForeignAddress(Permissive.of(foreignAddress));
                 }
             }
 
@@ -364,6 +380,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
     private PreparedStatementData generatePersonsByFilterQuery(RefBookPersonFilter filter) {
         // Используем параллельный запрос для ускорения работы, с разрешения БД-разработчиков.
+        //language=SQL
         String personQuery = "" +
                 "select /*+ parallel(person,8) first_rows(1)*/ \n" +
                 "       person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
@@ -395,12 +412,14 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "left join ref_book_asnu asnu on asnu.id = person.source_id \n";
 
         MapSqlParameterSource queryParams = new MapSqlParameterSource();
+        //language=SQL
         String filterQuery = "" +
                 "where person.status = 0 \n";
 
         if (filter != null) {
             // TODO вместо !null должно использоваться StringUtils.notEmpty
             if (filter.getId() != null) {
+                //language=SQL
                 filterQuery = filterQuery + "and person.old_id like '%" + filter.getId() + "%' \n";
             }
             if (filter.getLastName() != null) {
@@ -413,6 +432,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 filterQuery = filterQuery + "and lower(person.middle_name) like '%" + filter.getMiddleName().toLowerCase() + "%' \n";
             }
             if (filter.getBirthDateFrom() != null) {
+                //language=SQL
                 filterQuery = filterQuery + "and birth_date >= :birth_date_from \n";
                 queryParams.addValue("birth_date_from", filter.getBirthDateFrom());
             }
@@ -465,6 +485,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         String filteredPersonQuery = personQuery + filterQuery;
 
         if (filter != null && filter.isAllVersions() != null && filter.getVersionDate() != null && !filter.isAllVersions()) {
+            //language=SQL
             filteredPersonQuery = "" +
                     "select * \n" +
                     "from (" + filteredPersonQuery + ") \n" +
@@ -481,9 +502,10 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
         String filteredPersonQuery = psData.getQuery().toString();
         String finalQuery;
-        if (pagingParams != null) {
-            String sortParams = generateSortParams(pagingParams);
 
+        String sortParams = generateSortParams(pagingParams);
+
+        if (pagingParams != null) {
             int startIndex = pagingParams.getStartIndex();
             int endIndex = startIndex + pagingParams.getCount();
 
@@ -494,12 +516,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                         "from ( \n" +
                         "   select rownum rnum, a.* \n" +
                         "   from (" + finalQuery + ") a " +
-                    "   where rownum <= " + endIndex +
-                    ") " +
-                    "where rnum > " + startIndex;
+                        "   where rownum <= " + endIndex +
+                        ") " +
+                        "where rnum > " + startIndex;
             }
         } else {
-            finalQuery = filteredPersonQuery;
+            finalQuery = filteredPersonQuery + sortParams;
         }
 
         List<RefBookPerson> persons = getNamedParameterJdbcTemplate().query(finalQuery, psData.getNamedParams(), PERSON_MAPPER);
@@ -514,46 +536,95 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + psData.getQuery().toString() + ")", psData.getNamedParams(), Integer.class);
     }
 
-    private String generateSortParams(PagingParams pagingParams) {
-        String result = "";
-        String sortProperty = pagingParams.getProperty();
-        if (StringUtils.isNotEmpty(sortProperty)) {
-            String dbField = personDbFieldBySortProperty().get(sortProperty);
-            if (StringUtils.isNotEmpty(dbField)) {
-                result = result + "order by " + dbField;
+    /**
+     * Генерим выражение "order by ...", см. тесты метода.
+     */
+    static String generateSortParams(PagingParams pagingParams) {
+        String sortProperty = getSortProperty(pagingParams);
+        SortDirection sortDirection = SortDirection.getByValue(pagingParams.getDirection());
 
-                String sortDirection = pagingParams.getDirection();
-                if (StringUtils.isNotEmpty(sortDirection)) {
-                    result = result + " " + sortDirection;
-                }
-            }
+        if (sortProperty.equals("vip")) {
+            sortDirection = invertSortDirection(sortDirection);
         }
+
+        String result = "order by ";
+
+        if (isPropertyPermissive(sortProperty)) {
+            result = result + "vip " + invertSortDirection(sortDirection) + ", ";
+        }
+
+        List<String> sortFields = getSortFieldsByProperty(sortProperty);
+        String fieldsString = generateSortFieldsString(sortFields, sortDirection);
+        result = result + fieldsString;
+
         return result;
     }
 
-    private static Map<String, String> personDbFieldBySortProperty() {
-        Map<String, String> result = new HashMap<>();
+    private static boolean isPropertyPermissive(String field) {
+        List<String> permissiveProperties = Arrays.asList("docName", "docNumber", "inn", "innForeign", "snils", "address", "foreignAddress");
+        return permissiveProperties.contains(field);
+    }
 
-        result.put("oldId", "old_id");
-        result.put("vip", "vip");
-        result.put("lastName", "last_name");
-        result.put("firstName", "first_name");
-        result.put("middleName", "middle_name");
-        result.put("birthDate", "birth_date");
-        result.put("docName", "vip desc, doc_name");
-        result.put("docNumber", "vip desc, doc_number");
-        result.put("citizenship", "citizenship_country_code");
-        result.put("taxpayerState", "state_code");
-        result.put("inn", "vip desc, inn");
-        result.put("innForeign", "vip desc, inn_foreign");
-        result.put("snils", "vip desc, snils");
-        result.put("address", "vip desc, postal_code");
-        result.put("source", "asnu_name");
-        result.put("version", "version");
-        result.put("versionEnd", "version_to");
-        result.put("id", "id");
+    private static String getSortProperty(PagingParams pagingParams) {
+        if (pagingParams == null || StringUtils.isEmpty(pagingParams.getProperty())) {
+            return DEFAULT_SORT_PROPERTY;
+        } else {
+            return pagingParams.getProperty();
+        }
+    }
 
-        return result;
+    /**
+     * (["name", "id"], ASC) -> "name asc, id asc"
+     */
+    private static String generateSortFieldsString(List<String> fields, SortDirection direction) {
+        List<String> fieldsWithDirection = new ArrayList<>();
+        for (String field : fields) {
+            fieldsWithDirection.add(field + " " + direction);
+        }
+        return Joiner.on(", ").join(fieldsWithDirection);
+    }
+
+    private static SortDirection invertSortDirection(SortDirection sortDirection) {
+        switch (sortDirection) {
+            case ASC:
+                return SortDirection.DESC;
+            case DESC:
+                return SortDirection.ASC;
+            default:
+                return sortDirection;
+        }
+    }
+
+    private static List<String> getSortFieldsByProperty(String sortProperty) {
+        Map<String, List<String>> map = new HashMap<>();
+        map.put("oldId", Arrays.asList("old_id", "id"));
+        map.put("vip", Arrays.asList("vip", "id"));
+        map.put("lastName", Arrays.asList("last_name", "id"));
+        map.put("firstName", Arrays.asList("first_name", "id"));
+        map.put("middleName", Arrays.asList("middle_name", "id"));
+        map.put("birthDate", Arrays.asList("birth_date", "id"));
+        map.put("docName", Arrays.asList("doc_name", "id"));
+        map.put("docNumber", Arrays.asList("doc_number", "id"));
+        map.put("citizenship", Arrays.asList("citizenship_country_code", "id"));
+        map.put("taxpayerState", Arrays.asList("state_code", "id"));
+        map.put("inn", Arrays.asList("inn", "id"));
+        map.put("innForeign", Arrays.asList("inn_foreign", "id"));
+        map.put("snils", Arrays.asList("snils", "id"));
+        map.put("address", Arrays.asList("postal_code", "region_code", "district", "city", "locality", "street",
+                "house", "building", "apartment", "address_id", "id"));
+        map.put("foreignAddress", Arrays.asList("address_country_code", "address", "address_id", "id"));
+        map.put("source", Arrays.asList("asnu_code", "id"));
+        map.put("version", Arrays.asList("version", "id"));
+        map.put("versionEnd", Arrays.asList("version_to", "id"));
+        map.put("id", Collections.singletonList("id"));
+
+        List<String> result = map.get(sortProperty);
+
+        if (result != null) {
+            return result;
+        } else {
+            return map.get(DEFAULT_SORT_PROPERTY);
+        }
     }
 
 
