@@ -107,6 +107,12 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
         return getJdbcTemplate().query(REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = ? and dep.is_active = 1", new RefBookDepartmentRowMapper(), type.getCode());
     }
 
+    @Override
+    public String fetchFullName(Integer departmentId) {
+        return getJdbcTemplate().queryForObject("SELECT shortname AS full_name FROM department_fullpath WHERE id = ?",
+                String.class, departmentId);
+    }
+
     /**
      * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      * Также можно выбрать все подразделения или только действующие
@@ -156,7 +162,7 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
                     "from department dep " +
                     "inner join department_fullpath df on dep.id = df.id ";
 
-    private static final class RefBookDepartmentRowMapper implements RowMapper<RefBookDepartment> {
+    private final static class RefBookDepartmentRowMapper implements RowMapper<RefBookDepartment> {
         @Override
         public RefBookDepartment mapRow(ResultSet resultSet, int i) throws SQLException {
             RefBookDepartment refBookDepartment = new RefBookDepartment();

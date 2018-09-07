@@ -731,6 +731,15 @@
                     },
                     formatter: "codeNameFormatter"
                 };
+                // Подразделения
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DEPARTMENT] = {
+                    sort: {
+                        property: "fullName",
+                        direction: "asc"
+                    },
+                    filter: {},
+                    formatter: "fullNameFormatter"
+                };
                 // ОК 025-2001 (Общероссийский классификатор стран мира)
                 // Виды документов, удостоверяющих личность
                 // АСНУ
@@ -777,13 +786,11 @@
                         });
                     }
 
+                    $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
                     if (refBookId === APP_CONSTANTS.REFBOOK.DEPARTMENT) {
-                        $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
-                            property: "fullName",
-                            direction: "asc"
-                        }, "fullNameFormatter");
+                        $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments",
+                            {}, $scope.config.sort, $scope.config.formatter);
                     } else {
-                        $scope.config = $scope.refBookConfig[refBookId] ? $scope.refBookConfig[refBookId] : $scope.refBookConfig.default;
                         var isMultiple = (refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE);
                         $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(isMultiple, true, "controller/rest/refBook/" + refBookId + "/records",
                             $scope.config.filter,
