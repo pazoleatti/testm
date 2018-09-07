@@ -213,7 +213,7 @@ class Calculate extends AbstractScriptClass {
                     //noinspection GroovyAssignabilityCheck
                     logForDebug("В ПНФ номер " + declarationData.id + " получены записи о физ. лицах (" + primaryPersonDataList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
 
-                    Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries {NaturalPerson naturalPerson ->
+                    Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries { NaturalPerson naturalPerson ->
                         [naturalPerson.getPrimaryPersonId(), naturalPerson]
                     }
 
@@ -585,20 +585,13 @@ class Calculate extends AbstractScriptClass {
                     identifierList.add(personIdentifier)
                 }
 
-                List<Integer> departmentTbByCurrentPerformer = departmentService.fetchAllTBIdsByPerformer(declarationData.departmentId)
                 Integer parentTbId = departmentService.getParentTBId(declarationData.departmentId)
-                if (!departmentTbByCurrentPerformer.contains(parentTbId)) {
-                    departmentTbByCurrentPerformer.add(parentTbId)
-                }
 
-                for (Integer departmentTb : departmentTbByCurrentPerformer) {
-                    PersonTb personTb = new PersonTb()
-                    personTb.naturalPerson = person
-                    personTb.tbDepartmentId = departmentTb
-                    personTb.importDate = getDeclarationDataCreationDate()
-                    personTbList.add(personTb)
-                }
-
+                PersonTb personTb = new PersonTb()
+                personTb.naturalPerson = person
+                personTb.tbDepartmentId = parentTbId
+                personTb.importDate = getDeclarationDataCreationDate()
+                personTbList.add(personTb)
             }
 
             //insert addresses batch
@@ -623,7 +616,7 @@ class Calculate extends AbstractScriptClass {
                 mapPersonIdentifierAttr(personIdentifier)
             })
 
-            insertBatchRecords(RefBook.Id.PERSON_TB.getId(), personTbList, {PersonTb personTb -> mapPersonTbAttr(personTb)})
+            insertBatchRecords(RefBook.Id.PERSON_TB.getId(), personTbList, { PersonTb personTb -> mapPersonTbAttr(personTb) })
 
             //update reference to ref book
             updatePrimaryToRefBookPersonReferences(insertPersonList)
@@ -693,7 +686,6 @@ class Calculate extends AbstractScriptClass {
         List<Map<String, RefBookValue>> updateIdentifierList = new ArrayList<Map<String, RefBookValue>>()
 
         List<PersonTb> insertPersonTbList = new ArrayList<>()
-
 
         //primaryId - RefBookPerson
         HashMap<Long, NaturalPerson> conformityMap = new HashMap<Long, NaturalPerson>()
@@ -830,22 +822,17 @@ class Calculate extends AbstractScriptClass {
                     }
                 }
 
-                List<Integer> departmentTbByCurrentPerformer = departmentService.fetchAllTBIdsByPerformer(declarationData.departmentId)
                 Integer parentTbId = departmentService.getParentTBId(declarationData.departmentId)
-                if (!departmentTbByCurrentPerformer.contains(parentTbId)) {
-                    departmentTbByCurrentPerformer.add(parentTbId)
+                if (!refBookPerson.personTbList.tbDepartmentId.contains(parentTbId)) {
+                    PersonTb personTb = new PersonTb()
+                    personTb.naturalPerson = refBookPerson
+                    personTb.tbDepartmentId = parentTbId
+                    personTb.importDate = getDeclarationDataCreationDate()
+                    insertPersonTbList.add(personTb)
+                    Department department = getDepartment(parentTbId)
+                    infoMsgBuilder.append(String.format("[Добавлен новый Тербанк: \"%s\"]", department.getShortName()))
                 }
-                for (Integer departmentTb : departmentTbByCurrentPerformer) {
-                    if (!refBookPerson.personTbList.tbDepartmentId.contains(departmentTb)) {
-                        PersonTb personTb = new PersonTb()
-                        personTb.naturalPerson = refBookPerson
-                        personTb.tbDepartmentId = departmentTb
-                        personTb.importDate = getDeclarationDataCreationDate()
-                        insertPersonTbList.add(personTb)
-                        Department department = getDepartment(departmentTb)
-                        infoMsgBuilder.append(String.format("[Добавлен новый Тербанк: \"%s\"]", department.getShortName()))
-                    }
-                }
+
 
                 if (changed) {
                     updatePersonList.add(refBookPersonValues)
@@ -883,7 +870,7 @@ class Calculate extends AbstractScriptClass {
             mapPersonIdentifierAttr(personIdentifier)
         })
 
-        insertBatchRecords(RefBook.Id.PERSON_TB.getId(), insertPersonTbList, {PersonTb personTb -> mapPersonTbAttr(personTb)})
+        insertBatchRecords(RefBook.Id.PERSON_TB.getId(), insertPersonTbList, { PersonTb personTb -> mapPersonTbAttr(personTb) })
 
         List<Map<String, RefBookValue>> refBookDocumentList = new ArrayList<Map<String, RefBookValue>>()
 
@@ -938,10 +925,10 @@ class Calculate extends AbstractScriptClass {
 
     /**
      *  Собирает сообщение об обновлении атрибутов
-     * @param addressAttrCnt    слушатель обновления атрибута ФЛ
-     * @param personAttrCnt     слушатель обновления атрибута адреса
-     * @param infoMsg           билдер сообщения
-     * @return  сообщение об обновлении атрибутов
+     * @param addressAttrCnt слушатель обновления атрибута ФЛ
+     * @param personAttrCnt слушатель обновления атрибута адреса
+     * @param infoMsg билдер сообщения
+     * @return сообщение об обновлении атрибутов
      */
     def buildRefreshNotice(AttributeCountChangeListener addressAttrCnt, AttributeCountChangeListener personAttrCnt, StringBuilder infoMsg) {
         StringBuffer sb = new StringBuffer()
@@ -953,10 +940,10 @@ class Calculate extends AbstractScriptClass {
 
     /**
      * Проверяет существует ли у ФЛ запись с определенными ИНП и АСНУ
-     * @param person    объект ФЛ
-     * @param asnuId    значение АСНУ
-     * @param inp       значение ИНП
-     * @return  флаг указывающий имеется ли совпадение
+     * @param person объект ФЛ
+     * @param asnuId значение АСНУ
+     * @param inp значение ИНП
+     * @return флаг указывающий имеется ли совпадение
      */
     static Boolean containsPersonIdentifier(NaturalPerson person, Long asnuId, String inp) {
         String primaryInp = BaseWeightCalculator.prepareString(inp)
@@ -991,9 +978,9 @@ class Calculate extends AbstractScriptClass {
                 PersonDocument personDocument = personDocumentList.get(i)
 
                 if (i == incRepIndex) {
-                    if (naturalPerson?.majorDocument != null && naturalPerson.majorDocument.getId() != personDocument?.getId()){
+                    if (naturalPerson?.majorDocument != null && naturalPerson.majorDocument.getId() != personDocument?.getId()) {
                         String oldValue = String.format("%s - (%s) %s", naturalPerson?.majorDocument?.getDocumentNumber(), naturalPerson?.majorDocument?.getDocType()?.getCode(), naturalPerson?.majorDocument?.getDocType()?.getName())
-                        String newValue  = String.format("%s - (%s) %s", personDocument?.getDocumentNumber(), personDocument?.getDocType()?.getCode(), personDocument?.getDocType()?.getName())
+                        String newValue = String.format("%s - (%s) %s", personDocument?.getDocumentNumber(), personDocument?.getDocType()?.getCode(), personDocument?.getDocType()?.getName())
                         toReturn = true
                         personDocument.setIncRep(INCLUDE_TO_REPORT)
                         updateDocumentList.add(personDocument)
@@ -1209,7 +1196,7 @@ class Calculate extends AbstractScriptClass {
         return record
     }
 
-    static  void fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
+    static void fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
         values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getId()))
         values.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getRecordId()))
         values.put("VERSION", new RefBookValue(RefBookAttributeType.DATE, refBookObject.getVersion()))
@@ -1218,9 +1205,9 @@ class Calculate extends AbstractScriptClass {
 
     /**
      * Объединяет информациионную часть сообщения с префиксом-атрибутом
-     * @param refBookId     идентификатор справочника
-     * @param attrCounter   слушатель атрибута
-     * @param sb            билдер сообщения
+     * @param refBookId идентификатор справочника
+     * @param attrCounter слушатель атрибута
+     * @param sb билдер сообщения
      */
     def appendAttrInfo(Long refBookId, AttributeCountChangeListener attrCounter, StringBuffer sb) {
         if (attrCounter != null && attrCounter.isUpdate()) {
@@ -1457,7 +1444,7 @@ class Calculate extends AbstractScriptClass {
     /**
      * Объединяет фамилию имя и отчество физлица
      * @param naturalPerson объект физлица
-     * @return  строка вида <фамилия> <имя> <отчество>
+     * @return строка вида <фамилия> <имя> <отчество>
      */
     static String buildFio(NaturalPerson naturalPerson) {
         return naturalPerson.lastName + " " + naturalPerson.firstName + (naturalPerson.middleName ? " " + naturalPerson.middleName : "")
@@ -1466,7 +1453,7 @@ class Calculate extends AbstractScriptClass {
     /**
      * Получить дату создания налоговой формы
      * @param declarationDataId идентификатор налоговой формы
-     * @return  дата создания налоговой формы
+     * @return дата создания налоговой формы
      */
     Date getDeclarationDataCreationDate() {
         if (declarationDataCreationDate == null) {
@@ -1477,8 +1464,8 @@ class Calculate extends AbstractScriptClass {
 
     /**
      * Получить объект подразделения
-     * @param id    идентфикатор подразделения
-     * @return  объект подразделения
+     * @param id идентфикатор подразделения
+     * @return объект подразделения
      */
     Department getDepartment(Integer id) {
         Department result = departmentCache.get(id)
