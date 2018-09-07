@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
@@ -76,5 +77,5 @@ public interface PrintingService {
      * @param filter фильтр на ФЛ
      * @return uuid на блоб файла
      */
-    String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams);
+    String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams, TAUser user);
 }

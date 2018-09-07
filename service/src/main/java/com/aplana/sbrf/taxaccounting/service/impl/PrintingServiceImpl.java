@@ -1,13 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
@@ -56,8 +50,6 @@ import java.util.Map;
 public class PrintingServiceImpl implements PrintingService {
 
     private static final Log LOG = LogFactory.getLog(PrintingServiceImpl.class);
-    private static final String FILE_NAME = "Налоговый_отчет_";
-    private static final String POSTFIX = ".xlsm";
 
     @Autowired
     private CommonRefBookService commonRefBookService;
@@ -67,8 +59,6 @@ public class PrintingServiceImpl implements PrintingService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private LogEntryService logEntryService;
-    @Autowired
-    private RefBookPersonDao refBookPersonDao;
     @Autowired
     private PersonService personService;
 
@@ -273,9 +263,9 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams) {
+    public String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams, TAUser user) {
         pagingParams.setCount(-1);// выбираем все записи выбираем
-        List<RefBookPerson> persons = personService.getPersons(pagingParams, filter);
+        List<RefBookPerson> persons = personService.getPersons(pagingParams, filter, user);
         PersonsReportBuilder reportBuilder = new PersonsReportBuilder(persons, filter);
         String reportPath = null;
         try {

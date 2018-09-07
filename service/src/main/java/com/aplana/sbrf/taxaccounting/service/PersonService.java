@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -73,7 +74,7 @@ public interface PersonService {
      * @param pagingParams параметры постраничной выдачи и сортировки
      * @return список ФЛ
      */
-    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
+    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser);
 
     /**
      * Возвращяет кол-во ФЛ по фильтру

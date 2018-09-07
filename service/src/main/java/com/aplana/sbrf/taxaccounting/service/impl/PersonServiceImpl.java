@@ -4,12 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -17,10 +12,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +52,8 @@ public class PersonServiceImpl implements PersonService {
     private LockDataService lockDataService;
     @Autowired
     private AsyncManager asyncManager;
+    @Autowired
+    private DepartmentService departmentService;
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -106,9 +105,57 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
-        return refBookPersonDao.getPersons(pagingParams, filter);
+    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser) {
+        PagingResult<RefBookPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
+        forbidVipsDataByUserPermissions(persons, requestingUser);
+        return persons;
     }
+
+    private void forbidVipsDataByUserPermissions(List<RefBookPerson> persons, TAUser user) {
+        if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+            return;
+        }
+
+        List<Integer> departmentsAvailableToUser = departmentService.getBADepartmentIds(user);
+        if (departmentsAvailableToUser.isEmpty()) {
+            forbidAllVips(persons);
+        } else {
+            forbidVipsWithNotAvailableTBs(persons, departmentsAvailableToUser);
+        }
+    }
+
+    private void forbidVipsWithNotAvailableTBs(List<RefBookPerson> persons, List<Integer> permittedDepartments) {
+        Set<Integer> permittedDepartmentsSet = new HashSet<>(permittedDepartments);
+        for (RefBookPerson person : persons) {
+            if (person.isVip()) {
+                List<Integer> vipDepartments = refBookPersonDao.getPersonTbIds(person.getId());
+                Set<Integer> vipDepartmentsSet = new HashSet<>(vipDepartments);
+                Set<Integer> intersection = Sets.intersection(permittedDepartmentsSet, vipDepartmentsSet);
+                if (intersection.isEmpty()) {
+                    forbidPerson(person);
+                }
+            }
+        }
+    }
+
+    private void forbidAllVips(List<RefBookPerson> persons) {
+        for (RefBookPerson person : persons) {
+            if (person.isVip()) {
+                forbidPerson(person);
+            }
+        }
+    }
+
+    private void forbidPerson(RefBookPerson person) {
+        person.setDocName(Permissive.<String>forbidden());
+        person.setDocNumber(Permissive.<String>forbidden());
+        person.setInn(Permissive.<String>forbidden());
+        person.setInnForeign(Permissive.<String>forbidden());
+        person.setSnils(Permissive.<String>forbidden());
+        person.setAddress(Permissive.<RefBookAddress>forbidden());
+        person.setForeignAddress(Permissive.<RefBookAddress>forbidden());
+    }
+
 
     @Override
     public int getPersonsCount(RefBookPersonFilter filter) {

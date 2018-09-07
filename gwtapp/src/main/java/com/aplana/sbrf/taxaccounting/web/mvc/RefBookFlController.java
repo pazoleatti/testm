@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
@@ -58,14 +59,16 @@ public class RefBookFlController {
     @GetMapping(value = "/rest/refBookFL")
     public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam RefBookPersonFilter filter,
                                                               @RequestParam PagingParams pagingParams) {
-        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter);
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
     /**
      * Получение списка ДУЛ для всех версий физлица, в т.ч. и дубликатов
-     * @param personId      идентификатор ФЛ
-     * @param pagingParams  параметры пейджинга
+     *
+     * @param personId     идентификатор ФЛ
+     * @param pagingParams параметры пейджинга
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/actions/refBookFL/fetchIdDocs/{personId}")
@@ -76,8 +79,9 @@ public class RefBookFlController {
 
     /**
      * Получение списка ИНП для всех версий физлица, в т.ч. и дубликатов
-     * @param personId      идентификатор ФЛ
-     * @param pagingParams  параметры пейджинга
+     *
+     * @param personId     идентификатор ФЛ
+     * @param pagingParams параметры пейджинга
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/actions/refBookFL/fetchInp/{personId}")
@@ -88,8 +92,9 @@ public class RefBookFlController {
 
     /**
      * Получение списка Тербанков для всех версий физлица, в т.ч. и дубликатов
-     * @param personId      идентификатор ФЛ
-     * @param pagingParams  параметры пейджинга
+     *
+     * @param personId     идентификатор ФЛ
+     * @param pagingParams параметры пейджинга
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/actions/refBookFL/fetchTb/{personId}")
@@ -100,6 +105,7 @@ public class RefBookFlController {
 
     /**
      * Получение оригинала ФЛ
+     *
      * @return оригинал ФЛ
      */
     @GetMapping(value = "/actions/refBookFL/fetchOriginal/{id}")
@@ -109,6 +115,7 @@ public class RefBookFlController {
 
     /**
      * Получение оригинала ФЛ
+     *
      * @param id идентификатор версии
      * @return объект версии ФЛ
      */

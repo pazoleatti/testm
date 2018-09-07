@@ -106,6 +106,11 @@ public interface RefBookPersonDao {
     String getPersonDocNumber(long personId);
 
     /**
+     * Возвращает список ID тербанков ФЛ
+     */
+    List<Integer> getPersonTbIds(long personId);
+
+    /**
      * Получает список ФЛ с пагинацией и фильтрацией.
      *
      * @param pagingParams параметры постраничной выдачи и сортировки

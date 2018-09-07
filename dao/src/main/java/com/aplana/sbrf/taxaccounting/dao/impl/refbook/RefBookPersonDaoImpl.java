@@ -58,65 +58,54 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setVersion(rs.getDate("version"));
             result.setVersionEnd(rs.getDate("version_to"));
 
-            // TODO: Здесь должна быть проверка по правам запрашивающего, некоторым ролям доступны ВИПы
-            if ((result.isVip() != null) && result.isVip()) {
-                result.setDocName(Permissive.<String>forbidden());
-                result.setDocNumber(Permissive.<String>forbidden());
-                result.setInn(Permissive.<String>forbidden());
-                result.setInnForeign(Permissive.<String>forbidden());
-                result.setSnils(Permissive.<String>forbidden());
-                result.setAddress(Permissive.<RefBookAddress>forbidden());
-                result.setForeignAddress(Permissive.<RefBookAddress>forbidden());
+            result.setDocName(Permissive.of(rs.getString("doc_name")));
+            result.setDocNumber(Permissive.of(rs.getString("doc_number")));
+            result.setInn(Permissive.of(rs.getString("inn")));
+            result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+            result.setSnils(Permissive.of(rs.getString("snils")));
+
+            Long addressId = SqlUtils.getLong(rs, "address_id");
+            if (addressId == null) {
+                result.setAddress(Permissive.<RefBookAddress>of(null));
+                result.setForeignAddress(Permissive.<RefBookAddress>of(null));
             } else {
-                result.setDocName(Permissive.of(rs.getString("doc_name")));
-                result.setDocNumber(Permissive.of(rs.getString("doc_number")));
-                result.setInn(Permissive.of(rs.getString("inn")));
-                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
-                result.setSnils(Permissive.of(rs.getString("snils")));
+                RefBookAddress address = new RefBookAddress();
+                RefBookAddress foreignAddress = new RefBookAddress();
 
-                Long addressId = SqlUtils.getLong(rs, "address_id");
-                if (addressId == null) {
-                    result.setAddress(Permissive.<RefBookAddress>of(null));
-                    result.setForeignAddress(Permissive.<RefBookAddress>of(null));
+                address.setId(rs.getLong("address_id"));
+                foreignAddress.setId(rs.getLong("address_id"));
+
+                address.setAddressType(rs.getInt("address_type"));
+                foreignAddress.setAddressType(rs.getInt("address_type"));
+
+                address.setPostalCode(rs.getString("postal_code"));
+                address.setRegionCode(rs.getString("region_code"));
+                address.setDistrict(rs.getString("district"));
+                address.setCity(rs.getString("city"));
+                address.setLocality(rs.getString("locality"));
+                address.setStreet(rs.getString("street"));
+                address.setBuild(rs.getString("building"));
+                address.setHouse(rs.getString("house"));
+                address.setApartment(rs.getString("apartment"));
+
+                address.setAddress(rs.getString("address"));
+                foreignAddress.setAddress(rs.getString("address"));
+
+                Long countryId = SqlUtils.getLong(rs, "address_country_id");
+                if (countryId == null) {
+                    address.setCountry(null);
+                    foreignAddress.setCountry(null);
                 } else {
-                    RefBookAddress address = new RefBookAddress();
-                    RefBookAddress foreignAddress = new RefBookAddress();
-
-                    address.setId(rs.getLong("address_id"));
-                    foreignAddress.setId(rs.getLong("address_id"));
-
-                    address.setAddressType(rs.getInt("address_type"));
-                    foreignAddress.setAddressType(rs.getInt("address_type"));
-
-                    address.setPostalCode(rs.getString("postal_code"));
-                    address.setRegionCode(rs.getString("region_code"));
-                    address.setDistrict(rs.getString("district"));
-                    address.setCity(rs.getString("city"));
-                    address.setLocality(rs.getString("locality"));
-                    address.setStreet(rs.getString("street"));
-                    address.setBuild(rs.getString("building"));
-                    address.setHouse(rs.getString("house"));
-                    address.setApartment(rs.getString("apartment"));
-
-                    address.setAddress(rs.getString("address"));
-                    foreignAddress.setAddress(rs.getString("address"));
-
-                    Long countryId = SqlUtils.getLong(rs, "address_country_id");
-                    if (countryId == null) {
-                        address.setCountry(null);
-                        foreignAddress.setCountry(null);
-                    } else {
-                        RefBookCountry country = new RefBookCountry();
-                        country.setId(countryId);
-                        country.setCode(rs.getString("address_country_code"));
-                        country.setName(rs.getString("address_country_name"));
-                        address.setCountry(country);
-                        foreignAddress.setCountry(country);
-                    }
-
-                    result.setAddress(Permissive.of(address));
-                    result.setForeignAddress(Permissive.of(foreignAddress));
+                    RefBookCountry country = new RefBookCountry();
+                    country.setId(countryId);
+                    country.setCode(rs.getString("address_country_code"));
+                    country.setName(rs.getString("address_country_name"));
+                    address.setCountry(country);
+                    foreignAddress.setCountry(country);
                 }
+
+                result.setAddress(Permissive.of(address));
+                result.setForeignAddress(Permissive.of(foreignAddress));
             }
 
             Long countryId = SqlUtils.getLong(rs, "citizenship_country_id");
@@ -376,6 +365,18 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         } else {
             return null;
         }
+    }
+
+    @Override
+    public List<Integer> getPersonTbIds(long personId) {
+        //language=SQL
+        String query = "" +
+                "select d.id \n" +
+                "from department d, ref_book_person_tb p2tb \n" +
+                "where p2tb.person_id = " + personId + " \n" +
+                "    and p2tb.tb_department_id = d.id";
+
+        return getJdbcTemplate().queryForList(query, Integer.class);
     }
 
     private PreparedStatementData generatePersonsByFilterQuery(RefBookPersonFilter filter) {

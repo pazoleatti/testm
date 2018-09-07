@@ -1,12 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.NotificationType;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -47,7 +42,8 @@ public class ExcelReportPersonsAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         RefBookPersonFilter personsFilter = (RefBookPersonFilter) params.get("personsFilter");
         PagingParams pagingParams = (PagingParams) params.get("pagingParams");
-        String uuid = printingService.generateExcelPersons(personsFilter, pagingParams);
+        TAUser user = userService.getUser(taskData.getUserId());
+        String uuid = printingService.generateExcelPersons(personsFilter, pagingParams, user);
         return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
     }
 
