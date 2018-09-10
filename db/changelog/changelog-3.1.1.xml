@@ -10,8 +10,8 @@
             <column name="id" value="38"/>
             <column name="name" value="Выгрузка настроек подразделений в файл формата XLSX"/>
             <column name="handler_bean" value="ExcelReportDepartmentConfigsAsyncTask"/>
-            <column name="short_queue_limit" value="10000"/>
-            <column name="task_limit" value="200000"/>
+            <column name="short_queue_limit" value="500000"/>
+            <column name="task_limit" value="1000000"/>
             <column name="limit_kind" value="количество отобранных для выгрузки в файл записей"/>
         </insert>
     </changeSet>

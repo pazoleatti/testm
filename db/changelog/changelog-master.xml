@@ -10,4 +10,5 @@
 	<include file="changelog-3.0.xml"/>
 	<include file="changelog-3.0.1.xml"/>
 	<include file="changelog-3.1.xml"/>
+	<include file="changelog-3.1.1.xml"/>
 </databaseChangeLog>
