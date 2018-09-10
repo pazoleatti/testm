@@ -947,7 +947,7 @@
         "refBook.fl.table.title.versionEnd": "Окончание действия",
         "refBook.fl.table.title.versionId": "ИД версии",
 
-        "refBook.fl.table.label.permissionDenied": "<i>Доступ ограничен</i>",
+        "refBook.fl.table.label.permissionDenied": "<i>Доступ ограничен</i>", //используется также в: карточка ФЛ
         "refBook.fl.table.label.vip": "VIP",
         "refBook.fl.table.label.notVip": "Не VIP",
         "refBook.fl.table.label.duplicate": "(Дубл.)",

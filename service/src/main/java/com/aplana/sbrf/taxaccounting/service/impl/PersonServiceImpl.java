@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
+import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -23,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +57,8 @@ public class PersonServiceImpl implements PersonService {
     private AsyncManager asyncManager;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    BasePermissionEvaluator permissionEvaluator;
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -90,14 +95,21 @@ public class PersonServiceImpl implements PersonService {
         }
         for (List<RegistryPerson> groupContent : candidatesGroupedByOldId.values()) {
             RegistryPerson person = resolveVersion(groupContent, actualDate);
+            boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
             RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
-            if (person.getReportDoc().hasPermission()) {
+            if (viewVipDataGranted) {
                 PagingResult<Map<String, RefBookValue>> idDocs = refBookDao.getRecordsWithVersionInfo(refBookIdDoc, null, null, "frb.id = " + person.getReportDoc().value().get("REPORT_DOC"), null, "asc");
                 if (!idDocs.isEmpty()) {
                     person.setReportDoc(Permissive.of(commonRefBookService.dereference(refBookIdDoc, idDocs).get(0)));
                 } else {
                     person.setReportDoc(Permissive.<Map<String, RefBookValue>>of(null));
                 }
+            } else {
+                person.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
+                person.setInn(Permissive.<String>forbidden());
+                person.setSnils(Permissive.<String>forbidden());
+                person.setInnForeign(Permissive.<String>forbidden());
+                person.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
             }
             toReturnData.add(person);
         }
@@ -365,30 +377,40 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public RegistryPerson fetchPerson(Long id) {
+
         RegistryPerson person = refBookPersonDao.fetchPersonWithVersionInfo(id);
+        boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
         RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
         RefBook refBookCountry = refBookDao.get(RefBook.Id.COUNTRY.getId());
         RefBook refBookTaxPayerState = refBookDao.get(RefBook.Id.TAXPAYER_STATUS.getId());
         RefBook refBookAsnu = refBookDao.get(RefBook.Id.ASNU.getId());
         RefBook refBookAddress = refBookDao.get(RefBook.Id.PERSON_ADDRESS.getId());
 
-        if (person.getTaxPayerState().hasPermission()) {
+        if (!viewVipDataGranted) {
+            person.setInn(Permissive.<String>forbidden());
+            person.setInnForeign(Permissive.<String>forbidden());
+            person.setSnils(Permissive.<String>forbidden());
+        }
+
+        if (viewVipDataGranted) {
             PagingResult<Map<String, RefBookValue>> refBookTaxPayerStates = refBookDao.getRecordsWithVersionInfo(refBookTaxPayerState, null, null, "frb.id = " + person.getTaxPayerState().value().get("TAXPAYER_STATE").getReferenceValue(), null, "asc");
             if (!refBookTaxPayerStates.isEmpty()) {
                 person.setTaxPayerState(Permissive.of(commonRefBookService.dereference(refBookTaxPayerState, refBookTaxPayerStates).get(0)));
             } else {
                 person.setTaxPayerState(Permissive.<Map<String, RefBookValue>>of(null));
             }
+        } else {
+            person.setTaxPayerState(Permissive.<Map<String, RefBookValue>>forbidden());
         }
 
-        if (person.getCitizenship().hasPermission()) {
-            PagingResult<Map<String, RefBookValue>> citizenships = refBookDao.getRecordsWithVersionInfo(refBookCountry, null, null, "frb.id = " + person.getCitizenship().value().get("CITIZENSHIP").getReferenceValue(), null, "asc");
-            if (!citizenships.isEmpty()) {
-                person.setCitizenship(Permissive.of(commonRefBookService.dereference(refBookCountry, citizenships).get(0)));
-            } else {
-                person.setCitizenship(Permissive.<Map<String, RefBookValue>>of(null));
-            }
+
+        PagingResult<Map<String, RefBookValue>> citizenships = refBookDao.getRecordsWithVersionInfo(refBookCountry, null, null, "frb.id = " + person.getCitizenship().value().get("CITIZENSHIP").getReferenceValue(), null, "asc");
+        if (!citizenships.isEmpty()) {
+            person.setCitizenship(Permissive.of(commonRefBookService.dereference(refBookCountry, citizenships).get(0)));
+        } else {
+            person.setCitizenship(Permissive.<Map<String, RefBookValue>>of(null));
         }
+
 
         PagingResult<Map<String, RefBookValue>> sources = refBookDao.getRecordsWithVersionInfo(refBookAsnu, null, null, "frb.id = " + person.getSource().get("SOURCE_ID").getReferenceValue(), null, "asc");
         if (!sources.isEmpty()) {
@@ -397,22 +419,26 @@ public class PersonServiceImpl implements PersonService {
             person.setSource(null);
         }
 
-        if (person.getAddress().hasPermission()) {
+        if (viewVipDataGranted) {
             PagingResult<Map<String, RefBookValue>> addresses = refBookDao.getRecordsWithVersionInfo(refBookAddress, null, null, "frb.id = " + person.getAddress().value().get("ADDRESS").getReferenceValue(), null, "asc");
             if (!addresses.isEmpty()) {
                 person.setAddress(Permissive.of(commonRefBookService.dereference(refBookAddress, addresses).get(0)));
             } else {
                 person.setAddress(Permissive.<Map<String, RefBookValue>>of(null));
             }
+        } else {
+            person.setAddress(Permissive.<Map<String, RefBookValue>>forbidden());
         }
 
-        if (person.getReportDoc().hasPermission()) {
+        if (viewVipDataGranted) {
             PagingResult<Map<String, RefBookValue>> idDocs = refBookDao.getRecordsWithVersionInfo(refBookIdDoc, null, null, "frb.id = " + person.getReportDoc().value().get("REPORT_DOC"), null, "asc");
             if (!idDocs.isEmpty()) {
                 person.setReportDoc(Permissive.of(commonRefBookService.dereference(refBookIdDoc, idDocs).get(0)));
             } else {
                 person.setReportDoc(Permissive.<Map<String, RefBookValue>>of(null));
             }
+        } else {
+            person.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
         }
         return person;
     }

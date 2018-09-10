@@ -165,35 +165,25 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             source.put("SOURCE_ID", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("SOURCE_ID")));
             result.setSource(source);
 
-            if ((result.getVip() != null) && result.getVip()) {
-                result.setCitizenship(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setInn(Permissive.<String>forbidden());
-                result.setInnForeign(Permissive.<String>forbidden());
-                result.setSnils(Permissive.<String>forbidden());
-                result.setTaxPayerState(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setAddress(Permissive.<Map<String, RefBookValue>>forbidden());
-            } else {
-                Map<String, RefBookValue> citizenship = new HashMap<>();
-                citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
-                result.setCitizenship(Permissive.of(citizenship));
+            Map<String, RefBookValue> citizenship = new HashMap<>();
+            citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
+            result.setCitizenship(Permissive.of(citizenship));
 
-                Map<String, RefBookValue> reportDoc = new HashMap<>();
-                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-                result.setReportDoc(Permissive.of(reportDoc));
+            Map<String, RefBookValue> reportDoc = new HashMap<>();
+            reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+            result.setReportDoc(Permissive.of(reportDoc));
 
-                result.setInn(Permissive.of(rs.getString("inn")));
-                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
-                result.setSnils(Permissive.of(rs.getString("snils")));
+            result.setInn(Permissive.of(rs.getString("inn")));
+            result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+            result.setSnils(Permissive.of(rs.getString("snils")));
 
-                Map<String, RefBookValue> taxPayerState = new HashMap<>();
-                taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
-                result.setTaxPayerState(Permissive.of(taxPayerState));
+            Map<String, RefBookValue> taxPayerState = new HashMap<>();
+            taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
+            result.setTaxPayerState(Permissive.of(taxPayerState));
 
-                Map<String, RefBookValue> address = new HashMap<>();
-                address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
-                result.setAddress(Permissive.of(address));
-            }
+            Map<String, RefBookValue> address = new HashMap<>();
+            address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
+            result.setAddress(Permissive.of(address));
 
             return result;
         }
@@ -230,19 +220,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setMiddleName(rs.getString("middle_name"));
             result.setBirthDate(rs.getDate("birth_date"));
             result.setVip(rs.getBoolean("vip"));
+            Map<String, RefBookValue> reportDoc = new HashMap<>();
+            reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+            result.setReportDoc(Permissive.of(reportDoc));
+            result.setInn(Permissive.of(rs.getString("inn")));
+            result.setSnils(Permissive.of(rs.getString("snils")));
 
-            if ((result.getVip() != null) && result.getVip()) {
-                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setInn(Permissive.<String>forbidden());
-                result.setSnils(Permissive.<String>forbidden());
-            } else {
-                Map<String, RefBookValue> reportDoc = new HashMap<>();
-                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-                result.setReportDoc(Permissive.of(reportDoc));
-
-                result.setInn(Permissive.of(rs.getString("inn")));
-                result.setSnils(Permissive.of(rs.getString("snils")));
-            }
 
             return result;
         }
