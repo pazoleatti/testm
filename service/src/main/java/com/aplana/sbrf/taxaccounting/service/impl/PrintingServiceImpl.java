@@ -1,24 +1,36 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.impl.print.departmentConfigs.DepartmentConfigsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.persons.PersonsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
@@ -26,6 +38,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelRepo
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
@@ -61,6 +74,10 @@ public class PrintingServiceImpl implements PrintingService {
     private LogEntryService logEntryService;
     @Autowired
     private PersonService personService;
+    @Autowired
+    private DepartmentConfigService departmentConfigService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
@@ -277,5 +294,30 @@ public class PrintingServiceImpl implements PrintingService {
         } finally {
             cleanTmp(reportPath);
         }
+    }
+
+    @Override
+    public String generateExcelDepartmentConfigs(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+        pagingParams.setCount(-1);// выбираем все записи выбираем
+        List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchDepartmentConfigs(filter, pagingParams);
+        Department department = departmentService.getDepartment(filter.getDepartmentId());
+        DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, filter, department);
+        String reportPath = null;
+        try {
+            reportPath = reportBuilder.createReport();
+
+            String fileName = getDepartmentConfigsExcelFileName(filter);
+            return blobDataService.create(reportPath, fileName);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
+        } finally {
+            cleanTmp(reportPath);
+        }
+    }
+
+    private String getDepartmentConfigsExcelFileName(DepartmentConfigsFilter filter) {
+        Department department = departmentService.getDepartment(filter.getDepartmentId());
+        return department.getId() + "_" + department.getShortName() + "_" + FastDateFormat.getInstance("yyyyMMddhh24mm").format(new Date()) + ".xlsx";
     }
 }

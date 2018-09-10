@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigFetchingAction;
+import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
@@ -41,7 +41,7 @@ public class DepartmentConfigController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
-        binder.registerCustomEditor(DepartmentConfigFetchingAction.class, new RequestParamEditor(DepartmentConfigFetchingAction.class));
+        binder.registerCustomEditor(DepartmentConfigsFilter.class, new RequestParamEditor(DepartmentConfigsFilter.class));
         binder.registerCustomEditor(DepartmentConfig.class, new RequestParamEditor(DepartmentConfig.class));
         binder.registerCustomEditor(RefBookDepartment.class, new RequestParamEditor(DepartmentConfig.class));
         binder.registerCustomEditor(DepartmentType.class, new RequestParamEditor(DepartmentConfig.class));
@@ -55,7 +55,7 @@ public class DepartmentConfigController {
      * @return возвращает список настроек подразделений
      */
     @GetMapping(value = "/rest/departmentConfig")
-    public JqgridPagedList<DepartmentConfig> fetchDepartmentConfig(@RequestParam DepartmentConfigFetchingAction filter, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<DepartmentConfig> fetchDepartmentConfig(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
         if (filter.getDepartmentId() == null) {
             return new JqgridPagedList<>();
         }
@@ -99,5 +99,13 @@ public class DepartmentConfigController {
     @PostMapping(value = "/actions/departmentConfig/delete")
     public ActionResult delete(@RequestBody List<Long> ids) {
         return departmentConfigService.delete(ids, securityService.currentUserInfo());
+    }
+
+    /**
+     * Создаёт задачу на формирование отчета excel
+     */
+    @PostMapping(value = "/actions/departmentConfig/export/excel")
+    public ActionResult exportPersonsToExcel(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
+        return departmentConfigService.createTaskToCreateExcel(filter, pagingParams, securityService.currentUserInfo());
     }
 }

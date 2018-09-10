@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigFetchingAction;
+import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -11,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
@@ -45,18 +50,22 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     private RefBookFactory refBookFactory;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private LockDataService lockDataService;
+    @Autowired
+    private AsyncManager asyncManager;
 
     @Override
-    public PagingResult<DepartmentConfig> fetchDepartmentConfigs(DepartmentConfigFetchingAction action, PagingParams pagingParams) {
-        StringBuilder departmentConfigFilter = new StringBuilder().append(DepartmentConfigDetailAliases.DEPARTMENT_ID).append(" = ").append(action.getDepartmentId());
-        if (!isEmpty(action.getKpp())) {
-            departmentConfigFilter.append(" AND LOWER(KPP) like '%").append(action.getKpp().toLowerCase()).append("%'");
+    public PagingResult<DepartmentConfig> fetchDepartmentConfigs(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+        StringBuilder departmentConfigFilter = new StringBuilder().append(DepartmentConfigDetailAliases.DEPARTMENT_ID).append(" = ").append(filter.getDepartmentId());
+        if (!isEmpty(filter.getKpp())) {
+            departmentConfigFilter.append(" AND LOWER(KPP) like '%").append(filter.getKpp().toLowerCase()).append("%'");
         }
-        if (!isEmpty(action.getOktmo())) {
-            departmentConfigFilter.append(" AND LOWER(OKTMO.CODE) like '%").append(action.getOktmo().toLowerCase()).append("%'");
+        if (!isEmpty(filter.getOktmo())) {
+            departmentConfigFilter.append(" AND LOWER(OKTMO.CODE) like '%").append(filter.getOktmo().toLowerCase()).append("%'");
         }
-        if (!isEmpty(action.getTaxOrganCode())) {
-            departmentConfigFilter.append(" AND LOWER(TAX_ORGAN_CODE) like '%").append(action.getTaxOrganCode().toLowerCase()).append("%'");
+        if (!isEmpty(filter.getTaxOrganCode())) {
+            departmentConfigFilter.append(" AND LOWER(TAX_ORGAN_CODE) like '%").append(filter.getTaxOrganCode().toLowerCase()).append("%'");
         }
         RefBook refBook = commonRefBookService.get(NDFL_DETAIL.getId());
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
@@ -66,8 +75,24 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
             sortAttribute = refBook.getAttribute(pagingParams.getProperty());
         }
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(
-                action.getRelevanceDate(), pagingParams, departmentConfigFilter.toString(), sortAttribute);
+                filter.getRelevanceDate(), pagingParams, departmentConfigFilter.toString(), sortAttribute);
         return new PagingResult<>(convertToDepartmentConfigs(records), records.getTotalCount());
+    }
+
+    @Override
+    public int fetchCount(DepartmentConfigsFilter filter) {
+        StringBuilder departmentConfigFilter = new StringBuilder().append(DepartmentConfigDetailAliases.DEPARTMENT_ID).append(" = ").append(filter.getDepartmentId());
+        if (!isEmpty(filter.getKpp())) {
+            departmentConfigFilter.append(" AND LOWER(KPP) like '%").append(filter.getKpp().toLowerCase()).append("%'");
+        }
+        if (!isEmpty(filter.getOktmo())) {
+            departmentConfigFilter.append(" AND LOWER(OKTMO.CODE) like '%").append(filter.getOktmo().toLowerCase()).append("%'");
+        }
+        if (!isEmpty(filter.getTaxOrganCode())) {
+            departmentConfigFilter.append(" AND LOWER(TAX_ORGAN_CODE) like '%").append(filter.getTaxOrganCode().toLowerCase()).append("%'");
+        }
+        RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
+        return provider.getRecordsCount(filter.getRelevanceDate(), departmentConfigFilter.toString());
     }
 
     public DepartmentConfig fetch(long id) {
@@ -222,6 +247,28 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     public void delete(DepartmentConfig departmentConfig, Logger logger) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
         provider.deleteRecordVersions(logger, new ArrayList<Long>(singletonList(departmentConfig.getId())));
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
+    public ActionResult createTaskToCreateExcel(DepartmentConfigsFilter filter, PagingParams pagingParams, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+        ActionResult result = new ActionResult();
+        AsyncTaskType taskType = AsyncTaskType.EXCEL_DEPARTMENT_CONFIGS;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("departmentConfigsFilter", filter);
+        params.put("pagingParams", pagingParams);
+
+        String keyTask = "EXCEL_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
+        asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+            @Override
+            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+            }
+        });
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     private String getDeleteFailedMessage(DepartmentConfig departmentConfig, String error) {

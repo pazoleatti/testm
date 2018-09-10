@@ -25,6 +25,7 @@ public enum AsyncTaskType {
     SPECIFIC_REPORT_REF_BOOK(3, "SPECIFIC", "Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", 25L),
     EXCEL_REF_BOOK(0, "XLSX", "Формирование отчета справочника \"%s\" в XLSX-формате", 23L),
     EXCEL_PERSONS(37, "XLSX", "Выгрузка файла данных Реестра физических лиц в XLSX-формате", 37L),
+    EXCEL_DEPARTMENT_CONFIGS(38, "XLSX", "Выгрузка настроек подразделений в файл формата XLSX", 38L),
     CSV_REF_BOOK(1, "CSV", "Формирование отчета справочника \"%s\" в CSV-формате", 24L),
     TEST(-1, "TEST", "Тестовая задача %s", -1L),
     IDENTIFY_PERSON(1, "IDENTIFY_PERSON", "Идентификация ФЛ %s", 8L),

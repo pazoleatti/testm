@@ -72,6 +72,17 @@
                     }
                 });
 
+                $scope.filterRequestParam = function () {
+                    return JSON.stringify({
+                        departmentId: $scope.searchFilter.params.department ? $scope.searchFilter.params.department.id : undefined,
+                        relevanceDate: $scope.searchFilter.params.relevance.id === APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.DATE.id ?
+                            $scope.searchFilter.params.relevanceDate : null,
+                        oktmo: $scope.searchFilter.params.oktmo,
+                        kpp: $scope.searchFilter.params.kpp,
+                        taxOrganCode: $scope.searchFilter.params.taxOrganCode
+                    });
+                };
+
                 $scope.departmentConfigGrid = {
                     ctrl: {},
                     value: [],
@@ -80,14 +91,7 @@
                         angularResource: DepartmentConfigResource,
                         requestParameters: function () {
                             return {
-                                filter: JSON.stringify({
-                                    departmentId: $scope.searchFilter.params.department ? $scope.searchFilter.params.department.id : undefined,
-                                    relevanceDate: $scope.searchFilter.params.relevance.id === APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.DATE.id ?
-                                        $scope.searchFilter.params.relevanceDate : null,
-                                    oktmo: $scope.searchFilter.params.oktmo,
-                                    kpp: $scope.searchFilter.params.kpp,
-                                    taxOrganCode: $scope.searchFilter.params.taxOrganCode
-                                })
+                                filter: $scope.filterRequestParam()
                             };
                         },
                         colNames: [
@@ -248,7 +252,21 @@
                 };
 
                 $scope.exportDepartmentConfig = function () {
-                    // TODO
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/departmentConfig/export/excel",
+                        params: {
+                            filter: $scope.filterRequestParam(),
+                            pagingParams: JSON.stringify({
+                                property: $scope.departmentConfigGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortname'),
+                                direction: $scope.departmentConfigGrid.ctrl.getGrid().jqGrid('getGridParam', 'sortorder')
+                            })
+                        }
+                    }).success(function (response) {
+                        if (response.uuid) {
+                            $logPanel.open('log-panel-container', response.uuid);
+                        }
+                    });
                 };
 
                 $scope.importDepartmentConfig = function (file) {

@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Класс содержит данные передаваемые в качестве фильтра для поиска настроек подразделений
  */
-public class DepartmentConfigFetchingAction {
+public class DepartmentConfigsFilter implements Serializable {
     private Integer departmentId;
     private Date relevanceDate;
     private String kpp;
