@@ -196,7 +196,7 @@ public class RefBookMapperFactory {
         public RefBookSignatoryMark mapRow(ResultSet resultSet, int i) throws SQLException {
             RefBookSignatoryMark result = new RefBookSignatoryMark();
             result.setId(resultSet.getLong("id"));
-            result.setCode(resultSet.getString("code"));
+            result.setCode(resultSet.getInt("code"));
             result.setName(resultSet.getString("name"));
             return result;
         }

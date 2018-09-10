@@ -257,8 +257,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         AsyncTaskType taskType = AsyncTaskType.EXCEL_DEPARTMENT_CONFIGS;
 
         Map<String, Object> params = new HashMap<>();
-        params.put("departmentConfigsFilter", filter);
-        params.put("pagingParams", pagingParams);
+        params.put("departmentId", filter.getDepartmentId());
 
         String keyTask = "EXCEL_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
         asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {

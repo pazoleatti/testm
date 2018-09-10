@@ -16,7 +16,7 @@ public class PagingParams implements Serializable {
     /**
      * Направление сортировки
      */
-    private String direction;
+    private String direction = "ASC";
 
     /**
      * Номер страницы. По умолчанию = 1

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
-import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -83,8 +82,8 @@ public interface PrintingService {
     /**
      * Формирует excel-отчет настроек подразделений
      *
-     * @param filter фильтр
+     * @param departmentId ид подразделения
      * @return uuid на блоб файла
      */
-    String generateExcelDepartmentConfigs(DepartmentConfigsFilter filter, PagingParams pagingParams);
+    String generateExcelDepartmentConfigs(int departmentId);
 }

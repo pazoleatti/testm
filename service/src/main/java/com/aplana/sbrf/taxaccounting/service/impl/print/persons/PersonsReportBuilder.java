@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.aplana.sbrf.taxaccounting.service.impl.print.persons.StyleBuilder.CellType;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -36,7 +37,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     private StyleBuilder styleBuilder;
 
     public PersonsReportBuilder(List<RefBookPerson> persons, RefBookPersonFilter filter) {
-        super("Физические_лица_", ".xlsx");
+        super("tmp_физические_лица_", ".xlsx");
         this.persons = persons;
         this.filter = filter;
 
@@ -166,7 +167,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     private void createRowValues(ReportPerson reportPerson) {
         sheet.createRow(curRowIndex);
         int colIndex = 0;
-        createCellValue(colIndex++, curRowIndex - DATA_ROW_INDEX + 1, "rn", CellType.NUMBERIC);
+        createCellValue(colIndex++, curRowIndex - DATA_ROW_INDEX + 1, "rn", CellType.NUMERIC);
         createCellValue(colIndex++, reportPerson.getFLId(), "flId", CellType.STRING);
         createCellValue(colIndex++, reportPerson.getVip(), "vip", CellType.STRING);
         createCellValue(colIndex++, reportPerson.getLastName(), "lastName", CellType.STRING);
@@ -197,7 +198,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
                         cell.setCellValue(value.toString());
                     }
                     break;
-                case NUMBERIC:
+                case NUMERIC:
                     cell.setCellValue(((Number) value).doubleValue());
                     break;
                 case DATE:
@@ -225,11 +226,5 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
                     (dateFrom != null ? dateFormat.format(dateFrom) : "-") + " по " +
                     (dateTo != null ? dateFormat.format(dateTo) : "-"));
         }
-    }
-
-    enum CellType {
-        STRING,
-        NUMBERIC,
-        DATE
     }
 }

@@ -20,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -297,16 +296,20 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateExcelDepartmentConfigs(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+    public String generateExcelDepartmentConfigs(int departmentId) {
+        DepartmentConfigsFilter filter = new DepartmentConfigsFilter();
+        filter.setDepartmentId(departmentId);
+        // pagingParams не null, т.к. нужна сортировка по-умолчанию (по КПП/ОКТМО/Код НО)
+        PagingParams pagingParams = new PagingParams();
         pagingParams.setCount(-1);// выбираем все записи выбираем
         List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchDepartmentConfigs(filter, pagingParams);
         Department department = departmentService.getDepartment(filter.getDepartmentId());
-        DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, filter, department);
+        DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, department);
         String reportPath = null;
         try {
             reportPath = reportBuilder.createReport();
 
-            String fileName = getDepartmentConfigsExcelFileName(filter);
+            String fileName = getDepartmentConfigsExcelFileName(departmentId);
             return blobDataService.create(reportPath, fileName);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -316,8 +319,8 @@ public class PrintingServiceImpl implements PrintingService {
         }
     }
 
-    private String getDepartmentConfigsExcelFileName(DepartmentConfigsFilter filter) {
-        Department department = departmentService.getDepartment(filter.getDepartmentId());
+    private String getDepartmentConfigsExcelFileName(int departmentId) {
+        Department department = departmentService.getDepartment(departmentId);
         return department.getId() + "_" + department.getShortName() + "_" + FastDateFormat.getInstance("yyyyMMddhh24mm").format(new Date()) + ".xlsx";
     }
 }

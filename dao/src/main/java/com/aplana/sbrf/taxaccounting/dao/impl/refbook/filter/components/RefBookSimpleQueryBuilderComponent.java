@@ -688,7 +688,7 @@ public class RefBookSimpleQueryBuilderComponent {
     }
 
     private void appendPagingCondition(PagingParams pagingParams, PreparedStatementData ps) {
-        if (pagingParams != null) {
+        if (pagingParams != null && pagingParams.getCount() != -1) {
             ps.appendQuery(" WHERE ");
             ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
             ps.appendQuery(" BETWEEN ? AND ?");
