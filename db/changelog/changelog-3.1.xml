@@ -1602,6 +1602,13 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5570 Идентификация формы 25609 идет более 30 минут -->
+    <changeSet id="3.1-akorobko-65" author="akorobko">
+        <sql>
+            CREATE INDEX idx_ref_book_person_tb_pers ON REF_BOOK_PERSON_TB ("PERSON_ID");
+        </sql>
+    </changeSet>
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-5576 В ходе идентификации ФЛ добавились все тербанки по несколько раз -->
     <changeSet id="3.1-ytrofimov-19" author="ytrofimov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
