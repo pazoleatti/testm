@@ -101,5 +101,10 @@
                         $modalInstance.close(false);
                     }
                 };
+
+                // срабатывает при нажатии на крестик в модальном окне
+                $scope.modalCloseCallback = function () {
+                    $scope.close();
+                };
             }]);
 }());
