@@ -43,10 +43,10 @@
                 <span class="span5 person-card-data" data-ng-show="mode == 'VIEW'">{{person.version | dateFormatter}}</span>
             </div>
         </div>
-        <div class="span2">
+        <div class="span1">
             <div class="row-fluid form-group-view">
                 <span class="span4">{{::'refBook.fl.card.label.versionTo' | translate}}</span>
-                <span class="span8 person-card-data" data-ng-show="mode == 'VIEW'">{{person.recordVersionTo | dateFormatter}}</span>
+                <span class="span8 person-card-data" data-ng-show="mode == 'VIEW'">{{person.recordVersionTo ? (person.recordVersionTo | dateFormatter) : "-"}}</span>
             </div>
         </div>
         <div class="row-fluid" style="width: 800px" data-ng-show="mode == 'EDIT'">
