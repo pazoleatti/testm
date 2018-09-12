@@ -1563,16 +1563,6 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
         </update>
     </changeSet>
 
-    <!--https://jira.aplana.com/browse/SBRFNDFL-5415 Реализовать изменения в алгоритме идентификации по хранимым процедурам-->
-    <changeSet id="3.1-akorobko-64" author="akorobko">
-        <sqlFile dbms="oracle"
-                 encoding="utf8"
-                 endDelimiter=""
-                 path="/scripts/person_pkg_body8.sql"
-                 relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-
     <!--https://jira.aplana.com/browse/SBRFNDFL-3466 Реализовать Реестр ФЛ-->
     <changeSet id="3.1-ytrofimov-17" author="ytrofimov">
         <sql>
@@ -1607,5 +1597,23 @@ select id from ref_book_ndfl_detail where oktmo=(select distinct last_value(id) 
         <sql>
             CREATE INDEX idx_ref_book_person_tb_pers ON REF_BOOK_PERSON_TB ("PERSON_ID");
         </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5576 В ходе идентификации ФЛ добавились все тербанки по несколько раз -->
+    <changeSet id="3.1-ytrofimov-19" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
+        </update>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5415 Реализовать изменения в алгоритме идентификации по хранимым процедурам-->
+    <changeSet id="3.1-akorobko-66" author="akorobko">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body8.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>

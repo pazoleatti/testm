@@ -679,7 +679,6 @@ class Calculate extends AbstractScriptClass {
         List<Address> insertAddressList = new ArrayList<Address>()
         List<Map<String, RefBookValue>> updateAddressList = new ArrayList<Map<String, RefBookValue>>()
 
-        List<PersonDocument> insertDocumentList = new ArrayList<PersonDocument>()
         List<PersonDocument> updateDocumentList = new ArrayList<PersonDocument>()
 
         List<PersonIdentifier> insertIdentifierList = new ArrayList<PersonIdentifier>()
@@ -746,6 +745,8 @@ class Calculate extends AbstractScriptClass {
         msgCnt = 0
         maxMsgCnt = 0
         for (Map.Entry<Long, NaturalPerson> entry : conformityMap.entrySet()) {
+
+            List<PersonDocument> insertDocumentList = new ArrayList<PersonDocument>()
 
             long inTime = System.currentTimeMillis()
 
