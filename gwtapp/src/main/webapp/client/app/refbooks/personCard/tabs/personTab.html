@@ -200,7 +200,7 @@
                 <div class="row-fluid form-group-view">
                     <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.apartment' | translate}}</div>
                     <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.APARTMENT.value}}
+                        {{person.address.value.APPARTMENT.value}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
@@ -213,7 +213,7 @@
                     </div>
                     <div class="span8 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.BUILDING.value}}
+                        {{person.address.value.BUILD.value}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
