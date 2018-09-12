@@ -3,18 +3,23 @@ package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
+import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
@@ -53,7 +58,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     @Autowired
     private LockDataService lockDataService;
     @Autowired
+    private BlobDataService blobDataService;
+    @Autowired
     private AsyncManager asyncManager;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public PagingResult<DepartmentConfig> fetchDepartmentConfigs(DepartmentConfigsFilter filter, PagingParams pagingParams) {
@@ -249,6 +258,15 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         provider.deleteRecordVersions(logger, new ArrayList<Long>(singletonList(departmentConfig.getId())));
     }
 
+    private String getDeleteFailedMessage(DepartmentConfig departmentConfig, String error) {
+        return String.format("Возникла ошибка при удалении настройки подразделения \"%s\", КПП: \"%s\", ОКТМО: \"%s\", период актуальности с " +
+                        "\"%s\" по \"%s\". %s",
+                departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
+                FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
+                departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
+                error);
+    }
+
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public ActionResult createTaskToCreateExcel(DepartmentConfigsFilter filter, PagingParams pagingParams, TAUserInfo userInfo) {
@@ -270,13 +288,63 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         return result;
     }
 
-    private String getDeleteFailedMessage(DepartmentConfig departmentConfig, String error) {
-        return String.format("Возникла ошибка при удалении настройки подразделения \"%s\", КПП: \"%s\", ОКТМО: \"%s\", период актуальности с " +
-                        "\"%s\" по \"%s\". %s",
-                departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
-                FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
-                error);
+    @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
+    public ImportDepartmentConfigsResult createTaskToImportExcel(ImportDepartmentConfigsAction action, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+        ImportDepartmentConfigsResult result = new ImportDepartmentConfigsResult();
+        AsyncTaskType taskType = AsyncTaskType.IMPORT_DEPARTMENT_CONFIGS;
+
+        int fileNameDepartmentId = getDepartmentIdFromFileName(action.getFileName());
+        if (!action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
+            result.setConfirmDepartmentCheck(
+                    String.format("Загружаемый файл содержит настройки подразделения \"%s\", хотя отображаются данные подразделения \"%s\". " +
+                                    "Вы действительно хотите загрузить файл?",
+                            departmentService.getDepartment(fileNameDepartmentId).getShortName(),
+                            departmentService.getDepartment(action.getDepartmentId()).getShortName()
+                    ));
+        } else {
+            String uuid = blobDataService.create(action.getInputStream(), action.getFileName());
+            Map<String, Object> params = new HashMap<>();
+            params.put("departmentId", fileNameDepartmentId);
+            params.put("blobDataId", uuid);
+            params.put("fileName", action.getFileName());
+
+            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
+            asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                @Override
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+                }
+            });
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    @Override
+    public void importExcel(int departmentId, BlobData blobData) {
+        if (departmentId == 16) {
+            // ок
+        } else {
+            throw new ServiceException("Ещё не реализованно...");
+        }
+    }
+
+    private int getDepartmentIdFromFileName(String fileName) {
+        int indexOf = fileName.indexOf("_");
+        int departmentId;
+        if (indexOf != -1) {
+            String departmentIdString = fileName.substring(0, indexOf);
+            try {
+                departmentId = Integer.valueOf(departmentIdString);
+            } catch (NumberFormatException e) {
+                throw new ServiceException("Неверное число");
+            }
+        } else {
+            throw new ServiceException("Неверное имя файла");
+        }
+        return departmentId;
     }
 
     private void checkDepartmentConfig(DepartmentConfig departmentConfig, List<DepartmentConfig> relatedDepartmentConfigs) {

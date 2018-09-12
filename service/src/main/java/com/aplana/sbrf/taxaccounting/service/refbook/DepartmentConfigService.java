@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
+import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 
 import java.util.List;
 
@@ -60,4 +63,21 @@ public interface DepartmentConfigService {
      * @return результат создания задачи
      */
     ActionResult createTaskToCreateExcel(DepartmentConfigsFilter filter, PagingParams pagingParams, TAUserInfo userInfo);
+
+    /**
+     * Создаёт задачу на загрузку данных настроек подразделений из excel файла
+     *
+     * @param action   параметры загрузки
+     * @param userInfo пользователь, запустивший операцию
+     * @return результат создания задачи
+     */
+    ImportDepartmentConfigsResult createTaskToImportExcel(ImportDepartmentConfigsAction action, TAUserInfo userInfo);
+
+    /**
+     * Выполняет загрузку данных настроек подразделений из excel файла
+     *
+     * @param departmentId ид подразделения настроек подразделений , куда будут загружены данные
+     * @param blobData     данные файла
+     */
+    void importExcel(int departmentId, BlobData blobData);
 }

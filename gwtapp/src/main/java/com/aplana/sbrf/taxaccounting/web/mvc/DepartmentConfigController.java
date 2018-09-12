@@ -3,11 +3,14 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
+import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
@@ -22,7 +25,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -45,6 +51,7 @@ public class DepartmentConfigController {
         binder.registerCustomEditor(DepartmentConfig.class, new RequestParamEditor(DepartmentConfig.class));
         binder.registerCustomEditor(RefBookDepartment.class, new RequestParamEditor(DepartmentConfig.class));
         binder.registerCustomEditor(DepartmentType.class, new RequestParamEditor(DepartmentConfig.class));
+        binder.registerCustomEditor(ImportDepartmentConfigsAction.class, new RequestParamEditor(ImportDepartmentConfigsAction.class));
     }
 
     /**
@@ -102,10 +109,25 @@ public class DepartmentConfigController {
     }
 
     /**
-     * Создаёт задачу на формирование отчета excel
+     * Формирование отчета excel
      */
     @PostMapping(value = "/actions/departmentConfig/export/excel")
-    public ActionResult exportPersonsToExcel(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
+    public ActionResult exportToExcel(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
         return departmentConfigService.createTaskToCreateExcel(filter, pagingParams, securityService.currentUserInfo());
+    }
+
+    /**
+     * Загрузка данных из excel
+     */
+    @PostMapping(value = "/actions/departmentConfig/import")
+    public ImportDepartmentConfigsResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
+                                                     @RequestParam ImportDepartmentConfigsAction action)
+            throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        try (InputStream inputStream = file.getInputStream()) {
+            action.setInputStream(inputStream);
+            action.setFileName(file.getOriginalFilename());
+            return departmentConfigService.createTaskToImportExcel(action, userInfo);
+        }
     }
 }

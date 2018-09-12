@@ -18,8 +18,8 @@
             });
         }])
 
-        .controller('departmentConfigCtrl', ['$scope', '$filter', '$rootScope', 'APP_CONSTANTS', 'DepartmentConfigResource', '$http', '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker',
-            function ($scope, $filter, $rootScope, APP_CONSTANTS, DepartmentConfigResource, $http, $aplanaModal, $dialogs, $logPanel, PermissionChecker) {
+        .controller('departmentConfigCtrl', ['$scope', '$filter', '$rootScope', 'APP_CONSTANTS', 'DepartmentConfigResource', '$http', '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', 'Upload',
+            function ($scope, $filter, $rootScope, APP_CONSTANTS, DepartmentConfigResource, $http, $aplanaModal, $dialogs, $logPanel, PermissionChecker, Upload) {
                 var defaultDepartment = undefined;
                 $scope.searchFilter = {
                     params: getDefaultFilterParams(),
@@ -269,9 +269,39 @@
                     });
                 };
 
-                $scope.importDepartmentConfig = function (file) {
+                $scope.importDepartmentConfig = function (file, skipDepartmentCheck) {
                     if (file) {
-                        // TODO
+                        Upload.upload({
+                            url: 'controller/actions/departmentConfig/import',
+                            data: {
+                                uploader: file,
+                                action: JSON.stringify({
+                                    departmentId: $scope.searchFilter.params.department.id,
+                                    skipDepartmentCheck: skipDepartmentCheck
+                                })
+                            }
+                        }).progress(function (e) {
+                        }).then(function (response) {
+                            $logPanel.close();
+                            if (response.data && response.data.uuid) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
+                            if (response.data && response.data.confirmDepartmentCheck) {
+                                $dialogs.confirmDialog({
+                                    content: response.data.confirmDepartmentCheck,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $scope.importDepartmentConfig(file, true);
+                                    },
+                                    cancelBtnClick: function () {
+                                        file.msClose();
+                                    }
+                                });
+                            } else {
+                                file.msClose();
+                            }
+                        });
                     }
                 };
 

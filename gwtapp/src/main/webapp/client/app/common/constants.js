@@ -39,7 +39,9 @@
                 VIEW_TAXES_SERVICE: 1 << 25,
                 VIEW_TAXES_CREATE_APPLICATION_2: 1 << 26,
                 CREATE_DEPARTMENT_CONFIG: 1 << 27,
-                EXPORT_PERSONS: 1 << 28
+                EXPORT_PERSONS: 1 << 28,
+                EXPORT_DEPARTMENT_CONFIG: 1 << 29,
+                IMPORT_DEPARTMENT_CONFIG: 1 << 30
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

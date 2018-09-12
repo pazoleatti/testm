@@ -36,16 +36,6 @@ public abstract class DepartmentConfigPermission extends AbstractPermission<Depa
      */
     public static final Permission<DepartmentConfig> DELETE = new DeletePermission(1 << 3);
 
-    /**
-     * Право удаление записи настроек подразделений
-     */
-    public static final Permission<DepartmentConfig> EXPORT_EXCEL = new ExportExcelPermission(1 << 4);
-
-    /**
-     * Право удаление записи настроек подразделений
-     */
-    public static final Permission<DepartmentConfig> IMPORT_EXCEL = new ImportExcelPermission(1 << 5);
-
 
     public DepartmentConfigPermission(long mask) {
         super(mask);
@@ -86,30 +76,6 @@ public abstract class DepartmentConfigPermission extends AbstractPermission<Depa
         @Override
         protected boolean isGrantedInternal(User currentUser, DepartmentConfig targetDomainObject, Logger logger) {
             return super.isGrantedInternal(currentUser, targetDomainObject, logger);
-        }
-    }
-
-    public static final class ExportExcelPermission extends DepartmentConfigPermission {
-
-        public ExportExcelPermission(long mask) {
-            super(mask);
-        }
-
-        @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentConfig targetDomainObject, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
-        }
-    }
-
-    public static final class ImportExcelPermission extends DepartmentConfigPermission {
-
-        public ImportExcelPermission(long mask) {
-            super(mask);
-        }
-
-        @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentConfig targetDomainObject, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 

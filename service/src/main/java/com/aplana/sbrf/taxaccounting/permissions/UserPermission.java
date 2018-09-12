@@ -152,6 +152,16 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> EXPORT_PERSONS = new ExportPersonsPermission(1 << 28);
 
+    /**
+     * Право на создание записи настроек подразделений
+     */
+    public static final Permission<TAUser> EXPORT_DEPARTMENT_CONFIG = new ExportDepartmentConfigPermission(1 << 29);
+
+    /**
+     * Право на создание записи настроек подразделений
+     */
+    public static final Permission<TAUser> IMPORT_DEPARTMENT_CONFIG = new ImportDepartmentConfigPermission(1 << 30);
+
     public UserPermission(long mask) {
         super(mask);
     }
@@ -588,6 +598,30 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
+        }
+    }
+
+    public static final class ExportDepartmentConfigPermission extends UserPermission {
+
+        public ExportDepartmentConfigPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+        }
+    }
+
+    public static final class ImportDepartmentConfigPermission extends UserPermission {
+
+        public ImportDepartmentConfigPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 }
