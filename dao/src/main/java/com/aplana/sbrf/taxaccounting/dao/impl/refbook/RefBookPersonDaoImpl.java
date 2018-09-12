@@ -28,7 +28,10 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 
 @Repository
@@ -165,35 +168,25 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             source.put("SOURCE_ID", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("SOURCE_ID")));
             result.setSource(source);
 
-            if ((result.getVip() != null) && result.getVip()) {
-                result.setCitizenship(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setInn(Permissive.<String>forbidden());
-                result.setInnForeign(Permissive.<String>forbidden());
-                result.setSnils(Permissive.<String>forbidden());
-                result.setTaxPayerState(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setAddress(Permissive.<Map<String, RefBookValue>>forbidden());
-            } else {
-                Map<String, RefBookValue> citizenship = new HashMap<>();
-                citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
-                result.setCitizenship(Permissive.of(citizenship));
+            Map<String, RefBookValue> citizenship = new HashMap<>();
+            citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
+            result.setCitizenship(Permissive.of(citizenship));
 
-                Map<String, RefBookValue> reportDoc = new HashMap<>();
-                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-                result.setReportDoc(Permissive.of(reportDoc));
+            Map<String, RefBookValue> reportDoc = new HashMap<>();
+            reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+            result.setReportDoc(Permissive.of(reportDoc));
 
-                result.setInn(Permissive.of(rs.getString("inn")));
-                result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
-                result.setSnils(Permissive.of(rs.getString("snils")));
+            result.setInn(Permissive.of(rs.getString("inn")));
+            result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
+            result.setSnils(Permissive.of(rs.getString("snils")));
 
-                Map<String, RefBookValue> taxPayerState = new HashMap<>();
-                taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
-                result.setTaxPayerState(Permissive.of(taxPayerState));
+            Map<String, RefBookValue> taxPayerState = new HashMap<>();
+            taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
+            result.setTaxPayerState(Permissive.of(taxPayerState));
 
-                Map<String, RefBookValue> address = new HashMap<>();
-                address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
-                result.setAddress(Permissive.of(address));
-            }
+            Map<String, RefBookValue> address = new HashMap<>();
+            address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
+            result.setAddress(Permissive.of(address));
 
             return result;
         }
@@ -230,19 +223,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setMiddleName(rs.getString("middle_name"));
             result.setBirthDate(rs.getDate("birth_date"));
             result.setVip(rs.getBoolean("vip"));
+            Map<String, RefBookValue> reportDoc = new HashMap<>();
+            reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
+            result.setReportDoc(Permissive.of(reportDoc));
+            result.setInn(Permissive.of(rs.getString("inn")));
+            result.setSnils(Permissive.of(rs.getString("snils")));
 
-            if ((result.getVip() != null) && result.getVip()) {
-                result.setReportDoc(Permissive.<Map<String, RefBookValue>>forbidden());
-                result.setInn(Permissive.<String>forbidden());
-                result.setSnils(Permissive.<String>forbidden());
-            } else {
-                Map<String, RefBookValue> reportDoc = new HashMap<>();
-                reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-                result.setReportDoc(Permissive.of(reportDoc));
-
-                result.setInn(Permissive.of(rs.getString("inn")));
-                result.setSnils(Permissive.of(rs.getString("snils")));
-            }
 
             return result;
         }
@@ -412,37 +398,33 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "left join ref_book_country address_country on address_country.id = address.country_id \n" +
                 "left join ref_book_asnu asnu on asnu.id = person.source_id \n";
 
-        MapSqlParameterSource queryParams = new MapSqlParameterSource();
         //language=SQL
         String filterQuery = "" +
                 "where person.status = 0 \n";
 
         if (filter != null) {
-            // TODO вместо !null должно использоваться StringUtils.notEmpty
             if (filter.getId() != null) {
                 //language=SQL
                 filterQuery = filterQuery + "and person.old_id like '%" + filter.getId() + "%' \n";
             }
-            if (filter.getLastName() != null) {
+            if (isNotEmpty(filter.getLastName())) {
                 filterQuery = filterQuery + "and lower(person.last_name) like '%" + filter.getLastName().toLowerCase() + "%' \n";
             }
-            if (filter.getFirstName() != null) {
+            if (isNotEmpty(filter.getFirstName())) {
                 filterQuery = filterQuery + "and lower(person.first_name) like '%" + filter.getFirstName().toLowerCase() + "%' \n";
             }
-            if (filter.getMiddleName() != null) {
+            if (isNotEmpty(filter.getMiddleName())) {
                 filterQuery = filterQuery + "and lower(person.middle_name) like '%" + filter.getMiddleName().toLowerCase() + "%' \n";
             }
             if (filter.getBirthDateFrom() != null) {
                 //language=SQL
-                filterQuery = filterQuery + "and birth_date >= :birth_date_from \n";
-                queryParams.addValue("birth_date_from", filter.getBirthDateFrom());
+                filterQuery = filterQuery + "and birth_date >= " + dateToStr(filter.getBirthDateFrom()) + " \n";
             }
             if (filter.getBirthDateTo() != null) {
-                filterQuery = filterQuery + "and birth_date <= :birth_date_to \n";
-                queryParams.addValue("birth_date_to", filter.getBirthDateTo());
+                filterQuery = filterQuery + "and birth_date <= " + dateToStr(filter.getBirthDateTo()) + " \n";
             }
             List<Long> documentTypes = filter.getDocumentTypes();
-            if (documentTypes != null && !documentTypes.isEmpty() && filter.getDocumentNumber() != null) {
+            if (documentTypes != null && !documentTypes.isEmpty() && isNotEmpty(filter.getDocumentNumber())) {
                 String filterDocNumber = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
                 String docTypesString = Joiner.on(", ").join(documentTypes);
                 filterQuery = filterQuery + "" +
@@ -468,7 +450,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                         "        where d.doc_id in (" + docTypesString + ") \n" +
                         "    ) \n" +
                         ") \n";
-            } else if (filter.getDocumentNumber() != null) {
+            } else if (isNotEmpty(filter.getDocumentNumber())) {
                 String filterDocNumber = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
                 filterQuery = filterQuery + "" +
                         "and person.record_id in ( \n" +
@@ -486,16 +468,24 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         String filteredPersonQuery = personQuery + filterQuery;
 
         if (filter != null && filter.isAllVersions() != null && filter.getVersionDate() != null && !filter.isAllVersions()) {
+
+            String versionDate = dateToStr(filter.getVersionDate());
+
             //language=SQL
             filteredPersonQuery = "" +
                     "select * \n" +
                     "from (" + filteredPersonQuery + ") \n" +
-                    "where version <= :version_date and (version_to >= :version_date or version_to is null)";
-            queryParams.addValue("version_date", filter.getVersionDate());
+                    "where version <= " + versionDate + " and (version_to >= " + versionDate + " or version_to is null)";
         }
 
-        return new PreparedStatementData(filteredPersonQuery, queryParams);
+        return new PreparedStatementData(filteredPersonQuery);
     }
+
+    private String dateToStr(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        return "'" + formatter.format(date) + "'";
+    }
+
 
     @Override
     public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
@@ -644,7 +634,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "  where frb.status = 0%s) p ";
 
         String baseSql = String.format(personSql, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
-                (StringUtils.isNotEmpty(filter) ? "where " + filter : "");
+                (isNotEmpty(filter) ? "where " + filter : "");
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         if (version != null) {
@@ -674,7 +664,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
         }
         String direction = "asc";
-        if (pagingParams != null && StringUtils.isNotEmpty(pagingParams.getDirection())) {
+        if (pagingParams != null && isNotEmpty(pagingParams.getDirection())) {
             direction = pagingParams.getDirection();
         }
         String hint = (filter == null || filter.isEmpty()) ? "/*+ FIRST_ROWS */" : "/*+ PARALLEL(16) */";

@@ -117,7 +117,7 @@
                         ],
                         colModel: [
                             {name: 'id', index: 'id', hidden: true, key: true},
-                            {name: 'rowOrd', index: 'row_Ord', width: 55},
+                            {name: 'rowOrd', index: 'rownum', width: 55},
                             {
                                 name: 'startDate',
                                 index: 'version',

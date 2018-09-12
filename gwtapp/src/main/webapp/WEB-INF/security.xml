@@ -113,6 +113,8 @@
                              value-ref="notificationPermissionFactory"/>
                 <beans:entry key="com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig"
                              value-ref="departmentConfigPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.refbook.PermissivePerson"
+                             value-ref="personVipDataPermissionFactory" />
             </beans:map>
         </beans:property>
     </beans:bean>
@@ -173,6 +175,11 @@
         <beans:constructor-arg
                 value="com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission"/>
     </beans:bean>
+    <beans:bean id = "personVipDataPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+            value="com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission" />
+    </beans:bean>
 
     <!--Объекты расчета прав-->
     <beans:bean id="userPermissionSetter"
@@ -230,6 +237,11 @@
     <beans:bean id="departmentConfigPermissionSetter"
                 class="com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermissionSetter">
         <beans:property name="permissionFactory" ref="departmentConfigPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="personVipDataPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermissionSetter">
+        <beans:property name="permissionFactory" ref="personVipDataPermissionFactory"/>
         <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
     </beans:bean>
 </beans:beans>

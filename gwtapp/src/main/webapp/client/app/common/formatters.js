@@ -574,7 +574,7 @@
             return function (value) {
                 if (value) {
                     var date = $filter('dateFormatter')(value.birthDate);
-                    return "(" + value.recordId + ") " + value.lastName + " " + value.firstName + " " + value.middleName + ", " + date
+                    return "(" + value.recordId + ")" + (value.lastName?" " + value.lastName:"") + " " + (value.firstName?" " + value.firstName:"") + " " + (value.middleName?" " + value.middleName:"") + ", " + date
                 }
                 return ''
             };
@@ -587,7 +587,7 @@
             return function (value) {
                 if (!value) return '';
                 if (value.permission === false) {
-                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 if (!value.value) {
                     return ''
@@ -603,7 +603,7 @@
             return function (value) {
                 if (!value) return '';
                 if (value.permission === false) {
-                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 return value.value.DOC_ID.referenceObject.NAME.value;
             };
@@ -616,7 +616,7 @@
             return function (value) {
                 if (!value) return '';
                 if (value.permission === false) {
-                    return $filter('translate')('refBook.fl.label.permissionDenied');
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 return value.value.DOC_NUMBER.value;
             };

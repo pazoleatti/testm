@@ -54,6 +54,12 @@
                     }
                 });
 
+                $scope.$watch("person.reportDoc.permission", function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        $scope.idDocTab.disabled = !newValue
+                    }
+                });
+
                 /**
                  * @description Грид ДУЛ
                  */

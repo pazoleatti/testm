@@ -356,15 +356,15 @@
                             <div data-aplana-field>
                                 <input class="form-control" type="text"
                                        data-ng-model="record.reorgInn"
-                                       maxlength="9"
+                                       maxlength="10"
                                        data-ng-pattern="patterns.number"
-                                       data-ui-validate="{kppValidator : 'isKppValid($value)', length: '!$value || $value.length === 9'}"
+                                       data-ui-validate="{length: '!$value || $value.length === 10'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key="length">
-                                    {{::'common.validation.length' | translate:'{length: 9}'}}
+                                    {{::'common.validation.length' | translate:'{length: 10}'}}
                                 </div>
                             </div>
                         </div>

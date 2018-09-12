@@ -593,7 +593,7 @@
         "departmentConfig.modal.field.reorganization.label": "Код формы реорганизации",
         "departmentConfig.modal.field.reorgKpp.label": "КПП реорганизованной организации",
         "departmentConfig.modal.field.reorgInn.label": "ИНН реорганизованной организации",
-        "departmentConfig.dialog.delete.confirmMessage": "Вы подтверждаете удаление настройки подразделения",
+        "departmentConfig.dialog.delete.confirmMessage": "Вы подтверждаете удаление настройки подразделения?",
 
         "departmentConfig.modal.field.kpp.validation.digits": "5-6 разряды КПП должны принимать одно из следующих значений: \"01\", \"02\", \"03\", \"31\", \"32\", \"43\", \"45\"",
 
@@ -947,7 +947,7 @@
         "refBook.fl.table.title.versionEnd": "Окончание действия",
         "refBook.fl.table.title.versionId": "ИД версии",
 
-        "refBook.fl.table.label.permissionDenied": "<i>Доступ ограничен</i>",
+        "refBook.fl.table.label.permissionDenied": "<i>Доступ ограничен</i>", //используется также в: карточка ФЛ
         "refBook.fl.table.label.vip": "VIP",
         "refBook.fl.table.label.notVip": "Не VIP",
         "refBook.fl.table.label.duplicate": "(Дубл.)",

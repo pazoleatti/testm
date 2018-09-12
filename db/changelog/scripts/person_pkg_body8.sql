@@ -92,6 +92,7 @@ package body person_pkg as
                                                                and replace(nvl(fv.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
                                                                and replace(nvl(fv.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
                                                                )
+              join (select distinct calc_date,version,record_id from tmp_version) tv on tv.calc_date = TRUNC(SYSDATE) and tv.version = fv.version and tv.record_id = fv.record_id                                                               
               where n.declaration_data_id=p_declaration
                 and exists (select 1 from ref_book_person c join ref_book_person c1 on (c.record_id=c1.record_id) left join ref_book_id_tax_payer t on (t.person_id=c1.id)
                              where replace(lower(nvl(c.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
@@ -103,7 +104,7 @@ package body person_pkg as
                                and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
                                and t.as_nu=p_asnu and lower(t.inp)=lower(n.inp)
                                )
-                and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
+                --and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
                 and fv.record_id=fv.old_id
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
                      left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
@@ -186,7 +187,7 @@ package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version tv where tv.calc_date = v_date and tv.version = person.version and tv.record_id = person.record_id)
          and person.status=0 and person.record_id=person.old_id
       union
        /*по СНИЛСУ*/
@@ -252,7 +253,7 @@ package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version tv where tv.calc_date = v_date and tv.version = person.version and tv.record_id = person.record_id)
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ИННу*/
@@ -318,7 +319,7 @@ package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version tv where tv.calc_date = v_date and tv.version = person.version and tv.record_id = person.record_id)
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ИННу иностранного государства*/
@@ -384,11 +385,11 @@ package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version tv where tv.calc_date = v_date and tv.version = person.version and tv.record_id = person.record_id)
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ДУЛ*/
-      select /*+ use_hash(t doc) parallel(t 4) parallel(doc 4)*/ t.id as person_id,
+      select /*+ ordered first_rows(1)*/ t.id as person_id,
              person.id as ref_book_person_id,
              person.version as person_version,
              person.status as person_status,
@@ -450,9 +451,10 @@ package body person_pkg as
                            left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id) and tax.status=0)
                            left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person.record_id) and tb.status=0)                                                
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
+                           join (select distinct calc_date,version,record_id from tmp_version) tv on tv.calc_date = trunc(sysdate) and tv.version = person.version and tv.record_id = person.record_id
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         --and exists(select 1 from tmp_version tv where tv.calc_date = v_date and tv.version = person.version and tv.record_id = person.record_id)
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ИНП*/
@@ -519,7 +521,7 @@ package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version tv where tv.calc_date = v_date and tv.version = person.version and tv.record_id = person.record_id)
          and person.status=0 and person.record_id=person.old_id;
     return v_ref;
   end;

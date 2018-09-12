@@ -9,26 +9,12 @@ import java.util.Map;
  * Модель физлица для работы с реестром физлиц. Записи реестра физлиц содержат ссылки на таблицы справочники.
  * Чтобы работать с таким ссылками как с объектами, ссылки разыменовываются и объекты представляются в виде Мапы строка-значение справочника.
  */
-public class RegistryPerson {
-    /**
-     * Идентификатор версии физлица
-     */
-    private Long id;
-
-    /**
-     * Идентификатор физлица
-     */
-    private Long recordId;
+public class RegistryPerson extends PermissivePerson {
 
     /**
      * Исходный идентификатор физлица
      */
     private Long oldId;
-
-    /**
-     * Начало даты действия версии
-     */
-    private Date version;
 
     /**
      * Статус из справочника
@@ -96,11 +82,6 @@ public class RegistryPerson {
     private Map<String, RefBookValue> source;
 
     /**
-     * Важность
-     */
-    private Boolean vip;
-
-    /**
      * Адрес
      */
     private Permissive<Map<String, RefBookValue>> address;
@@ -113,28 +94,12 @@ public class RegistryPerson {
         this.id = id;
     }
 
-    public Long getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
-    }
-
     public Long getOldId() {
         return oldId;
     }
 
     public void setOldId(Long oldId) {
         this.oldId = oldId;
-    }
-
-    public Date getVersion() {
-        return version;
-    }
-
-    public void setVersion(Date version) {
-        this.version = version;
     }
 
     public Integer getState() {
@@ -239,14 +204,6 @@ public class RegistryPerson {
 
     public void setSource(Map<String, RefBookValue> source) {
         this.source = source;
-    }
-
-    public Boolean getVip() {
-        return vip;
-    }
-
-    public void setVip(Boolean vip) {
-        this.vip = vip;
     }
 
     public Permissive<Map<String, RefBookValue>> getAddress() {

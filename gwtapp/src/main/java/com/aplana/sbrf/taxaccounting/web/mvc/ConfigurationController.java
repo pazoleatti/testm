@@ -1,7 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.permissions.ConfigurationPermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
@@ -12,7 +18,12 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -139,7 +150,7 @@ public class ConfigurationController {
     }
 
     @PostMapping(value = "/actions/emailParam/checkValidate")
-    public String checkEmailParam(){
+    public String checkEmailParam() {
         return emailService.checkAuthAccess(securityService.currentUserInfo());
     }
 
@@ -173,7 +184,7 @@ public class ConfigurationController {
      * @return uuid идентификатор логгера с результатом создания параметра
      */
     @PostMapping(value = "/rest/commonParam/create")
-    public String create(@RequestParam Configuration commonParam) {
+    public String create(@RequestBody Configuration commonParam) {
         return configurationService.create(commonParam, securityService.currentUserInfo());
     }
 
@@ -185,8 +196,7 @@ public class ConfigurationController {
      */
     @PostMapping(value = "/actions/commonParam/remove")
     public String remove(@RequestBody List<String> codes) {
-        return configurationService.remove(codes, securityService.currentUserInfo()
-        );
+        return configurationService.remove(codes, securityService.currentUserInfo());
     }
 
     /**
