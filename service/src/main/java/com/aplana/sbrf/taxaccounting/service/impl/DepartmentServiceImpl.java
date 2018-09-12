@@ -311,6 +311,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Integer getParentTBId(int departmentId) {
+        return departmentDao.getParentTBId(departmentId);
+    }
+
+    @Override
     public List<Department> fetchAllDepartmentByIds(List<Integer> ids) {
         return departmentDao.fetchAllDepartmentByIds(ids);
     }

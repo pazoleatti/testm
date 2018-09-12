@@ -204,6 +204,11 @@ public interface DepartmentService {
     Department getParentTB(int departmentId);
 
     /**
+     * Получает ид родительского ТБ для подразделения.
+     */
+    Integer getParentTBId(int departmentId);
+
+    /**
      * Получить списиок ТБ подразделений, для которых подразделение из ТБ пользователя является исполнителем макетов
      *
      * @param userTBDepId     подразделения-исполнителя

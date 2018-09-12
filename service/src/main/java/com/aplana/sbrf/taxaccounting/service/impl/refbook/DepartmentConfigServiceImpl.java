@@ -4,9 +4,12 @@ import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
@@ -294,15 +297,23 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         Logger logger = new Logger();
         ImportDepartmentConfigsResult result = new ImportDepartmentConfigsResult();
         AsyncTaskType taskType = AsyncTaskType.IMPORT_DEPARTMENT_CONFIGS;
+        TAUser user = userInfo.getUser();
 
         int fileNameDepartmentId = getDepartmentIdFromFileName(action.getFileName());
+        if (!departmentService.existDepartment(fileNameDepartmentId)) {
+            throw new ServiceException("Не найден территориальный банк с идентификатором (" + fileNameDepartmentId + "), указанным в имени файла \"" + action.getFileName() + "\"");
+        }
+        int userTbId = departmentService.getParentTBId(user.getDepartmentId());
+        if (!(user.hasRole(TARole.N_ROLE_CONTROL_UNP) ||
+                user.hasRole(TARole.N_ROLE_CONTROL_NS) && userTbId == fileNameDepartmentId)) {
+            throw new ServiceException("У вас отсутствуют права загрузки настроек подразделения " + departmentService.getDepartment(fileNameDepartmentId).getShortName() + ".");
+        }
         if (!action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
-            result.setConfirmDepartmentCheck(
-                    String.format("Загружаемый файл содержит настройки подразделения \"%s\", хотя отображаются данные подразделения \"%s\". " +
-                                    "Вы действительно хотите загрузить файл?",
-                            departmentService.getDepartment(fileNameDepartmentId).getShortName(),
-                            departmentService.getDepartment(action.getDepartmentId()).getShortName()
-                    ));
+            Department fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId);
+            Department selectedDepartment = departmentService.getDepartment(action.getDepartmentId());
+            result.setConfirmDepartmentCheck("Загружаемый файл содержит настройки подразделения \"" + fileNameDepartment.getShortName() + "\", " +
+                    "хотя отображаются данные подразделения \"" + selectedDepartment.getShortName() + "\". " +
+                    "Вы действительно хотите загрузить файл?");
         } else {
             String uuid = blobDataService.create(action.getInputStream(), action.getFileName());
             Map<String, Object> params = new HashMap<>();
@@ -339,10 +350,10 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
             try {
                 departmentId = Integer.valueOf(departmentIdString);
             } catch (NumberFormatException e) {
-                throw new ServiceException("Неверное число");
+                throw new ServiceException("Неверное имя файла \"" + fileName + "\".");
             }
         } else {
-            throw new ServiceException("Неверное имя файла");
+            throw new ServiceException("Неверное имя файла \"" + fileName + "\".");
         }
         return departmentId;
     }
