@@ -594,7 +594,8 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("(SELECT t.*," +
                     "lead(t.version) over(partition BY t.record_id order by t.version) - interval '1' DAY version_end\n" +
                     "FROM ref_book_ndfl_detail t\n" +
-                    "join ref_book_oktmo oktmo on oktmo.id = t.oktmo)");
+                    "join ref_book_oktmo oktmo on oktmo.id = t.oktmo\n" +
+                    "order by t.kpp, oktmo.code, t.tax_organ_code)");
         } else {
             ps.appendQuery(refBook.getTableName());
         }
