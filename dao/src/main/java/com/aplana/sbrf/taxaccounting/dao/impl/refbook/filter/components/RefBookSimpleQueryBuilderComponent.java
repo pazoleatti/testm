@@ -584,22 +584,17 @@ public class RefBookSimpleQueryBuilderComponent {
             }
         }
         if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
-            ps.appendQuery(", frb.row_ord");
+            ps.appendQuery(", rownum row_ord");
         }
         ps.appendQuery(" FROM ");
         if (refBook.isVersioned()) {
             ps.appendQuery(" t, ");
         }
-        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
-            if (pagingParams != null) {
-                // для настроек подразделений вычисляем ROW_ORD
-                ps.appendQuery("(SELECT row_number() over(partition by t.department_id order by t.kpp, oktmo.code, t.tax_organ_code) ROW_ORD, t.*," +
-                        "lead(t.version) over(partition BY t.record_id order by t.version) - interval '1' DAY version_end\n" +
-                        "FROM ref_book_ndfl_detail t\n" +
-                        "join ref_book_oktmo oktmo on oktmo.id = t.oktmo)");
-            } else {
-                ps.appendQuery("(select t.*, rownum ROW_ORD from ref_book_ndfl_detail t)");
-            }
+        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId() && pagingParams != null) {
+            ps.appendQuery("(SELECT t.*," +
+                    "lead(t.version) over(partition BY t.record_id order by t.version) - interval '1' DAY version_end\n" +
+                    "FROM ref_book_ndfl_detail t\n" +
+                    "join ref_book_oktmo oktmo on oktmo.id = t.oktmo)");
         } else {
             ps.appendQuery(refBook.getTableName());
         }
@@ -650,12 +645,28 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
         }
 
-        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId() && pagingParams != null) {
-            if (sortAttribute == null) {
-                // Для сортировки по датам версии
-                ps.appendQuery(" ORDER BY frb.").appendQuery(!StringUtils.isEmpty(pagingParams.getProperty()) ? pagingParams.getProperty() : "row_ord")
-                        .appendQuery(" ").appendQuery(pagingParams.getDirection());
-            } else {
+        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
+            if (pagingParams != null && !StringUtils.isEmpty(pagingParams.getProperty())) {
+                if (sortAttribute == null) {
+                    // Для сортировки по датам версии
+                    ps.appendQuery(" ORDER BY ").appendQuery(!"rownum".equals(pagingParams.getProperty()) ? "frb." : "").appendQuery(pagingParams.getProperty())
+                            .appendQuery(" ").appendQuery(pagingParams.getDirection());
+                } else {
+                    String tableAlias = "frb";
+                    if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                        sortAttribute = sortAttribute.getRefBookAttribute();
+                        tableAlias = "a_sort";
+                    }
+                    ps.appendQuery(" ORDER BY ")
+                            .appendQuery(tableAlias + "." + sortAttribute.getAlias())
+                            .appendQuery(" " + pagingParams.getDirection());
+                }
+                if (refBook.isVersioned() && !checkVersion) {
+                    ps.appendQuery(" , t.version\n");
+                }
+            }
+        } else {
+            if (sortAttribute != null) {
                 String tableAlias = "frb";
                 if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                     sortAttribute = sortAttribute.getRefBookAttribute();
@@ -663,22 +674,13 @@ public class RefBookSimpleQueryBuilderComponent {
                 }
                 ps.appendQuery(" ORDER BY ")
                         .appendQuery(tableAlias + "." + sortAttribute.getAlias())
-                        .appendQuery(" " + pagingParams.getDirection());
+                        .appendQuery(isSortAscending ? " ASC" : " DESC");
+            } else {
+                ps.appendQuery(" ORDER BY frb.id");
             }
-        } else if (sortAttribute != null) {
-            String tableAlias = "frb";
-            if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
-                sortAttribute = sortAttribute.getRefBookAttribute();
-                tableAlias = "a_sort";
+            if (refBook.isVersioned() && !checkVersion) {
+                ps.appendQuery(" , t.version\n");
             }
-            ps.appendQuery(" ORDER BY ")
-                    .appendQuery(tableAlias + "." + sortAttribute.getAlias())
-                    .appendQuery(isSortAscending ? " ASC" : " DESC");
-        } else {
-            ps.appendQuery(" ORDER BY frb.id");
-        }
-        if (refBook.isVersioned() && !checkVersion) {
-            ps.appendQuery(" , t.version\n");
         }
 
         ps.appendQuery(") res) ");
