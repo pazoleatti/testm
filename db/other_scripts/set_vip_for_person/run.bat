@@ -1,4 +1,4 @@
-﻿@ECHO OFF
+@ECHO OFF
 REM строка подключения к бд
 SET AUTH=ndfl_schema/schema_password@host:port/service_name
 REM путь к папке BIN клиента oracle

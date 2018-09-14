@@ -8,7 +8,7 @@ declare
   v_fio varchar(400);
   v_vip number;
 begin
-  v_fio := 'Апланянц Аплан Апланардович';
+  v_fio := 'РђРїР»Р°РЅСЏРЅС† РђРїР»Р°РЅ РђРїР»Р°РЅР°СЂРґРѕРІРёС‡';
   v_vip := 1;
 
   select count(id) into v_count_id from REF_BOOK_PERSON where upper(last_name || ' ' || first_name || ' ' || middle_name) = upper(v_fio);
