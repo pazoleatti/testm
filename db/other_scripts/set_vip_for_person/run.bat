@@ -6,7 +6,7 @@ SET ORA_BIN=c:\app\client\user\product\12.2.0\client_1\BIN
 REM имя каталога для вывода результата выполнения
 SET LOG_DIR=_logs
 
-SET nls_lang=AMERICAN_AMERICA.CL8MSWIN1251
+SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 
 ECHO ## DB: %AUTH%
 
