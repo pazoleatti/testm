@@ -11,4 +11,5 @@
 
     <artifactId>fonts</artifactId>
     <description>Шрифты для формирования отчетов</description>
+    <packaging>jar</packaging>
 </project>

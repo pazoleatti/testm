@@ -82,7 +82,7 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>fonts</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
