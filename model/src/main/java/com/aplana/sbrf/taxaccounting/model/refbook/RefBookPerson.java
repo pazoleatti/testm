@@ -185,6 +185,16 @@ public class RefBookPerson extends RefBookVersioned<Long> {
         this.vip = vip;
     }
 
+    public void forbid() {
+        setDocName(Permissive.<String>forbidden());
+        setDocNumber(Permissive.<String>forbidden());
+        setInn(Permissive.<String>forbidden());
+        setInnForeign(Permissive.<String>forbidden());
+        setSnils(Permissive.<String>forbidden());
+        setAddress(Permissive.<RefBookAddress>forbidden());
+        setForeignAddress(Permissive.<RefBookAddress>forbidden());
+    }
+
     /*
      * Набор методов для сериализации объекта в JSON
      */

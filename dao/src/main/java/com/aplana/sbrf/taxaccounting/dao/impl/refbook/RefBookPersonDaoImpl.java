@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SortDirection;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -10,12 +10,9 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import com.google.common.base.Joiner;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,7 +25,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -42,8 +38,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     @Autowired
     RefBookMapperFactory refBookMapperFactory;
 
-
-    private static final String DEFAULT_SORT_PROPERTY = "id";
 
     private static final RowMapper<RefBookPerson> PERSON_MAPPER = new RowMapper<RefBookPerson>() {
         @Override
@@ -365,257 +359,27 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return getJdbcTemplate().queryForList(query, Integer.class);
     }
 
-    private PreparedStatementData generatePersonsByFilterQuery(RefBookPersonFilter filter) {
-        // Используем параллельный запрос для ускорения работы, с разрешения БД-разработчиков.
-        //language=SQL
-        String personQuery = "" +
-                "select /*+ parallel(person,8) first_rows(1)*/ \n" +
-                "       person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
-                "       person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, \n" +
-                "       person.inn_foreign, person.snils, person.version, \n" +
-                "       (   select min(version) - interval '1' day \n" +
-                "           from ref_book_person p \n" +
-                "           where status in (0, 2) \n" +
-                "               and p.version > person.version \n" +
-                "               and p.record_id = person.record_id \n" +
-                "       ) as version_to, \n" +
-                "       doc_type.name doc_name, doc.doc_number, \n" +
-                "       citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, \n" +
-                "       citizenship_country.name citizenship_country_name, \n" +
-                "       state.id state_id, state.code state_code, state.name state_name, \n" +
-                "       address.id address_id, address.address_type, address.postal_code, address.region_code, \n" +
-                "       address.district, address.city, address.locality, address.street, address.house, \n" +
-                "       address.build building, address.appartment apartment, address.address, \n" +
-                "       address_country.id address_country_id, address_country.code address_country_code, \n" +
-                "       address_country.name address_country_name, \n" +
-                "       asnu.id asnu_id, asnu.code asnu_code, asnu.name asnu_name, asnu.type asnu_type, asnu.priority asnu_priority \n" +
-                "from ref_book_person person \n" +
-                "left join ref_book_id_doc doc on doc.id = person.report_doc \n" +
-                "left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id \n" +
-                "left join ref_book_country citizenship_country on citizenship_country.id = person.citizenship \n" +
-                "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state \n" +
-                "left join ref_book_address address on address.id = person.address \n" +
-                "left join ref_book_country address_country on address_country.id = address.country_id \n" +
-                "left join ref_book_asnu asnu on asnu.id = person.source_id \n";
-
-        //language=SQL
-        String filterQuery = "" +
-                "where person.status = 0 \n";
-
-        if (filter != null) {
-            if (filter.getId() != null) {
-                //language=SQL
-                filterQuery = filterQuery + "and person.old_id like '%" + filter.getId() + "%' \n";
-            }
-            if (isNotEmpty(filter.getLastName())) {
-                filterQuery = filterQuery + "and lower(person.last_name) like '%" + filter.getLastName().toLowerCase() + "%' \n";
-            }
-            if (isNotEmpty(filter.getFirstName())) {
-                filterQuery = filterQuery + "and lower(person.first_name) like '%" + filter.getFirstName().toLowerCase() + "%' \n";
-            }
-            if (isNotEmpty(filter.getMiddleName())) {
-                filterQuery = filterQuery + "and lower(person.middle_name) like '%" + filter.getMiddleName().toLowerCase() + "%' \n";
-            }
-            if (filter.getBirthDateFrom() != null) {
-                //language=SQL
-                filterQuery = filterQuery + "and birth_date >= " + dateToStr(filter.getBirthDateFrom()) + " \n";
-            }
-            if (filter.getBirthDateTo() != null) {
-                filterQuery = filterQuery + "and birth_date <= " + dateToStr(filter.getBirthDateTo()) + " \n";
-            }
-            List<Long> documentTypes = filter.getDocumentTypes();
-            if (documentTypes != null && !documentTypes.isEmpty() && isNotEmpty(filter.getDocumentNumber())) {
-                String filterDocNumber = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
-                String docTypesString = Joiner.on(", ").join(documentTypes);
-                filterQuery = filterQuery + "" +
-                        "and person.record_id in ( \n" +
-                        "   select record_id \n" +
-                        "   from ref_book_person p \n" +
-                        "   where p.id in ( \n" +
-                        "       select d.person_id \n" +
-                        "       from ref_book_id_doc d \n" +
-                        "       where regexp_replace(lower(d.doc_number),'[^0-9A-Za-zА-Яа-я]','') like '%" + filterDocNumber + "%' \n" +
-                        "           and d.doc_id in (" + docTypesString + ") \n" +
-                        "    ) \n" +
-                        ") \n";
-            } else if (documentTypes != null && !documentTypes.isEmpty()) {
-                String docTypesString = Joiner.on(", ").join(documentTypes);
-                filterQuery = filterQuery + "" +
-                        "and person.record_id in ( \n" +
-                        "    select record_id \n" +
-                        "    from ref_book_person p \n" +
-                        "    where p.id in ( \n" +
-                        "        select d.person_id \n" +
-                        "        from ref_book_id_doc d \n" +
-                        "        where d.doc_id in (" + docTypesString + ") \n" +
-                        "    ) \n" +
-                        ") \n";
-            } else if (isNotEmpty(filter.getDocumentNumber())) {
-                String filterDocNumber = filter.getDocumentNumber().toLowerCase().replaceAll("[^0-9A-Za-zА-Яа-я]", "");
-                filterQuery = filterQuery + "" +
-                        "and person.record_id in ( \n" +
-                        "    select record_id \n" +
-                        "    from ref_book_person p \n" +
-                        "    where p.id in ( \n" +
-                        "        select d.person_id \n" +
-                        "        from ref_book_id_doc d \n" +
-                        "        where regexp_replace(lower(d.doc_number),'[^0-9A-Za-zА-Яа-я]','') like '%" + filterDocNumber + "%' \n" +
-                        "    ) \n" +
-                        ") \n";
-            }
-        }
-
-        String filteredPersonQuery = personQuery + filterQuery;
-
-        if (filter != null && filter.isAllVersions() != null && filter.getVersionDate() != null && !filter.isAllVersions()) {
-
-            String versionDate = dateToStr(filter.getVersionDate());
-
-            //language=SQL
-            filteredPersonQuery = "" +
-                    "select * \n" +
-                    "from (" + filteredPersonQuery + ") \n" +
-                    "where version <= " + versionDate + " and (version_to >= " + versionDate + " or version_to is null)";
-        }
-
-        return new PreparedStatementData(filteredPersonQuery);
-    }
-
-    private String dateToStr(Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-        return "'" + formatter.format(date) + "'";
-    }
-
-
     @Override
     public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
-        PreparedStatementData psData = generatePersonsByFilterQuery(filter);
 
-        String filteredPersonQuery = psData.getQuery().toString();
-        String finalQuery;
+        SelectPersonQueryGenerator selectPersonQueryGenerator = new SelectPersonQueryGenerator(filter, pagingParams);
+        String query = selectPersonQueryGenerator.generatePagedAndFilteredQuery();
+        List<RefBookPerson> persons = getJdbcTemplate().query(query, PERSON_MAPPER);
 
-        String sortParams = generateSortParams(pagingParams);
-
-        if (pagingParams != null) {
-            int startIndex = pagingParams.getStartIndex();
-            int endIndex = startIndex + pagingParams.getCount();
-
-            finalQuery = filteredPersonQuery + sortParams;
-            if (pagingParams.getCount() != -1) {
-                finalQuery = "" +
-                        "select * \n" +
-                        "from ( \n" +
-                        "   select rownum rnum, a.* \n" +
-                        "   from (" + finalQuery + ") a " +
-                        "   where rownum <= " + endIndex +
-                        ") " +
-                        "where rnum > " + startIndex;
-            }
-        } else {
-            finalQuery = filteredPersonQuery + sortParams;
-        }
-
-        List<RefBookPerson> persons = getNamedParameterJdbcTemplate().query(finalQuery, psData.getNamedParams(), PERSON_MAPPER);
-        Integer count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + filteredPersonQuery + ")", psData.getNamedParams(), Integer.class);
+        int count = getPersonsCount(filter);
 
         return new PagingResult<>(persons, count);
     }
 
     @Override
     public int getPersonsCount(RefBookPersonFilter filter) {
-        PreparedStatementData psData = generatePersonsByFilterQuery(filter);
-        return getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + psData.getQuery().toString() + ")", psData.getNamedParams(), Integer.class);
+        SelectPersonQueryGenerator selectPersonQueryGenerator = new SelectPersonQueryGenerator(filter);
+        String filteredPersonsQuery = selectPersonQueryGenerator.generateFilteredQuery();
+        return selectCountOfQueryResults(filteredPersonsQuery);
     }
 
-    /**
-     * Генерим выражение "order by ...", см. тесты метода.
-     */
-    static String generateSortParams(PagingParams pagingParams) {
-        String sortProperty = getSortProperty(pagingParams);
-        SortDirection sortDirection = SortDirection.getByValue(pagingParams.getDirection());
-
-        if (sortProperty.equals("vip")) {
-            sortDirection = invertSortDirection(sortDirection);
-        }
-
-        String result = "order by ";
-
-        if (isPropertyPermissive(sortProperty)) {
-            result = result + "vip " + invertSortDirection(sortDirection) + ", ";
-        }
-
-        List<String> sortFields = getSortFieldsByProperty(sortProperty);
-        String fieldsString = generateSortFieldsString(sortFields, sortDirection);
-        result = result + fieldsString;
-
-        return result;
-    }
-
-    private static boolean isPropertyPermissive(String field) {
-        List<String> permissiveProperties = Arrays.asList("docName", "docNumber", "inn", "innForeign", "snils", "address", "foreignAddress");
-        return permissiveProperties.contains(field);
-    }
-
-    private static String getSortProperty(PagingParams pagingParams) {
-        if (pagingParams == null || StringUtils.isEmpty(pagingParams.getProperty())) {
-            return DEFAULT_SORT_PROPERTY;
-        } else {
-            return pagingParams.getProperty();
-        }
-    }
-
-    /**
-     * (["name", "id"], ASC) -> "name asc, id asc"
-     */
-    private static String generateSortFieldsString(List<String> fields, SortDirection direction) {
-        List<String> fieldsWithDirection = new ArrayList<>();
-        for (String field : fields) {
-            fieldsWithDirection.add(field + " " + direction);
-        }
-        return Joiner.on(", ").join(fieldsWithDirection);
-    }
-
-    private static SortDirection invertSortDirection(SortDirection sortDirection) {
-        switch (sortDirection) {
-            case ASC:
-                return SortDirection.DESC;
-            case DESC:
-                return SortDirection.ASC;
-            default:
-                return sortDirection;
-        }
-    }
-
-    private static List<String> getSortFieldsByProperty(String sortProperty) {
-        Map<String, List<String>> map = new HashMap<>();
-        map.put("oldId", Arrays.asList("old_id", "id"));
-        map.put("vip", Arrays.asList("vip", "id"));
-        map.put("lastName", Arrays.asList("last_name", "id"));
-        map.put("firstName", Arrays.asList("first_name", "id"));
-        map.put("middleName", Arrays.asList("middle_name", "id"));
-        map.put("birthDate", Arrays.asList("birth_date", "id"));
-        map.put("docName", Arrays.asList("doc_name", "id"));
-        map.put("docNumber", Arrays.asList("doc_number", "id"));
-        map.put("citizenship", Arrays.asList("citizenship_country_code", "id"));
-        map.put("taxpayerState", Arrays.asList("state_code", "id"));
-        map.put("inn", Arrays.asList("inn", "id"));
-        map.put("innForeign", Arrays.asList("inn_foreign", "id"));
-        map.put("snils", Arrays.asList("snils", "id"));
-        map.put("address", Arrays.asList("postal_code", "region_code", "district", "city", "locality", "street",
-                "house", "building", "apartment", "address_id", "id"));
-        map.put("foreignAddress", Arrays.asList("address_country_code", "address", "address_id", "id"));
-        map.put("source", Arrays.asList("asnu_code", "id"));
-        map.put("version", Arrays.asList("version", "id"));
-        map.put("versionEnd", Arrays.asList("version_to", "id"));
-        map.put("id", Collections.singletonList("id"));
-
-        List<String> result = map.get(sortProperty);
-
-        if (result != null) {
-            return result;
-        } else {
-            return map.get(DEFAULT_SORT_PROPERTY);
-        }
+    private Integer selectCountOfQueryResults(String query) {
+        return getJdbcTemplate().queryForObject("select count(*) from (" + query + ")", Integer.class);
     }
 
 

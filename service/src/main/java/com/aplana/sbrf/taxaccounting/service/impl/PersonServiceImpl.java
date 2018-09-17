@@ -144,7 +144,7 @@ public class PersonServiceImpl implements PersonService {
                 Set<Integer> vipDepartmentsSet = new HashSet<>(vipDepartments);
                 Set<Integer> intersection = Sets.intersection(permittedDepartmentsSet, vipDepartmentsSet);
                 if (intersection.isEmpty()) {
-                    forbidPerson(person);
+                    person.forbid();
                 }
             }
         }
@@ -153,19 +153,9 @@ public class PersonServiceImpl implements PersonService {
     private void forbidAllVips(List<RefBookPerson> persons) {
         for (RefBookPerson person : persons) {
             if (person.isVip()) {
-                forbidPerson(person);
+                person.forbid();
             }
         }
-    }
-
-    private void forbidPerson(RefBookPerson person) {
-        person.setDocName(Permissive.<String>forbidden());
-        person.setDocNumber(Permissive.<String>forbidden());
-        person.setInn(Permissive.<String>forbidden());
-        person.setInnForeign(Permissive.<String>forbidden());
-        person.setSnils(Permissive.<String>forbidden());
-        person.setAddress(Permissive.<RefBookAddress>forbidden());
-        person.setForeignAddress(Permissive.<RefBookAddress>forbidden());
     }
 
 

@@ -334,7 +334,7 @@ create table declaration_template (
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,
-  XSD varchar2(36), 
+  XSD varchar2(36),
   form_kind number(18),
   form_type number(18)
 );
@@ -1199,7 +1199,7 @@ create table declaration_subreport_params
   type                     char(1) not null,
   filter                   varchar2(1000 char),
   attribute_id             number(18),
-  required                 number(1) default 0 not null 
+  required                 number(1) default 0 not null
 );
 comment on table declaration_subreport_params is 'Параметры спец. отчетов налоговых форм';
 comment on column declaration_subreport_params.name is 'Наименование параметра';
@@ -1258,12 +1258,12 @@ comment on column fias_addrobj.parentguid is 'Идентификатор объ�
 --------------------------------------------------------------------------------------------------------------------------
 create table ref_book_taxpayer_state
 (
-  id number(18)                   not null,
-  record_id   number(9)           not null,
-  version     date                not null,
-  status      number(1) default 0 not null,
-  code varchar2(1 char)           not null,
-  name varchar2(1000 char)        not null
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(1 char)    not null,
+  name      varchar2(1000 char) not null
 );
 
 comment on table ref_book_taxpayer_state is 'Статусы налогоплательщиков';
@@ -1276,7 +1276,7 @@ comment on column ref_book_taxpayer_state.name is 'Наименование';
 
 create table ref_book_person
 (
-  id             number(18) not null,
+  id             number(18)          not null,
   last_name      varchar2(60 char),
   first_name     varchar2(60 char),
   middle_name    varchar2(60 char),
@@ -1291,8 +1291,8 @@ create table ref_book_person
   address        number(18),
   employee       number(1) default 2,
   vip            number(1) default 0 not null,
-  record_id      number(18) not null,
-  version        date not null,
+  record_id      number(18)          not null,
+  version        date                not null,
   status         number(1) default 0 not null,
   source_id      number(18),
   old_id         number(18),
@@ -1324,7 +1324,7 @@ comment on column ref_book_person.old_status is 'Старый статус за�
 
 create table ref_book_id_doc
 (
-  id                  number(18) not null,
+  id                  number(18)          not null,
   record_id           number(18)          not null,
   version             date                not null,
   status              number(1) default 0 not null,
@@ -1348,22 +1348,22 @@ comment on column ref_book_id_doc.duplicate_record_id is 'Идентификат
 
 create table ref_book_address
 (
-  id number(18) not null,
-  record_id number(18) not null,
-  version   date           not null,
-  status    number(1)      not null,
-  address_type number(1) not null,
-  country_id number(18),
-  region_code varchar2(2 char),
-  postal_code varchar2(6 char),
-  district varchar2(50 char),
-  city varchar2(50 char),
-  locality varchar2(50 char),
-  street varchar2(50 char),
-  house varchar2(20 char),
-  build varchar2(20 char),
-  appartment varchar2(20 char),
-  address varchar2(255 char),
+  id           number(18) not null,
+  record_id    number(18) not null,
+  version      date       not null,
+  status       number(1)  not null,
+  address_type number(1)  not null,
+  country_id   number(18),
+  region_code  varchar2(2 char),
+  postal_code  varchar2(6 char),
+  district     varchar2(50 char),
+  city         varchar2(50 char),
+  locality     varchar2(50 char),
+  street       varchar2(50 char),
+  house        varchar2(20 char),
+  build        varchar2(20 char),
+  appartment   varchar2(20 char),
+  address      varchar2(255 char),
   address_full varchar2(255 char)
 );
 
@@ -1436,7 +1436,7 @@ comment on column state.name is 'Наименование';
 --------------------------------------------------------------------------------------------------------------------------
 -- Журналирование действий пользователей
 --------------------------------------------------------------------------------------------------------------------------
-create table log 
+create table log
 (
     id            varchar2(36) not null,
     user_id       number(18),
@@ -1451,7 +1451,7 @@ comment on column log.creation_date is 'Дата-время, включая мс
 create sequence seq_log start with 1;
 
 
-create table log_entry 
+create table log_entry
 (
     log_id        varchar2(36)          not null,
     ord           number(9)             not null,
@@ -1492,7 +1492,7 @@ create table department_decl_type_performer
 
 comment on table department_decl_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
 comment on column department_decl_type_performer.department_decl_type_id is 'Идентификатор связи подразделения с формой';
-comment on column department_decl_type_performer.performer_dep_id is 'Исполнитель'; 
+comment on column department_decl_type_performer.performer_dep_id is 'Исполнитель';
 --------------------------------------------------------------------------------------------------------------------------
 -- Планировщик задач
 --------------------------------------------------------------------------------------------------------------------------

@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -22,84 +27,89 @@ import static org.assertj.core.api.Assertions.*;
 public class RefBookPersonDaoTest {
 
     @Autowired
-    private RefBookPersonDaoImpl refBookPersonDao;
+    private RefBookPersonDao personDao;
 
     @Test
     public void test_fetchOriginal() {
-        List<RegistryPerson> personVersions = refBookPersonDao.fetchOriginal(3L);
+        List<RegistryPerson> personVersions = personDao.fetchOriginal(3L);
         assertThat(personVersions).hasSize(1);
         assertThat(personVersions.get(0).getId()).isEqualTo(1L);
     }
 
     @Test
-    public void test_generateSortParams_forNullValues() {
-        // given
-        PagingParams pagingParams = new PagingParams();
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams).isEqualTo("order by id asc");
+    public void test_getPersonTbIds() {
+        List<Integer> tbIds = personDao.getPersonTbIds(1);
+        assertThat(tbIds).hasSize(2);
+        assertThat(tbIds).containsExactly(1, 2);
     }
 
     @Test
-    public void test_generateSortParams_forEmptyValues() {
-        // given
-        PagingParams pagingParams = new PagingParams("", "");
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams).isEqualTo("order by id asc");
+    public void test_getPersons() {
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, null);
+
+        assertThat(persons).hasSize(4);
+        assertThat(persons.getTotalCount()).isEqualTo(4);
     }
 
     @Test
-    public void test_generateSortParams_forSimpleValue() {
-        // given
-        PagingParams pagingParams = new PagingParams("firstName", "desc");
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams).isEqualTo("order by first_name desc, id desc");
+    public void test_getPersons_filterByMiddleName() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setMiddleName("СЕРГЕЕВИЧ");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(2)
+                .extracting("middleName")
+                .containsOnly("Сергеевич");
     }
 
     @Test
-    public void test_generateSortParams_forVip() {
-        // given
-        PagingParams pagingParams = new PagingParams("vip", "desc");
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams).isEqualTo("order by vip asc, id asc");
+    public void test_getPersons_filterByBirthDateFrom() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(1981, Calendar.OCTOBER, 16);
+        filter.setBirthDateFrom(calendar.getTime());
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(3);
     }
 
     @Test
-    public void test_generateSortParams_forPermissiveFieldAsc() {
-        // given
-        PagingParams pagingParams = new PagingParams("inn", "asc");
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams).isEqualTo("order by vip desc, inn asc, id asc");
+    public void test_getPersons_filterByBirthDateTo() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(1981, Calendar.OCTOBER, 16);
+        filter.setBirthDateTo(calendar.getTime());
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2);
     }
 
     @Test
-    public void test_generateSortParams_forPermissiveFieldDesc() {
-        // given
-        PagingParams pagingParams = new PagingParams("inn", "desc");
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams).isEqualTo("order by vip asc, inn desc, id desc");
+    public void test_getPersons_filterByOldId() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setId("1");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(2)
+                .extracting("oldId")
+                .containsExactlyInAnyOrder(1L, 10L);
     }
 
+    @Ignore("На HSQL <2.3.4 не работает regexp_replace(), включить, когда разберёмся")
     @Test
-    public void test_generateSortParams_forAddressAsc() {
-        // given
-        PagingParams pagingParams = new PagingParams("address", "asc");
-        // when
-        String sortParams = RefBookPersonDaoImpl.generateSortParams(pagingParams);
-        // then
-        assertThat(sortParams)
-                .isEqualTo("order by vip desc, postal_code asc, region_code asc, district asc, city asc, " +
-                        "locality asc, street asc, house asc, building asc, apartment asc, address_id asc, id asc");
+    public void test_getPersons_filterByDocNumber() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setDocumentNumber("0101123456");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(1);
+        assertThat(persons.get(0).getDocNumber()).isEqualTo("01 01 123456");
     }
 }

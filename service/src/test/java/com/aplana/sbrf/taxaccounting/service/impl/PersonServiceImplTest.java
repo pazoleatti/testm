@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -36,7 +37,7 @@ public class PersonServiceImplTest {
     @Autowired
     private PersonServiceImpl personService;
     @Autowired
-    private RefBookPersonDao refBookPersonDao;
+    private RefBookPersonDao personDao;
     @Autowired
     private CommonRefBookService commonRefBookService;
 
@@ -172,11 +173,26 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    @Ignore
     // TODO: Написать полноценные тесты с учётом прав TAUser на Vip'ов
-    public void test_getPersons() {
-        personService.getPersons(any(PagingParams.class), any(RefBookPersonFilter.class), any(TAUser.class));
-        verify(refBookPersonDao).getPersons(any(PagingParams.class), any(RefBookPersonFilter.class));
+    public void test_getPersons_forControlUnp() {
+        PagingParams params = new PagingParams();
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        TAUser user = mock(TAUser.class);
+        when(user.hasRole(TARole.N_ROLE_CONTROL_UNP)).thenReturn(true);
+
+        personService.getPersons(params, filter, user);
+        verify(personDao).getPersons(params, filter);
+    }
+
+    @Test
+    public void test_getPersons_forOtherTb() {
+        PagingParams params = new PagingParams();
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        TAUser user = mock(TAUser.class);
+        when(user.hasRole(TARole.N_ROLE_CONTROL_UNP)).thenReturn(true);
+
+        personService.getPersons(params, filter, user);
+        verify(personDao).getPersons(params, filter);
     }
 
     @Test
@@ -186,10 +202,10 @@ public class PersonServiceImplTest {
         PagingParams pagingParams = mock(PagingParams.class);
         RefBookAttribute refBookAttribute = mock(RefBookAttribute.class);
         RefBook refBook = mock(RefBook.class);
-        when(refBookPersonDao.fetchPersonsAsMap(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(records);
-        when(refBookPersonDao.getRefBook()).thenReturn(refBook);
+        when(personDao.fetchPersonsAsMap(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(records);
+        when(personDao.getRefBook()).thenReturn(refBook);
         personService.fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
-        verify(refBookPersonDao).fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
+        verify(personDao).fetchPersonsAsMap(version, pagingParams, "", refBookAttribute);
         verify(commonRefBookService).dereference(refBook, records);
     }
 
@@ -201,7 +217,7 @@ public class PersonServiceImplTest {
 
         personService.fetchDuplicates(id, actualDate, pagingParams);
 
-        verify(refBookPersonDao).fetchDuplicates(id, pagingParams);
+        verify(personDao).fetchDuplicates(id, pagingParams);
     }
 
     @Test
@@ -211,7 +227,7 @@ public class PersonServiceImplTest {
 
         personService.fetchOriginal(id, actualDate);
 
-        verify(refBookPersonDao).fetchOriginal(id);
+        verify(personDao).fetchOriginal(id);
     }
 
     @Test(expected = NullPointerException.class)
@@ -220,7 +236,7 @@ public class PersonServiceImplTest {
 
         personService.fetchPerson(id);
 
-        verify(refBookPersonDao).fetchOriginal(id);
+        verify(personDao).fetchOriginal(id);
     }
 
     @Test

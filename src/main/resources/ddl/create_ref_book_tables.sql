@@ -3,12 +3,12 @@
 -----------------------------------------------------------------------------------------------------------------------------
 -- ОКТМО
 create table ref_book_oktmo (
-  id        number(18)     not null,
-  code      varchar2(11 char) not null,
+  id        number(18)         not null,
+  code      varchar2(11 char)  not null,
   name      varchar2(500 char) not null,
-  version   date           not null,
-  status    number(1)      not null,
-  record_id number(9)      not null,
+  version   date               not null,
+  status    number(1)          not null,
+  record_id number(9)          not null,
   razd      number(1)
 );
 comment on table ref_book_oktmo is 'ОКТМО';
@@ -20,17 +20,20 @@ comment on column ref_book_oktmo.status is 'Статус записи(0-обыч
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_oktmo.razd is 'Раздел';
 
-create sequence seq_ref_book_oktmo start with 300000 increment by 100;
-create sequence seq_ref_book_oktmo_record_id start with 1000000;
+create sequence seq_ref_book_oktmo
+  start with 300000
+  increment by 100;
+create sequence seq_ref_book_oktmo_record_id
+  start with 1000000;
 
 -- Коды видов дохода
 create table ref_book_income_type
 (
-  id        number(18) not null,
-  record_id number(9) not null,
-  version   date not null,
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
   status    number(1) default 0 not null,
-  code      varchar2(4 char) not null,
+  code      varchar2(4 char)    not null,
   name      varchar2(2000 char) not null
 );
 
@@ -45,13 +48,13 @@ comment on column ref_book_income_type.name is 'Наименование дох�
 -- Коды видов вычетов
 create table ref_book_deduction_type
 (
-    id             number(18)           not null, 
-	record_id      number(9)            not null, 
-	version        date                 not null, 
-	status         number(1) default 0  not null, 
-	code           varchar2(3 char)     not null, 
-	name           varchar2(2000 char)  not null,
-    deduction_mark number(9)            not null
+  id             number(18)           not null,
+  record_id      number(9)            not null,
+  version        date                 not null,
+  status         number(1) default 0  not null,
+  code           varchar2(3 char)     not null,
+  name           varchar2(2000 char)  not null,
+  deduction_mark number(9)            not null
 );
 
 comment on table ref_book_deduction_type is 'Коды видов вычетов';
@@ -66,14 +69,14 @@ comment on column ref_book_deduction_type.deduction_mark is 'Код призна
 -- Коды субъектов РФ
 create table ref_book_region
 (
-  id        number(18) not null,
-  record_id number(9) not null,
-  version   date not null,
-  status    number(1) default 0 not null,
-  code      varchar2(2 char) not null,
-  name      varchar2(255 char) not null,
+  id               number(18)          not null,
+  record_id        number(9)           not null,
+  version          date                not null,
+  status           number(1) default 0 not null,
+  code             varchar2(2 char)    not null,
+  name             varchar2(255 char)  not null,
   okato_definition varchar2(11 char),
-  oktmo     number(18),
+  oktmo            number(18),
   oktmo_definition varchar2(11 char)
 );
 
@@ -91,12 +94,12 @@ comment on column ref_book_region.oktmo_definition is 'Определяющая 
 -- Коды места представления расчета
 create table ref_book_present_place
 (
-  id        number(18) not null,
-  record_id number(9) not null,
-  version   date not null,
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
   status    number(1) default 0 not null,
-  code      varchar2(3 char) not null,
-  name      varchar2(255) not null
+  code      varchar2(3 char)    not null,
+  name      varchar2(255)       not null
 );
 
 comment on table ref_book_present_place is 'Коды места представления расчета';
@@ -109,13 +112,13 @@ comment on column ref_book_present_place.name is 'Наименование';
 
 -- Справочник АСНУ
 create table ref_book_asnu (
-  id        number(9),
-  code      varchar2(4 char)    not null,
-  name      varchar2(100 char)  not null,
-  type      varchar2(255 char)  not null,
-  role_alias number(9,0),
-  role_name number(9,0),
-  priority number(3,0) not null
+  id         number(9),
+  code       varchar2(4 char)   not null,
+  name       varchar2(100 char) not null,
+  type       varchar2(255 char) not null,
+  role_alias number(9, 0),
+  role_name  number(9, 0),
+  priority   number(3, 0)       not null
 );
 
 comment on table ref_book_asnu is 'Справочник АСНУ';
@@ -127,9 +130,9 @@ comment on column ref_book_asnu.type is 'Тип дохода';
 -- Виды налоговых форм
 create table ref_book_form_type
 (
-  id number(18) not null,
+  id   number(18)        not null,
   code varchar2(14 char) not null,
-  name varchar2(255) not null
+  name varchar2(255)     not null
 );
 
 comment on table ref_book_form_type is 'Виды налоговых форм';
@@ -138,9 +141,9 @@ comment on column ref_book_form_type.code is 'Код';
 comment on column ref_book_form_type.name is 'Наименование';
 
 -- Типы налоговых форм
-create table declaration_kind 
+create table declaration_kind
 (
-  id number(18) not null,
+  id   number(18)         not null,
   name varchar2(255 char) not null
 );
 comment on table declaration_kind is 'Типы налоговых форм';
@@ -150,12 +153,12 @@ comment on column declaration_kind.name is 'Наименование';
 -- Общероссийский классификатор видов экономической деятельности
 create table ref_book_okved
 (
-  id        number(18) not null,
-  record_id number(9) not null,
-  version   date not null,
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
   status    number(1) default 0 not null,
-  code      varchar2(8 char) not null,
-  name      varchar2(500 char) not null
+  code      varchar2(8 char)    not null,
+  name      varchar2(500 char)  not null
 );
 
 comment on table ref_book_okved is 'Общероссийский классификатор видов экономической деятельности';
@@ -169,12 +172,12 @@ comment on column ref_book_okved.name is 'Наименование';
 -- Признак кода вычета
 create table ref_book_deduction_mark
 (
-  id        number(18) not null,
-  record_id number(9) not null,
-  version   date not null,
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
   status    number(1) default 0 not null,
-  code      number(1) not null,
-  name      varchar2(30 char) not null
+  code      number(1)           not null,
+  name      varchar2(30 char)   not null
 );
 comment on table ref_book_deduction_mark is 'Признак кода вычета';
 comment on column ref_book_deduction_mark.id is 'Уникальный идентификатор';
@@ -185,7 +188,7 @@ comment on column ref_book_deduction_mark.code is 'Код признака вы�
 comment on column ref_book_deduction_mark.name is 'Наименование признака кода вычета';
 
 -- Коды форм реорганизации (ликвидации) организации
-create table ref_book_reorganization 
+create table ref_book_reorganization
 (
   id        number(18)          not null,
   record_id number(9)           not null,
@@ -205,8 +208,8 @@ comment on column ref_book_reorganization.name is 'Наименование';
 
 --Состояния ЭД
 create table ref_book_doc_state (
-  id number(18) not null,
-  knd varchar2(7 char),
+  id   number(18)         not null,
+  knd  varchar2(7 char),
   name varchar2(255 char) not null
 );
 
@@ -218,10 +221,10 @@ comment on column ref_book_doc_state.name is 'Наименование сост�
 --Виды дохода
 create table ref_book_income_kind
 (
-  id number(18) not null,
-  income_type_id number(18) not null,
-  mark varchar2(2 char) not null,
-  name varchar2(255)
+  id             number(18)       not null,
+  income_type_id number(18)       not null,
+  mark           varchar2(2 char) not null,
+  name           varchar2(255)
 );
 comment on table ref_book_income_kind is 'Виды дохода';
 comment on column ref_book_income_kind.id is 'Уникальный идентификатор';
@@ -232,8 +235,8 @@ comment on column ref_book_income_kind.name is 'Наименование';
 --Категории прикрепленных файлов
 create table ref_book_attach_file_type
 (
-  id number(18) not null,
-  code number(1) not null,
+  id   number(18)         not null,
+  code number(1)          not null,
   name varchar2(255 char) not null
 );
 comment on table ref_book_attach_file_type is 'Категории прикрепленных файлов';
@@ -257,8 +260,8 @@ comment on column ref_book_tax_inspection.name is 'Наименование на
 --Ставка НДФЛ
 create table ref_book_ndfl_rate
 (
-  id    number(18) not null,
-  rate  varchar2(255 char) not null
+  id   number(18)         not null,
+  rate varchar2(255 char) not null
 );
 
 comment on table ref_book_ndfl_rate is 'Ставка НДФЛ';
@@ -268,12 +271,12 @@ comment on column ref_book_ndfl_rate.rate is 'Процентная ставка'
 --Основания заполнения сумм страховых взносов
 create table ref_book_fill_base
 (
-  id number(18)                   not null,
-  record_id   number(9)           not null,
-  version     date                not null,
-  status      number(1) default 0 not null,
-  code varchar2(1 char)           not null,
-  name varchar2(2000 char)        not null
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(1 char)    not null,
+  name      varchar2(2000 char) not null
 );
 
 comment on table ref_book_fill_base is 'Основания заполнения сумм страховых взносов';
@@ -310,12 +313,12 @@ comment on column ref_book_tariff_payer.for_ops_dop is 'Используется
 --Коды классов условий труда
 create table ref_book_hard_work
 (
-  id number(18) not null,
-  record_id   number(9)           not null,
-  version     date                not null,
-  status      number(1) default 0 not null,
-  code varchar2(1 char) not null,
-  name varchar2(2000 char) not null
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(1 char)    not null,
+  name      varchar2(2000 char) not null
 );
 
 comment on table ref_book_hard_work is 'Коды классов условий труда';
@@ -329,13 +332,13 @@ comment on column ref_book_hard_work.name is 'Название класса ус
 --Классификатор доходов бюджетов Российской Федерации
 create table ref_book_budget_income
 (
-  id number(18) not null,
+  id        number(18)          not null,
   record_id number(9)           not null,
   version   date                not null,
   status    number(1) default 0 not null,
-  code varchar2(20 char) not null,
-  name varchar2(1000 char) not null,
-  lev varchar2(1 char) not null
+  code      varchar2(20 char)   not null,
+  name      varchar2(1000 char) not null,
+  lev       varchar2(1 char)    not null
 );
 comment on table ref_book_budget_income is 'Классификатор доходов бюджетов Российской Федерации';
 comment on column ref_book_budget_income.id is 'Уникальный идентификатор';
@@ -349,8 +352,8 @@ comment on column ref_book_budget_income.lev is 'Уровень кода. Слу
 --Коды, определяющие налоговый (отчётный) период
 create table report_period_type
 (
-  id                  number(18) not null,
-  code                varchar2(2 char) not null,
+  id                  number(18)         not null,
+  code                varchar2(2 char)   not null,
   name                varchar2(255 char) not null,
   start_date          date,
   end_date            date,
@@ -367,15 +370,15 @@ comment on column report_period_type.calendar_start_date is 'Календарн�
 --Общероссийский классификатор стран мира
 create table ref_book_country
 (
-    id number(18) not null,
-    record_id number(18) not null,
-    status number(1) default 0 not null,
-    version date not null,
-    code varchar2(3 char) not null,
-    code_2 varchar2(2 char) not null,
-    code_3 varchar2(3 char) not null,
-    name varchar2(500 char) not null,
-    fullname varchar2(500 char)
+  id        number(18)          not null,
+  record_id number(18)          not null,
+  status    number(1) default 0 not null,
+  version   date                not null,
+  code      varchar2(3 char)    not null,
+  code_2    varchar2(2 char)    not null,
+  code_3    varchar2(3 char)    not null,
+  name      varchar2(500 char)  not null,
+  fullname  varchar2(500 char)
 );
 comment on table ref_book_country is 'Общероссийский классификатор стран мира';
 comment on column ref_book_country.id is 'Уникальный идентификатор';
@@ -391,13 +394,13 @@ comment on column ref_book_country.fullname is 'Полное наименова�
 --Коды документов
 create table ref_book_doc_type
 (
-    id number(18) not null,
-    record_id number(18) not null,
-    status number(1) default 0 not null,
-    version date not null,
-    code varchar2(2 char) not null,
-    name varchar2(2000 char) not null,
-    priority number(2)
+  id        number(18)          not null,
+  record_id number(18)          not null,
+  status    number(1) default 0 not null,
+  version   date                not null,
+  code      varchar2(2 char)    not null,
+  name      varchar2(2000 char) not null,
+  priority  number(2)
 );
 comment on table ref_book_doc_type is 'Коды документов';
 comment on column ref_book_doc_type.id is 'Уникальный идентификатор';
@@ -447,12 +450,12 @@ comment on column ref_book_signatory_mark.name is 'Наименование';
 --Коды категорий застрахованных лиц
 create table ref_book_person_category
 (
-  id number(18) not null,
+  id        number(18)          not null,
   record_id number(9)           not null,
   status    number(1) default 0 not null,
   version   date                not null,
-  code varchar2(4 char) not null,
-  name varchar2(2000 char) not null
+  code      varchar2(4 char)    not null,
+  name      varchar2(2000 char) not null
 );
 comment on table ref_book_person_category is 'Коды категорий застрахованных лиц';
 comment on column ref_book_person_category.id is 'Уникальный идентификатор';
@@ -466,12 +469,12 @@ comment on column ref_book_person_category.name is 'Название катег�
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (
- id            number(18) not null,
- record_id     number(9) not null,
- version       date not null,
- status        number(1) default 0 not null,
- department_id number(18),
- inn           varchar2(12 char)
+  id            number(18)          not null,
+  record_id     number(9)           not null,
+  version       date                not null,
+  status        number(1) default 0 not null,
+  department_id number(18),
+  inn           varchar2(12 char)
 );
 
 comment on table ref_book_ndfl is 'Параметры подразделения по НДФЛ';
@@ -485,36 +488,36 @@ comment on column ref_book_ndfl.inn is 'ИНН';
 -- Параметры подразделения по НДФЛ (таблица)
 create table ref_book_ndfl_detail
 (
- id                 number(18)       not null,
- record_id          number(9) not null,
- version            date not null,
- status             number(1) default 0 not null,
- ref_book_ndfl_id   number(18)       not null,
- row_ord            number(4)        not null,
- department_id      number(18)       not null,
- --Строка сведений о налогоплательщике
- tax_organ_code     varchar2(4 char),
- kpp                varchar2(9 char),
- tax_organ_code_mid varchar2(4 char),
- present_place      number(18),
- name               varchar2(1000 char),
- okved              number(18),
- region             number(18),
- oktmo              number(18),
- phone              varchar2(25 char),
- obligation         number(18),
- type               number(18),
- --Сведения о реорганизации
- reorg_form_code    number(18),
- reorg_inn          varchar2(12 char),
- reorg_kpp          varchar2(9 char),
- --Ответственный за расчет
- signatory_id       number(18),
- signatory_surname  varchar2(60 char),
- signatory_firstname varchar2(60 char),
- signatory_lastname  varchar2(60 char),
- approve_doc_name    varchar2(120 char),
- approve_org_name    varchar2(1000 char)
+  id                  number(18)          not null,
+  record_id           number(9)           not null,
+  version             date                not null,
+  status              number(1) default 0 not null,
+  ref_book_ndfl_id    number(18)          not null,
+  row_ord             number(4)           not null,
+  department_id       number(18)          not null,
+  --Строка сведений о налогоплательщике
+  tax_organ_code      varchar2(4 char),
+  kpp                 varchar2(9 char),
+  tax_organ_code_mid  varchar2(4 char),
+  present_place       number(18),
+  name                varchar2(1000 char),
+  okved               number(18),
+  region              number(18),
+  oktmo               number(18),
+  phone               varchar2(25 char),
+  obligation          number(18),
+  type                number(18),
+  --Сведения о реорганизации
+  reorg_form_code     number(18),
+  reorg_inn           varchar2(12 char),
+  reorg_kpp           varchar2(9 char),
+  --Ответственный за расчет
+  signatory_id        number(18),
+  signatory_surname   varchar2(60 char),
+  signatory_firstname varchar2(60 char),
+  signatory_lastname  varchar2(60 char),
+  approve_doc_name    varchar2(120 char),
+  approve_org_name    varchar2(1000 char)
 );
 
 comment on table ref_book_ndfl_detail is 'Параметры подразделения по НДФЛ (таблица)';
@@ -549,12 +552,12 @@ comment on column ref_book_ndfl_detail.approve_org_name is 'Наименован
 -- Параметры подразделения по сборам, взносам
 create table ref_book_fond
 (
- id            number(18) not null,
- record_id     number(9) not null,
- version       date not null,
- status        number(1) default 0 not null,
- department_id number(18),
- inn           varchar2(12 char)
+  id            number(18)          not null,
+  record_id     number(9)           not null,
+  version       date                not null,
+  status        number(1) default 0 not null,
+  department_id number(18),
+  inn           varchar2(12 char)
 );
 
 comment on table ref_book_fond is 'Параметры подразделения по сборам, взносам';
@@ -568,36 +571,36 @@ comment on column ref_book_fond.inn is 'ИНН';
 -- Параметры подразделения по сборам, взносам (таблица)
 create table ref_book_fond_detail
 (
- id                 number(18)       not null,
- record_id          number(9) not null,
- version            date not null,
- status             number(1) default 0 not null,
- ref_book_fond_id   number(18)       not null,
- row_ord            number(4)        not null,
- department_id      number(18),
- --Строка сведений о налогоплательщике
- tax_organ_code     varchar2(4 char),
- kpp                varchar2(9 char),
- tax_organ_code_mid varchar2(4 char),
- present_place      number(18),
- name               varchar2(1000 char),
- okved              number(18),
- region             number(18),
- oktmo              number(18),
- phone              varchar2(20 char),
- obligation         number(18),
- type               number(18),
- --Сведения о реорганизации
- reorg_form_code    number(18),
- reorg_inn          varchar2(12 char),
- reorg_kpp          varchar2(9 char),
- --Ответственный за расчет
- signatory_id       number(18),
- signatory_surname  varchar2(60 char),
- signatory_firstname varchar2(60 char),
- signatory_lastname  varchar2(60 char),
- approve_doc_name    varchar2(120 char),
- approve_org_name    varchar2(1000 char)
+  id                  number(18)          not null,
+  record_id           number(9)           not null,
+  version             date                not null,
+  status              number(1) default 0 not null,
+  ref_book_fond_id    number(18)          not null,
+  row_ord             number(4)           not null,
+  department_id       number(18),
+  --Строка сведений о налогоплательщике
+  tax_organ_code      varchar2(4 char),
+  kpp                 varchar2(9 char),
+  tax_organ_code_mid  varchar2(4 char),
+  present_place       number(18),
+  name                varchar2(1000 char),
+  okved               number(18),
+  region              number(18),
+  oktmo               number(18),
+  phone               varchar2(20 char),
+  obligation          number(18),
+  type                number(18),
+  --Сведения о реорганизации
+  reorg_form_code     number(18),
+  reorg_inn           varchar2(12 char),
+  reorg_kpp           varchar2(9 char),
+  --Ответственный за расчет
+  signatory_id        number(18),
+  signatory_surname   varchar2(60 char),
+  signatory_firstname varchar2(60 char),
+  signatory_lastname  varchar2(60 char),
+  approve_doc_name    varchar2(120 char),
+  approve_org_name    varchar2(1000 char)
 );
 
 comment on table ref_book_fond_detail is 'Параметры подразделения по сборам, взносам (таблица)';
@@ -632,12 +635,12 @@ comment on column ref_book_fond_detail.approve_org_name is 'Наименован
 --Признак возложения обязанности по уплате налога на обособленное подразделение
 create table ref_book_detach_tax_pay
 (
-  id number(18) not null,
-  record_id number(9) not null,
-  version date not null,
-  status number(1) default 0 not null,
-  code varchar2(1 char) not null,
-  name varchar2(50 char) not null
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(1 char)    not null,
+  name      varchar2(50 char)   not null
 );
 comment on table ref_book_detach_tax_pay is 'Признак возложения обязанности по уплате налога на обособленное подразделение';
 comment on column ref_book_detach_tax_pay.id is 'Уникальный идентификатор';
@@ -647,12 +650,12 @@ comment on column ref_book_detach_tax_pay.name is 'Значение';
 --Признак составления расчёта
 create table ref_book_make_calc
 (
-  id number(18) not null,
-  record_id number(9) not null,
-  version date not null,
-  status number(1) default 0 not null,
-  code varchar2(1 char) not null,
-  name varchar2(255 char) not null
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(1 char)    not null,
+  name      varchar2(255 char)  not null
 );
 comment on table ref_book_make_calc is 'Признак составления расчёта';
 comment on column ref_book_make_calc.id is 'Уникальный идентификатор';
@@ -662,8 +665,8 @@ comment on column ref_book_make_calc.name is 'Значение';
 --Календарь
 create table ref_book_calendar
 (
-  cdate date not null,
-  ctype  number(1) default 0 not null
+  cdate date                not null,
+  ctype number(1) default 0 not null
 );
 
 comment on table ref_book_calendar is 'Календарь';

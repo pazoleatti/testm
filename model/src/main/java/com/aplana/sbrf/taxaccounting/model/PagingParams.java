@@ -115,6 +115,10 @@ public class PagingParams implements Serializable {
         this.direction = direction;
     }
 
+    public void setWithoutPaging() {
+        count = -1;
+    }
+
     @Override
     public String toString() {
         return "PagingParams [count=" + count + ", page=" + page + ", property=" + property + ", direction=" + direction + "]";

@@ -101,7 +101,9 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9061, 905, 'ИНП', 'INP', 1, 1, null, null, 1, null, 15, 1, 1, null, null, 0, 14);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9062, 905, 'АС НУ', 'AS_NU', 4, 2, 900, 9002, 1, null, 15, 1, 0, null, null, 0, null);
 
-
+--------------------------------------------------------
+--  Статусы налогоплательщика
+--------------------------------------------------------
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(1,'1','Налогоплательщик является налоговым резидентом Российской Федерации', 1, date '2016-01-01');
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(2,'2','Налогоплательщик не является налоговым резидентом Российской Федерации', 2, date '2016-01-01');
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(3,'3','Налогоплательщик - высококвалифицированный специалист не является налоговым резидентом Российской Федерации', 3, date '2016-01-01');
@@ -109,9 +111,40 @@ insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(4,'
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(5,'5','Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации', 5, date '2016-01-01');
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(6,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента', 6, date '2016-01-01');
 
+--------------------------------------------------------
+--  Документы физ. лиц
+--------------------------------------------------------
+insert into ref_book_doc_type (id, record_id, status, version, code, name) values (1, 1, 0, date '2018-01-01', '21', 'Паспорт');
+insert into ref_book_doc_type (id, record_id, status, version, code, name) values (2, 2, 0, date '2018-01-01', '03', 'Свидетельство о рождении');
 
+insert into ref_book_id_doc (id, record_id, version, status, doc_id, doc_number, inc_rep) values (1, 1, date '2018-01-01', 0, 1, '01 01 123456', 1);
+insert into ref_book_id_doc (id, record_id, version, status, doc_id, doc_number, inc_rep) values (2, 2, date '2018-01-01', 0, 2, 'Дц-01 123456', 0);
+insert into ref_book_id_doc (id, record_id, version, status, doc_id, doc_number, inc_rep) values (3, 3, date '2018-01-01', 0, 1, '12 34 567890', 1);
 
-insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (1, 'Иванов', 'Борис', 'Петрович', null, null, null, 1, date '1975-04-15', null, 1, 1, 2, 1, date '2016-01-01', 0, 6, 1, null);
-insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (2, 'Чучкалова', 'Екатерина', 'Викторовна', null, null, null, 1, date '1981-10-16', null, 1, 2, 2, 2, date '2016-01-01', 0, 6, 2, null);
-insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (3, 'Потапов', 'Сергей', 'Сергеевич', null, null, null, 1, date '1992-07-29', null, 1, 3, 2, 1, date '2016-01-01', 0, 6, 3, null);
-insert into ref_book_person(id, last_name, first_name, middle_name, inn, inn_foreign, snils, taxpayer_state, birth_date, birth_place, citizenship, address, employee, record_id, version, status, source_id, old_id, old_status) values (4, 'Сульжик', 'Владислав', 'Сергеевич', null, null, null, 1, date '1992-09-25', null, 1, 4, 2, 1, date '2016-01-01', 0, 6, 4, null);
+--------------------------------------------------------
+--  Справочник физ. лиц
+--------------------------------------------------------
+insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
+values                      (1,   'Иванов',   'Борис',      'Петрович',   null, null,         null,   1,                date '1975-04-15',  null,         1,            1,        2,        1,          date '2016-01-01',  0,      6,          1,      null,       1,    1);
+insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
+values                      (2,   'Чучкалова','Екатерина',  'Викторовна', null, null,         null,   1,                date '1981-10-16',  null,         1,            2,        2,        2,          date '2016-01-01',  0,      6,          2,      null,       1,    3);
+insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
+values                      (3,   'Потапов',  'Сергей',     'Сергеевич',  null, null,         null,   1,                date '1992-07-29',  null,         1,            3,        2,        1,          date '2016-01-01',  0,      6,          3,      null,       0,    null);
+insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
+values                      (4,   'Сульжик',  'Владислав',  'Сергеевич',  null, null,         null,   1,                date '1992-09-25',  null,         1,            4,        2,        1,          date '2016-01-01',  0,      6,          10,     null,       0,    null);
+
+-- Присваивам ранее созданным документам ссылку на ФЛ
+update ref_book_id_doc set person_id = 1 where id in (1, 2);
+update ref_book_id_doc set person_id = 2 where id = 3;
+
+--------------------------------------------------------
+--  Подразделения физ. лиц
+--------------------------------------------------------
+
+insert into department_type (id, name) values (2, 'Территориальный банк');
+
+insert into department (id, name, parent_id, type, is_active, code, garant_use, sunr_use) values (1, 'Байкальский банк', null, 2, 1, 4, 0, 0);
+insert into department (id, name, parent_id, type, is_active, code, garant_use, sunr_use) values (2, 'Волго-Вятский банк', null, 2, 1, 4, 0, 0);
+
+insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(1, 1, date '2018-01-01', 0, 1, 1);
+insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(2, 2, date '2018-01-01', 0, 1, 2);

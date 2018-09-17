@@ -118,6 +118,13 @@
             <artifactId>spring-aspects</artifactId>
         </dependency>
 
+        <!-- Idea annotations -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations-java5</artifactId>
+            <version>16.0.2</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>
