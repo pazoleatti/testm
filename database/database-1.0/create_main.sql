@@ -2103,8 +2103,6 @@ create table ref_book_id_doc
   person_id           number(18),
   doc_id              number(18),
   doc_number          varchar2(25 char),
-  issued_by           varchar2(255 char),
-  issued_date         date,
   inc_rep             number(1),
   duplicate_record_id number(18)
 );

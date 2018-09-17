@@ -471,7 +471,9 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
     @Override
     public RegistryPerson fetchPersonWithVersionInfo(Long id) {
-        String sql = "SELECT r.*, row_number() over (order by id asc) as rn FROM (" +
+        String sql = "SELECT r.*, " +
+                (isSupportOver() ? "row_number() over (order by id asc)" : "ROWNUM") +
+                " as rn FROM (" +
                 "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM REF_BOOK_PERSON WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to " +
                 "FROM (" +
                 " SELECT frb.* FROM REF_BOOK_PERSON frb " +
@@ -484,5 +486,91 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public void updateRegistryPerson(RegistryPerson person, String query) {
+        MapSqlParameterSource personParams = new MapSqlParameterSource();
+        personParams.addValue("id", person.getId())
+                .addValue(RegistryPerson.UpdatableField.LAST_NAME.getAlias(), person.getLastName())
+                .addValue(RegistryPerson.UpdatableField.FIRST_NAME.getAlias(), person.getFirstName())
+                .addValue(RegistryPerson.UpdatableField.MIDDLE_NAME.getAlias(), person.getMiddleName())
+                .addValue(RegistryPerson.UpdatableField.BIRTH_DATE.getAlias(), person.getBirthDate());
+        if (person.getCitizenship().value() != null && person.getCitizenship().value().get("id") != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.CITIZENSHIP.getAlias(), person.getCitizenship().value().get("id").getReferenceValue());
+        }
+        if (person.getReportDoc().value() != null && person.getReportDoc().value().get("id") != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.REPORT_DOC.getAlias(), person.getReportDoc().value().get("id").getReferenceValue());
+        }
+        if (person.getInn().value() != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.INN.getAlias(), person.getInn().value());
+        }
+        if (person.getInnForeign().value() != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.INN_FOREIGN.getAlias(), person.getInnForeign().value());
+        }
+        if (person.getSnils().value() != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.SNILS.getAlias(), person.getSnils().value());
+        }
+        if (person.getTaxPayerState().value() != null && person.getTaxPayerState().value().get("id") != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.TAX_PAYER_STATE.getAlias(), person.getTaxPayerState().value().get("id").getReferenceValue());
+        }
+        if (person.getSource() != null && person.getSource().get("id") != null) {
+            personParams.addValue(RegistryPerson.UpdatableField.SOURCE.getAlias(), person.getSource().get("id").getReferenceValue());
+        }
+        personParams.addValue(RegistryPerson.UpdatableField.VIP.getAlias(), person.getVip());
+        getNamedParameterJdbcTemplate().update(query, personParams);
+    }
+
+    @Override
+    public void updateRegistryPersonAddress(Map<String, RefBookValue> address, String query) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", address.get("ID").getReferenceValue());
+        if (address.get(RegistryPerson.UpdatableField.REGION_CODE.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.REGION_CODE.getAlias(), address.get(RegistryPerson.UpdatableField.REGION_CODE.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.POSTAL_CODE.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.POSTAL_CODE.getAlias(), address.get(RegistryPerson.UpdatableField.POSTAL_CODE.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.DISTRICT.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.DISTRICT.getAlias(), address.get(RegistryPerson.UpdatableField.DISTRICT.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.CITY.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.CITY.getAlias(), address.get(RegistryPerson.UpdatableField.CITY.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.LOCALITY.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.LOCALITY.getAlias(), address.get(RegistryPerson.UpdatableField.LOCALITY.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.STREET.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.STREET.getAlias(), address.get(RegistryPerson.UpdatableField.STREET.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.HOUSE.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.HOUSE.getAlias(), address.get(RegistryPerson.UpdatableField.HOUSE.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.BUILD.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.BUILD.getAlias(), address.get(RegistryPerson.UpdatableField.BUILD.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.APPARTMENT.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.APPARTMENT.getAlias(), address.get(RegistryPerson.UpdatableField.APPARTMENT.name()).getStringValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.COUNTRY_ID.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias(), address.get(RegistryPerson.UpdatableField.COUNTRY_ID.name()).getReferenceValue());
+        }
+        if (address.get(RegistryPerson.UpdatableField.ADDRESS.name()) != null) {
+            params.addValue(RegistryPerson.UpdatableField.ADDRESS.getAlias(), address.get(RegistryPerson.UpdatableField.ADDRESS.name()).getStringValue());
+        }
+        getNamedParameterJdbcTemplate().update(query, params);
+    }
+
+    @Override
+    public void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId) {
+        String sqlOldValue = "UPDATE ref_book_id_doc set inc_rep = 0 WHERE id = :oldReportDocId";
+        String sqlNewValue = "UPDATE ref_book_id_doc set inc_rep = 1 WHERE id = :newReportDocId";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("oldReportDocId", oldReportDocId)
+                .addValue("newReportDocId", newReportDocId);
+
+        getNamedParameterJdbcTemplate().update(sqlOldValue, params);
+        getNamedParameterJdbcTemplate().update(sqlNewValue, params);
     }
 }

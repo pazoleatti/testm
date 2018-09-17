@@ -16,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.PersonOriginalAndDup
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -162,5 +164,16 @@ public class RefBookFlController {
     @PostMapping(value = "/actions/refBookFL/export/excel")
     public ActionResult exportPersonsToExcel(@RequestParam RefBookPersonFilter filter, @RequestParam PagingParams pagingParams) {
         return personService.createTaskToCreateExcel(filter, pagingParams, securityService.currentUserInfo());
+    }
+
+    /**
+     * Обновить данные записи из реестра ФЛ
+     * @param person данные записи из реестра ФЛ
+     * @return ответ сервера
+     */
+    @PostMapping(value = "/actions/registryPerson/updatePerson")
+    public ResponseEntity updateRegistryPerson(@RequestBody RegistryPerson person) {
+        personService.updateRegistryPerson(person);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

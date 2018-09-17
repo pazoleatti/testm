@@ -1,23 +1,26 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQueryBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.*;
+import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,16 +33,21 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("PersonServiceImplTest.xml")
 public class PersonServiceImplTest {
 
-    @Autowired
+    @InjectMocks
+    @Spy
     private PersonServiceImpl personService;
-    @Autowired
+    @Mock
     private RefBookPersonDao personDao;
-    @Autowired
+    @Mock
     private CommonRefBookService commonRefBookService;
+    @Mock
+    private BasePermissionEvaluator basePermissionEvaluator;
+    @Mock
+    private RegistryPersonUpdateQueryBuilder registryPersonUpdateQueryBuilder;
+    @Captor
+    private ArgumentCaptor<List<RegistryPerson.UpdatableField>> personFieldsToUpdate;
 
     private static Method resolvePersonMethod;
 
@@ -48,6 +56,11 @@ public class PersonServiceImplTest {
         Class<? extends PersonServiceImpl> clazz = PersonServiceImpl.class;
         resolvePersonMethod = clazz.getDeclaredMethod("resolveVersion", List.class, Date.class);
         resolvePersonMethod.setAccessible(true);
+    }
+
+    @Before
+    public void setuUp() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -337,6 +350,48 @@ public class PersonServiceImplTest {
         RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
 
         assertThat(new Date(10L), is(equalTo(result.getVersion())));
+    }
+
+
+    @Test
+    public void test_updateRegistryPerson_whenVipPersonAndAccessGranted() {
+        //setup
+        RegistryPerson person = mock(RegistryPerson.class);
+        final RegistryPerson persistedPerson = mock(RegistryPerson.class);
+        doReturn(persistedPerson).when(personService).fetchPerson(anyLong());
+        when(basePermissionEvaluator.hasPermission(any(Authentication.class), any(), any())).thenReturn(true);
+        when(person.getLastName()).thenReturn("ИзмФам");
+        when(person.getInn()).thenReturn(Permissive.of("213456"));
+        when(persistedPerson.getLastName()).thenReturn("ОригФам");
+        when(persistedPerson.getInn()).thenReturn(Permissive.of("654321"));
+
+        //execution
+        personService.updateRegistryPerson(person);
+        //verification
+        verify(registryPersonUpdateQueryBuilder).buildPersonUpdateQuery(personFieldsToUpdate.capture());
+        Assertions.assertThat(personFieldsToUpdate.getValue().size()).isEqualTo(2);
+        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.LAST_NAME);
+        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.INN);
+    }
+
+    @Test
+    public void test_updateRegistryPerson_whenVipPersonAndAccessDisabled() {
+        //setup
+        RegistryPerson person = mock(RegistryPerson.class);
+        final RegistryPerson persistedPerson = mock(RegistryPerson.class);
+        doReturn(persistedPerson).when(personService).fetchPerson(anyLong());
+        when(basePermissionEvaluator.hasPermission(any(Authentication.class), any(), any())).thenReturn(false);
+        when(person.getLastName()).thenReturn("ИзмФам");
+        when(person.getInn()).thenReturn(Permissive.of("213456"));
+        when(persistedPerson.getLastName()).thenReturn("ОригФам");
+        when(persistedPerson.getInn()).thenReturn(Permissive.of("654321"));
+
+        //execution
+        personService.updateRegistryPerson(person);
+        //verification
+        verify(registryPersonUpdateQueryBuilder).buildPersonUpdateQuery(personFieldsToUpdate.capture());
+        Assertions.assertThat(personFieldsToUpdate.getValue().size()).isEqualTo(1);
+        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.LAST_NAME);
     }
 
     private static class VersionComparator implements Comparator<RegistryPerson> {

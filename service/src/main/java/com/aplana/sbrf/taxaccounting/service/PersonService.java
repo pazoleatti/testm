@@ -140,4 +140,10 @@ public interface PersonService {
      * @return результат создания задачи
      */
     ActionResult createTaskToCreateExcel(RefBookPersonFilter filter, PagingParams pagingParams, TAUserInfo userInfo);
+
+    /**
+     * Обновить запись в реестре ФЛ
+     * @param person    данные ФЛ для обновления
+     */
+    void updateRegistryPerson(RegistryPerson person);
 }

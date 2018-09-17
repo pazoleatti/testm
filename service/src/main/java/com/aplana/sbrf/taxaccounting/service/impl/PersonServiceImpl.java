@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQueryBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -59,6 +60,8 @@ public class PersonServiceImpl implements PersonService {
     private DepartmentService departmentService;
     @Autowired
     BasePermissionEvaluator permissionEvaluator;
+    @Autowired
+    RegistryPersonUpdateQueryBuilder registryPersonUpdateBuilder;
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -466,6 +469,126 @@ public class PersonServiceImpl implements PersonService {
         });
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
+    }
+
+    public void updateRegistryPerson(RegistryPerson person) {
+        RegistryPerson persistedPerson = fetchPerson(person.getId());
+        List<RegistryPerson.UpdatableField> personFieldsToUpdate = new ArrayList<>();
+        boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
+
+        if ((person.getLastName() != null && !person.getLastName().equalsIgnoreCase(persistedPerson.getLastName()))
+                || (person.getLastName() == null && persistedPerson.getLastName() != null))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.LAST_NAME);
+        if ((person.getFirstName() != null && !person.getFirstName().equalsIgnoreCase(persistedPerson.getFirstName()))
+                || (person.getFirstName() == null && persistedPerson.getFirstName() != null))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.FIRST_NAME);
+        if ((person.getMiddleName() != null && !person.getMiddleName().equalsIgnoreCase(persistedPerson.getMiddleName()))
+                || (person.getMiddleName() == null && persistedPerson.getMiddleName() != null))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.MIDDLE_NAME);
+        if ((person.getBirthDate() != null && !person.getBirthDate().equals(persistedPerson.getBirthDate()))
+                || (person.getBirthDate() == null && persistedPerson.getBirthDate() != null))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.BIRTH_DATE);
+        if (person.getCitizenship() != null && ((person.getCitizenship().value() != null && !person.getCitizenship().value().get("id").getReferenceValue().equals(persistedPerson.getCitizenship().value().get("id").getReferenceValue()))
+                || (person.getCitizenship().value() == null && persistedPerson.getCitizenship().value() != null)))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.CITIZENSHIP);
+        if ((person.getSource() != null && !person.getSource().isEmpty() && person.getSource().get("id").getReferenceValue().equals(persistedPerson.getSource().get("id").getReferenceValue()))
+                || (person.getSource() == null && persistedPerson.getSource() != null))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.SOURCE);
+        if (viewVipDataGranted) {
+            if (person.getReportDoc() != null && ((person.getReportDoc().value() != null && !person.getReportDoc().value().get("id").getReferenceValue().equals(persistedPerson.getReportDoc().value().get("id").getReferenceValue()))
+                    || (person.getReportDoc().value() == null && persistedPerson.getReportDoc().value() != null)))
+                personFieldsToUpdate.add(RegistryPerson.UpdatableField.REPORT_DOC);
+            if (person.getInn() != null && ((person.getInn().value() != null && !person.getInn().value().equalsIgnoreCase(persistedPerson.getInn().value()))
+                    || (person.getInn().value() == null && persistedPerson.getInn().value() != null)))
+                personFieldsToUpdate.add(RegistryPerson.UpdatableField.INN);
+            if (person.getInnForeign() != null && ((person.getInnForeign().value() != null && !person.getInnForeign().value().equalsIgnoreCase(persistedPerson.getInnForeign().value()))
+                    || (person.getInnForeign().value() == null && persistedPerson.getInnForeign().value() != null)))
+                personFieldsToUpdate.add(RegistryPerson.UpdatableField.INN_FOREIGN);
+            if (person.getSnils() != null && ((person.getSnils().value() != null && !person.getSnils().value().equalsIgnoreCase(persistedPerson.getSnils().value()))
+                    || (person.getSnils().value() == null && persistedPerson.getSnils().value() != null)))
+                personFieldsToUpdate.add(RegistryPerson.UpdatableField.SNILS);
+            if (person.getTaxPayerState() != null && ((person.getTaxPayerState().value() != null && !person.getTaxPayerState().value().get("id").getReferenceValue().equals(persistedPerson.getTaxPayerState().value().get("id").getReferenceValue()))
+                    || (person.getTaxPayerState().value() == null && persistedPerson.getTaxPayerState().value() != null)))
+                personFieldsToUpdate.add(RegistryPerson.UpdatableField.TAX_PAYER_STATE);
+            if (!person.getVip() == persistedPerson.getVip())
+                personFieldsToUpdate.add(RegistryPerson.UpdatableField.VIP);
+        }
+
+        List<RegistryPerson.UpdatableField> addressFieldsToUpdate = new ArrayList<>();
+        if (viewVipDataGranted) {
+            String newRegionCode = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.REGION_CODE.getAlias()).getStringValue() : null;
+            String oldRegionCode = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.REGION_CODE.getAlias()).getStringValue() : null;
+            String newPostalCode = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.POSTAL_CODE.getAlias()).getStringValue() : null;
+            String oldPostalCode = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.POSTAL_CODE.getAlias()).getStringValue() : null;
+            String newDistrict = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.DISTRICT.getAlias()).getStringValue() : null;
+            String oldDistrict = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.DISTRICT.getAlias()).getStringValue() : null;
+            String newCity = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.CITY.getAlias()).getStringValue() : null;
+            String oldCity = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.CITY.getAlias()).getStringValue() : null;
+            String newLocality = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.LOCALITY.getAlias()).getStringValue() : null;
+            String oldLocality = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.LOCALITY.getAlias()).getStringValue() : null;
+            String newStreet = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.STREET.getAlias()).getStringValue() : null;
+            String oldStreet = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.STREET.getAlias()).getStringValue() : null;
+            String newHouse = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.HOUSE.getAlias()).getStringValue() : null;
+            String oldHouse = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.HOUSE.getAlias()).getStringValue() : null;
+            String newBuild = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.BUILD.getAlias()).getStringValue() : null;
+            String oldBuild = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.BUILD.getAlias()).getStringValue() : null;
+            String newAppartment = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
+            String oldAppartment = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
+            String newCountryid = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getStringValue() : null;
+            String oldCountryId = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getStringValue() : null;
+            String newAddress = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
+            String oldAddress = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
+
+
+            if ((newRegionCode != null && !newRegionCode.equalsIgnoreCase(oldRegionCode))
+                    || (newRegionCode == null && oldRegionCode != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.REGION_CODE);
+            if ((newPostalCode != null && newPostalCode.equalsIgnoreCase(oldPostalCode))
+                    || (newPostalCode == null && oldPostalCode != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.POSTAL_CODE);
+            if ((newDistrict != null && !newDistrict.equalsIgnoreCase(oldDistrict))
+                    || (newDistrict == null && oldDistrict != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.DISTRICT);
+            if ((newCity != null && !newCity.equalsIgnoreCase(oldCity))
+                    || (newCity == null && oldCity != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.CITY);
+            if ((newLocality != null && !newLocality.equalsIgnoreCase(oldLocality))
+                    || (newLocality == null && oldLocality != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.LOCALITY);
+            if ((newStreet != null && !newStreet.equalsIgnoreCase(oldStreet))
+                    || (newStreet == null && oldStreet != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.STREET);
+            if ((newHouse != null && !newHouse.equalsIgnoreCase(oldHouse))
+                    || (newHouse == null && oldHouse != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.HOUSE);
+            if ((newBuild != null && !newBuild.equalsIgnoreCase(oldBuild))
+                    || (newBuild == null && oldBuild != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.BUILD);
+            if ((newAppartment != null && !newAppartment.equalsIgnoreCase(oldAppartment))
+                || (newAppartment == null && oldAppartment != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.APPARTMENT);
+            if ((newCountryid != null && !newCountryid.equalsIgnoreCase(oldCountryId))
+                || (newCountryid == null && oldCountryId != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.COUNTRY_ID);
+            if ((newAddress != null && !newAddress.equalsIgnoreCase(oldAddress))
+                || (newAddress == null && oldAddress != null))
+                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.ADDRESS);
+        }
+
+        String personSql = registryPersonUpdateBuilder.buildPersonUpdateQuery(personFieldsToUpdate);
+        String addressSql = registryPersonUpdateBuilder.buildAddressUpdateQuery(addressFieldsToUpdate);
+
+        if (personSql != null) {
+            refBookPersonDao.updateRegistryPerson(person, personSql);
+        }
+
+        if (addressSql != null) {
+            refBookPersonDao.updateRegistryPersonAddress(person.getAddress().value(), addressSql);
+        }
+
+        if (personFieldsToUpdate.contains(RegistryPerson.UpdatableField.REPORT_DOC)) {
+            refBookPersonDao.updateRegistryPersonIncRepDocId(persistedPerson.getReportDoc().value().get("id").getReferenceValue(), person.getReportDoc().value().get("id").getReferenceValue());
+        }
     }
 
     /**

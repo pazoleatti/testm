@@ -214,4 +214,43 @@ public class RegistryPerson extends PermissivePerson {
         this.address = address;
     }
 
+    /**
+     * Перечисление обновляемых полей записи реестра ФЛ
+     */
+    public enum UpdatableField {
+        LAST_NAME("lastName"),
+        FIRST_NAME("firstName"),
+        MIDDLE_NAME("middleName"),
+        BIRTH_DATE("birthDate"),
+        CITIZENSHIP("citizenship"),
+        REPORT_DOC("reportDoc"),
+        INN("inn"),
+        INN_FOREIGN("innForeign"),
+        SNILS("snils"),
+        TAX_PAYER_STATE("taxPayerState"),
+        SOURCE("source"),
+        REGION_CODE("regionCode"),
+        POSTAL_CODE("postalCode"),
+        DISTRICT("district"),
+        CITY("city"),
+        LOCALITY("locality"),
+        STREET("street"),
+        HOUSE("house"),
+        BUILD("build"),
+        APPARTMENT("appartment"),
+        COUNTRY_ID("countryId"),
+        ADDRESS("address"),
+        VIP("vip");
+
+        private String alias;
+
+        UpdatableField(String alias) {
+            this.alias = alias;
+        }
+
+        public String getAlias() {
+            return alias;
+        }
+    }
+
 }

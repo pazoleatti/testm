@@ -20,6 +20,8 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (54,10,'Полное наименование','FULLNAME',1,4,null,null,1,null,50,1,5,null,null,0,500);
 
 insert into ref_book_country(id, record_id, status, version, code, code_2, code_3, name, fullname) values (1, 1, 0, date '2016-01-01', '643', 'RU', 'RUS', 'РОССИЯ', 'Российская Федерация');
+Insert into REF_BOOK_COUNTRY (ID,RECORD_ID,STATUS,VERSION,CODE,CODE_2,CODE_3,NAME,FULLNAME) values (2,2,'0',to_date('01.01.16','DD.MM.RR'),'678','ST','STP','САН-ТОМЕ И ПРИНСИПИ','Демократическая Республика Сан-Томе и Принсипи');
+Insert into REF_BOOK_COUNTRY (ID,RECORD_ID,STATUS,VERSION,CODE,CODE_2,CODE_3,NAME,FULLNAME) values (3,3,'0',to_date('01.01.16','DD.MM.RR'),'630','PR','PRI','ПУЭРТО-РИКО',null);
 ---------------------------------------------------------
 -- Адреса
 ---------------------------------------------------------
@@ -75,8 +77,6 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9021, 902, 'Код ДУЛ', 'DOC_ID', 4, 1, 360, 3601, 1, null, 15, 1, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9022, 902, 'Серия и номер ДУЛ', 'DOC_NUMBER', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 25);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9023, 902, 'Кем выдан  ДУЛ', 'ISSUED_BY', 1, 3, null, null, 1, null, 15, 0, 0, null, null, 0, 255);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9024, 902, 'Дата выдачи документа ДУЛ', 'ISSUED_DATE', 3, 4, null, null, 1, null, 15, 0, 0, null, 1, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9025, 902, 'Включается в отчетность', 'INC_REP', 2, 5, null, null, 1, 0, 6, 0, 0, null, null, 0, 1);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9031, 903, 'Код', 'CODE', 1, 1, null, null, 1, null, 1, 1, 0, null, null, 0, 1);
@@ -110,6 +110,8 @@ insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(3,'
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(4,'4','Налогоплательщик - участник Государственной программы по оказанию содействия добровольному переселению в Российскую Федерацию соотечественников, проживающих за рубежом (член экипажа судна, плавающего под Государственным флагом Российской Федерации), не является налоговым резидентом Российской Федерации', 4, date '2016-01-01');
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(5,'5','Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации', 5, date '2016-01-01');
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(6,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента', 6, date '2016-01-01');
+
+
 
 --------------------------------------------------------
 --  Документы физ. лиц
@@ -148,3 +150,5 @@ insert into department (id, name, parent_id, type, is_active, code, garant_use, 
 
 insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(1, 1, date '2018-01-01', 0, 1, 1);
 insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(2, 2, date '2018-01-01', 0, 1, 2);
+
+Insert into REF_BOOK_ID_DOC (ID,RECORD_ID,VERSION,STATUS,PERSON_ID,DOC_ID,DOC_NUMBER,INC_REP,DUPLICATE_RECORD_ID) values (4,4,to_date('01.01.17','DD.MM.RR'),'0',1,null,'96 71 570980','0',null);

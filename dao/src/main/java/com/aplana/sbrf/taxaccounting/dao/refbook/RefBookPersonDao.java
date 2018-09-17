@@ -140,4 +140,26 @@ public interface RefBookPersonDao {
      * @return объект версии ФЛ
      */
     RegistryPerson fetchPersonWithVersionInfo(Long id);
+
+    /**
+     * Обновить данные записи реестра ФЛ
+     * @param person    данные ФЛ
+     * @param query     запрос
+     */
+    void updateRegistryPerson(RegistryPerson person, String query);
+
+    /**
+     * Обновить данные адреса записи реестра ФЛ
+     * @param address   данные адреса
+     * @param query     запрос
+     */
+    void updateRegistryPersonAddress(Map<String, RefBookValue> address, String query);
+
+    /**
+     * Обновить флаг "включается в отчетность"
+     * @param oldReportDocId    старое значение флага
+     * @param newReportDocId    новое значение флага
+     */
+    void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId);
+
 }
