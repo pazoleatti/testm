@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
@@ -17,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +24,7 @@ import java.util.Set;
 /**
  * Реализация сервиса для работы со справочником Подразделения
  */
-@Service
+@Service("refBookDepartmentDataService")
 public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataService {
     private RefBookDepartmentDataDao refBookDepartmentDataDao;
     private DepartmentDao departmentDao;

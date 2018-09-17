@@ -3,14 +3,15 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
 
 /**
  * Сервис для работы со справочником Подразделения
  */
+@ScriptExposed
 public interface RefBookDepartmentDataService {
 
     /**

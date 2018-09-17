@@ -66,7 +66,7 @@ public class DepartmentConfigController {
         if (filter.getDepartmentId() == null) {
             return new JqgridPagedList<>();
         }
-        PagingResult<DepartmentConfig> result = departmentConfigService.fetchDepartmentConfigs(filter, pagingParams);
+        PagingResult<DepartmentConfig> result = departmentConfigService.fetchAllByFilter(filter, pagingParams);
 
         setDepartmentConfigsPermission(result);
 

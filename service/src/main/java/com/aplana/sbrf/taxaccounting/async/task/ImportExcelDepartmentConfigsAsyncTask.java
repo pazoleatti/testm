@@ -40,7 +40,9 @@ public class ImportExcelDepartmentConfigsAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         BlobData blobData = blobDataService.get((String) params.get("blobDataId"));
         int departmentId = (Integer) params.get("departmentId");
-        departmentConfigService.importExcel(departmentId, blobData);
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
+        departmentConfigService.importExcel(departmentId, blobData, userInfo, logger);
         return new BusinessLogicResult(true, null);
     }
 

@@ -2,15 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -25,9 +17,11 @@ import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
@@ -36,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,10 +40,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.*;
+import static com.google.common.base.Objects.firstNonNull;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-@Service
+@Service("departmentConfigService")
 public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     protected static final Log LOG = LogFactory.getLog(DepartmentConfigServiceImpl.class);
 
@@ -66,9 +62,13 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     private AsyncManager asyncManager;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private RefBookScriptingService refBookScriptingService;
 
     @Override
-    public PagingResult<DepartmentConfig> fetchDepartmentConfigs(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+    public PagingResult<DepartmentConfig> fetchAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+        Assert.notNull(filter.getDepartmentId());
+
         StringBuilder departmentConfigFilter = new StringBuilder().append(DepartmentConfigDetailAliases.DEPARTMENT_ID).append(" = ").append(filter.getDepartmentId());
         if (!isEmpty(filter.getKpp())) {
             departmentConfigFilter.append(" AND LOWER(KPP) like '%").append(filter.getKpp().toLowerCase()).append("%'");
@@ -83,12 +83,19 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
         RefBookAttribute sortAttribute = null;
         // См. код с составлением запросов, там сортировка доделана если такого атрибута нет
-        if (pagingParams.getProperty() != null && refBook.hasAttribute(pagingParams.getProperty())) {
+        if (pagingParams != null && pagingParams.getProperty() != null && refBook.hasAttribute(pagingParams.getProperty())) {
             sortAttribute = refBook.getAttribute(pagingParams.getProperty());
         }
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(
                 filter.getRelevanceDate(), pagingParams, departmentConfigFilter.toString(), sortAttribute);
         return new PagingResult<>(convertToDepartmentConfigs(records), records.getTotalCount());
+    }
+
+    @Override
+    public List<DepartmentConfig> fetchAllByDepartmentId(int departmentId) {
+        DepartmentConfigsFilter filter = new DepartmentConfigsFilter();
+        filter.setDepartmentId(departmentId);
+        return fetchAllByFilter(filter, null);
     }
 
     @Override
@@ -113,7 +120,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         return convertToDepartmentConfig(record, null);
     }
 
-    public List<DepartmentConfig> fetchByKppAndOktmo(String kpp, String oktmoCode) {
+    @Override
+    public List<DepartmentConfig> fetchAllByKppAndOktmo(String kpp, String oktmoCode) {
         String filter = "LOWER(KPP) like '%" + kpp.toLowerCase() + "%'" +
                 " AND LOWER(OKTMO.CODE) like '%" + oktmoCode.toLowerCase() + "%'";
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
@@ -150,14 +158,14 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         logger.info("Для подразделения \"%s\" создана настройка КПП: \"%s\", ОКТМО: \"%s\", настройка действительна с \"%s\" по \"%s\"",
                 departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
                 FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
+                departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
     @Transactional
     public void create(DepartmentConfig departmentConfig, Logger logger) {
-        List<DepartmentConfig> relatedDepartmentConfigs = fetchByKppAndOktmo(departmentConfig.getKpp(), departmentConfig.getOktmo().getCode());
+        List<DepartmentConfig> relatedDepartmentConfigs = fetchAllByKppAndOktmo(departmentConfig.getKpp(), departmentConfig.getOktmo().getCode());
         if (!relatedDepartmentConfigs.isEmpty()) {
             departmentConfig.setRecordId(relatedDepartmentConfigs.get(0).getRecordId());
         }
@@ -201,14 +209,14 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         logger.info("В подразделении \"%s\" изменена настройка КПП: \"%s\", ОКТМО: \"%s\", настройка действительна с \"%s\" по \"%s\"",
                 departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
                 FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
+                departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
     @Transactional
     public void update(DepartmentConfig departmentConfig, Logger logger) {
-        checkDepartmentConfig(departmentConfig, fetchByKppAndOktmo(departmentConfig.getKpp(), departmentConfig.getOktmo().getCode()));
+        checkDepartmentConfig(departmentConfig, fetchAllByKppAndOktmo(departmentConfig.getKpp(), departmentConfig.getOktmo().getCode()));
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
         provider.updateRecordVersions(logger, departmentConfig.getStartDate(), departmentConfig.getEndDate(), new HashSet<>(singletonList(convertToMap(departmentConfig))));
     }
@@ -247,7 +255,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
                 localLogger.info("В подразделении \"%s\" удалена настройка КПП: \"%s\", ОКТМО: \"%s\", период актуальности с \"%s\" по \"%s\"",
                         departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
                         FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                        departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
+                        departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
             }
             logger.getEntries().addAll(localLogger.getEntries());
         }
@@ -258,7 +266,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     @Transactional
     public void delete(DepartmentConfig departmentConfig, Logger logger) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
-        provider.deleteRecordVersions(logger, new ArrayList<Long>(singletonList(departmentConfig.getId())));
+        provider.deleteRecordVersions(logger, new ArrayList<>(singletonList(departmentConfig.getId())));
     }
 
     private String getDeleteFailedMessage(DepartmentConfig departmentConfig, String error) {
@@ -266,8 +274,21 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
                         "\"%s\" по \"%s\". %s",
                 departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
                 FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
+                departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
                 error);
+    }
+
+    @Override
+    public void delete(List<DepartmentConfig> departmentConfigs, Logger logger) {
+        if (!departmentConfigs.isEmpty()) {
+            List<Long> ids = new ArrayList<>(departmentConfigs.size());
+            for (DepartmentConfig departmentConfig : departmentConfigs) {
+                ids.add(departmentConfig.getId());
+            }
+            LOG.info("delete: ids=" + ids);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
+            provider.deleteRecordVersions(logger, ids);
+        }
     }
 
     @Override
@@ -300,7 +321,9 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         TAUser user = userInfo.getUser();
 
         int fileNameDepartmentId = getDepartmentIdFromFileName(action.getFileName());
-        if (!departmentService.existDepartment(fileNameDepartmentId)) {
+        Department fileNameDepartment;
+        if (!departmentService.existDepartment(fileNameDepartmentId) ||
+                (fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId)).getType() != DepartmentType.TERR_BANK) {
             throw new ServiceException("Не найден территориальный банк с идентификатором (" + fileNameDepartmentId + "), указанным в имени файла \"" + action.getFileName() + "\"");
         }
         int userTbId = departmentService.getParentTBId(user.getDepartmentId());
@@ -309,7 +332,6 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
             throw new ServiceException("У вас отсутствуют права загрузки настроек подразделения " + departmentService.getDepartment(fileNameDepartmentId).getShortName() + ".");
         }
         if (!action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
-            Department fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId);
             Department selectedDepartment = departmentService.getDepartment(action.getDepartmentId());
             result.setConfirmDepartmentCheck("Загружаемый файл содержит настройки подразделения \"" + fileNameDepartment.getShortName() + "\", " +
                     "хотя отображаются данные подразделения \"" + selectedDepartment.getShortName() + "\". " +
@@ -334,11 +356,13 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
-    public void importExcel(int departmentId, BlobData blobData) {
-        if (departmentId == 16) {
-            // ок
-        } else {
-            throw new ServiceException("Ещё не реализованно...");
+    public void importExcel(int departmentId, BlobData blobData, TAUserInfo userInfo, Logger logger) {
+        Map<String, Object> scriptParams = new HashMap<>();
+        scriptParams.put("departmentId", departmentId);
+        scriptParams.put("inputStream", blobData.getInputStream());
+        scriptParams.put("fileName", blobData.getName());
+        if (!refBookScriptingService.executeScript(userInfo, RefBook.Id.NDFL_DETAIL.getId(), FormDataEvent.IMPORT, logger, scriptParams)) {
+            throw new ServiceException("Не удалось выпонить скрипт");
         }
     }
 
@@ -358,22 +382,17 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         return departmentId;
     }
 
-    private void checkDepartmentConfig(DepartmentConfig departmentConfig, List<DepartmentConfig> relatedDepartmentConfigs) {
+    @Override
+    public void checkDepartmentConfig(DepartmentConfig departmentConfig, List<DepartmentConfig> relatedDepartmentConfigs) {
         Date minDate = null, maxDate = new Date(0);
+        List<DepartmentConfig> overlappingDepartmentConfigs = new ArrayList<>();
         for (DepartmentConfig relatedDepartmentConfig : relatedDepartmentConfigs) {
             if (departmentConfig.getId() == null || !departmentConfig.getId().equals(relatedDepartmentConfig.getId())) {
                 // Проверка пересечения существующей с исходной
                 if (!(relatedDepartmentConfig.getEndDate() != null && departmentConfig.getStartDate().after(relatedDepartmentConfig.getEndDate())
                         || departmentConfig.getStartDate().before(relatedDepartmentConfig.getStartDate())
                         && departmentConfig.getEndDate() != null && departmentConfig.getEndDate().before(relatedDepartmentConfig.getStartDate()))) {
-                    throw new ServiceException("Для настройки подразделения КПП: \"%s\", ОКТМО: \"%s\", период актуальности: с \"%s\" по \"%s\" в подразделении: \"%s\" " +
-                            "уже существует настройка с такими же КПП и ОКТМО и пересекающимся периодом актуальности: с \"%s\" по \"%s\".",
-                            departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
-                            FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                            departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
-                            departmentConfig.getDepartment().getName(),
-                            FastDateFormat.getInstance("dd.MM.yyyy").format(relatedDepartmentConfig.getStartDate()),
-                            relatedDepartmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(relatedDepartmentConfig.getEndDate()));
+                    overlappingDepartmentConfigs.add(relatedDepartmentConfig);
                 }
                 if (minDate == null || relatedDepartmentConfig.getStartDate().before(minDate)) {
                     minDate = relatedDepartmentConfig.getStartDate();
@@ -383,15 +402,36 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
                 }
             }
         }
+        if (!overlappingDepartmentConfigs.isEmpty()) {
+            throw new ServiceException("Для настройки подразделения \"%s\" с КПП: \"%s\", ОКТМО: \"%s\" период действия с \"%s\" по \"%s\" " +
+                    "пересекается с периодом действия уже существующих настроек с теми же КПП и ОКТМО: %s",
+                    firstNonNull(departmentConfig.getDepartment().getShortName(), departmentConfig.getDepartment().getName()),
+                    departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
+                    FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
+                    departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
+                    makeOverlappingDepartmentConfigsString(overlappingDepartmentConfigs));
+        }
         if (!(minDate == null || DateUtils.addDays(minDate, -1).equals(departmentConfig.getEndDate())
                 || maxDate != null && DateUtils.addDays(maxDate, 1).equals(departmentConfig.getStartDate()))) {
             throw new ServiceException("Между периодом актуальности настройки подразделения КПП: \"%s\", ОКТМО: \"%s\" период актуальности с \"%s\" по \"%s\" " +
-                    "в подразделении: \"%s\" и другими настройками с такими же КПП и ОКТМО  имеется временной разрыв более 1 календарного дня.",
+                    "в подразделении: \"%s\" и другими настройками с такими же КПП и ОКТМО имеется временной разрыв более 1 календарного дня.",
                     departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
                     FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                    departmentConfig.getEndDate() == null ? "-" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
+                    departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
                     departmentConfig.getDepartment().getName());
         }
+    }
+
+    private String makeOverlappingDepartmentConfigsString(List<DepartmentConfig> overlappingDepartmentConfigs) {
+        List<String> overlappingDepartmentConfigsStrings = new ArrayList<>(overlappingDepartmentConfigs.size());
+        for (DepartmentConfig overlappingDepartmentConfig : overlappingDepartmentConfigs) {
+            overlappingDepartmentConfigsStrings.add(String.format(
+                    "[\"%s\", период действия с %s по %s]",
+                    firstNonNull(overlappingDepartmentConfig.getDepartment().getShortName(), overlappingDepartmentConfig.getDepartment().getName()),
+                    FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingDepartmentConfig.getStartDate()),
+                    overlappingDepartmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingDepartmentConfig.getEndDate())));
+        }
+        return Joiner.on(", ").join(overlappingDepartmentConfigsStrings);
     }
 
     private List<DepartmentConfig> convertToDepartmentConfigs(List<Map<String, RefBookValue>> records) {
@@ -440,7 +480,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         return result;
     }
 
-    private RefBookRecord convertToRefBookRecord(DepartmentConfig departmentConfig) {
+    @Override
+    public RefBookRecord convertToRefBookRecord(DepartmentConfig departmentConfig) {
         RefBookRecord refBookRecord = new RefBookRecord();
         refBookRecord.setUniqueRecordId(departmentConfig.getId());
         refBookRecord.setRecordId(departmentConfig.getRecordId());

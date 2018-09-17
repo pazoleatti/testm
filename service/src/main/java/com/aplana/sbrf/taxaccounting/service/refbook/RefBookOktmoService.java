@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ import java.util.Date;
  *
  * @author dloshkarev
  */
+@ScriptExposed
 public interface RefBookOktmoService {
     /**
      * Получает все записи справочника ОКТМО
