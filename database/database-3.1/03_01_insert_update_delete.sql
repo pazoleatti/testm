@@ -516,34 +516,6 @@ end;
 COMMIT;
 
 declare
-	v_task_name varchar2(128):='insert_update_delete #28 - merge into ref_book_oktmo (SBRFNDFL-5396)';  
-begin								
-	--https://jira.aplana.com/browse/SBRFNDFL-5396 Добавление значения в справочник ОКТМО на серверах Апланы
-	merge into ref_book_oktmo a using
-	(select '04614454' as code, 'сельсовет Памяти 13 Борцов' as name, 1 as razd, to_date('01.01.2012','dd.mm.yyyy') as version from dual
-	 union all
-	 select '04647454' as code, 'Уральский сельсовет' as name, 1 as razd, to_date('01.01.2012','dd.mm.yyyy') as version from dual
-	 union all
-	 select '04610433' as code, 'Предивинский сельсовет' as name, 1 as razd, to_date('01.01.2012','dd.mm.yyyy') as version from dual
-	 union all
-	 select '04635426' as code, 'Южно-Енисейский сельсовет' as name, 1 as razd, to_date('01.01.2012','dd.mm.yyyy') as version from dual
-	 union all
-	 select '04654439' as code, 'Светлогорский сельсовет' as name, 1 as razd, to_date('01.01.2012','dd.mm.yyyy') as version from dual
-	) b
-	on (a.code=b.code and a.status=0)
-	when not matched then
-	insert (id, record_id, version, status, code, name, razd)
-	values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name, b.razd);
-	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');	
-EXCEPTION
-  when OTHERS then
-    dbms_output.put_line(v_task_name||'[FATAL]: '||sqlerrm);
-        ROLLBACK;
-end;
-/
-COMMIT;
-
-declare
 	v_task_name varchar2(128):='insert_update_delete block #29 - update NDFL_PERSON';  
 begin								
 	update (select np.ID as np_id, np.DECLARATION_DATA_ID as np_dd_id, np.ASNU_ID as np_asnu, dd.ID as dd_id, dd.ASNU_ID as dd_asnu
