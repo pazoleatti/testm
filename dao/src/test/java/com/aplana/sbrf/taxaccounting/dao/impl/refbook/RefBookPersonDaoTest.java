@@ -124,6 +124,71 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
+    public void test_getPersons_filterByRegion() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setRegion("7");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(2)
+                .extracting("address.regionCode")
+                .containsOnly("77");
+    }
+
+    @Test
+    public void test_getPersons_filterByPostCode() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setPostalCode("43");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(3)
+                .extracting("address.postalCode")
+                .containsOnly("143080", "109431");
+    }
+
+    @Test
+    public void test_getPersons_filterByDistrict() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setDistrict("Одинцовский");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(2)
+                .extracting("address.district")
+                .containsOnly("ОДИНЦОВСКИЙ р-н");
+    }
+
+    @Test
+    public void test_getPersons_filterByLocality() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setLocality("внииссок");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(2)
+                .extracting("address.locality")
+                .containsOnly("ВНИИССОК п");
+    }
+
+    @Test
+    public void test_getPersons_filterByStreet() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setStreet("Ленин");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(1)
+                .extracting("address.street")
+                .containsOnly("Ленинские Горы ул");
+    }
+
+    @Test
     public void test_updateRegistryPerson() {
         //setup
         Map<String, RefBookValue> citizenship = new HashMap<>();

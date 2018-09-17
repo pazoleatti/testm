@@ -1,8 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 public enum SortDirection {
-    ASC(true),
-    DESC(false);
+    ASC(true) {
+        public SortDirection opposite() {
+            return SortDirection.DESC;
+        }
+    },
+    DESC(false) {
+        public SortDirection opposite() {
+            return SortDirection.ASC;
+        }
+    };
 
     private final boolean asc;
 
@@ -10,11 +18,13 @@ public enum SortDirection {
         this.asc = asc;
     }
 
+    public abstract SortDirection opposite();
+
     public boolean isAsc() {
         return this.asc;
     }
 
-    public static SortDirection getByAsc(boolean asc) {
+    public static SortDirection of(boolean asc) {
         if (asc) {
             return SortDirection.ASC;
         } else {
@@ -22,7 +32,7 @@ public enum SortDirection {
         }
     }
 
-    public static SortDirection getByValue(String value) {
+    public static SortDirection of(String value) {
         if (value == null) {
             return SortDirection.ASC;
         }

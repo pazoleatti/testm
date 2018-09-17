@@ -61,6 +61,12 @@
                         birthDateTo: $scope.searchFilter.params.birthDateTo,
                         documentTypes: $filter('idExtractor')($scope.searchFilter.params.documentTypes),
                         documentNumber: $scope.searchFilter.params.documentNumber,
+                        postalCode: $scope.searchFilter.params.postCode,
+                        region: $scope.searchFilter.params.regionCode,
+                        district: $scope.searchFilter.params.district,
+                        city: $scope.searchFilter.params.city,
+                        locality: $scope.searchFilter.params.locality,
+                        street: $scope.searchFilter.params.street,
                         allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
                         versionDate: $scope.searchFilter.params.versionDate
                     });

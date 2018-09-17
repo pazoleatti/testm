@@ -135,6 +135,7 @@ public class SelectPersonQueryGenerator {
             addLikeIgnoreCase("person.middle_name", filter.getMiddleName());
             addBirthDateConditions();
             addDocumentsConditions();
+            addAddressConditions();
             addVersionsConditions();
         }
     }
@@ -171,10 +172,9 @@ public class SelectPersonQueryGenerator {
                     "       from ref_book_id_doc d \n" +
                     whereMultiple(
                             likeIgnoreCaseAndDelimiters("d.doc_number", filter.getDocumentNumber()),
-                            searchIn("d.doc_id", filter.getDocumentTypes())
-                    ) +
+                            searchIn("d.doc_id", filter.getDocumentTypes())) +
                     "    ) \n" +
-                    ") \n";
+                    ")";
         }
     }
 
@@ -206,6 +206,15 @@ public class SelectPersonQueryGenerator {
         return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
     }
 
+    private void addAddressConditions() {
+        addLikeIgnoreCase("postal_code", filter.getPostalCode());
+        addLikeIgnoreCase("region_code", filter.getRegion());
+        addLikeIgnoreCase("district", filter.getDistrict());
+        addLikeIgnoreCase("city", filter.getCity());
+        addLikeIgnoreCase("locality", filter.getLocality());
+        addLikeIgnoreCase("street", filter.getStreet());
+    }
+
     private void addVersionsConditions() {
         if (notAllVersions()) {
             String versionStr = DateUtils.formatForSql(filter.getVersionDate());
@@ -225,10 +234,10 @@ public class SelectPersonQueryGenerator {
             query = query + "\n " + "order by ";
 
             String sortProperty = getSortProperty(pagingParams);
-            SortDirection sortDirection = SortDirection.getByValue(pagingParams.getDirection());
+            SortDirection sortDirection = SortDirection.of(pagingParams.getDirection());
 
             if (isPropertyPermissive(sortProperty)) {
-                query = query + "vip " + invertSortDirection(sortDirection) + ", ";
+                query = query + "vip " + sortDirection.opposite() + ", ";
             }
 
             List<String> sortFields = getSortFieldsByProperty(sortProperty);
@@ -258,17 +267,6 @@ public class SelectPersonQueryGenerator {
             fieldsWithDirection.add(field + " " + direction);
         }
         return Joiner.on(", ").join(fieldsWithDirection);
-    }
-
-    private SortDirection invertSortDirection(SortDirection sortDirection) {
-        switch (sortDirection) {
-            case ASC:
-                return SortDirection.DESC;
-            case DESC:
-                return SortDirection.ASC;
-            default:
-                return sortDirection;
-        }
     }
 
     private List<String> getSortFieldsByProperty(String sortProperty) {

@@ -85,6 +85,25 @@ public class SelectPersonQueryGeneratorTest {
     }
 
     @Test
+    public void test_generateFilteredQuery_filterByAddress() {
+        filter.setPostalCode("394000");
+        filter.setRegion("36");
+        filter.setDistrict("Ново-Усманский");
+        filter.setLocality("с. Отрадное");
+        filter.setCity("Воронеж");
+        filter.setStreet("пр. Революции");
+
+        String query = generator.generateFilteredQuery();
+
+        assertThat(query).contains("and lower(postal_code) like '%394000%'");
+        assertThat(query).contains("and lower(region_code) like '%36%'");
+        assertThat(query).contains("and lower(district) like '%ново-усманский%'");
+        assertThat(query).contains("and lower(locality) like '%с. отрадное%'");
+        assertThat(query).contains("and lower(city) like '%воронеж%'");
+        assertThat(query).contains("and lower(street) like '%пр. революции%'");
+    }
+
+    @Test
     public void test_generateFilteredQuery_filterByAllVersions() {
         filter.setAllVersions(true);
         String query = generator.generateFilteredQuery();

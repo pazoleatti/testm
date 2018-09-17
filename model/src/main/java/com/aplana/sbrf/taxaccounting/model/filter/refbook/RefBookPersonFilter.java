@@ -31,6 +31,7 @@ public class RefBookPersonFilter implements Serializable {
     private String city;
     private String locality;
     private String street;
+    // Адрес за пределами РФ
     private String country;
     private String foreignAddress;
 
