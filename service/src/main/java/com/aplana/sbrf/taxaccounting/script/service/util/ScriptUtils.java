@@ -1664,13 +1664,13 @@ public final class ScriptUtils {
             throw new ServiceException(WRONG_FILE_EXTENSION, "xlsx/xlsm");
         }
         OPCPackage pkg = null;
-        XSSFReader r = null;
-        StylesTable styles = null;
-        SharedStringsTable sst = null;
-        XMLReader parser = null;
-        ContentHandler handler = null;
+        XSSFReader r;
+        StylesTable styles;
+        SharedStringsTable sst;
+        XMLReader parser;
+        ContentHandler handler;
         InputStream sheet1 = null;
-        InputSource sheetSource = null;
+        InputSource sheetSource;
 
         try {
             // получение строк из файла (из первого листа)
@@ -1693,17 +1693,9 @@ public final class ScriptUtils {
             if (sheet1 != null) {
                 sheet1.close();
             }
-            sheet1 = null;
-            sheetSource = null;
-            parser = null;
-            handler = null;
-            sst = null;
-            styles = null;
-            r = null;
             if (pkg != null) {
                 pkg.close();
             }
-            pkg = null;
         }
     }
 
@@ -2183,10 +2175,16 @@ public final class ScriptUtils {
             this.tableStartValue = tableStartValue;
             this.tableEndValue = tableEndValue;
             this.headerRowCount = headerRowCount;
-            this.paramsMap = paramsMap;
+            if (paramsMap != null) {
+                this.paramsMap = paramsMap;
+            } else {
+                this.paramsMap = new HashMap<>();
+                this.paramsMap.put("rowOffset", 0);
+                this.paramsMap.put("colOffset", 0);
+            }
 
-            this.rowOffset = Integer.parseInt(String.valueOf(paramsMap.get("rowOffset")));
-            this.colOffset = Integer.parseInt(String.valueOf(paramsMap.get("colOffset")));
+            this.rowOffset = Integer.parseInt(String.valueOf(this.paramsMap.get("rowOffset")));
+            this.colOffset = Integer.parseInt(String.valueOf(this.paramsMap.get("colOffset")));
 
             this.lastValue = new StringBuffer();
         }

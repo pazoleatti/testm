@@ -5,6 +5,7 @@
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3927 Реализовать выгрузку настроек подразделений в файл Excel-->
     <changeSet id="3.1.1-dnovikov-1" author="dnovikov">
         <insert tableName="async_task_type">
             <column name="id" value="38"/>
@@ -14,6 +15,7 @@
         </insert>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5523 Реализовать загрузку настроек подразделений из файла Excel-->
     <changeSet id="3.1.1-dnovikov-2" author="dnovikov">
         <insert tableName="async_task_type">
             <column name="id" value="39"/>
@@ -21,6 +23,20 @@
             <column name="handler_bean" value="ImportExcelDepartmentConfigsAsyncTask"/>
             <column name="limit_kind" value="Размер файла (Кбайт)"/>
         </insert>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5523 Реализовать загрузку настроек подразделений из файла Excel-->
+    <changeSet id="3.1.1-dnovikov-3" author="dnovikov">
+        <insert tableName="blob_data">
+            <column name="id" value="38454eea-0595-47d5-8aff-5811a136888c"/>
+            <column name="name" value="department_configs.groovy"/>
+            <column name="data" valueBlobFile="templates-3.1.1/refbook/department_configs.groovy"/>
+            <column name="creation_date" valueDate="2018-07-19"/>
+        </insert>
+        <update tableName="ref_book">
+            <column name="script_id" value="38454eea-0595-47d5-8aff-5811a136888c"/>
+            <where>id = 951</where>
+        </update>
     </changeSet>
 
 </databaseChangeLog>

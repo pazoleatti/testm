@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  * Реализация сервиса для работы со справочником ОКТМО
  */
-@Service
+@Service("refBookOktmoService")
 public class RefBookOktmoServiceImpl implements RefBookOktmoService {
 
     @Autowired

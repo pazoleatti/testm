@@ -302,7 +302,7 @@ public class PrintingServiceImpl implements PrintingService {
         // pagingParams не null, т.к. нужна сортировка по-умолчанию (по КПП/ОКТМО/Код НО)
         PagingParams pagingParams = new PagingParams();
         pagingParams.setCount(-1);// выбираем все записи выбираем
-        List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchDepartmentConfigs(filter, pagingParams);
+        List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchAllByFilter(filter, pagingParams);
         Department department = departmentService.getDepartment(filter.getDepartmentId());
         DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, department);
         String reportPath = null;
