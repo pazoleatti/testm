@@ -3,12 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,8 +50,8 @@ public class RefBookPersonDaoTest {
     public void test_getPersons() {
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, null);
 
-        assertThat(persons).hasSize(4);
-        assertThat(persons.getTotalCount()).isEqualTo(4);
+        assertThat(persons).hasSize(6);
+        assertThat(persons.getTotalCount()).isEqualTo(6);
     }
 
     @Test
@@ -83,7 +76,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(3);
+        assertThat(persons).hasSize(5);
     }
 
     @Test
@@ -189,6 +182,32 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
+    public void test_getPersons_filterByForeignAddressCountry() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setCountries(Arrays.asList(2L, 3L));
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2)
+                .extracting("address.country.code")
+                .containsOnly("678", "630");
+    }
+
+    @Test
+    public void test_getPersons_filterByForeignAddress() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setForeignAddress("Washington");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(1);
+
+        RefBookAddress personAddress = persons.get(0).getAddress();
+        assertThat(personAddress.getAddress()).isEqualTo("COL, Washington DC, Kennedy street, 20");
+    }
+
+
+    @Test
     public void test_updateRegistryPerson() {
         //setup
         Map<String, RefBookValue> citizenship = new HashMap<>();
@@ -220,10 +239,11 @@ public class RefBookPersonDaoTest {
         person.setTaxPayerState(Permissive.of(taxPayerState));
         person.setSource(asnu);
 
+        //language=sql
         String query = "UPDATE ref_book_person set last_name = :lastName, first_name = :firstName, " +
-        "middle_name = :middleName, birth_date = :birthDate, citizenship = :citizenship, " +
+                "middle_name = :middleName, birth_date = :birthDate, citizenship = :citizenship, " +
                 "report_doc = :reportDoc, inn = :inn, inn_foreign = :innForeign, snils = :snils, " +
-        "taxpayer_state = :taxPayerState, source_id = :source where id = :id";
+                "taxpayer_state = :taxPayerState, source_id = :source where id = :id";
         //execution
         personDao.updateRegistryPerson(person, query);
 
@@ -273,6 +293,7 @@ public class RefBookPersonDaoTest {
         RegistryPerson person = new RegistryPerson();
         person.setId(1L);
         person.setAddress(Permissive.of(addressVal));
+        //language=sql
         String sql = "UPDATE ref_book_address set region_code = :regionCode, postal_code = :postalCode, " +
                 "district = :district, city = :city, locality = :locality, street = :street, house = :house, " +
                 "build = :build, appartment = :appartment, country_id = :countryId where id = :id";

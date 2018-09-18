@@ -32,7 +32,7 @@ public class RefBookPersonFilter implements Serializable {
     private String locality;
     private String street;
     // Адрес за пределами РФ
-    private String country;
+    private List<Long> countries;
     private String foreignAddress;
 
     private Boolean allVersions;
@@ -224,12 +224,12 @@ public class RefBookPersonFilter implements Serializable {
         this.street = street;
     }
 
-    public String getCountry() {
-        return country;
+    public List<Long> getCountries() {
+        return countries;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountries(List<Long> countries) {
+        this.countries = countries;
     }
 
     public String getForeignAddress() {

@@ -67,6 +67,8 @@
                         city: $scope.searchFilter.params.city,
                         locality: $scope.searchFilter.params.locality,
                         street: $scope.searchFilter.params.street,
+                        countries: $filter('idExtractor')($scope.searchFilter.params.countries),
+                        foreignAddress: $scope.searchFilter.params.foreignAddress,
                         allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
                         versionDate: $scope.searchFilter.params.versionDate
                     });

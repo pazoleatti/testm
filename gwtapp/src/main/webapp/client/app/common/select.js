@@ -680,22 +680,16 @@
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.SIGNATORY_MARK] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
                 // Коды форм реорганизации (ликвидации) организации
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.REORGANIZATION] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // Тип ДУЛ
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // Страны
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.COUNTRY] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
                     filter: {
                         columns: ["NAME", "CODE"]
                     },
                     formatter: "codeNameFormatter"
-                };
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = {
-                    filter: {
-                        columns: ["NAME", "CODE"]
-                    },
-                    formatter: "codeNameFormatter",
-                    sort: {
-                        property: "CODE",
-                        direction: "asc"
-                    }
                 };
                 // Физические лица
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON] = {
@@ -791,7 +785,7 @@
                         $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments",
                             {}, $scope.config.sort, $scope.config.formatter);
                     } else {
-                        var isMultiple = (refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE);
+                        var isMultiple = (refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE || refBookId === APP_CONSTANTS.REFBOOK.COUNTRY);
                         $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(isMultiple, true, "controller/rest/refBook/" + refBookId + "/records",
                             $scope.config.filter,
                             filter ? filter : '',

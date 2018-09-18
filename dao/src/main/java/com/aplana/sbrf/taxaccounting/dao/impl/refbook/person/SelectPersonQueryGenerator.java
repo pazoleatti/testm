@@ -136,6 +136,7 @@ public class SelectPersonQueryGenerator {
             addBirthDateConditions();
             addDocumentsConditions();
             addAddressConditions();
+            addForeignAddressConditions();
             addVersionsConditions();
         }
     }
@@ -213,6 +214,15 @@ public class SelectPersonQueryGenerator {
         addLikeIgnoreCase("city", filter.getCity());
         addLikeIgnoreCase("locality", filter.getLocality());
         addLikeIgnoreCase("street", filter.getStreet());
+    }
+
+    private void addForeignAddressConditions() {
+        addLikeIgnoreCase("address.address", filter.getForeignAddress());
+
+        List<Long> countries = filter.getCountries();
+        if (isNotEmpty(countries)) {
+            query = query + "\n" + "and " + searchIn("address_country.id", countries);
+        }
     }
 
     private void addVersionsConditions() {

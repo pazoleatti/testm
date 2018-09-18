@@ -29,6 +29,9 @@ insert into ref_book_address (id, record_id, version, status, address_type, coun
 insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (2, 2, date '2016-01-01', 0, 0, null, 50, 143080, 'ОДИНЦОВСКИЙ р-н', null, 'ВНИИССОК п', 'Рябиновая ул', '1', null, 'общ', '50,143080,ОДИНЦОВСКИЙ р-н,,ВНИИССОК п,Рябиновая ул,1,,общ', null);
 insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (3, 3, date '2016-01-01', 0, 0, null, 50, 143080, 'ОДИНЦОВСКИЙ р-н', null, 'ВНИИССОК п', 'Рябиновая ул', '1', null, 'общ', '50,143080,ОДИНЦОВСКИЙ р-н,,ВНИИССОК п,Рябиновая ул,1,,общ', null);
 insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (4, 4, date '2016-01-01', 0, 0, null, 77, 109431, null, null, null, 'Привольная ул', '57', '1', '5', '77,109431,,,,Привольная ул,57,1,5', null);
+-- Зарубежные адреса
+insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (5, 5, date '2016-01-01', 0, 1, 2, null, null, null, null, null, null, null, null, null, 'COL, Washington DC, Kennedy street, 20', null);
+insert into ref_book_address (id, record_id, version, status, address_type, country_id, region_code, postal_code, district, city, locality, street, house, build, appartment, address, address_full) values (6, 6, date '2016-01-01', 0, 1, 3, null, null, null, null, null, null, null, null, null, 'London, Cromwell street, 10a', null);
 
 --------------------------------------------------------
 --  REF_BOOK_ASNU
@@ -112,7 +115,6 @@ insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(5,'
 insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(6,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента', 6, date '2016-01-01');
 
 
-
 --------------------------------------------------------
 --  Документы физ. лиц
 --------------------------------------------------------
@@ -134,6 +136,10 @@ insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  
 values                      (3,   'Потапов',  'Сергей',     'Сергеевич',  null, null,         null,   1,                date '1992-07-29',  null,         1,            3,        2,        1,          date '2016-01-01',  0,      6,          3,      null,       0,    null);
 insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
 values                      (4,   'Сульжик',  'Владислав',  'Сергеевич',  null, null,         null,   1,                date '1992-09-25',  null,         1,            4,        2,        1,          date '2016-01-01',  0,      6,          10,     null,       0,    null);
+insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
+values                      (5,   'Doe',      'John',       null,         null, 'bb4',        null,   1,                date '1992-09-25',  null,         2,            5,        null,     1,          date '2016-01-01',  0,      6,          5,      null,       1,    null);
+insert into ref_book_person (id,  last_name,  first_name,   middle_name,  inn,  inn_foreign,  snils,  taxpayer_state,   birth_date,         birth_place,  citizenship,  address,  employee, record_id,  version,            status, source_id,  old_id, old_status, vip,  report_doc)
+values                      (6,   'Doe',      'Jane',       null,         null, '123-x123',   null,   1,                date '1992-09-25',  null,         3,            6,        null,     1,          date '2016-01-01',  0,      6,          6,      null,       0,    null);
 
 -- Присваивам ранее созданным документам ссылку на ФЛ
 update ref_book_id_doc set person_id = 1 where id in (1, 2);

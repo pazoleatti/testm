@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.person;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -101,6 +102,20 @@ public class SelectPersonQueryGeneratorTest {
         assertThat(query).contains("and lower(locality) like '%с. отрадное%'");
         assertThat(query).contains("and lower(city) like '%воронеж%'");
         assertThat(query).contains("and lower(street) like '%пр. революции%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByForeignAddressCountry() {
+        filter.setCountries(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and address_country.id in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByForeignAddress() {
+        filter.setForeignAddress("г. Алматы, ул. Пушкина");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and lower(address.address) like '%г. алматы, ул. пушкина%'");
     }
 
     @Test

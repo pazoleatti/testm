@@ -180,6 +180,35 @@
                                 </div>
                             </div>
                         </div>
+                        <!--Адрес за пределами РФ-->
+                        <div data-aplana-collapse data-label="'refBook.fl.filter.title.foreignAddress' | translate">
+                            <div class="ndfl-subfilter row-fluid">
+                                <!--Страна проживания-->
+                                <div class="span4">
+                                    <div class="span4">
+                                        <label class="control-label">{{::'refBook.fl.filter.label.country' | translate}}:</label>
+                                    </div>
+                                    <div class="span8"
+                                         data-ng-controller="SelectRefBookCtrl"
+                                         data-ui-select2="select.options"
+                                         data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.COUNTRY)"
+                                         data-ng-model="searchFilter.params.countries">
+                                    </div>
+                                </div>
+                                <!--Адрес-->
+                                <div class="span8">
+                                    <div class="span2">
+                                        <label class="control-label">{{::'refBook.fl.filter.label.address' | translate}}:</label>
+                                    </div>
+                                    <div class="span10">
+                                        <input data-ng-model="searchFilter.params.foreignAddress"
+                                               type="text"
+                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                               class="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <!--Параметры версий-->
                         <div data-aplana-collapse
                              data-is-collapsed="false"
