@@ -27,7 +27,7 @@ begin
 	values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name, b.razd);
 	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');	
 
-	v_task_name varchar2(128):='fill_ref_dep_params block #2 - deleting';  
+	v_task_name:='fill_ref_dep_params block #2 - deleting';  
 	delete from ref_book_ndfl_detail;
 	delete from ref_book_ndfl;
 	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
