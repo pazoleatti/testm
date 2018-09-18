@@ -130,9 +130,13 @@ public class SelectPersonQueryGenerator {
     private void addWhereConditions() {
         if (filter != null) {
             addLike("person.old_id", filter.getId());
+            addVipCondition();
             addLikeIgnoreCase("person.last_name", filter.getLastName());
             addLikeIgnoreCase("person.first_name", filter.getFirstName());
             addLikeIgnoreCase("person.middle_name", filter.getMiddleName());
+            addLikeIgnoreCase("person.inn", filter.getInn());
+            addLikeIgnoreCase("person.inn_foreign", filter.getInnForeign());
+            addLikeIgnoreCaseAndDelimiters("person.snils", filter.getSnils());
             addBirthDateConditions();
             addDocumentsConditions();
             addAddressConditions();
@@ -141,16 +145,15 @@ public class SelectPersonQueryGenerator {
         }
     }
 
-    private void addLike(String field, String value) {
-        if (isNotEmpty(value)) {
-            query = query + "\n" + "and " + field + " like '%" + value + "%'";
+    private void addVipCondition() {
+        Boolean isVip = filter.getVip();
+        if (isVip != null) {
+            query = query + "\n" + "and person.vip = " + toInt(isVip);
         }
     }
 
-    private void addLikeIgnoreCase(String field, String value) {
-        if (isNotEmpty(value)) {
-            query = query + "\n" + "and lower(" + field + ") like '%" + value.toLowerCase() + "%'";
-        }
+    private int toInt(boolean bool) {
+        return bool ? 1 : 0;
     }
 
     private void addBirthDateConditions() {
@@ -183,30 +186,6 @@ public class SelectPersonQueryGenerator {
         return isNotEmpty(filter.getDocumentTypes()) || isNotEmpty(filter.getDocumentNumber());
     }
 
-    private String searchIn(String field, List<Long> values) {
-        if (isEmpty(values)) {
-            return null;
-        }
-        String valuesList = join(values, ", ");
-        return field + " in (" + valuesList + ")";
-    }
-
-    private String whereMultiple(String... conditions) {
-        if (isAllEmpty(conditions)) {
-            return "";
-        }
-        return "where " + Joiner.on(" \n and ").skipNulls().join(conditions);
-    }
-
-    private String likeIgnoreCaseAndDelimiters(String field, String value) {
-        if (isEmpty(value)) {
-            return null;
-        }
-        String filteredValue = StringUtils.filterDelimiters(value);
-        String lowerCaseValue = filteredValue.toLowerCase();
-        return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
-    }
-
     private void addAddressConditions() {
         addLikeIgnoreCase("postal_code", filter.getPostalCode());
         addLikeIgnoreCase("region_code", filter.getRegion());
@@ -218,11 +197,7 @@ public class SelectPersonQueryGenerator {
 
     private void addForeignAddressConditions() {
         addLikeIgnoreCase("address.address", filter.getForeignAddress());
-
-        List<Long> countries = filter.getCountries();
-        if (isNotEmpty(countries)) {
-            query = query + "\n" + "and " + searchIn("address_country.id", countries);
-        }
+        addSearchIn("address_country.id", filter.getCountries());
     }
 
     private void addVersionsConditions() {
@@ -238,6 +213,55 @@ public class SelectPersonQueryGenerator {
     private boolean notAllVersions() {
         return (filter.isAllVersions() != null && !filter.isAllVersions() && filter.getVersionDate() != null);
     }
+
+    private void addLike(String field, String value) {
+        if (isNotEmpty(value)) {
+            query = query + "\n" + "and " + field + " like '%" + value + "%'";
+        }
+    }
+
+    private void addLikeIgnoreCase(String field, String value) {
+        if (isNotEmpty(value)) {
+            query = query + "\n" + "and lower(" + field + ") like '%" + value.toLowerCase() + "%'";
+        }
+    }
+
+    private void addLikeIgnoreCaseAndDelimiters(String field, String value) {
+        if (isNotEmpty(value)) {
+            query = query + "\n" + "and " + likeIgnoreCaseAndDelimiters(field, value);
+        }
+    }
+
+    private String likeIgnoreCaseAndDelimiters(String field, String value) {
+        if (isEmpty(value)) {
+            return null;
+        }
+        String filteredValue = StringUtils.filterDelimiters(value);
+        String lowerCaseValue = filteredValue.toLowerCase();
+        return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
+    }
+
+    private void addSearchIn(String field, Collection<?> values) {
+        if (isNotEmpty(values)) {
+            query = query + "\n" + "and " + searchIn(field, values);
+        }
+    }
+
+    private String searchIn(String field, Collection<?> values) {
+        if (isEmpty(values)) {
+            return null;
+        }
+        String valuesList = join(values, ", ");
+        return field + " in (" + valuesList + ")";
+    }
+
+    private String whereMultiple(String... conditions) {
+        if (isAllEmpty(conditions)) {
+            return "";
+        }
+        return "where " + Joiner.on(" \n and ").skipNulls().join(conditions);
+    }
+
 
     private void addOrder() {
         if (pagingParams != null) {

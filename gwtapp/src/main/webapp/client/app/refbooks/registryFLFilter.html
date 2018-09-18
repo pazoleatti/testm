@@ -63,6 +63,19 @@
                                                 ng-label="title.dateOfBirthFrom">
                                         </date-from-to-filter>
                                     </div>
+                                    <!-- Важность -->
+                                    <div class="row-fluid form-group">
+                                        <div class="span4">
+                                            <label class="control-label">{{::'title.importance' | translate}}:</label>
+                                        </div>
+                                        <div class="span8">
+                                            <div class="span5"
+                                                 data-ng-controller="SelectPersonImportanceCtrl"
+                                                 data-ui-select2="select.options"
+                                                 data-ng-model="searchFilter.params.importance">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="span4">
                                     <!--Тип ДУЛ-->
@@ -106,6 +119,44 @@
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    class="form-control"
                                                    title="{{searchFilter.params.id}}"/>
+                                        </div>
+                                    </div>
+                                    <!--ИНН РФ-->
+                                    <div class="row-fluid form-group">
+                                        <div class="span4">
+                                            <label class="control-label">{{::'title.innNp' |
+                                                translate}}:</label>
+                                        </div>
+                                        <div class="span8">
+                                            <input data-ng-model="searchFilter.params.inn"
+                                                   type="text"
+                                                   placeholder="{{'filter.placeholder.search' | translate}}"
+                                                   class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <!--ИНН Ино-->
+                                    <div class="row-fluid form-group">
+                                        <div class="span4">
+                                            <label class="control-label">{{::'title.innForeign' |
+                                                translate}}:</label>
+                                        </div>
+                                        <div class="span8">
+                                            <input data-ng-model="searchFilter.params.innForeign"
+                                                   type="text"
+                                                   placeholder="{{'filter.placeholder.search' | translate}}"
+                                                   class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <!--СНИЛС-->
+                                    <div class="row-fluid form-group">
+                                        <div class="span4">
+                                            <label class="control-label">{{::'title.snils' | translate}}:</label>
+                                        </div>
+                                        <div class="span8">
+                                            <input data-ng-model="searchFilter.params.snils"
+                                                   type="text"
+                                                   placeholder="{{'filter.placeholder.search' | translate}}"
+                                                   class="form-control"/>
                                         </div>
                                     </div>
                                 </div>

@@ -54,6 +54,7 @@
                 $scope.filterRequestParam = function () {
                     return JSON.stringify({
                         id: $scope.searchFilter.params.id,
+                        vip: $filter('vipOptionsFormatter')($scope.searchFilter.params.importance),
                         lastName: $scope.searchFilter.params.lastName,
                         firstName: $scope.searchFilter.params.firstName,
                         middleName: $scope.searchFilter.params.middleName,
@@ -61,6 +62,9 @@
                         birthDateTo: $scope.searchFilter.params.birthDateTo,
                         documentTypes: $filter('idExtractor')($scope.searchFilter.params.documentTypes),
                         documentNumber: $scope.searchFilter.params.documentNumber,
+                        inn: $scope.searchFilter.params.inn,
+                        innForeign: $scope.searchFilter.params.innForeign,
+                        snils: $scope.searchFilter.params.snils,
                         postalCode: $scope.searchFilter.params.postCode,
                         region: $scope.searchFilter.params.regionCode,
                         district: $scope.searchFilter.params.district,
@@ -120,7 +124,7 @@
                             },
                             {
                                 name: 'vip',
-                                formatter: $filter('vipFormatter'),
+                                formatter: $filter('vipTextFormatter'),
                                 width: 80
                             },
                             {

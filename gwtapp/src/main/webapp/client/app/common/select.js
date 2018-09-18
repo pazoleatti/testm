@@ -632,6 +632,13 @@
             }
         ])
 
+        .controller('SelectPersonImportanceCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var values = [APP_CONSTANTS.PERSON_IMPORTANCE.VIP, APP_CONSTANTS.PERSON_IMPORTANCE.NOT_VIP];
+                $scope.select = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, values);
+            }
+        ])
+
         /**
          * Контроллер для выбора роли пользователя.
          */

@@ -55,6 +55,32 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
+    public void test_getPersons_filterByVip() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setVip(true);
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(3)
+                .extracting("vip")
+                .containsOnly(true);
+    }
+
+    @Test
+    public void test_getPersons_filterByNonVip() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setVip(false);
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons)
+                .hasSize(3)
+                .extracting("vip")
+                .containsOnly(false);
+    }
+
+    @Test
     public void test_getPersons_filterByMiddleName() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setMiddleName("СЕРГЕЕВИЧ");
@@ -104,8 +130,8 @@ public class RefBookPersonDaoTest {
                 .containsExactlyInAnyOrder(1L, 10L);
     }
 
-    @Ignore("На HSQL <2.3.4 не работает regexp_replace(), включить, когда разберёмся")
     @Test
+    @Ignore("На HSQL <2.3.4 не работает regexp_replace(), включить, когда разберёмся")
     public void test_getPersons_filterByDocNumber() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setDocumentNumber("0101123456");
@@ -196,7 +222,7 @@ public class RefBookPersonDaoTest {
     @Test
     public void test_getPersons_filterByForeignAddress() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setForeignAddress("Washington");
+        filter.setForeignAddress("washington");
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
@@ -204,6 +230,41 @@ public class RefBookPersonDaoTest {
 
         RefBookAddress personAddress = persons.get(0).getAddress();
         assertThat(personAddress.getAddress()).isEqualTo("COL, Washington DC, Kennedy street, 20");
+    }
+
+    @Test
+    public void test_getPersons_filterByInn() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setInn("234");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2)
+                .extracting("inn")
+                .containsOnly("1234", "2345");
+    }
+
+    @Test
+    public void test_getPersons_filterByInnForeign() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setInnForeign("3-D1");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(1)
+                .extracting("innForeign")
+                .containsOnly("123-d123");
+    }
+
+    @Test
+    @Ignore("На HSQL <2.3.4 не работает regexp_replace(), включить, когда разберёмся")
+    public void test_getPersons_filterBySnils() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setSnils("21za");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(1);
     }
 
 

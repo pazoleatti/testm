@@ -85,8 +85,12 @@
                 EDIT: 1 << 13
             },
             USER_ACTIVITY: {
-                YES: {id: 1, name: "Да"},
-                NO: {id: 2, name: "Нет"}
+                YES: {id: 1, name: 'Да'},
+                NO: {id: 2, name: 'Нет'}
+            },
+            PERSON_IMPORTANCE: {
+                VIP: {id: 1, name: 'VIP'},
+                NOT_VIP: {id: 2, name: 'Не VIP'}
             },
             SHOW_VERSIONS: {
                 BY_DATE: {id: 1, name: "На дату"},

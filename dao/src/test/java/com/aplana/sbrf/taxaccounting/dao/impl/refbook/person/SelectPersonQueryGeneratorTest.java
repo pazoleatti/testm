@@ -41,6 +41,20 @@ public class SelectPersonQueryGeneratorTest {
     }
 
     @Test
+    public void test_generateFilteredQuery_filterByVip() {
+        filter.setVip(true);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.vip = 1");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByNonVip() {
+        filter.setVip(false);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.vip = 0");
+    }
+
+    @Test
     public void test_generateFilteredQuery_filterByName() {
         filter.setFirstName("John");
         String query = generator.generateFilteredQuery();
@@ -82,6 +96,28 @@ public class SelectPersonQueryGeneratorTest {
         filter.setDocumentNumber("D-1");
         String query = generator.generateFilteredQuery();
         assertThat(query).contains("doc_number");
+        assertThat(query).contains("like '%d1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByInn() {
+        filter.setInn("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and lower(person.inn) like '%d-1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByInnForeign() {
+        filter.setInnForeign("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and lower(person.inn_foreign) like '%d-1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterBySnils() {
+        filter.setSnils("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("person.snils");
         assertThat(query).contains("like '%d1%'");
     }
 

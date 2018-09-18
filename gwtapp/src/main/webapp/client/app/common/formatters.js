@@ -438,7 +438,7 @@
             };
         }])
 
-        .filter('vipFormatter', ['$filter', function ($filter) {
+        .filter('vipTextFormatter', ['$filter', function ($filter) {
             return function (value) {
                 if (value) {
                     return $filter('translate')('refBook.fl.table.label.vip');
@@ -476,7 +476,6 @@
 
         .filter('foreignAddressFormatter', ['$filter', function ($filter) {
             return function (data) {
-                console.log(data);
                 if (!data) return '';
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
@@ -574,7 +573,7 @@
             return function (value) {
                 if (value) {
                     var date = $filter('dateFormatter')(value.birthDate);
-                    return "(" + value.recordId + ")" + (value.lastName?" " + value.lastName:"") + " " + (value.firstName?" " + value.firstName:"") + " " + (value.middleName?" " + value.middleName:"") + ", " + date
+                    return "(" + value.recordId + ")" + (value.lastName ? " " + value.lastName : "") + " " + (value.firstName ? " " + value.firstName : "") + " " + (value.middleName ? " " + value.middleName : "") + ", " + date
                 }
                 return ''
             };
@@ -620,6 +619,20 @@
                 }
                 return value.value.DOC_NUMBER.value;
             };
+        }])
+
+        .filter('vipOptionsFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (vipOptionIds) {
+                if (!vipOptionIds) return null;
+                var hasVip = vipOptionIds.indexOf(APP_CONSTANTS.PERSON_IMPORTANCE.VIP) !== -1;
+                var hasNotVip = vipOptionIds.indexOf(APP_CONSTANTS.PERSON_IMPORTANCE.NOT_VIP) !== -1;
+                // Если выбраны обе опции или ни одна, фильтрация по ним не нужна
+                if (hasVip === hasNotVip) {
+                    return null;
+                } else {
+                    return hasVip;
+                }
+            }
         }])
     ;
 }());
