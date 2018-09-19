@@ -155,6 +155,20 @@ public class SelectPersonQueryGeneratorTest {
     }
 
     @Test
+    public void test_generateFilteredQuery_filterByNotDuplicates() {
+        filter.setDuplicates(false);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.record_id = person.old_id");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByDuplicatesOnly() {
+        filter.setDuplicates(true);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.record_id <> person.old_id");
+    }
+
+    @Test
     public void test_generateFilteredQuery_filterByAllVersions() {
         filter.setAllVersions(true);
         String query = generator.generateFilteredQuery();

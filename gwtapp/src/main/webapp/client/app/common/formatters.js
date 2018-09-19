@@ -244,6 +244,22 @@
             }
         }])
 
+        .filter('duplicatesFilterFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (duplicatesOption) {
+                if (duplicatesOption && duplicatesOption.id) {
+                    switch (duplicatesOption.id) {
+                        case APP_CONSTANTS.SHOW_DUPLICATES.NO.id:
+                            return false;
+                        case APP_CONSTANTS.SHOW_DUPLICATES.ONLY_DUPLICATES.id:
+                            return true;
+                        case APP_CONSTANTS.SHOW_DUPLICATES.ALL_RECORDS.id:
+                            return null;
+                    }
+                }
+                return undefined;
+            }
+        }])
+
         /**
          * @description Преобразует значение признака активности периода в текст (Открыт/Закрыт/Не задано)
          * @param value признак активности периода

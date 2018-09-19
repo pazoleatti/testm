@@ -23,8 +23,7 @@
                                             <input data-ng-model="searchFilter.params.lastName"
                                                    type="text"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
-                                                   class="form-control"
-                                                   title="{{searchFilter.params.lastName}}"/>
+                                                   class="form-control"/>
                                         </div>
                                     </div>
                                     <!--Имя-->
@@ -36,8 +35,7 @@
                                             <input data-ng-model="searchFilter.params.firstName"
                                                    type="text"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
-                                                   class="form-control"
-                                                   title="{{searchFilter.params.firstName}}"/>
+                                                   class="form-control"/>
                                         </div>
                                     </div>
                                     <!--Отчество-->
@@ -49,8 +47,7 @@
                                             <input data-ng-model="searchFilter.params.middleName"
                                                    type="text"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
-                                                   class="form-control"
-                                                   title="{{searchFilter.params.middleName}}"/>
+                                                   class="form-control"/>
                                         </div>
                                     </div>
                                     <!--Дата рождения-->
@@ -101,8 +98,7 @@
                                             <input data-ng-model="searchFilter.params.documentNumber"
                                                    type="text"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
-                                                   class="form-control"
-                                                   title="{{searchFilter.params.documentNumber}}"/>
+                                                   class="form-control"/>
                                         </div>
                                     </div>
                                 </div>
@@ -251,7 +247,7 @@
                                     <div class="span2">
                                         <label class="control-label">{{::'refBook.fl.filter.label.address' | translate}}:</label>
                                     </div>
-                                    <div class="span10">
+                                    <div class="span10" style="margin-left: 1.55%; width: 83.55%;">
                                         <input data-ng-model="searchFilter.params.foreignAddress"
                                                type="text"
                                                placeholder="{{'filter.placeholder.search' | translate}}"
@@ -283,6 +279,17 @@
                                                  data-ng-model="searchFilter.params.versionDate">
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                <!--Дубликаты-->
+                                <div class="span4">
+                                    <div class="span4">
+                                        <label class="control-label">{{::'refBook.fl.filter.label.duplicates' | translate}}:</label>
+                                    </div>
+                                    <div class="span8"
+                                         data-ng-controller="SelectDuplicatesCtrl"
+                                         data-ui-select2="select.options"
+                                         data-ng-model="searchFilter.params.showDuplicates">
                                     </div>
                                 </div>
                             </div>

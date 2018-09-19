@@ -33,7 +33,8 @@
                 function getDefaultFilterParams() {
                     return {
                         allVersions: APP_CONSTANTS.SHOW_VERSIONS.BY_DATE,
-                        versionDate: new Date().format("yyyy-mm-dd")
+                        versionDate: new Date().format("yyyy-mm-dd"),
+                        showDuplicates: APP_CONSTANTS.SHOW_DUPLICATES.NO
                     }
                 }
 
@@ -74,7 +75,8 @@
                         countries: $filter('idExtractor')($scope.searchFilter.params.countries),
                         foreignAddress: $scope.searchFilter.params.foreignAddress,
                         allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
-                        versionDate: $scope.searchFilter.params.versionDate
+                        versionDate: $scope.searchFilter.params.versionDate,
+                        duplicates: $filter('duplicatesFilterFormatter')($scope.searchFilter.params.showDuplicates)
                     });
                 };
 

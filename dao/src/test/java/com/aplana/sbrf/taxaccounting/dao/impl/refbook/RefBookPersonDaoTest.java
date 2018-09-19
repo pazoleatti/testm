@@ -46,6 +46,9 @@ public class RefBookPersonDaoTest {
         assertThat(tbIds).containsExactly(1, 2);
     }
 
+
+    // --- Метод getPersons ---
+
     @Test
     public void test_getPersons() {
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, null);
@@ -257,16 +260,33 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
-    @Ignore("На HSQL <2.3.4 не работает regexp_replace(), включить, когда разберёмся")
-    public void test_getPersons_filterBySnils() {
+    public void test_getPersons_filterByDuplicatesOnly() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setSnils("21za");
+        filter.setDuplicates(true);
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(1);
+        assertThat(persons).hasSize(2);
+
+        RefBookPerson person = persons.get(0);
+        assertThat(person.getRecordId()).isNotEqualTo(person.getOldId());
     }
 
+    @Test
+    public void test_getPersons_filterByNotDuplicates() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setDuplicates(false);
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(4);
+
+        RefBookPerson person = persons.get(0);
+        assertThat(person.getRecordId()).isEqualTo(person.getOldId());
+    }
+
+
+    // --- Методы работы с  RegistryPerson ---
 
     @Test
     public void test_updateRegistryPerson() {

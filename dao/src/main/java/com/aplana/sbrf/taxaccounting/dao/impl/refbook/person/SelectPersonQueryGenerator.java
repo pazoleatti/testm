@@ -141,6 +141,7 @@ public class SelectPersonQueryGenerator {
             addDocumentsConditions();
             addAddressConditions();
             addForeignAddressConditions();
+            addDuplicatesCondition();
             addVersionsConditions();
         }
     }
@@ -198,6 +199,14 @@ public class SelectPersonQueryGenerator {
     private void addForeignAddressConditions() {
         addLikeIgnoreCase("address.address", filter.getForeignAddress());
         addSearchIn("address_country.id", filter.getCountries());
+    }
+
+    private void addDuplicatesCondition() {
+        Boolean showOnlyDuplicates = filter.getDuplicates();
+        if (showOnlyDuplicates != null) {
+            String equalitySign = showOnlyDuplicates ? "<>" : "=";
+            query = query + "\n" + "and person.record_id " + equalitySign + " person.old_id";
+        }
     }
 
     private void addVersionsConditions() {

@@ -662,6 +662,16 @@
         ])
 
         /**
+         * Контроллер для выбора фильтрации по дубликатам.
+         */
+        .controller('SelectDuplicatesCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var attributes = [APP_CONSTANTS.SHOW_DUPLICATES.NO, APP_CONSTANTS.SHOW_DUPLICATES.ONLY_DUPLICATES, APP_CONSTANTS.SHOW_DUPLICATES.ALL_RECORDS];
+                $scope.select = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, attributes);
+            }
+        ])
+
+        /**
          * Универсальный контроллер для выбора из любого справочника
          */
         .controller('SelectRefBookCtrl', ['$scope', 'GetSelectOption', '$http', "$filter", "APP_CONSTANTS",

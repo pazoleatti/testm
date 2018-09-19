@@ -96,6 +96,11 @@
                 BY_DATE: {id: 1, name: "На дату"},
                 ALL: {id: 2, name: "Все версии"}
             },
+            SHOW_DUPLICATES: {
+                NO: {id: 1, name: "Не отображать дубликаты"},
+                ONLY_DUPLICATES: {id: 2, name: "Отображать только дубликаты"},
+                ALL_RECORDS: {id: 3, name: "Все записи"}
+            },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},
                 REFUSED: {id: 21123800, knd: 1166006, name: 'Отклонен'},
