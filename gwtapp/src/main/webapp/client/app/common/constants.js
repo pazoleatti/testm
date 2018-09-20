@@ -52,6 +52,7 @@
                 ROLE_ADMIN: "ROLE_ADMIN"
             },
             REFBOOK: {
+                COUNTRY: 10,
                 DEPARTMENT: 30,
                 DECLARATION_TYPE: 207,
                 ASNU: 900,

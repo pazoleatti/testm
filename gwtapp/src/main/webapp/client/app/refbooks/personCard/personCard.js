@@ -39,6 +39,8 @@
                  */
                 $scope.person = $scope.dataExtract();
 
+                console.log($scope.person)
+
                 /**
                  * @description Флаг принимающий значение {@code true} если Физлицо было отредактировано
                  * @type {boolean}
@@ -419,7 +421,7 @@
                     });
                 };
 
-                $scope.doEdit = function () {
+                $scope.editMode = function () {
                     $scope.mode = 'EDIT';
                 };
 

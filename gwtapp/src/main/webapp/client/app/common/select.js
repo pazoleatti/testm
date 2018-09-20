@@ -538,8 +538,8 @@
                 function getUserTB(departments) {
                     // значение по-умолчанию будет подразделение пользователя
                     var defaultDepartment = $scope.user.terBank && _.find(departments, function (department) {
-                        return department.id === $scope.user.terBank.id;
-                    });
+                            return department.id === $scope.user.terBank.id;
+                        });
                     // если подразделение пользователя не найдено, то первое попавшееся
                     if (!defaultDepartment) {
                         defaultDepartment = departments[0];
@@ -851,17 +851,161 @@
         /**
          * Контроллер для карточки реестра ФЛ
          */
-        .controller('SelectIdDocController', ['$scope', 'GetSelectOption',
-            function ($scope, GetSelectOption) {
-                $scope.init = function (values, person) {
-                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, values, false, 'idDocFormatter');
-                    $scope.selectedDocs.options.data.results = values;
-                    angular.forEach(values, function (value) {
-                        if (value.id.value === person.mainDoc.id.value) {
-                            person.mainDoc = value
+        .controller('SelectRegistryPersonController', ['$scope', 'GetSelectOption', '$http', 'APP_CONSTANTS', 'RefBookRecordResource', 'RefBookValuesResource',
+            function ($scope, GetSelectOption, $http, APP_CONSTANTS, RefBookRecordResource, RefBookValuesResource) {
+                $scope.initIdDocs = function (person) {
+                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'idDocFormatter');
+                    $http({
+                        method: "GET",
+                        url: "controller/actions/refBookFL/fetchIdDocs/" + person.recordId,
+                        params: {
+                            pagingParams: JSON.stringify({
+                                page: 1,
+                                count: 100000,
+                                startIndex: 0
+                            })
+                        }
+                    }).success(function (response) {
+
+                        response.rows.sort(function (obj1, obj2) {
+                            var priority1 = obj1.DOC_ID.referenceObject.PRIORITY.value;
+                            var priority2 = obj2.DOC_ID.referenceObject.PRIORITY.value;
+                            var doc_code1 = obj1.DOC_ID.referenceObject.CODE.value;
+                            var doc_code2 = obj2.DOC_ID.referenceObject.CODE.value;
+                            var doc_number1 = obj1.DOC_NUMBER.value;
+                            var doc_number2 = obj2.DOC_NUMBER.value;
+                            if (priority1 < priority2) {
+                                return -1
+                            }
+                            if (priority1 > priority2) {
+                                return 1
+                            }
+                            if (doc_code1 < doc_code2) {
+                                return -1
+                            }
+                            if (doc_code1 > doc_code2) {
+                                return 1
+                            }
+                            if (doc_number1 < doc_number2) {
+                                return -1
+                            }
+                            if (doc_number1 > doc_number2) {
+                                return 1
+                            }
+                            return 0;
+                        });
+                        $scope.selectedDocs.options.data.results = response.rows;
+                        angular.forEach($scope.selectedDocs.options.data.results, function (value) {
+                            if (value.id.value === person.reportDoc.value.id.value) {
+                                person.reportDoc.value = value
+                            }
+                        })
+                    });
+                };
+
+                $scope.initTaxPayerState = function(person) {
+                    $scope.taxPayerStateSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'taxPayerStateFormatter');
+                    RefBookRecordResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS,
+                        recordId: null,
+                        version: null,
+                        searchPattern: null,
+                        exactSearch: null,
+                        pagingParams: JSON.stringify({
+                        page: 1,
+                        count: 100000,
+                        startIndex: 0
+                    })
+                    }, function (data) {
+                        $scope.taxPayerStateSelected.options.data.results = data.rows;
+                        angular.forEach($scope.taxPayerStateSelected.options.data.results, function (value) {
+                            if (value.id.value === person.taxPayerState.value.id.value) {
+                                person.taxPayerState.value = value
+                            }
+                        })
+                    });
+                };
+
+                $scope.initAsnu = function (person) {
+                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'asnuFormatter');
+                    RefBookRecordResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.ASNU,
+                        recordId: null,
+                        version: null,
+                        searchPattern: null,
+                        exactSearch: null,
+                        pagingParams: JSON.stringify({
+                            page: 1,
+                            count: 100000,
+                            startIndex: 0
+                        })
+                    }, function (data) {
+                        $scope.asnuSelect.options.data.results = data.rows;
+                        angular.forEach($scope.asnuSelect.options.data.results, function (value) {
+                            if (value.id.value === person.source.id.value) {
+                                person.source = value
+                            }
+                        })
+                    });
+                };
+
+                $scope.initVip = function(person) {
+                    $scope.vipSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [{id: 1, value: true, name: 'VIP'}, {id: 2, value: false, name: 'не VIP'}], false);
+                    angular.forEach($scope.vipSelect.options.data.results, function (value) {
+                        if (value.value === person.vip) {
+                            person.vipSelect = value
                         }
                     })
                 };
+
+                $scope.initCitizenship = function(person) {
+                    $scope.citizenshipSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'countryFormatter');
+                    RefBookRecordResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
+                        recordId: null,
+                        version: null,
+                        searchPattern: null,
+                        exactSearch: null,
+                        pagingParams: JSON.stringify({
+                            page: 1,
+                            count: 100000,
+                            startIndex: 0,
+                            property: 'CODE'
+                        })
+                    }, function (data) {
+                        $scope.citizenshipSelected.options.data.results = data.rows;
+                        angular.forEach($scope.citizenshipSelected.options.data.results, function (value) {
+                            if (value.id.value === person.citizenship.value.id.value) {
+                                person.citizenship.value = value
+                            }
+                        })
+                    });
+                };
+
+                $scope.initCountry = function(person) {
+                    $scope.countrySelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'countryFormatter');
+                    RefBookRecordResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
+                        recordId: null,
+                        version: null,
+                        searchPattern: null,
+                        exactSearch: null,
+                        pagingParams: JSON.stringify({
+                            page: 1,
+                            count: 100000,
+                            startIndex: 0,
+                            property: 'CODE'
+                        })
+                    }, function (data) {
+                        $scope.countrySelected.options.data.results = data.rows;
+                        angular.forEach($scope.countrySelected.options.data.results, function (value) {
+                            if (value.id.value === person.address.value.COUNTRY_ID.value.id.value) {
+                                person.address.value.COUNTRY_ID.value = value
+                            }
+                        })
+                    });
+                };
+
             }])
     ;
 }());
