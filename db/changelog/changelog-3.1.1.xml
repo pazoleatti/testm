@@ -39,4 +39,11 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5632 Убрать из списка справочников псевдосправочник "Список тербанков назначенных ФЛ"-->
+    <changeSet id="3.1.1-amandzyak-1" author="amandzyak">
+        <sql>
+            update ref_book set visible = 0 where id = 908
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
