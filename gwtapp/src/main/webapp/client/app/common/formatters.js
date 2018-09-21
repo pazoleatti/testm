@@ -650,5 +650,14 @@
                 }
             }
         }])
+
+        .filter('departmentActivityFormatter', function () {
+            return function (entity) {
+                if (!entity) return "";
+                var name = entity.name ? entity.name : "";
+                var activity = (entity.active === true) ? "" : " (неакт.)";
+                return name + activity;
+            };
+        })
     ;
 }());

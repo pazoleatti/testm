@@ -138,7 +138,12 @@ public class SelectPersonQueryGenerator {
             addLikeIgnoreCase("person.inn_foreign", filter.getInnForeign());
             addLikeIgnoreCaseAndDelimiters("person.snils", filter.getSnils());
             addBirthDateConditions();
+            addTBCondition();
             addDocumentsConditions();
+            addSearchIn("citizenship_country.id", filter.getCitizenshipCountries());
+            addSearchIn("person.taxpayer_state", filter.getTaxpayerStates());
+            addSearchIn("person.source_id", filter.getSourceSystems());
+            addInpCondition();
             addAddressConditions();
             addForeignAddressConditions();
             addDuplicatesCondition();
@@ -166,6 +171,22 @@ public class SelectPersonQueryGenerator {
         }
     }
 
+    private void addTBCondition() {
+        List<Long> terBanks = filter.getTerBanks();
+        if (isNotEmpty(terBanks)) {
+            query = query + "\n" +
+                    "and person.record_id in ( \n" +
+                    "   select record_id \n" +
+                    "   from ref_book_person p \n" +
+                    "   where p.id in ( \n" +
+                    "       select person_id \n" +
+                    "       from ref_book_person_tb \n" +
+                    "       where " + searchIn("tb_department_id", terBanks) + "\n" +
+                    "    ) \n" +
+                    ")";
+        }
+    }
+
     private void addDocumentsConditions() {
         if (isDocumentsFilterNotEmpty()) {
             query = query + "\n" +
@@ -185,6 +206,21 @@ public class SelectPersonQueryGenerator {
 
     private boolean isDocumentsFilterNotEmpty() {
         return isNotEmpty(filter.getDocumentTypes()) || isNotEmpty(filter.getDocumentNumber());
+    }
+
+    private void addInpCondition() {
+        if (isNotEmpty(filter.getInp())) {
+            query = query + "\n" +
+                    "and person.record_id in ( \n" +
+                    "   select record_id \n" +
+                    "   from ref_book_person p \n" +
+                    "   where p.id in ( \n" +
+                    "       select person_id \n" +
+                    "       from ref_book_id_tax_payer \n" +
+                    "       where " + likeIgnoreCase("inp", filter.getInp()) + " \n" +
+                    "   ) \n" +
+                    ")";
+        }
     }
 
     private void addAddressConditions() {
@@ -231,8 +267,12 @@ public class SelectPersonQueryGenerator {
 
     private void addLikeIgnoreCase(String field, String value) {
         if (isNotEmpty(value)) {
-            query = query + "\n" + "and lower(" + field + ") like '%" + value.toLowerCase() + "%'";
+            query = query + "\n" + "and " + likeIgnoreCase(field, value);
         }
+    }
+
+    private String likeIgnoreCase(String field, String value) {
+        return "lower(" + field + ") like '%" + value.toLowerCase() + "%'";
     }
 
     private void addLikeIgnoreCaseAndDelimiters(String field, String value) {

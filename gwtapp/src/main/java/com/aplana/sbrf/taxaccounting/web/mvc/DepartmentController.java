@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentName;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -62,5 +59,14 @@ public class DepartmentController {
                                                                 @RequestParam(required = false) PagingParams pagingParams) {
         PagingResult<DepartmentName> departmentNames = departmentService.searchDepartmentNames(name, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departmentNames, departmentNames.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Выгрузка краткой информации о всех тербанках.
+     */
+    @GetMapping(value = "/rest/departments", params = "projection=tb")
+    public JqgridPagedList<DepartmentShortInfo> fetchAllTBNames(@RequestParam(required = false) PagingParams pagingParams) {
+        PagingResult<DepartmentShortInfo> tbs = departmentService.fetchAllTBShortInfo(pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(tbs, tbs.getTotalCount(), pagingParams);
     }
 }

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.person;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -97,6 +96,34 @@ public class SelectPersonQueryGeneratorTest {
         String query = generator.generateFilteredQuery();
         assertThat(query).contains("doc_number");
         assertThat(query).contains("like '%d1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByCitizenshipCountry() {
+        filter.setCitizenshipCountries(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and citizenship_country.id in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByTaxpayerStates() {
+        filter.setTaxpayerStates(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.taxpayer_state in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByAsnu() {
+        filter.setSourceSystems(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.source_id in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByInp() {
+        filter.setInp("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("lower(inp) like '%d-1%'");
     }
 
     @Test

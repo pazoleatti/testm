@@ -58,27 +58,13 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
-    public void test_getPersons_filterByVip() {
-        RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setVip(true);
-
-        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
-
-        assertThat(persons)
-                .hasSize(3)
-                .extracting("vip")
-                .containsOnly(true);
-    }
-
-    @Test
     public void test_getPersons_filterByNonVip() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setVip(false);
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(3)
+        assertThat(persons).hasSize(3)
                 .extracting("vip")
                 .containsOnly(false);
     }
@@ -90,8 +76,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(2)
+        assertThat(persons).hasSize(2)
                 .extracting("middleName")
                 .containsOnly("Сергеевич");
     }
@@ -121,16 +106,15 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
-    public void test_getPersons_filterByOldId() {
+    public void test_getPersons_filterByVip() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setId("1");
+        filter.setVip(true);
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(2)
-                .extracting("oldId")
-                .containsExactlyInAnyOrder(1L, 10L);
+        assertThat(persons).hasSize(3)
+                .extracting("vip")
+                .containsOnly(true);
     }
 
     @Test
@@ -146,14 +130,86 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
+    public void test_getPersons_filterByCitizenshipCountries() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setCitizenshipCountries(Arrays.asList(1L, 2L));
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(5)
+                .extracting("citizenship.code")
+                .containsOnly("643", "678")
+                .containsOnlyOnce("678");
+    }
+
+    @Test
+    public void test_getPersons_filterByTaxpayerStates() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setTaxpayerStates(Arrays.asList(2L, 3L));
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2)
+                .extracting("taxpayerState.id")
+                .containsOnly(2L, 3L);
+    }
+
+    @Test
+    public void test_getPersons_filterBySourceSystems() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setSourceSystems(Arrays.asList(1L, 2L));
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2)
+                .extracting("source.id")
+                .containsOnly(1L, 2L);
+    }
+
+    @Test
+    public void test_getPersons_filterByOldId() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setId("1");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2)
+                .extracting("oldId")
+                .containsExactlyInAnyOrder(1L, 10L);
+    }
+
+    @Test
+    public void test_getPersons_filterByInn() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setInn("234");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(2)
+                .extracting("inn")
+                .containsOnly("1234", "2345");
+    }
+
+    @Test
+    public void test_getPersons_filterByInnForeign() {
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setInnForeign("3-D1");
+
+        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
+
+        assertThat(persons).hasSize(1)
+                .extracting("innForeign")
+                .containsOnly("123-d123");
+    }
+
+    @Test
     public void test_getPersons_filterByRegion() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setRegion("7");
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(2)
+        assertThat(persons).hasSize(2)
                 .extracting("address.regionCode")
                 .containsOnly("77");
     }
@@ -178,8 +234,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(2)
+        assertThat(persons).hasSize(2)
                 .extracting("address.district")
                 .containsOnly("ОДИНЦОВСКИЙ р-н");
     }
@@ -191,8 +246,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(2)
+        assertThat(persons).hasSize(2)
                 .extracting("address.locality")
                 .containsOnly("ВНИИССОК п");
     }
@@ -204,8 +258,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons)
-                .hasSize(1)
+        assertThat(persons).hasSize(1)
                 .extracting("address.street")
                 .containsOnly("Ленинские Горы ул");
     }
@@ -233,30 +286,6 @@ public class RefBookPersonDaoTest {
 
         RefBookAddress personAddress = persons.get(0).getAddress();
         assertThat(personAddress.getAddress()).isEqualTo("COL, Washington DC, Kennedy street, 20");
-    }
-
-    @Test
-    public void test_getPersons_filterByInn() {
-        RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setInn("234");
-
-        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
-
-        assertThat(persons).hasSize(2)
-                .extracting("inn")
-                .containsOnly("1234", "2345");
-    }
-
-    @Test
-    public void test_getPersons_filterByInnForeign() {
-        RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setInnForeign("3-D1");
-
-        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
-
-        assertThat(persons).hasSize(1)
-                .extracting("innForeign")
-                .containsOnly("123-d123");
     }
 
     @Test
