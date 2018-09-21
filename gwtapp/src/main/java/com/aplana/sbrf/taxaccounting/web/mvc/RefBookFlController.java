@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.PersonOriginalAndDuplicatesDTO;
@@ -175,5 +176,10 @@ public class RefBookFlController {
     public ResponseEntity updateRegistryPerson(@RequestBody RegistryPerson person) {
         personService.updateRegistryPerson(person);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/actions/checkDul")
+    public CheckDulResult checkDul(@RequestParam String docCode, @RequestParam String docNumber) {
+        return personService.checkDul(docCode, docNumber);
     }
 }

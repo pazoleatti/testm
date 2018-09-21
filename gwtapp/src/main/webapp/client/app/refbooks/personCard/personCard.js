@@ -4,7 +4,7 @@
     /**
      * @description Модуль для отображения карточки Физлица
      */
-    angular.module('app.personCard', ['app.rest', 'app.regPerson'])
+    angular.module('app.personCard', ['app.rest', 'app.regPerson', 'app.idDocRecordModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('personCard', {
                 url: '/personRegistry/personCard/{id}',
@@ -19,8 +19,8 @@
             });
         }])
 
-        .controller('personCardCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource',
-            function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource) {
+        .controller('personCardCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs',
+            function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs) {
 
                 $scope.mode = 'VIEW';
 
@@ -29,8 +29,8 @@
                  */
                 $scope.dataExtract = function () {
                     var data = PersonCardResource.query({
-                            id: $state.params.id
-                        });
+                        id: $state.params.id
+                    });
                     return data;
                 };
 
@@ -38,8 +38,6 @@
                  * @description Объект подгруженного Физлица из рееестра Физлиц
                  */
                 $scope.person = $scope.dataExtract();
-
-                console.log($scope.person)
 
                 /**
                  * @description Флаг принимающий значение {@code true} если Физлицо было отредактировано
@@ -67,17 +65,17 @@
                  */
                 $scope.idDocsGrid = {
                     ctrl: {},
+                    value: [],
                     options: {
                         datatype: "local",
-                        data: $scope.person.idDocs,
                         colNames: [
                             '',
                             $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocCode'),
                             $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumber')
                         ],
                         colModel: [
-                            {name: 'id', width: 100, key: true, hidden: true},
-                            {name: 'DOC_ID', width: 380, formatter: $filter('idDocCodeFormatter')},
+                            {name: 'id.value', width: 100, key: true, hidden: true},
+                            {name: 'DOC_ID.referenceObject', width: 380, formatter: $filter('idDocCodeFormatter')},
                             {
                                 name: 'DOC_NUMBER',
                                 width: 240,
@@ -163,8 +161,20 @@
                             },
                             {name: 'reportDoc', width: 300, sortable: true, formatter: $filter('idDocTypeFormatter')},
                             {name: 'reportDoc', width: 120, sortable: true, formatter: $filter('idDocNumberFormatter')},
-                            {name: 'inn', index: 'inn', width: 120, sortable: true, formatter: $filter('simplePermissiveFormatter')},
-                            {name: 'snils', index: 'snils', width: 120, sortable: true, formatter: $filter('simplePermissiveFormatter')}
+                            {
+                                name: 'inn',
+                                index: 'inn',
+                                width: 120,
+                                sortable: true,
+                                formatter: $filter('simplePermissiveFormatter')
+                            },
+                            {
+                                name: 'snils',
+                                index: 'snils',
+                                width: 120,
+                                sortable: true,
+                                formatter: $filter('simplePermissiveFormatter')
+                            }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
@@ -266,7 +276,6 @@
                     fetchTab: false,
                     active: false
                 };
-
 
 
                 /**
@@ -422,12 +431,88 @@
                 };
 
                 $scope.editMode = function () {
-                    $scope.mode = 'EDIT';
+                    $scope.mode = APP_CONSTANTS.MODE.EDIT;
                 };
 
                 $scope.save = function () {
 
-                }
+                };
+
+                var editIdDoc = function (mode) {
+                    var title;
+                    var idDoc;
+                    switch (mode) {
+                        case APP_CONSTANTS.MODE.CREATE:
+                            title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.create');
+                            idDoc = {id : {fake: true, value: new Date().getTime()}};
+                            break;
+                        case APP_CONSTANTS.MODE.EDIT:
+                            title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.edit');
+                            idDoc = $scope.idDocsGrid.value[0];
+                            break;
+                    }
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/refbooks/personCard/modal/idDocModal.html',
+                        controller: 'idDocRecordModalCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    idDoc: idDoc,
+                                    mode: mode
+                                }
+                            }
+                        }
+                    })
+                };
+
+                $scope.addIdDoc = function () {
+                    editIdDoc(APP_CONSTANTS.MODE.CREATE)
+                };
+
+                $scope.editIdDoc = function () {
+                    editIdDoc(APP_CONSTANTS.MODE.EDIT)
+                };
+
+                $scope.deleteIdDoc = function() {
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.title'),
+                        content: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            var i=0;
+                            var deleteIndex = -1;
+                            angular.forEach($scope.idDocs, function (item) {
+                                if (item.id.value === $scope.idDocsGrid.value[0].id.value) {
+                                    deleteIndex = i;
+                                }
+                                i++;
+                            });
+                            if (deleteIndex > -1) {
+                                $scope.idDocs.splice(deleteIndex, 1);
+                            }
+                            $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
+                        }
+                    })
+                };
+
+                $scope.$on("createIdDoc", function (event, idDoc) {
+                    $scope.idDocs.push(idDoc);
+                    $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
+                });
+
+                $scope.$on("updateIdDoc", function (event, idDoc) {
+                    var i = 0;
+                    angular.forEach($scope.idDocs, function (item) {
+                        if (item.id.value === idDoc.id.value) {
+                            $scope.idDocs.splice(i, 1, idDoc);
+                        }
+                        i++;
+                    });
+                    $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
+                })
 
             }
         ]);

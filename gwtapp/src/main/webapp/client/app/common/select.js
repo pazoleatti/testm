@@ -1006,6 +1006,30 @@
                     });
                 };
 
+                $scope.initDocType = function(idDoc) {
+                    $scope.docTypeSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'idDocCodeFormatter');
+                    RefBookRecordResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.DOC_TYPE,
+                        recordId: null,
+                        version: null,
+                        searchPattern: null,
+                        exactSearch: null,
+                        pagingParams: JSON.stringify({
+                            page: 1,
+                            count: 100000,
+                            startIndex: 0,
+                            property: 'CODE'
+                        })
+                    }, function (data) {
+                        $scope.docTypeSelect.options.data.results = data.rows;
+                        angular.forEach($scope.docTypeSelect.options.data.results, function (value) {
+                            if (idDoc && value.id.value === idDoc.id.value) {
+                                idDoc = value
+                            }
+                        })
+                    });
+                }
+
             }])
     ;
 }());

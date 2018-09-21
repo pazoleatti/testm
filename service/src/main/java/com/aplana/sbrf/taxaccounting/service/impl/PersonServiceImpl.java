@@ -11,10 +11,12 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -589,6 +591,23 @@ public class PersonServiceImpl implements PersonService {
         if (personFieldsToUpdate.contains(RegistryPerson.UpdatableField.REPORT_DOC)) {
             refBookPersonDao.updateRegistryPersonIncRepDocId(persistedPerson.getReportDoc().value().get("id").getReferenceValue(), person.getReportDoc().value().get("id").getReferenceValue());
         }
+    }
+
+    @Override
+    public CheckDulResult checkDul(String docCode, String docNumber) {
+        CheckDulResult result = new CheckDulResult();
+        String erasedNumber = docNumber.replaceAll("[^\\wА-Яа-яЁё]", docNumber);
+        if (docCode.equals("91")) {
+            if(ScriptUtils.isUSSRIdDoc(docNumber)) {
+                result.setErrorMessage("Значение для типа ДУЛ с кодом 91 в поле \"Серия и номер\" указаны реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является разрешенным документом, удостоверяющим личность.");
+            }
+        } else {
+            result.setErrorMessage(ScriptUtils.checkDul(docCode, erasedNumber, "Серия и номер"));
+            if (result.getErrorMessage() == null) {
+                result.setFormattedNumber(ScriptUtils.formatDocNumber(docCode, erasedNumber));
+            }
+        }
+        return result;
     }
 
     /**

@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 
 import java.util.Date;
 import java.util.List;
@@ -146,4 +147,6 @@ public interface PersonService {
      * @param person    данные ФЛ для обновления
      */
     void updateRegistryPerson(RegistryPerson person);
+
+    CheckDulResult checkDul(String docCode, String docNumber);
 }

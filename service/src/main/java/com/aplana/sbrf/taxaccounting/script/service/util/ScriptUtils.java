@@ -2781,6 +2781,10 @@ public final class ScriptUtils {
         return null;
     }
 
+    public static boolean isUSSRIdDoc(String number) {
+        return checkFormat(number, "[IiVvXxLlCcУуХхЛлСс]-([А-ЯЁ]){2}\\s([0-9]){6}");
+    }
+
     public static String formatDocNumber(String code, String value) {
         StringBuilder formattedValue = new StringBuilder(value);
         switch (code) {

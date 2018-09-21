@@ -268,6 +268,10 @@
             DEPARTMENT_CONFIG_PERMISSION: {
                 UPDATE: 1 << 2,
                 DELETE: 1 << 3
+            },
+            MODE: {
+                CREATE: "CREATE",
+                EDIT: "EDIT"
             }
         });
 }());
