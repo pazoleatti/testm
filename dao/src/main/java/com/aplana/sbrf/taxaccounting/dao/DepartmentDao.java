@@ -266,5 +266,5 @@ public interface DepartmentDao extends PermissionDao {
     /**
      * Получение краткой информации о всех тербанках.
      */
-    PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(PagingParams pagingParams);
+    PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams);
 }

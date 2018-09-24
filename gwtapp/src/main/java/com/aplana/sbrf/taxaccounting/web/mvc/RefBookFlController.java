@@ -59,8 +59,8 @@ public class RefBookFlController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookFL")
-    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam RefBookPersonFilter filter,
-                                                              @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam(required = false) RefBookPersonFilter filter,
+                                                              @RequestParam(required = false) PagingParams pagingParams) {
         TAUser currentUser = securityService.currentUserInfo().getUser();
         PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
@@ -168,6 +168,7 @@ public class RefBookFlController {
 
     /**
      * Обновить данные записи из реестра ФЛ
+     *
      * @param person данные записи из реестра ФЛ
      * @return ответ сервера
      */

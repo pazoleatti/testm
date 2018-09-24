@@ -65,8 +65,9 @@ public class DepartmentController {
      * Выгрузка краткой информации о всех тербанках.
      */
     @GetMapping(value = "/rest/departments", params = "projection=tb")
-    public JqgridPagedList<DepartmentShortInfo> fetchAllTBNames(@RequestParam(required = false) PagingParams pagingParams) {
-        PagingResult<DepartmentShortInfo> tbs = departmentService.fetchAllTBShortInfo(pagingParams);
+    public JqgridPagedList<DepartmentShortInfo> fetchAllTBNames(@RequestParam(name = "name", required = false) String filter,
+                                                                @RequestParam(required = false) PagingParams pagingParams) {
+        PagingResult<DepartmentShortInfo> tbs = departmentService.fetchAllTBShortInfo(filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(tbs, tbs.getTotalCount(), pagingParams);
     }
 }

@@ -569,11 +569,16 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(PagingParams pagingParams) {
+    public PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams) {
         String query = "" +
                 "select id, shortname name, is_active active " +
                 "from department " +
                 "where type = 2";
+
+        if (isNotEmpty(filter)) {
+            query = query + "\n" +
+                    "and lower(shortname) like '%" + filter.toLowerCase() + "%'";
+        }
 
         Integer count = getJdbcTemplate().queryForObject(
                 "select count(*) from(" + query + ")",

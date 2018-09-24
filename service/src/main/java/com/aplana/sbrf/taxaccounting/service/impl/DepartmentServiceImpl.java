@@ -326,7 +326,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(PagingParams pagingParams) {
-        return departmentDao.fetchAllTBShortInfo(pagingParams);
+    public PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams) {
+        return departmentDao.fetchAllTBShortInfo(filter, pagingParams);
     }
 }
