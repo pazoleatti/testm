@@ -52,14 +52,14 @@ public class ReportPeriodController {
      */
     @GetMapping(value = "/rest/reportPeriod", params = "projection=all")
     public List<ReportPeriod> fetchAllReportPeriods() {
-        TAUser user = securityService.currentUserInfo().getUser();
-        return periodService.getPeriodsByDepartments(Collections.singletonList(user.getDepartmentId()));
+        return periodService.fetchAll();
     }
 
     /**
      * Получает периоды назначенные подразделению
-     * @param departmentId  идентификатор подразделения
-     * @return  возвращает список периодов назначенных подразделению
+     *
+     * @param departmentId идентификатор подразделения
+     * @return возвращает список периодов назначенных подразделению
      */
     @GetMapping(value = "/rest/reportPeriod", params = "projection=forDepartment")
     public List<ReportPeriodResult> fetchForDepartment(@RequestParam Integer departmentId) {

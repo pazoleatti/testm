@@ -123,6 +123,17 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
+    public List<ReportPeriod> fetchAll() {
+        return getJdbcTemplate().query("" +
+                        "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date \n" +
+                        "from report_period rp, tax_period tp \n" +
+                        "where rp.tax_period_id = tp.id \n" +
+                        "order by tp.year desc, calendar_start_date",
+                new ReportPeriodMapper()
+        );
+    }
+
+    @Override
     public List<ReportPeriod> fetchAllByTaxPeriod(int taxPeriodId) {
         return getJdbcTemplate().query(
                 "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date " +
@@ -315,7 +326,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     return reportPeriodResult;
                 }
             });
-        } catch(EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
     }
