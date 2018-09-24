@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Компонент для построения SQL запросов для DAO {@link com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl}
@@ -594,8 +595,12 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("(SELECT t.*," +
                     "lead(t.version) over(partition BY t.record_id order by t.version) - interval '1' DAY version_end\n" +
                     "FROM ref_book_ndfl_detail t\n" +
-                    "join ref_book_oktmo oktmo on oktmo.id = t.oktmo\n" +
-                    "order by t.kpp, oktmo.code, t.tax_organ_code)");
+                    "join ref_book_oktmo oktmo on oktmo.id = t.oktmo\n");
+            if (pagingParams.getCount() == -1) { // значит выполняется выгрузка в excel
+                ps.appendQuery("order by t.kpp, oktmo.code)");
+            } else {
+                ps.appendQuery("order by t.kpp, oktmo.code, t.tax_organ_code)");
+            }
         } else {
             ps.appendQuery(refBook.getTableName());
         }
@@ -638,7 +643,7 @@ public class RefBookSimpleQueryBuilderComponent {
             }
         }
         if (refBook.isVersioned()) {
-            if (StringUtils.isEmpty(filter) && StringUtils.isEmpty(filterPS.getQuery())) {
+            if (isEmpty(filter) && isEmpty(filterPS.getQuery())) {
                 ps.appendQuery(" WHERE ");
             } else {
                 ps.appendQuery(" AND ");
@@ -647,10 +652,11 @@ public class RefBookSimpleQueryBuilderComponent {
         }
 
         if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
-            if (pagingParams != null && !StringUtils.isEmpty(pagingParams.getProperty())) {
+            if (pagingParams != null) {
                 if (sortAttribute == null) {
                     // Для сортировки по датам версии
-                    ps.appendQuery(" ORDER BY ").appendQuery(!"rownum".equals(pagingParams.getProperty()) ? "frb." : "").appendQuery(pagingParams.getProperty())
+                    ps.appendQuery(" ORDER BY ").appendQuery("rownum".equals(pagingParams.getProperty()) || isEmpty(pagingParams.getProperty()) ? "" : "frb.")
+                            .appendQuery(!isEmpty(pagingParams.getProperty()) ? pagingParams.getProperty() : "rownum")
                             .appendQuery(" ").appendQuery(pagingParams.getDirection());
                 } else {
                     String tableAlias = "frb";
