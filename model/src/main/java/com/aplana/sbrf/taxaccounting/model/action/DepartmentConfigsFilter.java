@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Класс содержит данные передаваемые в качестве фильтра для поиска настроек подразделений
+ * Фильтр для поиска/отбора настроек подразделений
  */
 public class DepartmentConfigsFilter implements Serializable {
     private Integer departmentId;

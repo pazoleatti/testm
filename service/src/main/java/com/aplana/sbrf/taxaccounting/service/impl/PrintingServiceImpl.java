@@ -301,15 +301,14 @@ public class PrintingServiceImpl implements PrintingService {
         filter.setDepartmentId(departmentId);
         // pagingParams не null, т.к. нужна сортировка по-умолчанию (по КПП/ОКТМО/Код НО)
         PagingParams pagingParams = new PagingParams();
-        pagingParams.setCount(-1);// выбираем все записи выбираем
+        pagingParams.setCount(-1);// выбираем все записи
         List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchAllByFilter(filter, pagingParams);
         Department department = departmentService.getDepartment(filter.getDepartmentId());
         DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, department);
         String reportPath = null;
         try {
             reportPath = reportBuilder.createReport();
-
-            String fileName = getDepartmentConfigsExcelFileName(departmentId);
+            String fileName = makeDepartmentConfigsExcelFileName(departmentId);
             return blobDataService.create(reportPath, fileName);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -319,7 +318,7 @@ public class PrintingServiceImpl implements PrintingService {
         }
     }
 
-    private String getDepartmentConfigsExcelFileName(int departmentId) {
+    private String makeDepartmentConfigsExcelFileName(int departmentId) {
         Department department = departmentService.getDepartment(departmentId);
         return department.getId() + "_" + department.getShortName() + "_" + FastDateFormat.getInstance("yyyyMMddhh24mm").format(new Date()) + ".xlsx";
     }

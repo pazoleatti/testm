@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Выгрузка реестра ФЛ в excel-файл
+ */
 @Component("ExcelReportPersonsAsyncTask")
 public class ExcelReportPersonsAsyncTask extends AbstractAsyncTask {
     @Autowired
