@@ -73,50 +73,51 @@ class DepartmentConfigScript extends AbstractScriptClass {
         this.department = refBookDepartmentDataService.fetch(departmentId)
 
         List<List<String>> header = []
-        List<List<String>> rows = []
-        checkAndReadFile(inputStream, fileName, rows, header, this.header.first(), this.header.last(), 1, null)
+        List<List<String>> values = []
+        checkAndReadFile(inputStream, fileName, values, header, this.header.first(), this.header.last(), 1, null)
         checkHeader(header)
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
-        if (!rows) {
+        if (!values || new Row(values.first()).isEmpty()) {
             logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
             return
         }
 
-        int rowIndex = 0
+        int rowIndex = 1
+        int rowsCheckLogIndex = logger.entries.size()
         List<DepartmentConfigExt> departmentConfigs = []
-        for (def iterator = rows.iterator(); iterator.hasNext(); rowIndex++) {
-            checkInterrupted()
+        List<Row> rows = []
+        try {
+            for (def iterator = values.iterator(); iterator.hasNext(); rowIndex++) {
+                checkInterrupted()
+                Row row = new Row(rowIndex, iterator.next())
+                rows.add(row)
+                def departmentConfig = checkAndMakeDepartmentConfig(row)
+                if (row.logger.containsLevel(LogLevel.ERROR) || row.logger.containsLevel(LogLevel.WARNING)) {
+                    continue// строки с ошибками пропускаем
+                }
+                departmentConfigs.add(departmentConfig)
+            }
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
+            } else if (departmentConfigs.isEmpty()) {
+                logger.warn("Не удалось загрузить ни одной строки")
+            } else {
+                List<DepartmentConfig> departmentConfigsBeforeSave = departmentConfigService.fetchAllByDepartmentId(department.id)
+                departmentConfigService.delete(departmentConfigsBeforeSave, logger)
 
-            def row = new Row(rowIndex, iterator.next())
-            iterator.remove()
-            if (row.isEmpty()) {// все строки пустые - выход
-                if (rowIndex == 0) {
-                    logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
-                    return
-                }
-                break
+                List<DepartmentConfigExt> savedDepartmentConfigs = save(departmentConfigs)
+
+                logSaveResult(savedDepartmentConfigs, departmentConfigsBeforeSave)
             }
-            def departmentConfig = checkAndMakeDepartmentConfig(row)
-            if (row.logger.containsLevel(LogLevel.ERROR)) {
-                // если в строке есть ошибки, то добавляем их в логгер и пропускаем строку
-                for (LogEntry logEntry : row.logger.getEntries()) {
-                    logger.warn(logEntry.getMessage())
-                }
-                continue
+        } finally {
+            // все ошибки по строкам логируем в одну кучу и по порядку
+            for (Row row : rows) {
+                logger.entries.addAll(rowsCheckLogIndex, row.logger.getEntries())
+                rowsCheckLogIndex += row.logger.getEntries().size()
             }
-            departmentConfigs.add(departmentConfig)
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
-            return
-        }
-        if (departmentConfigs.isEmpty()) {
-            logger.warn("Не удалось загрузить ни одной строки")
-        } else {
-            save(departmentConfigs)
         }
     }
 
@@ -136,14 +137,14 @@ class DepartmentConfigScript extends AbstractScriptClass {
     }
 
     /**
-     * Создает {@link DepartmentConfig} по строке excel файла, выполняет проверки и возвращяет null, если проверка не пройдена
+     * Создает {@link DepartmentConfig} по строке excel файла и выполняет проверки
      * ошибки пишет в логгер отдельной строки
      */
     DepartmentConfigExt checkAndMakeDepartmentConfig(Row row) {
         int colNum = 0
         DepartmentConfigExt departmentConfig = new DepartmentConfigExt(row)
         departmentConfig.setDepartment(department)
-        departmentConfig.setStartDate(row.cell(colNum).toDate())
+        departmentConfig.setStartDate(row.cell(colNum).nonEmpty().toDate())
         departmentConfig.setEndDate(row.cell(++colNum).toDate())
         departmentConfig.setKpp(row.cell(++colNum).getKpp())
         departmentConfig.setOktmo(row.cell(++colNum).getOktmo())
@@ -162,10 +163,8 @@ class DepartmentConfigScript extends AbstractScriptClass {
         return departmentConfig
     }
 
-    void save(List<DepartmentConfigExt> departmentConfigs) {
-        List<DepartmentConfig> departmentConfigsBeforeSave = departmentConfigService.fetchAllByDepartmentId(department.id)
-        departmentConfigService.delete(departmentConfigsBeforeSave, logger)
-
+    // Сохраняет настройки подразделений с проверками
+    List<DepartmentConfigExt> save(List<DepartmentConfigExt> departmentConfigs) {
         List<DepartmentConfigExt> savedDepartmentConfigs = []
         for (def departmentConfig : departmentConfigs) {
             checkInterrupted()
@@ -175,7 +174,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
                 departmentConfigService.checkDepartmentConfig(departmentConfig, relatedDepartmentConfigs)
             } catch (ServiceException e) {
                 // пропускаем запись и переходим на следующую
-                logger.warn("Строка " + departmentConfig.row.num + " не сохранена. " + e.getMessage())
+                departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + e.getMessage())
                 continue
             }
             if (!relatedDepartmentConfigs.isEmpty()) {
@@ -187,8 +186,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
                 savedDepartmentConfigs.add(insertedDepartmentConfig)
             }
         }
-
-        logSaveResult(savedDepartmentConfigs, departmentConfigsBeforeSave)
+        return savedDepartmentConfigs
     }
 
     // Сохраняет запись настройки подразделений в бд
@@ -201,12 +199,12 @@ class DepartmentConfigScript extends AbstractScriptClass {
             def ids = provider.createRecordVersionWithoutLock(localLogger, departmentConfig.getStartDate(), departmentConfig.getEndDate(), [record])
             departmentConfig.setId(ids[0])
         } catch (Exception e) {
-            logger.warn("Строка " + departmentConfig.row.num + " не сохранена. " + e.getMessage())
+            departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + e.getMessage())
             return null
         }
         if (localLogger.containsLevel(LogLevel.ERROR)) {
             for (def logEntry : localLogger.getEntries()) {
-                logger.warn("Строка " + departmentConfig.row.num + " не сохранена. " + logEntry.getMessage())
+                departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + logEntry.getMessage())
             }
             return null
         }
@@ -256,7 +254,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             if (!presentPlace) {
                 def recordData = refBookFactory.getDataProvider(RefBook.Id.PRESENT_PLACE.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
-                    def record = recordData.entrySet().iterator().next().getValue()
+                    def record = recordData.entrySet().first().getValue()
                     presentPlace = new RefBookPresentPlace()
                     presentPlace.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     presentPlace.setCode(record.get("CODE").getStringValue())
@@ -276,7 +274,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             if (!signatoryMark) {
                 def recordData = refBookFactory.getDataProvider(RefBook.Id.MARK_SIGNATORY_CODE.getId()).getRecordDataVersionWhere(" where code = ${code}", new Date())
                 if (1 == recordData.entrySet().size()) {
-                    def record = recordData.entrySet().iterator().next().getValue()
+                    def record = recordData.entrySet().first().getValue()
                     signatoryMark = new RefBookSignatoryMark()
                     signatoryMark.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     signatoryMark.setCode(record.get("CODE").getNumberValue().intValue())
@@ -296,7 +294,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             if (!reorganization) {
                 def recordData = refBookFactory.getDataProvider(RefBook.Id.REORGANIZATION.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
-                    def record = recordData.entrySet().iterator().next().getValue()
+                    def record = recordData.entrySet().first().getValue()
                     reorganization = new RefBookReorganization()
                     reorganization.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     reorganization.setCode(record.get("CODE").getStringValue())
@@ -350,7 +348,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
         List<String> values
         Logger logger = new Logger()
 
-        Row(int index, List<String> values) {
+        Row(int index = 0, List<String> values) {
             this.index = index
             this.values = values
         }
@@ -390,6 +388,13 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         int getNum() {
             return index + 1
+        }
+
+        Cell nonEmpty() {
+            if (!value) {
+                logError("Отсутствует значение для ячейки столбца \"${header[index]}\"")
+            }
+            return this
         }
 
         Date toDate() {
@@ -503,8 +508,8 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
 
         String getApproveDocName() {
-            if (value && value.length() > 60) {
-                logError("\"Код формы реорганизации\" должен содержать число от 0 до 9")
+            if (value && value.length() > 120) {
+                logError("\"Документ полномочий подписанта\" должен быть строкой длиной не более 120 символов")
                 return null
             }
             return value ?: null
@@ -545,7 +550,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
 
         void logError(String message) {
-            row.logger.error("Строка " + row.num + ". " + message)
+            row.logger.warn("Строка " + row.num + ". " + message)
         }
     }
 }
