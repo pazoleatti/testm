@@ -931,6 +931,7 @@
         "refBook.fl.filter.label.address": "Адрес",
         "refBook.fl.filter.label.versions": "Отображать версии",
         "refBook.fl.filter.label.duplicates": "Дубликаты",
+        "refBook.fl.filter.text.department.inactive": "(неакт.)",
 
         "refBook.fl.table.title.id": "ИД ФЛ",
         "refBook.fl.table.title.importance": "Важность",

@@ -651,13 +651,13 @@
             }
         }])
 
-        .filter('departmentActivityFormatter', function () {
+        .filter('departmentActivityFormatter', ['$filter', function ($filter) {
             return function (entity) {
                 if (!entity) return "";
                 var name = entity.name ? entity.name : "";
-                var activity = (entity.active === true) ? "" : " (неакт.)";
+                var activity = (entity.active === true) ? "" : " " + $filter('translate')('refBook.fl.filter.text.department.inactive');
                 return name + activity;
             };
-        })
+        }])
     ;
 }());
