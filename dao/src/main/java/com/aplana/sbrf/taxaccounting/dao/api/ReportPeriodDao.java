@@ -34,6 +34,11 @@ public interface ReportPeriodDao extends PermissionDao {
     ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
 
     /**
+     * Получение списка всех отчётных периодов.
+     */
+    List<ReportPeriod> fetchAll();
+
+    /**
      * Получение списка отчётных периодов, входящий в данный налоговый период.
      * Список отсортирован по {@link ReportPeriod#getOrder()} порядковым номерам отчётных периодов
      *
@@ -121,6 +126,7 @@ public interface ReportPeriodDao extends PermissionDao {
 
     /**
      * Получить открытые периода назначеннных подразделению
+     *
      * @param departmentId идентификатор подразделения
      * @return период с датой корректировкиhttps://jira.aplana.com/browse/SBRFNDFL-5117
      */

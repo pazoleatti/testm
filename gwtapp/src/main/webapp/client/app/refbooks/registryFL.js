@@ -33,7 +33,8 @@
                 function getDefaultFilterParams() {
                     return {
                         allVersions: APP_CONSTANTS.SHOW_VERSIONS.BY_DATE,
-                        versionDate: new Date().format("yyyy-mm-dd")
+                        versionDate: new Date().format("yyyy-mm-dd"),
+                        showDuplicates: APP_CONSTANTS.SHOW_DUPLICATES.NO
                     }
                 }
 
@@ -54,21 +55,33 @@
                 $scope.filterRequestParam = function () {
                     return JSON.stringify({
                         id: $scope.searchFilter.params.id,
+                        vip: $filter('vipOptionsFormatter')($scope.searchFilter.params.importance),
                         lastName: $scope.searchFilter.params.lastName,
                         firstName: $scope.searchFilter.params.firstName,
                         middleName: $scope.searchFilter.params.middleName,
                         birthDateFrom: $scope.searchFilter.params.birthDateFrom,
                         birthDateTo: $scope.searchFilter.params.birthDateTo,
+                        terBanks: $filter('idExtractor')($scope.searchFilter.params.departments),
                         documentTypes: $filter('idExtractor')($scope.searchFilter.params.documentTypes),
                         documentNumber: $scope.searchFilter.params.documentNumber,
+                        citizenshipCountries: $filter('idExtractor')($scope.searchFilter.params.citizenshipCountries),
+                        taxpayerStates: $filter('idExtractor')($scope.searchFilter.params.taxpayerStates),
+                        sourceSystems: $filter('idExtractor')($scope.searchFilter.params.sourceSystems),
+                        inp: $scope.searchFilter.params.inp,
+                        inn: $scope.searchFilter.params.inn,
+                        innForeign: $scope.searchFilter.params.innForeign,
+                        snils: $scope.searchFilter.params.snils,
                         postalCode: $scope.searchFilter.params.postCode,
                         region: $scope.searchFilter.params.regionCode,
                         district: $scope.searchFilter.params.district,
                         city: $scope.searchFilter.params.city,
                         locality: $scope.searchFilter.params.locality,
                         street: $scope.searchFilter.params.street,
+                        countries: $filter('idExtractor')($scope.searchFilter.params.countries),
+                        foreignAddress: $scope.searchFilter.params.foreignAddress,
                         allVersions: $filter('versionsVisibilityFormatter')($scope.searchFilter.params.allVersions),
-                        versionDate: $scope.searchFilter.params.versionDate
+                        versionDate: $scope.searchFilter.params.versionDate,
+                        duplicates: $filter('duplicatesFilterFormatter')($scope.searchFilter.params.showDuplicates)
                     });
                 };
 
@@ -118,7 +131,7 @@
                             },
                             {
                                 name: 'vip',
-                                formatter: $filter('vipFormatter'),
+                                formatter: $filter('vipTextFormatter'),
                                 width: 80
                             },
                             {
@@ -137,8 +150,8 @@
                                 width: 80
                             },
                             {
-                                name: 'docName',
-                                formatter: $filter('permissiveFormatter'),
+                                name: 'docType',
+                                formatter: $filter('docTypeFormatter'),
                                 width: 250
                             },
                             {

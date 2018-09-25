@@ -55,7 +55,7 @@ public interface PeriodService {
      * Закрыть период
      *
      * @param departmentReportPeriodId идентификатор периода для подразделения "Банк"
-     * @param skipHasNotAcceptedCheck пропускает проверку наличия форм в состоянии отличном от "Принято"
+     * @param skipHasNotAcceptedCheck  пропускает проверку наличия форм в состоянии отличном от "Принято"
      * @return {@link ClosePeriodResult}
      */
     ClosePeriodResult close(Integer departmentReportPeriodId, boolean skipHasNotAcceptedCheck);
@@ -76,6 +76,11 @@ public interface PeriodService {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
      */
     ReportPeriod fetchReportPeriod(int reportPeriodId);
+
+    /**
+     * Получение списка всех отчётных периодов.
+     */
+    List<ReportPeriod> fetchAll();
 
     /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
@@ -156,6 +161,7 @@ public interface PeriodService {
 
     /**
      * Получить открытые периода назначеннных подразделению
+     *
      * @param departmentId идентификатор подразделения
      * @return период с датой корректировки
      */

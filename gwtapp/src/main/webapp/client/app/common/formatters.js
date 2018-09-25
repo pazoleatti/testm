@@ -244,6 +244,22 @@
             }
         }])
 
+        .filter('duplicatesFilterFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (duplicatesOption) {
+                if (duplicatesOption && duplicatesOption.id) {
+                    switch (duplicatesOption.id) {
+                        case APP_CONSTANTS.SHOW_DUPLICATES.NO.id:
+                            return false;
+                        case APP_CONSTANTS.SHOW_DUPLICATES.ONLY_DUPLICATES.id:
+                            return true;
+                        case APP_CONSTANTS.SHOW_DUPLICATES.ALL_RECORDS.id:
+                            return null;
+                    }
+                }
+                return undefined;
+            }
+        }])
+
         /**
          * @description Преобразует значение признака активности периода в текст (Открыт/Закрыт/Не задано)
          * @param value признак активности периода
@@ -438,7 +454,7 @@
             };
         }])
 
-        .filter('vipFormatter', ['$filter', function ($filter) {
+        .filter('vipTextFormatter', ['$filter', function ($filter) {
             return function (value) {
                 if (value) {
                     return $filter('translate')('refBook.fl.table.label.vip');
@@ -476,7 +492,6 @@
 
         .filter('foreignAddressFormatter', ['$filter', function ($filter) {
             return function (data) {
-                console.log(data);
                 if (!data) return '';
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
@@ -574,7 +589,7 @@
             return function (value) {
                 if (value) {
                     var date = $filter('dateFormatter')(value.birthDate);
-                    return "(" + value.recordId + ")" + (value.lastName?" " + value.lastName:"") + " " + (value.firstName?" " + value.firstName:"") + " " + (value.middleName?" " + value.middleName:"") + ", " + date
+                    return "(" + value.recordId + ")" + (value.lastName ? " " + value.lastName : "") + " " + (value.firstName ? " " + value.firstName : "") + " " + (value.middleName ? " " + value.middleName : "") + ", " + date
                 }
                 return ''
             };
@@ -619,6 +634,39 @@
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
                 return value.value.DOC_NUMBER.value;
+            };
+        }])
+
+        .filter('vipOptionsFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (vipOptionIds) {
+                if (!vipOptionIds) return null;
+                var hasVip = vipOptionIds.indexOf(APP_CONSTANTS.PERSON_IMPORTANCE.VIP) !== -1;
+                var hasNotVip = vipOptionIds.indexOf(APP_CONSTANTS.PERSON_IMPORTANCE.NOT_VIP) !== -1;
+                // Если выбраны обе опции или ни одна, фильтрация по ним не нужна
+                if (hasVip === hasNotVip) {
+                    return null;
+                } else {
+                    return hasVip;
+                }
+            }
+        }])
+
+        .filter('departmentActivityFormatter', ['$filter', function ($filter) {
+            return function (entity) {
+                if (!entity) return "";
+                var name = entity.name ? entity.name : "";
+                var activity = (entity.active === true) ? "" : " " + $filter('translate')('refBook.fl.filter.text.department.inactive');
+                return name + activity;
+            };
+        }])
+
+        .filter('docTypeFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
+                }
+                return $filter('codeNameFormatter')(data.value);
             };
         }])
     ;

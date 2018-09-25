@@ -262,4 +262,9 @@ public interface DepartmentDao extends PermissionDao {
      * @return список {@link DepartmentName} с полным числом записей
      */
     PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams);
+
+    /**
+     * Получение краткой информации о всех тербанках.
+     */
+    PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams);
 }

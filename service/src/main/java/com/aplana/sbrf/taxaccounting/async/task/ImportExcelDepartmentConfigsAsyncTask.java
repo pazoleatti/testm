@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Загрузка excel-файла с настройками подразделений
+ */
 @Component("ImportExcelDepartmentConfigsAsyncTask")
 public class ImportExcelDepartmentConfigsAsyncTask extends AbstractAsyncTask {
 

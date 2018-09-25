@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.model.action;
 
 import java.io.InputStream;
 
+/**
+ * Параметры загрузки настроек подразделений
+ */
 public class ImportDepartmentConfigsAction {
     // выбранное подразделение в форме gui
     private int departmentId;

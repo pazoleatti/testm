@@ -21,7 +21,11 @@ import static com.aplana.sbrf.taxaccounting.service.impl.print.departmentConfigs
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+/**
+ * Формирует excel файл с настройками подразделений
+ */
 public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
+    // начальная строка с данными
     private final static int DATA_ROW_INDEX = 1;
 
     // Записи настроек подразделений

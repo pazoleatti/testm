@@ -40,6 +40,20 @@ public class SelectPersonQueryGeneratorTest {
     }
 
     @Test
+    public void test_generateFilteredQuery_filterByVip() {
+        filter.setVip(true);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.vip = 1");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByNonVip() {
+        filter.setVip(false);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.vip = 0");
+    }
+
+    @Test
     public void test_generateFilteredQuery_filterByName() {
         filter.setFirstName("John");
         String query = generator.generateFilteredQuery();
@@ -85,6 +99,56 @@ public class SelectPersonQueryGeneratorTest {
     }
 
     @Test
+    public void test_generateFilteredQuery_filterByCitizenshipCountry() {
+        filter.setCitizenshipCountries(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and citizenship_country.id in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByTaxpayerStates() {
+        filter.setTaxpayerStates(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.taxpayer_state in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByAsnu() {
+        filter.setSourceSystems(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.source_id in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByInp() {
+        filter.setInp("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("lower(inp) like '%d-1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByInn() {
+        filter.setInn("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and lower(person.inn) like '%d-1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByInnForeign() {
+        filter.setInnForeign("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and lower(person.inn_foreign) like '%d-1%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterBySnils() {
+        filter.setSnils("D-1");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("person.snils");
+        assertThat(query).contains("like '%d1%'");
+    }
+
+    @Test
     public void test_generateFilteredQuery_filterByAddress() {
         filter.setPostalCode("394000");
         filter.setRegion("36");
@@ -101,6 +165,34 @@ public class SelectPersonQueryGeneratorTest {
         assertThat(query).contains("and lower(locality) like '%с. отрадное%'");
         assertThat(query).contains("and lower(city) like '%воронеж%'");
         assertThat(query).contains("and lower(street) like '%пр. революции%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByForeignAddressCountry() {
+        filter.setCountries(Arrays.asList(1L, 2L));
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and address_country.id in (1, 2)");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByForeignAddress() {
+        filter.setForeignAddress("г. Алматы, ул. Пушкина");
+        String query = generator.generateFilteredQuery();
+        assertThat(query).contains("and lower(address.address) like '%г. алматы, ул. пушкина%'");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByNotDuplicates() {
+        filter.setDuplicates(false);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.record_id = person.old_id");
+    }
+
+    @Test
+    public void test_generateFilteredQuery_filterByDuplicatesOnly() {
+        filter.setDuplicates(true);
+        String query = generator.generateFilteredQuery();
+        assertThat(query).endsWith("and person.record_id <> person.old_id");
     }
 
     @Test

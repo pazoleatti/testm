@@ -546,6 +546,20 @@
                     }
                     return defaultDepartment;
                 }
+
+                $scope.initTBMultiSelect = function () {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(
+                        true,
+                        true,
+                        'controller/rest/departments?projection=tb',
+                        {},
+                        {
+                            property: 'name',
+                            direction: 'asc'
+                        },
+                        'departmentActivityFormatter'
+                    );
+                }
             }
         ])
 
@@ -632,6 +646,13 @@
             }
         ])
 
+        .controller('SelectPersonImportanceCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var values = [APP_CONSTANTS.PERSON_IMPORTANCE.VIP, APP_CONSTANTS.PERSON_IMPORTANCE.NOT_VIP];
+                $scope.select = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, values);
+            }
+        ])
+
         /**
          * Контроллер для выбора роли пользователя.
          */
@@ -651,6 +672,16 @@
             function ($scope, APP_CONSTANTS, GetSelectOption) {
                 var attributes = [APP_CONSTANTS.SHOW_VERSIONS.BY_DATE, APP_CONSTANTS.SHOW_VERSIONS.ALL];
                 $scope.versionSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, attributes);
+            }
+        ])
+
+        /**
+         * Контроллер для выбора фильтрации по дубликатам.
+         */
+        .controller('SelectDuplicatesCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                var attributes = [APP_CONSTANTS.SHOW_DUPLICATES.NO, APP_CONSTANTS.SHOW_DUPLICATES.ONLY_DUPLICATES, APP_CONSTANTS.SHOW_DUPLICATES.ALL_RECORDS];
+                $scope.select = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, attributes);
             }
         ])
 
@@ -680,22 +711,18 @@
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.SIGNATORY_MARK] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
                 // Коды форм реорганизации (ликвидации) организации
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.REORGANIZATION] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // Тип ДУЛ
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // Страны
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.COUNTRY] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                // Система-источник
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.ASNU] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
                     filter: {
                         columns: ["NAME", "CODE"]
                     },
                     formatter: "codeNameFormatter"
-                };
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = {
-                    filter: {
-                        columns: ["NAME", "CODE"]
-                    },
-                    formatter: "codeNameFormatter",
-                    sort: {
-                        property: "CODE",
-                        direction: "asc"
-                    }
                 };
                 // Физические лица
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERSON] = {
@@ -791,7 +818,12 @@
                         $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments",
                             {}, $scope.config.sort, $scope.config.formatter);
                     } else {
-                        var isMultiple = (refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE);
+                        var isMultiple = (
+                            refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE
+                            || refBookId === APP_CONSTANTS.REFBOOK.COUNTRY
+                            || refBookId === APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS
+                            || refBookId === APP_CONSTANTS.REFBOOK.ASNU
+                        );
                         $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(isMultiple, true, "controller/rest/refBook/" + refBookId + "/records",
                             $scope.config.filter,
                             filter ? filter : '',

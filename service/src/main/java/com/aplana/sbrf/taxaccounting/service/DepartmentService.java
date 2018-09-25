@@ -232,4 +232,9 @@ public interface DepartmentService {
      * @return список {@link DepartmentName}
      */
     PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams);
+
+    /**
+     * Получение краткой информации о всех тербанках.
+     */
+    PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams);
 }

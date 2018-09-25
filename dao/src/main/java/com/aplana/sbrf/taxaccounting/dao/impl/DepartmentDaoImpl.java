@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -516,7 +517,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         StringBuilder mainQuery = new StringBuilder("select id, shortname from department_fullpath");
 
         // Добавляем поиск по имени
-        if (StringUtils.isNotBlank(name)) {
+        if (isNotBlank(name)) {
             mainQuery.append(" where lower(shortname) like '%")
                     .append(name.toLowerCase())
                     .append("%'");
@@ -526,8 +527,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         StringBuilder query;
         if (pagingParams != null) {
             // Добавляем сортировку к основному запросу
-            if (StringUtils.isNotBlank(pagingParams.getProperty()) &&
-                    StringUtils.isNotBlank(pagingParams.getDirection())) {
+            if (isNotBlank(pagingParams.getProperty()) && isNotBlank(pagingParams.getDirection())) {
                 mainQuery.append(" order by ")
                         .append(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()))
                         .append(" ")
@@ -566,5 +566,54 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         );
 
         return new PagingResult<>(departmentNames, count);
+    }
+
+    @Override
+    public PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams) {
+        String query = "" +
+                "select id, shortname name, is_active active " +
+                "from department " +
+                "where type = 2";
+
+        if (isNotEmpty(filter)) {
+            query = query + "\n" +
+                    "and lower(shortname) like '%" + filter.toLowerCase() + "%'";
+        }
+
+        Integer count = getJdbcTemplate().queryForObject(
+                "select count(*) from(" + query + ")",
+                Integer.class
+        );
+
+        if (pagingParams != null) {
+            String sortProperty = pagingParams.getProperty();
+            String sortDirection = pagingParams.getDirection();
+            if (isNotBlank(sortProperty) && isNotBlank(sortDirection)) {
+                query = query + " order by " + sortProperty + " " + sortDirection;
+            }
+
+            query = "select * \n" +
+                    "from ( \n" +
+                    "   select a.*, rownum rn \n" +
+                    "   from ( \n" + query + ") a \n" +
+                    ") \n" +
+                    "where rn > " + pagingParams.getStartIndex() + " and rownum <= " + pagingParams.getCount();
+        }
+
+        List<DepartmentShortInfo> departments = getJdbcTemplate().query(
+                query,
+                new RowMapper<DepartmentShortInfo>() {
+                    @Override
+                    public DepartmentShortInfo mapRow(ResultSet resultSet, int i) throws SQLException {
+                        DepartmentShortInfo department = new DepartmentShortInfo();
+                        department.setId(SqlUtils.getInteger(resultSet, "id"));
+                        department.setName(resultSet.getString("name"));
+                        department.setActive(resultSet.getBoolean("active"));
+                        return department;
+                    }
+                }
+        );
+
+        return new PagingResult<>(departments, count);
     }
 }

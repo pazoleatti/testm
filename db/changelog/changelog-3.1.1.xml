@@ -39,4 +39,46 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5632 Убрать из списка справочников псевдосправочник "Список тербанков назначенных ФЛ"-->
+    <changeSet id="3.1.1-amandzyak-1" author="amandzyak">
+        <sql>
+            update ref_book set visible = 0 where id = 908
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5637 Ошибка исполнения [43]: ORA-04063: при формировании "Реестра сформированной отчетности" для КНФ-->
+    <changeSet id="3.1.1-amandzyak-2" author="amandzyak">
+        <sql>
+			create or replace view vw_depart_kpp_oktmo as
+			select d.id dep_id,d.name dep_name,
+				   sd.kpp,o.code oktmo
+			  from department d join ref_book_ndfl_detail sd on (sd.department_id=d.id)
+								join ref_book_oktmo o on (o.id=sd.oktmo);
+			comment on table VW_DEPART_KPP_OKTMO is 'Пары КПП и ОКТМО в отчетных формах подразделений';
+			comment on column VW_DEPART_KPP_OKTMO.DEP_ID is 'Идентификатор подразделения';
+			comment on column VW_DEPART_KPP_OKTMO.DEP_NAME is 'Наименование подразделения';
+			comment on column VW_DEPART_KPP_OKTMO.KPP is 'КПП из параметров подразделения по НДФЛ';
+			comment on column VW_DEPART_KPP_OKTMO.OKTMO is 'ОКТМО  из параметров подразделения по НДФЛ';
+		</sql>
+    </changeSet>
+	
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5630 Длительная идентификация формы на 15 000 ФЛ-->
+    <changeSet id="3.1.1-amandzyak-3" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body9.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5523 Реализовать загрузку настроек подразделений из файла Excel-->
+    <changeSet id="3.1.1-dnovikov-4" author="dnovikov">
+        <update tableName="blob_data">
+            <column name="data"
+                    valueBlobFile="templates-3.1.1/refbook/department_configs.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 951)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

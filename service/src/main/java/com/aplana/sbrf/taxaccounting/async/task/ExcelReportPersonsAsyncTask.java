@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Выгрузка реестра ФЛ в excel-файл
+ */
 @Component("ExcelReportPersonsAsyncTask")
 public class ExcelReportPersonsAsyncTask extends AbstractAsyncTask {
     @Autowired
@@ -33,7 +36,7 @@ public class ExcelReportPersonsAsyncTask extends AbstractAsyncTask {
         if (value == 0) {
             throw new ServiceException("Выполнение операции \"%s\" невозможно, т.к. по заданным параметрам не найдено ни одной записи", taskDescription);
         }
-        String msg = String.format("количество отобранных для выгрузки в файл записей (%s) больше, чем разрешенное значение (%s). Для успешного выполнения операции установите дополнительный критерий фильтрации.", value, "%s");
+        String msg = String.format("количество отобранных для выгрузки в файл записей (%s) больше, чем разрешенное значение (%s).", value, "%s");
         return checkTask(value, taskDescription, msg);
     }
 

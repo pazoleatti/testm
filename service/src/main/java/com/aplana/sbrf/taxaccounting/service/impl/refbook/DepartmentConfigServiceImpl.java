@@ -384,14 +384,16 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Override
     public void checkDepartmentConfig(DepartmentConfig departmentConfig, List<DepartmentConfig> relatedDepartmentConfigs) {
+        if (departmentConfig.getEndDate() != null && !departmentConfig.getStartDate().before(departmentConfig.getEndDate())) {
+            throw new ServiceException("Дата начала актуальности записи не может быть больше даты окончания актуальности");
+        }
         Date minDate = null, maxDate = new Date(0);
         List<DepartmentConfig> overlappingDepartmentConfigs = new ArrayList<>();
         for (DepartmentConfig relatedDepartmentConfig : relatedDepartmentConfigs) {
             if (departmentConfig.getId() == null || !departmentConfig.getId().equals(relatedDepartmentConfig.getId())) {
                 // Проверка пересечения существующей с исходной
                 if (!(relatedDepartmentConfig.getEndDate() != null && departmentConfig.getStartDate().after(relatedDepartmentConfig.getEndDate())
-                        || departmentConfig.getStartDate().before(relatedDepartmentConfig.getStartDate())
-                        && departmentConfig.getEndDate() != null && departmentConfig.getEndDate().before(relatedDepartmentConfig.getStartDate()))) {
+                        || departmentConfig.getEndDate() != null && departmentConfig.getEndDate().before(relatedDepartmentConfig.getStartDate()))) {
                     overlappingDepartmentConfigs.add(relatedDepartmentConfig);
                 }
                 if (minDate == null || relatedDepartmentConfig.getStartDate().before(minDate)) {

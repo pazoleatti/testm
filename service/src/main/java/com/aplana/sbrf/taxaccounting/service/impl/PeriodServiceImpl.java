@@ -435,6 +435,11 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
+    public List<ReportPeriod> fetchAll() {
+        return reportPeriodDao.fetchAll();
+    }
+
+    @Override
     public boolean existForDepartment(int departmentId, int reportPeriodId) {
         return departmentReportPeriodService.isExistsByReportPeriodIdAndDepartmentId(departmentId, reportPeriodId);
     }

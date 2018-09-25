@@ -34,7 +34,7 @@ public class SelectPersonQueryGenerator {
             "               and p.version > person.version \n" +
             "               and p.record_id = person.record_id \n" +
             "       ) as version_to, \n" +
-            "       doc_type.name doc_name, doc.doc_number, \n" +
+            "       doc.doc_number, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, \n" +
             "       citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, \n" +
             "       citizenship_country.name citizenship_country_name, \n" +
             "       state.id state_id, state.code state_code, state.name state_name, \n" +
@@ -66,7 +66,7 @@ public class SelectPersonQueryGenerator {
         SORT_FIELDS_BY_PROPERTY.put("firstName", Arrays.asList("first_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("middleName", Arrays.asList("middle_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("birthDate", Arrays.asList("birth_date", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("docName", Arrays.asList("doc_name", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("docName", Arrays.asList("doc_code", "doc_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("docNumber", Arrays.asList("doc_number", "id"));
         SORT_FIELDS_BY_PROPERTY.put("citizenship", Arrays.asList("citizenship_country_code", "id"));
         SORT_FIELDS_BY_PROPERTY.put("taxpayerState", Arrays.asList("state_code", "id"));
@@ -130,26 +130,36 @@ public class SelectPersonQueryGenerator {
     private void addWhereConditions() {
         if (filter != null) {
             addLike("person.old_id", filter.getId());
+            addVipCondition();
             addLikeIgnoreCase("person.last_name", filter.getLastName());
             addLikeIgnoreCase("person.first_name", filter.getFirstName());
             addLikeIgnoreCase("person.middle_name", filter.getMiddleName());
+            addLikeIgnoreCase("person.inn", filter.getInn());
+            addLikeIgnoreCase("person.inn_foreign", filter.getInnForeign());
+            addLikeIgnoreCaseAndDelimiters("person.snils", filter.getSnils());
             addBirthDateConditions();
+            addTBCondition();
             addDocumentsConditions();
+            addSearchIn("citizenship_country.id", filter.getCitizenshipCountries());
+            addSearchIn("person.taxpayer_state", filter.getTaxpayerStates());
+            addSearchIn("person.source_id", filter.getSourceSystems());
+            addInpCondition();
             addAddressConditions();
+            addForeignAddressConditions();
+            addDuplicatesCondition();
             addVersionsConditions();
         }
     }
 
-    private void addLike(String field, String value) {
-        if (isNotEmpty(value)) {
-            query = query + "\n" + "and " + field + " like '%" + value + "%'";
+    private void addVipCondition() {
+        Boolean isVip = filter.getVip();
+        if (isVip != null) {
+            query = query + "\n" + "and person.vip = " + toInt(isVip);
         }
     }
 
-    private void addLikeIgnoreCase(String field, String value) {
-        if (isNotEmpty(value)) {
-            query = query + "\n" + "and lower(" + field + ") like '%" + value.toLowerCase() + "%'";
-        }
+    private int toInt(boolean bool) {
+        return bool ? 1 : 0;
     }
 
     private void addBirthDateConditions() {
@@ -158,6 +168,22 @@ public class SelectPersonQueryGenerator {
         }
         if (filter.getBirthDateTo() != null) {
             query = query + "\n" + "and birth_date <= " + DateUtils.formatForSql(filter.getBirthDateTo());
+        }
+    }
+
+    private void addTBCondition() {
+        List<Long> terBanks = filter.getTerBanks();
+        if (isNotEmpty(terBanks)) {
+            query = query + "\n" +
+                    "and person.record_id in ( \n" +
+                    "   select record_id \n" +
+                    "   from ref_book_person p \n" +
+                    "   where p.id in ( \n" +
+                    "       select person_id \n" +
+                    "       from ref_book_person_tb \n" +
+                    "       where " + searchIn("tb_department_id", terBanks) + "\n" +
+                    "    ) \n" +
+                    ")";
         }
     }
 
@@ -182,28 +208,19 @@ public class SelectPersonQueryGenerator {
         return isNotEmpty(filter.getDocumentTypes()) || isNotEmpty(filter.getDocumentNumber());
     }
 
-    private String searchIn(String field, List<Long> values) {
-        if (isEmpty(values)) {
-            return null;
+    private void addInpCondition() {
+        if (isNotEmpty(filter.getInp())) {
+            query = query + "\n" +
+                    "and person.record_id in ( \n" +
+                    "   select record_id \n" +
+                    "   from ref_book_person p \n" +
+                    "   where p.id in ( \n" +
+                    "       select person_id \n" +
+                    "       from ref_book_id_tax_payer \n" +
+                    "       where " + likeIgnoreCase("inp", filter.getInp()) + " \n" +
+                    "   ) \n" +
+                    ")";
         }
-        String valuesList = join(values, ", ");
-        return field + " in (" + valuesList + ")";
-    }
-
-    private String whereMultiple(String... conditions) {
-        if (isAllEmpty(conditions)) {
-            return "";
-        }
-        return "where " + Joiner.on(" \n and ").skipNulls().join(conditions);
-    }
-
-    private String likeIgnoreCaseAndDelimiters(String field, String value) {
-        if (isEmpty(value)) {
-            return null;
-        }
-        String filteredValue = StringUtils.filterDelimiters(value);
-        String lowerCaseValue = filteredValue.toLowerCase();
-        return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
     }
 
     private void addAddressConditions() {
@@ -213,6 +230,19 @@ public class SelectPersonQueryGenerator {
         addLikeIgnoreCase("city", filter.getCity());
         addLikeIgnoreCase("locality", filter.getLocality());
         addLikeIgnoreCase("street", filter.getStreet());
+    }
+
+    private void addForeignAddressConditions() {
+        addLikeIgnoreCase("address.address", filter.getForeignAddress());
+        addSearchIn("address_country.id", filter.getCountries());
+    }
+
+    private void addDuplicatesCondition() {
+        Boolean showOnlyDuplicates = filter.getDuplicates();
+        if (showOnlyDuplicates != null) {
+            String equalitySign = showOnlyDuplicates ? "<>" : "=";
+            query = query + "\n" + "and person.record_id " + equalitySign + " person.old_id";
+        }
     }
 
     private void addVersionsConditions() {
@@ -228,6 +258,59 @@ public class SelectPersonQueryGenerator {
     private boolean notAllVersions() {
         return (filter.isAllVersions() != null && !filter.isAllVersions() && filter.getVersionDate() != null);
     }
+
+    private void addLike(String field, String value) {
+        if (isNotEmpty(value)) {
+            query = query + "\n" + "and " + field + " like '%" + value + "%'";
+        }
+    }
+
+    private void addLikeIgnoreCase(String field, String value) {
+        if (isNotEmpty(value)) {
+            query = query + "\n" + "and " + likeIgnoreCase(field, value);
+        }
+    }
+
+    private String likeIgnoreCase(String field, String value) {
+        return "lower(" + field + ") like '%" + value.toLowerCase() + "%'";
+    }
+
+    private void addLikeIgnoreCaseAndDelimiters(String field, String value) {
+        if (isNotEmpty(value)) {
+            query = query + "\n" + "and " + likeIgnoreCaseAndDelimiters(field, value);
+        }
+    }
+
+    private String likeIgnoreCaseAndDelimiters(String field, String value) {
+        if (isEmpty(value)) {
+            return null;
+        }
+        String filteredValue = StringUtils.filterDelimiters(value);
+        String lowerCaseValue = filteredValue.toLowerCase();
+        return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
+    }
+
+    private void addSearchIn(String field, Collection<?> values) {
+        if (isNotEmpty(values)) {
+            query = query + "\n" + "and " + searchIn(field, values);
+        }
+    }
+
+    private String searchIn(String field, Collection<?> values) {
+        if (isEmpty(values)) {
+            return null;
+        }
+        String valuesList = join(values, ", ");
+        return field + " in (" + valuesList + ")";
+    }
+
+    private String whereMultiple(String... conditions) {
+        if (isAllEmpty(conditions)) {
+            return "";
+        }
+        return "where " + Joiner.on(" \n and ").skipNulls().join(conditions);
+    }
+
 
     private void addOrder() {
         if (pagingParams != null) {

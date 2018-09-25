@@ -324,4 +324,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     public PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams) {
         return departmentDao.searchDepartmentNames(name, pagingParams);
     }
+
+    @Override
+    public PagingResult<DepartmentShortInfo> fetchAllTBShortInfo(String filter, PagingParams pagingParams) {
+        return departmentDao.fetchAllTBShortInfo(filter, pagingParams);
+    }
 }

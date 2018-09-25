@@ -20,7 +20,11 @@ import static com.aplana.sbrf.taxaccounting.service.impl.print.persons.StyleBuil
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+/**
+ * Формирует excel файл с данными реестра ФЛ
+ */
 public class PersonsReportBuilder extends AbstractReportBuilder {
+    // начальная строка с данными
     private final static int DATA_ROW_INDEX = 7;
 
     // Список ФЛ

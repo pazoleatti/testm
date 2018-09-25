@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +21,8 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
@@ -30,80 +30,87 @@ import static org.junit.Assert.assertEquals;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ReportPeriodDaoTest {
 
-	@Autowired
-	private ReportPeriodDao reportPeriodDao;
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
 
-	@Autowired
-	private TaxPeriodDao taxPeriodDao;
+    @Autowired
+    private TaxPeriodDao taxPeriodDao;
 
-	private TaxPeriod taxPeriod;
+    private TaxPeriod taxPeriod;
 
-	@Test(expected = DaoException.class)
-	public void getNotExistentTest() {
-		reportPeriodDao.fetchOne(-1);
-	}
-	
-	@Before
-	public void init(){
-		taxPeriod = new TaxPeriod();
-		taxPeriod.setTaxType(TaxType.NDFL);
-		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
-		taxPeriod.setId(taxPeriodDao.create(taxPeriod));
-	}
+    @Test(expected = DaoException.class)
+    public void getNotExistentTest() {
+        reportPeriodDao.fetchOne(-1);
+    }
+
+    @Before
+    public void init() {
+        taxPeriod = new TaxPeriod();
+        taxPeriod.setTaxType(TaxType.NDFL);
+        taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
+        taxPeriod.setId(taxPeriodDao.create(taxPeriod));
+    }
 
     @Test
+    public void test_fetchAll() {
+        List<ReportPeriod> allPeriods = reportPeriodDao.fetchAll();
+        assertThat(allPeriods).hasSize(3);
+    }
+
+    @Test
+    // TODO: Тест ничего не делает
     public void getCorrectPeriods() {
         PagingParams pagingParams = new PagingParams();
         pagingParams.setProperty("id");
         pagingParams.setDirection("ASC");
         reportPeriodDao.getCorrectPeriods(1);
     }
-	
-	@Test
-	public void listByTaxPeriodSuccessfulTest() {
-		ReportPeriod newReportPeriod = new ReportPeriod();
-		newReportPeriod.setName("MyTestName1");
-		newReportPeriod.setTaxPeriod(taxPeriod);
-		newReportPeriod.setDictTaxPeriodId(21);
-		newReportPeriod.setStartDate(new Date());
-		newReportPeriod.setEndDate(new Date());
-		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
-		reportPeriodDao.create(newReportPeriod);
-		
-		newReportPeriod = new ReportPeriod();
-		newReportPeriod.setName("MyTestName2");
-		newReportPeriod.setTaxPeriod(taxPeriod);
-		newReportPeriod.setDictTaxPeriodId(22);
-		newReportPeriod.setStartDate(new Date());
-		newReportPeriod.setEndDate(new Date());
-		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
-		reportPeriodDao.create(newReportPeriod);
-		
-		List<ReportPeriod> reportPeriodList = reportPeriodDao.fetchAllByTaxPeriod(taxPeriod.getId());
+
+    @Test
+    public void listByTaxPeriodSuccessfulTest() {
+        ReportPeriod newReportPeriod = new ReportPeriod();
+        newReportPeriod.setName("MyTestName1");
+        newReportPeriod.setTaxPeriod(taxPeriod);
+        newReportPeriod.setDictTaxPeriodId(21);
+        newReportPeriod.setStartDate(new Date());
+        newReportPeriod.setEndDate(new Date());
+        newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
+        reportPeriodDao.create(newReportPeriod);
+
+        newReportPeriod = new ReportPeriod();
+        newReportPeriod.setName("MyTestName2");
+        newReportPeriod.setTaxPeriod(taxPeriod);
+        newReportPeriod.setDictTaxPeriodId(22);
+        newReportPeriod.setStartDate(new Date());
+        newReportPeriod.setEndDate(new Date());
+        newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
+        reportPeriodDao.create(newReportPeriod);
+
+        List<ReportPeriod> reportPeriodList = reportPeriodDao.fetchAllByTaxPeriod(taxPeriod.getId());
         assertEquals(2, reportPeriodList.size());
 
-		reportPeriodList = reportPeriodDao.fetchAllByTaxPeriod(-1);
-		assertEquals(0, reportPeriodList.size());
-	}
+        reportPeriodList = reportPeriodDao.fetchAllByTaxPeriod(-1);
+        assertEquals(0, reportPeriodList.size());
+    }
 
-	@Test
-	public void saveAndGetSuccessTest() {
-		ReportPeriod newReportPeriod = new ReportPeriod();
-		newReportPeriod.setName("MyTestName");
-		newReportPeriod.setTaxPeriod(taxPeriod);
-		newReportPeriod.setDictTaxPeriodId(21);
-		newReportPeriod.setStartDate(new Date());
-		newReportPeriod.setEndDate(new Date());
-		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
+    @Test
+    public void saveAndGetSuccessTest() {
+        ReportPeriod newReportPeriod = new ReportPeriod();
+        newReportPeriod.setName("MyTestName");
+        newReportPeriod.setTaxPeriod(taxPeriod);
+        newReportPeriod.setDictTaxPeriodId(21);
+        newReportPeriod.setStartDate(new Date());
+        newReportPeriod.setEndDate(new Date());
+        newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
 
-		int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
-		ReportPeriod reportPeriod = reportPeriodDao.fetchOne(newReportPeriodId);
+        int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOne(newReportPeriodId);
 
-		assertEquals("MyTestName", reportPeriod.getName());
-		assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
-		assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
-		assertEquals(21, reportPeriod.getDictTaxPeriodId());
-	}
+        assertEquals("MyTestName", reportPeriod.getName());
+        assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
+        assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
+        assertEquals(21, reportPeriod.getDictTaxPeriodId());
+    }
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest1() {
@@ -115,11 +122,11 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest2() {
-        Assert.assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDict(-1, -1));
+        assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDict(-1, -1));
     }
 
     private List<Integer> getReportPeriodIds(List<ReportPeriod> reportPeriodList) {
-        List<Integer> retVal = new LinkedList<Integer>();
+        List<Integer> retVal = new LinkedList<>();
         for (ReportPeriod reportPeriod : reportPeriodList) {
             retVal.add(reportPeriod.getId());
         }
@@ -131,8 +138,8 @@ public class ReportPeriodDaoTest {
         List<ReportPeriod> reportPeriods;
         reportPeriods = reportPeriodDao.fetchAllByDepartments(asList(1, 2, 3));
         assertEquals(3, reportPeriods.size());
-        Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
-            }
+        assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
+    }
 
     private ReportPeriod getReportPeriod() {
         ReportPeriod newReportPeriod = new ReportPeriod();
@@ -183,14 +190,14 @@ public class ReportPeriodDaoTest {
     public void getByTaxTypedCodeYearTest() {
         ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear("21", 2013);
         ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear("99", 2015);
-        Assert.assertNull(reportPeriod1);
-        Assert.assertNotNull(reportPeriod2);
+        assertNull(reportPeriod1);
+        assertNotNull(reportPeriod2);
         assertEquals(3, reportPeriod2.getId().intValue());
     }
 
     @Test
     public void getReportPeriodsByDateTest() {
-        List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
+        List<ReportPeriod> periodList = new ArrayList<>();
         periodList.add(reportPeriodDao.fetchOne(1));
         periodList.add(reportPeriodDao.fetchOne(2));
         Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
@@ -202,12 +209,12 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodTypeById() {
-	    assertEquals(reportPeriodDao.getReportPeriodTypeById(21L).getCode(), "99");
+        assertEquals(reportPeriodDao.getReportPeriodTypeById(21L).getCode(), "99");
     }
 
     @Test
     public void test_FetchActiveByDepartment() {
-	    List<ReportPeriodResult> result = reportPeriodDao.fetchActiveByDepartment(1);
-	    Assert.assertThat(result.size(), is(3));
+        List<ReportPeriodResult> result = reportPeriodDao.fetchActiveByDepartment(1);
+        assertThat(result.size(), is(3));
     }
 }

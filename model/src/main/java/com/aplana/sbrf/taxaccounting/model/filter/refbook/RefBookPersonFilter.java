@@ -11,14 +11,14 @@ public class RefBookPersonFilter implements Serializable {
     private String middleName;
     private Date birthDateFrom;
     private Date birthDateTo;
-    private Long terBankId;
+    private List<Long> terBanks;
     private List<Long> documentTypes;
     private String documentNumber;
-    private Long citizenshipCountryId;
-    private Long taxpayerStateId;
-    private Long sourceId;
+    private List<Long> citizenshipCountries;
+    private List<Long> taxpayerStates;
+    private List<Long> sourceSystems;
     private String id;
-    private Long inp;
+    private String inp;
     private String inn;
     private String innForeign;
     private String snils;
@@ -32,7 +32,7 @@ public class RefBookPersonFilter implements Serializable {
     private String locality;
     private String street;
     // Адрес за пределами РФ
-    private String country;
+    private List<Long> countries;
     private String foreignAddress;
 
     private Boolean allVersions;
@@ -80,12 +80,12 @@ public class RefBookPersonFilter implements Serializable {
         this.birthDateTo = birthDateTo;
     }
 
-    public Long getTerBankId() {
-        return terBankId;
+    public List<Long> getTerBanks() {
+        return terBanks;
     }
 
-    public void setTerBankId(Long terBankId) {
-        this.terBankId = terBankId;
+    public void setTerBanks(List<Long> terBanks) {
+        this.terBanks = terBanks;
     }
 
     public List<Long> getDocumentTypes() {
@@ -104,28 +104,28 @@ public class RefBookPersonFilter implements Serializable {
         this.documentNumber = documentNumber;
     }
 
-    public Long getCitizenshipCountryId() {
-        return citizenshipCountryId;
+    public List<Long> getCitizenshipCountries() {
+        return citizenshipCountries;
     }
 
-    public void setCitizenshipCountryId(Long citizenshipCountryId) {
-        this.citizenshipCountryId = citizenshipCountryId;
+    public void setCitizenshipCountries(List<Long> citizenshipCountries) {
+        this.citizenshipCountries = citizenshipCountries;
     }
 
-    public Long getTaxpayerStateId() {
-        return taxpayerStateId;
+    public List<Long> getTaxpayerStates() {
+        return taxpayerStates;
     }
 
-    public void setTaxpayerStateId(Long taxpayerStateId) {
-        this.taxpayerStateId = taxpayerStateId;
+    public void setTaxpayerStates(List<Long> taxpayerStates) {
+        this.taxpayerStates = taxpayerStates;
     }
 
-    public Long getSourceId() {
-        return sourceId;
+    public List<Long> getSourceSystems() {
+        return sourceSystems;
     }
 
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
+    public void setSourceSystems(List<Long> sourceSystems) {
+        this.sourceSystems = sourceSystems;
     }
 
     public String getId() {
@@ -136,11 +136,11 @@ public class RefBookPersonFilter implements Serializable {
         this.id = id;
     }
 
-    public Long getInp() {
+    public String getInp() {
         return inp;
     }
 
-    public void setInp(Long inp) {
+    public void setInp(String inp) {
         this.inp = inp;
     }
 
@@ -224,12 +224,12 @@ public class RefBookPersonFilter implements Serializable {
         this.street = street;
     }
 
-    public String getCountry() {
-        return country;
+    public List<Long> getCountries() {
+        return countries;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountries(List<Long> countries) {
+        this.countries = countries;
     }
 
     public String getForeignAddress() {

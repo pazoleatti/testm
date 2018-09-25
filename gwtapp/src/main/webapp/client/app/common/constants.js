@@ -52,21 +52,22 @@
                 ROLE_ADMIN: "ROLE_ADMIN"
             },
             REFBOOK: {
-                DEPARTMENT: 30,
-                DECLARATION_TYPE: 207,
                 ASNU: 900,
                 ATTACH_FILE_TYPE: 934,
+                COUNTRY: 10,
                 DECLARATION_DATA_TYPE_REF_BOOK: 931,
-                PERSON: 904,
-                OKTMO: 96,
+                DECLARATION_TYPE: 207,
+                DEPARTMENT: 30,
+                DOC_TYPE: 360,
                 INCOME_CODE: 922,
-                PERSON_ADDRESS: 901,
-                TAXPAYER_STATUS: 903,
+                OKTMO: 96,
                 PERIOD_CODE: 8,
+                PERSON: 904,
+                PERSON_ADDRESS: 901,
                 PRESENT_PLACE: 924,
-                SIGNATORY_MARK: 35,
                 REORGANIZATION: 928,
-                DOC_TYPE: 360
+                SIGNATORY_MARK: 35,
+                TAXPAYER_STATUS: 903
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -84,12 +85,21 @@
                 EDIT: 1 << 13
             },
             USER_ACTIVITY: {
-                YES: {id: 1, name: "Да"},
-                NO: {id: 2, name: "Нет"}
+                YES: {id: 1, name: 'Да'},
+                NO: {id: 2, name: 'Нет'}
+            },
+            PERSON_IMPORTANCE: {
+                VIP: {id: 1, name: 'VIP'},
+                NOT_VIP: {id: 2, name: 'Не VIP'}
             },
             SHOW_VERSIONS: {
                 BY_DATE: {id: 1, name: "На дату"},
                 ALL: {id: 2, name: "Все версии"}
+            },
+            SHOW_DUPLICATES: {
+                NO: {id: 1, name: "Не отображать дубликаты"},
+                ONLY_DUPLICATES: {id: 2, name: "Отображать только дубликаты"},
+                ALL_RECORDS: {id: 3, name: "Все записи"}
             },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},

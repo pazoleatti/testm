@@ -24,11 +24,11 @@ public interface DepartmentConfigService {
     /**
      * Возвращяет страницу настроек подразделений для отображения в GUI
      *
-     * @param action       объект содержащих данные используемые для фильтрации
+     * @param filter       объект содержащих данные используемые для фильтрации
      * @param pagingParams параметры пагиинации
      * @return список объектов содержащих данные о настройках подразделений
      */
-    PagingResult<DepartmentConfig> fetchAllByFilter(DepartmentConfigsFilter action, PagingParams pagingParams);
+    PagingResult<DepartmentConfig> fetchAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет список настроек подразделений по ид подразделения

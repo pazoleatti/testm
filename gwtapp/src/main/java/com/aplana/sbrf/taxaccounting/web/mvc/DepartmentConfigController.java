@@ -49,8 +49,8 @@ public class DepartmentConfigController {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(DepartmentConfigsFilter.class, new RequestParamEditor(DepartmentConfigsFilter.class));
         binder.registerCustomEditor(DepartmentConfig.class, new RequestParamEditor(DepartmentConfig.class));
-        binder.registerCustomEditor(RefBookDepartment.class, new RequestParamEditor(DepartmentConfig.class));
-        binder.registerCustomEditor(DepartmentType.class, new RequestParamEditor(DepartmentConfig.class));
+        binder.registerCustomEditor(RefBookDepartment.class, new RequestParamEditor(RefBookDepartment.class));
+        binder.registerCustomEditor(DepartmentType.class, new RequestParamEditor(DepartmentType.class));
         binder.registerCustomEditor(ImportDepartmentConfigsAction.class, new RequestParamEditor(ImportDepartmentConfigsAction.class));
     }
 

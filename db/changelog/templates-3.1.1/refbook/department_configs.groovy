@@ -14,8 +14,8 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataServic
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService
 import groovy.transform.TypeChecked
 import org.apache.commons.lang3.time.FastDateFormat
-
-import java.text.SimpleDateFormat
+import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.NDFL_DETAIL
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
@@ -72,40 +72,52 @@ class DepartmentConfigScript extends AbstractScriptClass {
         this.department = refBookDepartmentDataService.fetch(departmentId)
 
         List<List<String>> header = []
-        List<List<String>> rows = []
-        checkAndReadFile(inputStream, fileName, rows, header, this.header.first(), this.header.last(), 1, null)
+        List<List<String>> values = []
+        checkAndReadFile(inputStream, fileName, values, header, this.header.first(), this.header.last(), 1, null)
         checkHeader(header)
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
-        if (!rows) {
+        if (!values || new Row(values.first()).isEmpty()) {
             logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
             return
         }
 
-        int rowIndex = 0
+        int rowIndex = 1
+        int rowsCheckLogIndex = logger.entries.size()
         List<DepartmentConfigExt> departmentConfigs = []
-        for (def iterator = rows.iterator(); iterator.hasNext(); rowIndex++) {
-            checkInterrupted()
-
-            def row = new Row(rowIndex, iterator.next())
-            iterator.remove()
-            if (row.isEmpty()) {// все строки пустые - выход
-                if (rowIndex == 0) {
-                    logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
-                    return
+        List<Row> rows = []
+        try {
+            for (def iterator = values.iterator(); iterator.hasNext(); rowIndex++) {
+                checkInterrupted()
+                Row row = new Row(rowIndex, iterator.next())
+                rows.add(row)
+                def departmentConfig = checkAndMakeDepartmentConfig(row)
+                if (row.logger.containsLevel(LogLevel.ERROR) || row.logger.containsLevel(LogLevel.WARNING)) {
+                    continue// строки с ошибками пропускаем
                 }
-                break
+                departmentConfigs.add(departmentConfig)
             }
-            def departmentConfig = makeDepartmentConfig(row)
-            departmentConfigs.add(departmentConfig)
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
+            } else if (departmentConfigs.isEmpty()) {
+                logger.warn("Не удалось загрузить ни одной строки")
+            } else {
+                List<DepartmentConfig> departmentConfigsBeforeSave = departmentConfigService.fetchAllByDepartmentId(department.id)
+                departmentConfigService.delete(departmentConfigsBeforeSave, logger)
+
+                List<DepartmentConfigExt> savedDepartmentConfigs = save(departmentConfigs)
+
+                logSaveResult(savedDepartmentConfigs, departmentConfigsBeforeSave)
+            }
+        } finally {
+            // все ошибки по строкам логируем в одну кучу и по порядку
+            for (Row row : rows) {
+                logger.entries.addAll(rowsCheckLogIndex, row.logger.getEntries())
+                rowsCheckLogIndex += row.logger.getEntries().size()
+            }
         }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
-            return
-        }
-        save(departmentConfigs)
     }
 
     void checkHeader(List<List<String>> headerActual) {
@@ -123,42 +135,46 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
     }
 
-    DepartmentConfigExt makeDepartmentConfig(Row row) {
+    /**
+     * Создает {@link DepartmentConfig} по строке excel файла и выполняет проверки
+     * ошибки пишет в логгер отдельной строки
+     */
+    DepartmentConfigExt checkAndMakeDepartmentConfig(Row row) {
         int colNum = 0
         DepartmentConfigExt departmentConfig = new DepartmentConfigExt(row)
         departmentConfig.setDepartment(department)
-        departmentConfig.setStartDate(row.cell(colNum).toDate())
+        departmentConfig.setStartDate(row.cell(colNum).nonEmpty().toDate())
         departmentConfig.setEndDate(row.cell(++colNum).toDate())
-        departmentConfig.setKpp(row.cell(++colNum).toString())
-        departmentConfig.setOktmo(getOktmoByCode(row.cell(++colNum).toString()))
-        departmentConfig.setTaxOrganCode(row.cell(++colNum).toString())
-        departmentConfig.setPresentPlace(getPresentPlaceByCode(row.cell(++colNum).toString()))
-        departmentConfig.setName(row.cell(++colNum).toString())
-        departmentConfig.setPhone(row.cell(++colNum).toString())
-        departmentConfig.setSignatoryMark(getSignatoryMarkByCode(row.cell(++colNum).toInteger()))
-        departmentConfig.setSignatorySurName(row.cell(++colNum).toString())
-        departmentConfig.setSignatoryFirstName(row.cell(++colNum).toString())
-        departmentConfig.setSignatoryLastName(row.cell(++colNum).toString())
-        departmentConfig.setApproveDocName(row.cell(++colNum).toString())
-        departmentConfig.setReorganization(getReorganizationByCode(row.cell(++colNum).toString()))
-        departmentConfig.setReorgKpp(row.cell(++colNum).toString())
-        departmentConfig.setReorgInn(row.cell(++colNum).toString())
+        departmentConfig.setKpp(row.cell(++colNum).getKpp())
+        departmentConfig.setOktmo(row.cell(++colNum).getOktmo())
+        departmentConfig.setTaxOrganCode(row.cell(++colNum).getTaxOrganCode())
+        departmentConfig.setPresentPlace(row.cell(++colNum).getPresentPlace())
+        departmentConfig.setName(row.cell(++colNum).getName())
+        departmentConfig.setPhone(row.cell(++colNum).getPhone())
+        departmentConfig.setSignatoryMark(row.cell(++colNum).getSignatoryMark())
+        departmentConfig.setSignatorySurName(row.cell(++colNum).getSignatorySurName())
+        departmentConfig.setSignatoryFirstName(row.cell(++colNum).getSignatoryFirstName())
+        departmentConfig.setSignatoryLastName(row.cell(++colNum).getSignatoryLastName())
+        departmentConfig.setApproveDocName(row.cell(++colNum).getApproveDocName())
+        departmentConfig.setReorganization(row.cell(++colNum).getReorganization())
+        departmentConfig.setReorgKpp(row.cell(++colNum).getReorgKpp())
+        departmentConfig.setReorgInn(row.cell(++colNum).getReorgInn())
         return departmentConfig
     }
 
-    void save(List<DepartmentConfigExt> departmentConfigs) {
-        List<DepartmentConfig> departmentConfigsBeforeSave = departmentConfigService.fetchAllByDepartmentId(department.id)
-        departmentConfigService.delete(departmentConfigsBeforeSave, logger)
-
+    // Сохраняет настройки подразделений с проверками
+    List<DepartmentConfigExt> save(List<DepartmentConfigExt> departmentConfigs) {
         List<DepartmentConfigExt> savedDepartmentConfigs = []
         for (def departmentConfig : departmentConfigs) {
+            checkInterrupted()
+
             List<DepartmentConfig> relatedDepartmentConfigs = departmentConfigService.fetchAllByKppAndOktmo(departmentConfig.kpp, departmentConfig.oktmo.code)
             try {
                 departmentConfigService.checkDepartmentConfig(departmentConfig, relatedDepartmentConfigs)
             } catch (ServiceException e) {
                 // пропускаем запись и переходим на следующую
-                logger.warn("Строка " + departmentConfig.row.num + " не сохранена: " + e.getMessage())
-                break
+                departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + e.getMessage())
+                continue
             }
             if (!relatedDepartmentConfigs.isEmpty()) {
                 // если записи с такой парой КПП/ОКТМО уже есть, то recordId должен быть тот же что у них
@@ -169,11 +185,10 @@ class DepartmentConfigScript extends AbstractScriptClass {
                 savedDepartmentConfigs.add(insertedDepartmentConfig)
             }
         }
-
-        logSaveResult(savedDepartmentConfigs, departmentConfigsBeforeSave)
+        return savedDepartmentConfigs
     }
 
-    // Создаёт запись настройки подразделений в бд
+    // Сохраняет запись настройки подразделений в бд
     // через batch не получается из-за дат актуальности
     DepartmentConfigExt insertRecord(DepartmentConfigExt departmentConfig) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId())
@@ -183,12 +198,12 @@ class DepartmentConfigScript extends AbstractScriptClass {
             def ids = provider.createRecordVersionWithoutLock(localLogger, departmentConfig.getStartDate(), departmentConfig.getEndDate(), [record])
             departmentConfig.setId(ids[0])
         } catch (Exception e) {
-            logger.warn("Строка " + departmentConfig.row.num + " не сохранена: " + e.getMessage())
+            departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + e.getMessage())
             return null
         }
         if (localLogger.containsLevel(LogLevel.ERROR)) {
             for (def logEntry : localLogger.getEntries()) {
-                logger.warn("Строка " + departmentConfig.row.num + " не сохранена: " + logEntry.getMessage())
+                departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + logEntry.getMessage())
             }
             return null
         }
@@ -238,7 +253,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             if (!presentPlace) {
                 def recordData = refBookFactory.getDataProvider(RefBook.Id.PRESENT_PLACE.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
-                    def record = recordData.entrySet().iterator().next().getValue()
+                    def record = recordData.entrySet().first().getValue()
                     presentPlace = new RefBookPresentPlace()
                     presentPlace.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     presentPlace.setCode(record.get("CODE").getStringValue())
@@ -258,7 +273,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             if (!signatoryMark) {
                 def recordData = refBookFactory.getDataProvider(RefBook.Id.MARK_SIGNATORY_CODE.getId()).getRecordDataVersionWhere(" where code = ${code}", new Date())
                 if (1 == recordData.entrySet().size()) {
-                    def record = recordData.entrySet().iterator().next().getValue()
+                    def record = recordData.entrySet().first().getValue()
                     signatoryMark = new RefBookSignatoryMark()
                     signatoryMark.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     signatoryMark.setCode(record.get("CODE").getNumberValue().intValue())
@@ -278,7 +293,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             if (!reorganization) {
                 def recordData = refBookFactory.getDataProvider(RefBook.Id.REORGANIZATION.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
-                    def record = recordData.entrySet().iterator().next().getValue()
+                    def record = recordData.entrySet().first().getValue()
                     reorganization = new RefBookReorganization()
                     reorganization.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     reorganization.setCode(record.get("CODE").getStringValue())
@@ -330,8 +345,9 @@ class DepartmentConfigScript extends AbstractScriptClass {
         // индекс строки начиная с 0
         int index
         List<String> values
+        Logger logger = new Logger()
 
-        Row(int index, List<String> values) {
+        Row(int index = 0, List<String> values) {
             this.index = index
             this.values = values
         }
@@ -365,7 +381,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         Cell(int index, String value, Row row) {
             this.index = index
-            this.value = value
+            this.value = value ? value.trim() : null
             this.row = row
         }
 
@@ -373,12 +389,17 @@ class DepartmentConfigScript extends AbstractScriptClass {
             return index + 1
         }
 
+        Cell nonEmpty() {
+            if (!value) {
+                logError("Отсутствует значение для ячейки столбца \"${header[index]}\"")
+            }
+            return this
+        }
+
         Date toDate() {
             if (value != null && !value.isEmpty()) {
                 try {
-                    SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
-                    formatter.setLenient(false)
-                    return formatter.parse(value)
+                    return LocalDate.parse(value, DateTimeFormat.forPattern(SharedConstants.DATE_FORMAT)).toDate()
                 } catch (Exception ignored) {
                     logIncorrectTypeError("Дата")
                 }
@@ -386,42 +407,146 @@ class DepartmentConfigScript extends AbstractScriptClass {
             return null
         }
 
-        private Integer toInteger(Integer precision = null) {
-            return toBigDecimal(precision)?.intValue()
+        String getKpp() {
+            if (!value || value.length() != 9 || !(value[4..5] in ["01", "02", "03", "05", "31", "32", "43", "45"])) {
+                logError("\"КПП\" должен содержать 9 цифр, из которых 5 и 6 цифры должны содержать одно из значений: \"01\", \"02\", \"03\", \"05\", \"31\", \"32\", \"43\", \"45\"")
+                return null
+            }
+            return value
         }
 
-        Long toLong(Integer precision = null) {
-            return toBigDecimal(precision)?.longValue()
-        }
-
-        BigDecimal toBigDecimal(Integer precision = null, Integer scale = null) {
-            assert (precision == null || precision > 0) && (scale == null || scale > 0)
-            BigDecimal result = null
-            if (value) {
-                try {
-                    def bigDecimal = new BigDecimal(value)
-                    if (precision != null && bigDecimal.precision() > precision || scale != null && bigDecimal.scale() > scale) {
-                        logIncorrectTypeError("${!scale ? "Целое число" : "Число"}${!precision ? "" : "/${precision}${!scale ? "" : ".${scale}/"}"}")
-                    }
-                    result = bigDecimal
-                } catch (NumberFormatException ignored) {
-                    logIncorrectTypeError("${!scale ? "Целое число" : "Число"}${!precision ? "" : "/${precision}${!scale ? "" : ".${scale}/"}"}")
+        RefBookOktmo getOktmo() {
+            RefBookOktmo oktmo = null
+            if (!value || !(value.length() in [8, 11]) || !value.isNumber()) {
+                logError("\"ОКТМО\" должен содержать либо 8, либо 11 цифр")
+            } else {
+                oktmo = getOktmoByCode(value)
+                if (oktmo == null) {
+                    logError("Не найдено запись в справочнике \"ОКТМО\" по коду " + value)
                 }
             }
-            return result
+            return oktmo
         }
 
-        String toString(Integer maxLength = null, Integer minLength = null) {
-            if (value && (maxLength && value.length() > maxLength || minLength && value.length() < minLength)) {
-                logIncorrectTypeError("Строка/${maxLength}/")
+        String getTaxOrganCode() {
+            if (!value || value.length() != 4 || !value.isNumber()) {
+                logError("\"\"Код НО (конечного)\" должен содержать 4 цифры.")
+                return null
+            }
+            return value
+        }
+
+        RefBookPresentPlace getPresentPlace() {
+            RefBookPresentPlace presentPlace
+            if (!value || value.length() != 3 || !value.isNumber()) {
+                logError("\"Код по месту представления\" должен содержать 3 цифры")
+                return null
+            } else {
+                presentPlace = getPresentPlaceByCode(value)
+                if (presentPlace == null) {
+                    logError("Не найдено запись в справочнике \"Коды места представления расчета\" по коду " + value)
+                }
+            }
+            return presentPlace
+        }
+
+        String getName() {
+            if (value && value.length() > 1000) {
+                logError("\"Наименование для титульного листа\" должно содержать строку длиной не более 1000 символов")
+                return null
+            }
+            return value
+        }
+
+        String getPhone() {
+            if (value && value.length() > 25) {
+                logError("\"Контактный телефон\" должен содержать строку длиной не более 25 символов")
+                return null
+            }
+            return value
+        }
+
+        RefBookSignatoryMark getSignatoryMark() {
+            RefBookSignatoryMark signatoryMark
+            if (!value || value.length() != 1 || !value.isNumber()) {
+                logError("\"Признак подписанта\" должен содержать число от 0 до 9")
+                return null
+            } else {
+                signatoryMark = getSignatoryMarkByCode(Integer.valueOf(value))
+                if (signatoryMark == null) {
+                    logError("Не найдено запись в справочнике \"Признак лица, подписавшего документ\" по коду " + value)
+                }
+            }
+            return signatoryMark
+        }
+
+        String getSignatorySurName() {
+            if (value && value.length() > 60) {
+                logError("\"Фамилия подписанта\" должна быть строкой длиной не более 60 символов")
+                return null
+            }
+            return value ?: null
+        }
+
+        String getSignatoryFirstName() {
+            if (value && value.length() > 60) {
+                logError("\"Имя подписанта\" должно быть строкой длиной не более 60 символов")
+                return null
+            }
+            return value ?: null
+        }
+
+        String getSignatoryLastName() {
+            if (value && value.length() > 60) {
+                logError("\"Отчество подписанта\" должен быть строкой длиной не более 60 символов")
+                return null
+            }
+            return value ?: null
+        }
+
+        String getApproveDocName() {
+            if (value && value.length() > 120) {
+                logError("\"Документ полномочий подписанта\" должен быть строкой длиной не более 120 символов")
+                return null
+            }
+            return value ?: null
+        }
+
+        RefBookReorganization getReorganization() {
+            RefBookReorganization reorganization = null
+            if (!value || value.length() != 1 || !value.isNumber()) {
+                logError("\"Код формы реорганизации\" должен содержать число от 0 до 9")
+            } else {
+                reorganization = getReorganizationByCode(value)
+                if (reorganization == null) {
+                    logError("Не найдено запись в справочнике \"Коды форм реорганизации (ликвидации) организации\" по коду " + value)
+                }
+            }
+            return reorganization
+        }
+
+        String getReorgKpp() {
+            if (value && (value.length() != 9 || !(value[4..5] in ["01", "02", "03", "05", "31", "32", "43", "45"]))) {
+                logError("\"КПП реорганизованной организации\" должен содержать 9 цифр, из которых 5 и 6 цифры должны содержать одно из значений: \"01\", \"02\", \"03\", \"05\", \"31\", \"32\", \"43\", \"45\"")
+                return null
+            }
+            return value ?: null
+        }
+
+        String getReorgInn() {
+            if (value && value.length() != 10) {
+                logError("\"ИНН реорганизованной организации\" должен содержать 10 цифр")
                 return null
             }
             return value ?: null
         }
 
         void logIncorrectTypeError(def type) {
-            logger.error("Ошибка при определении значения ячейки файла \"$fileName\". Тип данных ячейки столбца \"${header[index]}\" № " + index +
-                    " строки ${row.index + 1} не соответствует ожидаемому \"$type\".")
+            logError("Тип данных ячейки столбца \"${header[index]}\" не соответствует ожидаемому \"$type\".")
+        }
+
+        void logError(String message) {
+            row.logger.warn("Строка " + row.num + ". " + message)
         }
     }
 }
