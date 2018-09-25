@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
@@ -8,18 +8,15 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -94,15 +91,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Autowired
     private DepartmentDao departmentDao;
     @Autowired
-    private CommonRefBookService commonRefBookService;
-    @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
     private AuditService auditService;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private AsyncTaskDao asyncTaskDao;
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -164,156 +159,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public List<Map<String, String>> getAsyncConfig() {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
-        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
-        List<Map<String, String>> params = new ArrayList<Map<String, String>>();
-        for (Map<String, RefBookValue> value : values) {
-            Map<String, String> record = new HashMap<String, String>();
-            for (Map.Entry<String, RefBookValue> entry : value.entrySet()) {
-                switch (entry.getValue().getAttributeType()) {
-                    case NUMBER:
-                        Number nValue = entry.getValue().getNumberValue();
-                        record.put(entry.getKey(), nValue != null ? nValue.toString() : null);
-                        break;
-                    case STRING:
-                        record.put(entry.getKey(), entry.getValue().getStringValue());
-                        break;
-                }
-            }
-            params.add(record);
-        }
-        return params;
-    }
-
-    @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
             "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo) {
         return configurationDao.fetchAllByDepartment(departmentId);
     }
-
-    @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
-    public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
-        if (model == null) {
-            return;
-        }
-        // Длина
-        for (ConfigurationParam parameter : model.keySet()) {
-            Map<Integer, List<String>> map = model.get(parameter);
-            int maxLength = parameter.getGroup().equals(ConfigurationParamGroup.EMAIL) ? EMAIL_MAX_LENGTH : MAX_LENGTH;
-            if (map == null) {
-                continue;
-            }
-            for (List<String> valueList : map.values()) {
-                if (valueList == null) {
-                    continue;
-                }
-                for (String value : valueList) {
-                    // Проверка значения параметра "Проверять ЭП"
-                    if (parameter.equals(ConfigurationParam.SIGN_CHECK)) {
-                        signCheck(value, logger);
-                    }
-                    if (value != null && value.length() > maxLength) {
-                        logger.error(MAX_LENGTH_ERROR, parameter.getCaption(), maxLength);
-                    }
-                }
-            }
-        }
-
-        // Проверки общих параметров
-        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
-            if (configurationParam.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                List<String> valuesList = model.get(configurationParam, 0);
-                if (valuesList == null || valuesList.isEmpty()) {
-                    // Обязательность
-                    model.remove(configurationParam);
-                } else {
-                    if (configurationParam.isUnique() && valuesList.size() != 1) {
-                        // Уникальность
-                        logger.error(DUPLICATE_SET_ERROR, configurationParam.getCaption());
-                    }
-                }
-            }
-        }
-
-        // Уникальность ТБ для параметров загрузки НФ (дубли могут проверяться только на клиенте)
-        Set<Integer> departmentIdSet = new HashSet<Integer>();
-        for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : model.entrySet()) {
-            if (entry.getKey().getGroup().equals(ConfigurationParamGroup.FORM)) {
-                for (int departmentId : entry.getValue().keySet()) {
-                    departmentIdSet.add(departmentId);
-                }
-            }
-        }
-
-        // Пути к каталогам для параметров загрузки НФ
-        Set<ConfigurationParam> configurationParamSet = new HashSet<ConfigurationParam>(asList(
-                ConfigurationParam.FORM_UPLOAD_DIRECTORY,
-                ConfigurationParam.FORM_ARCHIVE_DIRECTORY,
-                ConfigurationParam.FORM_ERROR_DIRECTORY));
-
-        for (ConfigurationParam param : configurationParamSet) {
-            for (int departmentId : departmentIdSet) {
-                List<String> list = model.get(param, departmentId);
-                if (list != null && !list.isEmpty()) {
-                    String value = list.get(0);
-                    // Проверка совпадения
-                    for (ConfigurationParam otherParam : configurationParamSet) {
-                        if (otherParam != param) {
-                            List<String> otherList = model.get(otherParam, departmentId);
-                            String otherValue = null;
-                            if (otherList != null && !otherList.isEmpty()) {
-                                otherValue = otherList.get(0);
-                            }
-                            if (value.equalsIgnoreCase(otherValue)) {
-                                Department department = departmentDao.getDepartment(departmentId);
-                                logger.error(UNIQUE_PATH_ERROR, value, param.getCaption(), otherParam.getCaption(),
-                                        department.getName());
-                                return;
-                            }
-                        }
-                    }
-                } else {
-                    // Не все указаны
-                    logger.error(NOT_SET_ERROR, param.getCaption());
-                    return;
-                }
-            }
-        }
-
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            saveAndLog(model, emailConfigs, asyncConfigs, userInfo);
-
-            //Сохранение настроек почты
-            RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
-
-            List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
-            for (Map<String, String> param : emailConfigs) {
-                Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
-                for (Map.Entry<String, String> entry : param.entrySet()) {
-                    record.put(entry.getKey(), new RefBookValue(RefBookAttributeType.STRING, entry.getValue()));
-                }
-                records.add(record);
-            }
-            provider.updateRecords(userInfo, new Date(), records);
-
-            //Сохранение настроек асинхронных задач
-            provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
-
-            records = new ArrayList<Map<String, RefBookValue>>();
-            for (Map<String, String> param : asyncConfigs) {
-                Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
-                for (Map.Entry<String, String> entry : param.entrySet()) {
-                    record.put(entry.getKey(), new RefBookValue(RefBookAttributeType.STRING, entry.getValue()));
-                }
-                records.add(record);
-            }
-            provider.updateRecords(userInfo, new Date(), records);
-        }
-    }
-
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
@@ -452,99 +302,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
     }
 
-    /**
-     * Сохранить новые конфигурационные параметры и записать в ЖА
-     *
-     * @param model    модель с конфигурационными параметрами
-     * @param userInfo информация о пользователе
-     */
-    @Deprecated
-    void saveAndLog(ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, TAUserInfo userInfo) {
-        ConfigurationParamModel oldModel = configurationDao.fetchAllAsModel();
-        Map<String, Map<String, String>> oldEmailConfigMap = new HashMap<String, Map<String, String>>();
-        Map<String, Map<String, String>> oldAsyncConfigMap = new HashMap<String, Map<String, String>>();
-        for (Map<String, String> config : getEmailConfig()) {
-            oldEmailConfigMap.put(config.get("NAME"), config);
-        }
-        for (Map<String, String> config : getAsyncConfig()) {
-            oldAsyncConfigMap.put(config.get("ID"), config);
-        }
-        model.put(ConfigurationParam.NO_CODE, oldModel.get(ConfigurationParam.NO_CODE));
-        model.put(ConfigurationParam.SBERBANK_INN, oldModel.get(ConfigurationParam.SBERBANK_INN));
-        model.put(ConfigurationParam.LIMIT_IDENT, oldModel.get(ConfigurationParam.LIMIT_IDENT));
-        model.put(ConfigurationParam.SHOW_TIMING, oldModel.get(ConfigurationParam.SHOW_TIMING));
-        model.put(ConfigurationParam.ENABLE_IMPORT_PERSON, oldModel.get(ConfigurationParam.ENABLE_IMPORT_PERSON));
-        configurationDao.save(model);
-        for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (ConfigurationParamGroup.COMMON.equals(param.getGroup())) {
-                if (model.keySet().contains(param) && oldModel.keySet().contains(param)) {
-                    String keyFileUrlDiff = checkParams(oldModel, model, param, 0);
-                    if (keyFileUrlDiff != null) {
-                        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + param.getCaption() + "\":" + keyFileUrlDiff, null);
-                    }
-                } else if (model.keySet().contains(param)) {
-                    String stringValue = "\"" + model.getFullStringValue(param, 0) + "\"";
-                    auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\":" + stringValue, null);
-                } else if (oldModel.keySet().contains(param)) {
-                    String stringValue = "\"" + oldModel.getFullStringValue(param, 0) + "\"";
-                    auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption() + "\":" + stringValue, null);
-                }
-            } else if (ConfigurationParamGroup.FORM.equals(param.getGroup())) {
-                Map<Integer, List<String>> values = model.get(param);
-                Map<Integer, List<String>> oldValues = oldModel.get(param);
-                Set<Integer> allDepartmentIds = new HashSet<Integer>();
-                Set<Integer> departmentIds = values != null ? values.keySet() : new HashSet<Integer>();
-                Set<Integer> oldDepartmentIds = oldValues != null ? oldValues.keySet() : new HashSet<Integer>();
-                allDepartmentIds.addAll(departmentIds);
-                allDepartmentIds.addAll(oldDepartmentIds);
-
-                for (Integer departmentId : allDepartmentIds) {
-                    if (departmentIds.contains(departmentId) && oldDepartmentIds.contains(departmentId)) {
-                        // Проверка на изменение
-                        String keyFileUrlDiff = checkParams(oldModel, model, param, departmentId);
-                        if (keyFileUrlDiff != null) {
-                            auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                    departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Изменён параметр \"" + param.getCaption() + "\":" + keyFileUrlDiff, null);
-                        }
-                    } else if (departmentIds.contains(departmentId)) {
-                        // Добавление
-                        String stringValue = "\"" + model.getFullStringValue(param, departmentId) + "\"";
-                        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\":" + stringValue, null);
-                    } else {
-                        // Удаление
-                        String stringValue = "\"" + oldModel.getFullStringValue(param, departmentId) + "\"";
-                        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Удален параметр \"" + param.getCaption() + "\":" + stringValue, null);
-                    }
-                }
-            }
-        }
-        for (Map<String, String> config : emailConfigs) {
-            Map<String, String> oldConfig = oldEmailConfigMap.get(config.get("NAME"));
-            String check = checkConfig(config, oldConfig, "VALUE");
-            if (check != null) {
-                auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                        userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" + config.get("NAME") + "\":" + check, null);
-            }
-        }
-        RefBook refBookAsyncConfig = commonRefBookService.get(RefBook.Id.ASYNC_CONFIG.getId());
-        for (Map<String, String> config : asyncConfigs) {
-            Map<String, String> oldConfig = oldAsyncConfigMap.get(config.get("ID"));
-            for (String key : Arrays.asList("SHORT_QUEUE_LIMIT", "TASK_LIMIT")) {
-                String check = checkConfig(config, oldConfig, key);
-                if (check != null) {
-                    auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() + ". Изменён параметр \"" + refBookAsyncConfig.getAttribute(key).getName() + "\" для задания \"" + config.get("NAME") + "\":" + check, null);
-                }
-            }
-        }
-    }
-
-
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public void resetCommonParams(TAUserInfo userInfo) {
@@ -554,7 +311,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) ")
     public PagingResult<AsyncTaskTypeData> fetchAsyncParams(PagingParams pagingParams, TAUserInfo userInfo) {
-        return asyncTaskDao.fetchAllAsyncTaskTypeData(pagingParams);
+        return asyncTaskTypeDao.findAll(pagingParams);
     }
 
     @Override
@@ -657,7 +414,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_ADMINISTRATION_CONFIG)")
     public String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
-        AsyncTaskTypeData oldAsyncParam = asyncTaskDao.getTaskTypeData(asyncParam.getId());
+        AsyncTaskTypeData oldAsyncParam = asyncTaskTypeDao.findById(asyncParam.getId());
         // необходимо при проверке изменения значения, так как, если в БД значение пустое,
         // оно выгружается как "0"
         if (oldAsyncParam.getTaskLimit() == 0) {
@@ -670,7 +427,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (logger.containsLevel(LogLevel.ERROR)) {
             return logEntryService.save(logger.getEntries());
         }
-        configurationDao.updateAsyncParam(asyncParam);
+        asyncTaskTypeDao.updateLimits(asyncParam);
 
         String message = String.format(EDIT_ASYNC_PARAM_MESSAGE,
                 ConfigurationParamGroup.ASYNC.getCaption(),
@@ -694,7 +451,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
             logger.info(message);
-
         }
 
         return logEntryService.save(logger.getEntries());
@@ -797,7 +553,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * Проверка параметра веса идентификации
      *
      * @param configuration значение параметра
-     * @param logger логгер
+     * @param logger        логгер
      */
     private void checkIdentificationWeightParam(Configuration configuration, Logger logger) {
         boolean formatError = false;

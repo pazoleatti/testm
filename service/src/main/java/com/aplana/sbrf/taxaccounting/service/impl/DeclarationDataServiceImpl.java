@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
@@ -28,7 +29,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.permissions.AbstractPermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
@@ -59,7 +59,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,6 +164,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private NdflPersonService ndflPersonService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private RefBookFactory rbFactory;
     @Autowired
@@ -2731,7 +2732,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Long getTaskLimit(AsyncTaskType reportType) {
-        return asyncTaskDao.getTaskTypeData(reportType.getAsyncTaskTypeId()).getTaskLimit();
+        return asyncTaskTypeDao.findById(reportType.getAsyncTaskTypeId()).getTaskLimit();
     }
 
     @Override

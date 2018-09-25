@@ -82,9 +82,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
         if (EMAIL_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookRefBookEmailConfig", RefBookEmailConfigProvider.class);
         }
-        if (ASYNC_CONFIG.getId() == refBookId) {
-            return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
-        }
         if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
             RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
             if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {

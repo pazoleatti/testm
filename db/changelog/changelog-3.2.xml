@@ -4,5 +4,14 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5492 удалил справочник "Настройки асинхронных задач"-->
+    <changeSet id="3.2-dnovikov-1" author="dnovikov">
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id = 401</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id = 401</where>
+        </delete>
+    </changeSet>
 
 </databaseChangeLog>

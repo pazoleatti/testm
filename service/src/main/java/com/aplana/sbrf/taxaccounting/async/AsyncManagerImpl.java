@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -17,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +56,8 @@ public class AsyncManagerImpl implements AsyncManager {
     private LockDataService lockDataService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -66,7 +68,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTask getAsyncTaskBean(long taskTypeId) throws AsyncTaskException {
-        AsyncTaskTypeData asyncTaskType = asyncTaskDao.getTaskTypeData(taskTypeId);
+        AsyncTaskTypeData asyncTaskType = asyncTaskTypeDao.findById(taskTypeId);
 
         if (asyncTaskType == null) {
             throw new AsyncTaskException("Cannot find parameters for async task with id " + taskTypeId + " in database table ASYNC_TASK_TYPE");

@@ -1,6 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import java.util.List;
 import java.util.Map;
@@ -12,12 +18,11 @@ import java.util.Map;
 public interface AsyncTaskDao {
 
     /**
-     * Получение данных типа асинхронной задачи по ее id
+     * Возвращяет все ассинхронные задачи
      *
-     * @param asyncTaskTypeId тип задачи
-     * @return данные задачи
+     * @return список ассинхронных задач
      */
-    AsyncTaskTypeData getTaskTypeData(long asyncTaskTypeId);
+    List<AsyncTaskData> findAll();
 
     /**
      * Сохраняет в БД информацию о новой асинхронной задаче
@@ -127,12 +132,14 @@ public interface AsyncTaskDao {
 
     /**
      * Очищает поле ASYNC_TASK.NODE и проставляет статус "В очереди на выполнение" для всех задач, выполняющихя на узле
+     *
      * @param node узел
      */
     void releaseNodeTasks(String node);
 
     /**
      * Получает список идентификаторов задач, привязанных к указанному узлу. Используется только в dev-моде
+     *
      * @param priorityNode узел, назначенный для выполнения
      * @return список идентификаторов
      */
@@ -140,16 +147,9 @@ public interface AsyncTaskDao {
 
     /**
      * Проверяет существование задачи по ее id
+     *
      * @param taskId идентификатор задачи
      * @return задача существует?
      */
     boolean isTaskExists(long taskId);
-
-    /**
-     * Получение списка типов асинхронных задач
-     *
-     * @param pagingParams параметры пагинации
-     * @return страница {@link PagingResult} с данными {@link AsyncTaskTypeData}
-     */
-    PagingResult<AsyncTaskTypeData> fetchAllAsyncTaskTypeData(PagingParams pagingParams);
 }

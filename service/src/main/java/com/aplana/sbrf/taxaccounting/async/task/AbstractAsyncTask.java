@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
@@ -48,7 +48,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private AsyncTaskDao asyncTaskDao;
+    private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     protected TAUserService userService;
     @Autowired
@@ -130,7 +130,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * @throws AsyncTaskException в случае, если проверка не была пройдена
      */
     protected AsyncQueue checkTask(Long value, String taskName, String msg) throws AsyncTaskException {
-        AsyncTaskTypeData taskTypeData = asyncTaskDao.getTaskTypeData(getAsyncTaskType().getAsyncTaskTypeId());
+        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.findById(getAsyncTaskType().getAsyncTaskTypeId());
         if (taskTypeData == null) {
             throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskName));
         }

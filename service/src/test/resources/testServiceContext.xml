@@ -83,10 +83,10 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.RefBookEmailConfigDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.RefBookAsyncConfigDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao"/>
