@@ -34,7 +34,7 @@ public class SelectPersonQueryGenerator {
             "               and p.version > person.version \n" +
             "               and p.record_id = person.record_id \n" +
             "       ) as version_to, \n" +
-            "       doc_type.name doc_name, doc.doc_number, \n" +
+            "       doc.doc_number, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, \n" +
             "       citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, \n" +
             "       citizenship_country.name citizenship_country_name, \n" +
             "       state.id state_id, state.code state_code, state.name state_name, \n" +
@@ -66,7 +66,7 @@ public class SelectPersonQueryGenerator {
         SORT_FIELDS_BY_PROPERTY.put("firstName", Arrays.asList("first_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("middleName", Arrays.asList("middle_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("birthDate", Arrays.asList("birth_date", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("docName", Arrays.asList("doc_name", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("docName", Arrays.asList("doc_code", "doc_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("docNumber", Arrays.asList("doc_number", "id"));
         SORT_FIELDS_BY_PROPERTY.put("citizenship", Arrays.asList("citizenship_country_code", "id"));
         SORT_FIELDS_BY_PROPERTY.put("taxpayerState", Arrays.asList("state_code", "id"));

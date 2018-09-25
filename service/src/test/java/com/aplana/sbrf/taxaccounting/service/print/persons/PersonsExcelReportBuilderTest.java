@@ -2,11 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.print.persons;
 
 import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAddress;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.persons.PersonsReportBuilder;
 import org.joda.time.LocalDate;
 import org.junit.Test;
@@ -43,8 +39,8 @@ public class PersonsExcelReportBuilderTest {
         person.setLastName("Фамилия1");
         person.setFirstName("Имя1");
         person.setMiddleName("Отч1");
-        person.setDocName(Permissive.of("docName"));
-        person.setDocNumber(Permissive.<String>forbidden());
+        person.setDocType(Permissive.<RefBookDocType>forbidden());
+        person.setDocNumber(Permissive.of("docNumber"));
         RefBookCountry country = new RefBookCountry();
         country.setCode("countryCode");
         country.setName("countryName");

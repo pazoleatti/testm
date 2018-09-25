@@ -150,8 +150,8 @@
                                 width: 80
                             },
                             {
-                                name: 'docName',
-                                formatter: $filter('permissiveFormatter'),
+                                name: 'docType',
+                                formatter: $filter('docTypeFormatter'),
                                 width: 250
                             },
                             {

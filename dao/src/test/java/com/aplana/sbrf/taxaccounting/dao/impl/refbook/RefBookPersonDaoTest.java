@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,18 +114,6 @@ public class RefBookPersonDaoTest {
         assertThat(persons).hasSize(3)
                 .extracting("vip")
                 .containsOnly(true);
-    }
-
-    @Test
-    @Ignore("На HSQL <2.3.4 не работает regexp_replace(), включить, когда разберёмся")
-    public void test_getPersons_filterByDocNumber() {
-        RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setDocumentNumber("0101123456");
-
-        PagingResult<RefBookPerson> persons = personDao.getPersons(null, filter);
-
-        assertThat(persons).hasSize(1);
-        assertThat(persons.get(0).getDocNumber()).isEqualTo("01 01 123456");
     }
 
     @Test

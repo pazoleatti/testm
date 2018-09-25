@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.persons;
 
 import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAddress;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -50,7 +51,16 @@ public class ReportPerson {
     }
 
     String getDocName() {
-        return getPermissiveValue(person.getDocNameForJson());
+        Permissive<RefBookDocType> docType = person.getDocTypeForJson();
+        try {
+            if (docType.hasPermission()) {
+                return "(" + docType.value().getCode() + ") " + docType.value().getName();
+            } else {
+                return "Доступ ограничен";
+            }
+        } catch (NullPointerException npe) {
+            return null;
+        }
     }
 
     String getDocNumber() {

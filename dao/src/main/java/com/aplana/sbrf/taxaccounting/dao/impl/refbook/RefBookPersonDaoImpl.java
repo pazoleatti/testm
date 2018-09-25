@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.RefBookPersonMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
@@ -38,111 +39,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     @Autowired
     RefBookMapperFactory refBookMapperFactory;
 
-
-    private static final RowMapper<RefBookPerson> PERSON_MAPPER = new RowMapper<RefBookPerson>() {
-        @Override
-        public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RefBookPerson result = new RefBookPerson();
-            result.setId(rs.getLong("id"));
-            result.setRecordId(rs.getLong("record_id"));
-            result.setOldId(rs.getLong("old_id"));
-            result.setVip(rs.getBoolean("vip"));
-            result.setFirstName(rs.getString("first_name"));
-            result.setLastName(rs.getString("last_name"));
-            result.setMiddleName(rs.getString("middle_name"));
-            result.setBirthDate(rs.getDate("birth_date"));
-            result.setBirthPlace(rs.getString("birth_place"));
-            result.setVersion(rs.getDate("version"));
-            result.setVersionEnd(rs.getDate("version_to"));
-
-            result.setDocName(Permissive.of(rs.getString("doc_name")));
-            result.setDocNumber(Permissive.of(rs.getString("doc_number")));
-            result.setInn(Permissive.of(rs.getString("inn")));
-            result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
-            result.setSnils(Permissive.of(rs.getString("snils")));
-
-            Long addressId = SqlUtils.getLong(rs, "address_id");
-            if (addressId == null) {
-                result.setAddress(Permissive.<RefBookAddress>of(null));
-                result.setForeignAddress(Permissive.<RefBookAddress>of(null));
-            } else {
-                RefBookAddress address = new RefBookAddress();
-                RefBookAddress foreignAddress = new RefBookAddress();
-
-                address.setId(rs.getLong("address_id"));
-                foreignAddress.setId(rs.getLong("address_id"));
-
-                address.setAddressType(rs.getInt("address_type"));
-                foreignAddress.setAddressType(rs.getInt("address_type"));
-
-                address.setPostalCode(rs.getString("postal_code"));
-                address.setRegionCode(rs.getString("region_code"));
-                address.setDistrict(rs.getString("district"));
-                address.setCity(rs.getString("city"));
-                address.setLocality(rs.getString("locality"));
-                address.setStreet(rs.getString("street"));
-                address.setBuild(rs.getString("building"));
-                address.setHouse(rs.getString("house"));
-                address.setApartment(rs.getString("apartment"));
-
-                address.setAddress(rs.getString("address"));
-                foreignAddress.setAddress(rs.getString("address"));
-
-                Long countryId = SqlUtils.getLong(rs, "address_country_id");
-                if (countryId == null) {
-                    address.setCountry(null);
-                    foreignAddress.setCountry(null);
-                } else {
-                    RefBookCountry country = new RefBookCountry();
-                    country.setId(countryId);
-                    country.setCode(rs.getString("address_country_code"));
-                    country.setName(rs.getString("address_country_name"));
-                    address.setCountry(country);
-                    foreignAddress.setCountry(country);
-                }
-
-                result.setAddress(Permissive.of(address));
-                result.setForeignAddress(Permissive.of(foreignAddress));
-            }
-
-            Long countryId = SqlUtils.getLong(rs, "citizenship_country_id");
-            if (countryId == null) {
-                result.setCitizenship(null);
-            } else {
-                RefBookCountry citizenship = new RefBookCountry();
-                citizenship.setId(countryId);
-                citizenship.setCode(rs.getString("citizenship_country_code"));
-                citizenship.setName(rs.getString("citizenship_country_name"));
-                result.setCitizenship(citizenship);
-            }
-
-            Long stateId = SqlUtils.getLong(rs, "state_id");
-            if (stateId == null) {
-                result.setTaxpayerState(null);
-            } else {
-                RefBookTaxpayerState taxpayerState = new RefBookTaxpayerState();
-                taxpayerState.setId(stateId);
-                taxpayerState.setCode(rs.getString("state_code"));
-                taxpayerState.setName(rs.getString("state_name"));
-                result.setTaxpayerState(taxpayerState);
-            }
-
-            Long asnuId = SqlUtils.getLong(rs, "asnu_id");
-            if (asnuId == null) {
-                result.setSource(null);
-            } else {
-                RefBookAsnu asnu = new RefBookAsnu();
-                asnu.setId(asnuId);
-                asnu.setCode(rs.getString("asnu_code"));
-                asnu.setName(rs.getString("asnu_name"));
-                asnu.setType(rs.getString("asnu_type"));
-                asnu.setPriority(rs.getInt("asnu_priority"));
-                result.setSource(asnu);
-            }
-
-            return result;
-        }
-    };
 
     private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_MAPPER = new RowMapper<RegistryPerson>() {
         @Override
@@ -364,7 +260,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
         SelectPersonQueryGenerator selectPersonQueryGenerator = new SelectPersonQueryGenerator(filter, pagingParams);
         String query = selectPersonQueryGenerator.generatePagedAndFilteredQuery();
-        List<RefBookPerson> persons = getJdbcTemplate().query(query, PERSON_MAPPER);
+        List<RefBookPerson> persons = getJdbcTemplate().query(query, new RefBookPersonMapper());
 
         int count = getPersonsCount(filter);
 

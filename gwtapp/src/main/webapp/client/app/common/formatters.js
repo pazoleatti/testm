@@ -659,5 +659,15 @@
                 return name + activity;
             };
         }])
+
+        .filter('docTypeFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
+                }
+                return $filter('codeNameFormatter')(data.value);
+            };
+        }])
     ;
 }());
