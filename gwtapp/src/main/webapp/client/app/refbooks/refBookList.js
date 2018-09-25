@@ -74,7 +74,7 @@
                                 formatter: typeFormatter
                             }
                         ],
-                        sortname: 'refBoookName',
+                        sortname: 'name',
                         hidegrid: false
                     }
                 };

@@ -1,7 +1,8 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook.person;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookMapperFactory;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.RefBookPersonMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonOriginalDuplicatesQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonQueryGenerator;

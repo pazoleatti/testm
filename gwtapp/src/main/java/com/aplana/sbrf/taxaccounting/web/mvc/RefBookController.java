@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -98,13 +95,13 @@ public class RefBookController {
     /**
      * Получение всех даных о справочниках для отображения в списке справочников
      *
-     * @param filter строка поиска по имени справочника
-     * @return список объектов содержащих данные о справочниках
+     * @param name         строка поиска по имени справочника
+     * @param pagingParams параметры сортировки и пагинации
      */
-    // TODO: Возвращать только краткую информацию о справочниках
     @GetMapping(value = "rest/refBook")
-    public List<RefBook> fetchAllRefBooks(@RequestParam(required = false) final String filter) {
-        return commonRefBookService.searchVisibleByName(filter);
+    public List<RefBookShortInfo> findAll(@RequestParam(name = "filter", required = false) String name,
+                                          @RequestParam(required = false) PagingParams pagingParams) {
+        return commonRefBookService.findAllShortInfo(name, pagingParams);
     }
 
     /**

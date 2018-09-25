@@ -39,27 +39,18 @@ public interface RefBookDao {
     RefBook get(@NotNull Long id);
 
     /**
-     * Возвращает список всех справочников
-     */
-    List<RefBook> fetchAll();
-
-    /**
      * Возвращает список всех видимых справочников
      */
-    List<RefBook> fetchAllVisible();
-
-    /**
-     * Возвращает список всех невидимых справочников
-     */
-    List<RefBook> fetchAllInvisible();
+    List<RefBook> findAllVisible();
 
     /**
      * Поиск видимых справочников по названию.
      *
-     * @param name поисковая строка
+     * @param name         поисковая строка
+     * @param pagingParams параметры сортировки и пагинации
      * @return список искомых справочников
      */
-    List<RefBook> searchVisibleByName(String name);
+    List<RefBookShortInfo> findAllVisibleShortInfo(String name, PagingParams pagingParams);
 
     /**
      * Возвращяет страницу данных в таблицу справочников из настройщика

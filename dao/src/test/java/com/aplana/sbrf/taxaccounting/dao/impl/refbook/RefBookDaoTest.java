@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.main.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -20,8 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-
-//TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RefBookDaoTest.xml"})
@@ -59,27 +58,21 @@ public class RefBookDaoTest {
     }
 
     @Test
-    public void testFetchAllVisible() {
-        List<RefBook> refBooks = refBookDao.fetchAllVisible();
-        assertThat(refBooks).hasSize(5);
+    public void test_findAllVisibleShortInfo_bySpaceSymbol_returnsAll() {
+        List<RefBookShortInfo> result = refBookDao.findAllVisibleShortInfo(" ", null);
+        assertThat(result).hasSize(5);
     }
 
     @Test
-    public void testFetchAllInvisible() {
-        List<RefBook> refBooks = refBookDao.fetchAllInvisible();
-        assertThat(refBooks).hasSize(1);
+    public void test_findAllVisibleShortInfo_byVisible_returnsOnlyVisible() {
+        List<RefBookShortInfo> result = refBookDao.findAllVisibleShortInfo("книга", null);
+        assertThat(result).hasSize(1);
     }
 
     @Test
-    public void testSearchVisibleByName() {
-        List<RefBook> searchSpaceSymbol = refBookDao.searchVisibleByName(" ");
-        assertThat(searchSpaceSymbol).hasSize(5);
-
-        List<RefBook> searchVisible = refBookDao.searchVisibleByName("книга");
-        assertThat(searchVisible).hasSize(1);
-
-        List<RefBook> searchInvisible = refBookDao.searchVisibleByName("Библиотека");
-        assertThat(searchInvisible).isEmpty();
+    public void test_findAllVisibleShortInfo_byInvisible_returnsNothing() {
+        List<RefBookShortInfo> result = refBookDao.findAllVisibleShortInfo("Библиотека", null);
+        assertThat(result).isEmpty();
     }
 
     @Test
