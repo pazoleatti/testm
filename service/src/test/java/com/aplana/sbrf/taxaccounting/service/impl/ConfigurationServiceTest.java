@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -14,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -86,18 +84,6 @@ public class ConfigurationServiceTest {
         ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
 
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
-        RefBookDataProvider providerEmail = mock(RefBookDataProvider.class);
-        PagingResult<Map<String, RefBookValue>> emailValues = new PagingResult<Map<String, RefBookValue>>();
-        Map<String, RefBookValue> config1 = new HashMap<String, RefBookValue>();
-        config1.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "test.test.p1"));
-        config1.put("VALUE", new RefBookValue(RefBookAttributeType.STRING, "test"));
-        emailValues.add(config1);
-        Map<String, RefBookValue> config2 = new HashMap<String, RefBookValue>();
-        config2.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "test.test.p2"));
-        config2.put("VALUE", new RefBookValue(RefBookAttributeType.STRING, "tes_"));
-        emailValues.add(config2);
-        when(providerEmail.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(emailValues);
-        when(refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId())).thenReturn(providerEmail);
 
         PagingResult<Map<String, RefBookValue>> asyncValues = new PagingResult<Map<String, RefBookValue>>();
         Map<String, RefBookValue> configAsync1 = new HashMap<String, RefBookValue>();

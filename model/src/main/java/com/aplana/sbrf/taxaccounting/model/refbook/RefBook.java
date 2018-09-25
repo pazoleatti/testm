@@ -114,7 +114,6 @@ public class RefBook implements Serializable {
         DEPARTMENT(30L),                            // Подразделения
         MARK_SIGNATORY_CODE(35),                    // Признак лица, подписавшего документ
         DOCUMENT_CODES(360),                        // Виды документов, удостоверяющих личность
-        EMAIL_CONFIG(400),                            // Настройки почтового клиента
         PERSON_ADDRESS(901),                        // Адреса физических лиц
         ID_DOC(902),                                // Документ, удостоверяющий личность
         TAXPAYER_STATUS(903),                        // Статус налогоплательщика

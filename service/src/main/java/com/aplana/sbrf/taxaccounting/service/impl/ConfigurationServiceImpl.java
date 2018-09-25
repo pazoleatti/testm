@@ -145,17 +145,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<Map<String, String>> getEmailConfig() {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
-        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
-        List<Map<String, String>> params = new ArrayList<Map<String, String>>();
-        for (Map<String, RefBookValue> value : values) {
-            Map<String, String> record = new HashMap<String, String>();
-            for (Map.Entry<String, RefBookValue> entry : value.entrySet()) {
-                record.put(entry.getKey(), entry.getValue().getStringValue());
-            }
-            params.add(record);
-        }
-        return params;
+        return null; // TODO используется в методе из EmailServiceImpl, который нигде не используется
     }
 
     @Override

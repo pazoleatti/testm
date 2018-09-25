@@ -14,4 +14,14 @@
         </delete>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5492 удалил справочник "Настройки почты"-->
+    <changeSet id="3.2-dnovikov-2" author="dnovikov">
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id = 400</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id = 400</where>
+        </delete>
+    </changeSet>
+
 </databaseChangeLog>
