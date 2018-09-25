@@ -3,7 +3,6 @@ package refbook
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.*
@@ -15,8 +14,8 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataServic
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService
 import groovy.transform.TypeChecked
 import org.apache.commons.lang3.time.FastDateFormat
-
-import java.text.SimpleDateFormat
+import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.NDFL_DETAIL
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
@@ -400,9 +399,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
         Date toDate() {
             if (value != null && !value.isEmpty()) {
                 try {
-                    SimpleDateFormat formatter = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
-                    formatter.setLenient(false)
-                    return formatter.parse(value)
+                    return LocalDate.parse(value, DateTimeFormat.forPattern(SharedConstants.DATE_FORMAT)).toDate()
                 } catch (Exception ignored) {
                     logIncorrectTypeError("Дата")
                 }
@@ -545,8 +542,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
 
         void logIncorrectTypeError(def type) {
-            logError("Ошибка при определении значения ячейки файла \"$fileName\". Тип данных ячейки столбца \"${header[index]}\" № " + index +
-                    " строки ${row.index + 1} не соответствует ожидаемому \"$type\".")
+            logError("Тип данных ячейки столбца \"${header[index]}\" не соответствует ожидаемому \"$type\".")
         }
 
         void logError(String message) {
