@@ -33,7 +33,9 @@ public interface ReportPeriodDao extends PermissionDao {
      */
     ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
 
-
+    /**
+     * Получение списка всех отчётных периодов.
+     */
     List<ReportPeriod> fetchAll();
 
     /**
