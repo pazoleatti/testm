@@ -50,6 +50,8 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Andrey Drunk
  */
@@ -1210,6 +1212,71 @@ public class NdflPersonDaoTest {
         List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentsForConsolidation((Collections.singletonList(1036L)));
         Assert.assertEquals(1, result.size());
         Assert.assertEquals(Long.valueOf("1"), result.get(0).getId());
+    }
+
+    @Test
+    public void testFetchNdflPersonIncomeByPeriodNdflPersonId()  {
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2005, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2005, Calendar.DECEMBER, 31);
+        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonId(1001L, startDate.getTime(), endDate.getTime(), true);
+        assertThat(result).hasSize(3);
+    }
+
+    @Test
+    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTemp()  {
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2005, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2005, Calendar.DECEMBER, 31);
+        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonIdTemp(1001L, startDate.getTime(), endDate.getTime(), true);
+        assertThat(result).hasSize(3);
+    }
+
+    @Test
+    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate()  {
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2010, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2010, Calendar.DECEMBER, 31);
+        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate(1001L, 13, startDate.getTime(), endDate.getTime());
+        assertThat(result).hasSize(3);
+    }
+
+    @Test
+    public void testFetchNdflPersonIncomeByPayoutDate()  {
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2005, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2005, Calendar.DECEMBER, 31);
+        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPayoutDate(1001L, 13, startDate.getTime(), endDate.getTime());
+        assertThat(result).hasSize(3);
+    }
+
+    @Test
+    public void testFetchNdflPersonDeductionByNdflPersonAndOperation() {
+
+        List<NdflPersonDeduction> result = ndflPersonDao.fetchNdflPersonDeductionByNdflPersonAndOperation(50001, "1");
+        assertThat(result).hasSize(3);
+    }
+
+    @Test
+    public void testFetchNdflPeronPrepaymentByNdflPersonAndOperation() {
+        List<NdflPersonPrepayment> result = ndflPersonDao.fetchNdflPeronPrepaymentByNdflPersonAndOperation(1001, "1");
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    public void testfindIncomesForPersonByKppOktmo() {
+        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmo(Arrays.asList(1001L, 1002L), "2222", "111222333");
+        assertThat(result).hasSize(5);
+    }
+
+    @Test
+    public void testfetchNdflPersonByPairKppOktmo() {
+        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(Arrays.asList(100L), "2222", "111222333", false);
+        assertThat(result).hasSize(1);
     }
 
     public static Date toDate(String dateStr) {
