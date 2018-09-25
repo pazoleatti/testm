@@ -21,8 +21,7 @@
                 };
 
                 RefBookResource.query({
-                    id: $scope.refBookId,
-                    projection: 'light'
+                    id: $scope.refBookId
                 }, function (data) {
                     $scope.refBook = data;
                     $scope.title = $scope.refBook.name;

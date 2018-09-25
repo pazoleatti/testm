@@ -53,7 +53,6 @@
                         angularResource: RefBookListResource,
                         requestParameters: function () {
                             return {
-                                projection: 'light',
                                 filter: $scope.searchFilter.params.text
                             };
                         },
