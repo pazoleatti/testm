@@ -1,14 +1,18 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * Результат открытия периода
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class OpenPeriodResult {
     private String error;
     private String uuid;
-
-    public OpenPeriodResult() {
-    }
 
     public OpenPeriodResult(String uuid) {
         this.uuid = uuid;
@@ -17,21 +21,5 @@ public class OpenPeriodResult {
     public OpenPeriodResult error(String error) {
         this.error = error;
         return this;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 }

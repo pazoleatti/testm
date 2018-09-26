@@ -62,6 +62,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
         <!--
             Фикс проблемы с запуском сборки на вебсфере
             https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5

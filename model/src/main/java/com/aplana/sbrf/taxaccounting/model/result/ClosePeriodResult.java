@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Результат закрытия периода
  */
+@Getter
+@Setter
 public class ClosePeriodResult {
     private String error;
 
@@ -22,29 +27,5 @@ public class ClosePeriodResult {
     public ClosePeriodResult fatal(boolean isFatal) {
         this.isFatal = isFatal;
         return this;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public boolean isFatal() {
-        return isFatal;
-    }
-
-    public void setFatal(boolean fatal) {
-        isFatal = fatal;
     }
 }
