@@ -79,11 +79,6 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public String getPersonDocNumber(long personId) {
-        return refBookPersonDao.getPersonDocNumber(personId);
-    }
-
-    @Override
     public PagingResult<RegistryPerson> fetchDuplicates(Long id, Date actualDate, PagingParams pagingParams) {
         List<RegistryPerson> toReturnData = new ArrayList<>();
         List<RegistryPerson> candidates = refBookPersonDao.fetchDuplicates(id, pagingParams);
