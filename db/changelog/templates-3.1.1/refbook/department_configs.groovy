@@ -1,4 +1,4 @@
-package refbook
+package refbook// department_configs_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -21,7 +21,6 @@ import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.NDFL_DETAIL
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 
-// department_configs_ref комментарий для локального поиска скрипта
 /**
  * Cкрипт Настроек подразделений
  */
@@ -514,12 +513,14 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         RefBookReorganization getReorganization() {
             RefBookReorganization reorganization = null
-            if (!value || value.length() != 1 || !value.isNumber()) {
-                logError("\"Код формы реорганизации\" должен содержать число от 0 до 9")
-            } else {
-                reorganization = getReorganizationByCode(value)
-                if (reorganization == null) {
-                    logError("Не найдено запись в справочнике \"Коды форм реорганизации (ликвидации) организации\" по коду " + value)
+            if (value) {
+                if (value.length() != 1 || !value.isNumber()) {
+                    logError("\"Код формы реорганизации\" должен содержать число от 0 до 9")
+                } else {
+                    reorganization = getReorganizationByCode(value)
+                    if (reorganization == null) {
+                        logError("Не найдено запись в справочнике \"Коды форм реорганизации (ликвидации) организации\" по коду " + value)
+                    }
                 }
             }
             return reorganization
