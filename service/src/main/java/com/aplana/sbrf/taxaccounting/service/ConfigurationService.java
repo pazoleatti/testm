@@ -35,8 +35,7 @@ public interface ConfigurationService {
      *
      * @return настройки почты - список <Столбец, Значение>
      */
-    @Deprecated
-    List<Map<String, String>> getEmailConfig();
+    List<Configuration> getEmailConfig();
 
     /**
      * Получение конфигурациооных параметров по подразделению

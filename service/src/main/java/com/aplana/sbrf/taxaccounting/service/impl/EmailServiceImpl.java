@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -37,28 +38,28 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void send(List<String> destinations, String subject, String text) {
-        List<Map<String, String>> params = configurationService.getEmailConfig();
+        List<Configuration> params = configurationService.getEmailConfig();
         Properties props = new Properties();
         String login = null;
         String password = null;
         String host = null;
         String port = null;
-        for (Map<String, String> param : params) {
-            String key = param.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE);
-            String value = param.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE);
+        for (Configuration param : params) {
+            String code = param.getCode();
+            String value = param.getValue();
             if (value != null && !value.isEmpty()) {
-                if ("mail.smtp.user".equals(key)) {
+                if ("mail.smtp.user".equals(code)) {
                     login = value;
-                } else if ("mail.smtp.password".equals(key)) {
+                } else if ("mail.smtp.password".equals(code)) {
                     password = value;
-                } else if ("mail.smtp.host".equals(key)) {
+                } else if ("mail.smtp.host".equals(code)) {
                     host = value;
-                    props.setProperty(key, value);
-                } else if ("mail.smtp.port".equals(key)) {
+                    props.setProperty(code, value);
+                } else if ("mail.smtp.port".equals(code)) {
                     port = value;
-                    props.setProperty(key, value);
+                    props.setProperty(code, value);
                 } else {
-                    props.setProperty(key, value);
+                    props.setProperty(code, value);
                 }
             }
         }

@@ -12,16 +12,6 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
     // Хранилище значений
     private Map<ConfigurationParam, Map<Integer, List<String>>> map = new HashMap<ConfigurationParam, Map<Integer, List<String>>>();
 
-    public static final String EMAIL_NAME_ATTRIBUTE = "NAME";
-    public static final String EMAIL_VALUE_ATTRIBUTE = "VALUE";
-    public static final String EMAIL_DESCRIPTION_ATTRIBUTE = "DESCRIPTION";
-
-    public static final String ASYNC_TYPE_ID = "ID";
-    public static final String ASYNC_TYPE = "NAME";
-    public static final String ASYNC_LIMIT_KIND = "LIMIT_KIND";
-    public static final String ASYNC_LIMIT = "TASK_LIMIT";
-    public static final String ASYNC_SHORT_LIMIT = "SHORT_QUEUE_LIMIT";
-
 	static final String SPLITTER = ";";
 
     /**

@@ -143,7 +143,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public List<Map<String, String>> getEmailConfig() {
+    public List<Configuration> getEmailConfig() {
         return null; // TODO используется в методе из EmailServiceImpl, который нигде не используется
     }
 
