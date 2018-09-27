@@ -49,7 +49,7 @@ public class StyleBuilder {
                     cellStyle.setDataFormat(dataFormat.getFormat("@"));
                     break;
                 case DATE:
-                    cellStyle.setDataFormat(dataFormat.getFormat("dd.MM.yyyy"));
+                    cellStyle.setDataFormat((short) 14);// 14 - формат для Дата (dd.MM.yyyy)
                     break;
             }
             cellStyleCache.put(cacheKey, cellStyle);
