@@ -294,7 +294,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EXPORT_DEPARTMENT_CONFIG)")
     public ActionResult createTaskToCreateExcel(DepartmentConfigsFilter filter, PagingParams pagingParams, TAUserInfo userInfo) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
@@ -315,7 +315,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).IMPORT_DEPARTMENT_CONFIG)")
     public ImportDepartmentConfigsResult createTaskToImportExcel(ImportDepartmentConfigsAction action, TAUserInfo userInfo) {
         Logger logger = new Logger();
         ImportDepartmentConfigsResult result = new ImportDepartmentConfigsResult();
