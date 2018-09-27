@@ -639,11 +639,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonDeduction> fetchNdflPersonDeductionWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate) {
-        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp, rba.NAME as asnu_name " +
-                "FROM ndfl_person_deduction npd, (SELECT operation_id, INCOME_ACCRUED_DATE, INCOME_CODE" +
-                " FROM NDFL_PERSON_INCOME WHERE ndfl_person_id = :ndflPersonId) i_data  " +
-                " left join ref_book_asnu rba on npd.asnu_id = rba.id " +
-                "WHERE npd.ndfl_person_id = :ndflPersonId" +
+        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp FROM ndfl_person_deduction npd, (SELECT operation_id, INCOME_ACCRUED_DATE, INCOME_CODE" +
+                " FROM NDFL_PERSON_INCOME WHERE ndfl_person_id = :ndflPersonId) i_data  WHERE npd.ndfl_person_id = :ndflPersonId" +
                 " AND npd.OPERATION_ID in i_data.operation_id AND npd.INCOME_ACCRUED in i_data.INCOME_ACCRUED_DATE" +
                 " AND npd.INCOME_CODE in i_data.INCOME_CODE AND npd.TYPE_CODE in " +
                 "(SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
@@ -665,10 +662,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (!prFequals1) {
             priznakFClause = " AND npi.not_holding_tax > 0";
         }
-        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp, rba.name as asnu_name " +
-                "FROM ndfl_person_deduction npd" +
+        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp FROM ndfl_person_deduction npd" +
                 " INNER JOIN ndfl_person_income npi ON npi.ndfl_person_id = npd.ndfl_person_id AND npi.operation_id = npd.operation_id" +
-                " left join ref_book_asnu rba on npd.asnu_id = rba.id" +
                 " WHERE npd.ndfl_person_id = :ndflPersonId" +
                 " AND npd.TYPE_CODE in (SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
                 "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME in ('Стандартный', 'Социальный', 'Инвестиционный', 'Имущественный') AND STATUS = 0)  AND STATUS = 0)" +
@@ -690,10 +685,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (!prFequals1) {
             priznakFClause = " AND npi.not_holding_tax > 0";
         }
-        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " rba.NAME as asnu_name " +
-                "FROM ndfl_person_prepayment npp " +
-                "left join ref_book_asnu rba on npp.asnu_id = rba.id " +
-                "WHERE npp.ndfl_person_id = :ndflPersonId " +
+        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp WHERE npp.ndfl_person_id = :ndflPersonId " +
                 "AND npp.operation_id IN (SELECT npi.operation_id FROM ndfl_person_income npi " +
                 "WHERE npi.ndfl_person_id = :ndflPersonId " +
                 "AND npi.tax_rate = :taxRate " +
@@ -1123,14 +1115,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(" AND npi.NOT_HOLDING_TAX IS NOT NULL")
                     .append(" AND npi.NOT_HOLDING_TAX > 0");
         }
-        /*String sql = "SELECT DISTINCT *//*+rule *//*" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
-                " FROM ndfl_person np " +
-                " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
-                " INNER JOIN ndfl_person_income npi " +
-                " ON np.id = npi.ndfl_person_id " +
-                " WHERE npi.kpp = :kpp " +
-                " AND npi.oktmo = :oktmo " +
-                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";*/
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)
                 .addValue("kpp", kpp)

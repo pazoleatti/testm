@@ -99,7 +99,7 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, departmentConfig.getSignatoryFirstName(), "signatoryFirstName", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, departmentConfig.getSignatoryLastName(), "signatoryLastName", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, departmentConfig.getApproveDocName(), "approveDocName", CellType.STRING, CellStyle.ALIGN_LEFT);
-        createCellValue(colIndex++, toString(departmentConfig.getReorganization()), "reorganizationCode", CellType.STRING, CellStyle.ALIGN_CENTER);
+        createCellValue(colIndex++, toString(departmentConfig.getReorganization()), "reorganizationCode", CellType.NUMERIC, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getReorgKpp(), "reorgKpp", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getReorgInn(), "reorgInn", CellType.STRING, CellStyle.ALIGN_CENTER);
     }

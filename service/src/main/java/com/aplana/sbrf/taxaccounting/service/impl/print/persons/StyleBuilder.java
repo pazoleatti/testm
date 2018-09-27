@@ -48,7 +48,7 @@ public class StyleBuilder {
                     break;
                 case DATE:
                     cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-                    cellStyle.setDataFormat(dataFormat.getFormat("dd.MM.yyyy"));
+                    cellStyle.setDataFormat((short) 14);// 14 - формат для Дата (dd.MM.yyyy)
                     break;
             }
             cellStyleCache.put(cacheKey, cellStyle);

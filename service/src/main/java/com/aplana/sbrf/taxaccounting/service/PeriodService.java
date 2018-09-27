@@ -77,7 +77,9 @@ public interface PeriodService {
      */
     ReportPeriod fetchReportPeriod(int reportPeriodId);
 
-
+    /**
+     * Получение списка всех отчётных периодов.
+     */
     List<ReportPeriod> fetchAll();
 
     /**

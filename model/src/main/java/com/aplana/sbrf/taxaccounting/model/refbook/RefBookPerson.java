@@ -40,11 +40,9 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     //Признак, является ли ФЛ VIP-ом
     private Boolean vip;
 
-    /*
-     * Вспомогательные поля для улучшения производительности. Заполняются не во всех случаях
-     */
-    //Название ДУЛ
-    private Permissive<String> docName;
+
+    //Тип ДУЛ
+    private Permissive<RefBookDocType> docType;
     //Серия и номер ДУЛ
     private Permissive<String> docNumber;
 
@@ -161,12 +159,12 @@ public class RefBookPerson extends RefBookVersioned<Long> {
         this.oldId = oldId;
     }
 
-    public String getDocName() {
-        return docName.value();
+    public RefBookDocType getDocType() {
+        return docType.value();
     }
 
-    public void setDocName(Permissive<String> docName) {
-        this.docName = docName;
+    public void setDocType(Permissive<RefBookDocType> docType) {
+        this.docType = docType;
     }
 
     public String getDocNumber() {
@@ -186,8 +184,8 @@ public class RefBookPerson extends RefBookVersioned<Long> {
     }
 
     public void forbid() {
-        setDocName(Permissive.<String>forbidden());
         setDocNumber(Permissive.<String>forbidden());
+        setDocType(Permissive.<RefBookDocType>forbidden());
         setInn(Permissive.<String>forbidden());
         setInnForeign(Permissive.<String>forbidden());
         setSnils(Permissive.<String>forbidden());
@@ -224,9 +222,9 @@ public class RefBookPerson extends RefBookVersioned<Long> {
         return foreignAddress;
     }
 
-    @JsonProperty("docName")
-    public Permissive<String> getDocNameForJson() {
-        return docName;
+    @JsonProperty("docType")
+    public Permissive<RefBookDocType> getDocTypeForJson() {
+        return docType;
     }
 
     @JsonProperty("docNumber")
