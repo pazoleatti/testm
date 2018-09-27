@@ -107,68 +107,8 @@ public class RefBookServiceImpl implements RefBookService {
     }
 
     @Override
-    public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-        return transactionHelper.executeInNewTransaction(logic);
-    }
-
-    @Override
     public List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         return refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
-    }
-
-    @Override
-    public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
-        return refBookDao.getNextVersion(refBookId, recordId, versionFrom);
-    }
-
-    @Override
-    public List<CheckCrossVersionsResult> checkCrossVersions(Long refBookId, Long recordId, Date versionFrom, Date versionTo, Long excludedRecordId) {
-        return refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, excludedRecordId);
-    }
-
-    @Override
-    public void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version) {
-        refBookDao.updateVersionRelevancePeriod(tableName, uniqueRecordId, version);
-    }
-
-    @Override
-    public void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds) {
-        refBookDao.deleteRecordVersions(tableName, uniqueRecordIds, false);
-    }
-
-    @Override
-    public List<String> isVersionUsedInDepartmentConfigs(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck) {
-        return refBookDao.isVersionUsedInDepartmentConfigs(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludeUseCheck);
-    }
-
-    @Override
-    public RefBookRecordVersion getPreviousVersion(Long refBookId, Long recordId, Date versionFrom) {
-        return refBookDao.getPreviousVersion(refBookId, recordId, versionFrom);
-    }
-
-    @Override
-    public Long findRecord(Long refBookId, Long recordId, Date version) {
-        return refBookDao.findRecord(refBookId, recordId, version);
-    }
-
-    @Override
-    public List<Long> getRelatedVersions(List<Long> uniqueRecordIds) {
-        return refBookDao.getRelatedVersions(uniqueRecordIds);
-    }
-
-    @Override
-    public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
-        return refBookDao.isVersionsExist(refBookId, recordIds, version);
-    }
-
-    @Override
-    public void createFakeRecordVersion(Long refBookId, Long recordId, Date version) {
-        refBookDao.createFakeRecordVersion(refBookId, recordId, version);
-    }
-
-    @Override
-    public void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records) {
-        refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
     }
 
     private RefBookValue getValue(Long refBookId, Long recordId, String alias) {

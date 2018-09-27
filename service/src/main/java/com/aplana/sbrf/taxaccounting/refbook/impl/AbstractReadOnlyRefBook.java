@@ -65,11 +65,6 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 	}
 
     @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
-        return refBookDao.getRecordIdPairs(refBookId, version, needAccurateVersion, filter);
-    }
-
-    @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(final Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(uniqueRecordId));}}, 1);
     }
@@ -202,12 +197,12 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     @Override
     public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
                           boolean isSortAscending) {
-        return refBookDao.getRowNum(getRefBookId(), version, recordId, filter, sortAttribute, isSortAscending);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookDao.getInactiveRecordsInPeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, recordIds, new Date(), null, false);
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -24,4 +24,14 @@
         </delete>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5491 Удалить провайдер вертикальных справочников RefBookUniversal-->
+    <changeSet id="3.2-dnovikov-3" author="dnovikov">
+        <sql>
+            drop table ref_book_value;
+        </sql>
+        <sql>
+            drop table ref_book_record;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

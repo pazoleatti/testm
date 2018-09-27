@@ -110,11 +110,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Date getNextVersion(Date version, String filter) {
         throw new UnsupportedOperationException();
     }
@@ -439,140 +434,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     @SuppressWarnings("unchecked")
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
-        if (logger == null) {
-            throw new ServiceException("Logger не может быть null!");
-        }
-        if (logger.getTaUserInfo() == null) {
-            throw new ServiceException("Текущий пользователь не установлен!");
-        }
-        List<String> lockedObjects = new ArrayList<String>();
-        int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = commonRefBookService.generateTaskKey(REF_BOOK_ID);
-        RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        if (lockService.lock(lockKey, userId,
-                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
-            try {
-                //Блокировка установлена
-                lockedObjects.add(lockKey);
-                //Блокируем связанные справочники
-                List<RefBookAttribute> attributes = refBook.getAttributes();
-                for (RefBookAttribute attribute : attributes) {
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = commonRefBookService.generateTaskKey(attribute.getRefBookId());
-                        if (!lockedObjects.contains(referenceLockKey)) {
-                            if (lockService.lock(referenceLockKey, userId, String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName())) == null) {
-                                //Блокировка установлена
-                                lockedObjects.add(referenceLockKey);
-                            } else {
-                                throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
-                                        logEntryService.save(logger.getEntries()));
-                            }
-                        }
-                    }
-                }
-
-                int depId = uniqueRecordIds.get(0).intValue();
-                Department department = departmentService.getDepartment(depId);
-
-                // Проверка типа подразделения
-                if (department.getType().equals(DepartmentType.ROOT_BANK)) {
-                    throw new ServiceLoggerException("Подразделение не может быть удалено, так как оно имеет тип \"Банк\"!", null);
-                }
-
-                List<Integer> childIds = departmentService.getAllChildrenIds(depId);
-                if (!childIds.isEmpty() && childIds.size() > 1) {
-                    throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как обнаружены подчиненные подразделения для %s!",
-                            logEntryService.save(logger.getEntries()),
-                            departmentService.getDepartment(depId).getName());
-                }
-                // проверка использования подразделения в гарантиях
-                if (department.isGarantUse()) {
-                    throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!",
-                            null);
-                }
-                // проверка использования подразделения в СУНР
-                if (department.isSunrUse()) {
-                    throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как оно используется в АС СУНР!",
-                            null);
-                }
-
-                isInUsed(department, logger);
-                if (logger.containsLevel(LogLevel.ERROR))
-                    throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
-                            logEntryService.save(logger.getEntries())
-                    );
-                else if (logger.containsLevel(LogLevel.WARNING) && !force) {
-                    return;
-                }
-
-                //удаление настроек подразделений
-                RefBookDataProvider provider;
-                List<Long> uniqueIds;
-                for (RefBook.WithTable withTable : RefBook.WithTable.values()) {
-                    provider = refBookFactory.getDataProvider(withTable.getRefBookId());
-                    uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                    if (!uniqueIds.isEmpty()) {
-                        provider.deleteRecordVersions(logger, uniqueIds, false);
-                    }
-                    provider = refBookFactory.getDataProvider(withTable.getTableRefBookId());
-                    uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                    if (!uniqueIds.isEmpty()) {
-                        provider.deleteRecordVersions(logger, uniqueIds, false);
-                    }
-                }
-                //удаление ссылок
-                if (deleteReference(new RefBookAttribute() {{
-                    setRefBookId(RefBook.Id.DEPARTMENT.getId());
-                    setId(160L);
-                }}, uniqueRecordIds.get(0), logger)) {
-                    throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
-                            logEntryService.save(logger.getEntries())
-                    );
-                }
-
-                //удаление периодов
-                deleteDRPs(depId);
-
-                auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), null, null, null, null, null,
-                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null);
-                refBookDepartmentDao.remove(depId);
-                logger.info("Подразделение удалено!");
-            } finally {
-                for (String lock : lockedObjects) {
-                    lockService.unlock(lock, userId);
-                }
-            }
-        } else {
-            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
-                    logEntryService.save(logger.getEntries()));
-        }
-    }
-
-    private boolean deleteReference(RefBookAttribute refBookAttribute, Long referenceId, Logger logger) {
-        boolean used = false;
-        //Проверка использования в нф
-        RefBook refBook = refBookDao.getByAttribute(refBookAttribute.getId());
-        RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
-        List<RefBookAttribute> attributeList = refBookDao.getAttributesByReferenceId(refBookAttribute.getRefBookId());
-        for (RefBookAttribute referenceRefBookAttribute : attributeList) {
-            RefBook refBookReference = refBookDao.getByAttribute(referenceRefBookAttribute.getId());
-            if (refBookReference.getTableName() == null || refBookReference.getTableName().isEmpty()) {
-                List<Long> recordIds = refBookDao.getDeletedRecords(refBookReference.getId(), referenceRefBookAttribute.getAlias() + "=" + referenceId);
-                for (Long recordId : recordIds) {
-                    used = used || deleteReference(referenceRefBookAttribute, recordId, logger);
-                }
-            }
-        }
-        if (!used && refBookAttribute.getAlias() != null) {
-            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(referenceId), true);
-        }
-        return used;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -583,11 +445,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public Long getRecordId(Long uniqueRecordId) {
         return uniqueRecordId;
-    }
-
-    @Override
-    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        return refBookDepartmentDao.getAttributesValues(attributePairs);
     }
 
     @Override
@@ -637,12 +494,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                     declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
                     department.getName(),
                     periodService.fetchReportPeriod(decData.getReportPeriodId()).getName()));
-        }
-
-        //3 точка запроса
-        for (String result : refBookDao.isVersionUsedInRefBooks(
-                REF_BOOK_ID, Arrays.asList((long) department.getId()), null, null, null, Arrays.asList(31l, 33l, 37l, 98l, 99l))) {
-            logger.error(result);
         }
 
         //5 точка запроса

@@ -76,11 +76,6 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     }
 
     @Override
-    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
         throw new UnsupportedOperationException();
     }

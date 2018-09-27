@@ -89,11 +89,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Date getNextVersion(Date version, @NotNull String filter) {
         throw new UnsupportedOperationException();
     }
@@ -666,11 +661,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Override
     public Long getRecordId(@NotNull Long uniqueRecordId) {
         return dao.getRecordId(getRefBook(), uniqueRecordId);
-    }
-
-    @Override
-    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

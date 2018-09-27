@@ -88,11 +88,6 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     }
 
     @Override
-    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        return refBookDao.getAttributesValues(attributePairs);
-    }
-
-    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
         return refBookDao.getUniqueRecordIds(getRefBookId(), getTableName(), filter);
     }

@@ -81,16 +81,6 @@ public interface RefBookDataProvider {
     PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
 
     /**
-     * Возвращает версии элементов справочника, удовлетворяющие указанному фильтру
-     *
-     * @param version             дата актуальности. Может быть null - тогда не учитывается
-     * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
-     * @param filter              фильтр для отбора записей
-     * @return пары идентификатор версии элемента - идентификатор элемента справочника
-     */
-    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
-
-    /**
      * Возвращает дату начала версии следующей за указанной
      *
      * @param version дата актуальности
@@ -391,15 +381,6 @@ public interface RefBookDataProvider {
      * @return
      */
     Long getRecordId(Long uniqueRecordId);
-
-    /**
-     * Возвращает данные по списку атрибутов
-     *
-     * @param attributePairs связки атрибут-запись справочника
-     * @return значения для связок
-     */
-    @Deprecated
-    Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 
     /**
      * Проверяет действуют ли записи справочника в указанном периоде

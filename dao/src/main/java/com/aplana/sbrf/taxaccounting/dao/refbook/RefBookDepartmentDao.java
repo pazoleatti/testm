@@ -19,16 +19,6 @@ public interface RefBookDepartmentDao {
 
 	Long REF_BOOK_ID = Department.REF_BOOK_ID;
 
-    String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
-    String STRING_VALUE_COLUMN_ALIAS = "string_value";
-    String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
-    String DATE_VALUE_COLUMN_ALIAS = "date_value";
-    String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
-    String REFBOOK_NAME_ALIAS = "refbookName";
-    String REFBOOK_ID_ALIAS = "ref_book_id";
-    String VERSION_START_ALIAS = "versionStart";
-    String VERSION_END_ALIAS = "versionEnd";
-
     /**
      * Загружает данные справочника
      * в данном случае даты актуальности нет смотри SBRFACCTAX-3245
@@ -98,23 +88,6 @@ public interface RefBookDepartmentDao {
      * @return
      */
     int getRecordsCount(String filter);
-
-    /**
-     * Возвращает значения атрибутов для указанных записей
-     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
-     * @return
-     *      ключ - пара идентификатор записи-идентификатор атрибута
-     *      значение - строковое представление значения атрибута
-     */
-    Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
-
-    /**
-     * Проверка использования записи в справочниках
-     * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
-     * @return справочник где 1-й ключ - id из ref_book_record(для уникальности ключа)
-     */
-    Map<Integer, Map<String, Object>> isVersionUsedInRefBooks(List<Long> refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает наменование периода ориентируясь только на дату начала(только на день-месяц, без года)
