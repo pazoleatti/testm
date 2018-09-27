@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -405,19 +404,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         AsyncTaskTypeData oldAsyncParam = asyncTaskTypeDao.findById(asyncParam.getId());
-        // необходимо при проверке изменения значения, так как, если в БД значение пустое,
-        // оно выгружается как "0"
-        if (oldAsyncParam.getTaskLimit() == 0) {
-            oldAsyncParam.setTaskLimit(null);
-        }
-        if (oldAsyncParam.getShortQueueLimit() == 0) {
-            oldAsyncParam.setShortQueueLimit(null);
-        }
         checkAsyncParam(asyncParam, logger);
         if (logger.containsLevel(LogLevel.ERROR)) {
             return logEntryService.save(logger.getEntries());
         }
-        asyncTaskTypeDao.updateLimits(asyncParam);
+        asyncTaskTypeDao.updateLimits(asyncParam.getId(), asyncParam.getShortQueueLimit(), asyncParam.getTaskLimit());
 
         String message = String.format(EDIT_ASYNC_PARAM_MESSAGE,
                 ConfigurationParamGroup.ASYNC.getCaption(),
@@ -484,7 +475,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             logger.error(ASYNC_PARAM_NOT_NUMBER_ERROR, asyncParam.getName(), ASYNC_PARAM_SHORT_QUEUE_LIMIT, asyncParam.getShortQueueLimit());
             return;
         }
-        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getHandlerClassName().equals(UPLOAD_REFBOOK_ASYNC_TASK) &&
+        if (asyncParam.getTaskLimit() != null && asyncParam.getShortQueueLimit() != null && asyncParam.getHandlerBean().equals(UPLOAD_REFBOOK_ASYNC_TASK) &&
                 (asyncParam.getTaskLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT || asyncParam.getShortQueueLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT)) {
             logger.error(ASYNC_PARAM_TOO_MUCH_VALUE_ERROR, asyncParam.getName(),
                     asyncParam.getTaskLimit() > UPLOAD_REFBOOK_ASYNC_TASK_LIMIT ? ASYNC_PARAM_TASK_LIMIT : ASYNC_PARAM_SHORT_QUEUE_LIMIT,
@@ -495,7 +486,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             logger.error(ASYNC_PARAM_INTERVAL_ERROR, asyncParam.getName(), asyncParam.getTaskLimit(), asyncParam.getShortQueueLimit());
         }
         if (AsyncTaskType.EXCEL_PERSONS.getId() == asyncParam.getId()) {
-            if (asyncParam.getTaskLimit() == null || asyncParam.getTaskLimit() > 1_000_000) {
+            if (asyncParam.getTaskLimit() != null && asyncParam.getTaskLimit() > 1_000_000) {
                 logger.error("Количество выгружаемых в файл Excel строк не может быть более 1 000 000");
             }
         }

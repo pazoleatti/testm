@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -533,8 +536,6 @@ public interface DeclarationDataService {
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
-    Long getTaskLimit(AsyncTaskType reportType);
-
     Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType);
 
     /**
@@ -875,15 +876,17 @@ public interface DeclarationDataService {
 
     /**
      * Загрузить файл налоговой формы на сервер.
+     *
      * @param fileInputStream   поток данных файла
      * @param fileName          имя файла
      * @param declarationDataId идентификатор налоговой формы для которой загружается файл
-     * @return  uuid загруженного файла
+     * @return uuid загруженного файла
      */
     String uploadFile(InputStream fileInputStream, String fileName, Long declarationDataId);
 
     /**
      * Скачать файл налоговой формы
+     *
      * @param declarationDataFile объект файла налоговой формы. Нам нужен не понлоценный объект, а огрызок объекта, где заполнены поля {@link DeclarationDataFile#declarationDataId} и {@link DeclarationDataFile#uuid}
      * @return данные файла
      */

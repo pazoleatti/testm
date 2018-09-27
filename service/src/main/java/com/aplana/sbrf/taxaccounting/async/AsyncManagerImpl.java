@@ -74,13 +74,13 @@ public class AsyncManagerImpl implements AsyncManager {
             throw new AsyncTaskException("Cannot find parameters for async task with id " + taskTypeId + " in database table ASYNC_TASK_TYPE");
         }
 
-        if (asyncTaskType.getHandlerClassName().startsWith("ejb")) {
+        if (asyncTaskType.getHandlerBean().startsWith("ejb")) {
             throw new AsyncTaskException("Incorrect name for bean-executor");
         }
 
         AsyncTask task;
         try {
-            task = applicationContext.getBean(asyncTaskType.getHandlerClassName(), AsyncTask.class);
+            task = applicationContext.getBean(asyncTaskType.getHandlerBean(), AsyncTask.class);
         } catch (NoSuchBeanDefinitionException e) {
             throw new AsyncTaskException("Cannot find bean-executor for task type with id " + taskTypeId + ", from database table ASYNC_TASK_TYPE", e);
         } catch (Exception e) {

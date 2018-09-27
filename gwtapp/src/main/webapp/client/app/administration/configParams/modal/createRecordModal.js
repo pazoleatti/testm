@@ -39,7 +39,7 @@
                             $scope.asyncParam.param = $shareData.asyncParam;
                             $scope.asyncParam.taskLimit = $shareData.asyncParam.taskLimit === 0 ? "" : $shareData.asyncParam.taskLimit;
                             $scope.asyncParam.shortQueueLimit = $shareData.asyncParam.shortQueueLimit === 0 ? "" : $shareData.asyncParam.shortQueueLimit;
-                            $scope.asyncParam.handlerClassName = $shareData.asyncParam.handlerClassName ? $shareData.asyncParam.handlerClassName : "";
+                            $scope.asyncParam.handlerBean = $shareData.asyncParam.handlerBean ? $shareData.asyncParam.handlerBean : "";
                         }
                         break;
                     case APP_CONSTANTS.CONFIGURATION_PARAM_TAB.EMAIL_PARAM :
@@ -90,7 +90,7 @@
                                         name: $scope.asyncParam.param.name,
                                         taskLimit: $scope.asyncParam.taskLimit ? Math.floor($scope.asyncParam.taskLimit) : null,
                                         shortQueueLimit: $scope.asyncParam.shortQueueLimit ? Math.floor($scope.asyncParam.shortQueueLimit) : null,
-                                        handlerClassName: $scope.asyncParam.handlerClassName
+                                        handlerBean: $scope.asyncParam.handlerBean
                                     }
                                 }).then(function (logger) {
                                     if (logger.data) {
@@ -245,7 +245,7 @@
                             return checkAccessQDefer.promise;
                         }
                         // проверка, что значения параметра "Загрузка данных из файла в справочник" меньше, чем 1500000
-                        if ($scope.asyncParam.param.handlerClassName === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)) {
+                        if ($scope.asyncParam.param.handlerBean === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)) {
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.tooMuch', {
                                     taskTitle: $scope.asyncParam.param.name,

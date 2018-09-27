@@ -28,7 +28,9 @@ public interface AsyncTaskTypeDao {
     /**
      * Изменяет ограничения у типов асинхронных задач
      *
-     * @param asyncParam обновляемый параметр
+     * @param id              ид типа задачи, у которого меняются параметры
+     * @param shortQueueLimit ограничение на выполнение задачи в очереди быстрых задач
+     * @param taskLimit       ограничение на выполнение задачи
      */
-    void updateLimits(AsyncTaskTypeData asyncParam);
+    void updateLimits(long id, Long shortQueueLimit, Long taskLimit);
 }

@@ -2731,11 +2731,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public Long getTaskLimit(AsyncTaskType reportType) {
-        return asyncTaskTypeDao.findById(reportType.getAsyncTaskTypeId()).getTaskLimit();
-    }
-
-    @Override
     public Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType) {
         DeclarationData declarationData = declarationDataDao.get(declarationDataId);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
