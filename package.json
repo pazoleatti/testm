@@ -1,13 +1,17 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "name": "ndfl-front-tests",
+  "version": "1.0.0",
+  "private": true,
   "devDependencies": {
-    "karma": "1.7.0",
-    "karma-cli": "1.0.1",
-    "karma-jasmine": "1.1.0",
-    "jasmine-core": "2.6.2",
-    "karma-chrome-launcher": "1.0.1",
-    "karma-ie-launcher": "1.0.0",
-    "karma-junit-reporter": "1.2.0"
+    "jasmine-core": "^3.2.1",
+    "karma": "^3.0.0",
+    "karma-coverage": "^1.1.2",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-jasmine": "^1.1.2",
+    "karma-junit-reporter": "^1.2.0"
+  },
+  "scripts": {
+    "test": "karma start ./gwtapp/src/test/js/unit/karma-unit.conf.js",
+    "test-watch": "karma start ./gwtapp/src/test/js/unit/karma-unit.conf.js --no-single-run --auto-watch"
   }
 }

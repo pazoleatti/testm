@@ -1,14 +1,13 @@
-module.exports = function(config) {
+module.exports = function (config) {
     config.set({
         basePath: '../../../',
         files: [
-            'main/webapp/client/lib/jquery-3.2.1.js',
-            'test/js/lib/angular-1.5.9.js',
-            'test/js/lib/angular-mocks-1.5.9.js',
-            'test/js/lib/underscore-1.8.3.js',
-            'main/webapp/client/components/grid/deep.js',
-            'main/webapp/client/app/common/*.js',
-            'test/js/unit/utils/*.spec.js'
+            {pattern: 'test/js/lib/angular-1.5.9.js', watched: false},
+            {pattern: 'test/js/lib/angular-mocks-1.5.9.js', watched: false},
+            {pattern: 'test/js/lib/underscore-1.8.3.js', watched: false},
+            {pattern: 'main/webapp/client/components/grid/deep.js', watched: false},
+            'test/js/unit/**/*.spec.js',
+            'main/webapp/client/app/common/*.js'
         ],
         autoWatch: true,
         singleRun: true,
@@ -16,16 +15,26 @@ module.exports = function(config) {
         browsers: ['IE'],
         plugins: [
             'karma-jasmine',
-            'karma-chrome-launcher',
             'karma-ie-launcher',
-            'karma-junit-reporter'
+            'karma-junit-reporter',
+            'karma-coverage'
         ],
-        reporters: ['progress', 'junit'],
+        reporters: [
+            'progress',
+            'junit',
+            'coverage'
+        ],
+        preprocessors: {
+            'main/webapp/client/app/**/*.js': 'coverage'
+        },
+        coverageReporter: {
+            type: 'in-memory'
+        },
         junitReporter: {
             outputFile: 'karma-unit-report.xml',
             suite: 'unit',
             useBrowserName: false
         },
-        logLevel: config.LOG_DEBUG
+        logLevel: config.LOG_INFO
     });
 };
