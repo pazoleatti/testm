@@ -174,4 +174,10 @@ public interface RefBookPersonDao {
      */
     void saveRegistryPersonFakeVersion(RegistryPerson person);
 
+    /**
+     * Получить все версии физлица, которые не являются дубликатами
+     * @param recordId идентификатор ФЛ
+     * @return список объектов найденных версий
+     */
+    List<RegistryPerson> fetchNonDuplicatesVersions(long recordId);
 }

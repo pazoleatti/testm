@@ -609,14 +609,14 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public void checkVersionOverlapping(RegistryPerson person) {
         Date minDate = null, maxDate = new Date(0);
-        List<RefBookPerson> overlappingPersonList = new ArrayList<>();
+        List<RegistryPerson> overlappingPersonList = new ArrayList<>();
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setId(person.getRecordId().toString());
-        PagingResult<RefBookPerson> relatedPersons = refBookPersonDao.getPersons(null, filter);
-        for (RefBookPerson relatedPerson : relatedPersons) {
+        List<RegistryPerson> relatedPersons = refBookPersonDao.fetchNonDuplicatesVersions(person.getRecordId());
+        for (RegistryPerson relatedPerson : relatedPersons) {
             if (person.getId() == null || !person.getId().equals(relatedPerson.getId())) {
                 // Проверка пересечения существующей с исходной
-                if (!(SimpleDateUtils.toStartOfDay(relatedPerson.getVersionEnd()) != null && SimpleDateUtils.toStartOfDay(person.getVersion()).after(SimpleDateUtils.toStartOfDay(relatedPerson.getVersionEnd()))
+                if (!(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()) != null && SimpleDateUtils.toStartOfDay(person.getVersion()).after(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()))
                         || SimpleDateUtils.toStartOfDay(person.getVersion()).before(SimpleDateUtils.toStartOfDay(relatedPerson.getVersion()))
                         && person.getVersion() != null && SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).before(SimpleDateUtils.toStartOfDay(relatedPerson.getVersion())))) {
                     overlappingPersonList.add(relatedPerson);
@@ -624,8 +624,8 @@ public class PersonServiceImpl implements PersonService {
                 if (minDate == null || SimpleDateUtils.toStartOfDay(relatedPerson.getVersion()).before(SimpleDateUtils.toStartOfDay(minDate))) {
                     minDate = relatedPerson.getVersion();
                 }
-                if (maxDate != null && (SimpleDateUtils.toStartOfDay(relatedPerson.getVersionEnd()) == null || SimpleDateUtils.toStartOfDay(relatedPerson.getVersionEnd()).after(SimpleDateUtils.toStartOfDay(maxDate)))) {
-                    maxDate = relatedPerson.getVersionEnd();
+                if (maxDate != null && (SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()) == null || SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()).after(SimpleDateUtils.toStartOfDay(maxDate)))) {
+                    maxDate = relatedPerson.getRecordVersionTo();
                 }
             }
         }
@@ -655,14 +655,14 @@ public class PersonServiceImpl implements PersonService {
         }
     }
 
-    private String makeOverlappingPersonsString(List<RefBookPerson> overlappingPersons) {
+    private String makeOverlappingPersonsString(List<RegistryPerson> overlappingPersons) {
         List<String> overlappingPersonStrings = new ArrayList<>(overlappingPersons.size());
-        for (RefBookPerson overlappingPerson : overlappingPersons) {
+        for (RegistryPerson overlappingPerson : overlappingPersons) {
             overlappingPersonStrings.add(String.format(
                     "[%s, период действия с %s по %s]",
                     overlappingPerson.getId(),
                     FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingPerson.getVersion()),
-                    overlappingPerson.getVersionEnd() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingPerson.getVersionEnd())));
+                    overlappingPerson.getRecordVersionTo() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingPerson.getRecordVersionTo())));
         }
         return Joiner.on(", ").join(overlappingPersonStrings);
     }

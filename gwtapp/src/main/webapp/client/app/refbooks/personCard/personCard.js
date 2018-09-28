@@ -525,8 +525,8 @@
                  * Отменить изменения
                  */
                 $scope.cancel = function () {
-                    $scope.person = $scope.dataExtract();
                     if ($scope.idDocTab.active) {
+                        $scope.idDocs = null;
                         $scope.fetchIdDocs($scope.idDocsGrid.ctrl)
                     } else if ($scope.inpTab.active) {
                         $scope.fetchInp($scope.inpListGrid.ctrl)
@@ -541,6 +541,7 @@
                     } else if ($scope.tbTab.active) {
                         $scope.fetchTb($scope.tbListGrid.ctrl)
                     }
+                    $scope.person = $scope.dataExtract();
                     $scope.mode = APP_CONSTANTS.MODE.VIEW;
                 };
 

@@ -98,7 +98,7 @@
                          data-ng-if="mode == 'EDIT' && person.taxPayerState.permission"
                          data-ui-select2="taxPayerStateSelected.options"
                          data-ng-model="person.taxPayerState.value"
-                         data-ng-init="initTaxPayerState(person)"
+                         data-ng-init="initTaxPayerState()"
                          style="width: 370px">
                     </div>
 
@@ -112,7 +112,7 @@
                     <div class="span8" data-ng-controller="SelectRegistryPersonController" data-ng-if="mode == 'EDIT'"
                          data-ui-select2="asnuSelect.options"
                          data-ng-model="person.source"
-                         data-ng-init="initAsnu(person)"
+                         data-ng-init="initAsnu()"
                          style="width: 370px">
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                     <div class="span8" data-ng-controller="SelectRegistryPersonController" data-ng-if="mode == 'EDIT'"
                          data-ui-select2="citizenshipSelected.options"
                          data-ng-model="person.citizenship.value"
-                         data-ng-init="initCitizenship(person)"
+                         data-ng-init="initCitizenship()"
                          style="width: 370px">
                     </div>
                 </div>
@@ -406,7 +406,7 @@
                         <div data-aplana-field>
                             <div data-ui-select2="countrySelected.options"
                                  data-ng-model="person.address.value.COUNTRY_ID.referenceObject"
-                                 data-ng-init="initCountry(person)"
+                                 data-ng-init="initCountry()"
                                  data-ui-validate="{requiredByAddress : 'isCountryValid($value)'}"
                                  data-ui-validate-watch="['person.address.value.ADDRESS.value']"
                                  style="width: 370px">

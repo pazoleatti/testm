@@ -399,9 +399,13 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 .addValue(RegistryPerson.UpdatableField.BIRTH_DATE.getAlias(), person.getBirthDate());
         if (person.getCitizenship().value() != null && person.getCitizenship().value().get("id") != null) {
             personParams.addValue(RegistryPerson.UpdatableField.CITIZENSHIP.getAlias(), person.getCitizenship().value().get("id").getNumberValue());
+        } else {
+            personParams.addValue(RegistryPerson.UpdatableField.CITIZENSHIP.getAlias(), null);
         }
         if (person.getReportDoc().value() != null && person.getReportDoc().value().get("id") != null) {
             personParams.addValue(RegistryPerson.UpdatableField.REPORT_DOC.getAlias(), person.getReportDoc().value().get("id").getNumberValue());
+        } else {
+            personParams.addValue(RegistryPerson.UpdatableField.REPORT_DOC.getAlias(), null);
         }
         if (person.getInn().value() != null) {
             personParams.addValue(RegistryPerson.UpdatableField.INN.getAlias(), person.getInn().value());
@@ -419,6 +423,8 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
         if (person.getSource() != null && person.getSource().get("id") != null) {
             personParams.addValue(RegistryPerson.UpdatableField.SOURCE.getAlias(), person.getSource().get("id").getNumberValue());
+        } else {
+            personParams.addValue(RegistryPerson.UpdatableField.SOURCE.getAlias(), null);
         }
         personParams.addValue(RegistryPerson.UpdatableField.VIP.getAlias(), person.getVip());
         getNamedParameterJdbcTemplate().update(query, personParams);
@@ -495,5 +501,21 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 .addValue("oldId", person.getRecordId())
                 .addValue("vip", person.getVip());
         getNamedParameterJdbcTemplate().update(query, params);
+    }
+
+    public List<RegistryPerson> fetchNonDuplicatesVersions(long recordId) {
+        String query = "select person.*, " +
+                "(select min(version) - interval '1' day \n" +
+                "from ref_book_person p \n" +
+                "where status in (0, 2) \n" +
+                "and p.version > person.version \n" +
+                "and p.record_id = person.record_id \n" +
+                ") as record_version_to \n" +
+                "from ref_book_person person \n" +
+                "where person.status = 0\n" +
+                "and person.record_id = :recordId\n" +
+                "and old_id = record_id";
+        MapSqlParameterSource params = new MapSqlParameterSource("recordId", recordId);
+        return getNamedParameterJdbcTemplate().query(query, params, REGISTRY_CARD_PERSON_MAPPER);
     }
 }

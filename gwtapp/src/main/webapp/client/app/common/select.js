@@ -928,7 +928,7 @@
                  * @param person изменяемое ФЛ
                  */
                 $scope.initIdDocs = function (idDocs, person) {
-                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'idDocFormatter');
+                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'idDocFormatter');
                     if (idDocs) {
                         performInitialization(idDocs, person)
                     } else {
@@ -950,10 +950,9 @@
 
                 /**
                  * Инициализировать выпадашку для выбора статуса Налогоплательщика
-                 * @param person изменяемое ФЛ
                  */
-                $scope.initTaxPayerState = function(person) {
-                    $scope.taxPayerStateSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'taxPayerStateFormatter');
+                $scope.initTaxPayerState = function() {
+                    $scope.taxPayerStateSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'taxPayerStateFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS,
                         recordId: null,
@@ -967,20 +966,14 @@
                     })
                     }, function (data) {
                         $scope.taxPayerStateSelected.options.data.results = data.rows;
-                        angular.forEach($scope.taxPayerStateSelected.options.data.results, function (value) {
-                            if (value.id.value === person.taxPayerState.value.id.value) {
-                                person.taxPayerState.value = value
-                            }
-                        })
                     });
                 };
 
                 /**
                  * Инициализировать выпадашку для выбора АСНУ
-                 * @param person изменяемое ФЛ
                  */
-                $scope.initAsnu = function (person) {
-                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'asnuFormatter');
+                $scope.initAsnu = function () {
+                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'asnuFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.ASNU,
                         recordId: null,
@@ -994,11 +987,6 @@
                         })
                     }, function (data) {
                         $scope.asnuSelect.options.data.results = data.rows;
-                        angular.forEach($scope.asnuSelect.options.data.results, function (value) {
-                            if (value.id.value === person.source.id.value) {
-                                person.source = value
-                            }
-                        })
                     });
                 };
 
@@ -1017,10 +1005,9 @@
 
                 /**
                  * Инициализировать выпадашку со списком стран для выбора гражданста
-                 * @param person изменяемое ФЛ
                  */
-                $scope.initCitizenship = function(person) {
-                    $scope.citizenshipSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'countryFormatter');
+                $scope.initCitizenship = function() {
+                    $scope.citizenshipSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'countryFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
                         recordId: null,
@@ -1035,20 +1022,16 @@
                         })
                     }, function (data) {
                         $scope.citizenshipSelected.options.data.results = data.rows;
-                        angular.forEach($scope.citizenshipSelected.options.data.results, function (value) {
-                            if (value.id.value === person.citizenship.value.id.value) {
-                                person.citizenship.value = value
-                            }
-                        })
                     });
                 };
+
 
                 /**
                  * Инициализировать выпадашку со списком стран
                  * @param person изменяемое ФЛ
                  */
                 $scope.initCountry = function(person) {
-                    $scope.countrySelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'countryFormatter');
+                    $scope.countrySelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'countryFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
                         recordId: null,
@@ -1063,11 +1046,6 @@
                         })
                     }, function (data) {
                         $scope.countrySelected.options.data.results = data.rows;
-                        angular.forEach($scope.countrySelected.options.data.results, function (value) {
-                            if (value.id.value === person.address.value.COUNTRY_ID.referenceObject.id.value) {
-                                person.address.value.COUNTRY_ID.referenceObject = value
-                            }
-                        })
                     });
                 };
 
@@ -1076,7 +1054,7 @@
                  * @param idDoc
                  */
                 $scope.initDocType = function(idDoc) {
-                    $scope.docTypeSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], false, 'idDocCodeFormatter');
+                    $scope.docTypeSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'idDocCodeFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DOC_TYPE,
                         recordId: null,
@@ -1091,14 +1069,8 @@
                         })
                     }, function (data) {
                         $scope.docTypeSelect.options.data.results = data.rows;
-                        angular.forEach($scope.docTypeSelect.options.data.results, function (value) {
-                            if (idDoc && value.id.value === idDoc.id.value) {
-                                idDoc = value
-                            }
-                        })
                     });
                 }
-
             }])
     ;
 }());
