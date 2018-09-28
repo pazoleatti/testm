@@ -130,7 +130,8 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
                     }
                     break;
                 case NUMERIC:
-                    cell.setCellValue(((Number) value).doubleValue());
+                    Number number = value instanceof String ? Integer.valueOf((String) value) : (Number) value;
+                    cell.setCellValue(number.doubleValue());
                     break;
                 case DATE:
                     cell.setCellValue((Date) value);
