@@ -8,7 +8,12 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -17,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -334,19 +338,7 @@ public class AsyncManagerImpl implements AsyncManager {
         return tx.executeInNewTransaction(new TransactionLogic<AsyncTaskData>() {
             @Override
             public AsyncTaskData execute() {
-                int rowsUpdated = asyncTaskDao.lockTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
-                if (rowsUpdated != 0) {
-                    LOG.info(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
-                }
-                if (rowsUpdated > 1) {
-                    throw new IllegalArgumentException("Incorrect tasks reserved per node!");
-                }
-                if (rowsUpdated == 1) {
-                    AsyncTaskData asyncTaskData = asyncTaskDao.getLockedTask(node, balancingVariants);
-                    LOG.info(String.format("Node '%s' reserved task: %s", node, asyncTaskData));
-                    return asyncTaskData;
-                }
-                return null;
+                return asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
             }
         });
     }
