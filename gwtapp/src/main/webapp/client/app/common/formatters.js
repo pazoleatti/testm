@@ -516,7 +516,7 @@
         .filter('idDocCodeFormatter', function () {
             return function (value) {
                 if (value) {
-                    return "(" + value.referenceObject.CODE.value + ") " + value.referenceObject.NAME.value;
+                    return "(" + value.CODE.value + ") " + value.NAME.value;
                 }
                 return ''
             }

@@ -2,11 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQueryBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -17,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.*;
 import org.springframework.security.core.Authentication;
@@ -356,6 +351,7 @@ public class PersonServiceImplTest {
     @Test
     public void test_updateRegistryPerson_whenVipPersonAndAccessGranted() {
         //setup
+        Date version = new Date(0);
         RegistryPerson person = mock(RegistryPerson.class);
         final RegistryPerson persistedPerson = mock(RegistryPerson.class);
         doReturn(persistedPerson).when(personService).fetchPerson(anyLong());
@@ -364,6 +360,8 @@ public class PersonServiceImplTest {
         when(person.getInn()).thenReturn(Permissive.of("213456"));
         when(persistedPerson.getLastName()).thenReturn("ОригФам");
         when(persistedPerson.getInn()).thenReturn(Permissive.of("654321"));
+        when(person.getVersion()).thenReturn(version);
+        when(persistedPerson.getVersion()).thenReturn(version);
 
         //execution
         personService.updateRegistryPerson(person);
@@ -377,6 +375,7 @@ public class PersonServiceImplTest {
     @Test
     public void test_updateRegistryPerson_whenVipPersonAndAccessDisabled() {
         //setup
+        Date version = new Date(0);
         RegistryPerson person = mock(RegistryPerson.class);
         final RegistryPerson persistedPerson = mock(RegistryPerson.class);
         doReturn(persistedPerson).when(personService).fetchPerson(anyLong());
@@ -385,6 +384,8 @@ public class PersonServiceImplTest {
         when(person.getInn()).thenReturn(Permissive.of("213456"));
         when(persistedPerson.getLastName()).thenReturn("ОригФам");
         when(persistedPerson.getInn()).thenReturn(Permissive.of("654321"));
+        when(person.getVersion()).thenReturn(version);
+        when(persistedPerson.getVersion()).thenReturn(version);
 
         //execution
         personService.updateRegistryPerson(person);

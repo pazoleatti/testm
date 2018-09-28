@@ -2,7 +2,8 @@
     <div>
         <div class="content-header pull-left" data-ng-show="mode == 'VIEW'">
             <a href="index.html#/refbooks/registryFL">{{::'move_back' | translate}}</a>
-            <h1>{{'— (' + person.recordId + ')' + (person.lastName ? ' ' + person.lastName:"") + (person.firstName ? ' ' + person.firstName :"") + (person.middleName ? ' ' + person.middleName :"" ) +
+            <h1>{{'— (' + person.recordId + ')' + (person.lastName ? ' ' + person.lastName:"") + (person.firstName ? ' '
+                + person.firstName :"") + (person.middleName ? ' ' + person.middleName :"" ) +
                 ', ' + (person.birthDate | dateFormatter) + (person.recordId !== person.oldId ?', дубликат':'')}}</h1>
         </div>
         <div class="content-header pull-left" data-ng-show="mode == 'EDIT'">
@@ -10,10 +11,8 @@
                 person.middleName + ', ' + (person.birthDate | dateFormatter)}}</h1>
         </div>
         <div class="pull-right" style="margin: 5px 10px 10px 0;" data-ng-show="mode == 'VIEW'">
-            <!--TODO убрать  data-ng-disabled="true" когда доделаем редактирование-->
             <button type="button" class="btn btn-default"
-                    data-ng-disabled="true"
-                    data-ng-click="doEdit()">
+                    data-ng-click="editMode()">
                 <span>{{:: 'refBook.fl.card.button.edit' | translate}}</span>
             </button>
         </div>
@@ -23,59 +22,54 @@
                 <span class="btn-icon-ok"></span>
             </button>
             <button type="button" class="btn btn-default-nonBg iconed-btn" id="cancelButton"
-                    style="border: 1px solid #279238">
+                    style="border: 1px solid #279238"
+                    data-ng-click="cancel()">
                 <span>{{:: 'refBook.fl.card.button.cancel' | translate}}</span>
                 <span class="btn-icon-noneBg-close"></span>
             </button>
         </div>
     </div>
 
-    <div class="info-wrapper" >
+    <div class="info-wrapper">
         <div class="span2">
             <div class="row-fluid form-group-view">
-                <span class="span5">{{::'refBook.fl.card.label.version' | translate}}</span>
-                <span class="span7 person-card-data" data-ng-show="mode == 'VIEW'">{{person.id}}</span>
+                <div class="span5">{{::'refBook.fl.card.label.version' | translate}}</div>
+                <div class="span7 person-card-data">{{person.id}}</div>
+            </div>
+        </div>
+        <div class="span3">
+            <div class="row-fluid form-group-view">
+                <div class="span5" style="text-align: right">{{::'refBook.fl.card.label.versionFrom' | translate}}</div>
+                <div class="span7 person-card-data"
+                     data-ng-show="mode == 'VIEW'">{{person.version | dateFormatter}}
+                </div>
+                <div class="span7" data-ng-show="mode == 'EDIT'">
+                    <div data-aplana-field>
+                        <div data-aplana-datepicker
+                             data-max-date="person.recordVersionTo"
+                             data-ng-model="person.version"
+                             required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="span2">
-            <div class="row-fluid form-group-view">
-                <span class="span7">{{::'refBook.fl.card.label.versionFrom' | translate}}</span>
-                <span class="span5 person-card-data" data-ng-show="mode == 'VIEW'">{{person.version | dateFormatter}}</span>
-            </div>
-        </div>
-        <div class="span1">
-            <div class="row-fluid form-group-view">
-                <span class="span4">{{::'refBook.fl.card.label.versionTo' | translate}}</span>
-                <span class="span8 person-card-data" data-ng-show="mode == 'VIEW'">{{person.recordVersionTo ? (person.recordVersionTo | dateFormatter) : "-"}}</span>
-            </div>
-        </div>
-        <div class="row-fluid" style="width: 800px" data-ng-show="mode == 'EDIT'">
-            <div class="span1" style="padding-top: 2px">
-                {{::'refBook.fl.card.label.version' | translate}}
-            </div>
-            <div class="span2" style="padding-top: 2px">
-                {{person.id}}
-            </div>
-            <div class="span1">
-                <label class="control-label">{{::'refBook.fl.cardEdit.label.versionFrom' | translate}}</label>
-            </div>
-            <div class="span2">
-                <span data-aplana-field>
-                    <span data-aplana-datepicker
-                          data-max-date="person.recordVersionTo"
-                          data-ng-model="person.version">
-                    </span>
-                </span>
-            </div>
-            <div class="span1">
-                <label class="control-label">-</label>
-            </div>
-            <div class="span2">
-                <span data-aplana-field>
-                    <span data-aplana-datepicker
-                          data-ng-model="person.recordVersionTo">
-                    </span>
-                </span>
+            <div class="row-fluid form-group-view" >
+                <div class="span3" style="text-align: right">{{::'refBook.fl.card.label.versionTo' | translate}}</div>
+                <div class="span9 person-card-data" data-ng-show="mode == 'VIEW'">
+                    {{person.recordVersionTo ? (person.recordVersionTo | dateFormatter) : " -"}}
+                </div>
+                <div class="span8" data-ng-show="mode == 'EDIT'">
+                    <div data-aplana-field>
+                        <div data-aplana-datepicker
+                             data-ng-model="person.recordVersionTo">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

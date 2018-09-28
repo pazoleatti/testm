@@ -13,12 +13,12 @@
                     </button>
                     <button type="button" class="btn btn-default"
                             data-ng-click="editIdDoc()"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT' || idDocsGrid.value.length != 1">
                         <span>{{::'refBook.fl.card.button.edit' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
                             data-ng-click="deleteIdDoc()"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT' || idDocsGrid.value.length != 1">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
                 </div>
