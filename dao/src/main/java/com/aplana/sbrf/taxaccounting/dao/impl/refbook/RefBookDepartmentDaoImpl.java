@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -23,7 +23,7 @@ import java.util.List;
  * Реализация дао для работы со справочником Подразделения
  */
 @Repository
-public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBookDepartmentDataDao {
+public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
     /**
      * Получение значения справочника по идентификатору

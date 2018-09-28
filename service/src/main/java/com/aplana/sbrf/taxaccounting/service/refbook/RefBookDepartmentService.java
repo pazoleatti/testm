@@ -12,7 +12,7 @@ import java.util.List;
  * Сервис для работы со справочником Подразделения
  */
 @ScriptExposed
-public interface RefBookDepartmentDataService {
+public interface RefBookDepartmentService {
 
     /**
      * Получение значения справочника по идентификатору

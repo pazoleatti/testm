@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Дао для работы со справочником Подразделения
  */
-public interface RefBookDepartmentDataDao {
+public interface RefBookDepartmentDao {
     /**
      * Получение значения справочника по идентификатору
      *

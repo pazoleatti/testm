@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService
 import groovy.transform.TypeChecked
 import org.apache.commons.lang3.time.FastDateFormat
@@ -31,7 +31,7 @@ import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.chec
 @TypeChecked
 class DepartmentConfigScript extends AbstractScriptClass {
 
-    RefBookDepartmentDataService refBookDepartmentDataService
+    RefBookDepartmentService refBookDepartmentService
     RefBookOktmoService refBookOktmoService
     RefBookFactory refBookFactory
     DepartmentConfigService departmentConfigService
@@ -45,7 +45,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
     DepartmentConfigScript(groovy.lang.Script script) {
         super(script)
-        this.refBookDepartmentDataService = (RefBookDepartmentDataService) getSafeProperty("refBookDepartmentDataService")
+        this.refBookDepartmentService = (RefBookDepartmentService) getSafeProperty("refBookDepartmentService")
         this.refBookOktmoService = (RefBookOktmoService) getSafeProperty("refBookOktmoService")
         this.refBookFactory = (RefBookFactory) getSafeProperty("refBookFactory")
         this.departmentConfigService = (DepartmentConfigService) getSafeProperty("departmentConfigService")
@@ -68,7 +68,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
                            "Документ полномочий подписанта", "Код формы реорганизации", "КПП реорганизованной организации", "ИНН реорганизованной организации"]
 
     void importData() {
-        this.department = refBookDepartmentDataService.fetch(departmentId)
+        this.department = refBookDepartmentService.fetch(departmentId)
 
         List<List<String>> header = []
         List<List<String>> values = []
