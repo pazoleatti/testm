@@ -66,7 +66,7 @@
                 PRESENT_PLACE: 924,
                 REORGANIZATION: 928,
                 SIGNATORY_MARK: 35,
-                TAXPAYER_STATUS: 903
+                TAXPAYER_STATUS: 903,
                 DOC_TYPE: 360,
                 ID_DOC: 902
             },
