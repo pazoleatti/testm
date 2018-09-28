@@ -98,23 +98,23 @@
          */
         .filter('amountCasesFormatter', function () {
             return function (num, nominative, singular, plural) {
-                var text;
-                if (num > 10 && ((num % 100) / 10) === 1) {
-                    return num + " " + plural;
+                switch (num % 100) {
+                    case 11:
+                    case 12:
+                    case 13:
+                    case 14:
+                        return plural;
                 }
                 switch (num % 10) {
                     case 1:
-                        text = nominative;
-                        break;
+                        return nominative;
                     case 2:
                     case 3:
                     case 4:
-                        text = singular;
-                        break;
+                        return singular;
                     default: // case 0, 5-9
-                        text = plural;
+                        return plural;
                 }
-                return text;
             };
         })
 
@@ -375,7 +375,11 @@
          */
         .filter('codeNameFormatter', function () {
             return function (record) {
-                return record ? "(" + record.code + ") " + record.name : "";
+                if (!record) return '';
+                if (!record.code && !record.name) return '';
+                if (!record.code) return record.name;
+                if (!record.name) return '(' + record.code + ')';
+                return "(" + record.code + ") " + record.name;
             };
         })
 

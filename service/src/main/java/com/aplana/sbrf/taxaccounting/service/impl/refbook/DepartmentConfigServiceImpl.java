@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.*;
 import static com.google.common.base.Objects.firstNonNull;
@@ -292,7 +294,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EXPORT_DEPARTMENT_CONFIG)")
     public ActionResult createTaskToCreateExcel(DepartmentConfigsFilter filter, PagingParams pagingParams, TAUserInfo userInfo) {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
@@ -313,14 +315,14 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).IMPORT_DEPARTMENT_CONFIG)")
     public ImportDepartmentConfigsResult createTaskToImportExcel(ImportDepartmentConfigsAction action, TAUserInfo userInfo) {
         Logger logger = new Logger();
         ImportDepartmentConfigsResult result = new ImportDepartmentConfigsResult();
         AsyncTaskType taskType = AsyncTaskType.IMPORT_DEPARTMENT_CONFIGS;
         TAUser user = userInfo.getUser();
 
-        int fileNameDepartmentId = getDepartmentIdFromFileName(action.getFileName());
+        int fileNameDepartmentId = parseDepartmentIdFromFileName(action.getFileName());
         Department fileNameDepartment;
         if (!departmentService.existDepartment(fileNameDepartmentId) ||
                 (fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId)).getType() != DepartmentType.TERR_BANK) {
@@ -343,7 +345,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
             params.put("blobDataId", uuid);
             params.put("fileName", action.getFileName());
 
-            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
+            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + fileNameDepartmentId;
             asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                 @Override
                 public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
@@ -362,20 +364,15 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         scriptParams.put("inputStream", blobData.getInputStream());
         scriptParams.put("fileName", blobData.getName());
         if (!refBookScriptingService.executeScript(userInfo, RefBook.Id.NDFL_DETAIL.getId(), FormDataEvent.IMPORT, logger, scriptParams)) {
-            throw new ServiceException("Не удалось выпонить скрипт");
+            throw new ServiceException("Не удалось выполнить скрипт");
         }
     }
 
-    private int getDepartmentIdFromFileName(String fileName) {
-        int indexOf = fileName.indexOf("_");
+    private int parseDepartmentIdFromFileName(String fileName) {
         int departmentId;
-        if (indexOf != -1) {
-            String departmentIdString = fileName.substring(0, indexOf);
-            try {
-                departmentId = Integer.valueOf(departmentIdString);
-            } catch (NumberFormatException e) {
-                throw new ServiceException("Неверное имя файла \"" + fileName + "\".");
-            }
+        Matcher matcher = Pattern.compile("(\\d*)_.*_\\d{14}\\.xlsx").matcher(fileName);
+        if (matcher.matches()) {
+            departmentId = Integer.valueOf(matcher.group(1));
         } else {
             throw new ServiceException("Неверное имя файла \"" + fileName + "\".");
         }

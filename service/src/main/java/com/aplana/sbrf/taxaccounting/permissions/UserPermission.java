@@ -609,7 +609,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
-            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 

@@ -1,4 +1,4 @@
-package refbook
+package refbook// department_configs_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -21,7 +21,6 @@ import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.NDFL_DETAIL
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 
-// department_configs_ref комментарий для локального поиска скрипта
 /**
  * Cкрипт Настроек подразделений
  */
@@ -422,7 +421,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             } else {
                 oktmo = getOktmoByCode(value)
                 if (oktmo == null) {
-                    logError("Не найдено запись в справочнике \"ОКТМО\" по коду " + value)
+                    logError("Не найдена запись в справочнике \"ОКТМО\" по коду " + value)
                 }
             }
             return oktmo
@@ -444,7 +443,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             } else {
                 presentPlace = getPresentPlaceByCode(value)
                 if (presentPlace == null) {
-                    logError("Не найдено запись в справочнике \"Коды места представления расчета\" по коду " + value)
+                    logError("Не найдена запись в справочнике \"Коды места представления расчета\" по коду " + value)
                 }
             }
             return presentPlace
@@ -474,7 +473,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
             } else {
                 signatoryMark = getSignatoryMarkByCode(Integer.valueOf(value))
                 if (signatoryMark == null) {
-                    logError("Не найдено запись в справочнике \"Признак лица, подписавшего документ\" по коду " + value)
+                    logError("Не найдена запись в справочнике \"Признак лица, подписавшего документ\" по коду " + value)
                 }
             }
             return signatoryMark
@@ -498,7 +497,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         String getSignatoryLastName() {
             if (value && value.length() > 60) {
-                logError("\"Отчество подписанта\" должен быть строкой длиной не более 60 символов")
+                logError("\"Отчество подписанта\" должно быть строкой длиной не более 60 символов")
                 return null
             }
             return value ?: null
@@ -514,12 +513,14 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         RefBookReorganization getReorganization() {
             RefBookReorganization reorganization = null
-            if (!value || value.length() != 1 || !value.isNumber()) {
-                logError("\"Код формы реорганизации\" должен содержать число от 0 до 9")
-            } else {
-                reorganization = getReorganizationByCode(value)
-                if (reorganization == null) {
-                    logError("Не найдено запись в справочнике \"Коды форм реорганизации (ликвидации) организации\" по коду " + value)
+            if (value) {
+                if (value.length() != 1 || !value.isNumber()) {
+                    logError("\"Код формы реорганизации\" должен содержать число от 0 до 9")
+                } else {
+                    reorganization = getReorganizationByCode(value)
+                    if (reorganization == null) {
+                        logError("Не найдена запись в справочнике \"Коды форм реорганизации (ликвидации) организации\" по коду " + value)
+                    }
                 }
             }
             return reorganization
