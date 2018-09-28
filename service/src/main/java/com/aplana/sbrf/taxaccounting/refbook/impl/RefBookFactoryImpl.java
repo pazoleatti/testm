@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,11 +74,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
         if (DEPARTMENT.getId() == refBookId) {
             return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
-        }
-        if (CONFIGURATION_PARAM.getId() == refBookId) {
-            RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
-            dataProvider.setRefBook(refBook);
-            return dataProvider;
         }
         Assert.isTrue(!Strings.isNullOrEmpty(refBook.getTableName()));
         RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);

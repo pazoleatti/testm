@@ -12,10 +12,11 @@ import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 @ScriptExposed
 public interface RefBookFactory {
 
-	/**
-	 * Возвращает провайдер данных для конкретного справочника
-	 * @param refBookId код справочника
-	 * @return провайдер данных
-	 */
-	RefBookDataProvider getDataProvider(Long refBookId);
+    /**
+     * Возвращает провайдер данных для конкретного справочника
+     *
+     * @param refBookId код справочника
+     * @return провайдер данных
+     */
+    RefBookDataProvider getDataProvider(Long refBookId);
 }

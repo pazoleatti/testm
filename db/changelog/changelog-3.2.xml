@@ -34,4 +34,14 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5717 удалил справочник "Конфигурационные параметры"-->
+    <changeSet id="3.2-dnovikov-4" author="dnovikov">
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id = 105</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id = 105</where>
+        </delete>
+    </changeSet>
+
 </databaseChangeLog>
