@@ -24,7 +24,6 @@ BEGIN
     EXECUTE IMMEDIATE 'alter table REF_BOOK_PERSON_TB add constraint PERSON_TB_FK_DEPARTMENT foreign key (TB_DEPARTMENT_ID) references DEPARTMENT(ID)';
     EXECUTE IMMEDIATE 'alter table REF_BOOK_TB_PERSON add constraint TB_PERSON_FK_DEPARTMENT foreign key (TB_DEPARTMENT_ID) references DEPARTMENT(ID)';
 	
-	
   select count(1) into v_count from user_constraints where constraint_name='NOTIFICATION_FK_NOTIFY_ROLE' AND table_name='NOTIFICATION';
   IF v_count>0 THEN
     EXECUTE IMMEDIATE 'alter table NOTIFICATION drop constraint NOTIFICATION_FK_NOTIFY_ROLE';
