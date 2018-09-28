@@ -78,7 +78,7 @@ public class DepartmentConfigsReportBuilderTest {
 
     private RefBookReorganization reorganization() {
         RefBookReorganization reorganization = new RefBookReorganization();
-        reorganization.setCode("reorganizationCode");
+        reorganization.setCode("1");
         reorganization.setName("reorganizationName");
         return reorganization;
     }

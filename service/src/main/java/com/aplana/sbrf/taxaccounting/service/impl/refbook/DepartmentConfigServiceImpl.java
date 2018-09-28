@@ -345,7 +345,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
             params.put("blobDataId", uuid);
             params.put("fileName", action.getFileName());
 
-            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
+            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + fileNameDepartmentId;
             asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                 @Override
                 public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {

@@ -2,7 +2,15 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +20,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -121,13 +130,13 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
 
         long id = dbUtils.getNextIds(DBUtils.Sequence.ASYNC_TASK, 1).get(0);
 
-        getJdbcTemplate().update("insert into async_task (id, type_id, user_id, description, queue, priority_node, task_group, serialized_params) values (?, ?, ?, ?, ?, ?, ?, ?)",
+        getJdbcTemplate().update("INSERT INTO async_task (id, type_id, user_id, description, queue, priority_node, task_group, serialized_params) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 id, taskTypeId, userId, substring(description, 0, 400), queue.getId(), priorityNode, taskGroup != null ? taskGroup.getId() : null, serializedParams);
         return getTaskData(id);
     }
 
     @Override
-    public int lockTask(String node, String priorityNode, int timeout, AsyncQueue queue, int maxTasksPerNode) {
+    public AsyncTaskData reserveTask(String node, String priorityNode, int timeout, AsyncQueue queue, int maxTasksPerNode) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("node", node);
         params.addValue("priorityNode", priorityNode);
@@ -142,27 +151,21 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                     ") where rownum = 1) for update skip locked";
             // Отбираем следующую задачу для выполнения на узле и блокируем эту строку на уровне БД, чтобы другой узел не успел ее перехватить
             // skip locked используем для того, чтобы не выбрасывались исключения в случае, если подходящая запись уже заблокирована другим запросом
-            Long lockedAsyncId = getNamedParameterJdbcTemplate().queryForObject(sql, params, Long.class);
-            LOG.info("AsyncTaskDaoImpl.lockTask. lockedAsyncId: " + lockedAsyncId);
+            long lockedAsyncId = getNamedParameterJdbcTemplate().queryForObject(sql, params, Long.class);
+            LOG.info("trying lock task id: " + lockedAsyncId);
             params.addValue("lockedAsyncId", lockedAsyncId);
             // Привязываем задачу к узлу
-            return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp " +
-                            "where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = :lockedAsyncId",
+            int rowsUpdated = getNamedParameterJdbcTemplate().update("UPDATE async_task SET node = :node, state_date = current_timestamp, start_process_date = current_timestamp " +
+                            "WHERE (SELECT count(*) FROM async_task WHERE node = :node AND queue = :queue) < :maxTasksPerNode AND id = :lockedAsyncId",
                     params);
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
-        }
-    }
-
-    @Override
-    public AsyncTaskData getLockedTask(String node, AsyncQueue queue) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("node", node);
-        params.addValue("queue", queue.getId());
-        try {
-            return getNamedParameterJdbcTemplate().queryForObject("select * from (" +
-                    "select * from async_task where node = :node and queue = :queue order by start_process_date desc" +
-                    ") where rownum = 1", params, new AsyncTaskDataMapper(true));
+            Assert.isTrue(rowsUpdated <= 1);
+            LOG.info(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
+            if (rowsUpdated == 1) {
+                AsyncTaskData asyncTaskData = getTaskData(lockedAsyncId);
+                LOG.info(String.format("Node '%s' reserved task: %s", node, asyncTaskData));
+                return asyncTaskData;
+            }
+            return null;
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -173,7 +176,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject("select * from async_task where id = :taskId", params, new AsyncTaskDataMapper(true));
+            return getNamedParameterJdbcTemplate().queryForObject("SELECT * FROM async_task WHERE id = :taskId", params, new AsyncTaskDataMapper(true));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -184,7 +187,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject("select * from async_task where id = :taskId", params, new AsyncTaskDataMapper(false));
+            return getNamedParameterJdbcTemplate().queryForObject("SELECT * FROM async_task WHERE id = :taskId", params, new AsyncTaskDataMapper(false));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -192,25 +195,25 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
 
     @Override
     public void updateState(long taskId, AsyncTaskState state) {
-        getJdbcTemplate().update("update async_task set state = ?, state_date = current_timestamp where id = ?", state.getId(), taskId);
+        getJdbcTemplate().update("UPDATE async_task SET state = ?, state_date = current_timestamp WHERE id = ?", state.getId(), taskId);
     }
 
     @Override
     public void finishTask(long taskId) {
         LOG.info("Finishing task: " + taskId);
-        getJdbcTemplate().update("delete from async_task where id = ?", taskId);
+        getJdbcTemplate().update("DELETE FROM async_task WHERE id = ?", taskId);
     }
 
     @Override
     public void cancelTask(long taskId) {
         LOG.info("Cancelling task: " + taskId);
-        getJdbcTemplate().update("update async_task set state = ? where id = ?", AsyncTaskState.CANCELLED.getId(), taskId);
+        getJdbcTemplate().update("UPDATE async_task SET state = ? WHERE id = ?", AsyncTaskState.CANCELLED.getId(), taskId);
     }
 
     @Override
     public boolean isTaskActive(long taskId) {
         try {
-            int state = getJdbcTemplate().queryForObject("select state from async_task where id = ?", Integer.class, taskId);
+            int state = getJdbcTemplate().queryForObject("SELECT state FROM async_task WHERE id = ?", Integer.class, taskId);
             return state != AsyncTaskState.CANCELLED.getId();
         } catch (DataAccessException e) {
             return false;
@@ -221,8 +224,8 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     public List<Integer> getUsersWaitingForTask(long taskId) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
-        return getNamedParameterJdbcTemplate().queryForList("select user_id from async_task_subscribers where async_task_id = :taskId " +
-                "union select user_id from async_task where id = :taskId", params, Integer.class);
+        return getNamedParameterJdbcTemplate().queryForList("SELECT user_id FROM async_task_subscribers WHERE async_task_id = :taskId " +
+                "UNION SELECT user_id FROM async_task WHERE id = :taskId", params, Integer.class);
     }
 
     @Override
@@ -230,7 +233,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
         params.addValue("userId", userId);
-        getNamedParameterJdbcTemplate().update("insert into async_task_subscribers (async_task_id, user_id) values (:taskId, :userId)", params);
+        getNamedParameterJdbcTemplate().update("INSERT INTO async_task_subscribers (async_task_id, user_id) VALUES (:taskId, :userId)", params);
     }
 
     @Override
@@ -270,18 +273,18 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     @Override
     public void releaseNodeTasks(String node) {
         LOG.info("Releasing tasks by node: " + node);
-        getJdbcTemplate().update("update async_task set node = null, start_process_date = null, state = 1 where node = ?", node);
+        getJdbcTemplate().update("UPDATE async_task SET node = NULL, start_process_date = NULL, state = 1 WHERE node = ?", node);
     }
 
     @Override
     public List<Long> getTasksByPriorityNode(String priorityNode) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("priorityNode", priorityNode);
-        return getNamedParameterJdbcTemplate().queryForList("select id from async_task where priority_node = :priorityNode", params, Long.class);
+        return getNamedParameterJdbcTemplate().queryForList("SELECT id FROM async_task WHERE priority_node = :priorityNode", params, Long.class);
     }
 
     @Override
     public boolean isTaskExists(long taskId) {
-        return getJdbcTemplate().queryForObject("select count(*) from async_task where id = ?", Integer.class, taskId) != 0;
+        return getJdbcTemplate().queryForObject("SELECT count(*) FROM async_task WHERE id = ?", Integer.class, taskId) != 0;
     }
 }
