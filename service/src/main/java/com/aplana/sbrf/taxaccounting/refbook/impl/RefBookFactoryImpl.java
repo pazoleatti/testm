@@ -71,10 +71,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
             dataProvider.setRefBook(refBook);
             return dataProvider;
         }
-
-        if (DEPARTMENT.getId() == refBookId) {
-            return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
-        }
         Assert.isTrue(!Strings.isNullOrEmpty(refBook.getTableName()));
         RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
         if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {

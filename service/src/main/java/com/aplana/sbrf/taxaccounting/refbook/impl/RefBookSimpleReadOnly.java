@@ -52,19 +52,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	}
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookDao.getChildrenRecords(getRefBookId(), getTableName(), parentRecordId, pagingParams, filter, sortAttribute, true);
-    }
-
-    @Override
     public Long getRowNum(Date version, Long recordId,
                           String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         return refBookDao.getRowNum(getRefBookId(), getTableName(), recordId, filter, sortAttribute, isSortAscending, getWhereClause());
-    }
-
-    @Override
-    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

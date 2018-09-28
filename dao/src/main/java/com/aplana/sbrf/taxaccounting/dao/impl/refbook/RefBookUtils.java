@@ -105,20 +105,6 @@ public class RefBookUtils extends AbstractDao {
         return errors;
     }
 
-    public List<Long> getParentsHierarchy(String tableName, Long uniqueRecordId) {
-        String sql = String.format("select ID from %s where level != 1 start with id = ? connect by prior parent_id = id order by level desc", tableName);
-        try {
-            return getJdbcTemplate().query(sql, new RowMapper<Long>() {
-                @Override
-                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return SqlUtils.getLong(rs, "ID");
-                }
-            }, uniqueRecordId);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Long>();
-        }
-    }
-
     public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
 
         @Override

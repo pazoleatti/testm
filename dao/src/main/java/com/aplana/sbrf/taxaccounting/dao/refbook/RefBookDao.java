@@ -127,9 +127,6 @@ public interface RefBookDao {
      */
     void updateXsdId(Long refBookId, String xsdId);
 
-    PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, String tableName, Long parentId, PagingParams pagingParams,
-                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
-
     PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute, String whereClause);
 
@@ -227,15 +224,6 @@ public interface RefBookDao {
      * @return ref_book_record.id - ref_book_value
      */
     Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds);
-
-    /**
-     * Проверяет, существуют ли указанные версии элемента справочника
-     *
-     * @param tableName       название таблицы, в которой хранится справочник, т.к метод общий для нескольких справочников
-     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
-     * @return список записей, которые не существуют
-     */
-    List<Long> isRecordsExist(String tableName, Set<Long> uniqueRecordIds);
 
     /**
      * Проверяет, существует ли указанный справочник

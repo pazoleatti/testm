@@ -61,18 +61,6 @@ public interface RefBookService {
     void executeInNewTransaction(TransactionLogic logic);
 
     /**
-     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
-     * отдельных справочников.
-     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
-     *
-     * @param recordId   уникальный идентификатор записи
-     * @param attributes атрибуты справочника
-     * @param records    новые значения полей элемента справочника
-     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
-     */
-    List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
-
-    /**
      * Получение значения справочника по Id через кэш
      */
     @SuppressWarnings("unused")
