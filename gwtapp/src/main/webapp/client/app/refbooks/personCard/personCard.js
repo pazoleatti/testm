@@ -19,10 +19,13 @@
             });
         }])
 
-        .controller('personCardCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs',
-            function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs) {
+        .controller('personCardCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs', '$logPanel',
+            function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs, $logPanel) {
 
-                $scope.mode = 'VIEW';
+                $scope.mode = APP_CONSTANTS.MODE.VIEW;
+
+                $scope.idDocsForDelete = [];
+                $scope.editedIdDocs = [];
 
                 /**
                  * @description Получить данные физлица открытой карточки
@@ -344,22 +347,28 @@
                  * @description Получение списка ДУЛ для ФЛ
                  */
                 $scope.fetchIdDocs = function (ctrl) {
-                    var page = ctrl.getGrid().jqGrid('getGridParam', 'page');
-                    var rows = ctrl.getGrid().jqGrid('getGridParam', 'rowNum');
-                    $http({
-                        method: "GET",
-                        url: "controller/actions/refBookFL/fetchIdDocs/" + $scope.person.recordId,
-                        params: {
-                            pagingParams: JSON.stringify({
-                                page: page,
-                                count: rows,
-                                startIndex: page === 1 ? 0 : rows * (page - 1)
-                            })
-                        }
-                    }).success(function (response) {
-                        $scope.idDocs = response.rows;
-                        $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
-                    });
+                    if (!$scope.idDocs) {
+                        var page = ctrl.getGrid().jqGrid('getGridParam', 'page');
+                        var rows = ctrl.getGrid().jqGrid('getGridParam', 'rowNum');
+                        $http({
+                            method: "GET",
+                            url: "controller/actions/refBookFL/fetchIdDocs/" + $scope.person.recordId,
+                            params: {
+                                pagingParams: JSON.stringify({
+                                    page: page,
+                                    count: rows,
+                                    startIndex: page === 1 ? 0 : rows * (page - 1)
+                                })
+                            }
+                        }).success(function (response) {
+                            $scope.idDocs = response.rows;
+                            $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
+                        });
+                    } else {
+                        ctrl.getGrid().jqGrid('clearGridData');
+                        ctrl.getGrid().jqGrid('setGridParam', {data: $scope.idDocs});
+                        ctrl.refreshGrid();
+                    }
                 };
 
                 /**
@@ -430,21 +439,129 @@
                     });
                 };
 
+                /**
+                 * Перейти в режим редактирования
+                 */
                 $scope.editMode = function () {
                     $scope.mode = APP_CONSTANTS.MODE.EDIT;
                 };
 
-                $scope.save = function () {
-
+                /**
+                 * @description Стереть информацию об изменениях в списке ДУЛ
+                 */
+                var eraseIdDocChangesInfo = function () {
+                    $scope.idDocsForDelete = [];
+                    $scope.editedIdDocs = [];
                 };
 
+                /**
+                 * @description Сохранить изменения из списка ДУЛ
+                 */
+                var performIdDocsPersist = function () {
+                    if ($scope.idDocsForDelete.length > 0) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/deleteVersions",
+                            data: $scope.idDocsForDelete
+                        });
+                    }
+                    angular.forEach($scope.idDocs, function (idDoc) {
+                        idDoc.DOC_ID.value = idDoc.DOC_ID.referenceObject.id.value;
+                        if ($scope.editedIdDocs.includes(idDoc.id.value)) {
+                            idDoc.PERSON_ID.value = idDoc.PERSON_ID.referenceObject.id.value;
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/editRecord/" + idDoc.id.value,
+                                data: idDoc
+                            });
+                        } else if (idDoc.id.fake) {
+                            idDoc.DOC_ID.value = idDoc.DOC_ID.referenceObject.id.value;
+                            idDoc.id = null;
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/createRecord",
+                                data: idDoc
+                            });
+                        }
+                    });
+                };
+
+                /**
+                 * @description Сохранить изменения
+                 */
+                $scope.save = function () {
+                    var personParam = $.extend(true, {}, $scope.person);
+                    personParam.vip = $scope.person.vipSelect.value;
+                    if ($scope.person.address.value.COUNTRY_ID.referenceObject) {
+                        personParam.address.value.COUNTRY_ID.value = $scope.person.address.value.COUNTRY_ID.referenceObject.id.value;
+                    } else {
+                        personParam.address.value.COUNTRY_ID.value = null
+                    }
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/registryPerson/checkVersionOverlapping",
+                        data: personParam
+                    }).then(function (response) {
+                        performIdDocsPersist();
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                        if (response.data.error) {
+                            $dialogs.errorDialog({content: response.data.error});
+                            $scope.cancel();
+                        } else {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/registryPerson/updatePerson",
+                                data: personParam
+                            });
+                        }
+                        eraseIdDocChangesInfo();
+                    });
+                    $scope.mode = APP_CONSTANTS.MODE.VIEW;
+                };
+
+                /**
+                 * Отменить изменения
+                 */
+                $scope.cancel = function () {
+                    $scope.person = $scope.dataExtract();
+                    if ($scope.idDocTab.active) {
+                        $scope.fetchIdDocs($scope.idDocsGrid.ctrl)
+                    } else if ($scope.inpTab.active) {
+                        $scope.fetchInp($scope.inpListGrid.ctrl)
+                    } else if ($scope.duplicatesTab.active) {
+                        $http({
+                            method: "GET",
+                            url: "controller/actions/refBookFL/fetchOriginal/" + $scope.person.id
+                        }).success(function (response) {
+                            $scope.original = response
+                        });
+                        $scope.fetchDuplicates($scope.duplicatesGrid.ctrl)
+                    } else if ($scope.tbTab.active) {
+                        $scope.fetchTb($scope.tbListGrid.ctrl)
+                    }
+                    $scope.mode = APP_CONSTANTS.MODE.VIEW;
+                };
+
+                /**
+                 * @description Редактировать ДУЛ
+                 * @param mode режим редактирования
+                 */
                 var editIdDoc = function (mode) {
                     var title;
                     var idDoc;
                     switch (mode) {
                         case APP_CONSTANTS.MODE.CREATE:
                             title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.create');
-                            idDoc = {id : {fake: true, value: new Date().getTime()}};
+                            idDoc = {
+                                id: {fake: true, value: new Date().getTime()},
+                                DOC_ID: {attributeType: "REFERENCE"},
+                                DOC_NUMBER: {attributeType: "STRING"},
+                                PERSON_ID: {attributeType: "REFERENCE", value: $scope.person.id},
+                                INC_REP: {attributeType: "NUMBER", value: 0}
+                            };
+
                             break;
                         case APP_CONSTANTS.MODE.EDIT:
                             title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.edit');
@@ -467,22 +584,34 @@
                     })
                 };
 
+                /**
+                 * @description Добавить ДУЛ
+                 */
                 $scope.addIdDoc = function () {
                     editIdDoc(APP_CONSTANTS.MODE.CREATE)
                 };
 
+                /**
+                 * @description Изменить ДУЛ
+                 */
                 $scope.editIdDoc = function () {
                     editIdDoc(APP_CONSTANTS.MODE.EDIT)
                 };
 
-                $scope.deleteIdDoc = function() {
+                /**
+                 * @description Удалить ДУЛ
+                 */
+                $scope.deleteIdDoc = function () {
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.title'),
                         content: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
-                            var i=0;
+                            if (!$scope.idDocsGrid.value[0].id.fake) {
+                                $scope.idDocsForDelete.push($scope.idDocsGrid.value[0].id.value);
+                            }
+                            var i = 0;
                             var deleteIndex = -1;
                             angular.forEach($scope.idDocs, function (item) {
                                 if (item.id.value === $scope.idDocsGrid.value[0].id.value) {
@@ -498,21 +627,61 @@
                     })
                 };
 
+                /**
+                 * @description Обработка события создания ДУЛ
+                 */
                 $scope.$on("createIdDoc", function (event, idDoc) {
                     $scope.idDocs.push(idDoc);
                     $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                 });
 
+                /**
+                 * @description Обпработка события изменения ДУЛ
+                 */
                 $scope.$on("updateIdDoc", function (event, idDoc) {
                     var i = 0;
                     angular.forEach($scope.idDocs, function (item) {
                         if (item.id.value === idDoc.id.value) {
+                            $scope.editedIdDocs.push(idDoc.id.value);
                             $scope.idDocs.splice(i, 1, idDoc);
                         }
                         i++;
                     });
                     $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
-                })
+                });
+
+                /**
+                 * Проверяет необходимость заполнения элементов адреса
+                 * @param value
+                 * @returns {*|boolean}
+                 */
+                $scope.isAddressRequiredByAddressItems = function (value) {
+                    return value || !($scope.person.address.value.APPARTMENT.value ||
+                        $scope.person.address.value.POSTAL_CODE.value ||
+                        $scope.person.address.value.DISTRICT.value ||
+                        $scope.person.address.value.CITY.value ||
+                        $scope.person.address.value.LOCALITY.value ||
+                        $scope.person.address.value.HOUSE.value ||
+                        $scope.person.address.value.BUILD.value)
+                };
+
+                /**
+                 * Проверяет валидность поля ввода адреса
+                 * @param value
+                 * @returns {*|boolean}
+                 */
+                $scope.isAddressValid = function (value) {
+                    return value || !$scope.person.address.value.COUNTRY_ID.referenceObject
+                };
+
+                /**
+                 * Проверяет валидность поля страны проживания
+                 * @param value
+                 * @returns {*|boolean}
+                 */
+                $scope.isCountryValid = function (value) {
+                    return value || !$scope.person.address.value.ADDRESS.value
+                }
 
             }
         ]);

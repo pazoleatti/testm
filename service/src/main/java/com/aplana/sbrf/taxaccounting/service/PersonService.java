@@ -148,5 +148,17 @@ public interface PersonService {
      */
     void updateRegistryPerson(RegistryPerson person);
 
+    /**
+     * Проверка пересечений версий
+     * @param person проверяемое физическое лицо
+     */
+    void checkVersionOverlapping(RegistryPerson person);
+
+    /**
+     * Проверяет корректность ДУЛ
+     * @param docCode   код документа
+     * @param docNumber номер документа
+     * @return
+     */
     CheckDulResult checkDul(String docCode, String docNumber);
 }

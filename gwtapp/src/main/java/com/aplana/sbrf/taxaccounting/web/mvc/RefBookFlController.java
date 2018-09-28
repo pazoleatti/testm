@@ -178,6 +178,23 @@ public class RefBookFlController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * Проверть пересечение сохраняемого версий ФЛ
+     * @param person объект ФЛ
+     * @return стандартный ответ сервера
+     */
+    @PostMapping(value = "/actions/registryPerson/checkVersionOverlapping")
+    public ResponseEntity checkVersionOverlapping(@RequestBody RegistryPerson person) {
+        personService.checkVersionOverlapping(person);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Проверить корректность введенного ДУЛ
+     * @param docCode   код документа
+     * @param docNumber серия и номер документа
+     * @return результат проверки
+     */
     @PostMapping(value = "/actions/checkDul")
     public CheckDulResult checkDul(@RequestParam String docCode, @RequestParam String docNumber) {
         return personService.checkDul(docCode, docNumber);

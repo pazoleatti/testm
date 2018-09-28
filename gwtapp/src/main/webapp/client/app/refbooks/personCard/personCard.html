@@ -22,7 +22,8 @@
                 <span class="btn-icon-ok"></span>
             </button>
             <button type="button" class="btn btn-default-nonBg iconed-btn" id="cancelButton"
-                    style="border: 1px solid #279238">
+                    style="border: 1px solid #279238"
+                    data-ng-click="cancel()">
                 <span>{{:: 'refBook.fl.card.button.cancel' | translate}}</span>
                 <span class="btn-icon-noneBg-close"></span>
             </button>
@@ -46,7 +47,11 @@
                     <div data-aplana-field>
                         <div data-aplana-datepicker
                              data-max-date="person.recordVersionTo"
-                             data-ng-model="person.version">
+                             data-ng-model="person.version"
+                             required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
                         </div>
                     </div>
                 </div>

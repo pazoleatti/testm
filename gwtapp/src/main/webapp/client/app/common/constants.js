@@ -67,7 +67,8 @@
                 PRESENT_PLACE: 924,
                 SIGNATORY_MARK: 35,
                 REORGANIZATION: 928,
-                DOC_TYPE: 360
+                DOC_TYPE: 360,
+                ID_DOC: 902
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -270,6 +271,7 @@
                 DELETE: 1 << 3
             },
             MODE: {
+                VIEW: "VIEW",
                 CREATE: "CREATE",
                 EDIT: "EDIT"
             }

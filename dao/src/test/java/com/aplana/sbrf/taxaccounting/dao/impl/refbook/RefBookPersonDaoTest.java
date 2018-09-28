@@ -192,19 +192,19 @@ public class RefBookPersonDaoTest {
     public void test_updateRegistryPerson() {
         //setup
         Map<String, RefBookValue> citizenship = new HashMap<>();
-        RefBookValue citizenshipId = new RefBookValue(RefBookAttributeType.REFERENCE, 2L);
+        RefBookValue citizenshipId = new RefBookValue(RefBookAttributeType.NUMBER, 2L);
         citizenship.put("id", citizenshipId);
 
         Map<String, RefBookValue> reportDoc = new HashMap<>();
-        RefBookValue reportDocId = new RefBookValue(RefBookAttributeType.REFERENCE, 4L);
+        RefBookValue reportDocId = new RefBookValue(RefBookAttributeType.NUMBER, 4L);
         reportDoc.put("id", reportDocId);
 
         Map<String, RefBookValue> asnu = new HashMap<>();
-        RefBookValue asnuId = new RefBookValue(RefBookAttributeType.REFERENCE, 5L);
+        RefBookValue asnuId = new RefBookValue(RefBookAttributeType.NUMBER, 5L);
         asnu.put("id", asnuId);
 
         Map<String, RefBookValue> taxPayerState = new HashMap<>();
-        RefBookValue taxPayerStateId = new RefBookValue(RefBookAttributeType.REFERENCE, 6L);
+        RefBookValue taxPayerStateId = new RefBookValue(RefBookAttributeType.NUMBER, 6L);
         taxPayerState.put("id", taxPayerStateId);
 
         RegistryPerson person = new RegistryPerson();
@@ -246,7 +246,7 @@ public class RefBookPersonDaoTest {
     public void test_updateRegistryPersonAddress() {
         //setup
         Map<String, RefBookValue> addressVal = new HashMap<>();
-        RefBookValue addressId = new RefBookValue(RefBookAttributeType.REFERENCE, 1L);
+        RefBookValue addressId = new RefBookValue(RefBookAttributeType.NUMBER, 1L);
         RefBookValue regionCode = new RefBookValue(RefBookAttributeType.STRING, "12");
         RefBookValue postalCode = new RefBookValue(RefBookAttributeType.STRING, "234567");
         RefBookValue district = new RefBookValue(RefBookAttributeType.STRING, "ИзмРайон");
@@ -258,7 +258,7 @@ public class RefBookPersonDaoTest {
         RefBookValue appartment = new RefBookValue(RefBookAttributeType.STRING, "32");
         RefBookValue country_id = new RefBookValue(RefBookAttributeType.REFERENCE, 3L);
 
-        addressVal.put("ID", addressId);
+        addressVal.put("id", addressId);
         addressVal.put("REGION_CODE", regionCode);
         addressVal.put("POSTAL_CODE", postalCode);
         addressVal.put("DISTRICT", district);
@@ -273,9 +273,9 @@ public class RefBookPersonDaoTest {
         RegistryPerson person = new RegistryPerson();
         person.setId(1L);
         person.setAddress(Permissive.of(addressVal));
-        String sql = "UPDATE ref_book_address set region_code = :regionCode, postal_code = :postalCode, " +
-                "district = :district, city = :city, locality = :locality, street = :street, house = :house, " +
-                "build = :build, appartment = :appartment, country_id = :countryId where id = :id";
+        String sql = "UPDATE ref_book_address set region_code = :REGION_CODE, postal_code = :POSTAL_CODE, " +
+                "district = :DISTRICT, city = :CITY, locality = :LOCALITY, street = :STREET, house = :HOUSE, " +
+                "build = :BUILD, appartment = :APPARTMENT, country_id = :COUNTRY_ID where id = :id";
         // execution
         personDao.updateRegistryPersonAddress(person.getAddress().value(), sql);
 

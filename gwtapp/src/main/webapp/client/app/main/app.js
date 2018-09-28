@@ -972,7 +972,7 @@
         "refBook.fl.card.label.taxPayerState": "Статус налогоплательщика: ",
         "refBook.fl.card.label.source": "Система-источник: ",
         "refBook.fl.card.label.vip": "Важность: ",
-        "refBook.fl.card.label.inn": "ИНН: ",
+        "refBook.fl.card.label.inn": "ИНН в РФ: ",
         "refBook.fl.card.label.innForeign": "ИНН в стране гражданства: ",
         "refBook.fl.card.label.citizenship": "Гражданство: ",
         "refBook.fl.card.label.reportDoc": "Документ для отчетности: ",
