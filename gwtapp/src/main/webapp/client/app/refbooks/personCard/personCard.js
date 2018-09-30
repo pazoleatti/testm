@@ -467,7 +467,7 @@
                     }
                     angular.forEach($scope.idDocs, function (idDoc) {
                         idDoc.DOC_ID.value = idDoc.DOC_ID.referenceObject.id.value;
-                        if ($scope.editedIdDocs.includes(idDoc.id.value)) {
+                        if ($scope.editedIdDocs.indexOf(idDoc.id.value) != -1) {
                             idDoc.PERSON_ID.value = idDoc.PERSON_ID.referenceObject.id.value;
                             $http({
                                 method: "POST",
