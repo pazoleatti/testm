@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.RefBookPersonMapper;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonOriginalDuplicatesQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
@@ -517,5 +518,17 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "and old_id = record_id";
         MapSqlParameterSource params = new MapSqlParameterSource("recordId", recordId);
         return getNamedParameterJdbcTemplate().query(query, params, REGISTRY_CARD_PERSON_MAPPER);
+    }
+
+    @Override
+    public PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter) {
+
+        SelectPersonQueryGenerator selectPersonQueryGenerator = new SelectPersonOriginalDuplicatesQueryGenerator(filter, pagingParams);
+        String query = selectPersonQueryGenerator.generatePagedAndFilteredQuery();
+        List<RefBookPerson> persons = getJdbcTemplate().query(query, new RefBookPersonMapper());
+
+        int count = selectCountOfQueryResults(query);
+
+        return new PagingResult<>(persons, count);
     }
 }

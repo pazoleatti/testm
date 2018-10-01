@@ -395,6 +395,18 @@ public class PersonServiceImplTest {
         Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.LAST_NAME);
     }
 
+
+    @Test
+    public void testFetchOriginalAndDuplicatesCandidates() {
+        PagingParams params = new PagingParams();
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        TAUser user = mock(TAUser.class);
+        when(user.hasRole(TARole.N_ROLE_CONTROL_UNP)).thenReturn(true);
+
+        personService.fetchOriginalDuplicatesCandidates(params, filter, user);
+        verify(personDao).fetchOriginalDuplicatesCandidates(params, filter);
+    }
+
     private static class VersionComparator implements Comparator<RegistryPerson> {
         @Override
         public int compare(RegistryPerson o1, RegistryPerson o2) {

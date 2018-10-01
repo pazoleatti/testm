@@ -4,7 +4,7 @@
     /**
      * @description Модуль для отображения карточки Физлица
      */
-    angular.module('app.personCard', ['app.rest', 'app.regPerson', 'app.idDocRecordModal'])
+    angular.module('app.personCard', ['app.rest', 'app.regPerson', 'app.idDocRecordModal', 'app.personSearch'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('personCard', {
                 url: '/personRegistry/personCard/{id}',
@@ -682,8 +682,32 @@
                  */
                 $scope.isCountryValid = function (value) {
                     return value || !$scope.person.address.value.ADDRESS.value
-                }
+                };
 
+                var addPerson = function(title, mode) {
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/refbooks/personCard/modal/personSearch.html',
+                        controller: 'personSearchCtrl',
+                        windowClass: 'modal1200',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    id: $scope.person.id,
+                                    mode: mode
+                                }
+                            }
+                        }
+                    })
+                };
+
+                $scope.addOriginal = function() {
+                    addPerson($filter('translate')('refBook.fl.card.tabs.original.modal.title'), APP_CONSTANTS.MODE.ORIGINAL)
+                };
+
+                $scope.addDuplicate = function() {
+                    addPerson($filter('translate')('refBook.fl.card.tabs.duplicate.modal.title'), APP_CONSTANTS.MODE.DUPLICATE)
+                }
             }
         ]);
 }());

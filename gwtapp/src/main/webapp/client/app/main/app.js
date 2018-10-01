@@ -1004,6 +1004,8 @@
         "refBook.fl.card.tabs.idDoc.modal.title.edit": "Редактирование ДУЛ",
         "refBook.fl.card.tabs.idDoc.deleteDialog.title": "Удаление ДУЛ",
         "refBook.fl.card.tabs.idDoc.deleteDialog.content": "Вы действительно хотите удалить выбранный ДУЛ?",
+        "refBook.fl.card.tabs.original.modal.title": "Выбор физического лица для назначения оригинала",
+        "refBook.fl.card.tabs.duplicate.modal.title": "Выбор физического лица для назначения дубликата",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocCode": "Код ДУЛ",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumber": "Серия и номер",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.asnu": "АС НУ",

@@ -427,4 +427,12 @@ public class RefBookPersonDaoTest {
         assertThat(newValue.get("INC_REP").getNumberValue().intValue()).isEqualTo(1);
     }
 
+    @Test
+    public void test_fetchOriginalDuplicatesCandidates() {
+        PagingResult<RefBookPerson> persons = personDao.fetchOriginalDuplicatesCandidates(null, null);
+
+        assertThat(persons).hasSize(6);
+        assertThat(persons.getTotalCount()).isEqualTo(6);
+    }
+
 }

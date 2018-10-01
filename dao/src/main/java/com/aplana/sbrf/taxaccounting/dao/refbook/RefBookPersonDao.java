@@ -180,4 +180,12 @@ public interface RefBookPersonDao {
      * @return список объектов найденных версий
      */
     List<RegistryPerson> fetchNonDuplicatesVersions(long recordId);
+
+    /**
+     * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
+     * @param filter        фильтр выборки
+     * @param pagingParams  параметры постраничной выдачи
+     * @return  Страница списка записей
+     */
+    PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
 }

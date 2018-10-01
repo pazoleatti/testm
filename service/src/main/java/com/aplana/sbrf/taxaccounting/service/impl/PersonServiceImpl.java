@@ -684,6 +684,17 @@ public class PersonServiceImpl implements PersonService {
         return result;
     }
 
+    @Override
+    @PreAuthorize("hasPermission(#requestingUser, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    public PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser) {
+        if (filter == null) {
+            return new PagingResult<>();
+        }
+        PagingResult<RefBookPerson> persons = refBookPersonDao.fetchOriginalDuplicatesCandidates(pagingParams, filter);
+        forbidVipsDataByUserPermissions(persons, requestingUser);
+        return persons;
+    }
+
     /**
      * Подготавливает введенный текст для использования в SQL-запросе
      *

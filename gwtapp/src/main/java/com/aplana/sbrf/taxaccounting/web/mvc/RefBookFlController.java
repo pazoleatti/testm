@@ -59,13 +59,28 @@ public class RefBookFlController {
      * @param pagingParams параметры постраничной выдачи
      * @return Страница списка значений справочника
      */
-    @GetMapping(value = "/rest/refBookFL")
+    @GetMapping(value = "/rest/refBookFL", params = "projection=common")
     public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam(required = false) RefBookPersonFilter filter,
                                                               @RequestParam(required = false) PagingParams pagingParams) {
         TAUser currentUser = securityService.currentUserInfo().getUser();
         PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
+
+    /**
+     * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
+     * @param filter        фильтр выборки
+     * @param pagingParams  параметры постраничной выдачи
+     * @return  Страница списка записей
+     */
+    @GetMapping(value = "/rest/refBookFL", params = "projection=originalAndDuplicates")
+    public JqgridPagedList<RefBookPerson> fetchOriginalDuplicatesCandidates(@RequestParam(required = false) RefBookPersonFilter filter,
+                                                              @RequestParam(required = false) PagingParams pagingParams) {
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookPerson> records = personService.fetchOriginalDuplicatesCandidates(pagingParams, filter, currentUser);
+        return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
+    }
+
 
     /**
      * Получение списка ДУЛ для всех версий физлица, в т.ч. и дубликатов

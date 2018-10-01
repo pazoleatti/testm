@@ -10,11 +10,12 @@
             <div class="pull-left">
                 <div class="row-fluid" style="margin-left: 20px">
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT' || original"
+                            data-ng-click="addOriginal()">
                         <span>{{::'refBook.fl.card.button.choose' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT' || !original">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
                 </div>
@@ -27,7 +28,8 @@
             <div class="pull-left">
                 <div class="row-fluid" style="margin-left: 20px">
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT'"
+                            data-ng-click="addDuplicate()">
                         <span>{{::'refBook.fl.card.button.add' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"

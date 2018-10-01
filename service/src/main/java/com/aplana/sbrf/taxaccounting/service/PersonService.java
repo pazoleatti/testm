@@ -161,4 +161,13 @@ public interface PersonService {
      * @return
      */
     CheckDulResult checkDul(String docCode, String docNumber);
+
+    /**
+     * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
+     * @param filter        фильтр выборки
+     * @param pagingParams  параметры постраничной выдачи
+     * @return  Страница списка записей
+     */
+    PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser);
+
 }

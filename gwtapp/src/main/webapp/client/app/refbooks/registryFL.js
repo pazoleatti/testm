@@ -99,7 +99,8 @@
                         },
                         requestParameters: function () {
                             return {
-                                filter: $scope.filterRequestParam()
+                                filter: $scope.filterRequestParam(),
+                                projection: 'common'
                             }
                         },
                         colNames: [
@@ -252,6 +253,21 @@
                     value = $filter('translate')('refBook.fl.table.label.undefined');
                 }
                 return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "'>" + value + "</a>";
+            };
+        }])
+
+        /**
+         * @description Форматтер для поля 'Фамилия' для перехода на карточку ФЛ в отдельной вкладке
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('personLinkSeparateTabFormatter', ['$filter', function ($filter) {
+            return function (cellValue, options) {
+                var value = cellValue;
+                if (!cellValue) {
+                    value = $filter('translate')('refBook.fl.table.label.undefined');
+                }
+                return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "' target='_blank'>" + value + "</a>";
             };
         }])
 }());

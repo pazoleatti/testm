@@ -204,6 +204,15 @@
                 INN: {alias: "inn", length: 50, label: "ИНН"},
                 ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"}
             },
+            PERSON_SEARCH_FIELDS_ORIGINAL_DUPLICATES: {
+                LAST_NAME: {alias: "lastName", length: 60, label: "Фамилия"},
+                FIRST_NAME: {alias: "firstName", length: 60, label: "Имя"},
+                MIDDLE_NAME: {alias: "middleName", length: 60, label: "Отчество"},
+                RECORD_ID: {alias: "recordId", length: 10, label: "ИД ФЛ"},
+                INN: {alias: "inn", length: 50, label: "ИНН"},
+                ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
+                SNILS: {alias: "snils", length: 14, label: "СНИЛС"}
+            },
             REPORT_PERIOD_STATUS: {
                 OPEN: "OPEN", // Открыт
                 CLOSE: "CLOSE", // Закрыт
@@ -282,7 +291,9 @@
             MODE: {
                 VIEW: "VIEW",
                 CREATE: "CREATE",
-                EDIT: "EDIT"
+                EDIT: "EDIT",
+                ORIGINAL: "ORIGINAL",
+                DUPLICATE: "DUPLICATE"
             }
         });
 }());
