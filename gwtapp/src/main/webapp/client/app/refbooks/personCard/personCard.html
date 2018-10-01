@@ -7,7 +7,7 @@
                 ', ' + (person.birthDate | dateFormatter) + (person.recordId !== person.oldId ?', ' + ('refBook.fl.table.label.duplicateString' | translate):'')}}</h1>
         </div>
         <div class="content-header pull-left" data-ng-show="mode == 'EDIT'">
-            <h1>{{('refBook.fl.table.label.editing') + ' - (' + person.recordId + ') ' + person.lastName + ' ' + person.firstName + ' ' +
+            <h1>{{('refBook.fl.table.label.editing' | translate) + ' - (' + person.recordId + ') ' + person.lastName + ' ' + person.firstName + ' ' +
                 person.middleName + ', ' + (person.birthDate | dateFormatter)}}</h1>
         </div>
         <div class="pull-right" style="margin: 5px 10px 10px 0;" data-ng-show="mode == 'VIEW'">
