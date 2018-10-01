@@ -955,6 +955,8 @@
         "refBook.fl.table.label.duplicate": "(Дубл.)",
         "refBook.fl.table.label.undefined": "Не заполнено",
 
+        "refBook.fl.table.label.editing": "Редактирование",
+        "refBook.fl.table.label.duplicateString": "дубликат",
         "refBook.fl.card.label.version": "Версия: ",
         "refBook.fl.card.label.versionFrom": "Действует с: ",
         "refBook.fl.cardEdit.label.versionFrom": "Действует: ",
