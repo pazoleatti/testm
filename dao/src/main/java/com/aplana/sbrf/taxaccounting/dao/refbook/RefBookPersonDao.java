@@ -162,4 +162,22 @@ public interface RefBookPersonDao {
      */
     void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId);
 
+    /**
+     * Удалить фиктивную версию ФЛ
+     * @param recordId идентификатор ФЛ
+     */
+    void deleteRegistryPersonFakeVersion(long recordId);
+
+    /**
+     * Сохранить фиктивную версию Физлица
+     * @param person объект ФЛ
+     */
+    void saveRegistryPersonFakeVersion(RegistryPerson person);
+
+    /**
+     * Получить все версии физлица, которые не являются дубликатами
+     * @param recordId идентификатор ФЛ
+     * @return список объектов найденных версий
+     */
+    List<RegistryPerson> fetchNonDuplicatesVersions(long recordId);
 }

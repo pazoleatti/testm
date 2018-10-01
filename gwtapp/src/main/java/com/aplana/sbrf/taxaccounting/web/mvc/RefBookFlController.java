@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.PersonOriginalAndDuplicatesDTO;
@@ -176,5 +177,27 @@ public class RefBookFlController {
     public ResponseEntity updateRegistryPerson(@RequestBody RegistryPerson person) {
         personService.updateRegistryPerson(person);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Проверть пересечение сохраняемого версий ФЛ
+     * @param person объект ФЛ
+     * @return стандартный ответ сервера
+     */
+    @PostMapping(value = "/actions/registryPerson/checkVersionOverlapping")
+    public ResponseEntity checkVersionOverlapping(@RequestBody RegistryPerson person) {
+        personService.checkVersionOverlapping(person);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Проверить корректность введенного ДУЛ
+     * @param docCode   код документа
+     * @param docNumber серия и номер документа
+     * @return результат проверки
+     */
+    @PostMapping(value = "/actions/checkDul")
+    public CheckDulResult checkDul(@RequestParam String docCode, @RequestParam String docNumber) {
+        return personService.checkDul(docCode, docNumber);
     }
 }

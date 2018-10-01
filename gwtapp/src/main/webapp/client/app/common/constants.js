@@ -58,7 +58,6 @@
                 DECLARATION_DATA_TYPE_REF_BOOK: 931,
                 DECLARATION_TYPE: 207,
                 DEPARTMENT: 30,
-                DOC_TYPE: 360,
                 INCOME_CODE: 922,
                 OKTMO: 96,
                 PERIOD_CODE: 8,
@@ -67,7 +66,9 @@
                 PRESENT_PLACE: 924,
                 REORGANIZATION: 928,
                 SIGNATORY_MARK: 35,
-                TAXPAYER_STATUS: 903
+                TAXPAYER_STATUS: 903,
+                DOC_TYPE: 360,
+                ID_DOC: 902
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -277,6 +278,11 @@
             DEPARTMENT_CONFIG_PERMISSION: {
                 UPDATE: 1 << 2,
                 DELETE: 1 << 3
+            },
+            MODE: {
+                VIEW: "VIEW",
+                CREATE: "CREATE",
+                EDIT: "EDIT"
             }
         });
 }());

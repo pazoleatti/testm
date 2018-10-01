@@ -20,6 +20,9 @@ public class Permissive<T> {
         this.value = value;
     }
 
+    public Permissive() {
+    }
+
     public static <T> Permissive<T> forbidden() {
         return new Permissive<>(false);
     }
@@ -37,5 +40,20 @@ public class Permissive<T> {
     public T value() {
         if (!permission) return null;
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Permissive)) return false;
+
+        Permissive<?> that = (Permissive<?>) o;
+
+        return value != null ? value.equals(that.value) : that.value == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
     }
 }

@@ -21,6 +21,11 @@ public class RegistryPersonUpdateQueryBuilder {
 
         for (RegistryPerson.UpdatableField changedField : changedFields) {
             switch (changedField) {
+                case VERSION:
+                    fieldsBuilder.append("version = :")
+                            .append(changedField.getAlias())
+                            .append(", ");
+                    break;
                 case LAST_NAME:
                     fieldsBuilder.append("last_name = :")
                             .append(changedField.getAlias())
