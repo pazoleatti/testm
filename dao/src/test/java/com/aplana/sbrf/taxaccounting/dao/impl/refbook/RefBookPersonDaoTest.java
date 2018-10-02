@@ -418,7 +418,7 @@ public class RefBookPersonDaoTest {
         //execution
         personDao.updateRegistryPersonIncRepDocId(1L, 4L);
 
-        //verification
+
         RefBook refBook = refBookDao.get(RefBook.Id.ID_DOC.getId());
         Map<String, RefBookValue> oldValue = refBookSimpleDao.getRecordData(refBook, 1L);
         Map<String, RefBookValue> newValue = refBookSimpleDao.getRecordData(refBook, 4L);
@@ -433,6 +433,46 @@ public class RefBookPersonDaoTest {
 
         assertThat(persons).hasSize(6);
         assertThat(persons.getTotalCount()).isEqualTo(6);
+    }
+
+    @Test
+    public void test_setOriginal() {
+        //setup
+        //execution
+        personDao.setOriginal(5L, 5L, 2L);
+        //verification
+        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(5L);
+        assertThat(changedPerson.getRecordId()).isEqualTo(2L);
+    }
+
+    @Test
+    public void test_deleteOriginal() {
+        //setup
+        //execution
+        personDao.deleteOriginal(1L, 10L);
+        //verification
+        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(4L);
+        assertThat(changedPerson.getRecordId()).isEqualTo(10L);
+    }
+
+    @Test
+    public void setDuplicates() {
+        //setup
+        //execution
+        personDao.setDuplicates(Collections.singletonList(5L), 2L);
+        //verification
+        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(5L);
+        assertThat(changedPerson.getRecordId()).isEqualTo(2L);
+    }
+
+    @Test
+    public void test_deleteDuplicates() {
+        //setup
+        //execution
+        personDao.deleteDuplicates(Collections.singletonList(10L));
+        //verification
+        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(4L);
+        assertThat(changedPerson.getRecordId()).isEqualTo(10L);
     }
 
 }

@@ -15,7 +15,8 @@
                         <span>{{::'refBook.fl.card.button.choose' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT' || !original">
+                            data-ng-disabled="mode !== 'EDIT' || !original"
+                            data-ng-click="deleteOriginal()">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
                 </div>
@@ -33,7 +34,8 @@
                         <span>{{::'refBook.fl.card.button.add' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT'"
+                            data-ng-click="deleteDuplicate()">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
                 </div>
@@ -45,7 +47,7 @@
                  data-grid-fill-space="false"
                  data-grid-options="duplicatesGrid.options"
                  data-grid-ctrl="duplicatesGrid.ctrl"
-                 data-ng-model="duyplicatesGrid.value"
+                 data-ng-model="duplicatesGrid.value"
                  data-init-grid="fetchDuplicates(ctrl)"
                  id = "duplicatesGrid">
             </div>

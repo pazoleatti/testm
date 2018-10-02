@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQueryBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -405,6 +406,73 @@ public class PersonServiceImplTest {
 
         personService.fetchOriginalDuplicatesCandidates(params, filter, user);
         verify(personDao).fetchOriginalDuplicatesCandidates(params, filter);
+    }
+
+    @Test
+    public void test_saveOriginalAndDuplicates_whenOriginalIsNull() {
+        // setup
+        PersonOriginalAndDuplicatesAction action = mock(PersonOriginalAndDuplicatesAction.class);
+        when(action.getAddedOriginal()).thenReturn(null);
+        when(action.isDeleteOriginal()).thenReturn(true);
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+        // execution
+        personService.saveOriginalAndDuplicates(userInfo, action);
+        //verification
+        verify(personDao).deleteOriginal(anyLong(), anyLong());
+    }
+
+    @Test
+    public void test_saveOriginalAndDuplicates_whenOriginalINotNull() {
+        PersonOriginalAndDuplicatesAction action = mock(PersonOriginalAndDuplicatesAction.class);
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+        when(action.getAddedOriginalVersionId()).thenReturn(1L);
+
+        RegistryPerson person = mock(RegistryPerson.class);
+        when(person.getOldId()).thenReturn(1L);
+        when(person.getRecordId()).thenReturn(1L);
+        when(personDao.fetchPersonWithVersionInfo(anyLong())).thenReturn(person);
+        // execution
+        personService.saveOriginalAndDuplicates(userInfo, action);
+        //verification
+        verify(personDao).setOriginal(anyLong(), anyLong(), anyLong());
+    }
+
+    @Test
+    public void test_saveOriginalAndDuplicates_whenAddedDuplicatesIsNotEmpty() {
+        PersonOriginalAndDuplicatesAction action = mock(PersonOriginalAndDuplicatesAction.class);
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+        List<Long> addedDuplicates = mock(List.class);
+        when(addedDuplicates.size()).thenReturn(1);
+        when(action.getAddedDuplicates()).thenReturn(addedDuplicates);
+        when(action.getAddedOriginalVersionId()).thenReturn(1L);
+
+        RegistryPerson person = mock(RegistryPerson.class);
+        when(person.getOldId()).thenReturn(1L);
+        when(person.getRecordId()).thenReturn(1L);
+        when(personDao.fetchPersonWithVersionInfo(anyLong())).thenReturn(person);
+        // execution
+        personService.saveOriginalAndDuplicates(userInfo, action);
+        //verification
+        verify(personDao).setDuplicates(addedDuplicates, 0L);
+    }
+
+    @Test
+    public void test_saveOriginalAndDuplicates_whenDeletedDuplicatesIsNotEmpty() {
+        PersonOriginalAndDuplicatesAction action = mock(PersonOriginalAndDuplicatesAction.class);
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+        List<Long> deletedDuplicates = mock(List.class);
+        when(deletedDuplicates.size()).thenReturn(1);
+        when(action.getDeletedDuplicates()).thenReturn(deletedDuplicates);
+        when(action.getAddedOriginalVersionId()).thenReturn(1L);
+
+        RegistryPerson person = mock(RegistryPerson.class);
+        when(person.getOldId()).thenReturn(1L);
+        when(person.getRecordId()).thenReturn(1L);
+        when(personDao.fetchPersonWithVersionInfo(anyLong())).thenReturn(person);
+        // execution
+        personService.saveOriginalAndDuplicates(userInfo, action);
+        //verification
+        verify(personDao).deleteDuplicates(deletedDuplicates);
     }
 
     private static class VersionComparator implements Comparator<RegistryPerson> {

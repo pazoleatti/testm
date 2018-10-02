@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
@@ -21,13 +22,6 @@ import java.util.Map;
  */
 public interface PersonService {
 
-    /**
-     * Переводит запись в статус дубликата
-     *
-     * @param recordIds  - идентификаторы записей
-     * @param originalId - идентификатор ФЛ оригинала
-     */
-    void setDuplicate(List<Long> recordIds, Long originalId);
 
     /**
      * Меняем родителя (RECORD_ID) у дубликатов
@@ -36,13 +30,6 @@ public interface PersonService {
      * @param originalId
      */
     void changeRecordId(List<Long> recordIds, Long originalId);
-
-    /**
-     * Переводит запись в статус оригинала
-     *
-     * @param recordIds - идентификаторы записей
-     */
-    void setOriginal(List<Long> recordIds);
 
     /**
      * Получение оригинала ФЛ
@@ -95,14 +82,11 @@ public interface PersonService {
 
     /**
      * Сохраняет изменения списке дубликатов и оригинале ФЛ
-     *
-     * @param currentPerson     запись в справочнике ФЛ, для которой назначаются оригинал/дубли
-     * @param original          оригинал ФЛ
-     * @param newDuplicates     новые дубликаты
-     * @param deletedDuplicates дубликаты, которые были удалены
-     * @return результат выполнения операции
+     * @param userInfo  информация о пользователей
+     * @param data      данные об изменении оригинала и дубликатов
+     * @return результат действия
      */
-    ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, RefBookPerson currentPerson, RefBookPerson original, List<RefBookPerson> newDuplicates, List<RefBookPerson> deletedDuplicates);
+    ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, PersonOriginalAndDuplicatesAction data);
 
     /**
      * Создает фильтр поиска

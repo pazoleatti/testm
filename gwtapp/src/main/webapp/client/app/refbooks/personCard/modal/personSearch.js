@@ -3,10 +3,8 @@
 
     angular.module('app.personSearch', [])
 
-        .controller('personSearchCtrl', ['$scope', '$modalInstance', '$shareData', '$filter',
-            '$dialogs', 'APP_CONSTANTS', '$logPanel', 'prepareSpecificReport', 'createReport', 'RefBookFLResource',
-            function ($scope, $modalInstance, $shareData, $filter, $dialogs, APP_CONSTANTS, $logPanel,
-                      prepareSpecificReport, createReport, RefBookFLResource) {
+        .controller('personSearchCtrl', ['$scope', '$rootScope', '$modalInstance', '$shareData', '$filter', 'APP_CONSTANTS', 'RefBookFLResource',
+            function ($scope, $rootScope, $modalInstance, $shareData, $filter, APP_CONSTANTS, RefBookFLResource) {
 
 
                 $scope.isEmptySearchParams = true;
@@ -220,7 +218,17 @@
                 };
 
                 $scope.complete = function() {
+                    if ($shareData.mode == APP_CONSTANTS.MODE.ORIGINAL) {
+                        $rootScope.$broadcast("addOriginal", $scope.flGrid.value[0]);
+                        $modalInstance.close()
+                    } else if($shareData.mode == APP_CONSTANTS.MODE.DUPLICATE) {
+                        $rootScope.$broadcast("addDuplicate", $scope.flGrid.value[0]);
+                        $modalInstance.close()
+                    }
+                };
 
+                $scope.close = function () {
+                    $modalInstance.close()
                 }
 
             }]);

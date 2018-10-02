@@ -3,9 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
@@ -13,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.PersonOriginalAndDuplicatesDTO;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -170,11 +170,11 @@ public class RefBookFlController {
      * Сохраняет изменения списке дубликатов и оригинале ФЛ
      *
      * @param data данные дубликатов и оригинала
+     * @return результат действия
      */
     @PostMapping(value = "/actions/refBookFL/saveOriginalAndDuplicates")
-    public ActionResult saveOriginalAndDuplicates(@RequestBody PersonOriginalAndDuplicatesDTO data) {
-        return personService.saveOriginalAndDuplicates(securityService.currentUserInfo(), data.getCurrentPerson(),
-                data.getOriginal(), data.getNewDuplicates(), data.getDeletedDuplicates());
+    public ActionResult saveOriginalAndDuplicates(@RequestBody PersonOriginalAndDuplicatesAction data) {
+        return personService.saveOriginalAndDuplicates(securityService.currentUserInfo(), data);
     }
 
     @PostMapping(value = "/actions/refBookFL/export/excel")

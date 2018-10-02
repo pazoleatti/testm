@@ -30,6 +30,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
             addDocumentsConditions();
             addVersionsConditions();
             selfExcludeCondition(filter.getVersionId());
+            selfExcludeDuplicates();
         }
     }
 
@@ -46,6 +47,6 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
     }
 
     private void selfExcludeDuplicates() {
-        query = query + "\n" + "and record_id <> old_id";
+        query = query + "\n" + "and record_id = old_id";
     }
 }

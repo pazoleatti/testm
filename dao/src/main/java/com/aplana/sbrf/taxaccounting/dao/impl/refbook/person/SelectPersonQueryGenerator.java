@@ -122,6 +122,9 @@ public class SelectPersonQueryGenerator {
         return query;
     }
 
+    public void setPagingParams(PagingParams pagingParams) {
+        this.pagingParams = pagingParams;
+    }
 
     private void initSelectPerson() {
         query = SELECT_FULL_PERSON;

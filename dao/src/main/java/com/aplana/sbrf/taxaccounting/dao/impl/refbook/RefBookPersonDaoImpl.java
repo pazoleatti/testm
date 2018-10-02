@@ -183,13 +183,19 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void setDuplicate(List<Long> recordIds, Long originalId) {
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put("originalId", originalId);
-        getNamedParameterJdbcTemplate().update(String.format("update ref_book_person set record_id = :originalId, old_id = record_id, old_status = status, status = -1 " +
-                "where old_id is null and %s", SqlUtils.transformToSqlInStatement("record_id", recordIds)), valueMap);
-        getNamedParameterJdbcTemplate().update(String.format("update ref_book_person set record_id = :originalId " +
-                "where old_id is not null and %s", SqlUtils.transformToSqlInStatement("record_id", recordIds)), valueMap);
+    public void setDuplicates(List<Long> addedDuplicateRecordIds, Long changingPersonRecordId) {
+        String sql = "UPDATE ref_book_person SET record_id = :changingPersonRecordId WHERE record_id in (:addedDuplicateRecordIds)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("changingPersonRecordId", changingPersonRecordId)
+                .addValue("addedDuplicateRecordIds", addedDuplicateRecordIds);
+
+        getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    @Override
+    public void deleteDuplicates(List<Long> deletedDuplicateOldIds) {
+        String sql = "UPDATE ref_book_person SET record_id = old_id where old_id in (:deletedDuplicateOldIds) and old_id <> record_id";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("deletedDuplicateOldIds", deletedDuplicateOldIds));
     }
 
     @Override
@@ -201,11 +207,27 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void setOriginal(List<Long> recordIds) {
-        getJdbcTemplate().update(String.format("update ref_book_person set record_id = old_id, old_id = null, status = old_status, old_status = null " +
-                "where %s", SqlUtils.transformToSqlInStatement("old_id", recordIds)));
-        getJdbcTemplate().update(String.format("delete from ref_book_id_doc " +
-                "where %s", SqlUtils.transformToSqlInStatement("duplicate_record_id", recordIds)));
+    public void setOriginal(Long changingPersonRecordId, Long changingPersonOldId, Long addedOriginalRecordId) {
+        String sql;
+        if (changingPersonRecordId == changingPersonOldId) {
+            sql = "UPDATE ref_book_person set record_id = :addedOriginalRecordId where record_id = :changingPersonRecordId";
+        } else {
+            sql = "UPDATE ref_book_person set record_id = :addedOriginalRecordId where record_id = :changingPersonRecordId AND old_id = :changingPersonOldId";
+        }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("addedOriginalRecordId", addedOriginalRecordId)
+                .addValue("changingPersonRecordId", changingPersonRecordId)
+                .addValue("changingPersonOldId", changingPersonOldId);
+        getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    @Override
+    public void deleteOriginal(Long changingPersonRecordId, Long changingPersonOldId) {
+        String sql = "UPDATE ref_book_person set record_id = old_id where record_id = :changingPersonRecordId AND old_id = :changingPersonOldId";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("changingPersonOldId", changingPersonOldId)
+                .addValue("changingPersonRecordId", changingPersonRecordId);
+        getNamedParameterJdbcTemplate().update(sql, params);
     }
 
     @Override
@@ -527,7 +549,8 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         String query = selectPersonQueryGenerator.generatePagedAndFilteredQuery();
         List<RefBookPerson> persons = getJdbcTemplate().query(query, new RefBookPersonMapper());
 
-        int count = selectCountOfQueryResults(query);
+        selectPersonQueryGenerator.setPagingParams(null);
+        int count = selectCountOfQueryResults(selectPersonQueryGenerator.generatePagedAndFilteredQuery());
 
         return new PagingResult<>(persons, count);
     }

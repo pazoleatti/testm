@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQue
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -14,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -26,6 +26,7 @@ import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -182,142 +183,31 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, RefBookPerson currentPerson, RefBookPerson original, List<RefBookPerson> newDuplicates, List<RefBookPerson> deletedDuplicates) {
-        // TODO: вся эта дичь ниже взята из старой реализации, ее надо переписать, но аналитики не нашли время чтобы сделать правки в постановке и синхронизировать ее с реализацией
+    public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, PersonOriginalAndDuplicatesAction data) {
         ActionResult result = new ActionResult();
-        Logger logger = new Logger();
-        logger.setTaUserInfo(userInfo);
-        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERSON.getId());
-        RefBookDataProvider dulDataProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.getId());
-
-        List<RefBookPerson> duplicateRecords = newDuplicates;
-        RefBookPerson originalMap;
-        if (original != null) {
-            // Проверка оригинала
-            if (original.getOldId() != null) {
-                throw new ServiceException("Выбранная оригиналом запись являеется дубликатом записи с \"Идентификатор ФЛ\" = %d", original.getOldId());
+        if (data.getAddedOriginal() != null && data.getAddedOriginalVersionId() != null) {
+            RegistryPerson original = refBookPersonDao.fetchPersonWithVersionInfo(data.getAddedOriginalVersionId());
+            if (!original.getOldId().equals(original.getRecordId())) {
+                Logger logger = new Logger();
+                logger.error("ФЛ%s%s%s (Идентификатор ФЛАГ: %s) не может быть назначен оригиналом, так как сам является дубликатом другого ФЛ.",
+                        original.getLastName() != null ? " " + original.getLastName() : "",
+                        original.getFirstName() != null ? " " + original.getFirstName() : "",
+                        original.getMiddleName() != null ? " " + original.getMiddleName() : "",
+                        original.getOldId());
+                result.setUuid(logEntryService.save(logger.getEntries()));
             }
-            originalMap = original;
-            duplicateRecords.add(currentPerson); // исходная запись является дубликатом
-        } else {
-            if (currentPerson.getOldId() != null) {
-                setOriginal(Collections.singletonList(currentPerson.getOldId()));
-            }
-            originalMap = currentPerson; // исходная запись становиться оригиналом
+            refBookPersonDao.setOriginal(data.getChangingPersonRecordId(), data.getChangingPersonOldId(), data.getAddedOriginal());
         }
-        Long originalRecordId = originalMap.getRecordId();
-        List<Long> originalUniqueRecordIds = refBookDataProvider.getUniqueRecordIds(null, "RECORD_ID = " + originalRecordId);
-
-        //набор ДУЛов оригинала
-        Map<Long, Map<String, RefBookValue>> originalDulList = dulDataProvider.getRecordDataWhere("PERSON_ID = " + originalMap.getId());
-
-        for (RefBookPerson duplicateRecord : duplicateRecords) {
-            Long duplicateRecordId = duplicateRecord.getRecordId();
-            Long duplicateOldId = null;
-            if (duplicateRecord.getOldId() != null) {
-                duplicateOldId = duplicateRecord.getOldId();
-            }
-            if (duplicateOldId == null) {
-                // оригинал становиться дубликатом
-                // нужно проверить дубликаты данной записи
-                setDuplicate(Collections.singletonList(duplicateRecordId), originalRecordId);
-
-                //набор ДУЛов дубликата
-                Map<Long, Map<String, RefBookValue>> duplicateDulList = dulDataProvider.getRecordDataWhere("PERSON_ID = " + duplicateRecord.getId());
-                List<RefBookRecord> newDulList = new ArrayList<RefBookRecord>();
-                for (Map.Entry<Long, Map<String, RefBookValue>> entryDuplicate : duplicateDulList.entrySet()) {
-                    boolean exist = false;
-                    for (Map.Entry<Long, Map<String, RefBookValue>> entryOriginal : originalDulList.entrySet()) {
-                        // проверяем существование ДУЛов у оригинала
-                        if (compare(entryOriginal.getValue(), entryDuplicate.getValue())) {
-                            exist = true;
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // Копируем ДУЛы
-                        for (Long uniqueRecordId : originalUniqueRecordIds) {
-                            RefBookRecord refBookRecord = new RefBookRecord();
-                            refBookRecord.setValues(newDul(entryDuplicate.getValue(), uniqueRecordId, duplicateRecordId));
-                            newDulList.add(refBookRecord);
-                        }
-                    }
-                }
-
-                if (!newDulList.isEmpty()) {
-                    dulDataProvider.createRecordVersion(logger, new Date(), null, newDulList);
-                }
-            } else if (duplicateRecordId.equals(originalRecordId)) {
-                // уже назначен дубликатом
-            } else {
-                // версия назначена дубликатом на другую запись???
-                if (original == null) {
-                    Long oldRecordId = currentPerson.getRecordId();
-                    if (oldRecordId.equals(duplicateRecordId)) {
-                        changeRecordId(Collections.singletonList(duplicateOldId), originalRecordId);
-                    }
-                }
-            }
+        if (data.isDeleteOriginal()){
+            refBookPersonDao.deleteOriginal(data.getChangingPersonRecordId(), data.getChangingPersonOldId());
         }
-
-        for (RefBookPerson duplicateRecord : deletedDuplicates) {
-            Long duplicateRecordId = duplicateRecord.getRecordId();
-            Long duplicateOldId = null;
-            if (duplicateRecord.getOldId() != null) {
-                duplicateOldId = duplicateRecord.getOldId();
-            }
-            if (duplicateOldId == null) {
-                // уже является оригиналом
-            } else if (duplicateRecordId.equals(originalRecordId)) {
-                // является дубликатом данной записи
-                setOriginal(Collections.singletonList(duplicateOldId));
-            } else {
-                // является дубликатом другой записи
-            }
+        if (CollectionUtils.isNotEmpty(data.getAddedDuplicates())) {
+            refBookPersonDao.setDuplicates(data.getAddedDuplicates(), data.getChangingPersonRecordId());
         }
-        logger.info("Изменения успешно сохранены");
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        if (CollectionUtils.isNotEmpty(data.getDeletedDuplicates())) {
+            refBookPersonDao.deleteDuplicates(data.getDeletedDuplicates());
+        }
         return result;
-    }
-
-    private boolean compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-        if (!o1.get("DOC_ID").equals(o2.get("DOC_ID"))) {
-            return false;
-        }
-        if (!o1.get("DOC_NUMBER").equals(o2.get("DOC_NUMBER"))) {
-            return false;
-        }
-        return true;
-    }
-
-    private Map<String, RefBookValue> newDul(Map<String, RefBookValue> original, Long originalId, Long duplicateRecordId) {
-        Map<String, RefBookValue> newDul = new HashMap<String, RefBookValue>();
-        newDul.put("DOC_ID", original.get("DOC_ID"));
-        newDul.put("DOC_NUMBER", original.get("DOC_NUMBER"));
-        newDul.put("ISSUED_BY", original.get("ISSUED_BY"));
-        newDul.put("ISSUED_DATE", original.get("ISSUED_DATE"));
-        newDul.put("INC_REP", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        newDul.put("PERSON_ID", new RefBookValue(RefBookAttributeType.REFERENCE, originalId));
-        if (original.get("DUPLICATE_RECORD_ID").getNumberValue() != null) {
-            newDul.put("DUPLICATE_RECORD_ID", original.get("DUPLICATE_RECORD_ID"));
-        } else {
-            newDul.put("DUPLICATE_RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, duplicateRecordId));
-        }
-        return newDul;
-    }
-
-    @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public void setOriginal(List<Long> recordIds) {
-        LOG.info(String.format("PersonServiceImpl.setOriginal. recordIds: %s", recordIds));
-        refBookPersonDao.setOriginal(recordIds);
-    }
-
-    @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public void setDuplicate(List<Long> recordIds, Long originalId) {
-        LOG.info(String.format("PersonServiceImpl.setDuplicate. recordIds: %s; originalId: %s", recordIds, originalId));
-        refBookPersonDao.setDuplicate(recordIds, originalId);
     }
 
     @Override
@@ -452,7 +342,10 @@ public class PersonServiceImpl implements PersonService {
         for (int i = 0; i < persons.size(); i++) {
             versionIds[i] = persons.get(i).get("id").getNumberValue().longValue();
         }
-        PagingResult<Map<String, RefBookValue>> result = refBookDao.getRecords(refBookId, actualRefBook.getTableName(), pagingParams, null, null, "person_id in (" + StringUtils.join(versionIds, ", ") + ") AND status = 0");
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>();
+        if (versionIds.length > 0) {
+            result = refBookDao.getRecords(refBookId, actualRefBook.getTableName(), pagingParams, null, null, "person_id in (" + StringUtils.join(versionIds, ", ") + ") AND status = 0");
+        }
         return commonRefBookService.dereference(actualRefBook, result);
     }
 
@@ -579,7 +472,7 @@ public class PersonServiceImpl implements PersonService {
         }
 
         if (person.getRecordVersionTo() != null) {
-            if (!person.getRecordVersionTo().equals(persistedPerson.getRecordVersionTo())) {
+            if (!SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).equals(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()))) {
                 refBookPersonDao.deleteRegistryPersonFakeVersion(person.getRecordId());
                 person.setVersionEnd(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()));
                 refBookPersonDao.saveRegistryPersonFakeVersion(person);
@@ -630,7 +523,7 @@ public class PersonServiceImpl implements PersonService {
             }
         }
         if (!overlappingPersonList.isEmpty()) {
-            throw new ServiceException("Период действия с %s по %s для версии %s ФЛ (%s)%s, %s пересекается с периодом действия других версий этого ФЛ: %s",
+            throw new ServiceException("Невозможно сохранить данные физического лица. Период действия с %s по %s для версии %s ФЛ (%s)%s, %s пересекается с периодом действия других версий этого ФЛ: %s",
                     FastDateFormat.getInstance("dd.MM.yyyy").format(person.getVersion()),
                     person.getRecordVersionTo() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(person.getRecordVersionTo()),
                     person.getId(),
@@ -644,7 +537,7 @@ public class PersonServiceImpl implements PersonService {
 
         if (!(minDate == null || DateUtils.addDays(SimpleDateUtils.toStartOfDay(minDate), -1).equals(SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()))
                 || maxDate != null && DateUtils.addDays(SimpleDateUtils.toStartOfDay(maxDate), 1).equals(SimpleDateUtils.toStartOfDay(person.getVersion())))) {
-            throw new ServiceException("Между периодом действия с %s по %s для версии %s ФЛ (%s) %s, %s и периодом действия других версий этого ФЛ имеется временной разрыв более 1 календарного дня.",
+            throw new ServiceException("Невозможно сохранить данные физического лица. Между периодом действия с %s по %s для версии %s ФЛ (%s) %s, %s и периодом действия других версий этого ФЛ имеется временной разрыв более 1 календарного дня.",
                     FastDateFormat.getInstance("dd.MM.yyyy").format(person.getVersion()),
                     person.getRecordVersionTo() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(person.getRecordVersionTo()),
                     person.getId(),

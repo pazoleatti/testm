@@ -27,6 +27,11 @@
                 $scope.idDocsForDelete = [];
                 $scope.editedIdDocs = [];
 
+                $scope.newDuplicates = [];
+                $scope.deletedDuplicates = [];
+
+                $scope.deleteOriginal = false;
+
                 /**
                  * @description Получить данные физлица открытой карточки
                  */
@@ -134,6 +139,7 @@
                  */
                 $scope.duplicatesGrid = {
                     ctrl: {},
+                    value: [],
                     options: {
                         datatype: "local",
                         data: $scope.duplicates,
@@ -397,23 +403,29 @@
                  * Получение списка дубликатов для ФЛ
                  */
                 $scope.fetchDuplicates = function (ctrl) {
-                    if ($scope.person.oldId === $scope.person.recordId) {
-                        var page = ctrl.getGrid().jqGrid('getGridParam', 'page');
-                        var rows = ctrl.getGrid().jqGrid('getGridParam', 'rowNum');
-                        $http({
-                            method: "GET",
-                            url: "controller/actions/refBookFL/fetchDuplicates/" + $scope.person.id,
-                            params: {
-                                pagingParams: JSON.stringify({
-                                    page: page,
-                                    count: rows,
-                                    startIndex: page === 1 ? 0 : rows * (page - 1)
-                                })
-                            }
-                        }).success(function (response) {
-                            $scope.duplicates = response.rows;
-                            $scope.duplicatesGrid.ctrl.refreshGridData($scope.duplicates);
-                        });
+                    if (!$scope.duplicates) {
+                        if ($scope.person.oldId === $scope.person.recordId) {
+                            var page = ctrl.getGrid().jqGrid('getGridParam', 'page');
+                            var rows = ctrl.getGrid().jqGrid('getGridParam', 'rowNum');
+                            $http({
+                                method: "GET",
+                                url: "controller/actions/refBookFL/fetchDuplicates/" + $scope.person.id,
+                                params: {
+                                    pagingParams: JSON.stringify({
+                                        page: page,
+                                        count: rows,
+                                        startIndex: page === 1 ? 0 : rows * (page - 1)
+                                    })
+                                }
+                            }).success(function (response) {
+                                $scope.duplicates = response.rows;
+                                $scope.duplicatesGrid.ctrl.refreshGridData($scope.duplicates);
+                            });
+                        }
+                    } else {
+                        ctrl.getGrid().jqGrid('clearGridData');
+                        ctrl.getGrid().jqGrid('setGridParam', {data: $scope.duplicates});
+                        ctrl.refreshGrid();
                     }
                 };
 
@@ -487,6 +499,34 @@
                 };
 
                 /**
+                 * @description Стереть информацию о дубликатах
+                 */
+                var erasedDuplicatesInfo = function () {
+                    $scope.newDuplicates = [];
+                    $scope.deletedDuplicates = [];
+                };
+
+                /**
+                 * Сохранить изменения для оригинала и дубликатов
+                 */
+                var performOriginalAndDuplicatesPersist = function () {
+                    var data = {
+                        addedOriginalVersionId: $scope.original ? $scope.original.id : null,
+                        changingPersonRecordId: $scope.person.recordId,
+                        changingPersonOldId: $scope.person.oldId,
+                        addedOriginal: $scope.original ? $scope.original.recordId : null,
+                        deleteOriginal: $scope.deleteOriginal,
+                        addedDuplicates: $scope.newDuplicates,
+                        deletedDuplicates: $scope.deletedDuplicates
+                    };
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/refBookFL/saveOriginalAndDuplicates",
+                        data: data
+                    });
+                };
+
+                /**
                  * @description Сохранить изменения
                  */
                 $scope.save = function () {
@@ -502,21 +542,24 @@
                         url: "controller/actions/registryPerson/checkVersionOverlapping",
                         data: personParam
                     }).then(function (response) {
-                        performIdDocsPersist();
-                        if (response.data.uuid) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
                         if (response.data.error) {
                             $dialogs.errorDialog({content: response.data.error});
                             $scope.cancel();
                         } else {
+                            if (response.data.uuid) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                                return;
+                            }
+                            performIdDocsPersist();
+                            performOriginalAndDuplicatesPersist();
                             $http({
                                 method: "POST",
                                 url: "controller/actions/registryPerson/updatePerson",
                                 data: personParam
                             });
+                            eraseIdDocChangesInfo();
+                            erasedDuplicatesInfo();
                         }
-                        eraseIdDocChangesInfo();
                     });
                     $scope.mode = APP_CONSTANTS.MODE.VIEW;
                 };
@@ -535,7 +578,8 @@
                             method: "GET",
                             url: "controller/actions/refBookFL/fetchOriginal/" + $scope.person.id
                         }).success(function (response) {
-                            $scope.original = response
+                            $scope.original = response;
+                            $scope.deleteOriginal = false;
                         });
                         $scope.fetchDuplicates($scope.duplicatesGrid.ctrl)
                     } else if ($scope.tbTab.active) {
@@ -684,7 +728,7 @@
                     return value || !$scope.person.address.value.ADDRESS.value
                 };
 
-                var addPerson = function(title, mode) {
+                var addPerson = function (title, mode) {
                     $aplanaModal.open({
                         title: title,
                         templateUrl: 'client/app/refbooks/personCard/modal/personSearch.html',
@@ -701,13 +745,79 @@
                     })
                 };
 
-                $scope.addOriginal = function() {
+                /**
+                 * @description Добавить оригинал
+                 */
+                $scope.addOriginal = function () {
                     addPerson($filter('translate')('refBook.fl.card.tabs.original.modal.title'), APP_CONSTANTS.MODE.ORIGINAL)
                 };
 
-                $scope.addDuplicate = function() {
+                /**
+                 * @description Добавить дубликат
+                 */
+                $scope.addDuplicate = function () {
                     addPerson($filter('translate')('refBook.fl.card.tabs.duplicate.modal.title'), APP_CONSTANTS.MODE.DUPLICATE)
-                }
+                };
+
+                /**
+                 * @description Удалить оригинал
+                 */
+                $scope.deleteOriginal = function () {
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('refBook.fl.card.tabs.original.deleteDialog.title'),
+                        content: $filter('translate')('refBook.fl.card.tabs.original.deleteDialog.content'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $scope.original = null;
+                            $scope.deleteOriginal = true
+                        }
+                    })
+                };
+
+                /**
+                 * @description Удалить дубликат
+                 */
+                $scope.deleteDuplicate = function () {
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('refBook.fl.card.tabs.duplicate.deleteDialog.title'),
+                        content: $filter('translate')('refBook.fl.card.tabs.duplicate.deleteDialog.content'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+
+                            $scope.deletedDuplicates.push($scope.duplicatesGrid.value[0].oldId);
+                            var indexOfDeleting = null;
+                            var i = 0;
+                            angular.forEach($scope.duplicates, function (item) {
+                                if (item.id == $scope.duplicatesGrid.value[0].id) {
+                                    indexOfDeleting = i;
+                                }
+                                i++;
+                            });
+                            if (indexOfDeleting != null) {
+                                $scope.duplicates.splice(indexOfDeleting, 1);
+                            }
+                            $scope.duplicatesGrid.ctrl.refreshGridData($scope.duplicates);
+                        }
+                    })
+                };
+
+                $scope.$on("addOriginal", function (event, original) {
+                    $scope.original = original;
+                    $scope.deleteOriginal = false;
+                });
+
+                $scope.$on("addDuplicate", function (event, duplicate) {
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/personRegistry/fetch/" + duplicate.id
+                    }).then(function (response) {
+                        $scope.duplicates.push(response.data);
+                        $scope.duplicatesGrid.ctrl.refreshGridData($scope.duplicates)
+                    });
+                    $scope.newDuplicates.push(duplicate.recordId);
+                });
             }
         ]);
 }());
