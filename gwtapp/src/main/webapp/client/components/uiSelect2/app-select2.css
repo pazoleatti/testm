@@ -98,6 +98,8 @@
     border: 1px solid #cccccc;
     height: 26px;
     background-color: #ffffff;
+    max-height: 120px;
+    overflow-y: auto;
 }
 .select2-container-multi .select2-choices .select2-search-choice {
     padding: 1px 5px 1px 18px;
