@@ -538,8 +538,8 @@
                 function getUserTB(departments) {
                     // значение по-умолчанию будет подразделение пользователя
                     var defaultDepartment = $scope.user.terBank && _.find(departments, function (department) {
-                            return department.id === $scope.user.terBank.id;
-                        });
+                        return department.id === $scope.user.terBank.id;
+                    });
                     // если подразделение пользователя не найдено, то первое попавшееся
                     if (!defaultDepartment) {
                         defaultDepartment = departments[0];
@@ -886,7 +886,7 @@
         .controller('SelectRegistryPersonController', ['$scope', 'GetSelectOption', '$http', 'APP_CONSTANTS', 'RefBookRecordResource', 'RefBookValuesResource',
             function ($scope, GetSelectOption, $http, APP_CONSTANTS, RefBookRecordResource, RefBookValuesResource) {
 
-                var performInitialization = function(idDocs, person) {
+                var performInitialization = function (idDocs, person) {
                     idDocs.sort(function (obj1, obj2) {
                         var priority1 = obj1.DOC_ID.referenceObject.PRIORITY.value;
                         var priority2 = obj2.DOC_ID.referenceObject.PRIORITY.value;
@@ -916,7 +916,8 @@
                     });
                     $scope.selectedDocs.options.data.results = idDocs;
                     angular.forEach($scope.selectedDocs.options.data.results, function (value) {
-                        if (value.id.value === person.reportDoc.value.id.value) {
+                        if (person.reportDoc && person.reportDoc.value
+                            && value.id.value === person.reportDoc.value.id.value) {
                             person.reportDoc.value = value
                         }
                     })
@@ -951,7 +952,7 @@
                 /**
                  * Инициализировать выпадашку для выбора статуса Налогоплательщика
                  */
-                $scope.initTaxPayerState = function() {
+                $scope.initTaxPayerState = function () {
                     $scope.taxPayerStateSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'taxPayerStateFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS,
@@ -960,10 +961,10 @@
                         searchPattern: null,
                         exactSearch: null,
                         pagingParams: JSON.stringify({
-                        page: 1,
-                        count: 100000,
-                        startIndex: 0
-                    })
+                            page: 1,
+                            count: 100000,
+                            startIndex: 0
+                        })
                     }, function (data) {
                         $scope.taxPayerStateSelected.options.data.results = data.rows;
                     });
@@ -994,8 +995,12 @@
                  * Инициализировать выпадашку для установления важности
                  * @param person изменяемое ФЛ
                  */
-                $scope.initVip = function(person) {
-                    $scope.vipSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [{id: 1, value: true, name: 'VIP'}, {id: 2, value: false, name: 'не VIP'}], false);
+                $scope.initVip = function (person) {
+                    $scope.vipSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [{
+                        id: 1,
+                        value: true,
+                        name: 'VIP'
+                    }, {id: 2, value: false, name: 'не VIP'}], false);
                     angular.forEach($scope.vipSelect.options.data.results, function (value) {
                         if (value.value === person.vip) {
                             person.vipSelect = value
@@ -1006,7 +1011,7 @@
                 /**
                  * Инициализировать выпадашку со списком стран для выбора гражданста
                  */
-                $scope.initCitizenship = function() {
+                $scope.initCitizenship = function () {
                     $scope.citizenshipSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'countryFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
@@ -1030,7 +1035,7 @@
                  * Инициализировать выпадашку со списком стран
                  * @param person изменяемое ФЛ
                  */
-                $scope.initCountry = function(person) {
+                $scope.initCountry = function (person) {
                     $scope.countrySelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'countryFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
@@ -1053,7 +1058,7 @@
                  * Инициализировать выпадашку с кодами документов
                  * @param idDoc
                  */
-                $scope.initDocType = function(idDoc) {
+                $scope.initDocType = function (idDoc) {
                     $scope.docTypeSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'idDocCodeFormatter');
                     RefBookRecordResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DOC_TYPE,

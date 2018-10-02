@@ -495,7 +495,9 @@ public class PersonServiceImpl implements PersonService {
         }
 
         if (personFieldsToUpdate.contains(RegistryPerson.UpdatableField.REPORT_DOC)) {
-            refBookPersonDao.updateRegistryPersonIncRepDocId(persistedPerson.getReportDoc().value().get("id").getNumberValue().longValue(), person.getReportDoc().value().get("id").getNumberValue().longValue());
+            Long oldRepDocId = persistedPerson.getReportDoc().value() != null ? persistedPerson.getReportDoc().value().get("id").getNumberValue().longValue() : null;
+            Long newRepDocId = person.getReportDoc().value() != null ? person.getReportDoc().value().get("id").getNumberValue().longValue() : null;
+            refBookPersonDao.updateRegistryPersonIncRepDocId(oldRepDocId, newRepDocId);
         }
     }
 
