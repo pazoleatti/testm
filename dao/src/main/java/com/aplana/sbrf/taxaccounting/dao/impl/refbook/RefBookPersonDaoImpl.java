@@ -502,8 +502,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         params.addValue("oldReportDocId", oldReportDocId)
                 .addValue("newReportDocId", newReportDocId);
 
-        getNamedParameterJdbcTemplate().update(sqlOldValue, params);
-        getNamedParameterJdbcTemplate().update(sqlNewValue, params);
+        if (oldReportDocId != null) {
+            getNamedParameterJdbcTemplate().update(sqlOldValue, params);
+        }
+        if (newReportDocId != null) {
+            getNamedParameterJdbcTemplate().update(sqlNewValue, params);
+        }
     }
 
     @Override

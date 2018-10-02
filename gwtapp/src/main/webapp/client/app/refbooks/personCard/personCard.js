@@ -666,6 +666,11 @@
                             });
                             if (deleteIndex > -1) {
                                 $scope.idDocs.splice(deleteIndex, 1);
+                                if ($scope.person.reportDoc && $scope.person.reportDoc.value &&
+                                    $scope.person.reportDoc.value.id.value === $scope.idDocsGrid.value[0].id.value
+                                ) {
+                                    $scope.person.reportDoc.value = null;
+                                }
                             }
                             $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                         }
