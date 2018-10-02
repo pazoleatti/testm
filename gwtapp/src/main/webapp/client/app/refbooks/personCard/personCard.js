@@ -30,7 +30,7 @@
                 $scope.newDuplicates = [];
                 $scope.deletedDuplicates = [];
 
-                $scope.deleteOriginal = false;
+                $scope.doDeleteOriginal = false;
 
                 /**
                  * @description Получить данные физлица открытой карточки
@@ -515,7 +515,7 @@
                         changingPersonRecordId: $scope.person.recordId,
                         changingPersonOldId: $scope.person.oldId,
                         addedOriginal: $scope.original ? $scope.original.recordId : null,
-                        deleteOriginal: $scope.deleteOriginal,
+                        deleteOriginal: $scope.doDeleteOriginal,
                         addedDuplicates: $scope.newDuplicates,
                         deletedDuplicates: $scope.deletedDuplicates
                     };
@@ -579,7 +579,7 @@
                             url: "controller/actions/refBookFL/fetchOriginal/" + $scope.person.id
                         }).success(function (response) {
                             $scope.original = response;
-                            $scope.deleteOriginal = false;
+                            $scope.doDeleteOriginal = false;
                         });
                         $scope.fetchDuplicates($scope.duplicatesGrid.ctrl)
                     } else if ($scope.tbTab.active) {
@@ -763,6 +763,7 @@
                  * @description Удалить оригинал
                  */
                 $scope.deleteOriginal = function () {
+                    console.log("aaa")
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.original.deleteDialog.title'),
                         content: $filter('translate')('refBook.fl.card.tabs.original.deleteDialog.content'),
@@ -770,7 +771,7 @@
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
                             $scope.original = null;
-                            $scope.deleteOriginal = true
+                            $scope.doDeleteOriginal = true
                         }
                     })
                 };
@@ -805,7 +806,7 @@
 
                 $scope.$on("addOriginal", function (event, original) {
                     $scope.original = original;
-                    $scope.deleteOriginal = false;
+                    $scope.doDeleteOriginal = false;
                 });
 
                 $scope.$on("addDuplicate", function (event, duplicate) {
