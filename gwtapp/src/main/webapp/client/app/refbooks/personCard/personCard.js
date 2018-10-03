@@ -33,6 +33,20 @@
                 $scope.doDeleteOriginal = false;
 
                 /**
+                 * Флаг указывающий что удаление ДУЛ выполнено
+                 * @type {boolean}
+                 */
+                $scope.idDocsDeleteCompleted = false;
+
+                /**
+                 * Флаг указывающий что изменение и создание ДУЛ выполнено
+                 * @type {boolean}
+                 */
+                $scope.idDocsUpdateCompleted = false;
+
+                $scope.personParam = {};
+
+                /**
                  * @description Получить данные физлица открытой карточки
                  */
                 $scope.dataExtract = function () {
@@ -467,6 +481,42 @@
                 };
 
                 /**
+                 * @description Наблюдает обработалась ли информация по ДУЛ и обновляет данные ФЛ. Из-за того что имеем
+                 * двустороннюю ссылку у ДУЛ и ФЛ, приходится ждать асинхронного завершения обработки ДУЛ чтобы назначить ссылку на ДУЛ.
+                 * При рефакторинге это нужно учесть.
+                 */
+                $scope.$watchGroup(['idDocsDeleteCompleted', 'idDocsUpdateCompleted'], function (newValues) {
+                    if (newValues[0] && newValues[1]) {
+                        // Нам нужен идентификатор вновь созданного, но не сохраненного на момент начала операции "save" ДУЛ
+                        $http({
+                            method: "GET",
+                            url: "controller/actions/refBookFL/fetchIdDocs/" + $scope.person.recordId,
+                            params: {
+                                pagingParams: JSON.stringify({
+                                    page: 1,
+                                    count: 10000
+                                })
+                            }
+                        }).success(function (response) {
+                            angular.forEach(response.rows, function (idDoc) {
+                                if (idDoc.DOC_NUMBER.value === $scope.personParam.reportDoc.value.DOC_NUMBER.value && $scope.personParam.reportDoc && $scope.personParam.reportDoc.value.id.fake) {
+                                    $scope.personParam.reportDoc.value = idDoc;
+                                }
+                            });
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/registryPerson/updatePerson",
+                                data: $scope.personParam
+                            });
+                            eraseIdDocChangesInfo();
+                            erasedDuplicatesInfo();
+                        });
+                        $scope.idDocsDeleteCompleted = false;
+                        $scope.idDocsUpdateCompleted = false;
+                    }
+                });
+
+                /**
                  * @description Сохранить изменения из списка ДУЛ
                  */
                 var performIdDocsPersist = function () {
@@ -475,16 +525,27 @@
                             method: "POST",
                             url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/deleteVersions",
                             data: $scope.idDocsForDelete
+                        }).then(function () {
+                            $scope.idDocsDeleteCompleted = true;
                         });
+                    } else {
+                        $scope.idDocsDeleteCompleted = true;
                     }
+                    var startedCounter = 0;
+                    var completedCounter = 0;
                     angular.forEach($scope.idDocs, function (idDoc) {
                         idDoc.DOC_ID.value = idDoc.DOC_ID.referenceObject.id.value;
-                        if ($scope.editedIdDocs.indexOf(idDoc.id.value) != -1) {
+                        if ($scope.editedIdDocs.indexOf(idDoc.id.value) != -1 && !idDoc.id.fake) {
                             idDoc.PERSON_ID.value = idDoc.PERSON_ID.referenceObject.id.value;
                             $http({
                                 method: "POST",
                                 url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/editRecord/" + idDoc.id.value,
                                 data: idDoc
+                            }).then(function () {
+                                completedCounter++;
+                                if(startedCounter == completedCounter) {
+                                    $scope.idDocsUpdateCompleted = true;
+                                }
                             });
                         } else if (idDoc.id.fake) {
                             idDoc.DOC_ID.value = idDoc.DOC_ID.referenceObject.id.value;
@@ -493,9 +554,26 @@
                                 method: "POST",
                                 url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/createRecord",
                                 data: idDoc
+                            }).then(function () {
+                                completedCounter++;
+                                if(startedCounter == completedCounter) {
+                                    $scope.idDocsUpdateCompleted = true;
+                                }
                             });
+                        } else {
+                            completedCounter++;
+                            if(startedCounter == completedCounter) {
+                                $scope.idDocsUpdateCompleted = true;
+                            }
+                        }
+                        startedCounter++;
+                        if(startedCounter == completedCounter) {
+                            $scope.idDocsUpdateCompleted = true;
                         }
                     });
+                    if (startedCounter == 0) {
+                        $scope.idDocsUpdateCompleted = true;
+                    }
                 };
 
                 /**
@@ -530,17 +608,20 @@
                  * @description Сохранить изменения
                  */
                 $scope.save = function () {
-                    var personParam = $.extend(true, {}, $scope.person);
-                    personParam.vip = $scope.person.vipSelect.value;
+
+                    $scope.personParam = $.extend(true, {}, $scope.person);
+                    $scope.personParam.vip = $scope.person.vipSelect.value;
                     if ($scope.person.address.value.COUNTRY_ID.referenceObject) {
-                        personParam.address.value.COUNTRY_ID.value = $scope.person.address.value.COUNTRY_ID.referenceObject.id.value;
+                        $scope.personParam.address.value.COUNTRY_ID.value = $scope.person.address.value.COUNTRY_ID.referenceObject.id.value;
                     } else {
-                        personParam.address.value.COUNTRY_ID.value = null
+                        $scope.personParam.address.value.COUNTRY_ID.value = null
                     }
+                    var personParamForCheck = $.extend(true, {}, $scope.personParam);
+                    personParamForCheck.reportDoc = null;
                     $http({
                         method: "POST",
                         url: "controller/actions/registryPerson/checkVersionOverlapping",
-                        data: personParam
+                        data: personParamForCheck
                     }).then(function (response) {
                         if (response.data.error) {
                             $dialogs.errorDialog({content: response.data.error});
@@ -552,13 +633,6 @@
                             }
                             performIdDocsPersist();
                             performOriginalAndDuplicatesPersist();
-                            $http({
-                                method: "POST",
-                                url: "controller/actions/registryPerson/updatePerson",
-                                data: personParam
-                            });
-                            eraseIdDocChangesInfo();
-                            erasedDuplicatesInfo();
                         }
                     });
                     $scope.mode = APP_CONSTANTS.MODE.VIEW;
