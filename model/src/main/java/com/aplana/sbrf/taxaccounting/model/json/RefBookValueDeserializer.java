@@ -24,7 +24,7 @@ public class RefBookValueDeserializer extends JsonDeserializer<RefBookValue> {
         RefBookAttributeType attributeType = RefBookAttributeType.valueOf(jsonNode.get("attributeType").asText());
         JsonNode jsonValue = jsonNode.get("value");
         Object value = null;
-        if (jsonValue != null && !jsonValue.isNull()) {
+        if (jsonValue != null && !jsonValue.isNull() && jsonValue.asText() != null && !jsonValue.asText().isEmpty()) {
             switch (attributeType) {
                 case STRING:
                     value = jsonValue.asText();
