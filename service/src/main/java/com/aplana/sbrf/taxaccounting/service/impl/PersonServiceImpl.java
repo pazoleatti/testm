@@ -474,12 +474,10 @@ public class PersonServiceImpl implements PersonService {
         if (person.getRecordVersionTo() != null) {
             if (!SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).equals(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()))) {
                 refBookPersonDao.deleteRegistryPersonFakeVersion(person.getRecordId());
-                person.setVersionEnd(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()));
-                refBookPersonDao.saveRegistryPersonFakeVersion(person);
-            }
-        } else {
-            if (persistedPerson.getRecordVersionTo() != null) {
-                refBookPersonDao.deleteRegistryPersonFakeVersion(person.getRecordId());
+                if (SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).compareTo(SimpleDateUtils.toStartOfDay(person.getVersion())) > 0) {
+                    person.setVersionEnd(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()));
+                    refBookPersonDao.saveRegistryPersonFakeVersion(person);
+                }
             }
         }
 
@@ -509,7 +507,7 @@ public class PersonServiceImpl implements PersonService {
         filter.setId(person.getRecordId().toString());
         List<RegistryPerson> relatedPersons = refBookPersonDao.fetchNonDuplicatesVersions(person.getRecordId());
         for (RegistryPerson relatedPerson : relatedPersons) {
-            if (person.getId() == null || !person.getId().equals(relatedPerson.getId())) {
+            if (person.getId() == null || !person.getId().equals(relatedPerson.getId()) && person.getRecordId().equals(person.getOldId())) {
                 // Проверка пересечения существующей с исходной
                 if (!(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()) != null && SimpleDateUtils.toStartOfDay(person.getVersion()).after(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()))
                         || SimpleDateUtils.toStartOfDay(person.getVersion()).before(SimpleDateUtils.toStartOfDay(relatedPerson.getVersion()))

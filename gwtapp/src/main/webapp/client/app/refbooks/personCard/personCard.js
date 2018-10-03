@@ -768,7 +768,6 @@
                  * @description Удалить оригинал
                  */
                 $scope.deleteOriginal = function () {
-                    console.log("aaa")
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.original.deleteDialog.title'),
                         content: $filter('translate')('refBook.fl.card.tabs.original.deleteDialog.content'),

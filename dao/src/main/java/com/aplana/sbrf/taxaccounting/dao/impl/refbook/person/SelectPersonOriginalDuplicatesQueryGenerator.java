@@ -36,7 +36,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
 
     private void addInnCondition(String value) {
         if (isNotEmpty(value)) {
-            query = query + "\n" + "and " + likeIgnoreCase("person.inn", value) + " or " + likeIgnoreCase("person.innForeign", value);
+            query = query + "\n" + "and " + likeIgnoreCase("person.inn", value) + " or " + likeIgnoreCase("person.inn_foreign", value);
         }
     }
 
