@@ -199,9 +199,9 @@ public class DeclarationDataDaoTest {
         assertIdsEquals(new long[]{1, 5, 4, 3, 123}, res);
 
         res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
-        assertIdsEquals(new long[]{1, 3, 2, 4, 5}, res);
+        assertIdsEquals(new long[]{1, 3, 123, 4, 5}, res);
         res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
-        assertIdsEquals(new long[]{123, 5, 4, 2, 3}, res);
+        assertIdsEquals(new long[]{2, 5, 4, 123, 3}, res);
     }
 
     private PagingParams getPagingParams(int page, int count) {

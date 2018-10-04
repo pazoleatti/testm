@@ -58,8 +58,6 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
-    public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
-
     private static final String DELETE_VERSION = "update %s set status = -1 where %s";
     private static final String DELETE_VERSION_DELETE = "delete from %s where %s";
 

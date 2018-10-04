@@ -15,10 +15,28 @@ public interface RefBookDepartmentDao {
     /**
      * Получение значения справочника по идентификатору
      *
-     * @param id    идентификатор подразделения
+     * @param id идентификатор подразделения
      * @return значение справочника
      */
     RefBookDepartment fetchDepartmentById(Integer id);
+
+    /**
+     * Возвращяет список подразделений по наименованию (через оператор like), включая родительские подразделения у найденных
+     *
+     * @param name        наименование подразделения
+     * @param exactSearch признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return список подразделений
+     */
+    List<RefBookDepartment> findAllByName(String name, boolean exactSearch);
+
+    /**
+     * То же что {@link #findAllByName(String, boolean)}, но в виде дерева
+     *
+     * @param name        наименование подразделения
+     * @param exactSearch признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return список подразделений
+     */
+    List<RefBookDepartment> findAllByNameAsTree(String name, boolean exactSearch);
 
     /**
      * Получение значений справочника по идентификаторам

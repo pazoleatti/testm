@@ -15,9 +15,14 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Реализация дао для работы со справочником Подразделения
@@ -38,6 +43,54 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
                 "WHERE dep.is_active = 1 AND dep.id = ? " +
                 ") WHERE rownum = 1";
         return getJdbcTemplate().queryForObject(query, new Object[]{id}, new RefBookDepartmentRowMapper());
+    }
+
+    @Override
+    public List<RefBookDepartment> findAllByName(String name, boolean exactSearch) {
+        String nameLike = exactSearch ? name : "%" + name.toLowerCase() + "%";
+        Object[] params = null;
+        String whereClause = "";
+        if (isNotEmpty(name)) {
+            whereClause = "WHERE " + (exactSearch ? "name" : "lower(name)") + " LIKE ?";
+            params = new Object[]{nameLike};
+        }
+        List<RefBookDepartment> departments = getJdbcTemplate().query(
+                "WITH deps AS (" +
+                        "   SELECT id FROM department " + whereClause +
+                        ")" +
+                        REF_BOOK_DEPARTMENT_SELECT +
+                        "WHERE dep.id IN (" +
+                        "   SELECT id FROM deps" +
+                        "   UNION ALL" +
+                        "   SELECT parent_id FROM DEPARTMENT_CHILD_VIEW WHERE id IN (SELECT id FROM deps)" +
+                        ")", params, new RefBookDepartmentRowMapper());
+
+        return departments;
+    }
+
+    @Override
+    public List<RefBookDepartment> findAllByNameAsTree(String name, boolean exactSearch) {
+        return asTree(findAllByName(name, exactSearch));
+    }
+
+    private List<RefBookDepartment> asTree(List<RefBookDepartment> departments) {
+        List<RefBookDepartment> rootDepartments = new ArrayList<>();
+        Map<Integer, RefBookDepartment> dtoByIdCache = new HashMap<>();
+        for (RefBookDepartment department : departments) {
+            dtoByIdCache.put(department.getId(), department);
+        }
+        for (RefBookDepartment department : departments) {
+            if (department.getParentId() != null) {// Сбербанк пропускаем
+                RefBookDepartment parent = dtoByIdCache.get(department.getParentId());
+                department.setParent(parent);
+                if (department.getType() == DepartmentType.TERR_BANK) {
+                    rootDepartments.add(department);
+                } else {
+                    parent.addChild(department);
+                }
+            }
+        }
+        return rootDepartments;
     }
 
     /**
@@ -104,7 +157,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public List<RefBookDepartment> fetchAllActiveByType(DepartmentType type) {
-        return getJdbcTemplate().query(REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = ? and dep.is_active = 1", new RefBookDepartmentRowMapper(), type.getCode());
+        return getJdbcTemplate().query(REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = ? AND dep.is_active = 1", new RefBookDepartmentRowMapper(), type.getCode());
     }
 
     @Override

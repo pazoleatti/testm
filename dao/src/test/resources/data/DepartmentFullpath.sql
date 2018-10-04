@@ -10,7 +10,7 @@ CREATE TABLE department_fullpath (
 INSERT INTO department_fullpath (id, shortname) VALUES (1, 'Банк');
 INSERT INTO department_fullpath (id, shortname) VALUES (2, 'Банк/ТБ1');
 INSERT INTO department_fullpath (id, shortname) VALUES (3, 'Банк/ТБ2');
-INSERT INTO department_fullpath (id, shortname) VALUES (4, 'Банк/ЦСКО 1');
-INSERT INTO department_fullpath (id, shortname) VALUES (5, 'Банк/ЦСКО 1');
-INSERT INTO department_fullpath (id, shortname) VALUES (6, 'Банк/ЦСКО 1');
+INSERT INTO department_fullpath (id, shortname) VALUES (4, 'Банк/ТБ2/Подр1 от ТБ2');
+INSERT INTO department_fullpath (id, shortname) VALUES (5, 'Банк/ТБ2/Подр2 от ТБ2');
+INSERT INTO department_fullpath (id, shortname) VALUES (6, 'Банк/ТБ1/Подр1 от ТБ1');
 INSERT INTO department_fullpath (id, shortname) VALUES (7, 'Банк/ТБ3');

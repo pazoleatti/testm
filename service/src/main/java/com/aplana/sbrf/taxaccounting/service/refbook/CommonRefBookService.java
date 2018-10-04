@@ -240,18 +240,6 @@ public interface CommonRefBookService {
                               String searchPattern, boolean exactSearch, Map<String, String> extraParams, AsyncTaskType reportType);
 
     /**
-     * Получает данные иерархического справочника. В случае применения фильтра для элементов дополнительно подгружаются
-     * родительские элементы вплоть до корневого для корректного отображения в дереве
-     *
-     * @param refBookId     идентификатор справочника
-     * @param searchPattern Строка с запросом поиска по справочнику
-     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
-     * @param needGroup     Признак того, что записи нужно группировать по родительским записям
-     * @return
-     */
-    PagingResult<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch, boolean needGroup);
-
-    /**
      * Получение всех значений указанного справочника с возможностью самостоятельно сформировать SQL-условие по входным параметрам фильтрации и поиска
      *
      * @param refBookId     идентификатор справочника

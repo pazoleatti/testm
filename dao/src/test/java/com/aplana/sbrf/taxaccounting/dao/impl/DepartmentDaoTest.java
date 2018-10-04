@@ -195,7 +195,7 @@ public class DepartmentDaoTest {
         assertThat(searchEmpty).hasSize(7);
 
         List<DepartmentName> searchExisting = departmentDao.searchDepartmentNames("банк/тб", pagingParams);
-        assertThat(searchExisting).hasSize(3);
+        assertThat(searchExisting).hasSize(6);
 
         List<DepartmentName> searchNonexistent = departmentDao.searchDepartmentNames("Не банк", pagingParams);
         assertThat(searchNonexistent).isEmpty();

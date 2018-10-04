@@ -60,7 +60,7 @@ public class RefBookExcelReportBuilderTest extends AbstractRefBookReportBuilderT
     @Test
     public void buildHierRefBookReportTest() throws Exception {
         RefBookExcelReportBuilder reportBuilder = new RefBookExcelReportBuilder(hierRefBook, hierAttributes,
-                version, "ася", true, sortAttribute, new PagingResult<>(hierRecords, hierRecords.size()));
+                version, "ася", true, sortAttribute, hierRecords);
 
         String reportPath = null;
         try {
@@ -73,8 +73,8 @@ public class RefBookExcelReportBuilderTest extends AbstractRefBookReportBuilderT
                     {""},
                     {"Наименование", "Число", "Дата начала актуальности", "Дата окончания актуальности", "Код родительского подразделения", "Уровень"},
                     {"Вася", "111.0", "01-янв-2017", "01-янв-2019", "", "1.0"},
-                    {"Дася", "222.0", "01-янв-2017", "01-янв-2019", "", "2.0"},
-                    {"Мася", "333.0", "01-янв-2017", "01-янв-2019", "", "2.0"}
+                    {"Дася", "222.0", "01-янв-2017", "01-янв-2019", "Вася", "2.0"},
+                    {"Мася", "333.0", "01-янв-2017", "01-янв-2019", "Вася", "2.0"}
             };
             assertEquals(toList(rowsExpected).toString(),
                     readExcelFile(reportPath).toString());

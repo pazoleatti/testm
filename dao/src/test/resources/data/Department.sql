@@ -14,10 +14,10 @@ INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_cod
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
   VALUES (3, 'ТБ2', 1, 2, NULL, NULL, NULL, 1, 3, 0);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
-  VALUES (4, 'ЦСКО 1', 3, 3, NULL, NULL, NULL, 2, 4, 0);
+  VALUES (4, 'Подр1 от ТБ2', 3, 3, NULL, NULL, NULL, 2, 4, 0);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
-  VALUES (5, 'ЦСКО 1', 3, 3, NULL, NULL, NULL, 1, 5, 0);
+  VALUES (5, 'Подр2 от ТБ2', 3, 3, NULL, NULL, NULL, 1, 5, 0);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
-  VALUES (6, 'ЦСКО 1', 2, 3, NULL, NULL, NULL, 2, 6, 0);
+  VALUES (6, 'Подр1 от ТБ1', 2, 3, NULL, NULL, NULL, 2, 6, 0);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
   VALUES (7, 'ТБ3', 1, 2, NULL, NULL, 'tb3', 2, 3, 0);

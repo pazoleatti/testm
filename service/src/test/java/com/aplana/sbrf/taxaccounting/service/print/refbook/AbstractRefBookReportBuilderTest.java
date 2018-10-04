@@ -110,7 +110,7 @@ public class AbstractRefBookReportBuilderTest extends AbstractReportBuilderTest 
         RefBookValue parentValue = new RefBookValue(REFERENCE, null);
         hierRecords.get(0).put(RefBook.RECORD_PARENT_ID_ALIAS, parentValue);
 
-        parentValue = new RefBookValue(REFERENCE, 1L);
+        parentValue = new RefBookValue(REFERENCE, hierRecords.get(0));
         for (int i = 1; i < hierRecords.size(); i++) {
             hierRecords.get(i).put(RefBook.RECORD_PARENT_ID_ALIAS, parentValue);
         }

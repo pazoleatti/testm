@@ -39,13 +39,16 @@ public class RefBookCSVReportBuilder extends AbstractRefBookReportBuilder {
         this.records = records;
         if (refBook.isHierarchic()) {
             attributes.add(levelAttribute);
-            Long parent_id;
             for (Map<String, RefBookValue> record : records) {
-                parent_id = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-                if (!hierarchicRecords.containsKey(parent_id)) {
-                    hierarchicRecords.put(parent_id, new ArrayList<Map<String, RefBookValue>>());
+                Map<String, RefBookValue> parent = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceObject();
+                Long parentId = null;
+                if (parent != null) {
+                    parentId = parent.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
                 }
-                hierarchicRecords.get(parent_id).add(record);
+                if (!hierarchicRecords.containsKey(parentId)) {
+                    hierarchicRecords.put(parentId, new ArrayList<Map<String, RefBookValue>>());
+                }
+                hierarchicRecords.get(parentId).add(record);
             }
         }
     }
@@ -175,7 +178,7 @@ public class RefBookCSVReportBuilder extends AbstractRefBookReportBuilder {
                 break;
             case REFERENCE:
                 if (value.getReferenceObject() != null) {
-                    getCellValue(value.getReferenceObject().get(attribute.getAlias()), attribute);
+                    result = getCellValue(value.getReferenceObject().get(attribute.getAlias()), attribute);
                 }
                 break;
             default:

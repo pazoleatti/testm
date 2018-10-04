@@ -1,11 +1,25 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
+import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.refbook.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAttachFileTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
@@ -79,6 +93,19 @@ public class RefBookValuesController {
         TAUser user = securityService.currentUserInfo().getUser();
         PagingResult<RefBookDepartment> departments = refBookDepartmentService.fetchAvailableDepartments(user, name, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение списка всех подразделений
+     *
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return список подразделений
+     */
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=allDepartmentsWithChildren")
+    public List<RefBookDepartmentDTO> findAllDepartmentsWithChildren(@RequestParam(required = false) String searchPattern,
+                                                                     @RequestParam(required = false) boolean exactSearch) {
+        return refBookDepartmentService.findAllTBWithChildren(searchPattern, exactSearch);
     }
 
     /**

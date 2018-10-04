@@ -83,7 +83,7 @@
          * @description Справочники
          */
         .factory('RefBookValuesResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBookValues/:refBookId', {}, {
+            return $resource('controller/rest/refBookValues/:refBookId?projection=:projection', {}, {
                 query: {method: 'GET', isArray: true, cache: false},
                 querySource: {method: 'GET', isArray: true, cache: false}
             });

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -68,17 +67,21 @@ public class RefBookExcelReportBuilder extends AbstractRefBookReportBuilder {
     }
 
     public RefBookExcelReportBuilder(RefBook refBook, List<RefBookAttribute> attributes, Date version, String searchPattern,
-                                     boolean exactSearch, RefBookAttribute sortAttribute, PagingResult<Map<String, RefBookValue>> records) {
+                                     boolean exactSearch, RefBookAttribute sortAttribute, List<Map<String, RefBookValue>> records) {
         this(refBook, attributes, version, searchPattern, exactSearch, sortAttribute);
         if (refBook.isHierarchic()) {
             attributes.add(levelAttribute);
             // Для иерархических справочников записи упорядочиваем по родительскому узлу
             for (Map<String, RefBookValue> record : records) {
-                Long parent_id = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-                if (!hierarchicRecords.containsKey(parent_id)) {
-                    hierarchicRecords.put(parent_id, new ArrayList<Map<String, RefBookValue>>());
+                Map<String, RefBookValue> parent = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceObject();
+                Long parentId = null;
+                if (parent != null) {
+                    parentId = parent.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
                 }
-                hierarchicRecords.get(parent_id).add(record);
+                if (!hierarchicRecords.containsKey(parentId)) {
+                    hierarchicRecords.put(parentId, new ArrayList<Map<String, RefBookValue>>());
+                }
+                hierarchicRecords.get(parentId).add(record);
             }
         }
 
@@ -199,11 +202,13 @@ public class RefBookExcelReportBuilder extends AbstractRefBookReportBuilder {
                 if (value.getNumberValue() != null) {
                     if (Formats.BOOLEAN.equals(attribute.getFormat())) {
                         cell.setCellValue(value.getNumberValue().longValue() > 0 ? "Да" : "Нет");
-                    } else {
+                    } else if (value.getNumberValue() instanceof BigDecimal) {
                         BigDecimal bd = (BigDecimal) value.getNumberValue();
                         if (bd != null) {
                             cell.setCellValue(attribute.getPrecision() > 0 ? Double.parseDouble(bd.toString()) : bd.longValue());
                         }
+                    } else {
+                        cell.setCellValue(value.getNumberValue().longValue());
                     }
                 }
                 break;

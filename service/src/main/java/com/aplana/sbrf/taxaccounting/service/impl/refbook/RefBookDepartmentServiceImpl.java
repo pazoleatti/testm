@@ -10,12 +10,14 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,6 +84,16 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
     public PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams) {
         List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user);
         return refBookDepartmentDao.fetchDepartments(declarationDepartments, name, pagingParams);
+    }
+
+    @Override
+    public List<RefBookDepartmentDTO> findAllTBWithChildren(String searchPattern, boolean exactSearch) {
+        List<RefBookDepartment> departments = refBookDepartmentDao.findAllByNameAsTree(searchPattern, exactSearch);
+        List<RefBookDepartmentDTO> dtoList = new ArrayList<>(departments.size());
+        for (RefBookDepartment department : departments) {
+            dtoList.add(new RefBookDepartmentDTO(department));
+        }
+        return dtoList;
     }
 
     /**

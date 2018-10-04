@@ -15,14 +15,17 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.spring.json.JsonMixins;
 import com.aplana.sbrf.taxaccounting.web.spring.json.JsonPredefinedMixins;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -106,22 +109,6 @@ public class RefBookController {
         PagingResult<Map<String, RefBookValue>> records = commonRefBookService.fetchAllRecords(
                 refBookId, recordId, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, pagingParams.getDirection());
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Получение списка всех записей иерархического справочника без учета пэйджинга
-     * Версии так же не учитываются, считаем, что у нас нет версионируемых иерархических справочников
-     *
-     * @param refBookId     Идентификатор справочника
-     * @param searchPattern Строка с запросом поиска по справочнику
-     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
-     * @return Страница списка значений справочника
-     */
-    @GetMapping(value = "/rest/refBookRecords/{refBookId}", params = "projection=hier")
-    public PagingResult<Map<String, RefBookValue>> fetchHierRefBookRecords(@PathVariable Long refBookId,
-                                                                           @RequestParam(required = false) String searchPattern,
-                                                                           @RequestParam(required = false) boolean exactSearch) {
-        return commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, true);
     }
 
     /**

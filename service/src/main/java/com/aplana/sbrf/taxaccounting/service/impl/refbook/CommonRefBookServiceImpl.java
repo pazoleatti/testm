@@ -48,8 +48,6 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private TAUserService userService;
-    @Autowired
-    private PersonService personService;
 
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -506,70 +504,6 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("isAuthenticated()")
-    @SuppressWarnings("unchecked")
-    public PagingResult<Map<String, RefBookValue>> fetchHierRecords(Long refBookId, String searchPattern, boolean exactSearch, boolean needGroup) {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
-        String filter = null;
-        if (StringUtils.isNotEmpty(searchPattern)) {
-            // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-            filter = getSearchQueryStatement("", searchPattern, refBookId, exactSearch);
-        }
-        List<Map<String, RefBookValue>> records = provider.getRecords(null, null, filter, null, true);
-        PagingResult<Map<String, RefBookValue>> result = null;
-        Map<Number, Map<String, RefBookValue>> recordsById = new HashMap<>();
-        result = new PagingResult<>();
-
-        // Группируем по id
-        for (Map<String, RefBookValue> record : records) {
-            recordsById.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue(), record);
-        }
-        Map<Number, Map<String, RefBookValue>> parents = new HashMap<>();
-        if (StringUtils.isNotEmpty(filter)) {
-            // Если есть фильтр, то надо для найденных записей найти все родительские для корректного отображения в дереве
-            for (Map<String, RefBookValue> record : recordsById.values()) {
-                parents = fetchParentsRecursively(provider, record, parents);
-            }
-            recordsById.putAll(parents);
-        }
-
-        if (needGroup) {
-            // Собираем дочерние подразделения внутри родительских
-            for (Map<String, RefBookValue> record : recordsById.values()) {
-                if (record.get(RefBook.RECORD_PARENT_ID_ALIAS) != null) {
-                    Number parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-                    if (parentId != null) {
-                        Map<String, RefBookValue> parent = recordsById.get(parentId);
-                        if (!parent.containsKey(RefBook.RECORD_CHILDREN_ALIAS)) {
-                            parent.put(RefBook.RECORD_CHILDREN_ALIAS, new RefBookValue(RefBookAttributeType.COLLECTION, new ArrayList()));
-                        }
-                        parent.get(RefBook.RECORD_CHILDREN_ALIAS).getCollectionValue().add(record);
-                        if (parentId.intValue() == Department.ROOT_DEPARTMENT_ID) {
-                            // Отбираем только ТБ - все остальные подразделения будут уже как дочерние
-                            result.add(record);
-                        }
-                    }
-                }
-            }
-        } else {
-            for (Map.Entry<Number, Map<String, RefBookValue>> parent : parents.entrySet()) {
-                // Добавляем родительские записи, которых еще нет в списке
-                boolean exists = false;
-                for (Map<String, RefBookValue> record : records) {
-                    if (record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().equals(parent.getKey())) {
-                        exists = true;
-                    }
-                }
-                if (!exists) {
-                    records.add(parent.getValue());
-                }
-            }
-            result = new PagingResult<>(records);
-        }
-        return result;
-    }
-
-    @Override
-    @PreAuthorize("isAuthenticated()")
     public PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version,
                                                                    String searchPattern, boolean exactSearch, Map<String, String> extraParams,
                                                                    PagingParams pagingParams, RefBookAttribute sortAttribute, String direction) {
@@ -594,41 +528,13 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         String filter = null;
         if (StringUtils.isNotEmpty(searchPattern)) {
             // Волшебным образом получаем кусок sql-запроса, который подставляется в итоговый и применяется в качестве фильтра для отбора записей
-            if (refBookId == RefBook.Id.DEPARTMENT.getId()) {
-                filter = getSearchQueryStatement("", searchPattern, refBookId, exactSearch);
+            if (CollectionUtils.isEmpty(extraParams)) {
+                filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
             } else {
-                if (CollectionUtils.isEmpty(extraParams)) {
-                    filter = getSearchQueryStatement(searchPattern, refBookId, exactSearch);
-                } else {
-                    filter = getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, exactSearch);
-                }
+                filter = getSearchQueryStatementWithAdditionalStringParameters(extraParams, searchPattern, refBookId, exactSearch);
             }
         }
         return provider.getRecordsCount(version, filter);
-    }
-
-    /**
-     * Рекурсивно находит все родительские записи для указанной. В первую очередь запись ищется среди ранее найденных, т.к в этом случае искать дальше смысла нет - все родительские уже в этом списке
-     *
-     * @param provider провайдер для доступа к справочнику
-     * @param record   текущая запись
-     * @param parents  все ранее найденные родительские записи упорядоченные по ID
-     * @return дополненный список родительских записей
-     */
-    private Map<Number, Map<String, RefBookValue>> fetchParentsRecursively(RefBookDataProvider provider, Map<String, RefBookValue> record, Map<Number, Map<String, RefBookValue>> parents) {
-        if (record.containsKey(RefBook.RECORD_PARENT_ID_ALIAS)) {
-            Long parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-            if (parentId != null && !parents.containsKey(parentId)) {
-                Map<String, RefBookValue> parent = provider.getRecordData(parentId);
-                parents.put(parentId, parent);
-                if (parentId == Department.ROOT_DEPARTMENT_ID) {
-                    return parents;
-                } else {
-                    fetchParentsRecursively(provider, parent, parents);
-                }
-            }
-        }
-        return parents;
     }
 
     public PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records) {
