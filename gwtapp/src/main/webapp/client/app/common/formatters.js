@@ -620,7 +620,7 @@
          */
         .filter('idDocTypeFormatter', ['$filter', function ($filter) {
             return function (value) {
-                if (!value) return '';
+                if (!value || !value.value) return '';
                 if (value.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
@@ -633,7 +633,7 @@
          */
         .filter('idDocNumberFormatter', ['$filter', function ($filter) {
             return function (value) {
-                if (!value) return '';
+                if (!value || !value.value) return '';
                 if (value.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
