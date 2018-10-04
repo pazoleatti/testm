@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +46,17 @@ public interface RefBookPersonDao {
     List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper);
 
     /**
-     * Переводит запись в статус дубликата
-     *
-     * @param recordIds  - идентификаторы записей
-     * @param originalId - идентификатор ФЛ оригинала
+     * Установить дубликаты
+     * @param addedDuplicateRecordIds   идентификаторы ФЛ которые необходимо установить дубликатами
+     * @param changingPersonRecordId    идентификатор изменяемого ФЛ
      */
-    void setDuplicate(List<Long> recordIds, Long originalId);
+    void setDuplicates(List<Long> addedDuplicateRecordIds, Long changingPersonRecordId);
+
+    /**
+     * Удалить дубликаты
+     * @param deletedDuplicateOldIds идентификаторы ФЛ удаляемые из дубликатов
+     */
+    void deleteDuplicates(List<Long> deletedDuplicateOldIds);
 
     /**
      * Меняем родителя (RECORD_ID) у дубликатов
@@ -58,11 +64,19 @@ public interface RefBookPersonDao {
     void changeRecordId(List<Long> recordIds, Long originalId);
 
     /**
-     * Переводит запись в статус оригинала
-     *
-     * @param recordIds - идентификаторы записей
+     * Установить оригинал
+     * @param changingPersonRecordId    идентификатор изменяемого ФЛ
+     * @param changingPersonOldId       исходный идентификатор изменяемого ФЛ
+     * @param addedOriginalRecordId     идентификатор добавляемого оригинала
      */
-    void setOriginal(List<Long> recordIds);
+    void setOriginal(Long changingPersonRecordId, Long changingPersonOldId, @NotNull Long addedOriginalRecordId);
+
+    /**
+     * Удалить оригинал
+     * @param changingPersonRecordId    идентификатор изменяемого ФЛ
+     * @param changingPersonOldId       исходный идентификатор изменяемого ФЛ
+     */
+    void deleteOriginal(Long changingPersonRecordId, Long changingPersonOldId);
 
     /**
      * Получение оригинала ФЛ
@@ -162,4 +176,30 @@ public interface RefBookPersonDao {
      */
     void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId);
 
+    /**
+     * Удалить фиктивную версию ФЛ
+     * @param recordId идентификатор ФЛ
+     */
+    void deleteRegistryPersonFakeVersion(long recordId);
+
+    /**
+     * Сохранить фиктивную версию Физлица
+     * @param person объект ФЛ
+     */
+    void saveRegistryPersonFakeVersion(RegistryPerson person);
+
+    /**
+     * Получить все версии физлица, которые не являются дубликатами
+     * @param recordId идентификатор ФЛ
+     * @return список объектов найденных версий
+     */
+    List<RegistryPerson> fetchNonDuplicatesVersions(long recordId);
+
+    /**
+     * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
+     * @param filter        фильтр выборки
+     * @param pagingParams  параметры постраничной выдачи
+     * @return  Страница списка записей
+     */
+    PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
 }

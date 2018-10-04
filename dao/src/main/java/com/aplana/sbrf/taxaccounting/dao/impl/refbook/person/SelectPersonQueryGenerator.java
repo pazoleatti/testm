@@ -88,9 +88,9 @@ public class SelectPersonQueryGenerator {
 
 
     @Language("SQL")
-    private String query;
+    protected String query;
 
-    private RefBookPersonFilter filter;
+    protected RefBookPersonFilter filter;
     private PagingParams pagingParams;
 
     public SelectPersonQueryGenerator(RefBookPersonFilter filter) {
@@ -122,12 +122,15 @@ public class SelectPersonQueryGenerator {
         return query;
     }
 
+    public void setPagingParams(PagingParams pagingParams) {
+        this.pagingParams = pagingParams;
+    }
 
     private void initSelectPerson() {
         query = SELECT_FULL_PERSON;
     }
 
-    private void addWhereConditions() {
+    protected void addWhereConditions() {
         if (filter != null) {
             addLike("person.old_id", filter.getId());
             addVipCondition();
@@ -162,7 +165,7 @@ public class SelectPersonQueryGenerator {
         return bool ? 1 : 0;
     }
 
-    private void addBirthDateConditions() {
+    protected void addBirthDateConditions() {
         if (filter.getBirthDateFrom() != null) {
             query = query + "\n" + "and birth_date >= " + DateUtils.formatForSql(filter.getBirthDateFrom());
         }
@@ -187,7 +190,7 @@ public class SelectPersonQueryGenerator {
         }
     }
 
-    private void addDocumentsConditions() {
+    protected void addDocumentsConditions() {
         if (isDocumentsFilterNotEmpty()) {
             query = query + "\n" +
                     "and person.record_id in ( \n" +
@@ -245,7 +248,7 @@ public class SelectPersonQueryGenerator {
         }
     }
 
-    private void addVersionsConditions() {
+    protected void addVersionsConditions() {
         if (notAllVersions()) {
             String versionStr = DateUtils.formatForSql(filter.getVersionDate());
             query = "" +
@@ -259,23 +262,23 @@ public class SelectPersonQueryGenerator {
         return (filter.isAllVersions() != null && !filter.isAllVersions() && filter.getVersionDate() != null);
     }
 
-    private void addLike(String field, String value) {
+    protected void addLike(String field, String value) {
         if (isNotEmpty(value)) {
             query = query + "\n" + "and " + field + " like '%" + value + "%'";
         }
     }
 
-    private void addLikeIgnoreCase(String field, String value) {
+    protected void addLikeIgnoreCase(String field, String value) {
         if (isNotEmpty(value)) {
             query = query + "\n" + "and " + likeIgnoreCase(field, value);
         }
     }
 
-    private String likeIgnoreCase(String field, String value) {
+    protected String likeIgnoreCase(String field, String value) {
         return "lower(" + field + ") like '%" + value.toLowerCase() + "%'";
     }
 
-    private void addLikeIgnoreCaseAndDelimiters(String field, String value) {
+    protected void addLikeIgnoreCaseAndDelimiters(String field, String value) {
         if (isNotEmpty(value)) {
             query = query + "\n" + "and " + likeIgnoreCaseAndDelimiters(field, value);
         }

@@ -214,10 +214,62 @@ public class RegistryPerson extends PermissivePerson {
         this.address = address;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RegistryPerson)) return false;
+
+        RegistryPerson that = (RegistryPerson) o;
+
+        if (getState() != null ? !getState().equals(that.getState()) : that.getState() != null) return false;
+        if (getRecordVersionTo() != null ? !getRecordVersionTo().equals(that.getRecordVersionTo()) : that.getRecordVersionTo() != null)
+            return false;
+        if (getLastName() != null ? !getLastName().equals(that.getLastName()) : that.getLastName() != null)
+            return false;
+        if (getFirstName() != null ? !getFirstName().equals(that.getFirstName()) : that.getFirstName() != null)
+            return false;
+        if (getMiddleName() != null ? !getMiddleName().equals(that.getMiddleName()) : that.getMiddleName() != null)
+            return false;
+        if (getBirthDate() != null ? !getBirthDate().equals(that.getBirthDate()) : that.getBirthDate() != null)
+            return false;
+        if (getCitizenship() != null ? !getCitizenship().equals(that.getCitizenship()) : that.getCitizenship() != null)
+            return false;
+        if (getReportDoc() != null ? !getReportDoc().equals(that.getReportDoc()) : that.getReportDoc() != null)
+            return false;
+        if (getInn() != null ? !getInn().equals(that.getInn()) : that.getInn() != null) return false;
+        if (getInnForeign() != null ? !getInnForeign().equals(that.getInnForeign()) : that.getInnForeign() != null)
+            return false;
+        if (getSnils() != null ? !getSnils().equals(that.getSnils()) : that.getSnils() != null) return false;
+        if (getTaxPayerState() != null ? !getTaxPayerState().equals(that.getTaxPayerState()) : that.getTaxPayerState() != null)
+            return false;
+        if (getSource() != null ? !getSource().equals(that.getSource()) : that.getSource() != null) return false;
+        return getAddress() != null ? getAddress().equals(that.getAddress()) : that.getAddress() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getState() != null ? getState().hashCode() : 0;
+        result = 31 * result + (getRecordVersionTo() != null ? getRecordVersionTo().hashCode() : 0);
+        result = 31 * result + (getLastName() != null ? getLastName().hashCode() : 0);
+        result = 31 * result + (getFirstName() != null ? getFirstName().hashCode() : 0);
+        result = 31 * result + (getMiddleName() != null ? getMiddleName().hashCode() : 0);
+        result = 31 * result + (getBirthDate() != null ? getBirthDate().hashCode() : 0);
+        result = 31 * result + (getCitizenship() != null ? getCitizenship().hashCode() : 0);
+        result = 31 * result + (getReportDoc() != null ? getReportDoc().hashCode() : 0);
+        result = 31 * result + (getInn() != null ? getInn().hashCode() : 0);
+        result = 31 * result + (getInnForeign() != null ? getInnForeign().hashCode() : 0);
+        result = 31 * result + (getSnils() != null ? getSnils().hashCode() : 0);
+        result = 31 * result + (getTaxPayerState() != null ? getTaxPayerState().hashCode() : 0);
+        result = 31 * result + (getSource() != null ? getSource().hashCode() : 0);
+        result = 31 * result + (getAddress() != null ? getAddress().hashCode() : 0);
+        return result;
+    }
+
     /**
      * Перечисление обновляемых полей записи реестра ФЛ
      */
     public enum UpdatableField {
+        VERSION("version"),
         LAST_NAME("lastName"),
         FIRST_NAME("firstName"),
         MIDDLE_NAME("middleName"),
@@ -229,17 +281,17 @@ public class RegistryPerson extends PermissivePerson {
         SNILS("snils"),
         TAX_PAYER_STATE("taxPayerState"),
         SOURCE("source"),
-        REGION_CODE("regionCode"),
-        POSTAL_CODE("postalCode"),
-        DISTRICT("district"),
-        CITY("city"),
-        LOCALITY("locality"),
-        STREET("street"),
-        HOUSE("house"),
-        BUILD("build"),
-        APPARTMENT("appartment"),
-        COUNTRY_ID("countryId"),
-        ADDRESS("address"),
+        REGION_CODE("REGION_CODE"),
+        POSTAL_CODE("POSTAL_CODE"),
+        DISTRICT("DISTRICT"),
+        CITY("CITY"),
+        LOCALITY("LOCALITY"),
+        STREET("STREET"),
+        HOUSE("HOUSE"),
+        BUILD("BUILD"),
+        APPARTMENT("APPARTMENT"),
+        COUNTRY_ID("COUNTRY_ID"),
+        ADDRESS("ADDRESS"),
         VIP("vip");
 
         private String alias;

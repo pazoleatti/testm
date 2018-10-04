@@ -326,7 +326,7 @@ public class PrintingServiceImpl implements PrintingService {
 
     private String makeDepartmentConfigsExcelFileName(int departmentId) {
         Department department = departmentService.getDepartment(departmentId);
-        return department.getId() + "_" + department.getShortName() + "_" + FastDateFormat.getInstance("yyyyMMddhh24mm").format(new Date()) + ".xlsx";
+        return department.getId() + "_" + department.getShortName() + "_" + FastDateFormat.getInstance("yyyyMMddHHmm").format(new Date()) + ".xlsx";
     }
 
     private List<Map<String, RefBookValue>> toMap(List<RefBookDepartment> departmentsTree, Map<String, RefBookValue> parent) {

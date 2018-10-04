@@ -3,16 +3,17 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.PersonOriginalAndDuplicatesDTO;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -58,13 +59,28 @@ public class RefBookFlController {
      * @param pagingParams параметры постраничной выдачи
      * @return Страница списка значений справочника
      */
-    @GetMapping(value = "/rest/refBookFL")
+    @GetMapping(value = "/rest/refBookFL", params = "projection=common")
     public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam(required = false) RefBookPersonFilter filter,
                                                               @RequestParam(required = false) PagingParams pagingParams) {
         TAUser currentUser = securityService.currentUserInfo().getUser();
         PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
+
+    /**
+     * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
+     * @param filter        фильтр выборки
+     * @param pagingParams  параметры постраничной выдачи
+     * @return  Страница списка записей
+     */
+    @GetMapping(value = "/rest/refBookFL", params = "projection=originalAndDuplicates")
+    public JqgridPagedList<RefBookPerson> fetchOriginalDuplicatesCandidates(@RequestParam(required = false) RefBookPersonFilter filter,
+                                                              @RequestParam(required = false) PagingParams pagingParams) {
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookPerson> records = personService.fetchOriginalDuplicatesCandidates(pagingParams, filter, currentUser);
+        return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
+    }
+
 
     /**
      * Получение списка ДУЛ для всех версий физлица, в т.ч. и дубликатов
@@ -154,11 +170,11 @@ public class RefBookFlController {
      * Сохраняет изменения списке дубликатов и оригинале ФЛ
      *
      * @param data данные дубликатов и оригинала
+     * @return результат действия
      */
     @PostMapping(value = "/actions/refBookFL/saveOriginalAndDuplicates")
-    public ActionResult saveOriginalAndDuplicates(@RequestBody PersonOriginalAndDuplicatesDTO data) {
-        return personService.saveOriginalAndDuplicates(securityService.currentUserInfo(), data.getCurrentPerson(),
-                data.getOriginal(), data.getNewDuplicates(), data.getDeletedDuplicates());
+    public ActionResult saveOriginalAndDuplicates(@RequestBody PersonOriginalAndDuplicatesAction data) {
+        return personService.saveOriginalAndDuplicates(securityService.currentUserInfo(), data);
     }
 
     @PostMapping(value = "/actions/refBookFL/export/excel")
@@ -176,5 +192,27 @@ public class RefBookFlController {
     public ResponseEntity updateRegistryPerson(@RequestBody RegistryPerson person) {
         personService.updateRegistryPerson(person);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Проверть пересечение сохраняемого версий ФЛ
+     * @param person объект ФЛ
+     * @return стандартный ответ сервера
+     */
+    @PostMapping(value = "/actions/registryPerson/checkVersionOverlapping")
+    public ResponseEntity checkVersionOverlapping(@RequestBody RegistryPerson person) {
+        personService.checkVersionOverlapping(person);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Проверить корректность введенного ДУЛ
+     * @param docCode   код документа
+     * @param docNumber серия и номер документа
+     * @return результат проверки
+     */
+    @PostMapping(value = "/actions/checkDul")
+    public CheckDulResult checkDul(@RequestParam String docCode, @RequestParam String docNumber) {
+        return personService.checkDul(docCode, docNumber);
     }
 }

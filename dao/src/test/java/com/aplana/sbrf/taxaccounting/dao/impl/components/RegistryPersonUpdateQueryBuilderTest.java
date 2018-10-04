@@ -84,8 +84,8 @@ public class RegistryPersonUpdateQueryBuilderTest {
         //execution
         String result = builder.buildAddressUpdateQuery(params);
         //verification
-        assertThat(result).isEqualToIgnoringCase("UPDATE ref_book_address set region_code = :regionCode, postal_code = :postalCode, " +
-                "district = :district, city = :city, locality = :locality, street = :street, house = :house, " +
-                "build = :build, appartment = :appartment, country_id = :countryId, address = :address where id = :id");
+        assertThat(result).isEqualToIgnoringCase("UPDATE ref_book_address set region_code = :REGION_CODE, postal_code = :POSTAL_CODE, " +
+                "district = :DISTRICT, city = :CITY, locality = :LOCALITY, street = :STREET, house = :HOUSE, " +
+                "build = :BUILD, appartment = :APPARTMENT, country_id = :COUNTRY_ID, address = :ADDRESS where id = :id");
     }
 }

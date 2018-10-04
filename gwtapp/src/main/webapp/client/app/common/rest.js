@@ -401,7 +401,7 @@
          * @description Справочник физических лиц
          */
         .factory('RefBookFLResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBookFL', {}, {
+            return $resource('controller/rest/refBookFL?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false},
                 querySource: {method: 'GET', isArray: true, cache: false}
             });

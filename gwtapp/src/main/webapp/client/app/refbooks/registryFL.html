@@ -2,8 +2,8 @@
     <div class="content-header">
         <h1>{{::'refBook.fl.title' | translate}}</h1>
     </div>
-    <div id="registryFLGridContainer" class="container-grid box-shadow-block flex-fill flex-column">
-        <div id="usersGridTop">
+    <div id="registryFLGridContainer" class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto;">
+        <div id="usersGridTop" style="flex-shrink: 0;">
             <!-- Кнопка выгрузки в Excel -->
             <div style="float: right; padding-top: 10px" ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EXPORT_PERSONS)">
                 <img src='resources/img/unload-white-16.png'>
@@ -16,7 +16,7 @@
         </div>
 
         <!-- Таблица -->
-        <div class="flex-grid flex-fill"
+        <div class="flex-grid flex-fill" style="min-height: calc(100% - 50px);"
              data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector="#registryFLGridContainer"

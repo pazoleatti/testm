@@ -6,22 +6,30 @@ import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQue
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,142 +183,31 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, RefBookPerson currentPerson, RefBookPerson original, List<RefBookPerson> newDuplicates, List<RefBookPerson> deletedDuplicates) {
-        // TODO: вся эта дичь ниже взята из старой реализации, ее надо переписать, но аналитики не нашли время чтобы сделать правки в постановке и синхронизировать ее с реализацией
+    public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, PersonOriginalAndDuplicatesAction data) {
         ActionResult result = new ActionResult();
-        Logger logger = new Logger();
-        logger.setTaUserInfo(userInfo);
-        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERSON.getId());
-        RefBookDataProvider dulDataProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.getId());
-
-        List<RefBookPerson> duplicateRecords = newDuplicates;
-        RefBookPerson originalMap;
-        if (original != null) {
-            // Проверка оригинала
-            if (original.getOldId() != null) {
-                throw new ServiceException("Выбранная оригиналом запись являеется дубликатом записи с \"Идентификатор ФЛ\" = %d", original.getOldId());
+        if (data.getAddedOriginal() != null && data.getAddedOriginalVersionId() != null) {
+            RegistryPerson original = refBookPersonDao.fetchPersonWithVersionInfo(data.getAddedOriginalVersionId());
+            if (!original.getOldId().equals(original.getRecordId())) {
+                Logger logger = new Logger();
+                logger.error("ФЛ%s%s%s (Идентификатор ФЛАГ: %s) не может быть назначен оригиналом, так как сам является дубликатом другого ФЛ.",
+                        original.getLastName() != null ? " " + original.getLastName() : "",
+                        original.getFirstName() != null ? " " + original.getFirstName() : "",
+                        original.getMiddleName() != null ? " " + original.getMiddleName() : "",
+                        original.getOldId());
+                result.setUuid(logEntryService.save(logger.getEntries()));
             }
-            originalMap = original;
-            duplicateRecords.add(currentPerson); // исходная запись является дубликатом
-        } else {
-            if (currentPerson.getOldId() != null) {
-                setOriginal(Collections.singletonList(currentPerson.getOldId()));
-            }
-            originalMap = currentPerson; // исходная запись становиться оригиналом
+            refBookPersonDao.setOriginal(data.getChangingPersonRecordId(), data.getChangingPersonOldId(), data.getAddedOriginal());
         }
-        Long originalRecordId = originalMap.getRecordId();
-        List<Long> originalUniqueRecordIds = refBookDataProvider.getUniqueRecordIds(null, "RECORD_ID = " + originalRecordId);
-
-        //набор ДУЛов оригинала
-        Map<Long, Map<String, RefBookValue>> originalDulList = dulDataProvider.getRecordDataWhere("PERSON_ID = " + originalMap.getId());
-
-        for (RefBookPerson duplicateRecord : duplicateRecords) {
-            Long duplicateRecordId = duplicateRecord.getRecordId();
-            Long duplicateOldId = null;
-            if (duplicateRecord.getOldId() != null) {
-                duplicateOldId = duplicateRecord.getOldId();
-            }
-            if (duplicateOldId == null) {
-                // оригинал становиться дубликатом
-                // нужно проверить дубликаты данной записи
-                setDuplicate(Collections.singletonList(duplicateRecordId), originalRecordId);
-
-                //набор ДУЛов дубликата
-                Map<Long, Map<String, RefBookValue>> duplicateDulList = dulDataProvider.getRecordDataWhere("PERSON_ID = " + duplicateRecord.getId());
-                List<RefBookRecord> newDulList = new ArrayList<RefBookRecord>();
-                for (Map.Entry<Long, Map<String, RefBookValue>> entryDuplicate : duplicateDulList.entrySet()) {
-                    boolean exist = false;
-                    for (Map.Entry<Long, Map<String, RefBookValue>> entryOriginal : originalDulList.entrySet()) {
-                        // проверяем существование ДУЛов у оригинала
-                        if (compare(entryOriginal.getValue(), entryDuplicate.getValue())) {
-                            exist = true;
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // Копируем ДУЛы
-                        for (Long uniqueRecordId : originalUniqueRecordIds) {
-                            RefBookRecord refBookRecord = new RefBookRecord();
-                            refBookRecord.setValues(newDul(entryDuplicate.getValue(), uniqueRecordId, duplicateRecordId));
-                            newDulList.add(refBookRecord);
-                        }
-                    }
-                }
-
-                if (!newDulList.isEmpty()) {
-                    dulDataProvider.createRecordVersion(logger, new Date(), null, newDulList);
-                }
-            } else if (duplicateRecordId.equals(originalRecordId)) {
-                // уже назначен дубликатом
-            } else {
-                // версия назначена дубликатом на другую запись???
-                if (original == null) {
-                    Long oldRecordId = currentPerson.getRecordId();
-                    if (oldRecordId.equals(duplicateRecordId)) {
-                        changeRecordId(Collections.singletonList(duplicateOldId), originalRecordId);
-                    }
-                }
-            }
+        if (data.isDeleteOriginal()){
+            refBookPersonDao.deleteOriginal(data.getChangingPersonRecordId(), data.getChangingPersonOldId());
         }
-
-        for (RefBookPerson duplicateRecord : deletedDuplicates) {
-            Long duplicateRecordId = duplicateRecord.getRecordId();
-            Long duplicateOldId = null;
-            if (duplicateRecord.getOldId() != null) {
-                duplicateOldId = duplicateRecord.getOldId();
-            }
-            if (duplicateOldId == null) {
-                // уже является оригиналом
-            } else if (duplicateRecordId.equals(originalRecordId)) {
-                // является дубликатом данной записи
-                setOriginal(Collections.singletonList(duplicateOldId));
-            } else {
-                // является дубликатом другой записи
-            }
+        if (CollectionUtils.isNotEmpty(data.getAddedDuplicates())) {
+            refBookPersonDao.setDuplicates(data.getAddedDuplicates(), data.getChangingPersonRecordId());
         }
-        logger.info("Изменения успешно сохранены");
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        if (CollectionUtils.isNotEmpty(data.getDeletedDuplicates())) {
+            refBookPersonDao.deleteDuplicates(data.getDeletedDuplicates());
+        }
         return result;
-    }
-
-    private boolean compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-        if (!o1.get("DOC_ID").equals(o2.get("DOC_ID"))) {
-            return false;
-        }
-        if (!o1.get("DOC_NUMBER").equals(o2.get("DOC_NUMBER"))) {
-            return false;
-        }
-        return true;
-    }
-
-    private Map<String, RefBookValue> newDul(Map<String, RefBookValue> original, Long originalId, Long duplicateRecordId) {
-        Map<String, RefBookValue> newDul = new HashMap<String, RefBookValue>();
-        newDul.put("DOC_ID", original.get("DOC_ID"));
-        newDul.put("DOC_NUMBER", original.get("DOC_NUMBER"));
-        newDul.put("ISSUED_BY", original.get("ISSUED_BY"));
-        newDul.put("ISSUED_DATE", original.get("ISSUED_DATE"));
-        newDul.put("INC_REP", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        newDul.put("PERSON_ID", new RefBookValue(RefBookAttributeType.REFERENCE, originalId));
-        if (original.get("DUPLICATE_RECORD_ID").getNumberValue() != null) {
-            newDul.put("DUPLICATE_RECORD_ID", original.get("DUPLICATE_RECORD_ID"));
-        } else {
-            newDul.put("DUPLICATE_RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, duplicateRecordId));
-        }
-        return newDul;
-    }
-
-    @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public void setOriginal(List<Long> recordIds) {
-        LOG.info(String.format("PersonServiceImpl.setOriginal. recordIds: %s", recordIds));
-        refBookPersonDao.setOriginal(recordIds);
-    }
-
-    @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public void setDuplicate(List<Long> recordIds, Long originalId) {
-        LOG.info(String.format("PersonServiceImpl.setDuplicate. recordIds: %s; originalId: %s", recordIds, originalId));
-        refBookPersonDao.setDuplicate(recordIds, originalId);
     }
 
     @Override
@@ -440,12 +337,15 @@ public class PersonServiceImpl implements PersonService {
     public PagingResult<Map<String, RefBookValue>> fetchReferencesList(Long recordId, Long refBookId, PagingParams pagingParams) {
         RefBook actualRefBook = refBookDao.get(refBookId);
         RefBook refBookPerson = refBookDao.get(RefBook.Id.PERSON.getId());
-        PagingResult<Map<String, RefBookValue>> persons = refBookDao.getRecords(refBookPerson.getId(), refBookPerson.getTableName(), pagingParams, null, null, "record_id = " + recordId);
+        PagingResult<Map<String, RefBookValue>> persons = refBookDao.getRecords(refBookPerson.getId(), refBookPerson.getTableName(), pagingParams, null, null, "record_id = " + recordId + " AND status = 0");
         Long[] versionIds = new Long[persons.size()];
         for (int i = 0; i < persons.size(); i++) {
             versionIds[i] = persons.get(i).get("id").getNumberValue().longValue();
         }
-        PagingResult<Map<String, RefBookValue>> result = refBookDao.getRecords(refBookId, actualRefBook.getTableName(), pagingParams, null, null, "person_id in (" + StringUtils.join(versionIds, ", ") + ")");
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>();
+        if (versionIds.length > 0) {
+            result = refBookDao.getRecords(refBookId, actualRefBook.getTableName(), pagingParams, null, null, "person_id in (" + StringUtils.join(versionIds, ", ") + ") AND status = 0");
+        }
         return commonRefBookService.dereference(actualRefBook, result);
     }
 
@@ -471,44 +371,40 @@ public class PersonServiceImpl implements PersonService {
         return result;
     }
 
+    @Override
+    @PreAuthorize("hasPermission(#person, T(com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission).VIEW_VIP_DATA)")
     public void updateRegistryPerson(RegistryPerson person) {
         RegistryPerson persistedPerson = fetchPerson(person.getId());
         List<RegistryPerson.UpdatableField> personFieldsToUpdate = new ArrayList<>();
         boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
 
-        if ((person.getLastName() != null && !person.getLastName().equalsIgnoreCase(persistedPerson.getLastName()))
-                || (person.getLastName() == null && persistedPerson.getLastName() != null))
+        person.setVersion(SimpleDateUtils.toStartOfDay(person.getVersion()));
+        persistedPerson.setVersion(SimpleDateUtils.toStartOfDay(persistedPerson.getVersion()));
+
+        if (!person.getVersion().equals(persistedPerson.getVersion()))
+            personFieldsToUpdate.add(RegistryPerson.UpdatableField.VERSION);
+        if (!Optional.fromNullable(person.getLastName()).equals(Optional.fromNullable(persistedPerson.getLastName())))
             personFieldsToUpdate.add(RegistryPerson.UpdatableField.LAST_NAME);
-        if ((person.getFirstName() != null && !person.getFirstName().equalsIgnoreCase(persistedPerson.getFirstName()))
-                || (person.getFirstName() == null && persistedPerson.getFirstName() != null))
+        if (!Optional.fromNullable(person.getFirstName()).equals(Optional.fromNullable(persistedPerson.getFirstName())))
             personFieldsToUpdate.add(RegistryPerson.UpdatableField.FIRST_NAME);
-        if ((person.getMiddleName() != null && !person.getMiddleName().equalsIgnoreCase(persistedPerson.getMiddleName()))
-                || (person.getMiddleName() == null && persistedPerson.getMiddleName() != null))
+        if (!Optional.fromNullable(person.getMiddleName()).equals(Optional.fromNullable(persistedPerson.getMiddleName())))
             personFieldsToUpdate.add(RegistryPerson.UpdatableField.MIDDLE_NAME);
-        if ((person.getBirthDate() != null && !person.getBirthDate().equals(persistedPerson.getBirthDate()))
-                || (person.getBirthDate() == null && persistedPerson.getBirthDate() != null))
+        if (!Optional.fromNullable(SimpleDateUtils.toStartOfDay(person.getBirthDate())).equals(Optional.fromNullable(SimpleDateUtils.toStartOfDay(persistedPerson.getBirthDate()))))
             personFieldsToUpdate.add(RegistryPerson.UpdatableField.BIRTH_DATE);
-        if (person.getCitizenship() != null && ((person.getCitizenship().value() != null && !person.getCitizenship().value().get("id").getReferenceValue().equals(persistedPerson.getCitizenship().value().get("id").getReferenceValue()))
-                || (person.getCitizenship().value() == null && persistedPerson.getCitizenship().value() != null)))
+        if (!Optional.fromNullable(person.getCitizenship()).equals(Optional.fromNullable(persistedPerson.getCitizenship())))
             personFieldsToUpdate.add(RegistryPerson.UpdatableField.CITIZENSHIP);
-        if ((person.getSource() != null && !person.getSource().isEmpty() && person.getSource().get("id").getReferenceValue().equals(persistedPerson.getSource().get("id").getReferenceValue()))
-                || (person.getSource() == null && persistedPerson.getSource() != null))
+        if (!Optional.fromNullable(person.getSource()).equals(Optional.fromNullable(persistedPerson.getSource())))
             personFieldsToUpdate.add(RegistryPerson.UpdatableField.SOURCE);
         if (viewVipDataGranted) {
-            if (person.getReportDoc() != null && ((person.getReportDoc().value() != null && !person.getReportDoc().value().get("id").getReferenceValue().equals(persistedPerson.getReportDoc().value().get("id").getReferenceValue()))
-                    || (person.getReportDoc().value() == null && persistedPerson.getReportDoc().value() != null)))
+            if (!Optional.fromNullable(person.getReportDoc()).equals(Optional.fromNullable(persistedPerson.getReportDoc())))
                 personFieldsToUpdate.add(RegistryPerson.UpdatableField.REPORT_DOC);
-            if (person.getInn() != null && ((person.getInn().value() != null && !person.getInn().value().equalsIgnoreCase(persistedPerson.getInn().value()))
-                    || (person.getInn().value() == null && persistedPerson.getInn().value() != null)))
+            if (!Optional.fromNullable(person.getInn()).equals(Optional.fromNullable(persistedPerson.getInn())))
                 personFieldsToUpdate.add(RegistryPerson.UpdatableField.INN);
-            if (person.getInnForeign() != null && ((person.getInnForeign().value() != null && !person.getInnForeign().value().equalsIgnoreCase(persistedPerson.getInnForeign().value()))
-                    || (person.getInnForeign().value() == null && persistedPerson.getInnForeign().value() != null)))
+            if (!Optional.fromNullable(person.getInnForeign()).equals(Optional.fromNullable(persistedPerson.getInnForeign())))
                 personFieldsToUpdate.add(RegistryPerson.UpdatableField.INN_FOREIGN);
-            if (person.getSnils() != null && ((person.getSnils().value() != null && !person.getSnils().value().equalsIgnoreCase(persistedPerson.getSnils().value()))
-                    || (person.getSnils().value() == null && persistedPerson.getSnils().value() != null)))
+            if (!Optional.fromNullable(person.getSnils()).equals(Optional.fromNullable(persistedPerson.getSnils())))
                 personFieldsToUpdate.add(RegistryPerson.UpdatableField.SNILS);
-            if (person.getTaxPayerState() != null && ((person.getTaxPayerState().value() != null && !person.getTaxPayerState().value().get("id").getReferenceValue().equals(persistedPerson.getTaxPayerState().value().get("id").getReferenceValue()))
-                    || (person.getTaxPayerState().value() == null && persistedPerson.getTaxPayerState().value() != null)))
+            if (!Optional.fromNullable(person.getTaxPayerState()).equals(Optional.fromNullable(persistedPerson.getTaxPayerState())))
                 personFieldsToUpdate.add(RegistryPerson.UpdatableField.TAX_PAYER_STATE);
             if (!person.getVip() == persistedPerson.getVip())
                 personFieldsToUpdate.add(RegistryPerson.UpdatableField.VIP);
@@ -534,8 +430,8 @@ public class PersonServiceImpl implements PersonService {
             String oldBuild = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.BUILD.getAlias()).getStringValue() : null;
             String newAppartment = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
             String oldAppartment = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
-            String newCountryid = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getStringValue() : null;
-            String oldCountryId = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getStringValue() : null;
+            Long newCountryId = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getReferenceValue() : null;
+            Long oldCountryId = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null && persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getValue() != null ? ((Map<String, RefBookValue>) persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getValue()).get("id").getNumberValue().longValue() : null;
             String newAddress = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
             String oldAddress = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
 
@@ -543,7 +439,7 @@ public class PersonServiceImpl implements PersonService {
             if ((newRegionCode != null && !newRegionCode.equalsIgnoreCase(oldRegionCode))
                     || (newRegionCode == null && oldRegionCode != null))
                 addressFieldsToUpdate.add(RegistryPerson.UpdatableField.REGION_CODE);
-            if ((newPostalCode != null && newPostalCode.equalsIgnoreCase(oldPostalCode))
+            if ((newPostalCode != null && !newPostalCode.equalsIgnoreCase(oldPostalCode))
                     || (newPostalCode == null && oldPostalCode != null))
                 addressFieldsToUpdate.add(RegistryPerson.UpdatableField.POSTAL_CODE);
             if ((newDistrict != null && !newDistrict.equalsIgnoreCase(oldDistrict))
@@ -565,14 +461,24 @@ public class PersonServiceImpl implements PersonService {
                     || (newBuild == null && oldBuild != null))
                 addressFieldsToUpdate.add(RegistryPerson.UpdatableField.BUILD);
             if ((newAppartment != null && !newAppartment.equalsIgnoreCase(oldAppartment))
-                || (newAppartment == null && oldAppartment != null))
+                    || (newAppartment == null && oldAppartment != null))
                 addressFieldsToUpdate.add(RegistryPerson.UpdatableField.APPARTMENT);
-            if ((newCountryid != null && !newCountryid.equalsIgnoreCase(oldCountryId))
-                || (newCountryid == null && oldCountryId != null))
+            if ((newCountryId != null && !newCountryId.equals(oldCountryId))
+                    || (newCountryId == null && oldCountryId != null))
                 addressFieldsToUpdate.add(RegistryPerson.UpdatableField.COUNTRY_ID);
             if ((newAddress != null && !newAddress.equalsIgnoreCase(oldAddress))
-                || (newAddress == null && oldAddress != null))
+                    || (newAddress == null && oldAddress != null))
                 addressFieldsToUpdate.add(RegistryPerson.UpdatableField.ADDRESS);
+        }
+
+        if (person.getRecordVersionTo() != null) {
+            if (!SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).equals(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()))) {
+                refBookPersonDao.deleteRegistryPersonFakeVersion(person.getRecordId());
+                if (SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).compareTo(SimpleDateUtils.toStartOfDay(person.getVersion())) > 0) {
+                    person.setVersionEnd(SimpleDateUtils.toStartOfDay(persistedPerson.getRecordVersionTo()));
+                    refBookPersonDao.saveRegistryPersonFakeVersion(person);
+                }
+            }
         }
 
         String personSql = registryPersonUpdateBuilder.buildPersonUpdateQuery(personFieldsToUpdate);
@@ -587,8 +493,99 @@ public class PersonServiceImpl implements PersonService {
         }
 
         if (personFieldsToUpdate.contains(RegistryPerson.UpdatableField.REPORT_DOC)) {
-            refBookPersonDao.updateRegistryPersonIncRepDocId(persistedPerson.getReportDoc().value().get("id").getReferenceValue(), person.getReportDoc().value().get("id").getReferenceValue());
+            Long oldRepDocId = persistedPerson.getReportDoc().value() != null ? persistedPerson.getReportDoc().value().get("id").getNumberValue().longValue() : null;
+            Long newRepDocId = person.getReportDoc().value() != null ? person.getReportDoc().value().get("id").getNumberValue().longValue() : null;
+            refBookPersonDao.updateRegistryPersonIncRepDocId(oldRepDocId, newRepDocId);
         }
+    }
+
+    @Override
+    public void checkVersionOverlapping(RegistryPerson person) {
+        Date minDate = null, maxDate = new Date(0);
+        List<RegistryPerson> overlappingPersonList = new ArrayList<>();
+        RefBookPersonFilter filter = new RefBookPersonFilter();
+        filter.setId(person.getRecordId().toString());
+        List<RegistryPerson> relatedPersons = refBookPersonDao.fetchNonDuplicatesVersions(person.getRecordId());
+        for (RegistryPerson relatedPerson : relatedPersons) {
+            if (person.getId() == null || !person.getId().equals(relatedPerson.getId()) && person.getRecordId().equals(person.getOldId())) {
+                // Проверка пересечения существующей с исходной
+                if (!(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()) != null && SimpleDateUtils.toStartOfDay(person.getVersion()).after(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()))
+                        || SimpleDateUtils.toStartOfDay(person.getVersion()).before(SimpleDateUtils.toStartOfDay(relatedPerson.getVersion()))
+                        && person.getVersion() != null && SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()).before(SimpleDateUtils.toStartOfDay(relatedPerson.getVersion())))) {
+                    overlappingPersonList.add(relatedPerson);
+                }
+                if (minDate == null || SimpleDateUtils.toStartOfDay(relatedPerson.getVersion()).before(SimpleDateUtils.toStartOfDay(minDate))) {
+                    minDate = relatedPerson.getVersion();
+                }
+                if (maxDate != null && (SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()) == null || SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()).after(SimpleDateUtils.toStartOfDay(maxDate)))) {
+                    maxDate = relatedPerson.getRecordVersionTo();
+                }
+            }
+        }
+        if (!overlappingPersonList.isEmpty()) {
+            throw new ServiceException("Невозможно сохранить данные физического лица. Период действия с %s по %s для версии %s ФЛ (%s)%s, %s пересекается с периодом действия других версий этого ФЛ: %s",
+                    FastDateFormat.getInstance("dd.MM.yyyy").format(person.getVersion()),
+                    person.getRecordVersionTo() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(person.getRecordVersionTo()),
+                    person.getId(),
+                    person.getRecordId(),
+                    (person.getLastName() != null ? " " + person.getLastName() : "") + (person.getFirstName() != null ? " "
+                            + person.getFirstName() : "") + (person.getMiddleName() != null ? " " + person.getMiddleName() : ""),
+                    person.getBirthDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(person.getBirthDate()),
+                    makeOverlappingPersonsString(overlappingPersonList));
+
+        }
+
+        if (!(minDate == null || DateUtils.addDays(SimpleDateUtils.toStartOfDay(minDate), -1).equals(SimpleDateUtils.toStartOfDay(person.getRecordVersionTo()))
+                || maxDate != null && DateUtils.addDays(SimpleDateUtils.toStartOfDay(maxDate), 1).equals(SimpleDateUtils.toStartOfDay(person.getVersion())))) {
+            throw new ServiceException("Невозможно сохранить данные физического лица. Между периодом действия с %s по %s для версии %s ФЛ (%s) %s, %s и периодом действия других версий этого ФЛ имеется временной разрыв более 1 календарного дня.",
+                    FastDateFormat.getInstance("dd.MM.yyyy").format(person.getVersion()),
+                    person.getRecordVersionTo() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(person.getRecordVersionTo()),
+                    person.getId(),
+                    person.getRecordId(),
+                    (person.getLastName() != null ? " " + person.getLastName() : "") + (person.getFirstName() != null ? " "
+                            + person.getFirstName() : "") + (person.getMiddleName() != null ? " " + person.getMiddleName() : ""),
+                    person.getBirthDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(person.getBirthDate()));
+        }
+    }
+
+    private String makeOverlappingPersonsString(List<RegistryPerson> overlappingPersons) {
+        List<String> overlappingPersonStrings = new ArrayList<>(overlappingPersons.size());
+        for (RegistryPerson overlappingPerson : overlappingPersons) {
+            overlappingPersonStrings.add(String.format(
+                    "[%s, период действия с %s по %s]",
+                    overlappingPerson.getId(),
+                    FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingPerson.getVersion()),
+                    overlappingPerson.getRecordVersionTo() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(overlappingPerson.getRecordVersionTo())));
+        }
+        return Joiner.on(", ").join(overlappingPersonStrings);
+    }
+
+    @Override
+    public CheckDulResult checkDul(String docCode, String docNumber) {
+        CheckDulResult result = new CheckDulResult();
+        String erasedNumber = docNumber.replaceAll("[^\\wА-Яа-яЁё]", "");
+        if (docCode.equals("91")) {
+            if (ScriptUtils.isUSSRIdDoc(docNumber)) {
+                result.setErrorMessage("Значение для типа ДУЛ с кодом 91 в поле \"Серия и номер\" указаны реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является разрешенным документом, удостоверяющим личность.");
+            }
+        } else {
+            result.setErrorMessage(ScriptUtils.checkDul(docCode, erasedNumber, "Серия и номер"));
+            if (result.getErrorMessage() == null) {
+                result.setFormattedNumber(ScriptUtils.formatDocNumber(docCode, erasedNumber));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#requestingUser, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    public PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser) {
+        if (filter == null) {
+            return new PagingResult<>();
+        }
+        PagingResult<RefBookPerson> persons = refBookPersonDao.fetchOriginalDuplicatesCandidates(pagingParams, filter);
+        forbidVipsDataByUserPermissions(persons, requestingUser);
+        return persons;
     }
 
     /**

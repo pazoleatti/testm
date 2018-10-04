@@ -94,12 +94,12 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, toString(departmentConfig.getPresentPlace()), "presentPlace", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getName(), "name", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, departmentConfig.getPhone(), "phone", CellType.STRING, CellStyle.ALIGN_LEFT);
-        createCellValue(colIndex++, toNumber(departmentConfig.getSignatoryMark()), "signatoryMark", CellType.NUMERIC, CellStyle.ALIGN_CENTER);
+        createCellValue(colIndex++, toNumber(departmentConfig.getSignatoryMark()), "signatoryMark", CellType.INTEGER, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getSignatorySurName(), "signatorySurName", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, departmentConfig.getSignatoryFirstName(), "signatoryFirstName", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, departmentConfig.getSignatoryLastName(), "signatoryLastName", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, departmentConfig.getApproveDocName(), "approveDocName", CellType.STRING, CellStyle.ALIGN_LEFT);
-        createCellValue(colIndex++, toString(departmentConfig.getReorganization()), "reorganizationCode", CellType.NUMERIC, CellStyle.ALIGN_CENTER);
+        createCellValue(colIndex++, toString(departmentConfig.getReorganization()), "reorganizationCode", CellType.INTEGER, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getReorgKpp(), "reorgKpp", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getReorgInn(), "reorgInn", CellType.STRING, CellStyle.ALIGN_CENTER);
     }
@@ -129,7 +129,7 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
                         cell.setCellValue(value.toString());
                     }
                     break;
-                case NUMERIC:
+                case INTEGER:
                     Number number = value instanceof String ? Integer.valueOf((String) value) : (Number) value;
                     cell.setCellValue(number.doubleValue());
                     break;

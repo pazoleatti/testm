@@ -370,7 +370,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     private int parseDepartmentIdFromFileName(String fileName) {
         int departmentId;
-        Matcher matcher = Pattern.compile("(\\d*)_.*_\\d{14}\\.xlsx").matcher(fileName);
+        Matcher matcher = Pattern.compile("(\\d*)_.*_\\d{12}\\.xlsx").matcher(fileName);
         if (matcher.matches()) {
             departmentId = Integer.valueOf(matcher.group(1));
         } else {

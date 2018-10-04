@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.departmentConfigs;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -16,7 +15,7 @@ public class StyleBuilder {
 
     enum CellType {
         STRING,
-        NUMERIC,
+        INTEGER,
         DATE
     }
 
@@ -44,12 +43,12 @@ public class StyleBuilder {
                     cellStyle.setWrapText(true);
                     cellStyle.setDataFormat(dataFormat.getFormat("@"));
                     break;
-                case NUMERIC:
+                case INTEGER:
                     cellStyle.setWrapText(true);
-                    cellStyle.setDataFormat(dataFormat.getFormat("@"));
+                    cellStyle.setDataFormat((short) 1);// 1 - числовой без десятичных знаков
                     break;
                 case DATE:
-                    cellStyle.setDataFormat((short) 14);// 14 - формат для Дата (dd.MM.yyyy)
+                    cellStyle.setDataFormat((short) 14);// 14 - формат для Дата (dd.MM.yyyy), см BuiltinFormats
                     break;
             }
             cellStyleCache.put(cacheKey, cellStyle);

@@ -58,7 +58,6 @@
                 DECLARATION_DATA_TYPE_REF_BOOK: 931,
                 DECLARATION_TYPE: 207,
                 DEPARTMENT: 30,
-                DOC_TYPE: 360,
                 INCOME_CODE: 922,
                 OKTMO: 96,
                 PERIOD_CODE: 8,
@@ -67,7 +66,9 @@
                 PRESENT_PLACE: 924,
                 REORGANIZATION: 928,
                 SIGNATORY_MARK: 35,
-                TAXPAYER_STATUS: 903
+                TAXPAYER_STATUS: 903,
+                DOC_TYPE: 360,
+                ID_DOC: 902
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -203,6 +204,15 @@
                 INN: {alias: "inn", length: 50, label: "ИНН"},
                 ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"}
             },
+            PERSON_SEARCH_FIELDS_ORIGINAL_DUPLICATES: {
+                LAST_NAME: {alias: "lastName", length: 60, label: "Фамилия"},
+                FIRST_NAME: {alias: "firstName", length: 60, label: "Имя"},
+                MIDDLE_NAME: {alias: "middleName", length: 60, label: "Отчество"},
+                RECORD_ID: {alias: "recordId", length: 10, label: "ИД ФЛ"},
+                INN: {alias: "inn", length: 50, label: "ИНН"},
+                ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
+                SNILS: {alias: "snils", length: 14, label: "СНИЛС"}
+            },
             REPORT_PERIOD_STATUS: {
                 OPEN: "OPEN", // Открыт
                 CLOSE: "CLOSE", // Закрыт
@@ -277,6 +287,13 @@
             DEPARTMENT_CONFIG_PERMISSION: {
                 UPDATE: 1 << 2,
                 DELETE: 1 << 3
+            },
+            MODE: {
+                VIEW: "VIEW",
+                CREATE: "CREATE",
+                EDIT: "EDIT",
+                ORIGINAL: "ORIGINAL",
+                DUPLICATE: "DUPLICATE"
             }
         });
 }());

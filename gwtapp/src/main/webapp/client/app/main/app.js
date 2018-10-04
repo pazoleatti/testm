@@ -955,6 +955,8 @@
         "refBook.fl.table.label.duplicate": "(Дубл.)",
         "refBook.fl.table.label.undefined": "Не заполнено",
 
+        "refBook.fl.table.label.editing": "Редактирование",
+        "refBook.fl.table.label.duplicateString": "дубликат",
         "refBook.fl.card.label.version": "Версия: ",
         "refBook.fl.card.label.versionFrom": "Действует с: ",
         "refBook.fl.cardEdit.label.versionFrom": "Действует: ",
@@ -974,7 +976,7 @@
         "refBook.fl.card.label.taxPayerState": "Статус налогоплательщика: ",
         "refBook.fl.card.label.source": "Система-источник: ",
         "refBook.fl.card.label.vip": "Важность: ",
-        "refBook.fl.card.label.inn": "ИНН: ",
+        "refBook.fl.card.label.inn": "ИНН в РФ: ",
         "refBook.fl.card.label.innForeign": "ИНН в стране гражданства: ",
         "refBook.fl.card.label.citizenship": "Гражданство: ",
         "refBook.fl.card.label.reportDoc": "Документ для отчетности: ",
@@ -996,6 +998,18 @@
         "refBook.fl.card.tabs.title.duplicates": "Дубликаты",
         "refBook.fl.card.tabs.title.terbanks": "Тербанки",
         "refBook.fl.card.tabs.title.changelog": "История изменений",
+        "refBook.fl.card.tabs.idDoc.modal.idDocCode.type": "Тип",
+        "refBook.fl.card.tabs.idDoc.modal.idDocNumber": "Серия и номер",
+        "refBook.fl.card.tabs.idDoc.modal.title.create": "Создание нового ДУЛ",
+        "refBook.fl.card.tabs.idDoc.modal.title.edit": "Редактирование ДУЛ",
+        "refBook.fl.card.tabs.idDoc.deleteDialog.title": "Удаление ДУЛ",
+        "refBook.fl.card.tabs.idDoc.deleteDialog.content": "Вы действительно хотите удалить выбранный ДУЛ?",
+        "refBook.fl.card.tabs.original.modal.title": "Выбор физического лица для назначения оригинала",
+        "refBook.fl.card.tabs.duplicate.modal.title": "Выбор физического лица для назначения дубликата",
+        "refBook.fl.card.tabs.original.deleteDialog.title": "Удаление Оригинала",
+        "refBook.fl.card.tabs.duplicate.deleteDialog.title": "Удаление дубликата",
+        "refBook.fl.card.tabs.original.deleteDialog.content": "Вы действительно хотите удалить выбранный Оригинал?",
+        "refBook.fl.card.tabs.duplicate.deleteDialog.content": "Вы действительно хотите удалить выбранный дубликат?",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocCode": "Код ДУЛ",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumber": "Серия и номер",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.asnu": "АС НУ",
@@ -1134,7 +1148,8 @@
         'app.linearRefBook',
         'app.hierRefBook',
         'app.refBookConfList',
-        'app.departmentConfig'
+        'app.departmentConfig',
+        'app.idDocRecordModal'
     ]);
 
     /**

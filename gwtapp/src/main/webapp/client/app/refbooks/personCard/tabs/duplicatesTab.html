@@ -4,17 +4,19 @@
             translate}}
         </div>
         <div style="padding-left: 20px">
-            <a href="index.html#/personRegistry/personCard/{{original.id}}">{{original | originalFormatter}}</a>
+            <a href="index.html#/personRegistry/personCard/{{original.id}}" target="_blank">{{original | originalFormatter}}</a>
         </div>
         <div class="row">
             <div class="pull-left">
                 <div class="row-fluid" style="margin-left: 20px">
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT' || original"
+                            data-ng-click="addOriginal()">
                         <span>{{::'refBook.fl.card.button.choose' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT' || !original"
+                            data-ng-click="deleteOriginal()">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
                 </div>
@@ -27,11 +29,13 @@
             <div class="pull-left">
                 <div class="row-fluid" style="margin-left: 20px">
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT'"
+                            data-ng-click="addDuplicate()">
                         <span>{{::'refBook.fl.card.button.add' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'">
+                            data-ng-disabled="mode !== 'EDIT'"
+                            data-ng-click="deleteDuplicate()">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
                 </div>
@@ -43,7 +47,7 @@
                  data-grid-fill-space="false"
                  data-grid-options="duplicatesGrid.options"
                  data-grid-ctrl="duplicatesGrid.ctrl"
-                 data-ng-model="duyplicatesGrid.value"
+                 data-ng-model="duplicatesGrid.value"
                  data-init-grid="fetchDuplicates(ctrl)"
                  id = "duplicatesGrid">
             </div>
