@@ -19,8 +19,8 @@
             });
         }])
 
-        .controller('personCardCtrl', ['$scope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs', '$logPanel',
-            function ($scope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs, $logPanel) {
+        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs', '$logPanel',
+            function ($scope, $rootScope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs, $logPanel) {
 
                 $scope.mode = APP_CONSTANTS.MODE.VIEW;
 
@@ -469,6 +469,10 @@
                  * Перейти в режим редактирования
                  */
                 $scope.editMode = function () {
+                    $scope.idDocs = null;
+                    if ($scope.idDocTab.active) {
+                        $scope.fetchIdDocs($scope.idDocsGrid.ctrl)
+                    }
                     $scope.mode = APP_CONSTANTS.MODE.EDIT;
                 };
 
@@ -531,7 +535,7 @@
                     } else {
                         $scope.idDocsDeleteCompleted = true;
                     }
-                    var startedCounter = 0;
+                    var size = $scope.idDocs ? $scope.idDocs.length : 0;
                     var completedCounter = 0;
                     angular.forEach($scope.idDocs, function (idDoc) {
                         idDoc.DOC_ID.value = idDoc.DOC_ID.referenceObject.id.value;
@@ -543,7 +547,7 @@
                                 data: idDoc
                             }).then(function () {
                                 completedCounter++;
-                                if(startedCounter == completedCounter) {
+                                if(size == completedCounter) {
                                     $scope.idDocsUpdateCompleted = true;
                                 }
                             });
@@ -556,22 +560,18 @@
                                 data: idDoc
                             }).then(function () {
                                 completedCounter++;
-                                if(startedCounter == completedCounter) {
+                                if(size == completedCounter) {
                                     $scope.idDocsUpdateCompleted = true;
                                 }
                             });
                         } else {
                             completedCounter++;
-                            if(startedCounter == completedCounter) {
+                            if(size == completedCounter) {
                                 $scope.idDocsUpdateCompleted = true;
                             }
                         }
-                        startedCounter++;
-                        if(startedCounter == completedCounter) {
-                            $scope.idDocsUpdateCompleted = true;
-                        }
                     });
-                    if (startedCounter == 0) {
+                    if (size == 0) {
                         $scope.idDocsUpdateCompleted = true;
                     }
                 };
@@ -756,6 +756,7 @@
                  */
                 $scope.$on("createIdDoc", function (event, idDoc) {
                     $scope.idDocs.push(idDoc);
+                    $rootScope.$broadcast("addIdDoc",$scope.idDocs, $scope.person);
                     $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                 });
 

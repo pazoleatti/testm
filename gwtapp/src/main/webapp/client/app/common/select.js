@@ -949,6 +949,10 @@
                     }
                 };
 
+                $scope.$on("addIdDoc", function (event, idDocs, person) {
+                    performInitialization(idDocs, person)
+                });
+
                 /**
                  * Инициализировать выпадашку для выбора статуса Налогоплательщика
                  */
