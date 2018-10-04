@@ -2766,11 +2766,8 @@ public final class ScriptUtils {
         } else if (code.equals("27")) {
             format = "[^\\wА-яа-яЁё]*([А-ЯЁ][^\\wА-яа-яЁё]*){2}([0-9][^\\wА-яа-яЁё]*){6,7}";
             formatStr = "\"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)";
-        } else if (code.equals("91")) {
-            format = "^(I|i|V|v|X|x|L|l|C|c|У|у|Х|х|Л|л|С|с|1)*-[А-Я]{2} [0-9]{6}$";
-            if (checkFormat(value, format)) {
-                return "\"Значение гр. 11 ДУЛ Номер (\"" + value + "\") содержит реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является актуальным документом, удостоверяющим личность\"";
-            }
+        } else if (code.equals("91") && isUSSRIdDoc(value)) {
+            return "Значение гр. 11 ДУЛ Номер (\"" + value + "\") содержит реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является актуальным документом, удостоверяющим личность";
         }
         if (format != null && !checkFormat(value, format)) {
             return "Значение гр. \"" + attrName + "\" (\"" + value + "\") не соответствует формату " + formatStr;
@@ -2782,7 +2779,7 @@ public final class ScriptUtils {
     }
 
     public static boolean isUSSRIdDoc(String number) {
-        return checkFormat(number, "[IiVvXxLlCcУуХхЛлСс]-([А-ЯЁ]){2}\\s([0-9]){6}");
+        return checkFormat(number, "[IiVvXxLlCcУуХхЛлСс1]*-[А-ЯЁ]{2} [0-9]{6}");
     }
 
     public static String formatDocNumber(String code, String value) {
