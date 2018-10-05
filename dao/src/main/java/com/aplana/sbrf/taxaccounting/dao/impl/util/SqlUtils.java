@@ -108,6 +108,13 @@ public final class SqlUtils extends AbstractDao {
     }
 
     /**
+     * Alias for {@link #transformToSqlInStatement(String, Collection)}
+     */
+    public static String in(String prefix, Collection<?> collection) {
+        return transformToSqlInStatement(prefix, collection);
+    }
+
+    /**
      * Формирует in () sql-выражение для строковой коллекции с добавлением одинарных кавычек для запроса
      *
      * @param prefix     значение, которое будет соединяться со значениями из коллекции

@@ -14,22 +14,12 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Сервис для работы со справочником физ. лиц, для специфики по дубликатам.
  */
 public interface PersonService {
-
-
-    /**
-     * Меняем родителя (RECORD_ID) у дубликатов
-     *
-     * @param recordIds
-     * @param originalId
-     */
-    void changeRecordId(List<Long> recordIds, Long originalId);
 
     /**
      * Получение оригинала ФЛ
@@ -142,7 +132,6 @@ public interface PersonService {
      * Проверяет корректность ДУЛ
      * @param docCode   код документа
      * @param docNumber номер документа
-     * @return
      */
     CheckDulResult checkDul(String docCode, String docNumber);
 
@@ -153,5 +142,4 @@ public interface PersonService {
      * @return  Страница списка записей
      */
     PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser);
-
 }

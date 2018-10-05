@@ -59,11 +59,6 @@ public interface RefBookPersonDao {
     void deleteDuplicates(List<Long> deletedDuplicateOldIds);
 
     /**
-     * Меняем родителя (RECORD_ID) у дубликатов
-     */
-    void changeRecordId(List<Long> recordIds, Long originalId);
-
-    /**
      * Установить оригинал
      * @param changingPersonRecordId    идентификатор изменяемого ФЛ
      * @param changingPersonOldId       исходный идентификатор изменяемого ФЛ

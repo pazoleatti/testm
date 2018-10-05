@@ -199,14 +199,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void changeRecordId(List<Long> recordIds, Long originalId) {
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put("originalId", originalId);
-        getNamedParameterJdbcTemplate().update(String.format("update ref_book_person set record_id = :originalId " +
-                "where old_id is not null and %s", SqlUtils.transformToSqlInStatement("old_id", recordIds)), valueMap);
-    }
-
-    @Override
     public void setOriginal(Long changingPersonRecordId, Long changingPersonOldId, Long addedOriginalRecordId) {
         String sql;
         if (changingPersonRecordId == changingPersonOldId) {

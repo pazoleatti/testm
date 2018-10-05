@@ -527,9 +527,9 @@
                     if ($scope.idDocsForDelete.length > 0) {
                         $http({
                             method: "POST",
-                            url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/deleteVersions",
+                            url: "controller/actions/refBookFL/deleteIdDocs",
                             data: $scope.idDocsForDelete
-                        }).then(function () {
+                        }).then(function success() {
                             $scope.idDocsDeleteCompleted = true;
                         });
                     } else {
@@ -547,7 +547,7 @@
                                 data: idDoc
                             }).then(function () {
                                 completedCounter++;
-                                if(size == completedCounter) {
+                                if (size == completedCounter) {
                                     $scope.idDocsUpdateCompleted = true;
                                 }
                             });
@@ -560,13 +560,13 @@
                                 data: idDoc
                             }).then(function () {
                                 completedCounter++;
-                                if(size == completedCounter) {
+                                if (size == completedCounter) {
                                     $scope.idDocsUpdateCompleted = true;
                                 }
                             });
                         } else {
                             completedCounter++;
-                            if(size == completedCounter) {
+                            if (size == completedCounter) {
                                 $scope.idDocsUpdateCompleted = true;
                             }
                         }
@@ -746,7 +746,7 @@
                                     $scope.person.reportDoc.value = null;
                                 }
                             }
-                            $rootScope.$broadcast("addIdDoc",$scope.idDocs, $scope.person);
+                            $rootScope.$broadcast("addIdDoc", $scope.idDocs, $scope.person);
                             $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                         }
                     })
@@ -757,7 +757,7 @@
                  */
                 $scope.$on("createIdDoc", function (event, idDoc) {
                     $scope.idDocs.push(idDoc);
-                    $rootScope.$broadcast("addIdDoc",$scope.idDocs, $scope.person);
+                    $rootScope.$broadcast("addIdDoc", $scope.idDocs, $scope.person);
                     $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                 });
 

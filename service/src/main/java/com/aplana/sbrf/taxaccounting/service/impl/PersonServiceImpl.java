@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
@@ -30,8 +29,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,14 +45,11 @@ import java.util.*;
 @Service
 @Transactional
 public class PersonServiceImpl implements PersonService {
-    private static final Log LOG = LogFactory.getLog(PersonServiceImpl.class);
 
     @Autowired
     private RefBookPersonDao refBookPersonDao;
     @Autowired
     private CommonRefBookService commonRefBookService;
-    @Autowired
-    private RefBookFactory refBookFactory;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -198,7 +192,7 @@ public class PersonServiceImpl implements PersonService {
             }
             refBookPersonDao.setOriginal(data.getChangingPersonRecordId(), data.getChangingPersonOldId(), data.getAddedOriginal());
         }
-        if (data.isDeleteOriginal()){
+        if (data.isDeleteOriginal()) {
             refBookPersonDao.deleteOriginal(data.getChangingPersonRecordId(), data.getChangingPersonOldId());
         }
         if (CollectionUtils.isNotEmpty(data.getAddedDuplicates())) {
@@ -211,12 +205,6 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    public void changeRecordId(List<Long> recordIds, Long originalId) {
-        LOG.info(String.format("PersonServiceImpl.changeRecordId. recordIds: %s; originalId: %s", recordIds, originalId));
-        refBookPersonDao.changeRecordId(recordIds, originalId);
-    }
-
     public String createSearchFilter(String firstName, String lastName, String searchPattern, Boolean exactSearch) {
         String filter = "";
         // Отдельная фильтрация по имени и фамилии - выполняем сначала, чтобы меньше результатов попало под полнотекстовый поиск
@@ -626,5 +614,4 @@ public class PersonServiceImpl implements PersonService {
         }
         return toReturn;
     }
-
 }
