@@ -29,7 +29,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
             addBirthDateConditions();
             addDocumentsConditions();
             addVersionsConditions();
-            selfExcludeCondition(filter.getVersionId());
+            selfExcludeCondition(filter.getRecordId());
             selfExcludeDuplicates();
         }
     }
@@ -42,7 +42,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
 
     private void selfExcludeCondition(Long value) {
         if (value != null) {
-            query = query + "\n" + "and id <> " + value;
+            query = query + "\n" + "and record_id <> " + value;
         }
     }
 

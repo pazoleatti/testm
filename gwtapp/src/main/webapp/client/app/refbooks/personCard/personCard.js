@@ -818,7 +818,7 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    id: $scope.person.id,
+                                    recordId: $scope.person.recordId,
                                     mode: mode
                                 }
                             }

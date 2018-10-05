@@ -74,7 +74,7 @@
                  */
                 $scope.filterRequestParam = function () {
                     return JSON.stringify({
-                        versionId: $shareData.id,
+                        recordId: $shareData.recordId,
                         lastName: $scope.searchFilter.params.lastName,
                         firstName: $scope.searchFilter.params.firstName,
                         middleName: $scope.searchFilter.params.middleName,
