@@ -367,7 +367,7 @@
                 /**
                  * @description Обработать результат операций "Идентифицировать ФЛ" и "Консолидировать"
                  */
-                function calculateResult(response, force, cancelTask) {
+                function calculateResult(response, force, cancelTask, retryFunc) {
                     if (response.data && response.data.uuid && response.data.uuid !== null) {
                         $logPanel.open('log-panel-container', response.data.uuid);
                     } else {
@@ -377,7 +377,7 @@
                                 okBtnCaption: $filter('translate')('common.button.yes'),
                                 cancelBtnCaption: $filter('translate')('common.button.no'),
                                 okBtnClick: function () {
-                                    $scope.calculate(true, cancelTask);
+                                    retryFunc(true, cancelTask);
                                 }
                             });
                         } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
@@ -386,7 +386,7 @@
                                 okBtnCaption: $filter('translate')('common.button.yes'),
                                 cancelBtnCaption: $filter('translate')('common.button.no'),
                                 okBtnClick: function () {
-                                    $scope.calculate(force, true);
+                                    retryFunc(force, true);
                                 }
                             });
                         }
@@ -462,19 +462,15 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Идентифицировать ФЛ"
                  */
                 $scope.identify = function (force, cancelTask) {
-                    {
-                        force = typeof force !== 'undefined' ? force : false;
-                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
-                    }
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/identify",
                         params: {
-                            force: force ? force : false,
-                            cancelTask: cancelTask ? cancelTask : false
+                            force: !!force,
+                            cancelTask: !!cancelTask
                         }
                     }).then(function (response) {
-                        calculateResult(response, force, cancelTask);
+                        calculateResult(response, force, cancelTask, $scope.identify);
                     });
                 };
 
@@ -482,19 +478,15 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Консолидировать"
                  */
                 $scope.consolidate = function (force, cancelTask) {
-                    {
-                        force = typeof force !== 'undefined' ? force : false;
-                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
-                    }
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/consolidate",
                         params: {
-                            force: force ? force : false,
-                            cancelTask: cancelTask ? cancelTask : false
+                            force: !!force,
+                            cancelTask: !!cancelTask
                         }
                     }).then(function (response) {
-                        calculateResult(response, force, cancelTask);
+                        calculateResult(response, force, cancelTask, $scope.consolidate);
                     });
                 };
 
