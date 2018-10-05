@@ -1118,6 +1118,7 @@
         'aplana.modal',
         'aplana.modal.dialogs',
         // Модули приложения
+        'app.inputDecorator',
         'app.treeMenu',
         'app.header',
         'app.footer',
