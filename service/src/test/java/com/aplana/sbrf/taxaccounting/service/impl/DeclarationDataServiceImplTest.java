@@ -182,8 +182,8 @@ public class DeclarationDataServiceImplTest {
         long declarationDataId1 = 1, declarationDataId2 = 2;
         TAUserInfo userInfo = new TAUserInfo();
 
-        when(reportService.getDec(declarationDataId1, DeclarationDataReportType.XML_DEC)).thenReturn(uuid1);
-        when(reportService.getDec(declarationDataId2, DeclarationDataReportType.XML_DEC)).thenReturn(uuid2);
+        when(reportService.getSafeDec(declarationDataId1, DeclarationDataReportType.XML_DEC)).thenReturn(uuid1);
+        when(reportService.getSafeDec(declarationDataId2, DeclarationDataReportType.XML_DEC)).thenReturn(uuid2);
         ReflectionTestUtils.setField(declarationDataService, "reportService", reportService);
 
         assertEquals(expectedDate, declarationDataService.getXmlDataDocDate(declarationDataId1, userInfo));
@@ -256,7 +256,7 @@ public class DeclarationDataServiceImplTest {
         when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
         when(departmentService.getDepartment(2)).thenReturn(department);
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
-        when(reportService.getDec(anyLong(), Matchers.<DeclarationDataReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
+        when(reportService.getSafeDec(anyLong(), Matchers.<DeclarationDataReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.fetchReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
 
@@ -411,7 +411,7 @@ public class DeclarationDataServiceImplTest {
         declarationData.setId(1L);
 
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
-        when(reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC)).thenReturn("uuid1");
+        when(reportService.getSafeDec(declarationData.getId(), DeclarationDataReportType.XML_DEC)).thenReturn("uuid1");
 
         BlobDataService blobDataService = mock(BlobDataService.class);
         when(blobDataService.getLength("uuid1")).thenReturn(1200L);

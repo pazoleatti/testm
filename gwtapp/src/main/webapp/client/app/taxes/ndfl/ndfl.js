@@ -84,7 +84,7 @@
                 /**
                  * @description Инициализация первичных данных на странице
                  */
-                $scope.updateDeclarationInfo = function updateDeclarationInfo() {
+                function updateDeclarationInfo() {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
                             projection: "declarationData",
@@ -92,45 +92,36 @@
                         },
                         function (data) {
                             if (data) {
-                                var isRefreshGridNeeded = false;
-                                if ($scope.declarationData && $scope.declarationData.actualDataDate &&
-                                    $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
-                                    isRefreshGridNeeded = true;
+                                if (!data.declarationDataExists) {
+                                    cancelAllIntervals();
+                                    showDeclarationDataNotExistsError();
+                                } else {
+                                    var isRefreshGridNeeded = false;
+                                    if ($scope.declarationData && $scope.declarationData.actualDataDate &&
+                                        $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
+                                        isRefreshGridNeeded = true;
+                                    }
+                                    $scope.declarationData = data;
+                                    $scope.declarationDataId = $stateParams.declarationDataId;
+                                    if (isRefreshGridNeeded) {
+                                        $scope.refreshGrid(1);
+                                    }
                                 }
-                                $scope.declarationData = data;
-                                $scope.declarationDataId = $stateParams.declarationDataId;
-                                if (isRefreshGridNeeded) {
-                                    $scope.refreshGrid(1);
-                                }
-                            }
-                        },
-                        function (e) {
-                            if (e.status === 403) {
-                                $dialogs.errorDialog({
-                                    content: $filter('translate')('ndfl.not.access')
-                                });
                             }
                         }
                     );
-                };
+                }
 
-                var interval;
-                $scope.updateDeclarationInfoPeriodically = function () {
-                    if (angular.isDefined(interval)) {
-                        return;
-                    }
-                    $scope.updateDeclarationInfo();
-                    interval = $interval($scope.updateDeclarationInfo, 3000);
-                };
+                var updateDeclarationInfoInterval;
+                function startUpdateDeclarationInfoInterval() {
+                    updateDeclarationInfoInterval = $interval(updateDeclarationInfo, 3000);
+                    updateDeclarationInfo();
+                }
+                startUpdateDeclarationInfoInterval();
 
-                $scope.$on('$destroy', function () {
-                    if (angular.isDefined(interval)) {
-                        $interval.cancel(interval);
-                        interval = undefined;
-                    }
-                });
-
-                $scope.updateDeclarationInfoPeriodically();
+                function cancelUpdateDeclarationInfoInterval() {
+                    $interval.cancel(updateDeclarationInfoInterval);
+                }
 
                 /**
                  * @description Проверяет готовность отчетов у открытой формы
@@ -144,35 +135,50 @@
                         function (data) {
                             if (data) {
                                 if (!data.declarationDataExist) {
-                                    $interval.cancel($scope.intervalId);
-                                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                    $dialogs.errorDialog({
-                                        content: message,
-                                        closeBtnClick: function () {
-                                            $state.go("/");
-                                        }
-                                    });
-                                    return;
-                                }
-                                $scope.availableReports = data.downloadXmlAvailable;
-                                $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
-                                $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
-                                $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
-                                if (!$scope.intervalId) {
-                                    $scope.intervalId = $interval(function () {
-                                        updateAvailableReports();
-                                    }, 10000);
+                                    cancelAllIntervals();
+                                    showDeclarationDataNotExistsError();
+                                } else {
+                                    $scope.availableReports = data.downloadXmlAvailable;
+                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
                                 }
                             }
                         }
                     );
                 }
 
-                updateAvailableReports();
+                var updateAvailableReportsInterval;
+                function startUpdateAvailableReportsInterval() {
+                    updateAvailableReportsInterval = $interval(function () {
+                        updateAvailableReports();
+                    }, 10000);
+                    updateAvailableReports();
+                }
+                startUpdateAvailableReportsInterval();
 
-                $rootScope.$on("$locationChangeStart", function () {
-                    $interval.cancel($scope.intervalId);
+                function cancelUpdateAvailableReportsInterval() {
+                    $interval.cancel(updateAvailableReportsInterval);
+                }
+
+                function cancelAllIntervals() {
+                    cancelUpdateDeclarationInfoInterval();
+                    cancelUpdateAvailableReportsInterval();
+                }
+
+                function showDeclarationDataNotExistsError() {
+                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                    $dialogs.errorDialog({
+                        content: message,
+                        closeBtnClick: function () {
+                            $state.go("/");
+                        }
+                    });
+                }
+
+                $scope.$on('$destroy', function () {
+                    cancelAllIntervals();
                 });
 
                 // Чтобы положение datepicker менялось при скроллинге
@@ -506,7 +512,7 @@
                         function (response) {
                             if (response.uuid && response.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.uuid);
-                                $scope.updateDeclarationInfo();
+                                updateDeclarationInfo();
                             } else {
                                 if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                     $dialogs.confirmDialog({
@@ -546,7 +552,7 @@
                     }, function (response) {
                         if (response.uuid && response.uuid !== null) {
                             $logPanel.open('log-panel-container', response.uuid);
-                            $scope.updateDeclarationInfo();
+                            updateDeclarationInfo();
                         } else {
                             if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                 $dialogs.confirmDialog({
@@ -585,7 +591,7 @@
                             moveToCreatedDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
                                     reason: reason
                                 }, function (response) {
-                                    $scope.updateDeclarationInfo();
+                                    updateDeclarationInfo();
                                 }
                             );
                         });
@@ -678,7 +684,7 @@
                     }).then(function (response) {
                         if (response.data && response.data !== null) {
                             $logPanel.open('log-panel-container', response.data);
-                            $scope.updateDeclarationInfo();
+                            updateDeclarationInfo();
                         }
                     });
                 };

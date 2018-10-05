@@ -30,6 +30,15 @@ public interface ReportService {
     String getDec(long declarationDataId, DeclarationDataReportType type);
 
     /**
+     * То же что {@link #getDec(long, DeclarationDataReportType)}, но с проверкой прав
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param type              тип отчета
+     * @return uuid идентификатор блоба
+     */
+    String getSafeDec(long declarationDataId, DeclarationDataReportType type);
+
+    /**
      * Удаление всех отчетов по id декларации
      *
      * @param declarationDataId идентификатор декларации
