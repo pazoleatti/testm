@@ -914,13 +914,15 @@
                         }
                         return 0;
                     });
-                    $scope.selectedDocs.options.data.results = idDocs;
-                    angular.forEach($scope.selectedDocs.options.data.results, function (value) {
-                        if (person.reportDoc && person.reportDoc.value
-                            && value.id.value === person.reportDoc.value.id.value) {
-                            person.reportDoc.value = value
-                        }
-                    })
+                    if ($scope.selectedDocs) {
+                        $scope.selectedDocs.options.data.results = idDocs;
+                        angular.forEach($scope.selectedDocs.options.data.results, function (value) {
+                            if (person.reportDoc && person.reportDoc.value
+                                && value.id.value === person.reportDoc.value.id.value) {
+                                person.reportDoc.value = value
+                            }
+                        })
+                    }
                 };
 
                 /**

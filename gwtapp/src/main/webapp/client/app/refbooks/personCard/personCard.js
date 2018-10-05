@@ -503,7 +503,7 @@
                             }
                         }).success(function (response) {
                             angular.forEach(response.rows, function (idDoc) {
-                                if (idDoc.DOC_NUMBER.value === $scope.personParam.reportDoc.value.DOC_NUMBER.value && $scope.personParam.reportDoc && $scope.personParam.reportDoc.value.id.fake) {
+                                if (idDoc.DOC_NUMBER && $scope.personParam.reportDoc.value && idDoc.DOC_NUMBER.value === $scope.personParam.reportDoc.value.DOC_NUMBER.value && $scope.personParam.reportDoc && $scope.personParam.reportDoc.value.id.fake) {
                                     $scope.personParam.reportDoc.value = idDoc;
                                 }
                             });
