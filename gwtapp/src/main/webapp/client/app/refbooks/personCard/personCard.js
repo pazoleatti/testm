@@ -746,6 +746,7 @@
                                     $scope.person.reportDoc.value = null;
                                 }
                             }
+                            $rootScope.$broadcast("addIdDoc",$scope.idDocs, $scope.person);
                             $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                         }
                     })
