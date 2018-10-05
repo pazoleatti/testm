@@ -15,6 +15,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -47,13 +48,13 @@ public class RefBookFlControllerTest {
     @Test
     public void test_deleteIdDoc() throws Exception {
 
-        long anyPersonId = 10;
         List<Long> docIds = asList(1L, 2L);
-
         doNothing().when(idDocService).deleteByIds(docIds, anyUser);
 
-        mockMvc.perform(delete("/rest/refBookFL/{personId}/idDocs", anyPersonId)
-                .param("id", "1", "2"))
+        mockMvc.perform(
+                post("/actions/refBookFL/deleteIdDocs")
+                        .contentType(APPLICATION_JSON)
+                        .content("[1, 2]"))
                 .andExpect(status().isNoContent());
 
         verify(idDocService, times(1)).deleteByIds(docIds, anyUser);

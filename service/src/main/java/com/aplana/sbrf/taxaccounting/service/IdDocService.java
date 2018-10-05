@@ -10,7 +10,7 @@ import java.util.List;
 public interface IdDocService {
 
     /**
-     * Удаление ДУЛ.
+     * Удаление ДУЛ-ов.
      */
     void deleteByIds(List<Long> ids, TAUser requestingUser);
 }

@@ -224,11 +224,11 @@ public class RefBookFlController {
     }
 
     /**
-     * Удаление ДУЛ ФЛ.
+     * Удаление ДУЛ-ов.
      */
-    @DeleteMapping("/rest/refBookFL/{personId}/idDocs")
+    @PostMapping("/actions/refBookFL/deleteIdDocs")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteIdDoc(@RequestParam("id") List<Long> docIds) {
+    public void deleteIdDocs(@RequestBody List<Long> docIds) {
         TAUser currentUser = securityService.currentUserInfo().getUser();
         idDocService.deleteByIds(docIds, currentUser);
     }

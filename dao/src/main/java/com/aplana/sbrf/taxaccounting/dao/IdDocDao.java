@@ -8,7 +8,7 @@ import java.util.List;
 public interface IdDocDao {
 
     /**
-     * Удаление ДУЛ.
+     * Удаление ДУЛ-ов.
      */
     void deleteByIds(List<Long> ids);
 }

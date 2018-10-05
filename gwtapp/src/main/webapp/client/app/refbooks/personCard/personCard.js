@@ -526,11 +526,9 @@
                 var performIdDocsPersist = function () {
                     if ($scope.idDocsForDelete.length > 0) {
                         $http({
-                            method: "DELETE",
-                            url: "controller/rest/refBookFL/" + $scope.person.recordId + "/idDocs",
-                            params: {
-                                id: $scope.idDocsForDelete
-                            }
+                            method: "POST",
+                            url: "controller/actions/refBookFL/deleteIdDocs",
+                            data: $scope.idDocsForDelete
                         }).then(function success() {
                             $scope.idDocsDeleteCompleted = true;
                         });
@@ -748,7 +746,7 @@
                                     $scope.person.reportDoc.value = null;
                                 }
                             }
-                            $rootScope.$broadcast("addIdDoc",$scope.idDocs, $scope.person);
+                            $rootScope.$broadcast("addIdDoc", $scope.idDocs, $scope.person);
                             $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                         }
                     })
