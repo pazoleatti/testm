@@ -723,6 +723,7 @@ public interface RefBookDao {
      * Удаляет указанные версии записи из справочника
      *
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
+     * @param isDelete        если true, запись удаляется физически, иначе проставляется status = -1
      */
     void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds, boolean isDelete);
 

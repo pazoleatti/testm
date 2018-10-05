@@ -526,10 +526,12 @@
                 var performIdDocsPersist = function () {
                     if ($scope.idDocsForDelete.length > 0) {
                         $http({
-                            method: "POST",
-                            url: "controller/actions/refBook/" + APP_CONSTANTS.REFBOOK.ID_DOC + "/deleteVersions",
-                            data: $scope.idDocsForDelete
-                        }).then(function () {
+                            method: "DELETE",
+                            url: "controller/rest/refBookFL/" + $scope.person.recordId + "/idDocs",
+                            params: {
+                                id: $scope.idDocsForDelete
+                            }
+                        }).then(function success() {
                             $scope.idDocsDeleteCompleted = true;
                         });
                     } else {
@@ -547,7 +549,7 @@
                                 data: idDoc
                             }).then(function () {
                                 completedCounter++;
-                                if(size == completedCounter) {
+                                if (size == completedCounter) {
                                     $scope.idDocsUpdateCompleted = true;
                                 }
                             });
@@ -560,13 +562,13 @@
                                 data: idDoc
                             }).then(function () {
                                 completedCounter++;
-                                if(size == completedCounter) {
+                                if (size == completedCounter) {
                                     $scope.idDocsUpdateCompleted = true;
                                 }
                             });
                         } else {
                             completedCounter++;
-                            if(size == completedCounter) {
+                            if (size == completedCounter) {
                                 $scope.idDocsUpdateCompleted = true;
                             }
                         }
@@ -757,7 +759,7 @@
                  */
                 $scope.$on("createIdDoc", function (event, idDoc) {
                     $scope.idDocs.push(idDoc);
-                    $rootScope.$broadcast("addIdDoc",$scope.idDocs, $scope.person);
+                    $rootScope.$broadcast("addIdDoc", $scope.idDocs, $scope.person);
                     $scope.idDocsGrid.ctrl.refreshGridData($scope.idDocs);
                 });
 
