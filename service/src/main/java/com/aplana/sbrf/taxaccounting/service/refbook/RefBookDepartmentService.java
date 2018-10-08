@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * Сервис для работы со справочником Подразделения
  */
 @ScriptExposed
-public interface RefBookDepartmentDataService {
+public interface RefBookDepartmentService {
 
     /**
      * Получение значения справочника по идентификатору
@@ -48,6 +49,15 @@ public interface RefBookDepartmentDataService {
      * @return Страница списка значений справочника
      */
     PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams);
+
+    /**
+     * Возвращяет список ТБ с установленными дочерними подразделениями
+     *
+     * @param searchPattern Строка с запросом поиска по справочнику
+     * @param exactSearch   Признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return список подразделений
+     */
+    List<RefBookDepartmentDTO> findAllTBWithChildren(String searchPattern, boolean exactSearch);
 
     /**
      * Получение доступных (согласно правам доступа пользователя) для бизнес-администрирования подразделений с фильтрацией по наименованию и пейджингом

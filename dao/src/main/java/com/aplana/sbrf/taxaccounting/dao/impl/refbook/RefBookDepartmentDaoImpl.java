@@ -1,453 +1,238 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-//import com.aplana.sbrf.taxaccounting.model.CacheConstants;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowCallbackHandler;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
-import javax.validation.constraints.NotNull;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
- * User: ekuvshinov
+ * Реализация дао для работы со справочником Подразделения
  */
 @Repository
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
-	private static final Log LOG = LogFactory.getLog(RefBookDepartmentDaoImpl.class);
-
-	private static final String TABLE_NAME = "DEPARTMENT";
-
-    @Autowired
-    ReportPeriodDao reportPeriodDao;
-    @Autowired
-    RefBookDao refBookDao;
-    @Autowired
-    RefBookSimpleDao refBookSimpleDao;
-
+    /**
+     * Получение значения справочника по идентификатору
+     *
+     * @param id Идентификатор подразделения
+     * @return Значение справочника
+     */
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookDao.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
+    public RefBookDepartment fetchDepartmentById(Integer id) {
+        String query = "SELECT * FROM ( " +
+                REF_BOOK_DEPARTMENT_SELECT +
+                "WHERE dep.is_active = 1 AND dep.id = ? " +
+                ") WHERE rownum = 1";
+        return getJdbcTemplate().queryForObject(query, new Object[]{id}, new RefBookDepartmentRowMapper());
     }
 
     @Override
-    public Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookDao.getRowNum(REF_BOOK_ID, TABLE_NAME, recordId, filter, sortAttribute, isSortAscending, null);
-    }
-
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return getRecords(pagingParams, filter, sortAttribute, true);
-    }
-
-    @Override
-    public Map<String, RefBookValue> getRecordData(Long recordId) {
-		return refBookDao.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
-    }
-
-    @Override
-    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds) {
-        return refBookSimpleDao.getRecordData(refBookDao.get(REF_BOOK_ID), uniqRecordIds);
-    }
-
-    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION =
-            "select name from department t where t.is_active = 1 AND %s %s %s";
-    @Override
-    public List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
-        ArrayList<RefBookAttribute> uniqueAttrs = new ArrayList<RefBookAttribute>();
-        for (RefBookAttribute attribute : attributes) {
-            if (attribute.getUnique() != 0){
-                uniqueAttrs.add(attribute);
-            }
+    public List<RefBookDepartment> findAllByName(String name, boolean exactSearch) {
+        String nameLike = exactSearch ? name : "%" + name.toLowerCase() + "%";
+        Object[] params = null;
+        String whereClause = "";
+        if (isNotEmpty(name)) {
+            whereClause = "WHERE " + (exactSearch ? "name" : "lower(name)") + " LIKE ?";
+            params = new Object[]{nameLike};
         }
-        //Если уникальных атрибутов нет, то поиск не нужен
-        if (uniqueAttrs.isEmpty())
-            return new ArrayList<Pair<String, String>>(0);
-        String idOddsTag = recordId != null ? "t.id <> " + recordId : "";
+        List<RefBookDepartment> departments = getJdbcTemplate().query(
+                "WITH deps AS (" +
+                        "   SELECT id FROM department " + whereClause +
+                        ")" +
+                        REF_BOOK_DEPARTMENT_SELECT +
+                        "WHERE dep.id IN (" +
+                        "   SELECT id FROM deps" +
+                        "   UNION ALL" +
+                        "   SELECT parent_id FROM DEPARTMENT_CHILD_VIEW WHERE id IN (SELECT id FROM deps)" +
+                        ")", params, new RefBookDepartmentRowMapper());
 
-        ArrayList<Pair<String, String>> pairList = new ArrayList<Pair<String, String>>();
-        String andTag = !uniqueAttrs.isEmpty() && recordId != null ? "AND" : "";
-        for (final RefBookAttribute attribute : uniqueAttrs) {
-            String querySql;
-            Object value = null;
-            if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                        idOddsTag,
-                        andTag,
-                        "upper(t." + attribute.getAlias() + ") = upper(?)");
-            } else {
-                querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                        idOddsTag,
-                        andTag,
-                        "t." + attribute.getAlias() + " = ?");
-            }
-            Map<String, RefBookValue> values = records.get(0).getValues();
-
-            if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                value =  values.get(attribute.getAlias()).getStringValue();
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                value = values.get(attribute.getAlias()).getReferenceValue();
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                value = values.get(attribute.getAlias()).getNumberValue();
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                value = values.get(attribute.getAlias()).getDateValue();
-            }
-
-            try {
-                pairList.addAll(getJdbcTemplate().query(querySql, new Object[]{value},
-                        new RowMapper<Pair<String, String>>() {
-                            @Override
-                            public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                return new Pair<String, String>(rs.getString("NAME"), attribute.getName());
-                            }
-                        }));
-            } catch (DataAccessException e) {
-                throw new DaoException("Ошибка при поиске уникальных значений в справочнике " + TABLE_NAME, e);
-            }
-        }
-
-        return pairList;
+        return departments;
     }
 
-    private static final String UPDATE_DEPARTMENT = "update department t set %s where id = ?";
-
     @Override
-    //@CacheEvict(value = CacheConstants.DEPARTMENT,key = "#uniqueId", beforeInvocation = true)
-    public void update(int uniqueId, Map<String, RefBookValue> records,  List<RefBookAttribute> attributes) {
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(UPDATE_DEPARTMENT);
-        StringBuilder sql = new StringBuilder();
-        for (RefBookAttribute attribute : attributes) {
-            sql.append(String.format("t.%s = ?,",  attribute.getAlias()));
-
-            if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                ps.addParam(records.get(attribute.getAlias()).getStringValue());
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                ps.addParam(records.get(attribute.getAlias()).getReferenceValue());
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                ps.addParam(records.get(attribute.getAlias()).getNumberValue());
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                ps.addParam(records.get(attribute.getAlias()).getDateValue());
-            }
-        }
-        ps.addParam(uniqueId);
-        getJdbcTemplate().update(
-                String.format(ps.getQuery().toString(), sql.toString().substring(0, sql.toString().length() - 1)),
-                ps.getParams().toArray());
+    public List<RefBookDepartment> findAllByNameAsTree(String name, boolean exactSearch) {
+        return asTree(findAllByName(name, exactSearch));
     }
 
-    private static final String CREATE_DEPARTMENT = "insert into department (id, %s) values(seq_department.nextval, %s)";
-    @Override
-    public int create(Map<String, RefBookValue> record, List<RefBookAttribute> attributes) {
-        final PreparedStatementData ps = new PreparedStatementData();
-        for (RefBookAttribute attribute : attributes) {
-            ps.appendQuery(attribute.getAlias() + ",");
-
-            if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                ps.addParam(record.get(attribute.getAlias()).getStringValue());
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                ps.addParam(record.get(attribute.getAlias()).getReferenceValue());
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                ps.addParam(record.get(attribute.getAlias()).getNumberValue());
-            }
-            if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                ps.addParam(record.get(attribute.getAlias()).getDateValue());
-            }
+    private List<RefBookDepartment> asTree(List<RefBookDepartment> departments) {
+        List<RefBookDepartment> rootDepartments = new ArrayList<>();
+        Map<Integer, RefBookDepartment> dtoByIdCache = new HashMap<>();
+        for (RefBookDepartment department : departments) {
+            dtoByIdCache.put(department.getId(), department);
         }
-        final String ph = SqlUtils.preparePlaceHolders(attributes.size());
-        try {
-            PreparedStatementCreator psc = new PreparedStatementCreator() {
-                @Override
-                public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                    PreparedStatement statement = con.prepareStatement(
-                            String.format(CREATE_DEPARTMENT, ps.getQuery().toString().substring(0, ps.getQuery().toString().length() - 1), ph),
-                            new String[]{"ID"}
-                    );
-                    for (int i =0; i < ps.getParams().size(); i++)
-                        statement.setObject(i+1, ps.getParams().get(i));
-                    return statement;
+        for (RefBookDepartment department : departments) {
+            if (department.getParentId() != null) {// Сбербанк пропускаем
+                RefBookDepartment parent = dtoByIdCache.get(department.getParentId());
+                department.setParent(parent);
+                if (department.getType() == DepartmentType.TERR_BANK) {
+                    rootDepartments.add(department);
+                } else {
+                    parent.addChild(department);
                 }
-            };
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            getJdbcTemplate().update(
-                    psc, keyHolder);
-            return keyHolder.getKey().intValue();
-        } catch (DataAccessException e){
-			LOG.error("", e);
-            throw new DaoException("", e);
-        }
-    }
-
-    @Override
-    public void remove(long uniqueId) {
-        try {
-            getJdbcTemplate().update("DELETE FROM department WHERE id = ?", uniqueId);
-        } catch (DataIntegrityViolationException e){
-            throw new DaoException("Нарушение ограничения целостности. Возможно обнаружена порожденная запись.", e);
-        } catch (DataAccessException e){
-			LOG.error("", e);
-            throw new DaoException("", e);
-        }
-    }
-
-    @Override
-    public int getRecordsCount(String filter) {
-        return refBookDao.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
-    }
-
-    private final static String GET_ATTRIBUTES_VALUES = "select \n" +
-            "  attribute_id,\n" +
-            "  record_id, \n" +
-            "  value,\n" +
-            "  data_type\n" +
-            "from (\n" +
-            "  with t as (\n" +
-            "  select id as record_id, name, to_char(parent_id) as parent_id, to_char(type)as type, shortname, to_char(tb_index) as tb_index, sbrf_code, to_char(region_id) as region_id, to_char(is_active) as is_active, to_char(code) as code from department \n" +
-            "  )\n" +
-            "  select a.id as attribute_id, a.type as data_type, record_id, value from t\n" +
-            "  unpivot \n" +
-            "  (value for attribute_alias in (NAME, parent_id, type, shortname, tb_index, sbrf_code, region_id, is_active, code)) \n" +
-            "  join ref_book_attribute a on attribute_alias = a.alias\n" +
-            "  where ref_book_id = 30\n" +
-            ") where (record_id, attribute_id) in ";
-
-    @Override
-    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        final Map<RefBookAttributePair, String> result = new HashMap<RefBookAttributePair, String>();
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(GET_ATTRIBUTES_VALUES);
-        ps.appendQuery("(");
-        for (Iterator<RefBookAttributePair> it = attributePairs.iterator(); it.hasNext();) {
-            RefBookAttributePair pair = it.next();
-            ps.appendQuery("(?,?)");
-            ps.addParam(pair.getUniqueRecordId());
-            ps.addParam(pair.getAttributeId());
-            if (it.hasNext()) {
-                ps.appendQuery(",");
             }
         }
-        ps.appendQuery(")");
-        getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
-                new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        result.put(new RefBookAttributePair(rs.getLong("attribute_id"), rs.getLong("record_id")), rs.getString("value"));
-                    }
-                });
-        return result;
+        return rootDepartments;
     }
 
-    private static final String CHECK_USAGES_IN_REFBOOK =
-            "WITH\n" +
-                    "    recordsByVersion AS (SELECT\n" +
-                    "                           r.ID,\n" +
-                    "                           r.RECORD_ID,\n" +
-                    "                           r.REF_BOOK_ID,\n" +
-                    "                           r.VERSION,\n" +
-                    "                           r.STATUS,\n" +
-                    "                           row_number()\n" +
-                    "                           OVER (PARTITION BY r.RECORD_ID\n" +
-                    "                             ORDER BY r.version) rn\n" +
-                    "                         FROM REF_BOOK_RECORD r\n" +
-                    "                         WHERE r.REF_BOOK_ID in (:refBookIds)),\n" +
-                    "    t AS (SELECT\n" +
-                    "            rv.ID,\n" +
-                    "            rv.RECORD_ID                   RECORD_ID,\n" +
-                    "            rv.REF_BOOK_ID,\n" +
-                    "            rv.VERSION                     version,\n" +
-                    "            rv2.version - interval '1' day versionEnd\n" +
-                    "          FROM recordsByVersion rv LEFT OUTER JOIN recordsByVersion rv2\n" +
-                    "              ON rv.RECORD_ID = rv2.RECORD_ID AND rv.rn + 1 = rv2.rn\n" +
-                    "          WHERE rv.status in (0,1))\n" +
-                    "SELECT\n" +
-                    "  t.id,\n" +
-                    "  b.name    AS refbookName,\n" +
-                    "  t.version AS versionStart,\n" +
-                    "  t.versionEnd AS versionEnd,\n" +
-                    "  v.string_value,\n" +
-                    "  v.number_value,\n" +
-                    "  v.date_value,\n" +
-                    "  v.reference_value,\n" +
-                    "  a.is_unique,\n" +
-                    "  b.id as ref_book_id\n" +
-                    "FROM ref_book b\n" +
-                    "  JOIN t ON b.id = t.ref_book_id\n" +
-                    "  JOIN ref_book_value v ON v.record_id = t.id AND (v.reference_value IN (:uniqueRefId))\n" +
-                    "  JOIN ref_book_attribute a\n" +
-                    "    ON (a.ref_book_id = b.id OR a.reference_id = b.id) AND t.ref_book_id = a.ref_book_id AND a.id = v.attribute_id";
-
+    /**
+     * Получение значений справочника по идентификаторам
+     *
+     * @param ids Список идентификаторов
+     * @return Список значений справочника
+     */
     @Override
-    public Map<Integer, Map<String, Object>> isVersionUsedInRefBooks(List<Long> refBookIds, List<Long> uniqueRecordIds) {
-        Map<String, Object> params = new HashMap<String, Object>(2);
-        //Проверка использования в справочниках
-        try {
-            params.put("refBookIds", refBookIds);
-            params.put("uniqueRefId", uniqueRecordIds);
-
-            final Map<Integer, Map<String, Object>> records = new HashMap<Integer, Map<String, Object>>();
-
-            getNamedParameterJdbcTemplate().query(CHECK_USAGES_IN_REFBOOK, params, new RowMapper<Map<Integer, Map<String, Object>>>() {
-                @Override
-                public Map<Integer, Map<String, Object>> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    int id = rs.getInt("id");
-                    int is_unique = rs.getInt("is_unique");
-                    Map<String, Object> recordValues = new HashMap<String, Object>();
-                    recordValues.put(REFBOOK_NAME_ALIAS, rs.getString(REFBOOK_NAME_ALIAS));
-                    recordValues.put(VERSION_START_ALIAS, rs.getDate(VERSION_START_ALIAS));
-                    recordValues.put(REFBOOK_ID_ALIAS, rs.getLong(REFBOOK_ID_ALIAS));
-                    recordValues.put(VERSION_END_ALIAS, rs.getDate(VERSION_END_ALIAS));
-
-                    if (is_unique != 0) {
-                        StringBuilder attr = new StringBuilder();
-                        concatAttrs(rs, attr);
-                        recordValues.put(UNIQUE_ATTRIBUTES_ALIAS, attr.toString());
-                    }
-                    records.put(id, recordValues);
-
-                    return records;
-                }
-
-                public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
-                    attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getFloat(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");
-                }
-            });
-
-            return records;
-        } catch (EmptyResultDataAccessException e) {
-            return new HashMap<Integer, Map<String, Object>>(0);
-        } catch (DataAccessException e) {
-			LOG.error("Проверка использования", e);
-            throw new DaoException("Проверка использования", e);
-        }
+    public List<RefBookDepartment> fetchDepartments(Collection<Integer> ids) {
+        return fetchDepartments(ids, false);
     }
-    
-    private static final String GET_REPORT_PERIOD_NAME = 
-            "WITH record_date AS (SELECT\n" +
-                    "                  v.record_id AS record_id\n" +
-                    "                FROM ref_book b\n" +
-                    "                  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-                    "                  JOIN ref_book_value v ON v.attribute_id = a.id\n" +
-                    "                WHERE b.id = 8 AND to_char(v.DATE_VALUE, 'DDMM') = to_char(:startDate, 'DDMM') AND a.alias = 'CALENDAR_START_DATE'),\n" +
-                    "  record_type AS(SELECT\n" +
-                    "                   v.record_id AS record_id\n" +
-                    "                 FROM ref_book b\n" +
-                    "                   JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-                    "                   JOIN ref_book_value v ON v.attribute_id = a.id\n" +
-                    "                 WHERE b.id = 8 AND a.alias = :taxCode AND v.NUMBER_VALUE = 1\n" +
-                    ")\n" +
-                    "SELECT\n" +
-                    "  rbv.STRING_VALUE\n" +
-                    "FROM ref_book_attribute a\n" +
-                    "  JOIN record_date rd ON 1 = 1\n" +
-                    "  JOIN record_type rt ON 1 = 1\n" +
-                    "  JOIN ref_book_value rbv ON rbv.attribute_id = a.id AND rbv.RECORD_ID = rd.record_id AND rbv.RECORD_ID = rt.record_id\n" +
-                    "WHERE a.alias = 'NAME'";
 
+    /**
+     * Получение действующих значений справочника по идентификаторам
+     *
+     * @param ids Список идентификаторов
+     * @return Список значений справочника
+     */
     @Override
-    public String getReportPeriodNameByDate(TaxType taxType, Date startDate) {
-        try{
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("taxCode", String.valueOf(taxType.getCode()));
-            params.put("startDate", startDate);
-            return getNamedParameterJdbcTemplate().queryForObject(GET_REPORT_PERIOD_NAME, params, String.class);
-        } catch (EmptyResultDataAccessException e){
-            return "";
-        } catch (DataAccessException e){
-            throw new DaoException("", e);
-        }
+    public List<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids) {
+        return fetchDepartments(ids, true);
+    }
+
+    /**
+     * Получение значений справочника по идентификаторам
+     *
+     * @param ids        Список идентификаторов
+     * @param activeOnly Искать только действующие подразделения
+     * @return Список значений справочника
+     */
+    private List<RefBookDepartment> fetchDepartments(Collection<Integer> ids, boolean activeOnly) {
+        String sql = REF_BOOK_DEPARTMENT_SELECT + "where dep.is_active = 1 AND dep.id IN (:ids)";
+        return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("ids", ids), new RefBookDepartmentRowMapper());
+    }
+
+    /**
+     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     *
+     * @param ids          Список идентификаторов
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @Override
+    public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
+        return fetchDepartments(ids, name, false, pagingParams);
+    }
+
+    /**
+     * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     *
+     * @param ids          Список идентификаторов
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @Override
+    public PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
+        return fetchDepartments(ids, name, true, pagingParams);
     }
 
     @Override
-    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
-        //Исключаем несуществующие записи
-        String sql = String.format("select id from department where %s ", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
-        List<Long> recordIds = new LinkedList<Long>(uniqueRecordIds);
-        List<Long> existRecords = new ArrayList<Long>();
-        try {
-            //Получаем список существующих записей среди входного набора
-            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
-                @Override
-                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("id");
-                }
-            });
-        } catch (EmptyResultDataAccessException ignored) {}
-
-        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
-            Long recordId = it.next();
-            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
-            if (existRecords.contains(recordId)) {
-                it.remove();
-            }
-        }
-        return recordIds;
+    public List<RefBookDepartment> fetchAllActiveByType(DepartmentType type) {
+        return getJdbcTemplate().query(REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = ? AND dep.is_active = 1", new RefBookDepartmentRowMapper(), type.getCode());
     }
 
     @Override
-    public List<ReferenceCheckResult> getInactiveRecords(@NotNull List<Long> uniqueRecordIds) {
-        final List<ReferenceCheckResult> result = new ArrayList<ReferenceCheckResult>();
-        Set<Long> recordIds = new HashSet<Long>(uniqueRecordIds);
-        List<Long> existRecords = new ArrayList<Long>();
+    public String fetchFullName(Integer departmentId) {
+        return getJdbcTemplate().queryForObject("SELECT shortname AS full_name FROM department_fullpath WHERE id = ?",
+                String.class, departmentId);
+    }
 
-        //Исключаем несуществующие записи
-        String sql = String.format("select id from department where %s and is_active != -1", SqlUtils.transformToSqlInStatement("id", recordIds));
-        try {
-            //Получаем список существующих записей среди входного набора
-            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
-                @Override
-                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("id");
-                }
-            });
-        } catch (EmptyResultDataAccessException ignored) {}
-        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
-            Long recordId = it.next();
-            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
-            if (!existRecords.contains(recordId)) {
-                result.add(new ReferenceCheckResult(recordId, CheckResult.NOT_EXISTS));
-                it.remove();
-            }
+    /**
+     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     * Также можно выбрать все подразделения или только действующие
+     *
+     * @param ids          Список идентификаторов
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param activeOnly   Искать только действующие подразделения
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    private PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, boolean activeOnly, PagingParams pagingParams) {
+        String baseSql = String.format(REF_BOOK_DEPARTMENT_SELECT +
+                "where %s ", SqlUtils.transformToSqlInStatement("dep.id", ids));
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        if (StringUtils.isNotBlank(name)) {
+            baseSql += " and (lower(dep.name) like :name or lower(df.shortname) like :name) ";
+            params.addValue("name", "%" + name.toLowerCase() + "%");
         }
-        return result;
+        if (activeOnly) {
+            baseSql += " and dep.is_active = 1 ";
+        }
+
+        if (StringUtils.isNotBlank(pagingParams.getProperty()) && StringUtils.isNotBlank(pagingParams.getDirection())) {
+            baseSql += new Formatter().format(" order by %s %s ",
+                    FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),
+                    pagingParams.getDirection()).toString();
+        }
+
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("count", pagingParams.getCount());
+
+        List<RefBookDepartment> departments = getNamedParameterJdbcTemplate().query(
+                "select * from ( select a.*, rownum rn from (\n" + baseSql + ") a \n) where rn > :startIndex and rowNum <= :count",
+                params,
+                new RefBookDepartmentRowMapper());
+
+        int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", params, Integer.class);
+        return new PagingResult<>(departments, totalCount);
+    }
+
+    private final static String REF_BOOK_DEPARTMENT_SELECT =
+            "select dep.id, dep.name, dep.shortname, dep.parent_id, dep.type, dep.tb_index, dep.sbrf_code, " +
+                    "dep.region_id, dep.is_active, dep.code, df.shortname as full_name " +
+                    "from department dep " +
+                    "inner join department_fullpath df on dep.id = df.id ";
+
+    private final static class RefBookDepartmentRowMapper implements RowMapper<RefBookDepartment> {
+        @Override
+        public RefBookDepartment mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookDepartment refBookDepartment = new RefBookDepartment();
+
+            refBookDepartment.setId(SqlUtils.getInteger(resultSet, "id"));
+            refBookDepartment.setName(resultSet.getString("name"));
+            refBookDepartment.setShortName(resultSet.getString("shortname"));
+            refBookDepartment.setParentId(SqlUtils.getInteger(resultSet, "parent_id"));
+            refBookDepartment.setType(DepartmentType.fromCode(resultSet.getInt("type")));
+            refBookDepartment.setTbIndex(resultSet.getString("tb_index"));
+            refBookDepartment.setSbrfCode(resultSet.getString("sbrf_code"));
+            refBookDepartment.setRegionId(SqlUtils.getLong(resultSet, "region_id"));
+            refBookDepartment.setActive(resultSet.getBoolean("is_active"));
+            refBookDepartment.setCode(SqlUtils.getLong(resultSet, "code"));
+            refBookDepartment.setFullName(resultSet.getString("full_name"));
+
+            return refBookDepartment;
+        }
     }
 }

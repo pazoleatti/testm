@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -60,6 +61,8 @@ public class AsyncManagerImpl implements AsyncManager {
     private LockDataService lockDataService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -70,19 +73,19 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTask getAsyncTaskBean(long taskTypeId) throws AsyncTaskException {
-        AsyncTaskTypeData asyncTaskType = asyncTaskDao.getTaskTypeData(taskTypeId);
+        AsyncTaskTypeData asyncTaskType = asyncTaskTypeDao.findById(taskTypeId);
 
         if (asyncTaskType == null) {
             throw new AsyncTaskException("Cannot find parameters for async task with id " + taskTypeId + " in database table ASYNC_TASK_TYPE");
         }
 
-        if (asyncTaskType.getHandlerClassName().startsWith("ejb")) {
+        if (asyncTaskType.getHandlerBean().startsWith("ejb")) {
             throw new AsyncTaskException("Incorrect name for bean-executor");
         }
 
         AsyncTask task;
         try {
-            task = applicationContext.getBean(asyncTaskType.getHandlerClassName(), AsyncTask.class);
+            task = applicationContext.getBean(asyncTaskType.getHandlerBean(), AsyncTask.class);
         } catch (NoSuchBeanDefinitionException e) {
             throw new AsyncTaskException("Cannot find bean-executor for task type with id " + taskTypeId + ", from database table ASYNC_TASK_TYPE", e);
         } catch (Exception e) {

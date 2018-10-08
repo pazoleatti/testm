@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -20,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -77,6 +79,8 @@ public class PrintingServiceImpl implements PrintingService {
     private DepartmentConfigService departmentConfigService;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private RefBookDepartmentDao refBookDepartmentDao;
 
     @Override
     public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
@@ -195,10 +199,11 @@ public class PrintingServiceImpl implements PrintingService {
         String reportPath = null;
         try {
             RefBook refBook = commonRefBookService.get(refBookId);
-            PagingResult<Map<String, RefBookValue>> records;
+            List<Map<String, RefBookValue>> records;
 
             if (refBook.isHierarchic()) {
-                records = commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false);
+                List<RefBookDepartment> departmentsTree = refBookDepartmentDao.findAllByNameAsTree(searchPattern, exactSearch);
+                records = toMap(departmentsTree, null);
             } else {
                 records = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, null, sortAttribute, direction);
             }
@@ -227,8 +232,9 @@ public class PrintingServiceImpl implements PrintingService {
 
             RefBookExcelReportBuilder refBookExcelReportBuilder;
             if (refBook.isHierarchic()) {
+                List<RefBookDepartment> departmentsTree = refBookDepartmentDao.findAllByNameAsTree(searchPattern, exactSearch);
                 refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook),
-                        version, searchPattern, exactSearch, sortAttribute, commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch, false));
+                        version, searchPattern, exactSearch, sortAttribute, toMap(departmentsTree, null));
             } else {
                 refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, getAttributes(refBook),
                         version, searchPattern, exactSearch, sortAttribute, new BatchIterator() {
@@ -321,5 +327,34 @@ public class PrintingServiceImpl implements PrintingService {
     private String makeDepartmentConfigsExcelFileName(int departmentId) {
         Department department = departmentService.getDepartment(departmentId);
         return department.getId() + "_" + department.getShortName() + "_" + FastDateFormat.getInstance("yyyyMMddHHmm").format(new Date()) + ".xlsx";
+    }
+
+    private List<Map<String, RefBookValue>> toMap(List<RefBookDepartment> departmentsTree, Map<String, RefBookValue> parent) {
+        List<Map<String, RefBookValue>> result = new ArrayList<>();
+        if (departmentsTree != null) {
+            for (RefBookDepartment department : departmentsTree) {
+                Map<String, RefBookValue> mapDepartment = toMap(department, parent);
+                result.add(mapDepartment);
+                result.addAll(toMap(department.getChildren(), mapDepartment));
+            }
+        }
+        return result;
+    }
+
+    private Map<String, RefBookValue> toMap(RefBookDepartment department, Map<String, RefBookValue> parent) {
+        Map<String, RefBookValue> values = null;
+        if (department != null) {
+            values = new HashMap<>();
+            values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, department.getId()));
+            values.put("CODE", new RefBookValue(RefBookAttributeType.NUMBER, department.getCode()));
+            values.put("NAME", new RefBookValue(RefBookAttributeType.STRING, department.getName()));
+            values.put("SHORTNAME", new RefBookValue(RefBookAttributeType.STRING, department.getShortName()));
+            values.put("PARENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, parent));
+            values.put("TYPE", new RefBookValue(RefBookAttributeType.STRING, department.getType() != null ? department.getType().getLabel() : null));
+            values.put("IS_ACTIVE", new RefBookValue(RefBookAttributeType.STRING, department.isActive() ? "Да" : "Нет"));
+            values.put("TB_INDEX", new RefBookValue(RefBookAttributeType.STRING, department.getTbIndex()));
+            values.put("SBRF_CODE", new RefBookValue(RefBookAttributeType.STRING, department.getSbrfCode()));
+        }
+        return values;
     }
 }

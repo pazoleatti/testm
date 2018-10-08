@@ -112,24 +112,6 @@ public interface RefBookSimpleDao {
     Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(RefBook refBook, String whereClause, Date version);
 
     /**
-     * Загружает данные иерархического справочника на определенную дату актуальности
-     *
-     * @param version        дата актуальности
-     * @param parentRecordId код родительского элемента
-     * @param pagingParams   определяет параметры запрашиваемой страницы данных
-     * @param filter         условие фильтрации строк
-     * @param sortAttribute  сортируемый столбец. Может быть не задан
-     * @return список записей
-     */
-    PagingResult<Map<String, RefBookValue>> getChildrenRecords(RefBook refBook, Date version,
-                                                               Long parentRecordId, PagingParams pagingParams,
-                                                               String filter, RefBookAttribute sortAttribute);
-
-    PagingResult<Map<String, RefBookValue>> getChildrenRecords(RefBook refBook, Date version,
-                                                               Long parentRecordId, PagingParams pagingParams,
-                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
-
-    /**
      * Получение row_num записи по заданным параметрам
      *
      * @param refBook       справочник

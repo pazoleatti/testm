@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5492 удалил справочник "Настройки асинхронных задач"-->
+    <changeSet id="3.2-dnovikov-1" author="dnovikov">
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id = 401</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id = 401</where>
+        </delete>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5492 удалил справочник "Настройки почты"-->
+    <changeSet id="3.2-dnovikov-2" author="dnovikov">
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id = 400</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id = 400</where>
+        </delete>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5491 Удалить провайдер вертикальных справочников RefBookUniversal-->
+    <changeSet id="3.2-dnovikov-3" author="dnovikov">
+        <sql>
+            drop table ref_book_value;
+        </sql>
+        <sql>
+            drop table ref_book_record;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5717 удалил справочник "Конфигурационные параметры"-->
+    <changeSet id="3.2-dnovikov-4" author="dnovikov">
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id = 105</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id = 105</where>
+        </delete>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5717 удалил справочник "Конфигурационные параметры"-->
+    <changeSet id="3.2-dnovikov-5" author="dnovikov">
+        <sql>
+            update ref_book set script_id = null where id = 30
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

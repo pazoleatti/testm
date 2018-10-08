@@ -365,7 +365,7 @@
          */
         .filter('asyncLimitFormatter', function () {
             return function (value) {
-                return value === 0 ? "" : value;
+                return !value ? "" : value;
             };
         })
 

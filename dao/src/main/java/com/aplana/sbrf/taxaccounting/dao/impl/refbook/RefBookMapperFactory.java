@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public class RefBookMapperFactory {
 
     @Autowired
-    private RefBookDepartmentDataDao refBookDepartmentDataDao;
+    private RefBookDepartmentDao refBookDepartmentDao;
 
     @SuppressWarnings("unchecked")
     public <T extends RefBookSimple> RowMapper<T> getMapper(long refBookId) {
@@ -175,7 +175,7 @@ public class RefBookMapperFactory {
             RefBookDepartment result = new RefBookDepartment();
             result.setId(resultSet.getInt("id"));
             result.setName(resultSet.getString("name"));
-            result.setFullName(refBookDepartmentDataDao.fetchFullName(result.getId()));
+            result.setFullName(refBookDepartmentDao.fetchFullName(result.getId()));
             return result;
         }
     }

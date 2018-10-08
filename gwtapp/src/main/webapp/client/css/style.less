@@ -1778,19 +1778,17 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   }
 }
 
-.tree-node-closed {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-top: 1px;
-  *margin-right: .3em;
-  line-height: 14px;
-  vertical-align: text-top;
+.tree-node-closed {;
   background-image: url("../img/collapse.png");
   background-position: 14px 14px;
 }
 
 .tree-node-open {
+  background-image: url("../img/expand.png");
+  background-position: 14px 14px;
+}
+
+.tree-node {
   display: inline-block;
   width: 14px;
   height: 14px;
@@ -1798,11 +1796,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   *margin-right: .3em;
   line-height: 14px;
   vertical-align: text-top;
-  background-image: url("../img/expand.png");
-  background-position: 14px 14px;
-}
-
-.tree-node {
 }
 
 .inline-label {

@@ -1,135 +1,92 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
-import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
- * User: ekuvshinov
+ * Дао для работы со справочником Подразделения
  */
 public interface RefBookDepartmentDao {
-
-	Long REF_BOOK_ID = Department.REF_BOOK_ID;
-
-    String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
-    String STRING_VALUE_COLUMN_ALIAS = "string_value";
-    String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
-    String DATE_VALUE_COLUMN_ALIAS = "date_value";
-    String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
-    String REFBOOK_NAME_ALIAS = "refbookName";
-    String REFBOOK_ID_ALIAS = "ref_book_id";
-    String VERSION_START_ALIAS = "versionStart";
-    String VERSION_END_ALIAS = "versionEnd";
-
     /**
-     * Загружает данные справочника
-     * в данном случае даты актуальности нет смотри SBRFACCTAX-3245
+     * Получение значения справочника по идентификатору
      *
-     * @param pagingParams
-     * @param sortAttribute может быть не задан (null)
-     * @return
+     * @param id идентификатор подразделения
+     * @return значение справочника
      */
-    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+    RefBookDepartment fetchDepartmentById(Integer id);
 
     /**
-     * Перегруженный метод с восходящей сортировкой по умолчанию
+     * Возвращяет список подразделений по наименованию (через оператор like), включая родительские подразделения у найденных
      *
-     * @param pagingParams
-     * @param filter
-     * @param sortAttribute
-     * @return
+     * @param name        наименование подразделения
+     * @param exactSearch признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return список подразделений
      */
-    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    List<RefBookDepartment> findAllByName(String name, boolean exactSearch);
 
     /**
-     * По коду возвращает строку справочника
+     * То же что {@link #findAllByName(String, boolean)}, но в виде дерева
      *
+     * @param name        наименование подразделения
+     * @param exactSearch признак того, что результат поиска должен быть с полным соответствием поисковой строке
+     * @return список подразделений
+     */
+    List<RefBookDepartment> findAllByNameAsTree(String name, boolean exactSearch);
+
+    /**
+     * Получение значений справочника по идентификаторам
      *
-     * @param recordId код строки справочника
-     * @return
+     * @param ids список идентификаторов
+     * @return список значений справочника
      */
-    Map<String, RefBookValue> getRecordData(Long recordId);
+    List<RefBookDepartment> fetchDepartments(Collection<Integer> ids);
 
     /**
-     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     * Получение действующих значений справочника по идентификаторам
      *
-     * @param uniqRecordIds коды строк справочника
+     * @param ids список идентификаторов
+     * @return список значений справочника
      */
-    Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds);
+    List<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids);
 
     /**
-     * Получение row_num записи по заданным параметрам
-     * @param recordId
-     * @param filter
-     * @param sortAttribute
-     * @param isSortAscending
-     * @return
+     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     *
+     * @param ids          список идентификаторов
+     * @param name         параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams параметры пейджинга
+     * @return страница списка значений справочника
      */
-    Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+    PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 
     /**
-     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
-     * отдельных справочников.
-     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
-     * @param recordId идентификатор справочника
-     * @param attributes атрибуты справочника
-     * @param records новые значения полей элемента справочника
-     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
+     * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     *
+     * @param ids          список идентификаторов
+     * @param name         параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams параметры пейджинга
+     * @return страница списка значений справочника
      */
-    List<Pair<String,String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
-
-    void update(int uniqueId, Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
-
-    int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
-
-    void remove(long uniqueId);
+    PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 
     /**
-     * Получает количетсво уникальных записей, удовлетворяющих условиям фильтра
-     * @param filter условие фильтрации строк. Может быть не задано
-     * @return
+     * Возвращяет список активных подразделений по типу
+     *
+     * @param type тип подразделений
+     * @return список подразделений
      */
-    int getRecordsCount(String filter);
+    List<RefBookDepartment> fetchAllActiveByType(DepartmentType type);
 
     /**
-     * Возвращает значения атрибутов для указанных записей
-     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
-     * @return
-     *      ключ - пара идентификатор записи-идентификатор атрибута
-     *      значение - строковое представление значения атрибута
+     * Возвращяет полное наименование (путь) подразделения, от корневого (банк, ид=0) до самого подразделения,
+     * напрмер, "Банк/Байкальский банк"
      */
-    Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
-
-    /**
-     * Проверка использования записи в справочниках
-     * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
-     * @return справочник где 1-й ключ - id из ref_book_record(для уникальности ключа)
-     */
-    Map<Integer, Map<String, Object>> isVersionUsedInRefBooks(List<Long> refBookId, List<Long> uniqueRecordIds);
-
-    /**
-     * Возвращает наменование периода ориентируясь только на дату начала(только на день-месяц, без года)
-     * Должно быть только одно значение, даже не учитывая вид налога{@link com.aplana.sbrf.taxaccounting.model.TaxType}
-     * Справвочник Параметры подразделения по УКС
-     * @param startDate Начало периода
-     */
-    String getReportPeriodNameByDate(TaxType taxType, Date startDate);
-
-    List<Long> isRecordsExist(List<Long> uniqueRecordIds);
-
-    /**
-     * Проверяет действуют ли записи справочника
-     * @param recordIds уникальные идентификаторы записей справочника
-     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
-     */
-    List<ReferenceCheckResult> getInactiveRecords(@NotNull List<Long> recordIds);
+    String fetchFullName(Integer departmentId);
 }

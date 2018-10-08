@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -15,7 +16,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -34,7 +40,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -58,6 +72,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private RefBookDao refBookDao;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private AsyncManager asyncManager;
     @Autowired
@@ -118,7 +134,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         if (checkPathArchiveError(userInfo, logger, taskId)) {
             asyncManager.updateState(taskId, AsyncTaskState.FIAS_IMPORT);
             try {
-                long maxFileSize = asyncTaskDao.getTaskTypeData(AsyncTaskType.LOAD_ALL_TRANSPORT_DATA.getAsyncTaskTypeId()).getTaskLimit();
+                long maxFileSize = asyncTaskTypeDao.findById(AsyncTaskType.LOAD_ALL_TRANSPORT_DATA.getAsyncTaskTypeId()).getTaskLimit();
                 importCounter = importRefBook(userInfo, logger, ConfigurationParam.FIAS_UPLOAD_DIRECTORY,
                         fiasMappingMap, FIAS_NAME, true, loadedFileNameList, taskId, maxFileSize);
             } catch (Exception e) {

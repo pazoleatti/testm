@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -12,10 +13,17 @@ import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Matchers.anyLong;
@@ -26,25 +34,18 @@ public class PrintingServiceImplTest {
 
     @InjectMocks
     private PrintingServiceImpl printingService;
-
     @Mock
     private PersonService personService;
-
     @Mock
     private CommonRefBookService commonRefBookService;
-
     @Mock
     private BlobDataService blobDataService;
-
     @Mock
-    private RefBookPersonDao refBookPersonDao;
-
+    private RefBookDepartmentDao refBookDepartmentDao;
     @Captor
     private ArgumentCaptor<String> infoPath;
-
     @Captor
     private ArgumentCaptor<String> fileName;
-
     private long refBookId;
     @Mock
     private Date version;
@@ -61,6 +62,7 @@ public class PrintingServiceImplTest {
     private RefBook refBook;
     @Mock
     private Map<String, RefBookValue> record;
+    private List<RefBookDepartment> departments = new ArrayList<>();
     @Mock
     private PagingResult<Map<String, RefBookValue>> records;
     @Mock
@@ -82,7 +84,7 @@ public class PrintingServiceImplTest {
     public void test_generateRefBookCsv_hier() {
 
         when(commonRefBookService.get(0L)).thenReturn(refBook);
-        when(commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch,false)).thenReturn(records);
+        when(refBookDepartmentDao.findAllByNameAsTree(searchPattern, exactSearch)).thenReturn(departments);
         when(refBook.isHierarchic()).thenReturn(true);
         when(iterator.hasNext()).thenReturn(true, false);
         when(iterator.next()).thenReturn(record);
@@ -126,7 +128,7 @@ public class PrintingServiceImplTest {
         when(commonRefBookService.get(0L)).thenReturn(refBook);
         when(refBook.isHierarchic()).thenReturn(true);
         when(refBook.getName()).thenReturn("refbookName");
-        when(commonRefBookService.fetchHierRecords(refBookId, searchPattern, exactSearch,false)).thenReturn(records);
+        when(refBookDepartmentDao.findAllByNameAsTree(searchPattern, exactSearch)).thenReturn(departments);
         when(iterator.hasNext()).thenReturn(true, false);
         when(iterator.next()).thenReturn(record);
         when(records.iterator()).thenReturn(iterator);

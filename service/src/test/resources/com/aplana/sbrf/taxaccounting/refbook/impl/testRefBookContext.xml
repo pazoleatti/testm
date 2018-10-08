@@ -20,8 +20,6 @@
         <constructor-arg index="0" ref="dataSource"/>
     </bean>
 
-    <bean id="refBookDepartment" class="com.aplana.sbrf.taxaccounting.refbook.impl.RefBookDepartment" />
-
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils"/>
     </bean>
@@ -74,9 +72,6 @@
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao"/>
     </bean>
 
     <bean class="com.aplana.sbrf.taxaccounting.dao.impl.DBInfo" />

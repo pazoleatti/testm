@@ -3,15 +3,24 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -23,12 +32,12 @@ import java.util.*;
  * Реализует базовые методы для чтения данных плоского справочника. Вся специфика определяется в классах наследниках.
  * В методах, которые относятся к API редактирования выбрасываются исключения {@link UnsupportedOperationException}.
  * </p>
+ *
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 29.01.14 17:11
  */
 public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 
-	/** Код справочника */
     protected RefBook refBook;
 
     @Autowired
@@ -36,7 +45,7 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
-			RefBookAttribute sortAttribute) {
+                                                              RefBookAttribute sortAttribute) {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
@@ -57,21 +66,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
         return list;
     }
 
-	@Override
-	public RefBookValue getValue(Long recordId, Long attributeId) {
-		RefBook refBook = refBookDao.get(getRefBookId());
-		RefBookAttribute attribute = refBook.getAttribute(attributeId);
-		return getRecordData(recordId).get(attribute.getAlias());
-	}
-
     @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
-        return refBookDao.getRecordIdPairs(refBookId, version, needAccurateVersion, filter);
-    }
-
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(final Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(uniqueRecordId));}}, 1);
+    public RefBookValue getValue(Long recordId, Long attributeId) {
+        RefBook refBook = refBookDao.get(getRefBookId());
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+        return getRecordData(recordId).get(attribute.getAlias());
     }
 
     @Override
@@ -80,32 +79,12 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-		throw new UnsupportedOperationException();
-	}
-
-    @Override
-    public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
-		RefBookRecordVersion version = new RefBookRecordVersion();
-		version.setRecordId(uniqueRecordId);
-		Date d = new Date(0);
-		version.setVersionStart(d);
-		version.setVersionEnd(d);
+        RefBookRecordVersion version = new RefBookRecordVersion();
+        version.setRecordId(uniqueRecordId);
+        Date d = new Date(0);
+        version.setVersionStart(d);
+        version.setVersionEnd(d);
         return version;
     }
 
@@ -134,23 +113,18 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
-	@Override
-	public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
+    @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         throw new UnsupportedOperationException();
     }
 
@@ -179,20 +153,20 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
         return uniqueRecordId;
     }
 
-	public Long getRefBookId() {
-		if (refBook == null) {
-			throw new IllegalArgumentException("Field \"refBook\" must be set");
-		}
-		return refBook.getId();
-	}
+    public Long getRefBookId() {
+        if (refBook == null) {
+            throw new IllegalArgumentException("Field \"refBook\" must be set");
+        }
+        return refBook.getId();
+    }
 
-	public RefBook getRefBook() {
-		return refBook;
-	}
+    public RefBook getRefBook() {
+        return refBook;
+    }
 
-	public void setRefBook(RefBook refBook) {
-		this.refBook = refBook;
-	}
+    public void setRefBook(RefBook refBook) {
+        this.refBook = refBook;
+    }
 
     @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
@@ -202,12 +176,12 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     @Override
     public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
                           boolean isSortAscending) {
-        return refBookDao.getRowNum(getRefBookId(), version, recordId, filter, sortAttribute, isSortAscending);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookDao.getInactiveRecordsInPeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, recordIds, new Date(), null, false);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -221,27 +195,12 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 }

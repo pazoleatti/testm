@@ -20,7 +20,6 @@ public class RefBook implements Serializable {
     public static final String BUSINESS_ID_ALIAS = "record_id";
     public static final String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
     public static final String RECORD_CHILDREN_ALIAS = "children";
-    public static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
     public static final String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
@@ -93,7 +92,6 @@ public class RefBook implements Serializable {
         SEC_ROLE(95),                                // Роли
         OKTMO(96),                                  // Территорий муниципальных образований (ОКТМО)
         DEPARTMENT_TYPE(103),                        // Типы подразделений
-        CONFIGURATION_PARAM(105),                    // Конфигурационные параметры
         DECLARATION_TEMPLATE(207),                    // Макеты налоговых форм
         ASNU(900),                                    // АСНУ
         CALENDAR(945),                                // Календарь
@@ -114,8 +112,6 @@ public class RefBook implements Serializable {
         DEPARTMENT(30L),                            // Подразделения
         MARK_SIGNATORY_CODE(35),                    // Признак лица, подписавшего документ
         DOCUMENT_CODES(360),                        // Виды документов, удостоверяющих личность
-        EMAIL_CONFIG(400),                            // Настройки почтового клиента
-        ASYNC_CONFIG(401),                            // Настройки асинхронных задач
         PERSON_ADDRESS(901),                        // Адреса физических лиц
         ID_DOC(902),                                // Документ, удостоверяющий личность
         TAXPAYER_STATUS(903),                        // Статус налогоплательщика

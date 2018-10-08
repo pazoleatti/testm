@@ -24,8 +24,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public String getDec(long declarationDataId, DeclarationDataReportType type) {
+        return reportDao.getDec(declarationDataId, type);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
+    public String getSafeDec(long declarationDataId, DeclarationDataReportType type) {
         return reportDao.getDec(declarationDataId, type);
     }
 

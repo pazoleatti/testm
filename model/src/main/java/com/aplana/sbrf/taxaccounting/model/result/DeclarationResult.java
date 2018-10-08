@@ -7,6 +7,10 @@ import java.util.Date;
  */
 public class DeclarationResult {
     /**
+     * Существует ли форма в бд
+     */
+    private boolean declarationDataExists;
+    /**
      * Подразделение
      */
     private String department;
@@ -97,6 +101,14 @@ public class DeclarationResult {
      * Признак, показывающий необходимость корректировки отрицательных значений
      */
     private boolean isAdjustNegativeValues;
+
+    public boolean isDeclarationDataExists() {
+        return declarationDataExists;
+    }
+
+    public void setDeclarationDataExistsTrue() {
+        this.declarationDataExists = true;
+    }
 
     public String getDepartment() {
         return department;

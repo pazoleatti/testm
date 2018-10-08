@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.permissions.UserPermission;
 import com.aplana.sbrf.taxaccounting.permissions.UserPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.UserDataModel;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserDataController {
     private SecurityService securityService;
     private UserPermissionSetter userPermissionSetter;
-    private RefBookDepartmentDataService refBookDepartmentDataService;
+    private RefBookDepartmentService refBookDepartmentService;
     private DepartmentService departmentService;
 
-    public UserDataController(SecurityService securityService, RefBookDepartmentDataService refBookDepartmentDataService,
+    public UserDataController(SecurityService securityService, RefBookDepartmentService refBookDepartmentService,
                               UserPermissionSetter userPermissionSetter, DepartmentService departmentService) {
         this.securityService = securityService;
         this.userPermissionSetter = userPermissionSetter;
-        this.refBookDepartmentDataService = refBookDepartmentDataService;
+        this.refBookDepartmentService = refBookDepartmentService;
         this.departmentService = departmentService;
     }
 
@@ -40,7 +40,7 @@ public class UserDataController {
     public UserDataModel fetchUserData() {
         TAUserInfo userInfo = securityService.currentUserInfo();
         TAUser user = userInfo.getUser();
-        RefBookDepartment userDepartment = refBookDepartmentDataService.fetchUserDepartment(user);
+        RefBookDepartment userDepartment = refBookDepartmentService.fetchUserDepartment(user);
         Department userTB = departmentService.getParentTB(userDepartment.getId());
         userPermissionSetter.setPermissions(user, UserPermission.VIEW_TAXES, UserPermission.VIEW_TAXES_NDFL, UserPermission.VIEW_TAXES_NDFL_SETTINGS,
                 UserPermission.VIEW_TAXES_NDFL_REPORTS, UserPermission.VIEW_TAXES_GENERAL, UserPermission.VIEW_NSI,

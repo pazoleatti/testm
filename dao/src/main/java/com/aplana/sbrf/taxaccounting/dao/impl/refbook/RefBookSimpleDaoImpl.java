@@ -236,44 +236,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     }
 
     /**
-     * Загружает данные иерархического справочника на определенную дату актуальности
-     * @param version дата актуальности
-     * @param parentRecordId код родительского элемента
-     * @param pagingParams определяет параметры запрашиваемой страницы данных
-     * @param filter условие фильтрации строк
-     * @param sortAttribute сортируемый столбец. Может быть не задан
-     * @return список записей
-     */
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(RefBook refBook, Date version,
-                                                                      Long parentRecordId, PagingParams pagingParams,
-                                                                      String filter, RefBookAttribute sortAttribute) {
-        return getChildrenRecords(refBook, version, parentRecordId, pagingParams, filter, sortAttribute, true);
-    }
-
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(RefBook refBook, Date version,
-                                                                      Long parentRecordId, PagingParams pagingParams,
-                                                                      String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-
-        if (refBook.isHierarchic() && parentRecordId == null && filter == null) {
-            String fullFilter = RefBook.RECORD_PARENT_ID_ALIAS + " is null";
-            return getRecords(refBook, version, pagingParams, fullFilter, sortAttribute, true);
-        } else if (!refBook.isHierarchic()){
-            throw new IllegalArgumentException(String.format(RefBookDaoImpl.NOT_HIERARCHICAL_REF_BOOK_ERROR, refBook.getName(), refBook.getId()));
-        }
-
-        PreparedStatementData ps = queryBuilder.psGetChildrenRecordsQuery(refBook, parentRecordId, version, sortAttribute, filter, pagingParams, isSortAscending);
-        List<Map<String, RefBookValue>> records = refBookDao.getRecordsWithHasChild(ps, refBook);
-
-        ps = queryBuilder.psGetChildrenRecordsQuery(refBook, parentRecordId, version, sortAttribute, filter, null, isSortAscending);
-
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        result.setTotalCount(refBookDao.getRecordsCount(ps));
-        return result;
-    }
-
-    /**
      * Получение row_num записи по заданным параметрам
      * @param refBook справочник
      * @param version дата актуальности

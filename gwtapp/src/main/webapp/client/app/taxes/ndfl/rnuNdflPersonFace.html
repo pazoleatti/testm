@@ -1,8 +1,9 @@
 <div class="modal-body">
 
-    <form class="form-horizontal" role="form" style="width: 100%; margin: auto">
-        <div class="row">
-            <div class="filter-col w450">
+    <form class="form-horizontal" role="form" style="width: 100%; display: flex;"
+          data-aplana-submit-valid="searchPerson()" novalidate>
+        <div class="grid-filter flex-fill flex-row" style="margin-bottom: 20px;">
+            <div class="flex-fill">
 
                 <div class="row-fluid form-group">
                     <div class="span4">
@@ -41,7 +42,7 @@
 
             </div>
 
-            <div class="filter-col w250">
+            <div class="flex-fill">
 
                 <div class="row-fluid form-group">
                     <div class="span3">
@@ -88,7 +89,7 @@
 
             </div>
 
-            <div class="filter-col w350">
+            <div class="flex-fill">
 
                 <div class="row-fluid form-group">
                     <div class="span3">
@@ -118,48 +119,43 @@
                     </div>
                 </div>
             </div>
-
-            <div class="filter-col">
-                <!--Кнопка Найти-->
-                <button type="button"
-                        class="btn btn-default"
-                        data-ng-click="searchPerson()">
-                    <span data-translate-once="common.button.search"></span>
-                </button>
-            </div>
         </div>
 
-        <!-- Блок информации -->
-        <div style="margin: auto; padding-bottom: 15px;">
-            <div data-ng-show="showInfo">
-                <div style="min-height: 40px; min-width: 750px; border: 1px solid #aeaeac; border-radius: 6px;  background-color: #f0f8d1">
-                    <div style="margin: 10px 0 10px 20px;">
-                        <span> {{infoMessage}}</span>
-                    </div>
-                </div>
-            </div>
+        <div class="vertical-btn-group" style="flex: 0 80px; padding-left: 20px">
+            <!--Кнопка Найти-->
+            <button type="submit" class="btn btn-default search-button">
+                <span data-translate-once="common.button.search"></span>
+            </button>
         </div>
     </form>
 
+    <!-- Блок информации -->
+    <div style="margin: auto; padding-bottom: 15px;">
+        <div data-ng-show="showInfo">
+            <div style="min-height: 40px; min-width: 750px; border: 1px solid #aeaeac; border-radius: 6px;  background-color: #f0f8d1">
+                <div style="margin: 10px 0 10px 20px;">
+                    <span> {{infoMessage}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div data-aplana-grid
          data-grid-options="rnuNdflGrid.options"
          data-grid-ctrl="rnuNdflGrid.ctrl"
+         data-init-grid="rnuNdflGrid.init(ctrl)"
          data-ng-model="rnuNdflGrid.value"
          id="rnuNdflTable"
          style="width: 100%;"></div>
 </div>
 
-<div class="modal-footer" style="">
-
+<div class="modal-footer">
     <!--Кнопка Сформировать-->
     <button type="button"
             class="btn btn-default"
             data-ng-show="rnuNdflGrid.value.length"
             data-ng-click="formationRNU()">
         <span data-translate-once="common.button.formation"></span>
-
-
     </button>
     <!--Кнопка Выход-->
     <button type="button"
@@ -168,6 +164,4 @@
         <span data-translate-once="button.close"></span>
         <span class="btn-icon-noneBg-close"></span>
     </button>
-
-
 </div>

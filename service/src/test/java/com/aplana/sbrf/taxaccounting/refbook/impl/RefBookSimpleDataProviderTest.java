@@ -89,15 +89,6 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    @Ignore
-    public void getChildrenRecordsInvokesDao() throws Exception {
-        provider.getChildrenRecords(1L, null, null, null, null);
-
-        verify(daoMock, atLeastOnce()).getChildrenRecords(any(RefBook.class),
-                any(Date.class), anyLong(), any(PagingParams.class), anyString(), any(RefBookAttribute.class));
-    }
-
-    @Test
     public void getRowNumInvokesDao() throws Exception {
         provider.getRowNum(null, TEST_RECORD_ID, null, null, true);
 
@@ -200,13 +191,6 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordVersionsByIdInvokesDao() throws Exception {
-        provider.getRecordVersionsById(5L, null, null, null);
-        verify(daoMock).getRecordVersions(any(RefBook.class), eq(5L), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class), eq(true));
-    }
-
-    @Test
     public void getRecordData2InvokesDao() throws Exception {
         provider.getRecordData(Arrays.asList(1L,2L));
         verify(daoMock).getRecordData(any(RefBook.class), anyListOf(Long.class));
@@ -225,11 +209,6 @@ public class RefBookSimpleDataProviderTest {
 
     @Test
     public void getRecords1() throws Exception {
-
-    }
-
-    @Test
-    public void getChildrenRecords() throws Exception {
 
     }
 
@@ -264,17 +243,7 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void isRecordsExist() throws Exception {
-
-    }
-
-    @Test
     public void getRowNum() throws Exception {
-
-    }
-
-    @Test
-    public void getParentsHierarchy() throws Exception {
 
     }
 

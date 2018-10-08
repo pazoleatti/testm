@@ -1,21 +1,32 @@
 package com.aplana.sbrf.taxaccounting.script.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -30,7 +41,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -56,9 +74,6 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private TransactionHelper transactionHelper;
-
-    @Autowired
-    private RefBookDepartmentDao refBookDepartmentDao;
 
     @Autowired
     private TAUserService taUserService;
@@ -104,71 +119,6 @@ public class RefBookServiceImpl implements RefBookService {
     @Override
     public void executeInNewTransaction(TransactionLogic logic) {
         transactionHelper.executeInNewTransaction(logic);
-    }
-
-    @Override
-    public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-        return transactionHelper.executeInNewTransaction(logic);
-    }
-
-    @Override
-    public List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        return refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
-    }
-
-    @Override
-    public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
-        return refBookDao.getNextVersion(refBookId, recordId, versionFrom);
-    }
-
-    @Override
-    public List<CheckCrossVersionsResult> checkCrossVersions(Long refBookId, Long recordId, Date versionFrom, Date versionTo, Long excludedRecordId) {
-        return refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, excludedRecordId);
-    }
-
-    @Override
-    public void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version) {
-        refBookDao.updateVersionRelevancePeriod(tableName, uniqueRecordId, version);
-    }
-
-    @Override
-    public void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds) {
-        refBookDao.deleteRecordVersions(tableName, uniqueRecordIds, false);
-    }
-
-    @Override
-    public List<String> isVersionUsedInDepartmentConfigs(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck) {
-        return refBookDao.isVersionUsedInDepartmentConfigs(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludeUseCheck);
-    }
-
-    @Override
-    public RefBookRecordVersion getPreviousVersion(Long refBookId, Long recordId, Date versionFrom) {
-        return refBookDao.getPreviousVersion(refBookId, recordId, versionFrom);
-    }
-
-    @Override
-    public Long findRecord(Long refBookId, Long recordId, Date version) {
-        return refBookDao.findRecord(refBookId, recordId, version);
-    }
-
-    @Override
-    public List<Long> getRelatedVersions(List<Long> uniqueRecordIds) {
-        return refBookDao.getRelatedVersions(uniqueRecordIds);
-    }
-
-    @Override
-    public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
-        return refBookDao.isVersionsExist(refBookId, recordIds, version);
-    }
-
-    @Override
-    public void createFakeRecordVersion(Long refBookId, Long recordId, Date version) {
-        refBookDao.createFakeRecordVersion(refBookId, recordId, version);
-    }
-
-    @Override
-    public void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records) {
-        refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
     }
 
     private RefBookValue getValue(Long refBookId, Long recordId, String alias) {

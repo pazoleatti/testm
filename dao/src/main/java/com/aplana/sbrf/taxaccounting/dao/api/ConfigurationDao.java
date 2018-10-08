@@ -109,13 +109,6 @@ public interface ConfigurationDao {
     void removeCommonParam(List<ConfigurationParam> params);
 
     /**
-     * Обновление записи конфигурационного параметра типов асинхронных задач
-     *
-     * @param asyncParam обновляемый параметр
-     */
-    void updateAsyncParam(AsyncTaskTypeData asyncParam);
-
-    /**
      * Обновление записи конфигурационного параметра електронной почты
      *
      * @param emailParam обновляемый параметр

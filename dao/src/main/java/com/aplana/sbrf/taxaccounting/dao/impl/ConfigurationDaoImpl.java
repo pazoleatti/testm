@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
@@ -126,7 +125,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 }
             });
             sqlParams.addValue("codes", codes);
-            return getNamedParameterJdbcTemplate().query("SELECT code, department_id, value FROM configuration WHERE code in (:codes)",
+            return getNamedParameterJdbcTemplate().query("SELECT code, department_id, value FROM configuration WHERE code IN (:codes)",
                     sqlParams, configurationRowMapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -252,24 +251,12 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public void updateAsyncParam(AsyncTaskTypeData asyncParam) {
-        getJdbcTemplate().update("UPDATE ASYNC_TASK_TYPE SET TASK_LIMIT=?, SHORT_QUEUE_LIMIT=? WHERE ID=?",
-                new Object[]{
-                        (asyncParam.getTaskLimit()),
-                        (asyncParam.getShortQueueLimit()),
-                        asyncParam.getId()
-                },
-                new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
-        );
-    }
-
-    @Override
     public void updateEmailParam(Configuration emailParam) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("code", ConfigurationParam.getNameValueAsDB(emailParam.getCode()));
         params.addValue("value", emailParam.getValue());
         getNamedParameterJdbcTemplate().update(
-                "update configuration_email set value = :value where name = :code",
+                "UPDATE configuration_email SET value = :value WHERE name = :code",
                 params);
     }
 
@@ -279,13 +266,13 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         params.addValue("start", pagingParams.getStartIndex() + 1);
         params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
         List<Configuration> emailParamList = getNamedParameterJdbcTemplate().query(
-                "select * from (" +
-                        "   select rownum rn, ordered.* from (select id, name, value, description from configuration_email) ordered " +
+                "SELECT * FROM (" +
+                        "   SELECT rownum rn, ordered.* FROM (SELECT id, name, value, description FROM configuration_email) ordered " +
                         ") numbered " +
-                        "where rn between :start and :end order by id",
+                        "WHERE rn BETWEEN :start AND :end ORDER BY id",
                 params, emailConfigurationRowMapper
         );
-        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select id, value from configuration_email)", Integer.class);
+        int totalCount = getJdbcTemplate().queryForObject("SELECT count(*) FROM (SELECT id, value FROM configuration_email)", Integer.class);
         return new PagingResult<>(emailParamList, totalCount);
     }
 

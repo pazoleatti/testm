@@ -35,16 +35,7 @@ public interface ConfigurationService {
      *
      * @return настройки почты - список <Столбец, Значение>
      */
-    @Deprecated
-    List<Map<String, String>> getEmailConfig();
-
-    /**
-     * Получает настройки асинхронных задач
-     *
-     * @return настройки асинхронных задач - список <Столбец, Значение>
-     */
-    @Deprecated
-    List<Map<String, String>> getAsyncConfig();
+    List<Configuration> getEmailConfig();
 
     /**
      * Получение конфигурациооных параметров по подразделению
@@ -53,12 +44,6 @@ public interface ConfigurationService {
      * @return модель {@link ConfigurationParamModel} содержащаяя информацию о конфигурационных параметрах
      */
     ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo);
-
-    /**
-     * Сохранение конфигурационных параметров (табл. CONFIGURATION)
-     */
-    @Deprecated
-    void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger);
 
     /**
      * Проверка конфигурационного параметра, представляющего из себя путь в файловой системе,

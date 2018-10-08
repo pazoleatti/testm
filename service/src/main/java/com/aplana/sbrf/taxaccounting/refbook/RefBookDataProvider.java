@@ -2,18 +2,25 @@ package com.aplana.sbrf.taxaccounting.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Интерфейс провайдеров данных для справочников.
  * <p>
- * Параметр filter функций getChildrenRecords, getRecords это условие фильтрации строк. Может быть не задано.
+ * Параметр filter функций getRecords это условие фильтрации строк. Может быть не задано.
  * Фильтр строковый параметр - кусок sql запроса который добавляется в часть where, основного запроса для выборки данных из справочника.
  * Пример фильтра "ALIAS1 = ALIAS2 AND (ALIAS3 != 'groovy' or ALIAS3 LIKE 'java')"
  * Фильтр обрабатывается лексическим анализатором и парсером, для исключения sql инъекции, а так же для автоматического преобразования алиасов.
@@ -81,16 +88,6 @@ public interface RefBookDataProvider {
     PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
 
     /**
-     * Возвращает версии элементов справочника, удовлетворяющие указанному фильтру
-     *
-     * @param version             дата актуальности. Может быть null - тогда не учитывается
-     * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
-     * @param filter              фильтр для отбора записей
-     * @return пары идентификатор версии элемента - идентификатор элемента справочника
-     */
-    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
-
-    /**
      * Возвращает дату начала версии следующей за указанной
      *
      * @param version дата актуальности
@@ -136,27 +133,6 @@ public interface RefBookDataProvider {
     List<Pair<Long, Long>> checkRecordExistence(Date version, String filter);
 
     /**
-     * Проверяет, существуют ли указанные версии элемента справочника
-     *
-     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
-     * @return все записи существуют?
-     */
-    List<Long> isRecordsExist(List<Long> uniqueRecordIds);
-
-    /**
-     * Загружает данные иерархического справочника на определенную дату актуальности
-     *
-     * @param parentRecordId код родительского элемента
-     * @param version        дата актуальности
-     * @param pagingParams   определяет параметры запрашиваемой страницы данных
-     * @param filter         условие фильтрации строк
-     * @param sortAttribute  сортируемый столбец. Может быть не задан
-     * @return
-     */
-    PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
-                                                               PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
-
-    /**
      * Получение row_num записи по заданным параметрам
      *
      * @param version         дата актуальности
@@ -168,15 +144,6 @@ public interface RefBookDataProvider {
      */
     Long getRowNum(Date version, Long recordId,
                    String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
-
-    /**
-     * Возвращает список идентификаторов элементов справочника, являющихся родительскими  по иерархии вверх для указанного элемента
-     * Список упорядочен и начинается с главного корневого элемента
-     *
-     * @param uniqueRecordId идентификатор записи справочника
-     * @return иерархия родительских элементов
-     */
-    List<Long> getParentsHierarchy(Long uniqueRecordId);
 
     /**
      * По коду возвращает строку справочника
@@ -227,18 +194,6 @@ public interface RefBookDataProvider {
      * @return
      */
     List<Date> getVersions(Date startDate, Date endDate);
-
-    /**
-     * Возвращает все версии указанной записи справочника
-     *
-     * @param uniqueRecordId уникальный идентификатор записи, все версии которой будут получены
-     * @param pagingParams   определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param filter         условие фильтрации строк. Может быть не задано
-     * @param sortAttribute  сортируемый столбец. Может быть не задан
-     * @return
-     */
-    PagingResult<Map<String, RefBookValue>> getRecordVersionsById(Long uniqueRecordId, PagingParams pagingParams,
-                                                                  String filter, RefBookAttribute sortAttribute);
 
     /**
      * Возвращает все версии из указанной группы версий записи справочника
@@ -335,12 +290,6 @@ public interface RefBookDataProvider {
     void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
 
     /**
-     * То же самое что и {@link RefBookDataProvider#updateRecordsVersionEnd(com.aplana.sbrf.taxaccounting.model.log.Logger, java.util.Date, java.util.List<java.lang.Long>)}
-     * Но без блокировок
-     */
-    void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
-
-    /**
      * Удаляет все версии записи из справочника
      *
      * @param uniqueRecordIds список уникальных идентификаторов записей, все версии которых будут удалены
@@ -367,16 +316,6 @@ public interface RefBookDataProvider {
     void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds);
 
     /**
-     * Удаляет указанные версии записи из справочника
-     *
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
-     * @param force           флаг для получнеия информации из модального окна, в случае когда необходимо запросить
-     *                        какое-нибудь подтверждение(например, об удалении
-     *                        пример {@link com.aplana.sbrf.taxaccounting.refbook.impl.RefBookDepartment})
-     */
-    void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force);
-
-    /**
      * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
      *
      * @param uniqueRecordId идентификатор версии записи справочника
@@ -393,15 +332,6 @@ public interface RefBookDataProvider {
     Long getRecordId(Long uniqueRecordId);
 
     /**
-     * Возвращает данные по списку атрибутов
-     *
-     * @param attributePairs связки атрибут-запись справочника
-     * @return значения для связок
-     */
-    @Deprecated
-    Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
-
-    /**
      * Проверяет действуют ли записи справочника в указанном периоде
      * http://conf.aplana.com/pages/viewpage.action?pageId=23245326
      *
@@ -411,34 +341,6 @@ public interface RefBookDataProvider {
      * @return идентификаторы записей, которые не действуют в указанном периоде + результат проверки
      */
     List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
-
-    /**
-     * Создает новые записи в справочнике без учета версионирования
-     *
-     * @param version дата актуальности новых записей
-     * @param records список новых записей
-     */
-    void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
-
-    /**
-     * То же самое что и {@link RefBookDataProvider#insertRecords(com.aplana.sbrf.taxaccounting.model.TAUserInfo, java.util.Date, java.util.List<java.util.Map<java.lang.String,com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue>>)}
-     * Но без блокировок
-     */
-    void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
-
-    /**
-     * Обновляет значения в справочнике без учета версионирования
-     *
-     * @param version задает дату актуальности
-     * @param records список обновленных записей
-     */
-    void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
-
-    /**
-     * То же самое что и {@link RefBookDataProvider#updateRecords(com.aplana.sbrf.taxaccounting.model.TAUserInfo, java.util.Date, java.util.List<java.util.Map<java.lang.String,com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue>>)}
-     * Но без блокировок
-     */
-    void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
     /**
      * Разыменование набора ссылок

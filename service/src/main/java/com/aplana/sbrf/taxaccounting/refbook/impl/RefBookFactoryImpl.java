@@ -3,11 +3,12 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -70,33 +71,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
             dataProvider.setRefBook(refBook);
             return dataProvider;
         }
-
-        if (DEPARTMENT.getId() == refBookId) {
-            return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
+        Assert.isTrue(!Strings.isNullOrEmpty(refBook.getTableName()));
+        RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+        if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
+            dataProvider.setWhereClause("ID <> -1");
         }
-        if (CONFIGURATION_PARAM.getId() == refBookId) {
-            RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
-            dataProvider.setRefBook(refBook);
-            return dataProvider;
-        }
-        if (EMAIL_CONFIG.getId() == refBookId) {
-            return applicationContext.getBean("refBookRefBookEmailConfig", RefBookEmailConfigProvider.class);
-        }
-        if (ASYNC_CONFIG.getId() == refBookId) {
-            return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
-        }
-        if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
-            RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
-                dataProvider.setWhereClause("ID <> -1");
-            }
-            dataProvider.setRefBook(refBook);
-            return dataProvider;
-        } else {
-            RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
-            refBookUniversal.setRefBookId(refBookId);
-            return refBookUniversal;
-        }
+        dataProvider.setRefBook(refBook);
+        return dataProvider;
     }
 
     @Override

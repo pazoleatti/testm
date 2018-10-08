@@ -49,21 +49,6 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     @Autowired
     private DBUtils dbUtils;
 
-    private static final class AsyncTaskTypeMapper implements RowMapper<AsyncTaskTypeData> {
-
-        @Override
-        public AsyncTaskTypeData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            AsyncTaskTypeData result = new AsyncTaskTypeData();
-            result.setId(rs.getLong("id"));
-            result.setName(rs.getString("name"));
-            result.setHandlerClassName(rs.getString("handler_bean"));
-            result.setShortQueueLimit(rs.getLong("short_queue_limit"));
-            result.setTaskLimit(rs.getLong("task_limit"));
-            result.setLimitKind(rs.getString("limit_kind"));
-            return result;
-        }
-    }
-
     private static final class AsyncTaskDataMapper implements RowMapper<AsyncTaskData> {
         /* Признак того, что надо заполнить все поля включая сериализованные параметры */
         private boolean full;
@@ -123,15 +108,8 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public AsyncTaskTypeData getTaskTypeData(long asyncTaskTypeId) {
-        try {
-            return getJdbcTemplate().queryForObject("SELECT id, name, handler_bean, short_queue_limit, task_limit, limit_kind FROM async_task_type WHERE id = ?",
-                    new Object[]{asyncTaskTypeId},
-                    new int[]{Types.INTEGER},
-                    new AsyncTaskTypeMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+    public List<AsyncTaskData> findAll() {
+        return getNamedParameterJdbcTemplate().query("select * from async_task", new AsyncTaskDataMapper(true));
     }
 
     @Override
@@ -309,21 +287,4 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     public boolean isTaskExists(long taskId) {
         return getJdbcTemplate().queryForObject("SELECT count(*) FROM async_task WHERE id = ?", Integer.class, taskId) != 0;
     }
-
-    @Override
-    public PagingResult<AsyncTaskTypeData> fetchAllAsyncTaskTypeData(PagingParams pagingParams) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("start", pagingParams.getStartIndex() + 1);
-        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-        List<AsyncTaskTypeData> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
-                "SELECT * FROM (" +
-                        "   SELECT rownum rn, ordered.* FROM (SELECT id, name, handler_bean, short_queue_limit, task_limit, limit_kind FROM async_task_type) ordered " +
-                        ") numbered " +
-                        "WHERE rn BETWEEN :start AND :end ORDER BY name",
-                params, new AsyncTaskTypeMapper()
-        );
-        int totalCount = getJdbcTemplate().queryForObject("SELECT count(*) FROM (SELECT id, name, handler_bean, short_queue_limit, task_limit FROM async_task_type)", Integer.class);
-        return new PagingResult<>(asyncTaskTypeDataList, totalCount);
-    }
-
 }

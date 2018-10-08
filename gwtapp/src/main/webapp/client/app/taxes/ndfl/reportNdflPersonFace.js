@@ -122,6 +122,8 @@
                     }
                 };
 
+                var gridInitiated = false;
+
                 $scope.searchPerson = function () {
                     // очищаем список ошибок
                     errorList = [];
@@ -202,29 +204,22 @@
                                     resultSize + $filter('translate')('reportPersonFace.info.needSearchClarify');
                                 $scope.showInfo = true;
                             }
-                            var columns = response.prepareSpecificReportResult.tableColumns;
-                            var i = 0;
-                            for (; i < columns.length; i++) {
-                                $scope.colNames.push(columns[i].name);
-                                if (columns[i].alias === 'pNumSpravka') {
+                            if (!gridInitiated) {
+                                var columns = response.prepareSpecificReportResult.tableColumns;
+                                var i = 0;
+                                for (; i < columns.length; i++) {
+                                    $scope.colNames.push(columns[i].name);
                                     $scope.colModel.push({
                                         name: columns[i].alias,
                                         index: columns[i].alias,
                                         width: columns[i].width * 10,
-                                        key: true
-                                    });
-                                } else {
-                                    $scope.colModel.push({
-                                        name: columns[i].alias,
-                                        index: columns[i].alias,
-                                        width: columns[i].width * 10
+                                        key: columns[i].alias === 'pNumSpravka'
                                     });
                                 }
 
+                                $scope.reportNdflGrid.ctrl.rebuildGrid();
+                                gridInitiated = true;
                             }
-
-                            $scope.reportNdflGrid.ctrl.rebuildGrid();
-
                             $scope.reportNdflGrid.ctrl.refreshGridData(response.prepareSpecificReportResult.dataRows);
 
                             $scope.enabledGrid = true;

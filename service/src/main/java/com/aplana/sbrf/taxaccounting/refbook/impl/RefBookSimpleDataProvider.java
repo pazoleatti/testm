@@ -79,21 +79,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
-                                                                      PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        throw new UnsupportedOperationException();
-        /*if (!getRefBook().isHierarchic()) {
-            throw new IllegalArgumentException(String.format(RefBookDaoImpl.NOT_HIERARCHICAL_REF_BOOK_ERROR, getRefBook().getName(), getRefBook().getId()));
-        }
-        return dao.getChildrenRecords(getRefBook().getTableName(), getRefBook().getId(), version, parentRecordId, pagingParams, filter, sortAttribute);*/
-    }
-
-    @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Date getNextVersion(Date version, @NotNull String filter) {
         throw new UnsupportedOperationException();
     }
@@ -128,18 +113,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
-        return refBookDao.isRecordsExist(refBook.getTableName(), new HashSet<Long>(uniqueRecordIds));
-    }
-
-    @Override
     public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         return dao.getRowNum(getRefBook(), version, recordId, filter, sortAttribute, isSortAscending);
-    }
-
-    @Override
-    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -177,11 +152,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         } else {
             return readOnlyProvider.getVersions(startDate, endDate);
         }
-    }
-
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return dao.getRecordVersions(getRefBook(), uniqueRecordId, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
@@ -532,11 +502,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void deleteAllRecords(@NotNull Logger logger, List<Long> uniqueRecordIds) {
         checkIfRefBookIsEditable();
         if (logger.getTaUserInfo() == null) {
@@ -653,12 +618,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
-        checkIfRefBookIsEditable();
-        deleteRecordVersions(logger, uniqueRecordIds);
-    }
-
-    @Override
     public Long getFirstRecordId(Long uniqueRecordId) {
         return dao.getFirstRecordId(getRefBook(), uniqueRecordId);
     }
@@ -669,37 +628,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
         return refBookDao.getInactiveRecords(getRefBook().getTableName(), recordIds);
-    }
-
-    @Override
-    public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        checkIfRefBookIsEditable();
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        checkIfRefBookIsEditable();
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        checkIfRefBookIsEditable();
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
-        checkIfRefBookIsEditable();
-        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -156,10 +156,6 @@ public class NdflPersonController {
             return null;
         }
 
-        if (pagingParams == null) {
-            pagingParams = new PagingParams();
-        }
-
         Map<String, Object> filterParams = new HashMap<String, Object>();
 
         if (ndflPersonFilter.getInp() != null) {
@@ -192,7 +188,7 @@ public class NdflPersonController {
             filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, DateUtils.truncate(ndflPersonFilter.getDateTo(), Calendar.DATE));
         }
 
-        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(declarationDataId, filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount()));
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(declarationDataId, filterParams, pagingParams);
         JqgridPagedList<NdflPerson> resultPerson = JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersons,
                 ndflPersons.getTotalCount(),

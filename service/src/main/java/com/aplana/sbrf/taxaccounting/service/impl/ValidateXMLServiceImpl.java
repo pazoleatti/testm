@@ -242,7 +242,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String fileName, String xsdBlobDataId, long timeout) {
-        BlobData xmlBlob = blobDataService.get(reportService.getDec(data.getId(), DeclarationDataReportType.XML_DEC));
+        BlobData xmlBlob = blobDataService.get(reportService.getSafeDec(data.getId(), DeclarationDataReportType.XML_DEC));
         File xmlFileBD = null;
         try {
             String xmlFileName = xmlBlob.getName().substring(0, xmlBlob.getName().lastIndexOf('.'));

@@ -119,31 +119,6 @@ public class RefBookSimpleDaoTest {
     }
 
     @Test
-    public void getChildrenRecordsReturnsAll() throws Exception {
-        PagingResult<Map<String, RefBookValue>> data = dao.getChildrenRecords(createHierarchyRefBook(), null,
-                null, null, null, null);
-        assertEquals(1, data.size());
-        assertEquals(1, data.getTotalCount());
-    }
-
-    @Test
-    public void getChildrenRecordsThrowsAnExceptionOnNotHierarchicalRefBook() throws Exception {
-        try {
-            dao.getChildrenRecords(createRefBook(), null, null, null, null, null);
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Справочник \"Физические лица\" (id=904) не является иерархичным", ex.getMessage());
-        }
-    }
-
-//    @Test
-    public void getChildrenRecordsReturnsSome() throws Exception {
-        PagingResult<Map<String, RefBookValue>> data = dao.getChildrenRecords(createHierarchyRefBook(), null,
-                1L, null, null, null);
-        assertEquals(2, data.size());
-        assertEquals(2, data.getTotalCount());
-    }
-
-    @Test
     public void getRowNumReturnsNum() throws Exception {
         Date version = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime();
         Long rowNum = dao.getRowNum(createRefBook(), version, 3L, null, null, true);

@@ -19,12 +19,11 @@ import java.util.Map;
 public interface AsyncTaskDao {
 
     /**
-     * Получение данных типа асинхронной задачи по ее id
+     * Возвращяет все ассинхронные задачи
      *
-     * @param asyncTaskTypeId тип задачи
-     * @return данные задачи
+     * @return список ассинхронных задач
      */
-    AsyncTaskTypeData getTaskTypeData(long asyncTaskTypeId);
+    List<AsyncTaskData> findAll();
 
     /**
      * Сохраняет в БД информацию о новой асинхронной задаче
@@ -146,12 +145,4 @@ public interface AsyncTaskDao {
      * @return задача существует?
      */
     boolean isTaskExists(long taskId);
-
-    /**
-     * Получение списка типов асинхронных задач
-     *
-     * @param pagingParams параметры пагинации
-     * @return страница {@link PagingResult} с данными {@link AsyncTaskTypeData}
-     */
-    PagingResult<AsyncTaskTypeData> fetchAllAsyncTaskTypeData(PagingParams pagingParams);
 }
