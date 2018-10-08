@@ -82,7 +82,7 @@ create or replace package body person_pkg as
                addr.address_type,
                addr.address
           from (
-             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id order by fv.id) ref_person_id
+             select /*+ use_hash(n fv)*/ distinct n.id as person_id,first_value(fv.id) over(partition by n.id order by fv.id) ref_person_id
                from  ndfl_person n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
                                                                and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
                                                                and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
@@ -388,7 +388,7 @@ create or replace package body person_pkg as
          and person.status=0 and person.record_id=person.old_id
       union
       /*По ДУЛ*/
-      select /*+ ordered first_rows(1)*/ t.id as person_id,
+      select /*+ use_hash(t doc)*/ t.id as person_id,
              person.id as ref_book_person_id,
              person.version as person_version,
              person.status as person_status,

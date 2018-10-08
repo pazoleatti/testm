@@ -90,4 +90,14 @@
         </update>
     </changeSet>
 
+    <!--SBRFNDFL-5701. Операция "Идентификация ФЛ" завершается ошибкой [54]: ORA-01652:-->
+    <changeSet id="3.1.1-amandzyak-4" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body10.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>

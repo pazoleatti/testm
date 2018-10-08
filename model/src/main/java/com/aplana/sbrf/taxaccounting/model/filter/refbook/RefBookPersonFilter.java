@@ -6,7 +6,7 @@ import java.util.List;
 
 public class RefBookPersonFilter implements Serializable {
 
-    private Long versionId;
+    private Long recordId;
     private String lastName;
     private String firstName;
     private String middleName;
@@ -41,12 +41,12 @@ public class RefBookPersonFilter implements Serializable {
 
     private Boolean duplicates;
 
-    public Long getVersionId() {
-        return versionId;
+    public Long getRecordId() {
+        return recordId;
     }
 
-    public void setVersionId(Long versionId) {
-        this.versionId = versionId;
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 
     public String getLastName() {

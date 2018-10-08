@@ -620,11 +620,12 @@
          */
         .filter('idDocTypeFormatter', ['$filter', function ($filter) {
             return function (value) {
-                if (!value) return '';
-                if (value.permission === false) {
+                if (value && value.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
+                } else if (value && value.value)  {
+                    return value.value.DOC_ID.referenceObject.NAME.value;
                 }
-                return value.value.DOC_ID.referenceObject.NAME.value;
+                return '';
             };
         }])
 
@@ -633,11 +634,12 @@
          */
         .filter('idDocNumberFormatter', ['$filter', function ($filter) {
             return function (value) {
-                if (!value) return '';
-                if (value.permission === false) {
+                if (value && value.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
+                } else if (value && value.value)  {
+                    return value.value.DOC_NUMBER.value;
                 }
-                return value.value.DOC_NUMBER.value;
+                return '';
             };
         }])
 
