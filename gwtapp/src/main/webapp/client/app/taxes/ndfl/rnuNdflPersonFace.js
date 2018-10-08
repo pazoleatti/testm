@@ -97,54 +97,6 @@
                     }
                 };
 
-                var totalCountResult = function () {
-                    RnuPerson.query({
-                        projection: 'rnuPersons',
-                        declarationDataId: $shareData.declarationDataId,
-                        ndflPersonFilter: JSON.stringify({
-                            lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
-                            firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
-                            middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
-                            inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
-                            snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
-                            innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
-                            idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
-                            dateFrom: $scope.searchFilter.params.dateFrom,
-                            dateTo: $scope.searchFilter.params.dateTo
-                        }),
-                        pagingParams: {}
-
-                    }, function (data) {
-                        $scope.showInfo = true;
-                        if (data.records > 10) {
-                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.manyRecords', {count: data.records});
-                        } else {
-                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count: data.records});
-                        }
-                    });
-                };
-
-                // Отбрасывает часы, минуты, секунды, миллисекунды
-                var truncHMS = function (date) {
-                    if (!_.isUndefined(date) && !_.isNull(date) && date !== "") {
-                        date.setHours(0);
-                        date.setMinutes(0);
-                        date.setSeconds(0);
-                        date.setMilliseconds(0);
-                        return date.getTime();
-                    }
-                    return date;
-                };
-
-                /**
-                 * Валидатор диапазона дат. Проверяет, что стартовая дата не превышает конечную
-                 * @returns {boolean} признак корректности диапазона дат
-                 */
-                var checkDateInterval = function () {
-                    return ($scope.searchFilter.params.dateFrom === undefined || $scope.searchFilter.params.dateFrom === null || $scope.searchFilter.params.dateFrom === "") ||
-                        ($scope.searchFilter.params.dateTo === undefined || $scope.searchFilter.params.dateTo === null || $scope.searchFilter.params.dateTo === "") ||
-                        (truncHMS(new Date($scope.searchFilter.params.dateFrom)) <= truncHMS(new Date($scope.searchFilter.params.dateTo)));
-                };
                 /**
                  * @description Создание рну ндфл для физ лица
                  */
@@ -187,6 +139,16 @@
                  * Grid для отображения найденных физ лиц в документе
                  */
                 $scope.rnuNdflGrid = {
+                    init: function (ctrl) {
+                        ctrl.gridComplete = function () {
+                            $scope.showInfo = true;
+                            if ($scope.rnuNdflGrid.ctrl.getCountRecords() > 10) {
+                                $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.manyRecords', {count: $scope.rnuNdflGrid.ctrl.getCountRecords()});
+                            } else {
+                                $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count: $scope.rnuNdflGrid.ctrl.getCountRecords()});
+                            }
+                        };
+                    },
                     ctrl: {},
                     value: [],
                     options: {
@@ -237,9 +199,9 @@
                             {name: 'lastName', index: 'last_name', width: 140},
                             {name: 'firstName', index: 'first_name', width: 140},
                             {name: 'middleName', index: 'middle_name', width: 140},
-                            {name: 'snils', index: 'snils', width: 100, sortable: false},
-                            {name: 'innNp', index: 'innNp', width: 100},
-                            {name: 'innForeign', index: 'innForeign', width: 100},
+                            {name: 'snils', index: 'snils', width: 100},
+                            {name: 'innNp', index: 'inn_np', width: 100},
+                            {name: 'innForeign', index: 'inn_foreign', width: 100},
                             {name: 'inp', index: 'inp', width: 100},
                             {
                                 name: 'birthDay',
@@ -247,15 +209,13 @@
                                 width: 100,
                                 formatter: $filter('dateFormatter')
                             },
-
                             {name: 'idDocNumber', index: 'id_doc_number', width: 95},
                             {name: 'status', index: 'status', width: 160}
-
                         ],
                         rowNum: 10,
                         viewrecords: true,
-                        sortname: 'createDate',
-                        sortorder: "desc",
+                        sortname: 'last_name',
+                        sortorder: "asc",
                         hidegrid: false,
                         multiselect: false
                     }
@@ -305,10 +265,8 @@
                     $scope.showInfo = false;
                     $scope.isEmptySearchParams = false;
                     $scope.infoMessage = "";
-                    totalCountResult();
+
                     $scope.rnuNdflGrid.ctrl.refreshGrid();
-
-
                 };
 
                 $scope.searchFilter = {

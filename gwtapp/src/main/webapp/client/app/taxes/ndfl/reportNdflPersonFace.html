@@ -1,8 +1,8 @@
 <div class="modal-body">
 
-    <form class="form-horizontal" role="form" style="width: 100%; margin: auto">
-        <div class="row">
-            <div class="filter-col w450">
+    <form class="form-horizontal" role="form" data-aplana-submit-valid="searchPerson()" style="width: 100%; margin: auto">
+        <div class="row-fluid" style="padding-right: 20px;">
+            <div class="span4">
                 <div class="row-fluid form-group">
                     <div class="span4">
                         <label class="control-label">{{::'title.lastName' |
@@ -41,7 +41,7 @@
                 </date-from-to-filter>
             </div>
 
-            <div class="filter-col w250">
+            <div class="span4">
                 <div class="row-fluid form-group">
                     <div class="span3">
                         <label class="control-label">{{::'title.firstName' |
@@ -72,7 +72,7 @@
 
             </div>
 
-            <div class="filter-col w350">
+            <div class="span4">
                 <div class="row-fluid form-group">
                     <div class="span3">
                         <label class="control-label">{{::'title.middleName' |
@@ -101,6 +101,9 @@
                     </div>
                 </div>
             </div>
+
+            <!--чтобы при нажатии на enter отрабатывал поиск-->
+            <input type="submit" style="left: 99999px; position: absolute; tab-index: -1;">
         </div>
         <div style="margin: auto;">
             <div data-ng-show="showInfo"

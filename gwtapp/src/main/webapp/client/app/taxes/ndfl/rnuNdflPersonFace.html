@@ -1,8 +1,8 @@
 <div class="modal-body">
 
-    <form class="form-horizontal" role="form" style="width: 100%; margin: auto">
-        <div class="row">
-            <div class="filter-col w450">
+    <form class="form-horizontal" role="form" style="width: 100%;" data-aplana-submit-valid="searchPerson()" novalidate>
+        <div class="row-fluid" style="padding-right: 20px;">
+            <div class="span4">
 
                 <div class="row-fluid form-group">
                     <div class="span4">
@@ -41,7 +41,7 @@
 
             </div>
 
-            <div class="filter-col w250">
+            <div class="span4">
 
                 <div class="row-fluid form-group">
                     <div class="span3">
@@ -88,7 +88,7 @@
 
             </div>
 
-            <div class="filter-col w350">
+            <div class="span4">
 
                 <div class="row-fluid form-group">
                     <div class="span3">
@@ -119,14 +119,8 @@
                 </div>
             </div>
 
-            <div class="filter-col">
-                <!--Кнопка Найти-->
-                <button type="button"
-                        class="btn btn-default"
-                        data-ng-click="searchPerson()">
-                    <span data-translate-once="common.button.search"></span>
-                </button>
-            </div>
+            <!--чтобы при нажатии на enter отрабатывал поиск-->
+            <input type="submit" style="left: 99999px; position: absolute; tab-index: -1;">
         </div>
 
         <!-- Блок информации -->
@@ -141,25 +135,28 @@
         </div>
     </form>
 
-
     <div data-aplana-grid
          data-grid-options="rnuNdflGrid.options"
          data-grid-ctrl="rnuNdflGrid.ctrl"
+         data-init-grid="rnuNdflGrid.init(ctrl)"
          data-ng-model="rnuNdflGrid.value"
          id="rnuNdflTable"
          style="width: 100%;"></div>
 </div>
 
-<div class="modal-footer" style="">
-
+<div class="modal-footer">
+    <!--Кнопка Найти-->
+    <button type="button"
+            class="btn btn-default"
+            data-ng-click="searchPerson()">
+        <span data-translate-once="common.button.search"></span>
+    </button>
     <!--Кнопка Сформировать-->
     <button type="button"
             class="btn btn-default"
             data-ng-show="rnuNdflGrid.value.length"
             data-ng-click="formationRNU()">
         <span data-translate-once="common.button.formation"></span>
-
-
     </button>
     <!--Кнопка Выход-->
     <button type="button"
@@ -168,6 +165,4 @@
         <span data-translate-once="button.close"></span>
         <span class="btn-icon-noneBg-close"></span>
     </button>
-
-
 </div>
