@@ -56,7 +56,6 @@
 
                     sortname: 'logDate',
                     sortorder: "desc",
-                    viewrecords: true,
                     hidegrid: false
                 }
             };
