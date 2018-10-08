@@ -216,6 +216,7 @@
                         viewrecords: true,
                         sortname: 'last_name',
                         sortorder: "asc",
+                        disableAutoLoad: true,
                         hidegrid: false,
                         multiselect: false
                     }
