@@ -41,6 +41,10 @@
         "DIALOGS_CREATE": "Создать",
         "DIALOGS_CANCELLATION": "Отмена",
 
+        "authorization.expire.dialog.title": "Ваша сессия истекла",
+        "authorization.expire.dialog.message": "Ваша сессия истекла. Вам необходимо повторно войти в систему. Вы можете закрыть это окно и скопировать несохраненные данные, в противном случае они будут утеряны",
+        "authorization.expire.dialog.reload": "Войти в систему",
+
         "yes": "Да",
         "no": "Нет",
         "common.select.formatSearching": "Идет поиск...",
