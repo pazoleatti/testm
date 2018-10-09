@@ -653,21 +653,25 @@
                             data: {uploader: file},
                             params: {force: !!force}
                         }).progress(function (e) {
-                        }).success(function (data) {
-                            if (data.uuid && data.uuid !== null) {
-                                $logPanel.open('log-panel-container', data.uuid);
+                        }).then(function (response) {
+                            if (response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
+                            if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                                $dialogs.confirmDialog({
+                                    title: $filter('translate')('title.confirm'),
+                                    content: response.data.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $scope.doImport(file, true);
+                                    },
+                                    cancelBtnClick: function () {
+                                        file.msClose();
+                                    }
+                                });
                             } else {
-                                if (data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                                    $dialogs.confirmDialog({
-                                        title: $filter('translate')('title.confirm'),
-                                        content: data.restartMsg,
-                                        okBtnCaption: $filter('translate')('common.button.yes'),
-                                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                                        okBtnClick: function () {
-                                            $scope.doImport(file, true);
-                                        }
-                                    });
-                                }
+                                file.msClose();
                             }
                         });
                     }
