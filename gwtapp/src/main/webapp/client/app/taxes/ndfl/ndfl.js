@@ -667,11 +667,11 @@
                                         $scope.doImport(file, true);
                                     },
                                     cancelBtnClick: function () {
-                                        file.msClose();
+                                        file.msClose && file.msClose();
                                     }
                                 });
                             } else {
-                                file.msClose();
+                                file.msClose && file.msClose();
                             }
                         });
                     }
