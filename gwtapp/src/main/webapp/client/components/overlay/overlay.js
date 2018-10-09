@@ -302,16 +302,11 @@
                     response: function (response) {
                         var invalidHeader = ('true' === response.headers('isLoginPage')) ||
                             ('true' !== response.headers('isCustomPage'));
-                        //У нас есть два вида кэшей - сгенеренные градлом в templates.js и приличные кэши запросов,
-                        //которые ведет ангуляр. В первос случае в кэше лежит просто строка, а в втором весь запрос
-                        //в виде массива [status, response, headers]
-                        //На нужно отловить запросы не из кэша или из кеша, но не из templates.js
                         var nonCached = !(angular.isDefined(response.config.cache) &&
                             angular.isObject(response.config.cache) && angular.isDefined(response.config.cache.info()));
-                        var cachedRequest = !nonCached && angular.isArray(response.config.cache.get(response.config.url));
 
                         if (response.headers()['content-type'] && response.headers()['content-type'].indexOf("text/html") !== -1
-                            && invalidHeader && (nonCached || cachedRequest)) {
+                            && invalidHeader && nonCached) {
                             if (!expireDialogOpened && !expireDialogCanceled) {
                                 expireDialogOpened = true;
 
