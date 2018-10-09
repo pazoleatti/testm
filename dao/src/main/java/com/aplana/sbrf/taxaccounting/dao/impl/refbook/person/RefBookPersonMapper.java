@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class RefBookPersonMapper implements RowMapper<RefBookPerson> {
+class RefBookPersonMapper implements RowMapper<RefBookPerson> {
 
     @Override
     public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {

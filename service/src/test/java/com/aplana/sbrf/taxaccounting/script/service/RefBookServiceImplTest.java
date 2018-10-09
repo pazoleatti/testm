@@ -32,7 +32,7 @@ public class RefBookServiceImplTest {
     @Test
     public void testexportRefBookConfs() throws IOException, InvocationTargetException, IllegalAccessException {
         refBookService.exportRefBookConfs(mock(TAUserInfo.class));
-        verify(commonRefBookService).fetchVisible();
+        verify(commonRefBookService).findAllVisible();
         verify(blobDataService).create(any(InputStream.class), eq("refBooksData.zip"));
         verify(blobDataService).get(anyString());
 

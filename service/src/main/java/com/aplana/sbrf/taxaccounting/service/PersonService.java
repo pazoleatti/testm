@@ -30,14 +30,6 @@ public interface PersonService {
     RegistryPerson fetchOriginal(Long id, Date actualDate);
 
     /**
-     * Возвращает серию + номер ДУЛ ФЛ
-     *
-     * @param personId идентификатор ФЛ
-     * @return серия + номер ДУЛ
-     */
-    String getPersonDocNumber(long personId);
-
-    /**
      * Получение списка дубликатов ФЛ по идентификатору версии ФЛ
      *
      * @param personId     идентификатор версии ФЛ (ID)
@@ -118,7 +110,8 @@ public interface PersonService {
 
     /**
      * Обновить запись в реестре ФЛ
-     * @param person    данные ФЛ для обновления
+     *
+     * @param person данные ФЛ для обновления
      */
     void updateRegistryPerson(RegistryPerson person);
 

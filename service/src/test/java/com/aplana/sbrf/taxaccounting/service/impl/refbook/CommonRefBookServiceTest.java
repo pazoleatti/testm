@@ -54,27 +54,16 @@ public class CommonRefBookServiceTest {
     }
 
     @Test
-    public void testFetchAll() {
-        commonRefBookService.fetchAll();
-        verify(refBookDao).fetchAll();
+    public void test_findAllVisible() {
+        commonRefBookService.findAllVisible();
+        verify(refBookDao).findAllVisible();
     }
 
     @Test
-    public void testFetchVisible() {
-        commonRefBookService.fetchVisible();
-        verify(refBookDao).fetchAllVisible();
-    }
-
-    @Test
-    public void testFetchInvisible() {
-        commonRefBookService.fetchInvisible();
-        verify(refBookDao).fetchAllInvisible();
-    }
-
-    @Test
-    public void testSearchVisibleByName() {
-        commonRefBookService.searchVisibleByName(anyString());
-        verify(refBookDao).searchVisibleByName(anyString());
+    public void test_findAllVisibleByName() {
+        PagingParams pagingParams = any(PagingParams.class);
+        commonRefBookService.findAllShortInfo(anyString(), pagingParams);
+        verify(refBookDao).findAllVisibleShortInfo(anyString(), same(pagingParams));
     }
 
     @Test

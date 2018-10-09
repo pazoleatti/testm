@@ -17,7 +17,7 @@ import static org.apache.commons.collections4.CollectionUtils.*;
 /**
  * Генератор SQL-запросов для RefBookPerson
  */
-public class SelectPersonQueryGenerator {
+class SelectPersonQueryGenerator {
 
     private static final String DEFAULT_SORT_PROPERTY = "id";
 
@@ -93,11 +93,11 @@ public class SelectPersonQueryGenerator {
     protected RefBookPersonFilter filter;
     private PagingParams pagingParams;
 
-    public SelectPersonQueryGenerator(RefBookPersonFilter filter) {
+    SelectPersonQueryGenerator(RefBookPersonFilter filter) {
         this.filter = filter;
     }
 
-    public SelectPersonQueryGenerator(RefBookPersonFilter filter, PagingParams pagingParams) {
+    SelectPersonQueryGenerator(RefBookPersonFilter filter, PagingParams pagingParams) {
         this.filter = filter;
         this.pagingParams = pagingParams;
     }
@@ -105,7 +105,7 @@ public class SelectPersonQueryGenerator {
     /**
      * Генерирует SQL-запрос с фильтром.
      */
-    public String generateFilteredQuery() {
+    String generateFilteredQuery() {
         initSelectPerson();
         addWhereConditions();
         return query;
@@ -114,7 +114,7 @@ public class SelectPersonQueryGenerator {
     /**
      * Генерирует SQL-запрос с фильтром, сортировкой и пагинацией.
      */
-    public String generatePagedAndFilteredQuery() {
+    String generatePagedAndFilteredQuery() {
         initSelectPerson();
         addWhereConditions();
         addOrder();

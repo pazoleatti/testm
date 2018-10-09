@@ -107,14 +107,6 @@ public interface RefBookPersonDao {
     int getCountOfUniqueEntries(long declarationDataId);
 
     /**
-     * Возвращает серию + номер ДУЛ ФЛ
-     *
-     * @param personId идентификатор ФЛ
-     * @return серия + номер ДУЛ
-     */
-    String getPersonDocNumber(long personId);
-
-    /**
      * Возвращает список ID тербанков ФЛ
      */
     List<Integer> getPersonTbIds(long personId);

@@ -1,7 +1,8 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook.person;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookMapperFactory;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.RefBookPersonMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonOriginalDuplicatesQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonQueryGenerator;
@@ -250,27 +251,12 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public String getPersonDocNumber(long personId) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("personId", personId);
-        List<String> result = getNamedParameterJdbcTemplate().queryForList(
-                "select doc_number from REF_BOOK_ID_DOC where person_id = :personId and inc_rep = 1", params, String.class);
-        if (result.size() > 0) {
-            return result.get(0);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     public List<Integer> getPersonTbIds(long personId) {
-        //language=SQL
         String query = "" +
                 "select d.id \n" +
                 "from department d, ref_book_person_tb p2tb \n" +
                 "where p2tb.person_id = " + personId + " \n" +
                 "    and p2tb.tb_department_id = d.id";
-
         return getJdbcTemplate().queryForList(query, Integer.class);
     }
 

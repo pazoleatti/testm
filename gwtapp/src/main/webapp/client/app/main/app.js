@@ -626,7 +626,7 @@
         "ndflFL.title.id": "Идентификатор строки\n Гр. 23",
         "ndflFL.title.modifiedDate": "Дата и время редактирования\n Гр. 24",
         "ndflFL.title.modifiedBy": "Обновил\n Гр. 25",
-        "ndflFL.title.asnu" : "АСНУ\n Гр. 26",
+        "ndflFL.title.asnu": "АСНУ\n Гр. 26",
 
         "incomesAndTax.title.numberpp": "№ п/п\n Гр. 1",
         "incomesAndTax.title.inp": "ИНП\nГр. 2",
@@ -733,8 +733,6 @@
         "ndlfPrepayment.title.modifiedDate": "Дата и время редактирования\n Гр. 9",
         "ndlfPrepayment.title.modifiedBy": "Обновил\n Гр. 10",
         "ndlfPrepayment.title.asnu": "АСНУ\n Гр. 11",
-
-
 
         "createReport.period": "Период",
         "createReport.department": "Подразделение",
@@ -1038,31 +1036,6 @@
         "refBook.fl.card.button.cancel": "Отмена",
         "refBook.fl.card.tabs.lable.idDoc": "Документы, удостоверяющие личность (ДУЛ)",
 
-        // Старый справочник ФЛ
-        "refBook.fl.title.id": "Идентификатор ФЛ",
-        "refBook.fl.title.inn": "ИНН в Российской федерации",
-        "refBook.fl.title.innForeign": "ИНН в стране гражданства",
-        "refBook.fl.title.birthPlace": "Место рождения",
-        "refBook.fl.title.citizenship": "Гражданство",
-        "refBook.fl.title.address": "Адрес места жительства",
-        "refBook.fl.title.employee": "Сотрудник",
-        "refBook.fl.title.sourceId": "Система-источник",
-        "refBook.fl.title.oldId": "Старый идентификатор ФЛ",
-        "refBook.fl.title.docNumber": "Серия и номер ДУЛ",
-
-        "refBook.fl.title.originalAndDuplicate": "Назначить оригинал и дубли выбранной записи справочника ФЛ",
-        "refBook.fl.label.record": "Выбранная запись справочника ФЛ",
-        "refBook.fl.label.record.data": "Идентификатор ФЛ = {{recordId}}{{lastName}}{{firstName}}{{middleName}}{{inn}}{{innForeign}}{{snils}}{{docNumber}}",
-        "refBook.fl.label.record.data.lastName": ", Фамилия = {{lastName}}",
-        "refBook.fl.label.record.data.firstName": ", Имя = {{firstName}}",
-        "refBook.fl.label.record.data.middleName": ", Отчество = {{middleName}}",
-        "refBook.fl.label.record.data.inn": ", ИНН в Российской Федерации = {{inn}}",
-        "refBook.fl.label.record.data.innForeign": ", ИНН в стране гражданства = {{innForeign}}",
-        "refBook.fl.label.record.data.snils": ", СНИЛС = {{snils}}",
-        "refBook.fl.label.record.data.docNumber": ", Серия и номер ДУЛ = {{docNumber}}",
-        "refBook.fl.label.original": "Оригинал выбранной записи справочника ФЛ",
-        "refBook.fl.label.duplicates": "Дубли выбранной записи справочника ФЛ",
-
         "refBook.version": "Дата актуальности",
         "refBook.versionFrom": "Дата начала актуальности",
         "refBook.versionTo": "Дата окончания актуальности",
@@ -1127,7 +1100,6 @@
         'app.header',
         'app.footer',
         'app.logPanel',
-        'app.refBookPicker',
         'app.validationUtils',
         'app.ndfl',
         'app.ndflJournal',
@@ -1149,7 +1121,6 @@
         'app.registryFL',
         'app.refBookList',
         'app.personCard',
-        'app.refBookFL',
         'app.linearRefBook',
         'app.hierRefBook',
         'app.refBookConfList',

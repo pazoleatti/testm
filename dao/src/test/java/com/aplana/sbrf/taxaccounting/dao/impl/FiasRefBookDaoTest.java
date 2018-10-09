@@ -22,43 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Andrey Drunk
- */
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FiasRefBookDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FiasRefBookDaoTest {
 
-    private static final int ADDR_OBJECT_ROW_CNT = 21;
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Autowired
-    private FiasRefBookDao fiasRefBookDao;
-
-    @Autowired
     RefBookDao refBookDao;
-
-
-    @Test
-    public void testAddressObject() {
-
-        //В скрипте создаем 21 записей
-        Assert.assertEquals(ADDR_OBJECT_ROW_CNT, refBookDao.getRecordsCount(Id.FIAS_ADDR_OBJECT.getId(), Table.FIAS_ADDR_OBJECT.getTable(), null));
-
-        //создаем 3 записи через DAO
-        fiasRefBookDao.insertRecordsBatch(Table.FIAS_ADDR_OBJECT.getTable(), createAddrObjectRecords());
-
-        Assert.assertEquals(ADDR_OBJECT_ROW_CNT + 3, refBookDao.getRecordsCount(Id.FIAS_ADDR_OBJECT.getId(), Table.FIAS_ADDR_OBJECT.getTable(), null));
-
-        //Удаляем все записи
-        fiasRefBookDao.clearAll();
-
-        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_ADDR_OBJECT.getId(), Table.FIAS_ADDR_OBJECT.getTable(), null));
-    }
 
     @Test
     public void findAddressUtils() {
@@ -75,34 +50,4 @@ public class FiasRefBookDaoTest {
         Assert.assertEquals(null, FiasRefBookDaoImpl.getLeaf(null));
         Assert.assertEquals(null, FiasRefBookDaoImpl.getLeaf());
     }
-
-    private static List<Map<String, Object>> createAddrObjectRecords() {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        result.add(createAddrObjectRow(new Object[]{"7", 0, 0, "000", "Ветеранов 3-я", 1, "001", "Ветеранов 3-я", 0, "0000", "385000", 1, 2, "0026", "01", "0", "0000", 22, 22, "ул", "000", "000", "000"}));
-        result.add(createAddrObjectRow(new Object[]{"7", 0, 0, "000", "Береговая", 1, "001", "Береговая", 0, "0000", "385012", 1, 2, "0017", "01", "0", "0000", 23, 23, "ул", "000", "000", "000"}));
-        result.add(createAddrObjectRow(new Object[]{"7", 0, 0, "000", "Братьев Соловьевых", 1, "001", "Братьев Соловьевых", 0, "0000", "385000", 1, 2, "0019", "01", "0", "0000", 24, 24, "пер", "000", "000", "000"}));
-        return result;
-    }
-
-
-    private static final int AOLEVEL = 0, CURRSTATUS = 1, FORMALNAME = 4, LIVESTATUS = 5,
-            POSTALCODE = 10, PARENTGUID = 12, REGIONCODE = 14, ID = 17, AOID = 18, SHORTNAME = 19;
-
-    private static Map<String, Object> createAddrObjectRow(Object[] values) {
-
-        Map<String, Object> recordsMap = new HashMap<String, Object>();
-        recordsMap.put("ID", values[ID]);
-        recordsMap.put("AOID", values[AOID]);
-        recordsMap.put("PARENTGUID", values[PARENTGUID]);
-        recordsMap.put("FORMALNAME", values[FORMALNAME]);
-        recordsMap.put("SHORTNAME", values[SHORTNAME]);
-        recordsMap.put("REGIONCODE", values[REGIONCODE]);
-        recordsMap.put("LIVESTATUS", values[LIVESTATUS]);
-        recordsMap.put("CURRSTATUS", values[CURRSTATUS]);
-        //Поле тип адресации. Хотя поле обязательное в выгрузке его нет, ставим значение 0 - не определено
-        recordsMap.put("AOLEVEL", values[AOLEVEL]);
-        recordsMap.put("POSTALCODE", values[POSTALCODE]);
-        return recordsMap;
-    }
-
 }

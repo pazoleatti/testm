@@ -53,7 +53,6 @@
                         angularResource: RefBookListResource,
                         requestParameters: function () {
                             return {
-                                projection: 'light',
                                 filter: $scope.searchFilter.params.text
                             };
                         },
@@ -75,7 +74,7 @@
                                 formatter: typeFormatter
                             }
                         ],
-                        sortname: 'refBoookName',
+                        sortname: 'name',
                         hidegrid: false
                     }
                 };

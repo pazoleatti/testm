@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookShortInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,12 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
 
-
-//TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RefBookDaoTest.xml"})
@@ -53,33 +51,21 @@ public class RefBookDaoTest {
     }
 
     @Test
-    public void testFetchAll() {
-        List<RefBook> refBooks = refBookDao.fetchAll();
-        assertThat(refBooks).hasSize(6);
+    public void test_findAllVisibleShortInfo_bySpaceSymbol_returnsAll() {
+        List<RefBookShortInfo> result = refBookDao.findAllVisibleShortInfo(" ", null);
+        assertThat(result).hasSize(5);
     }
 
     @Test
-    public void testFetchAllVisible() {
-        List<RefBook> refBooks = refBookDao.fetchAllVisible();
-        assertThat(refBooks).hasSize(5);
+    public void test_findAllVisibleShortInfo_byVisible_returnsOnlyVisible() {
+        List<RefBookShortInfo> result = refBookDao.findAllVisibleShortInfo("книга", null);
+        assertThat(result).hasSize(1);
     }
 
     @Test
-    public void testFetchAllInvisible() {
-        List<RefBook> refBooks = refBookDao.fetchAllInvisible();
-        assertThat(refBooks).hasSize(1);
-    }
-
-    @Test
-    public void testSearchVisibleByName() {
-        List<RefBook> searchSpaceSymbol = refBookDao.searchVisibleByName(" ");
-        assertThat(searchSpaceSymbol).hasSize(5);
-
-        List<RefBook> searchVisible = refBookDao.searchVisibleByName("книга");
-        assertThat(searchVisible).hasSize(1);
-
-        List<RefBook> searchInvisible = refBookDao.searchVisibleByName("Библиотека");
-        assertThat(searchInvisible).isEmpty();
+    public void test_findAllVisibleShortInfo_byInvisible_returnsNothing() {
+        List<RefBookShortInfo> result = refBookDao.findAllVisibleShortInfo("Библиотека", null);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -101,15 +87,15 @@ public class RefBookDaoTest {
     public void testSetScriptId() {
 
         RefBook refBook = refBookDao.get(3L);
-        assertTrue(refBook.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
+        assertThat(refBook.getScriptId()).isEqualTo("24af57ef-ec1c-455f-a4fa-f0fb29483066");
 
         refBookDao.updateScriptId(3L, null);
         RefBook refBook1 = refBookDao.get(3L);
-        assertTrue(refBook1.getScriptId() == null);
+        assertThat(refBook1.getScriptId()).isNull();
 
         refBookDao.updateScriptId(3L, "24af57ef-ec1c-455f-a4fa-f0fb29483066");
         RefBook refBook2 = refBookDao.get(3L);
-        assertTrue(refBook2.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
+        assertThat(refBook2.getScriptId()).isEqualTo("24af57ef-ec1c-455f-a4fa-f0fb29483066");
     }
 
     @Test(expected = Exception.class)
