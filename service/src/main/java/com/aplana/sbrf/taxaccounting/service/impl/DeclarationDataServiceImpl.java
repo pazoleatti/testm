@@ -80,6 +80,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2171,7 +2173,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 stateLogger.updateState(AsyncTaskState.PREPARE_TEMP_FILE);
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
-                    fileWriter = new FileWriter(xmlFile);
+                    fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), Charset.forName("windows-1251"));
                     fileWriter.write(XML_HEADER);
                 } catch (IOException e) {
                     throw new ServiceException("Ошибка при формировании временного файла для XML", e);

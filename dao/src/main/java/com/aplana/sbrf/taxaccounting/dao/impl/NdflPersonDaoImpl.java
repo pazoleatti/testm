@@ -685,7 +685,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (!prFequals1) {
             priznakFClause = " AND npi.not_holding_tax > 0";
         }
-        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp WHERE npp.ndfl_person_id = :ndflPersonId " +
+        String sql = "SELECT rba.NAME as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " " +
+                "FROM ndfl_person_prepayment npp " +
+                "LEFT JOIN ref_book_asnu rba ON npp.asnu_id = rba.id " +
+                "WHERE npp.ndfl_person_id = :ndflPersonId " +
                 "AND npp.operation_id IN (SELECT npi.operation_id FROM ndfl_person_income npi " +
                 "WHERE npi.ndfl_person_id = :ndflPersonId " +
                 "AND npi.tax_rate = :taxRate " +

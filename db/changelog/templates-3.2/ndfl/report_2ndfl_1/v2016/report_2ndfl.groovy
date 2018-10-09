@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
+import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
 import org.apache.poi.ss.usermodel.CellStyle
