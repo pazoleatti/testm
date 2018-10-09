@@ -98,9 +98,7 @@
                             url: 'controller/actions/refBookConf/import',
                             data: {uploader: file}
                         }).progress(function (e) {
-                        }).then(function (response) {
-                            file.msClose();
-                            var uuid = response.data;
+                        }).success(function (uuid) {
                             if (uuid) {
                                 $logPanel.open('log-panel-container', uuid);
                             }

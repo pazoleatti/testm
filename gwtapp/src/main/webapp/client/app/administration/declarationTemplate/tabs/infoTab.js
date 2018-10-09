@@ -19,9 +19,7 @@
                         url: 'controller/actions/declarationTemplate/uploadXsd',
                         data: {declarationTemplateId: $scope.declarationTemplate.id, uploader: file}
                     }).progress(function (e) {
-                    }).then(function (response) {
-                        file.msClose();
-                        var uuid = response.data;
+                    }).success(function (uuid) {
                         if (uuid) {
                             $scope.declarationTemplate.xsdId = uuid;
                             $dialogs.messageDialog({

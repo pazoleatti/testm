@@ -121,11 +121,10 @@
                             url: 'controller/rest/declarationTemplate/' + $scope.declarationTemplate.id + "?projection=import",
                             data: {uploader: file}
                         }).progress(function (e) {
-                        }).then(function (response) {
-                            file.msClose();
-                            if (response.data && response.data.uuid) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
-                                if (response.data.success) {
+                        }).success(function (data) {
+                            if (data && data.uuid) {
+                                $logPanel.open('log-panel-container', data.uuid);
+                                if (data.success) {
                                     $dialogs.messageDialog({
                                         content: $filter('translate')('declarationTemplate.info.importSuccess')
                                     });

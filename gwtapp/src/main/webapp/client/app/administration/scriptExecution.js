@@ -39,11 +39,10 @@
                             url: 'controller/rest/extractScript',
                             data: {uploader: file}
                         }).progress(function (e) {
-                        }).then(function (response) {
-                            file.msClose();
-                            editor.setValue(response.data);
-                            if (response.data && response.data.uuid) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
+                        }).success(function (data) {
+                            editor.setValue(data);
+                            if (data && data.uuid) {
+                                $logPanel.open('log-panel-container', data.uuid);
                             }
                         });
                     }

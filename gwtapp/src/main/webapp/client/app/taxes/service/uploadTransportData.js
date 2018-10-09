@@ -31,10 +31,9 @@
                             url: 'controller/actions/transportData/upload',
                             data: {uploader: file}
                         }).progress(function (e) {
-                        }).then(function (response) {
-                            file.msClose();
-                            if(response.data && response.data.uuid) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
+                        }).success(function (data) {
+                            if(data && data.uuid) {
+                                $logPanel.open('log-panel-container', data.uuid);
                             }
                         });
                     }

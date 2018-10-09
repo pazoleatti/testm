@@ -144,11 +144,10 @@
                             },
                             method: 'POST'
                         }).progress(function (e) {
-                        }).then(function (response) {
-                            file.msClose();
-                            if (response.data && response.data.uuid) {
+                        }).success(function (data) {
+                            if (data && data.uuid) {
                                 var newFile = [{
-                                    uuid: response.data.uuid,
+                                    uuid: data.uuid,
                                     fileName: file.name,
                                     fileTypeId: defaultFileType.id,
                                     fileTypeName: defaultFileType.name,
@@ -167,8 +166,8 @@
                                     });
                                     grid.trigger("reloadGrid");
                                 }
-                            } else if (response.data && response.data.errorUuid) {
-                                $logPanel.open('log-panel-container', response.data.errorUuid);
+                            } else if (data && data.errorUuid) {
+                                $logPanel.open('log-panel-container', data.errorUuid);
                             }
                         });
                     }

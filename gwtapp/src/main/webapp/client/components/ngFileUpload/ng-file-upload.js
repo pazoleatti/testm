@@ -153,6 +153,8 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     promise.success = function (fn) {
       promise.then(function (response) {
         fn(response.data, response.status, response.headers, config);
+      }).finally(function () {
+          config._file && config._file.msClose();
       });
       return promise;
     };

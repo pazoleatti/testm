@@ -653,15 +653,14 @@
                             data: {uploader: file},
                             params: {force: !!force}
                         }).progress(function (e) {
-                        }).then(function (response) {
-                            file.msClose();
-                            if (response.data.uuid && response.data.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
+                        }).success(function (data) {
+                            if (data.uuid && data.uuid !== null) {
+                                $logPanel.open('log-panel-container', data.uuid);
                             } else {
-                                if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                                if (data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
                                     $dialogs.confirmDialog({
                                         title: $filter('translate')('title.confirm'),
-                                        content: response.data.restartMsg,
+                                        content: data.restartMsg,
                                         okBtnCaption: $filter('translate')('common.button.yes'),
                                         cancelBtnCaption: $filter('translate')('common.button.no'),
                                         okBtnClick: function () {
