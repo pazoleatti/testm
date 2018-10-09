@@ -17,6 +17,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("ValidateServiceImplTest.xml")
+@Ignore
 public class ValidateXMLServiceImplTest implements Runnable {
 
     private static final String XSD_1 = "NO_NDS.12_1_003_07_05_04_01.xsd";
