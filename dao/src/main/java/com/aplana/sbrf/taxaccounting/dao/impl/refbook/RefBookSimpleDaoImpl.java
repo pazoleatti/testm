@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.main.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookAddressValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
@@ -38,13 +37,13 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 /**
  * DAO для RefBookSimpleDataProvider, поддерживающий редактируемые версионируемые справочники.
  * Иногда такие справочники могут не поддерживать по отдельности редактирование или версионирование.
- *
+ * <p>
  * Справочники должны иметь поля STATUS, VERSION, RECORD_ID
  */
 @Repository
 public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDao {
 
-	private static final Log LOG = LogFactory.getLog(RefBookSimpleDaoImpl.class);
+    private static final Log LOG = LogFactory.getLog(RefBookSimpleDaoImpl.class);
 
     @Autowired
     private RefBookDao refBookDao;
@@ -76,11 +75,12 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности
-     * @param refBook справочник
-     * @param version дата актуальности
-     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param filter условие фильтрации строк. Может быть не задано
-     * @param sortAttribute сортируемый столбец. Может быть не задан
+     *
+     * @param refBook         справочник
+     * @param version         дата актуальности
+     * @param pagingParams    определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter          условие фильтрации строк. Может быть не задано
+     * @param sortAttribute   сортируемый столбец. Может быть не задан
      * @param isSortAscending признак сортировки по возрастанию
      * @return список записей
      */
@@ -90,49 +90,66 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false, false);
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
 
-		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-		if (pagingParams != null) {
-			ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false, false);
-			result.setTotalCount(refBookDao.getRecordsCount(ps));
-		} else {
-			result.setTotalCount(records.size());
-		}
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        if (pagingParams != null) {
+            ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false, false);
+            result.setTotalCount(refBookDao.getRecordsCount(ps));
+        } else {
+            result.setTotalCount(records.size());
+        }
         return result;
     }
 
     @Override
-    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute,
-                                                                String direction, PagingParams pagingParams,
-                                                                List<String> columns, String searchPattern, String filter) {
+    public <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook,
+                                                                RefBookAttribute sortAttribute,
+                                                                String direction,
+                                                                PagingParams pagingParams,
+                                                                List<String> columns,
+                                                                String searchPattern,
+                                                                String filter) {
         QueryBuilder q;
         if (refBook.isVersioned()) {
             q = queryBuilder.allRecordsByVersion(refBook, new Date(), columns, searchPattern, filter, pagingParams, sortAttribute, direction);
         } else {
             q = queryBuilder.allRecords(refBook, columns, searchPattern, filter, pagingParams, sortAttribute, direction);
         }
-        List<T> records = refBookDao.getMappedRecordsData(q, refBook);
+        List<T> records = getMappedRecordsData(q, refBook);
 
         PagingResult<T> result = new PagingResult<>(records);
         result.setTotalCount(getNamedParameterJdbcTemplate().queryForObject(q.getCountQuery(), q.getNamedParams(), Integer.class));
         return result;
     }
 
-    @Override
-	public PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
-		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
-		LOG.debug(ps.getQuery().toString());
-		List<Map<String, RefBookValue>> records =
-			getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(), getRowMapper(refBook));
+    /**
+     * Получает данные записей справочника замапленные на сущности
+     *
+     * @param q       объект с sql-запросом и его параметрами
+     * @param refBook справочник
+     */
+    private <T extends RefBookSimple> List<T> getMappedRecordsData(QueryBuilder q, RefBook refBook) {
+        RowMapper<T> rowMapper = refBookMapperFactory.getMapper(refBook.getId());
+        return getNamedParameterJdbcTemplate().query(q.getPagedQuery(), q.getNamedParams(), rowMapper);
+    }
 
-		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-		result.setTotalCount(records.size());
-		return result;
-	}
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
+        LOG.debug(ps.getQuery().toString());
+        List<Map<String, RefBookValue>> records =
+                getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(), getRowMapper(refBook));
+
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        result.setTotalCount(records.size());
+        return result;
+    }
 
     /**
      * Получает запись по уникальному идентификатору
+     *
      * @param refBook справочник
-     * @param id уникальный идентификатор записи
+     * @param id      уникальный идентификатор записи
      * @return Map, где key - alias атрибута, а value - его значение ({@link RefBookValue})
      */
     @Override
@@ -161,7 +178,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк
      *
-     * @param refBook справочник
+     * @param refBook   справочник
      * @param recordIds список кодов строк справочника
      */
     @Override
@@ -195,7 +212,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк. Используется для возможности передачи курсора в in
-     * @param refBook справочник
+     *
+     * @param refBook     справочник
      * @param whereClause условие для подстановки в where
      * @return
      */
@@ -212,9 +230,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк. Используется для возможности передачи курсора в in
-     * @param refBook справочник
+     *
+     * @param refBook     справочник
      * @param whereClause условие для подстановки в where
-     * @param version версия справочника
+     * @param version     версия справочника
      * @return
      */
     @Override
@@ -228,7 +247,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
-    private Map<Long, Map<String, RefBookValue>> mapListToData(List<Map<String, RefBookValue>> recordsList){
+    private Map<Long, Map<String, RefBookValue>> mapListToData(List<Map<String, RefBookValue>> recordsList) {
         Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
         for (Map<String, RefBookValue> record : recordsList) {
             recordData.put(record.get("id").getNumberValue().longValue(), record);
@@ -238,10 +257,11 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Получение row_num записи по заданным параметрам
-     * @param refBook справочник
-     * @param version дата актуальности
-     * @param recordId идентификатор искомой записи
-     * @param filter условие фильтрации строк. Может быть не задано
+     *
+     * @param refBook       справочник
+     * @param version       дата актуальности
+     * @param recordId      идентификатор искомой записи
+     * @param filter        условие фильтрации строк. Может быть не задано
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return номер записи
      */
@@ -256,7 +276,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      *
      * @param refBook справочник
      * @param version дата актуальности
-     * @param filter условие фильтрации строк. Может быть не задано
+     * @param filter  условие фильтрации строк. Может быть не задано
      * @return список идентификаторов
      */
     @Override
@@ -267,8 +287,9 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     *
      * @param version дата актуальности
-     * @param filter условие фильтрации строк. Может быть не задано
+     * @param filter  условие фильтрации строк. Может быть не задано
      * @return количество
      */
     @Override
@@ -314,6 +335,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Перечень версий записей за период
+     *
      * @param refBook справочник
      * @return список дат - версий
      */
@@ -325,7 +347,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Возвращает количество существующих версий для элемента справочника
-     * @param refBook справочник
+     *
+     * @param refBook        справочник
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @return количество версий
      */
@@ -339,7 +362,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Возвращает идентификатор записи справочника без учета версий
-     * @param refBook справочник
+     *
+     * @param refBook        справочник
      * @param uniqueRecordId уникальный идентификатор версии записи
      * @return
      */
@@ -348,16 +372,17 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         try {
             return getJdbcTemplate().queryForObject(String.format(SQL_GET_RECORD_ID, refBook.getTableName(), uniqueRecordId), Long.class);
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException(String.format("Не найдена запись справочника '%s' (id = %d) с id = %d", (refBook !=null ? refBook.getName() : "null"), (refBook!=null ? refBook.getId() : null), uniqueRecordId));
+            throw new DaoException(String.format("Не найдена запись справочника '%s' (id = %d) с id = %d", (refBook != null ? refBook.getName() : "null"), (refBook != null ? refBook.getId() : null), uniqueRecordId));
         }
     }
 
     /**
      * Возвращает все версии из указанной группы версий записи справочника
-     * @param refBook справочник
-     * @param recordId идентификатор группы версий записи справочника
-     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param filter условие фильтрации строк. Может быть не задано
+     *
+     * @param refBook       справочник
+     * @param recordId      идентификатор группы версий записи справочника
+     * @param pagingParams  определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter        условие фильтрации строк. Может быть не задано
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
@@ -381,13 +406,12 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     }
 
     /**
-     *
      * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми.
      * Обеспечение соблюдения уникальности атрибутов в пределах справочника
      *
-     * @param refBook справочник
+     * @param refBook        справочник
      * @param uniqueRecordId уникальный идентификатор записи справочника. Может быть null (при создании нового элемента). Используется для исключения из проверки указанного элемента справочника
-     * @param record новые значения полей элемента справочника
+     * @param record         новые значения полей элемента справочника
      * @return список пар "идентификатор записи"-"имя атрибута", у которых совпали значения уникальных атрибутов
      */
     @Override
@@ -395,7 +419,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
                                                                         RefBookRecord record) {
 
         List<RefBookAttribute> attributes = refBook.getAttributes();
-		// [группа уникальности : [атрибут-значение, ...]]
+        // [группа уникальности : [атрибут-значение, ...]]
         Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> recordsGroupsUniqueAttributesValues =
                 aggregateUniqueAttributesAndValues(attributes, record);
 
@@ -420,7 +444,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      * Агрегировать список пар уникальный атрибут - его значение по группам уникальности и по записям
      *
      * @param attributes атрибуты справочника
-     * @param record    запись
+     * @param record     запись
      * @return список записей с группами уникальности списков пар уникальных атрибутов и значений
      */
     private Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> aggregateUniqueAttributesAndValues(List<RefBookAttribute> attributes, RefBookRecord record) {
@@ -473,9 +497,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+     *
      * @param recordPairs записи, у которых совпали уникальные атрибуты
      * @param versionFrom дата начала актуальности новой версии
-     * @param versionTo дата конца актуальности новой версии
+     * @param versionTo   дата конца актуальности новой версии
      * @return список идентификаторов записей, в которых есть пересечение
      */
     @Override
@@ -490,8 +515,9 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Проверяет существуют ли конфликты в датах актуальности у проверяемых записей и их родительских записей (в иерархических справочниках)
+     *
      * @param versionFrom дата начала актуальности
-     * @param records проверяемые записи
+     * @param records     проверяемые записи
      */
     @Override
     public List<Pair<Long, Integer>> checkParentConflict(RefBook refBook, Date versionFrom, List<RefBookRecord> records) {
@@ -501,7 +527,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
             if (parentId != null) {
                 PreparedStatementData ps = queryBuilder.psCheckParentConflict(refBook, parentId, versionFrom, record.getVersionTo());
                 getNamedParameterJdbcTemplate().query(ps.getQueryString(), ps.getNamedParams(), new RowCallbackHandler() {
-                    
+
                     public void processRow(ResultSet rs) throws SQLException {
                         result.add(new Pair<Long, Integer>(SqlUtils.getLong(rs, "id"), SqlUtils.getInteger(rs, "result")));
                     }
@@ -513,10 +539,11 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
-     * @param refBook справочник
-     * @param recordId идентификатор записи справочника (без учета версий)
-     * @param versionFrom дата начала актуальности новой версии
-     * @param versionTo дата окончания актуальности новой версии
+     *
+     * @param refBook          справочник
+     * @param recordId         идентификатор записи справочника (без учета версий)
+     * @param versionFrom      дата начала актуальности новой версии
+     * @param versionTo        дата окончания актуальности новой версии
      * @param excludedRecordId идентификатор версии записи справочника, которая исключается из проверки пересечения. Используется только при редактировании
      * @return результат проверки по каждой версии, с которой есть пересечение
      */
@@ -535,7 +562,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psCheckCrossVersions(refBook);
 
         return getNamedParameterJdbcTemplate().query(ps.getQueryString(), params, new RowMapper<CheckCrossVersionsResult>() {
-            
+
             public CheckCrossVersionsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
                 CheckCrossVersionsResult result = new CheckCrossVersionsResult();
                 result.setNum(SqlUtils.getInteger(rs, "NUM"));
@@ -555,8 +582,9 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Проверяет использование записи как родителя для дочерних
-     * @param refBook справочник
-     * @param parentId уникальный идентификатор записи
+     *
+     * @param refBook     справочник
+     * @param parentId    уникальный идентификатор записи
      * @param versionFrom дата начала актуальности новой версии
      * @return список пар <дата начала - дата окончания> периода актуальности обнаруженных дочерних записей
      */
@@ -569,7 +597,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psVersionUsedLikeParent(refBook);
         return getNamedParameterJdbcTemplate().query(ps.getQueryString(), parameters,
                 new RowMapper<Pair<Date, Date>>() {
-                    
+
                     public Pair<Date, Date> mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return new Pair<Date, Date>(rs.getDate("version"), rs.getDate("versionEnd"));
                     }
@@ -578,9 +606,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Возвращает дату начала версии следующей за указанной
+     *
      * @param refBook справочник
      * @param version дата актуальности
-     * @param filter фильтр для отбора записей. Обязательное поле, т.к записи не фильтруются по RECORD_ID
+     * @param filter  фильтр для отбора записей. Обязательное поле, т.к записи не фильтруются по RECORD_ID
      * @return дата начала следующей версии
      */
     @Override
@@ -590,7 +619,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         try {
             List<Date> versions = getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(),
                     new RowMapper<Date>() {
-                        
+
                         public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
                             return rs.getDate("version");
                         }
@@ -603,18 +632,19 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     private static final String SQL_GET_NEXT_RECORD_VERSION =
             "with nextVersion as (select r.id, r.record_id, r.status, r.version from %1$s r where r.record_id = :recordId and r.status != -1 and r.version  = \n" +
-            "\t(select min(version) from %1$s where record_id=r.record_id and status=0 and version > :versionFrom)),\n" +
-            "minNextVersion as (select r.record_id, min(r.version) version from %1$s r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.status != -1 group by r.record_id),\n" +
-            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %1$s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
-            "select nv.id as %2$s, nv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
-            "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
-            "from nextVersion nv \n" +
-            "left join nextVersionEnd nve on (nve.record_id= nv.record_id)";
+                    "\t(select min(version) from %1$s where record_id=r.record_id and status=0 and version > :versionFrom)),\n" +
+                    "minNextVersion as (select r.record_id, min(r.version) version from %1$s r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.status != -1 group by r.record_id),\n" +
+                    "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %1$s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
+                    "select nv.id as %2$s, nv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
+                    "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
+                    "from nextVersion nv \n" +
+                    "left join nextVersionEnd nve on (nve.record_id= nv.record_id)";
 
     /**
      * Возвращает данные о версии следующей за указанной
-     * @param refBook справочник
-     * @param recordId идентификатор записи справочника (без учета версий)
+     *
+     * @param refBook     справочник
+     * @param recordId    идентификатор записи справочника (без учета версий)
      * @param versionFrom дата начала актуальности версии текущей версии, после которой будет выполняться поиск следующей версии
      * @return данные версии
      */
@@ -636,18 +666,19 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     private static final String SQL_GET_PREVIOUS_RECORD_VERSION =
             "with previousVersion as (select r.id, r.record_id, r.status, r.version from %1$s r where r.record_id = :recordId and r.status = 0 and r.version  = \n" +
-            "\t(select max(version) from %1$s where record_id=r.record_id and status=0 and version < :versionFrom)),\n" +
-            "minNextVersion as (select r.record_id, min(r.version) version from %1$s r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.status != -1 group by r.record_id),\n" +
-            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %1$s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
-            "select pv.id as %2$s, pv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
-            "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
-            "from previousVersion pv \n" +
-            "left join nextVersionEnd nve on (nve.record_id= pv.record_id)";
+                    "\t(select max(version) from %1$s where record_id=r.record_id and status=0 and version < :versionFrom)),\n" +
+                    "minNextVersion as (select r.record_id, min(r.version) version from %1$s r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.status != -1 group by r.record_id),\n" +
+                    "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %1$s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
+                    "select pv.id as %2$s, pv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
+                    "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
+                    "from previousVersion pv \n" +
+                    "left join nextVersionEnd nve on (nve.record_id= pv.record_id)";
 
     /**
      * Возвращает данные о версии следующей до указанной
-     * @param refBook справочник
-     * @param recordId идентификатор записи справочника (без учета версий)
+     *
+     * @param refBook     справочник
+     * @param recordId    идентификатор записи справочника (без учета версий)
      * @param versionFrom дата начала актуальности версии текущей версии, после которой будет выполняться поиск следующей версии
      * @return данные версии
      */
@@ -669,9 +700,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Создает фиктивную запись, являющуюся датой окончания периода актуальности какой то версии
-     * @param refBook справочник
+     *
+     * @param refBook  справочник
      * @param recordId идентификатор записи справочника без учета версий
-     * @param version версия записи справочника
+     * @param version  версия записи справочника
      */
     @Override
     public void createFakeRecordVersion(RefBook refBook, Long recordId, Date version) {
@@ -683,9 +715,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     /**
      * Создает новые версии записи в справочнике.
      * Если задан параметр recordId - то создается новая версия записи справочника
+     *
      * @param refBook справочник
      * @param version дата актуальности новых записей
-     * @param status статус записи
+     * @param status  статус записи
      * @param records список новых записей
      * @return идентификатор записи справочника (без учета версий)
      */
@@ -750,11 +783,12 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Возвращает все версии указанной записи справочника
-     * @param refBook идентификатор справочник
+     *
+     * @param refBook        идентификатор справочник
      * @param uniqueRecordId уникальный идентификатор записи, все версии которой будут получены
-     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param filter условие фильтрации строк. Может быть не задано
-     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @param pagingParams   определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter         условие фильтрации строк. Может быть не задано
+     * @param sortAttribute  сортируемый столбец. Может быть не задан
      * @return
      */
     @Override
@@ -776,6 +810,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     /**
      * Проверяет существует ли циклическая зависимость для указанных записей справочника
      * Если среди дочерних элементов указанной записи существует указанный родительский элемент, то существует цикл
+     *
      * @param uniqueRecordId идентификатор записи
      * @param parentRecordId идентификатор родительской записи
      * @return циклическая зависимость существует?
@@ -789,9 +824,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Возвращает уникальный идентификатор записи, удовлетворяющей указанным условиям
-     * @param refBook справочник
+     *
+     * @param refBook  справочник
      * @param recordId идентификатор записи справочника (без учета версий)
-     * @param version дата
+     * @param version  дата
      * @return уникальный идентификатор записи, удовлетворяющей указанным условиям
      */
     @Override
@@ -811,15 +847,16 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     private static final String SQL_GET_RELATED_VERSIONS =
             "with currentRecord as (select id, record_id from %1$s where %2$s),\n" +
-            "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(%3$s) rn from %1$s r, currentRecord cr where r.record_id=cr.record_id and r.status != -1) \n" +
-            "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=%4$d";
+                    "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(%3$s) rn from %1$s r, currentRecord cr where r.record_id=cr.record_id and r.status != -1) \n" +
+                    "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=%4$d";
 
     private static final String SQL_GET_RELATED_VERSIONS_PARTITION = "partition by r.RECORD_ID order by r.version";
 
     /**
      * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии.
      * Без привязки ко входным параметрам, т.к метод используется просто для удаления по id
-     * @param refBook справочник
+     *
+     * @param refBook         справочник
      * @param uniqueRecordIds идентификаторы версии записи справочника
      * @return идентификаторы фиктивных версии
      */
@@ -847,9 +884,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Проверяет существование версий записи справочника
-     * @param refBook справочник
+     *
+     * @param refBook   справочник
      * @param recordIds идентификаторы записей справочника без учета версий
-     * @param version версия записи справочника
+     * @param version   версия записи справочника
      * @return
      */
     @Override
@@ -862,9 +900,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Обновляет значения атрибутов у указанной версии
-     * @param refBook справочник
+     *
+     * @param refBook        справочник
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @param record список значений атрибутов
+     * @param record         список значений атрибутов
      */
     @Override
     public void updateRecordVersion(RefBook refBook, Long uniqueRecordId, Map<String, RefBookValue> record) {
@@ -879,13 +918,14 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
-    private final static String SQL_GET_FIRST_RECORD_ID =
+    private final static String SQL_GET_FIRST_RECORD_ID = "" +
             "with allRecords as (select id, version from %1$s where record_id = (select record_id from %1$s where id = :id) and id != :id and status not in (-1, 2))\n" +
             "select id from allRecords where version = (select min(version) from allRecords)";
 
     /**
      * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
-     * @param refBook справочник
+     *
+     * @param refBook        справочник
      * @param uniqueRecordId идентификатор версии записи справочника
      * @return
      */
@@ -905,7 +945,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      * Удаляет все версии записи из справочника
-     * @param refBook справочник
+     *
+     * @param refBook         справочник
      * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
      */
     @Override
@@ -959,5 +1000,4 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
             return null;
         }
     }
-
 }

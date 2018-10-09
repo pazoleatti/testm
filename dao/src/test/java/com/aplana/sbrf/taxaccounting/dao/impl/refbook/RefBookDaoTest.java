@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.main.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookShortInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -49,12 +48,6 @@ public class RefBookDaoTest {
     public void testGet3() {
         RefBook refBook3 = refBookDao.get(3L);
         assertEquals("24af57ef-ec1c-455f-a4fa-f0fb29483066", refBook3.getScriptId());
-    }
-
-    @Test
-    public void testFetchAll() {
-        List<RefBook> refBooks = refBookDao.fetchAll();
-        assertThat(refBooks).hasSize(6);
     }
 
     @Test
@@ -94,15 +87,15 @@ public class RefBookDaoTest {
     public void testSetScriptId() {
 
         RefBook refBook = refBookDao.get(3L);
-        assertTrue(refBook.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
+        assertThat(refBook.getScriptId()).isEqualTo("24af57ef-ec1c-455f-a4fa-f0fb29483066");
 
         refBookDao.updateScriptId(3L, null);
         RefBook refBook1 = refBookDao.get(3L);
-        assertTrue(refBook1.getScriptId() == null);
+        assertThat(refBook1.getScriptId()).isNull();
 
         refBookDao.updateScriptId(3L, "24af57ef-ec1c-455f-a4fa-f0fb29483066");
         RefBook refBook2 = refBookDao.get(3L);
-        assertTrue(refBook2.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
+        assertThat(refBook2.getScriptId()).isEqualTo("24af57ef-ec1c-455f-a4fa-f0fb29483066");
     }
 
     @Test(expected = Exception.class)

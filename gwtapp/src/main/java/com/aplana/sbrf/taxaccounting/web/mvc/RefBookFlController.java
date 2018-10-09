@@ -161,17 +161,6 @@ public class RefBookFlController {
     }
 
     /**
-     * Возвращает серию + номер ДУЛ ФЛ
-     *
-     * @param personId идентификатор ФЛ
-     * @return серия + номер ДУЛ
-     */
-    @GetMapping(value = "/actions/refBookFL/getDocNumber/{personId}")
-    public String getPersonDocNumber(@PathVariable long personId) {
-        return personService.getPersonDocNumber(personId);
-    }
-
-    /**
      * Сохраняет изменения списке дубликатов и оригинале ФЛ
      *
      * @param data данные дубликатов и оригинала
