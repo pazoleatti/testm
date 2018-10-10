@@ -1122,7 +1122,7 @@
         'app.refBookList',
         'app.personCard',
         'app.linearRefBook',
-        'app.hierRefBook',
+        'app.departmentRefBook',
         'app.refBookConfList',
         'app.departmentConfig',
         'app.idDocRecordModal'

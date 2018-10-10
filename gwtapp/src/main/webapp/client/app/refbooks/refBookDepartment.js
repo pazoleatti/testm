@@ -4,12 +4,12 @@
     /**
      * @description Модуль для отображения иерархического справочника
      */
-    angular.module('app.hierRefBook', ['aplana.treeview'])
+    angular.module('app.departmentRefBook', ['aplana.treeview'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('hierRefBook', {
-                url: '/refBooks/hierRefBook/{refBookId}?uuid',
+            $stateProvider.state('departmentRefBook', {
+                url: '/refBooks/department/{refBookId}?uuid',
                 templateUrl: 'client/app/refbooks/refBookDepartment.html',
-                controller: 'hierRefBookCtrl',
+                controller: 'departmentRefBookCtrl',
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
                     function ($state, PermissionChecker, APP_CONSTANTS, $rootScope) {
                         if (!PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
@@ -19,7 +19,7 @@
             });
         }])
 
-        .controller('hierRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
+        .controller('departmentRefBookCtrl', ['$scope', "$stateParams", "$injector", "$compile", "APP_CONSTANTS",
             "RefBookResource", "RefBookValuesResource", "$aplanaModal", '$filter', "$http", "$logPanel",
             function ($scope, $stateParams, $injector, $compile, APP_CONSTANTS, RefBookResource, RefBookValuesResource, $aplanaModal, $filter, $http, $logPanel) {
                 $scope.search = {

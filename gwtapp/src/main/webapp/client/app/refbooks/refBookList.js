@@ -24,8 +24,8 @@
 
                 function linkFormatter(cellValue, options, row) {
                     var url;
-                    if (row.hierarchic) {
-                        url = $state.href('hierRefBook', {refBookId: row.id});
+                    if (row.id === APP_CONSTANTS.REFBOOK.DEPARTMENT) {
+                        url = $state.href('departmentRefBook', {refBookId: row.id});
                     } else {
                         url = $state.href('linearRefBook', {refBookId: row.id});
                     }
