@@ -44,7 +44,7 @@
         </delete>
     </changeSet>
 
-    <!--https://jira.aplana.com/browse/SBRFNDFL-5717 удалил справочник "Конфигурационные параметры"-->
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5494 удалил скрипт у справочника подразделений-->
     <changeSet id="3.2-dnovikov-5" author="dnovikov">
         <sql>
             update ref_book set script_id = null where id = 30
