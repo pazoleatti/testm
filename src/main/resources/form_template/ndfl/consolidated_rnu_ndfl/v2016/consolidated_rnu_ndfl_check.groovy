@@ -189,7 +189,7 @@ class Check extends AbstractScriptClass {
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
 
-    final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED;
+    final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED
 
     // Дата окончания отчетного периода
     Date periodEndDate = null
@@ -203,28 +203,28 @@ class Check extends AbstractScriptClass {
     public Check(scriptClass) {
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("departmentService")) {
-            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
-            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
         }
         if (scriptClass.getBinding().hasVariable("fiasRefBookService")) {
-            this.fiasRefBookService = (FiasRefBookService) scriptClass.getProperty("fiasRefBookService");
+            this.fiasRefBookService = (FiasRefBookService) scriptClass.getProperty("fiasRefBookService")
         }
         if (scriptClass.getBinding().hasVariable("calendarService")) {
-            this.calendarService = (CalendarService) scriptClass.getProperty("calendarService");
+            this.calendarService = (CalendarService) scriptClass.getProperty("calendarService")
         }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
-            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
-            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
         }
     }
 
@@ -233,9 +233,9 @@ class Check extends AbstractScriptClass {
         initConfiguration()
         switch (formDataEvent) {
             case FormDataEvent.CHECK:
-                ScriptUtils.checkInterrupted();
+                ScriptUtils.checkInterrupted()
 
-                long time = System.currentTimeMillis();
+                long time = System.currentTimeMillis()
                 // Реквизиты
                 List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_NAME, ndflPersonList.size())
@@ -252,41 +252,41 @@ class Check extends AbstractScriptClass {
                 List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT_NAME, ndflPersonPrepaymentList.size())
 
-                logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)");
+                logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)")
 
-                time = System.currentTimeMillis();
+                time = System.currentTimeMillis()
                 // ФЛ Map<person_id, RefBook>
                 Map<Long, Map<String, RefBookValue>> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
-                logForDebug("Проверки на соответствие справочникам / Выгрузка Реестра физических лиц (" + (System.currentTimeMillis() - time) + " мс)");
+                logForDebug("Проверки на соответствие справочникам / Выгрузка Реестра физических лиц (" + (System.currentTimeMillis() - time) + " мс)")
 
-                ScriptUtils.checkInterrupted();
+                ScriptUtils.checkInterrupted()
 
                 // Проверки на соответствие справочникам
                 checkDataReference(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList, personMap)
 
-                ScriptUtils.checkInterrupted();
+                ScriptUtils.checkInterrupted()
 
                 // Общие проверки
                 checkDataCommon(ndflPersonList, ndflPersonIncomeList, personMap)
 
-                ScriptUtils.checkInterrupted();
+                ScriptUtils.checkInterrupted()
 
                 // Проверки сведений о доходах
                 checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList, personMap)
 
-                ScriptUtils.checkInterrupted();
+                ScriptUtils.checkInterrupted()
 
                 // Проверки Сведения о вычетах
                 checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, personMap)
 
-                ScriptUtils.checkInterrupted();
+                ScriptUtils.checkInterrupted()
 
                 // Проверки Сведения о доходах в виде авансовых платежей
                 checkDataPrepayment(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList, personMap)
 
-                logForDebug("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
+                logForDebug("Все проверки (" + (System.currentTimeMillis() - time) + " мс)")
         }
     }
 
@@ -300,7 +300,7 @@ class Check extends AbstractScriptClass {
                     JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
                 """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(RefBook.Id.PERSON.id, whereClause, getReportPeriodEndDate() - 1)
-        Map<Long, Map<String, RefBookValue>> refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>();
+        Map<Long, Map<String, RefBookValue>> refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>()
         refBookMap.each { Long personId, Map<String, RefBookValue> refBookValue ->
             Long refBookRecordId = (Long) refBookValue.get(RF_RECORD_ID).value
             refBookMapResult.put(refBookRecordId, refBookValue)
@@ -333,7 +333,7 @@ class Check extends AbstractScriptClass {
             List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
             List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
 
-        long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis()
         // Страны
         Map<Long, String> citizenshipCodeMap = getRefCountryCode()
         logForDebug(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
@@ -362,25 +362,25 @@ class Check extends AbstractScriptClass {
         List<String> taxInspectionList = getRefNotifSource()
         logForDebug(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         // ИНП Map<person_id, List<RefBook>>
         Map<Long, List<Map<String, RefBookValue>>> inpMap = getActualRefInpMapByDeclarationDataId()
         logForDebug(SUCCESS_GET_TABLE, R_INP, inpMap.size())
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         // ДУЛ Map<person_id, List<RefBook>>
         def dulMap = getActualRefDulByDeclarationDataId()
         logForDebug(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)")
 
         // Получим Мапу адресов
         // Адреса
         def addressIds = []
         Map<Long, Map<String, RefBookValue>> addressMap = [:]
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         personMap.each { recordId, person ->
             // Сохраним идентификаторы адресов в коллекцию
             if (person.get(RF_ADDRESS).value != null) {
@@ -391,14 +391,14 @@ class Check extends AbstractScriptClass {
             addressMap = getRefAddress(addressIds)
             logForDebug(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
         }
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)")
 
         long timeIsExistsAddress = 0
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
         for (NdflPerson ndflPerson : ndflPersonList) {
 
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
             if (ndflPersonFL == null) {
@@ -416,7 +416,7 @@ class Check extends AbstractScriptClass {
             }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
-            long tIsExistsAddress = System.currentTimeMillis();
+            long tIsExistsAddress = System.currentTimeMillis()
             if (!isPersonAddressEmpty(ndflPerson)) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))) {
@@ -509,7 +509,7 @@ class Check extends AbstractScriptClass {
                     } else {
                         //Спр12.1 ИНП консолидированная - проверка соответствия RECORD_ID
                         //if (formType == CONSOLIDATE){}
-                        String recordId = String.valueOf(personRecord.get(RF_RECORD_ID).getNumberValue().longValue());
+                        String recordId = String.valueOf(personRecord.get(RF_RECORD_ID).getNumberValue().longValue())
                         if (!ndflPerson.inp.equals(recordId)) {
                             //TODO turn_to_error
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -604,14 +604,14 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
-        logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)");
+        logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -679,12 +679,12 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_INCOME_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_INCOME_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -710,12 +710,12 @@ class Check extends AbstractScriptClass {
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_NOTIF_SOURCE), fioAndInp, pathError, errMsg)
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
         for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
 
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -731,25 +731,25 @@ class Check extends AbstractScriptClass {
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_NOTIF_SOURCE), fioAndInp, pathError, errMsg)
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
     /**
      * Общие проверки
      */
     def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
-        long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis()
         long timeTotal = time
         // Параметры подразделения
         Map<String, List<String>> mapRefBookNdflDetail = getRefBookNdflDetail()
 
-        logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         for (NdflPerson ndflPerson : ndflPersonList) {
 
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
             if (ndflPersonFL == null) {
@@ -837,14 +837,14 @@ class Check extends AbstractScriptClass {
                         errMsg)
             }
         }
-        logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis();
+        time = System.currentTimeMillis()
 
         Department department = departmentService.get(declarationData.departmentId)
 
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             def operationId = ndflPersonIncome.operationId ?: ""
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
@@ -1075,11 +1075,11 @@ class Check extends AbstractScriptClass {
             }
         }
 
-        ScriptUtils.checkInterrupted();
+        ScriptUtils.checkInterrupted()
 
-        logForDebug("Общие проверки / '$T_PERSON_INCOME_NAME' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Общие проверки / '$T_PERSON_INCOME_NAME' (" + (System.currentTimeMillis() - time) + " мс)")
 
-        logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
+        logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
     }
 
     /**
@@ -1245,7 +1245,7 @@ class Check extends AbstractScriptClass {
 
         ndflPersonIncomeCache.each { Map.Entry<Long, List<NdflPersonIncome>> item ->
 
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             for (NdflPersonIncome ndflPersonIncome : item.value) {
                 NdflPerson ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
@@ -1305,7 +1305,7 @@ class Check extends AbstractScriptClass {
 
                 // СведДох3 НДФЛ.Процентная ставка (Графа 14)
                 if ((ndflPersonIncome.taxRate ?: 0) > 0) {
-                    boolean checkNdflPersonIncomingTaxRateTotal = false;
+                    boolean checkNdflPersonIncomingTaxRateTotal = false
 
                     boolean presentCitizenship = ndflPerson.citizenship != null && ndflPerson.citizenship != "0"
                     boolean presentIncomeCode = ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeCode != "0"
@@ -1876,7 +1876,7 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
-        logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
     /**
@@ -1927,7 +1927,7 @@ class Check extends AbstractScriptClass {
         }.groupBy({ it.ndflPersonId }, { it.operationId })
 
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             def operationId = ndflPersonDeduction.operationId
             def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(ndflPersonDeduction.ndflPersonId)?.get(operationId) ?: []
@@ -1975,7 +1975,7 @@ class Check extends AbstractScriptClass {
                     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
                     String strCorrPeriod = ""
                     if (departmentReportPeriod.getCorrectionDate() != null) {
-                        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+                        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy")
                     }
                     Department department = departmentService.get(departmentReportPeriod.departmentId)
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не входит в отчетный период налоговой формы \"%s\"",
@@ -2060,7 +2060,7 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
-        logForDebug("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
     /**
@@ -2552,16 +2552,16 @@ class Check extends AbstractScriptClass {
     class Column21EqualsColumn7Plus1WorkingDay extends TaxTransferDateConditionChecker {
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
-            Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(checkedIncome.taxTransferDate);
+            Calendar calendar21 = Calendar.getInstance()
+            calendar21.setTime(checkedIncome.taxTransferDate)
 
             // "Графа 7" + "1 рабочий день"
             int offset = 1
             Date workDay = dateConditionWorkDay.getWorkDay(checkedIncome.incomePayoutDate, offset)
-            Calendar calendar7 = Calendar.getInstance();
-            calendar7.setTime(workDay);
+            Calendar calendar7 = Calendar.getInstance()
+            calendar7.setTime(workDay)
 
-            return calendar21.equals(calendar7);
+            return calendar21.equals(calendar7)
         }
     }
 
@@ -2602,11 +2602,11 @@ class Check extends AbstractScriptClass {
             if (checkedIncome.taxTransferDate == null || checkedIncome.incomePayoutDate == null) {
                 return false
             }
-            Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(checkedIncome.taxTransferDate);
+            Calendar calendar21 = Calendar.getInstance()
+            calendar21.setTime(checkedIncome.taxTransferDate)
 
-            Calendar calendar7 = Calendar.getInstance();
-            calendar7.setTime(checkedIncome.incomePayoutDate);
+            Calendar calendar7 = Calendar.getInstance()
+            calendar7.setTime(checkedIncome.incomePayoutDate)
 
             // находим последний день месяца
             calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))
@@ -2614,9 +2614,9 @@ class Check extends AbstractScriptClass {
             // если последний день месяца приходится на выходной, то следующий первый рабочий день
             int offset = 0
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            calendar7.setTime(workDay);
+            calendar7.setTime(workDay)
 
-            return calendar21.equals(calendar7);
+            return calendar21.equals(calendar7)
         }
     }
 
@@ -2660,7 +2660,7 @@ class Check extends AbstractScriptClass {
         Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataVersionWhere(whereClause, version)
         if (refBookMap == null || refBookMap.size() == 0) {
             //throw new ScriptException("Не найдены записи справочника " + refBookId)
-            return Collections.emptyMap();
+            return Collections.emptyMap()
         }
         return refBookMap
     }
@@ -2676,7 +2676,7 @@ class Check extends AbstractScriptClass {
                 countryCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
             }
         }
-        return countryCodeCache;
+        return countryCodeCache
     }
 
     Map<Long, String> getRefDocumentTypeCode() {
@@ -2686,7 +2686,7 @@ class Check extends AbstractScriptClass {
                 documentTypeCodeCache.put(id, refBookValueMap?.get("CODE")?.getStringValue())
             }
         }
-        return documentTypeCodeCache;
+        return documentTypeCodeCache
     }
 
     /**
@@ -2700,7 +2700,7 @@ class Check extends AbstractScriptClass {
                 taxpayerStatusCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
             }
         }
-        return taxpayerStatusCodeCache;
+        return taxpayerStatusCodeCache
     }
 
     /**
@@ -2714,7 +2714,7 @@ class Check extends AbstractScriptClass {
         refBookMap.each { Map<String, RefBookValue> refBook ->
             mapResult.put((Long) refBook?.id?.numberValue, refBook)
         }
-        return mapResult;
+        return mapResult
     }
 
     /**
@@ -2748,7 +2748,7 @@ class Check extends AbstractScriptClass {
                 deductionTypeCache.add(refBook?.CODE?.stringValue)
             }
         }
-        return deductionTypeCache;
+        return deductionTypeCache
     }
 
     /**
@@ -2762,7 +2762,7 @@ class Check extends AbstractScriptClass {
                 taxInspectionCache.add(refBook?.CODE?.stringValue)
             }
         }
-        return taxInspectionCache;
+        return taxInspectionCache
     }
 
     /**
@@ -2798,12 +2798,12 @@ class Check extends AbstractScriptClass {
             Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_DOC.id, whereClause)
 
             refBookMap.each { Long personId, Map<String, RefBookValue> refBookValues ->
-                Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
-                Map<Long, Map<String, RefBookValue>> dulMap = dulActualCache.get(refBookPersonId);
+                Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue()
+                Map<Long, Map<String, RefBookValue>> dulMap = dulActualCache.get(refBookPersonId)
                 if (dulMap == null) {
-                    dulMap = new HashMap<Long, Map<String, RefBookValue>>();
+                    dulMap = new HashMap<Long, Map<String, RefBookValue>>()
                 }
-                dulMap.put(personId, refBookValues);
+                dulMap.put(personId, refBookValues)
                 dulActualCache.put(refBookPersonId, dulMap)
             }
         }
@@ -2821,7 +2821,7 @@ class Check extends AbstractScriptClass {
                 addressCache.put(addressId, address)
             }
         }
-        return addressCache;
+        return addressCache
     }
 
     /**
@@ -2833,8 +2833,8 @@ class Check extends AbstractScriptClass {
         boolean emptyAddress = ScriptUtils.isEmpty(ndflPerson.regionCode) && ScriptUtils.isEmpty(ndflPerson.area) &&
                 ScriptUtils.isEmpty(ndflPerson.city) && ScriptUtils.isEmpty(ndflPerson.locality) &&
                 ScriptUtils.isEmpty(ndflPerson.street) && ScriptUtils.isEmpty(ndflPerson.house) &&
-                ScriptUtils.isEmpty(ndflPerson.building) && ScriptUtils.isEmpty(ndflPerson.flat);
-        return emptyAddress;
+                ScriptUtils.isEmpty(ndflPerson.building) && ScriptUtils.isEmpty(ndflPerson.flat)
+        return emptyAddress
     }
 
     void logFiasError(String fioAndInp, String pathError, String name, String value) {
@@ -2979,7 +2979,7 @@ class Check extends AbstractScriptClass {
                 documentTypeCache.put((Long) refBook?.id?.numberValue, refBook)
             }
         }
-        return documentTypeCache;
+        return documentTypeCache
     }
 
     /**
@@ -3007,7 +3007,7 @@ class Check extends AbstractScriptClass {
         Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
         if (refBookMap == null || refBookMap.size() == 0) {
             //throw new ScriptException("Не найдены записи справочника " + refBookId)
-            return Collections.emptyMap();
+            return Collections.emptyMap()
         }
         return refBookMap
     }
