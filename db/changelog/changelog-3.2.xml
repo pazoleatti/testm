@@ -92,4 +92,15 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.2-dnovikov-10" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.2/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.2/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 5</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

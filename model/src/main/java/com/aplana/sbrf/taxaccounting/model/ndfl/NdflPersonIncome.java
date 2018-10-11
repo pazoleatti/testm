@@ -301,6 +301,19 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.modifiedBy = modifiedBy;
     }
 
+    /**
+     * Является ли строка фиктивной
+     */
+    public boolean isDummy() {
+        return "0".equals(operationId) && equalsZero(taxBase) && taxRate == 0 &&
+                (equalsZero(incomeAccruedSumm) && equalsZero(calculatedTax) ||
+                        equalsZero(incomePayoutSumm) && equalsZero(withholdingTax));
+    }
+
+    private boolean equalsZero(BigDecimal x) {
+        return x != null && new BigDecimal("0").compareTo(x) == 0;
+    }
+
     @Override
     public String toString() {
         return "NdflPersonIncomeFilter{" +
