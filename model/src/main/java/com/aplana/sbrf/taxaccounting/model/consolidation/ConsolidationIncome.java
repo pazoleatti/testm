@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.consolidation;
 
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -19,27 +20,27 @@ public class ConsolidationIncome extends NdflPersonIncome {
     private Long asnuId;
 
     /**
-     *  Идентификатор ПНФ к которой относится операция
+     * Идентификатор ПНФ к которой относится операция
      */
     private Long declarationDataId;
 
     /**
-     *  Флаг указывающий принята ли ПНФ к которой относится операция
+     * Флаг указывающий принята ли ПНФ к которой относится операция
      */
     private Boolean accepted;
 
     /**
-     *  Год отчетного периода ПНФ операции
+     * Год отчетного периода ПНФ операции
      */
     private Integer year;
 
     /**
-     *  Код отчетного периода ПНФ операции
+     * Код отчетного периода ПНФ операции
      */
     private String periodCode;
 
     /**
-     *  Дата корректировки
+     * Дата корректировки
      */
     private Date correctionDate;
 
@@ -129,5 +130,18 @@ public class ConsolidationIncome extends NdflPersonIncome {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    /**
+     * Является ли строка фиктивной
+     */
+    public boolean isDummy() {
+        return "0".equals(operationId) && equalsZero(taxBase) && taxRate == 0 &&
+                (equalsZero(incomeAccruedSumm) && equalsZero(calculatedTax) ||
+                        equalsZero(incomePayoutSumm) && equalsZero(withholdingTax));
+    }
+
+    private boolean equalsZero(BigDecimal x) {
+        return x != null && new BigDecimal("0").compareTo(x) == 0;
     }
 }
