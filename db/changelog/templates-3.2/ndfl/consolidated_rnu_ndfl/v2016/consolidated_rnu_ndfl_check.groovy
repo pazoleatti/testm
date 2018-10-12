@@ -336,14 +336,11 @@ class Check extends AbstractScriptClass {
         for (def personId : incomesByPersonId.keySet()) {
             ScriptUtils.checkInterrupted()
             def incomesOfPerson = incomesByPersonId.get(personId)
-            def iterator = incomesOfPerson.iterator()
-            while (iterator.hasNext()) {
-                NdflPersonIncome income = iterator.next()
+            for (def income : incomesOfPerson) {
                 NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(income.ndflPersonId)
                 String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, income.operationId])
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
                 if (income.isDummy()) {
-                    iterator.remove()
                     if (incomesOfPerson.size() > 1) {
                         String errMsg = String.format("У ФЛ: %s в Разделе 2 имеется более одной строки, несмотря на то, " +
                                 "что текущая строка (для которой ставка налога = 0, ID операции = 0) показывает отсутствие операций по данному ФЛ.",
