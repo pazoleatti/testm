@@ -6,9 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -161,7 +159,7 @@ public class RefBookPersonServiceTest {
         result.setSnils(snils);
 
         result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
-        result.getPersonDocumentList().add(createPersonDocument(5L, 1, docNumber));
+        result.getDocuments().add(createPersonDocument(5L, 1, docNumber));
 
         result.setLastName(lastName);
         result.setFirstName(firstName);
@@ -187,7 +185,7 @@ public class RefBookPersonServiceTest {
         result.setRecordId(id);
 
         result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
-        result.getPersonDocumentList().add(createPersonDocument(5L, 1, docNumber));
+        result.getDocuments().add(createPersonDocument(5L, 1, docNumber));
 
         result.setInn(inn);
         result.setInnForeign(innForeign);

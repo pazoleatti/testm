@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.components;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,11 +15,11 @@ public class RegistryPersonUpdateQueryBuilder {
      * @param changedFields список изменнных полей
      * @return  Построенный запрос
      */
-    public String buildPersonUpdateQuery(List<RegistryPerson.UpdatableField> changedFields) {
+    public String buildPersonUpdateQuery(List<RegistryPersonDTO.UpdatableField> changedFields) {
         StringBuilder result = new StringBuilder("UPDATE ref_book_person set");
         StringBuilder fieldsBuilder = new StringBuilder();
 
-        for (RegistryPerson.UpdatableField changedField : changedFields) {
+        for (RegistryPersonDTO.UpdatableField changedField : changedFields) {
             switch (changedField) {
                 case VERSION:
                     fieldsBuilder.append("version = :")
@@ -103,11 +103,11 @@ public class RegistryPersonUpdateQueryBuilder {
      * @param changedFields список изменнных полей
      * @return  Построенный запрос
      */
-    public String buildAddressUpdateQuery(List<RegistryPerson.UpdatableField> changedFields) {
+    public String buildAddressUpdateQuery(List<RegistryPersonDTO.UpdatableField> changedFields) {
         StringBuilder result = new StringBuilder("UPDATE ref_book_address set");
         StringBuilder fieldsBuilder = new StringBuilder();
 
-        for (RegistryPerson.UpdatableField changedField : changedFields) {
+        for (RegistryPersonDTO.UpdatableField changedField : changedFields) {
             switch (changedField) {
                 case REGION_CODE:
                     fieldsBuilder.append("region_code = :")

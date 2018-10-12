@@ -1,17 +1,19 @@
-package com.aplana.sbrf.taxaccounting.model.identification;
+package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author Andrey Drunk
  */
-public class PersonDocument extends RefBookObject {
+public class PersonDocument extends IdentityObject<Long> {
 
     /**
      * Ссылка на ФЛ
      */
-    private NaturalPerson naturalPerson;
+    private RegistryPerson person;
 
     /**
      * Тип документа
@@ -28,6 +30,15 @@ public class PersonDocument extends RefBookObject {
      */
     private Integer incRep;
 
+    public static final String TABLE_NAME = "ref_book_id_doc";
+
+    public static final String[] COLUMNS = {"id", "person_id", "doc_id", "doc_number", "inc_rep"};
+
+    /**
+     * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
+     */
+    public static final String[] FIELDS = {"id", "person.id", "docType.id", "documentNumber", "incRep"};
+
 
     public DocType getDocType() {
         return docType;
@@ -37,12 +48,12 @@ public class PersonDocument extends RefBookObject {
         this.docType = docType;
     }
 
-    public NaturalPerson getNaturalPerson() {
-        return naturalPerson;
+    public RegistryPerson getPerson() {
+        return person;
     }
 
-    public void setNaturalPerson(NaturalPerson naturalPerson) {
-        this.naturalPerson = naturalPerson;
+    public void setPerson(RegistryPerson person) {
+        this.person = person;
     }
 
     public String getDocumentNumber() {

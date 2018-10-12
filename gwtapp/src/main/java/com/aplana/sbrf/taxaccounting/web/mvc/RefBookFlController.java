@@ -4,13 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.service.IdDocService;
@@ -132,7 +131,7 @@ public class RefBookFlController {
      * @return оригинал ФЛ
      */
     @GetMapping(value = "/actions/refBookFL/fetchOriginal/{id}")
-    public RegistryPerson fetchOriginal(@PathVariable Long id) {
+    public RegistryPersonDTO fetchOriginal(@PathVariable Long id) {
         return personService.fetchOriginal(id, new Date());
     }
 
@@ -143,7 +142,7 @@ public class RefBookFlController {
      * @return объект версии ФЛ
      */
     @GetMapping(value = "/rest/personRegistry/fetch/{id}")
-    public RegistryPerson fetchPerson(@PathVariable Long id) {
+    public RegistryPersonDTO fetchPerson(@PathVariable Long id) {
         return personService.fetchPerson(id);
     }
 
@@ -155,8 +154,8 @@ public class RefBookFlController {
      * @return Страница списка дубликатов ФЛ
      */
     @GetMapping(value = "/actions/refBookFL/fetchDuplicates/{personId}")
-    public JqgridPagedList<RegistryPerson> fetchDuplicates(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
-        PagingResult<RegistryPerson> duplicates = personService.fetchDuplicates(personId, new Date(), pagingParams);
+    public JqgridPagedList<RegistryPersonDTO> fetchDuplicates(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
+        PagingResult<RegistryPersonDTO> duplicates = personService.fetchDuplicates(personId, new Date(), pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(duplicates, duplicates.getTotalCount(), pagingParams);
     }
 
@@ -183,7 +182,7 @@ public class RefBookFlController {
      * @return ответ сервера
      */
     @PostMapping(value = "/actions/registryPerson/updatePerson")
-    public ResponseEntity updateRegistryPerson(@RequestBody RegistryPerson person) {
+    public ResponseEntity updateRegistryPerson(@RequestBody RegistryPersonDTO person) {
         personService.updateRegistryPerson(person);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -195,7 +194,7 @@ public class RefBookFlController {
      * @return стандартный ответ сервера
      */
     @PostMapping(value = "/actions/registryPerson/checkVersionOverlapping")
-    public ResponseEntity checkVersionOverlapping(@RequestBody RegistryPerson person) {
+    public ResponseEntity checkVersionOverlapping(@RequestBody RegistryPersonDTO person) {
         personService.checkVersionOverlapping(person);
         return new ResponseEntity<>(HttpStatus.OK);
     }

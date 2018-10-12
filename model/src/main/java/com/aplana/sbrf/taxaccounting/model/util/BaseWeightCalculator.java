@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.model.util;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -183,7 +183,7 @@ public abstract class BaseWeightCalculator<T> implements WeightCalculator<T> {
     }
 
     public static PersonDocument findDocument(NaturalPerson person, Long docTypeId, String docNumber) {
-        for (PersonDocument personDocument : person.getPersonDocumentList()) {
+        for (PersonDocument personDocument : person.getDocuments()) {
             DocType docType = personDocument.getDocType();
             if (docType != null) {
                 if (isValueEquals(docTypeId, docType.getId())

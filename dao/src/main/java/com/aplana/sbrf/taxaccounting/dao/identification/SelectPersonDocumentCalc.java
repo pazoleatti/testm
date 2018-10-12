@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.identification.Country;
+import com.aplana.sbrf.taxaccounting.model.refbook.Country;
 import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.components;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -24,7 +24,7 @@ public class RegistryPersonUpdateQueryBuilderTest {
     @Test
     public void test_buildPersonUpdateQuery_nothingToUpdate() {
         //setup
-        List<RegistryPerson.UpdatableField> params = new ArrayList<>();
+        List<RegistryPersonDTO.UpdatableField> params = new ArrayList<>();
         //execution
         String result = builder.buildPersonUpdateQuery(params);
         //verification
@@ -34,19 +34,19 @@ public class RegistryPersonUpdateQueryBuilderTest {
     @Test
     public void test_buildPersonUpdateQuery() {
         //setup
-        ArrayList<RegistryPerson.UpdatableField> params = new ArrayList<>();
-        params.add(RegistryPerson.UpdatableField.LAST_NAME);
-        params.add(RegistryPerson.UpdatableField.FIRST_NAME);
-        params.add(RegistryPerson.UpdatableField.MIDDLE_NAME);
-        params.add(RegistryPerson.UpdatableField.BIRTH_DATE);
-        params.add(RegistryPerson.UpdatableField.CITIZENSHIP);
-        params.add(RegistryPerson.UpdatableField.REPORT_DOC);
-        params.add(RegistryPerson.UpdatableField.INN);
-        params.add(RegistryPerson.UpdatableField.INN_FOREIGN);
-        params.add(RegistryPerson.UpdatableField.SNILS);
-        params.add(RegistryPerson.UpdatableField.TAX_PAYER_STATE);
-        params.add(RegistryPerson.UpdatableField.SOURCE);
-        params.add(RegistryPerson.UpdatableField.VIP);
+        ArrayList<RegistryPersonDTO.UpdatableField> params = new ArrayList<>();
+        params.add(RegistryPersonDTO.UpdatableField.LAST_NAME);
+        params.add(RegistryPersonDTO.UpdatableField.FIRST_NAME);
+        params.add(RegistryPersonDTO.UpdatableField.MIDDLE_NAME);
+        params.add(RegistryPersonDTO.UpdatableField.BIRTH_DATE);
+        params.add(RegistryPersonDTO.UpdatableField.CITIZENSHIP);
+        params.add(RegistryPersonDTO.UpdatableField.REPORT_DOC);
+        params.add(RegistryPersonDTO.UpdatableField.INN);
+        params.add(RegistryPersonDTO.UpdatableField.INN_FOREIGN);
+        params.add(RegistryPersonDTO.UpdatableField.SNILS);
+        params.add(RegistryPersonDTO.UpdatableField.TAX_PAYER_STATE);
+        params.add(RegistryPersonDTO.UpdatableField.SOURCE);
+        params.add(RegistryPersonDTO.UpdatableField.VIP);
         //execution
         String result = builder.buildPersonUpdateQuery(params);
         //verification
@@ -59,7 +59,7 @@ public class RegistryPersonUpdateQueryBuilderTest {
     @Test
     public void test_buildAddressUpdateQuery_nothingToUpdate() {
         //setup
-        List<RegistryPerson.UpdatableField> params = new ArrayList<>();
+        List<RegistryPersonDTO.UpdatableField> params = new ArrayList<>();
         //execution
         String result = builder.buildAddressUpdateQuery(params);
         //verification
@@ -69,18 +69,18 @@ public class RegistryPersonUpdateQueryBuilderTest {
     @Test
     public void test_buildAddressUpdateQuery() {
         //setup
-        ArrayList<RegistryPerson.UpdatableField> params = new ArrayList<>();
-        params.add(RegistryPerson.UpdatableField.REGION_CODE);
-        params.add(RegistryPerson.UpdatableField.POSTAL_CODE);
-        params.add(RegistryPerson.UpdatableField.DISTRICT);
-        params.add(RegistryPerson.UpdatableField.CITY);
-        params.add(RegistryPerson.UpdatableField.LOCALITY);
-        params.add(RegistryPerson.UpdatableField.STREET);
-        params.add(RegistryPerson.UpdatableField.HOUSE);
-        params.add(RegistryPerson.UpdatableField.BUILD);
-        params.add(RegistryPerson.UpdatableField.APPARTMENT);
-        params.add(RegistryPerson.UpdatableField.COUNTRY_ID);
-        params.add(RegistryPerson.UpdatableField.ADDRESS);
+        ArrayList<RegistryPersonDTO.UpdatableField> params = new ArrayList<>();
+        params.add(RegistryPersonDTO.UpdatableField.REGION_CODE);
+        params.add(RegistryPersonDTO.UpdatableField.POSTAL_CODE);
+        params.add(RegistryPersonDTO.UpdatableField.DISTRICT);
+        params.add(RegistryPersonDTO.UpdatableField.CITY);
+        params.add(RegistryPersonDTO.UpdatableField.LOCALITY);
+        params.add(RegistryPersonDTO.UpdatableField.STREET);
+        params.add(RegistryPersonDTO.UpdatableField.HOUSE);
+        params.add(RegistryPersonDTO.UpdatableField.BUILD);
+        params.add(RegistryPersonDTO.UpdatableField.APPARTMENT);
+        params.add(RegistryPersonDTO.UpdatableField.COUNTRY_ID);
+        params.add(RegistryPersonDTO.UpdatableField.ADDRESS);
         //execution
         String result = builder.buildAddressUpdateQuery(params);
         //verification

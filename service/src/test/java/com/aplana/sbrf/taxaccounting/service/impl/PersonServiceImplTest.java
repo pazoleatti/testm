@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.IdDocDaoImpl;
+import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
+import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQueryBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.assertj.core.api.Assertions;
@@ -42,8 +43,22 @@ public class PersonServiceImplTest {
     private BasePermissionEvaluator basePermissionEvaluator;
     @Mock
     private RegistryPersonUpdateQueryBuilder registryPersonUpdateQueryBuilder;
+    @Mock
+    private IdDocDaoImpl idDocDaoImpl;
+    @Mock
+    private IdTaxPayerDaoImpl idTaxPayerDaoImpl;
+    @Mock
+    private PersonTbDaoImpl personTbDaoImpl;
+    @Mock
+    private DBUtils dbUtils;
     @Captor
-    private ArgumentCaptor<List<RegistryPerson.UpdatableField>> personFieldsToUpdate;
+    private ArgumentCaptor<List<RegistryPersonDTO.UpdatableField>> personFieldsToUpdate;
+    @Captor
+    ArgumentCaptor<List<PersonDocument>> idDocs;
+    @Captor
+    ArgumentCaptor<List<PersonIdentifier>> idTaxPayers;
+    @Captor
+    ArgumentCaptor<List<PersonTb>> personTbs;
 
     private static Method resolvePersonMethod;
 
@@ -250,10 +265,10 @@ public class PersonServiceImplTest {
 
     @Test
     public void test_resolvePersonMethod_whenActualVersionPresentAndBoundedActualVersion() throws InvocationTargetException, IllegalAccessException {
-        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson4 = mock(RegistryPerson.class);
+        RegistryPersonDTO registryPerson1 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson2 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson3 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson4 = mock(RegistryPersonDTO.class);
         when(registryPerson1.getVersion()).thenReturn(new Date(10L));
         when(registryPerson2.getVersion()).thenReturn(new Date(20L));
         when(registryPerson3.getVersion()).thenReturn(new Date(30L));
@@ -262,22 +277,22 @@ public class PersonServiceImplTest {
         when(registryPerson2.getState()).thenReturn(0);
         when(registryPerson3.getState()).thenReturn(0);
         when(registryPerson4.getState()).thenReturn(2);
-        List<RegistryPerson> persons = new ArrayList<>();
+        List<RegistryPersonDTO> persons = new ArrayList<>();
         persons.add(registryPerson1);
         persons.add(registryPerson2);
         persons.add(registryPerson3);
         persons.add(registryPerson4);
         Collections.sort(persons, new VersionComparator());
-        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+        RegistryPersonDTO result = (RegistryPersonDTO) resolvePersonMethod.invoke(personService, persons, new Date(25L));
 
         assertThat(new Date(20L), is(equalTo(result.getVersion())));
     }
 
     @Test
     public void test_resolvePersonMethod_whenActualVersionPresentAndBoundedDummyVersion() throws InvocationTargetException, IllegalAccessException {
-        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+        RegistryPersonDTO registryPerson1 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson2 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson3 = mock(RegistryPersonDTO.class);
 
         when(registryPerson1.getVersion()).thenReturn(new Date(10L));
         when(registryPerson2.getVersion()).thenReturn(new Date(20L));
@@ -287,22 +302,22 @@ public class PersonServiceImplTest {
         when(registryPerson2.getState()).thenReturn(0);
         when(registryPerson3.getState()).thenReturn(2);
 
-        List<RegistryPerson> persons = new ArrayList<>();
+        List<RegistryPersonDTO> persons = new ArrayList<>();
         persons.add(registryPerson1);
         persons.add(registryPerson2);
         persons.add(registryPerson3);
 
         Collections.sort(persons, new VersionComparator());
-        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+        RegistryPersonDTO result = (RegistryPersonDTO) resolvePersonMethod.invoke(personService, persons, new Date(25L));
 
         assertThat(new Date(20L), is(equalTo(result.getVersion())));
     }
 
     @Test
     public void test_resolvePersonMethod_whenAllVersionsAfterActual() throws InvocationTargetException, IllegalAccessException {
-        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+        RegistryPersonDTO registryPerson1 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson2 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson3 = mock(RegistryPersonDTO.class);
 
         when(registryPerson1.getVersion()).thenReturn(new Date(30L));
         when(registryPerson2.getVersion()).thenReturn(new Date(40L));
@@ -312,22 +327,22 @@ public class PersonServiceImplTest {
         when(registryPerson2.getState()).thenReturn(0);
         when(registryPerson3.getState()).thenReturn(2);
 
-        List<RegistryPerson> persons = new ArrayList<>();
+        List<RegistryPersonDTO> persons = new ArrayList<>();
         persons.add(registryPerson1);
         persons.add(registryPerson2);
         persons.add(registryPerson3);
 
         Collections.sort(persons, new VersionComparator());
-        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+        RegistryPersonDTO result = (RegistryPersonDTO) resolvePersonMethod.invoke(personService, persons, new Date(25L));
 
         assertThat(new Date(30L), is(equalTo(result.getVersion())));
     }
 
     @Test
     public void test_resolvePersonMethod_whenAllVersionsBeforeActual() throws InvocationTargetException, IllegalAccessException {
-        RegistryPerson registryPerson1 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson2 = mock(RegistryPerson.class);
-        RegistryPerson registryPerson3 = mock(RegistryPerson.class);
+        RegistryPersonDTO registryPerson1 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson2 = mock(RegistryPersonDTO.class);
+        RegistryPersonDTO registryPerson3 = mock(RegistryPersonDTO.class);
 
         when(registryPerson1.getVersion()).thenReturn(new Date(5L));
         when(registryPerson2.getVersion()).thenReturn(new Date(10L));
@@ -337,13 +352,13 @@ public class PersonServiceImplTest {
         when(registryPerson2.getState()).thenReturn(0);
         when(registryPerson3.getState()).thenReturn(2);
 
-        List<RegistryPerson> persons = new ArrayList<>();
+        List<RegistryPersonDTO> persons = new ArrayList<>();
         persons.add(registryPerson1);
         persons.add(registryPerson2);
         persons.add(registryPerson3);
 
         Collections.sort(persons, new VersionComparator());
-        RegistryPerson result = (RegistryPerson) resolvePersonMethod.invoke(personService, persons, new Date(25L));
+        RegistryPersonDTO result = (RegistryPersonDTO) resolvePersonMethod.invoke(personService, persons, new Date(25L));
 
         assertThat(new Date(10L), is(equalTo(result.getVersion())));
     }
@@ -353,8 +368,8 @@ public class PersonServiceImplTest {
     public void test_updateRegistryPerson_whenVipPersonAndAccessGranted() {
         //setup
         Date version = new Date(0);
-        RegistryPerson person = mock(RegistryPerson.class);
-        final RegistryPerson persistedPerson = mock(RegistryPerson.class);
+        RegistryPersonDTO person = mock(RegistryPersonDTO.class);
+        final RegistryPersonDTO persistedPerson = mock(RegistryPersonDTO.class);
         doReturn(persistedPerson).when(personService).fetchPerson(anyLong());
         when(basePermissionEvaluator.hasPermission(any(Authentication.class), any(), any())).thenReturn(true);
         when(person.getLastName()).thenReturn("ИзмФам");
@@ -369,16 +384,16 @@ public class PersonServiceImplTest {
         //verification
         verify(registryPersonUpdateQueryBuilder).buildPersonUpdateQuery(personFieldsToUpdate.capture());
         Assertions.assertThat(personFieldsToUpdate.getValue().size()).isEqualTo(2);
-        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.LAST_NAME);
-        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.INN);
+        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPersonDTO.UpdatableField.LAST_NAME);
+        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPersonDTO.UpdatableField.INN);
     }
 
     @Test
     public void test_updateRegistryPerson_whenVipPersonAndAccessDisabled() {
         //setup
         Date version = new Date(0);
-        RegistryPerson person = mock(RegistryPerson.class);
-        final RegistryPerson persistedPerson = mock(RegistryPerson.class);
+        RegistryPersonDTO person = mock(RegistryPersonDTO.class);
+        final RegistryPersonDTO persistedPerson = mock(RegistryPersonDTO.class);
         doReturn(persistedPerson).when(personService).fetchPerson(anyLong());
         when(basePermissionEvaluator.hasPermission(any(Authentication.class), any(), any())).thenReturn(false);
         when(person.getLastName()).thenReturn("ИзмФам");
@@ -393,7 +408,7 @@ public class PersonServiceImplTest {
         //verification
         verify(registryPersonUpdateQueryBuilder).buildPersonUpdateQuery(personFieldsToUpdate.capture());
         Assertions.assertThat(personFieldsToUpdate.getValue().size()).isEqualTo(1);
-        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPerson.UpdatableField.LAST_NAME);
+        Assertions.assertThat(personFieldsToUpdate.getValue()).contains(RegistryPersonDTO.UpdatableField.LAST_NAME);
     }
 
 
@@ -427,7 +442,7 @@ public class PersonServiceImplTest {
         TAUserInfo userInfo = mock(TAUserInfo.class);
         when(action.getAddedOriginalVersionId()).thenReturn(1L);
 
-        RegistryPerson person = mock(RegistryPerson.class);
+        RegistryPersonDTO person = mock(RegistryPersonDTO.class);
         when(person.getOldId()).thenReturn(1L);
         when(person.getRecordId()).thenReturn(1L);
         when(personDao.fetchPersonWithVersionInfo(anyLong())).thenReturn(person);
@@ -446,7 +461,7 @@ public class PersonServiceImplTest {
         when(action.getAddedDuplicates()).thenReturn(addedDuplicates);
         when(action.getAddedOriginalVersionId()).thenReturn(1L);
 
-        RegistryPerson person = mock(RegistryPerson.class);
+        RegistryPersonDTO person = mock(RegistryPersonDTO.class);
         when(person.getOldId()).thenReturn(1L);
         when(person.getRecordId()).thenReturn(1L);
         when(personDao.fetchPersonWithVersionInfo(anyLong())).thenReturn(person);
@@ -465,7 +480,7 @@ public class PersonServiceImplTest {
         when(action.getDeletedDuplicates()).thenReturn(deletedDuplicates);
         when(action.getAddedOriginalVersionId()).thenReturn(1L);
 
-        RegistryPerson person = mock(RegistryPerson.class);
+        RegistryPersonDTO person = mock(RegistryPersonDTO.class);
         when(person.getOldId()).thenReturn(1L);
         when(person.getRecordId()).thenReturn(1L);
         when(personDao.fetchPersonWithVersionInfo(anyLong())).thenReturn(person);
@@ -475,9 +490,49 @@ public class PersonServiceImplTest {
         verify(personDao).deleteDuplicates(deletedDuplicates);
     }
 
-    private static class VersionComparator implements Comparator<RegistryPerson> {
+    @Test
+    public void test_savePersons() {
+        // setUp
+        List<RegistryPerson> personList = new ArrayList<>();
+
+        RegistryPerson person1 = mock(RegistryPerson.class);
+        RegistryPerson person2 = mock(RegistryPerson.class);
+
+        List<PersonDocument> idDocs1 = new ArrayList<>();
+        List<PersonIdentifier> idTaxPayers1 = new ArrayList<>();
+        List<PersonTb> personTbs1 = new ArrayList<>();
+        List<PersonDocument> idDocs2 = new ArrayList<>();
+        List<PersonIdentifier> idTaxPayers2 = new ArrayList<>();
+        List<PersonTb> personTbs2 = new ArrayList<>();
+
+        when(person1.getDocuments()).thenReturn(idDocs1);
+        when(person1.getPersonIdentityList()).thenReturn(idTaxPayers1);
+        when(person1.getPersonTbList()).thenReturn(personTbs1);
+        when(person2.getDocuments()).thenReturn(idDocs2);
+        when(person2.getPersonIdentityList()).thenReturn(idTaxPayers2);
+        when(person2.getPersonTbList()).thenReturn(personTbs2);
+
+        List<Long> personIds = Collections.singletonList(1L);
+        when(dbUtils.getNextRefBookRecordIds(anyInt())).thenReturn(personIds);
+        when(dbUtils.getNextIds(any(DBUtils.Sequence.class), anyInt())).thenReturn(personIds);
+
+        personList.addAll(Arrays.asList(person1, person2));
+
+        // execute
+        personService.savePersons(personList);
+
+        //verify
+        verify(personDao).saveBatch(personList);
+        verify(idDocDaoImpl).saveBatch(idDocs.capture());
+        verify(idTaxPayerDaoImpl).saveBatch(idTaxPayers.capture());
+        verify(personTbDaoImpl).saveBatch(personTbs.capture());
+        verify(personDao).updateBatch(personList);
+
+    }
+
+    private static class VersionComparator implements Comparator<RegistryPersonDTO> {
         @Override
-        public int compare(RegistryPerson o1, RegistryPerson o2) {
+        public int compare(RegistryPersonDTO o1, RegistryPersonDTO o2) {
             return o2.getVersion().compareTo(o1.getVersion());
         }
     }

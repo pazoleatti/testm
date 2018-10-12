@@ -1,10 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -26,6 +30,8 @@ public abstract class AbstractDao {
 
     @Autowired
     private DBInfo dbInfo;
+    @Autowired
+    private DBUtilsImpl dbUtils;
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -100,5 +106,28 @@ public abstract class AbstractDao {
      */
     protected List<Long> getSubList(List<Long> list, int i) {
         return list.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, list.size()));
+    }
+
+    /**
+     * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
+     *
+     * @param identityObjects объекты обладающий суррогатным ключом
+     * @param table           наименование таблицы используемой для хранения данных объекта
+     * @param seq             наименование последовательностт используемой для генерации ключей
+     * @param columns         массив содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields          массив содержащий наименования параметров соответствующих столбцам
+     * @param <E>             тип объекта
+     */
+    protected  <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
+        List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
+        String insert = SqlUtils.createInsert(table, seq, columns, fields);
+        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
+        int i = 0;
+        for (E identityObject : identityObjects) {
+            identityObject.setId(ids.get(i));
+            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
+            i++;
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
     }
 }

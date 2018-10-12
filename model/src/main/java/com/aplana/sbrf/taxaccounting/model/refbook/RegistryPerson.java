@@ -1,31 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.identification.*;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
-/**
- * Модель физлица для работы с реестром физлиц. Записи реестра физлиц содержат ссылки на таблицы справочники.
- * Чтобы работать с таким ссылками как с объектами, ссылки разыменовываются и объекты представляются в виде Мапы строка-значение справочника.
- */
-public class RegistryPerson extends PermissivePerson {
+public class RegistryPerson extends IdentityObject<Long> {
 
-    /**
-     * Исходный идентификатор физлица
-     */
-    private Long oldId;
+    private Long recordId;
 
-    /**
-     * Статус из справочника
-     */
-    private Integer state;
+    private Date startDate;
 
-    /**
-     * Окончание даты действия версии
-     */
-    private Date recordVersionTo;
-
+    private Date endDate;
     /**
      * Фамилия
      */
@@ -37,9 +25,39 @@ public class RegistryPerson extends PermissivePerson {
     private String firstName;
 
     /**
-     * Отчество
+     * Отчетство
      */
     private String middleName;
+
+    /**
+     * ИНН
+     */
+    private String inn;
+
+    /**
+     * ИНН ИН
+     */
+    private String innForeign;
+
+    /**
+     * Снилс
+     */
+    private String snils;
+
+    /**
+     * Номер ФЛ
+     */
+    private Integer num;
+
+    /**
+     * Статус физлица
+     */
+    private TaxpayerStatus taxPayerStatus;
+
+    /**
+     * Гражданство
+     */
+    private Country citizenship;
 
     /**
      * Дата рождения
@@ -47,75 +65,83 @@ public class RegistryPerson extends PermissivePerson {
     private Date birthDate;
 
     /**
-     * Гражданство
+     * Список идентификаторов ФЛ
      */
-    private Permissive<Map<String, RefBookValue>> citizenship;
+    protected List<PersonIdentifier> personIdentityList;
 
     /**
-     * Документ включаемый в отчетность
+     * ДУЛ включаемый в отчетность
      */
-    private Permissive<Map<String, RefBookValue>> reportDoc;
+    private PersonDocument reportDoc;
 
     /**
-     * ИНН
+     * Список документов ФЛ
      */
-    private Permissive<String> inn;
+    private List<PersonDocument> documents;
 
     /**
-     * ИНН в иностранном государстве
+     * Список назначенных подразделений на ФЛ
      */
-    private Permissive<String> innForeign;
+    private List<PersonTb> personTbList;
 
     /**
-     * СНИЛС
+     * Адрес фл
      */
-    private Permissive<String> snils;
+    private Address address;
 
     /**
-     * Статус налогоплательщика
+     * Источник (АСНУ)
      */
-    private Permissive<Map<String, RefBookValue>> taxPayerState;
+    private RefBookAsnu source;
+
+    private Long oldId;
+
+    private boolean vip;
+
+    public static final String TABLE_NAME = "ref_book_person";
+
+    public static final String[] COLUMNS = {"id", "record_id", "old_id", "start_date", "end_date", "last_name",
+            "first_name", "middle_name", "inn", "inn_foreign", "snils", "taxpayer_state", "birth_date", "citizenship",
+            "report_doc", "source_id", "vip", "region_code", "postal_code", "district", "city", "locality", "street", "house",
+            "build", "appartment", "country_id", "address_foreign"};
 
     /**
-     * Система-источник
+     * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
      */
-    private Map<String, RefBookValue> source;
+    public static final String[] FIELDS = {"id", "recordId", "oldId", "startDate", "endDate", "lastName", "firstName",
+            "middleName", "inn", "innForeign", "snils", "taxPayerStatus.id", "birthDate", "citizenship.id",
+            "reportDoc.id", "source.id", "vip", "address.regionCode", "address.postalCode", "address.district", "address.city",
+            "address.locality", "address.street", "address.house", "address.build", "address.appartment",
+            "address.country.id", "address.addressIno"};
 
-    /**
-     * Адрес
-     */
-    private Permissive<Map<String, RefBookValue>> address;
-
-    public Long getId() {
-        return id;
+    public RegistryPerson() {
+        this.personIdentityList = new ArrayList<>();
+        this.documents = new ArrayList<>();
+        this.personTbList = new ArrayList<>();
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getRecordId() {
+        return recordId;
     }
 
-    public Long getOldId() {
-        return oldId;
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 
-    public void setOldId(Long oldId) {
-        this.oldId = oldId;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public Integer getState() {
-        return state;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public Date getEndDate() {
+        return endDate;
     }
 
-    public Date getRecordVersionTo() {
-        return recordVersionTo;
-    }
-
-    public void setRecordVersionTo(Date recordVersionTo) {
-        this.recordVersionTo = recordVersionTo;
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     public String getLastName() {
@@ -142,6 +168,54 @@ public class RegistryPerson extends PermissivePerson {
         this.middleName = middleName;
     }
 
+    public String getInn() {
+        return inn;
+    }
+
+    public void setInn(String inn) {
+        this.inn = inn;
+    }
+
+    public String getInnForeign() {
+        return innForeign;
+    }
+
+    public void setInnForeign(String innForeign) {
+        this.innForeign = innForeign;
+    }
+
+    public String getSnils() {
+        return snils;
+    }
+
+    public void setSnils(String snils) {
+        this.snils = snils;
+    }
+
+    public Integer getNum() {
+        return num;
+    }
+
+    public void setNum(Integer num) {
+        this.num = num;
+    }
+
+    public TaxpayerStatus getTaxPayerStatus() {
+        return taxPayerStatus;
+    }
+
+    public void setTaxPayerStatus(TaxpayerStatus taxPayerStatus) {
+        this.taxPayerStatus = taxPayerStatus;
+    }
+
+    public Country getCitizenship() {
+        return citizenship;
+    }
+
+    public void setCitizenship(Country citizenship) {
+        this.citizenship = citizenship;
+    }
+
     public Date getBirthDate() {
         return birthDate;
     }
@@ -150,159 +224,67 @@ public class RegistryPerson extends PermissivePerson {
         this.birthDate = birthDate;
     }
 
-    public Permissive<Map<String, RefBookValue>> getCitizenship() {
-        return citizenship;
+    public List<PersonIdentifier> getPersonIdentityList() {
+        return personIdentityList;
     }
 
-    public void setCitizenship(Permissive<Map<String, RefBookValue>> citizenship) {
-        this.citizenship = citizenship;
+    public void setPersonIdentityList(List<PersonIdentifier> personIdentityList) {
+        this.personIdentityList = personIdentityList;
     }
 
-    public Permissive<Map<String, RefBookValue>> getReportDoc() {
+    public PersonDocument getReportDoc() {
         return reportDoc;
     }
 
-    public void setReportDoc(Permissive<Map<String, RefBookValue>> reportDoc) {
+    public void setReportDoc(PersonDocument reportDoc) {
         this.reportDoc = reportDoc;
     }
 
-    public Permissive<String> getInn() {
-        return inn;
+    public List<PersonDocument> getDocuments() {
+        return documents;
     }
 
-    public void setInn(Permissive<String> inn) {
-        this.inn = inn;
+    public void setDocuments(List<PersonDocument> documents) {
+        this.documents = documents;
     }
 
-    public Permissive<String> getInnForeign() {
-        return innForeign;
+    public List<PersonTb> getPersonTbList() {
+        return personTbList;
     }
 
-    public void setInnForeign(Permissive<String> innForeign) {
-        this.innForeign = innForeign;
+    public void setPersonTbList(List<PersonTb> personTbList) {
+        this.personTbList = personTbList;
     }
 
-    public Permissive<String> getSnils() {
-        return snils;
-    }
-
-    public void setSnils(Permissive<String> snils) {
-        this.snils = snils;
-    }
-
-    public Permissive<Map<String, RefBookValue>> getTaxPayerState() {
-        return taxPayerState;
-    }
-
-    public void setTaxPayerState(Permissive<Map<String, RefBookValue>> taxPayerState) {
-        this.taxPayerState = taxPayerState;
-    }
-
-    public Map<String, RefBookValue> getSource() {
-        return source;
-    }
-
-    public void setSource(Map<String, RefBookValue> source) {
-        this.source = source;
-    }
-
-    public Permissive<Map<String, RefBookValue>> getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(Permissive<Map<String, RefBookValue>> address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RegistryPerson)) return false;
-
-        RegistryPerson that = (RegistryPerson) o;
-
-        if (getState() != null ? !getState().equals(that.getState()) : that.getState() != null) return false;
-        if (getRecordVersionTo() != null ? !getRecordVersionTo().equals(that.getRecordVersionTo()) : that.getRecordVersionTo() != null)
-            return false;
-        if (getLastName() != null ? !getLastName().equals(that.getLastName()) : that.getLastName() != null)
-            return false;
-        if (getFirstName() != null ? !getFirstName().equals(that.getFirstName()) : that.getFirstName() != null)
-            return false;
-        if (getMiddleName() != null ? !getMiddleName().equals(that.getMiddleName()) : that.getMiddleName() != null)
-            return false;
-        if (getBirthDate() != null ? !getBirthDate().equals(that.getBirthDate()) : that.getBirthDate() != null)
-            return false;
-        if (getCitizenship() != null ? !getCitizenship().equals(that.getCitizenship()) : that.getCitizenship() != null)
-            return false;
-        if (getReportDoc() != null ? !getReportDoc().equals(that.getReportDoc()) : that.getReportDoc() != null)
-            return false;
-        if (getInn() != null ? !getInn().equals(that.getInn()) : that.getInn() != null) return false;
-        if (getInnForeign() != null ? !getInnForeign().equals(that.getInnForeign()) : that.getInnForeign() != null)
-            return false;
-        if (getSnils() != null ? !getSnils().equals(that.getSnils()) : that.getSnils() != null) return false;
-        if (getTaxPayerState() != null ? !getTaxPayerState().equals(that.getTaxPayerState()) : that.getTaxPayerState() != null)
-            return false;
-        if (getSource() != null ? !getSource().equals(that.getSource()) : that.getSource() != null) return false;
-        return getAddress() != null ? getAddress().equals(that.getAddress()) : that.getAddress() == null;
+    public RefBookAsnu getSource() {
+        return source;
     }
 
-    @Override
-    public int hashCode() {
-        int result = getState() != null ? getState().hashCode() : 0;
-        result = 31 * result + (getRecordVersionTo() != null ? getRecordVersionTo().hashCode() : 0);
-        result = 31 * result + (getLastName() != null ? getLastName().hashCode() : 0);
-        result = 31 * result + (getFirstName() != null ? getFirstName().hashCode() : 0);
-        result = 31 * result + (getMiddleName() != null ? getMiddleName().hashCode() : 0);
-        result = 31 * result + (getBirthDate() != null ? getBirthDate().hashCode() : 0);
-        result = 31 * result + (getCitizenship() != null ? getCitizenship().hashCode() : 0);
-        result = 31 * result + (getReportDoc() != null ? getReportDoc().hashCode() : 0);
-        result = 31 * result + (getInn() != null ? getInn().hashCode() : 0);
-        result = 31 * result + (getInnForeign() != null ? getInnForeign().hashCode() : 0);
-        result = 31 * result + (getSnils() != null ? getSnils().hashCode() : 0);
-        result = 31 * result + (getTaxPayerState() != null ? getTaxPayerState().hashCode() : 0);
-        result = 31 * result + (getSource() != null ? getSource().hashCode() : 0);
-        result = 31 * result + (getAddress() != null ? getAddress().hashCode() : 0);
-        return result;
+    public void setSource(RefBookAsnu source) {
+        this.source = source;
     }
 
-    /**
-     * Перечисление обновляемых полей записи реестра ФЛ
-     */
-    public enum UpdatableField {
-        VERSION("version"),
-        LAST_NAME("lastName"),
-        FIRST_NAME("firstName"),
-        MIDDLE_NAME("middleName"),
-        BIRTH_DATE("birthDate"),
-        CITIZENSHIP("citizenship"),
-        REPORT_DOC("reportDoc"),
-        INN("inn"),
-        INN_FOREIGN("innForeign"),
-        SNILS("snils"),
-        TAX_PAYER_STATE("taxPayerState"),
-        SOURCE("source"),
-        REGION_CODE("REGION_CODE"),
-        POSTAL_CODE("POSTAL_CODE"),
-        DISTRICT("DISTRICT"),
-        CITY("CITY"),
-        LOCALITY("LOCALITY"),
-        STREET("STREET"),
-        HOUSE("HOUSE"),
-        BUILD("BUILD"),
-        APPARTMENT("APPARTMENT"),
-        COUNTRY_ID("COUNTRY_ID"),
-        ADDRESS("ADDRESS"),
-        VIP("vip");
-
-        private String alias;
-
-        UpdatableField(String alias) {
-            this.alias = alias;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
+    public Long getOldId() {
+        return oldId;
     }
 
+    public void setOldId(Long oldId) {
+        this.oldId = oldId;
+    }
+
+    public boolean isVip() {
+        return vip;
+    }
+
+    public void setVip(boolean vip) {
+        this.vip = vip;
+    }
 }

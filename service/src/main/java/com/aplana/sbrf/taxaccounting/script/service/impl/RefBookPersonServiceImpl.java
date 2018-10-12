@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.Address;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
@@ -114,9 +117,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                                     .append("Для физического лица ")
                                     .append(buildFio(declarationDataPerson))
                                     .append(", ")
-                                    .append(declarationDataPerson.getMajorDocument().getDocType().getName())
+                                    .append(declarationDataPerson.getReportDoc().getDocType().getName())
                                     .append(" № ")
-                                    .append(declarationDataPerson.getMajorDocument().getDocumentNumber())
+                                    .append(declarationDataPerson.getReportDoc().getDocumentNumber())
                                     .append(" Найдены записи в реестре ФЛ:\n");
                             for (NaturalPerson refBookPerson : personDataList) {
                                 msg.append("Идентификатор ФЛ: ")
@@ -293,7 +296,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 //Запись справочника физлиц
                 NaturalPerson refBookPerson = (NaturalPerson) b;
 
-                PersonDocument primaryPersonDocument = primaryPerson.getMajorDocument();
+                PersonDocument primaryPersonDocument = primaryPerson.getReportDoc();
 
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;

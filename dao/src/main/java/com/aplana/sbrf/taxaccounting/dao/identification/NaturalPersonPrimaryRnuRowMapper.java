@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.identification.Address;
+import com.aplana.sbrf.taxaccounting.model.refbook.Address;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +49,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         String inp = rs.getString("inp");
         if (inp != null && asnuId != null) {
             PersonIdentifier personIdentifier = new PersonIdentifier();
-            personIdentifier.setNaturalPerson(person);
+            personIdentifier.setPerson(person);
             personIdentifier.setInp(inp);
             personIdentifier.setAsnuId(asnuId);
             person.getPersonIdentityList().add(personIdentifier);
@@ -60,11 +60,10 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         if (documentNumber != null && documentTypeCode != null) {
             PersonDocument personDocument = new PersonDocument();
-            personDocument.setNaturalPerson(person);
+            personDocument.setPerson(person);
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
             personDocument.setIncRep(1);
-            person.addDocument(personDocument);
         }
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
@@ -89,9 +88,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         address.setBuild(rs.getString("building"));
         address.setAppartment(rs.getString("flat"));
         address.setAddressIno(rs.getString("address"));
-        //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
-        int addressType = (address.getAddressIno() != null && !address.getAddressIno().isEmpty()) ? 1 : 0;
-        address.setAddressType(addressType);
+
         return address;
     }
 

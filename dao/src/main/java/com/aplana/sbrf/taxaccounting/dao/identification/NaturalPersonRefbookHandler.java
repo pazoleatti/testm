@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.collections4.map.HashedMap;
 
 import java.sql.ResultSet;
@@ -119,13 +120,9 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             PersonIdentifier personIdentifier = new PersonIdentifier();
             personIdentifier.setId(personIdentifierId);
 
-            personIdentifier.setRecordId(SqlUtils.getLong(rs, "tax_record_id"));
-            personIdentifier.setStatus(SqlUtils.getInteger(rs, "tax_status"));
-            personIdentifier.setVersion(rs.getDate("tax_version"));
-
             personIdentifier.setInp(rs.getString("inp"));
             personIdentifier.setAsnuId(SqlUtils.getLong(rs, "as_nu"));
-            personIdentifier.setNaturalPerson(naturalPerson);
+            personIdentifier.setPerson(naturalPerson);
             personIdentityMap.put(personIdentifierId, personIdentifier);
             naturalPerson.getPersonIdentityList().add(personIdentifier);
         }
@@ -148,23 +145,19 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             PersonDocument personDocument = new PersonDocument();
             personDocument.setId(docId);
 
-            personDocument.setRecordId(SqlUtils.getLong(rs, "doc_record_id"));
-            personDocument.setStatus(docStatus);
-            personDocument.setVersion(rs.getDate("doc_version"));
-
             personDocument.setDocType(docType);
             personDocument.setDocumentNumber(rs.getString("doc_number"));
             personDocument.setIncRep(SqlUtils.getInteger(rs, "inc_rep"));
-            personDocument.setNaturalPerson(naturalPerson);
+            personDocument.setPerson(naturalPerson);
             pesonDocumentMap.put(docId, personDocument);
-            naturalPerson.getPersonDocumentList().add(personDocument);
+            naturalPerson.getDocuments().add(personDocument);
         }
     }
 
     private void initReportDoc(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
         Long reportDocId = rs.getLong("report_doc");
         PersonDocument personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
-        naturalPerson.setMajorDocument(personDocument);
+        naturalPerson.setReportDoc(personDocument);
     }
 
     private void addPersonTb(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
@@ -181,12 +174,9 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (personTbId != null && !tbMap.containsKey(personTbId) && tbStatus == 0) {
             PersonTb personTb = new PersonTb();
             personTb.setId(personTbId);
-            personTb.setRecordId(SqlUtils.getLong(rs, "tb_record_id"));
-            personTb.setStatus(tbStatus);
-            personTb.setVersion(rs.getDate("tb_version"));
             personTb.setTbDepartmentId(rs.getInt("tb_department_id"));
             personTb.setImportDate(rs.getDate("import_date"));
-            personTb.setNaturalPerson(naturalPerson);
+            personTb.setPerson(naturalPerson);
             tbMap.put(personTbId, personTb);
             naturalPerson.getPersonTbList().add(personTb);
         }
@@ -203,12 +193,9 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             //person
             person.setId(refBookPersonId);
 
-            //TODO Разделить модель на два класса NaturalPerson для представления данных первичной формы и данных справочника
-            //person.setPrimaryPersonId(primaryPersonId);
-
             person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
-            person.setStatus(SqlUtils.getInteger(rs, "person_status"));
-            person.setVersion(rs.getDate("person_version"));
+            person.setStartDate(rs.getDate("start_date"));
+            person.setEndDate(rs.getDate("end_date"));
 
             person.setLastName(rs.getString("last_name"));
             person.setFirstName(rs.getString("first_name"));
@@ -239,12 +226,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (addrId != null) {
             Address address = new Address();
 
-            address.setId(addrId);
-            address.setRecordId(SqlUtils.getLong(rs, "addr_record_id"));
-            address.setStatus(SqlUtils.getInteger(rs, "addr_status"));
-            address.setVersion(rs.getDate("addr_version"));
-
-            address.setAddressType(SqlUtils.getInteger(rs, "address_type"));
             address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
             address.setRegionCode(rs.getString("region_code"));
             address.setPostalCode(rs.getString("postal_code"));

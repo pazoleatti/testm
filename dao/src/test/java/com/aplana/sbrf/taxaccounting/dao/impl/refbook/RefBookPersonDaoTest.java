@@ -34,7 +34,7 @@ public class RefBookPersonDaoTest {
 
     @Test
     public void test_fetchOriginal() {
-        List<RegistryPerson> personVersions = personDao.fetchOriginal(3L);
+        List<RegistryPersonDTO> personVersions = personDao.fetchOriginal(3L);
         assertThat(personVersions).hasSize(1);
         assertThat(personVersions.get(0).getId()).isEqualTo(1L);
     }
@@ -324,7 +324,7 @@ public class RefBookPersonDaoTest {
         RefBookValue taxPayerStateId = new RefBookValue(RefBookAttributeType.NUMBER, 6L);
         taxPayerState.put("id", taxPayerStateId);
 
-        RegistryPerson person = new RegistryPerson();
+        RegistryPersonDTO person = new RegistryPersonDTO();
         person.setId(1L);
         person.setLastName("ИзмФам");
         person.setFirstName("ИзмИм");
@@ -346,7 +346,7 @@ public class RefBookPersonDaoTest {
         personDao.updateRegistryPerson(person, query);
 
         //verification
-        RegistryPerson result = personDao.fetchPersonWithVersionInfo(1L);
+        RegistryPersonDTO result = personDao.fetchPersonWithVersionInfo(1L);
         assertThat(result.getLastName()).isEqualTo("ИзмФам");
         assertThat(result.getFirstName()).isEqualTo("ИзмИм");
         assertThat(result.getMiddleName()).isEqualTo("ИзмОтч");
@@ -388,7 +388,7 @@ public class RefBookPersonDaoTest {
         addressVal.put("APPARTMENT", appartment);
         addressVal.put("COUNTRY_ID", country_id);
 
-        RegistryPerson person = new RegistryPerson();
+        RegistryPersonDTO person = new RegistryPersonDTO();
         person.setId(1L);
         person.setAddress(Permissive.of(addressVal));
         String sql = "UPDATE ref_book_address set region_code = :REGION_CODE, postal_code = :POSTAL_CODE, " +
@@ -442,7 +442,7 @@ public class RefBookPersonDaoTest {
         //execution
         personDao.setOriginal(5L, 5L, 2L);
         //verification
-        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(5L);
+        RegistryPersonDTO changedPerson = personDao.fetchPersonWithVersionInfo(5L);
         assertThat(changedPerson.getRecordId()).isEqualTo(2L);
     }
 
@@ -452,7 +452,7 @@ public class RefBookPersonDaoTest {
         //execution
         personDao.deleteOriginal(1L, 10L);
         //verification
-        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(4L);
+        RegistryPersonDTO changedPerson = personDao.fetchPersonWithVersionInfo(4L);
         assertThat(changedPerson.getRecordId()).isEqualTo(10L);
     }
 
@@ -462,7 +462,7 @@ public class RefBookPersonDaoTest {
         //execution
         personDao.setDuplicates(Collections.singletonList(5L), 2L);
         //verification
-        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(5L);
+        RegistryPersonDTO changedPerson = personDao.fetchPersonWithVersionInfo(5L);
         assertThat(changedPerson.getRecordId()).isEqualTo(2L);
     }
 
@@ -472,7 +472,7 @@ public class RefBookPersonDaoTest {
         //execution
         personDao.deleteDuplicates(Collections.singletonList(10L));
         //verification
-        RegistryPerson changedPerson = personDao.fetchPersonWithVersionInfo(4L);
+        RegistryPersonDTO changedPerson = personDao.fetchPersonWithVersionInfo(4L);
         assertThat(changedPerson.getRecordId()).isEqualTo(10L);
     }
 

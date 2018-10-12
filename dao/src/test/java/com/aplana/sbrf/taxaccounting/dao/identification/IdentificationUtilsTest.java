@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.Country;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
 import org.junit.Assert;
 import org.junit.Test;
 

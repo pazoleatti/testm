@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
@@ -16,5 +17,8 @@ public interface PersonService {
      * @return  количество записей
      */
     int getCountOfUniqueEntries(long declarationDataId);
+
+
+    void saveNewPersons(List<RegistryPerson> persons);
 
 }

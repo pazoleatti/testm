@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.identification;
+package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -6,12 +6,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 /**
  * @author Andrey Drunk
  */
-public class Address extends RefBookObject {
-
-    /**
-     * Адрес физлица
-     */
-    private Integer addressType;
+public class Address {
 
     private String regionCode;
     private String postalCode;
@@ -21,23 +16,13 @@ public class Address extends RefBookObject {
     private String street;
     private String house;
     private String build;
-    private String apartment;
+    private String appartment;
 
     /**
      * Адрес вне РФ
      */
     private Country country;
-    private String countryCode;
     private String addressIno;
-
-
-    public Integer getAddressType() {
-        return addressType;
-    }
-
-    public void setAddressType(Integer addressType) {
-        this.addressType = addressType;
-    }
 
     public String getRegionCode() {
         return regionCode;
@@ -104,11 +89,11 @@ public class Address extends RefBookObject {
     }
 
     public String getAppartment() {
-        return apartment;
+        return appartment;
     }
 
     public void setAppartment(String appartment) {
-        this.apartment = appartment;
+        this.appartment = appartment;
     }
 
     public Country getCountry() {
@@ -117,14 +102,6 @@ public class Address extends RefBookObject {
 
     public void setCountry(Country country) {
         this.country = country;
-    }
-
-    public String getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
     }
 
     public String getAddressIno() {
@@ -138,8 +115,6 @@ public class Address extends RefBookObject {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
-                .append("id", id)
-                .append("addressType", addressType)
                 .append("regionCode", regionCode)
                 .append("postalCode", postalCode)
                 .append("district", district)
@@ -148,9 +123,8 @@ public class Address extends RefBookObject {
                 .append("street", street)
                 .append("house", house)
                 .append("build", build)
-                .append("appartment", apartment)
+                .append("appartment", appartment)
                 .append("country", country)
-                .append("countryCode", countryCode)
                 .append("addressIno", addressIno)
                 .toString();
     }

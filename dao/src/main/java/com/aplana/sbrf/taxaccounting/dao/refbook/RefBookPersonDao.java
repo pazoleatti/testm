@@ -9,10 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Интерфейс DAO для работы со справочником физлиц
@@ -79,7 +76,7 @@ public interface RefBookPersonDao {
      * @param id идентификатро версии ФЛ
      * @return Оригинал ФЛ
      */
-    List<RegistryPerson> fetchOriginal(Long id);
+    List<RegistryPersonDTO> fetchOriginal(Long id);
 
     /**
      * Получение дубликатов ФЛ
@@ -88,7 +85,7 @@ public interface RefBookPersonDao {
      * @param pagingParams параметры пейджинга
      * @return список дубликатов ФЛ
      */
-    List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams);
+    List<RegistryPersonDTO> fetchDuplicates(Long id, PagingParams pagingParams);
 
     /**
      * Получает список идентификаторов ФЛ, являющихся дуликатами указанных ФЛ
@@ -140,14 +137,14 @@ public interface RefBookPersonDao {
      * @param id идентификатор версии
      * @return объект версии ФЛ
      */
-    RegistryPerson fetchPersonWithVersionInfo(Long id);
+    RegistryPersonDTO fetchPersonWithVersionInfo(Long id);
 
     /**
      * Обновить данные записи реестра ФЛ
      * @param person    данные ФЛ
      * @param query     запрос
      */
-    void updateRegistryPerson(RegistryPerson person, String query);
+    void updateRegistryPerson(RegistryPersonDTO person, String query);
 
     /**
      * Обновить данные адреса записи реестра ФЛ
@@ -173,14 +170,14 @@ public interface RefBookPersonDao {
      * Сохранить фиктивную версию Физлица
      * @param person объект ФЛ
      */
-    void saveRegistryPersonFakeVersion(RegistryPerson person);
+    void saveRegistryPersonFakeVersion(RegistryPersonDTO person);
 
     /**
      * Получить все версии физлица, которые не являются дубликатами
      * @param recordId идентификатор ФЛ
      * @return список объектов найденных версий
      */
-    List<RegistryPerson> fetchNonDuplicatesVersions(long recordId);
+    List<RegistryPersonDTO> fetchNonDuplicatesVersions(long recordId);
 
     /**
      * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
@@ -189,4 +186,18 @@ public interface RefBookPersonDao {
      * @return  Страница списка записей
      */
     PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
+
+    /**
+     * Сохранить группу Физлиц.
+     * @param persons коллекция Физлиц
+     */
+    void saveBatch(Collection<RegistryPerson> persons);
+
+    /**
+     * Обновить группу Физлиц. При групповом обновлении не обновляются поля id, record_id, old_id, start_date, end_date.
+     * В версии 3.2 нет необходимости обновлять вышеуказанные поля массово и поскольку их обновление без проверок
+     * потенциально ведёт к дефектам их массовое обновление недоступно.
+     * @param persons коллекция Физлиц
+     */
+    void updateBatch(Collection<RegistryPerson> persons);
 }

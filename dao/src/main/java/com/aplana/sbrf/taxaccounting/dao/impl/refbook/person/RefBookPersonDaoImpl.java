@@ -3,9 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.person;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookMapperFactory;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.RefBookPersonMapper;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonOriginalDuplicatesQueryGenerator;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.SelectPersonQueryGenerator;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -23,6 +20,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
@@ -46,10 +44,10 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     private DBUtils dbUtils;
 
 
-    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_MAPPER = new RowMapper<RegistryPerson>() {
+    private static final RowMapper<RegistryPersonDTO> REGISTRY_CARD_PERSON_MAPPER = new RowMapper<RegistryPersonDTO>() {
         @Override
-        public RegistryPerson mapRow(ResultSet rs, int i) throws SQLException {
-            RegistryPerson result = new RegistryPerson();
+        public RegistryPersonDTO mapRow(ResultSet rs, int i) throws SQLException {
+            RegistryPersonDTO result = new RegistryPersonDTO();
             result.setId(rs.getLong("id"));
             result.setRecordId(rs.getLong("record_id"));
             result.setOldId(rs.getLong("old_id"));
@@ -88,10 +86,10 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
     };
 
-    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_ORIGINAL_MAPPER = new RowMapper<RegistryPerson>() {
+    private static final RowMapper<RegistryPersonDTO> REGISTRY_CARD_PERSON_ORIGINAL_MAPPER = new RowMapper<RegistryPersonDTO>() {
         @Override
-        public RegistryPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RegistryPerson result = new RegistryPerson();
+        public RegistryPersonDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RegistryPersonDTO result = new RegistryPersonDTO();
             result.setId(rs.getLong("id"));
             result.setRecordId(rs.getLong("record_id"));
             result.setFirstName(rs.getString("first_name"));
@@ -105,10 +103,10 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
     };
 
-    private static final RowMapper<RegistryPerson> REGISTRY_CARD_PERSON_DUPLICATE_MAPPER = new RowMapper<RegistryPerson>() {
+    private static final RowMapper<RegistryPersonDTO> REGISTRY_CARD_PERSON_DUPLICATE_MAPPER = new RowMapper<RegistryPersonDTO>() {
         @Override
-        public RegistryPerson mapRow(ResultSet rs, int i) throws SQLException {
-            RegistryPerson result = new RegistryPerson();
+        public RegistryPersonDTO mapRow(ResultSet rs, int i) throws SQLException {
+            RegistryPersonDTO result = new RegistryPersonDTO();
             result.setId(rs.getLong("id"));
             result.setRecordId(rs.getLong("record_id"));
             result.setOldId(rs.getLong("old_id"));
@@ -345,7 +343,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<RegistryPerson> fetchOriginal(Long id) {
+    public List<RegistryPersonDTO> fetchOriginal(Long id) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         try {
@@ -356,7 +354,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams) {
+    public List<RegistryPersonDTO> fetchDuplicates(Long id, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         params.addValue("startIndex", pagingParams.getStartIndex());
@@ -371,7 +369,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public RegistryPerson fetchPersonWithVersionInfo(Long id) {
+    public RegistryPersonDTO fetchPersonWithVersionInfo(Long id) {
         String sql = "SELECT r.*, " +
                 (isSupportOver() ? "row_number() over (order by id asc)" : "ROWNUM") +
                 " as rn FROM (" +
@@ -390,44 +388,44 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void updateRegistryPerson(RegistryPerson person, String query) {
+    public void updateRegistryPerson(RegistryPersonDTO person, String query) {
         MapSqlParameterSource personParams = new MapSqlParameterSource();
         personParams.addValue("id", person.getId())
-                .addValue(RegistryPerson.UpdatableField.VERSION.getAlias(), person.getVersion())
-                .addValue(RegistryPerson.UpdatableField.LAST_NAME.getAlias(), person.getLastName())
-                .addValue(RegistryPerson.UpdatableField.FIRST_NAME.getAlias(), person.getFirstName())
-                .addValue(RegistryPerson.UpdatableField.MIDDLE_NAME.getAlias(), person.getMiddleName())
-                .addValue(RegistryPerson.UpdatableField.BIRTH_DATE.getAlias(), person.getBirthDate());
+                .addValue(RegistryPersonDTO.UpdatableField.VERSION.getAlias(), person.getVersion())
+                .addValue(RegistryPersonDTO.UpdatableField.LAST_NAME.getAlias(), person.getLastName())
+                .addValue(RegistryPersonDTO.UpdatableField.FIRST_NAME.getAlias(), person.getFirstName())
+                .addValue(RegistryPersonDTO.UpdatableField.MIDDLE_NAME.getAlias(), person.getMiddleName())
+                .addValue(RegistryPersonDTO.UpdatableField.BIRTH_DATE.getAlias(), person.getBirthDate());
         if (person.getCitizenship().value() != null && person.getCitizenship().value().get("id") != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.CITIZENSHIP.getAlias(), person.getCitizenship().value().get("id").getNumberValue());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.CITIZENSHIP.getAlias(), person.getCitizenship().value().get("id").getNumberValue());
         } else {
-            personParams.addValue(RegistryPerson.UpdatableField.CITIZENSHIP.getAlias(), null);
+            personParams.addValue(RegistryPersonDTO.UpdatableField.CITIZENSHIP.getAlias(), null);
         }
         if (person.getReportDoc().value() != null && person.getReportDoc().value().get("id") != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.REPORT_DOC.getAlias(), person.getReportDoc().value().get("id").getNumberValue());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.REPORT_DOC.getAlias(), person.getReportDoc().value().get("id").getNumberValue());
         } else {
-            personParams.addValue(RegistryPerson.UpdatableField.REPORT_DOC.getAlias(), null);
+            personParams.addValue(RegistryPersonDTO.UpdatableField.REPORT_DOC.getAlias(), null);
         }
         if (person.getInn().value() != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.INN.getAlias(), person.getInn().value());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.INN.getAlias(), person.getInn().value());
         }
         if (person.getInnForeign().value() != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.INN_FOREIGN.getAlias(), person.getInnForeign().value());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.INN_FOREIGN.getAlias(), person.getInnForeign().value());
         }
         if (person.getSnils().value() != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.SNILS.getAlias(), person.getSnils().value());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.SNILS.getAlias(), person.getSnils().value());
         }
         if (person.getTaxPayerState().value() != null && person.getTaxPayerState().value().get("id") != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.TAX_PAYER_STATE.getAlias(), person.getTaxPayerState().value().get("id").getNumberValue());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.TAX_PAYER_STATE.getAlias(), person.getTaxPayerState().value().get("id").getNumberValue());
         } else {
-            personParams.addValue(RegistryPerson.UpdatableField.TAX_PAYER_STATE.getAlias(), null);
+            personParams.addValue(RegistryPersonDTO.UpdatableField.TAX_PAYER_STATE.getAlias(), null);
         }
         if (person.getSource() != null && person.getSource().get("id") != null) {
-            personParams.addValue(RegistryPerson.UpdatableField.SOURCE.getAlias(), person.getSource().get("id").getNumberValue());
+            personParams.addValue(RegistryPersonDTO.UpdatableField.SOURCE.getAlias(), person.getSource().get("id").getNumberValue());
         } else {
-            personParams.addValue(RegistryPerson.UpdatableField.SOURCE.getAlias(), null);
+            personParams.addValue(RegistryPersonDTO.UpdatableField.SOURCE.getAlias(), null);
         }
-        personParams.addValue(RegistryPerson.UpdatableField.VIP.getAlias(), person.getVip());
+        personParams.addValue(RegistryPersonDTO.UpdatableField.VIP.getAlias(), person.getVip());
         getNamedParameterJdbcTemplate().update(query, personParams);
     }
 
@@ -435,38 +433,38 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     public void updateRegistryPersonAddress(Map<String, RefBookValue> address, String query) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", address.get("id").getNumberValue());
-        if (address.get(RegistryPerson.UpdatableField.REGION_CODE.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.REGION_CODE.getAlias(), address.get(RegistryPerson.UpdatableField.REGION_CODE.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.REGION_CODE.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.REGION_CODE.getAlias(), address.get(RegistryPersonDTO.UpdatableField.REGION_CODE.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.POSTAL_CODE.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.POSTAL_CODE.getAlias(), address.get(RegistryPerson.UpdatableField.POSTAL_CODE.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.POSTAL_CODE.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.POSTAL_CODE.getAlias(), address.get(RegistryPersonDTO.UpdatableField.POSTAL_CODE.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.DISTRICT.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.DISTRICT.getAlias(), address.get(RegistryPerson.UpdatableField.DISTRICT.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.DISTRICT.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.DISTRICT.getAlias(), address.get(RegistryPersonDTO.UpdatableField.DISTRICT.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.CITY.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.CITY.getAlias(), address.get(RegistryPerson.UpdatableField.CITY.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.CITY.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.CITY.getAlias(), address.get(RegistryPersonDTO.UpdatableField.CITY.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.LOCALITY.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.LOCALITY.getAlias(), address.get(RegistryPerson.UpdatableField.LOCALITY.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.LOCALITY.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.LOCALITY.getAlias(), address.get(RegistryPersonDTO.UpdatableField.LOCALITY.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.STREET.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.STREET.getAlias(), address.get(RegistryPerson.UpdatableField.STREET.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.STREET.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.STREET.getAlias(), address.get(RegistryPersonDTO.UpdatableField.STREET.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.HOUSE.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.HOUSE.getAlias(), address.get(RegistryPerson.UpdatableField.HOUSE.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.HOUSE.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.HOUSE.getAlias(), address.get(RegistryPersonDTO.UpdatableField.HOUSE.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.BUILD.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.BUILD.getAlias(), address.get(RegistryPerson.UpdatableField.BUILD.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.BUILD.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.BUILD.getAlias(), address.get(RegistryPersonDTO.UpdatableField.BUILD.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.APPARTMENT.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.APPARTMENT.getAlias(), address.get(RegistryPerson.UpdatableField.APPARTMENT.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.APPARTMENT.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.APPARTMENT.getAlias(), address.get(RegistryPersonDTO.UpdatableField.APPARTMENT.name()).getStringValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.COUNTRY_ID.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias(), address.get(RegistryPerson.UpdatableField.COUNTRY_ID.name()).getReferenceValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.COUNTRY_ID.getAlias(), address.get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.name()).getReferenceValue());
         }
-        if (address.get(RegistryPerson.UpdatableField.ADDRESS.name()) != null) {
-            params.addValue(RegistryPerson.UpdatableField.ADDRESS.getAlias(), address.get(RegistryPerson.UpdatableField.ADDRESS.name()).getStringValue());
+        if (address.get(RegistryPersonDTO.UpdatableField.ADDRESS.name()) != null) {
+            params.addValue(RegistryPersonDTO.UpdatableField.ADDRESS.getAlias(), address.get(RegistryPersonDTO.UpdatableField.ADDRESS.name()).getStringValue());
         }
         getNamedParameterJdbcTemplate().update(query, params);
     }
@@ -496,7 +494,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void saveRegistryPersonFakeVersion(RegistryPerson person) {
+    public void saveRegistryPersonFakeVersion(RegistryPersonDTO person) {
         String query = "INSERT INTO ref_book_person(id, version, status, record_id, old_id, vip) VALUES(:id, :version, :status, :recordId, :oldId, :vip)";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", dbUtils.getNextRefBookRecordIds(1).get(0))
@@ -508,7 +506,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         getNamedParameterJdbcTemplate().update(query, params);
     }
 
-    public List<RegistryPerson> fetchNonDuplicatesVersions(long recordId) {
+    public List<RegistryPersonDTO> fetchNonDuplicatesVersions(long recordId) {
         String query = "select person.*, " +
                 "(select min(version) - interval '1' day \n" +
                 "from ref_book_person p \n" +
@@ -535,5 +533,33 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         int count = selectCountOfQueryResults(selectPersonQueryGenerator.generatePagedAndFilteredQuery());
 
         return new PagingResult<>(persons, count);
+    }
+
+    @Override
+    public void saveBatch(Collection<RegistryPerson> persons) {
+        saveNewObjects(persons, RegistryPerson.TABLE_NAME, DBUtils.Sequence.REF_BOOK_RECORD.getName(), RegistryPerson.COLUMNS, RegistryPerson.FIELDS);
+    }
+
+    @Override
+    public void updateBatch(Collection<RegistryPerson> persons) {
+        StringBuilder sql = new StringBuilder("UPDATE ")
+                .append(RegistryPerson.TABLE_NAME)
+                .append(" SET ");
+        for (int i = 5; i < RegistryPerson.FIELDS.length; i++) {
+            sql.append(RegistryPerson.COLUMNS[i])
+                    .append(" = :")
+                    .append(RegistryPerson.FIELDS[i]);
+                    if (RegistryPerson.FIELDS.length - i > 1) {
+                        sql.append(", ");
+                    }
+        }
+        sql.append(" WHERE id = :id");
+        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[persons.size()];
+        int i = 0;
+        for (RegistryPerson identityObject : persons) {
+            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
+            i++;
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(sql.toString(), batchArgs);
     }
 }

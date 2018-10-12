@@ -54,9 +54,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     private static final Log LOG = LogFactory.getLog(NdflPersonDaoImpl.class);
 
     @Autowired
-    DBUtilsImpl dbUtils;
-
-    @Autowired
     DepartmentDao departmentDao;
     @Autowired
     DepartmentConfigDao departmentConfigDao;
@@ -1220,7 +1217,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             throw new DaoException(DUPLICATE_ERORR_MSG);
         }
 
-        String insert = createInsert(table, seq, columns, fields);
+        String insert = SqlUtils.createInsert(table, seq, columns, fields);
         NamedParameterJdbcTemplate jdbcTemplate = getNamedParameterJdbcTemplate();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -1284,45 +1281,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    /**
-     * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
-     *
-     * @param identityObjects объекты обладающий суррогатным ключом
-     * @param table           наименование таблицы используемой для хранения данных объекта
-     * @param seq             наименование последовательностт используемой для генерации ключей
-     * @param columns         массив содержащий наименование столбцов таблицы для вставки в insert
-     * @param fields          массив содержащий наименования параметров соответствующих столбцам
-     * @param <E>             тип объекта
-     */
-    private <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
-        List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
-        String insert = createInsert(table, columns, fields);
-        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
-        int i = 0;
-        for (E identityObject : identityObjects) {
-            identityObject.setId(ids.get(i));
-            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
-            i++;
-        }
-        getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
-    }
 
-    private static String createInsert(String table, String[] columns, String[] fields) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into ").append(table);
-        sb.append(toSqlString(columns));
-        sb.append(" VALUES ");
-        sb.append(toSqlParameters(fields));
-        return sb.toString();
-    }
-
-    public static String toSqlParameters(String[] fields) {
-        List<String> result = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
-            result.add(":" + fields[i]);
-        }
-        return toSqlString(result.toArray());
-    }
 
     @Override
     public void delete(Long id) {
@@ -1875,55 +1834,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         for (String col : columns) {
             list.add(alias + "." + col);
         }
-        String columnsNames = toSqlString(list.toArray());
+        String columnsNames = SqlUtils.toSqlString(list.toArray());
         return columnsNames.replace("(", "").replace(")", "");
     }
 
-    private static String createInsert(String table, String seq, String[] columns, String[] fields) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into ").append(table);
-        sb.append(toSqlString(columns));
-        sb.append(" VALUES ");
-        sb.append(toSqlParameters(fields, seq));
-        return sb.toString();
-    }
-
-    /**
-     * Метод преобразует массив {"a", "b", "c"} в строку "(a, b, c)"
-     *
-     * @param a исходный массив
-     * @return строка
-     */
-    public static String toSqlString(Object[] a) {
-        if (a == null) {
-            return "";
-        }
-        int iMax = a.length - 1;
-        if (iMax == -1) {
-            return "";
-        }
-        StringBuilder b = new StringBuilder();
-        b.append('(');
-        for (int i = 0; ; i++) {
-            b.append(a[i]);
-            if (i == iMax) {
-                return b.append(')').toString();
-            }
-            b.append(", ");
-        }
-    }
-
-    public static String toSqlParameters(String[] fields, String seq) {
-        List<String> result = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].equals("id")) {
-                result.add(seq + ".nextval");
-            } else {
-                result.add(":" + fields[i]);
-            }
-        }
-        return toSqlString(result.toArray());
-    }
 
     //>-------------------------<The DAO row mappers>-----------------------------<
 

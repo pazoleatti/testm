@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.identification;
+package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 

@@ -6,14 +6,12 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,7 +25,7 @@ public interface PersonService {
      * @param id идентификатор версии ФЛ (ID)
      * @return оригинал ФЛ
      */
-    RegistryPerson fetchOriginal(Long id, Date actualDate);
+    RegistryPersonDTO fetchOriginal(Long id, Date actualDate);
 
     /**
      * Получение списка дубликатов ФЛ по идентификатору версии ФЛ
@@ -36,7 +34,7 @@ public interface PersonService {
      * @param pagingParams параметры пейджинга
      * @return Страница списка дубликатов ФЛ
      */
-    PagingResult<RegistryPerson> fetchDuplicates(Long personId, Date actualDate, PagingParams pagingParams);
+    PagingResult<RegistryPersonDTO> fetchDuplicates(Long personId, Date actualDate, PagingParams pagingParams);
 
     /**
      * Получает список ФЛ.
@@ -87,7 +85,7 @@ public interface PersonService {
      * @param id идентификатор версии Физлица
      * @return объект версии ФЛ
      */
-    RegistryPerson fetchPerson(Long id);
+    RegistryPersonDTO fetchPerson(Long id);
 
     /**
      * Получить список значений справочника ссылающихся на физлицо, для всех версий физлица, в т.ч. и дубликатов
@@ -113,13 +111,13 @@ public interface PersonService {
      *
      * @param person данные ФЛ для обновления
      */
-    void updateRegistryPerson(RegistryPerson person);
+    void updateRegistryPerson(RegistryPersonDTO person);
 
     /**
      * Проверка пересечений версий
      * @param person проверяемое физическое лицо
      */
-    void checkVersionOverlapping(RegistryPerson person);
+    void checkVersionOverlapping(RegistryPersonDTO person);
 
     /**
      * Проверяет корректность ДУЛ
@@ -135,4 +133,10 @@ public interface PersonService {
      * @return  Страница списка записей
      */
     PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser);
+
+    /**
+     * Сохранить группу Физлиц.
+     * @param personList коллекция Физлиц
+     */
+    void savePersons(List<RegistryPerson> personList);
 }

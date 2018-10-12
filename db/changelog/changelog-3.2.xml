@@ -75,4 +75,123 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-0" author="ytrofimov">
+        <sql>
+            alter table
+            ref_book_person
+            add
+            (
+            "START_DATE" DATE,
+            "END_DATE" DATE
+            );
+        </sql>
+        <sql>
+            comment on column "REF_BOOK_PERSON"."START_DATE" is 'Дата начала действия';
+            comment on column "REF_BOOK_PERSON"."END_DATE" is 'Дата окончания действия';
+            commit;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-1" author="ytrofimov">
+        <sql>
+            alter table
+            ref_book_person
+            add
+            (
+            "REGION_CODE" VARCHAR2(2 CHAR),
+            "POSTAL_CODE" VARCHAR2(6 CHAR),
+            "DISTRICT" VARCHAR2(500 CHAR),
+            "CITY" VARCHAR2(500 CHAR),
+            "LOCALITY" VARCHAR2(500 CHAR),
+            "STREET" VARCHAR2(500 CHAR),
+            "HOUSE" VARCHAR2(20 CHAR),
+            "BUILD" VARCHAR2(20 CHAR),
+            "APPARTMENT" VARCHAR2(20 CHAR),
+            "COUNTRY_ID" NUMBER(18,0),
+            "ADDRESS_FOREIGN" VARCHAR2(255 CHAR)
+            );
+        </sql>
+        <sql>
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."REGION_CODE" IS 'Код региона';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."POSTAL_CODE" IS 'Почтовый индекс';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."DISTRICT" IS 'Район';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."CITY" IS 'Город';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."LOCALITY" IS 'Населенный пункт (село, поселок)';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."STREET" IS 'Улица (проспект, переулок)';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."HOUSE" IS 'Номер дома (владения)';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."BUILD" IS 'Номер корпуса (строения)';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."APPARTMENT" IS 'Номер квартиры';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."COUNTRY_ID" IS 'Страна проживания';
+            COMMENT ON COLUMN "REF_BOOK_PERSON"."ADDRESS_FOREIGN" IS 'Адрес за пределами Российской Федерации';
+            commit;
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-2" author="ytrofimov">
+        <sql>
+            alter table
+            REF_BOOK_ID_DOC
+            drop
+            (
+            RECORD_ID,
+            VERSION,
+            STATUS,
+            DUPLICATE_RECORD_ID
+            );
+        </sql>
+        <sql>
+            alter table
+            REF_BOOK_ID_TAX_PAYER
+            drop
+            (
+            RECORD_ID,
+            VERSION,
+            STATUS
+            );
+        </sql>
+        <sql>
+            alter table
+            REF_BOOK_PERSON_TB
+            drop
+            (
+            RECORD_ID,
+            VERSION,
+            STATUS
+            );
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-3" author="ytrofimov">
+        <sql>
+            alter table
+            REF_BOOK_PERSON
+            drop
+            (
+            VERSION,
+            STATUS
+            );
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-4" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-5" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.2/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

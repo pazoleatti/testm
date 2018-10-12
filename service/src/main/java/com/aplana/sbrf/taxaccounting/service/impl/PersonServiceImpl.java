@@ -2,9 +2,13 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.dao.impl.IdDocDaoImpl;
+import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
+import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.components.RegistryPersonUpdateQueryBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -61,9 +65,18 @@ public class PersonServiceImpl implements PersonService {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    BasePermissionEvaluator permissionEvaluator;
+    private BasePermissionEvaluator permissionEvaluator;
     @Autowired
-    RegistryPersonUpdateQueryBuilder registryPersonUpdateBuilder;
+    private RegistryPersonUpdateQueryBuilder registryPersonUpdateBuilder;
+    @Autowired
+    private IdDocDaoImpl idDocDaoImpl;
+    @Autowired
+    private IdTaxPayerDaoImpl idTaxPayerDaoImpl;
+    @Autowired
+    private PersonTbDaoImpl personTbDaoImpl;
+    @Autowired
+    private DBUtils dbUtils;
+
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -73,18 +86,18 @@ public class PersonServiceImpl implements PersonService {
     };
 
     @Override
-    public RegistryPerson fetchOriginal(Long id, Date actualDate) {
-        List<RegistryPerson> versions = refBookPersonDao.fetchOriginal(id);
+    public RegistryPersonDTO fetchOriginal(Long id, Date actualDate) {
+        List<RegistryPersonDTO> versions = refBookPersonDao.fetchOriginal(id);
         return resolveVersion(versions, actualDate);
     }
 
     @Override
-    public PagingResult<RegistryPerson> fetchDuplicates(Long id, Date actualDate, PagingParams pagingParams) {
-        List<RegistryPerson> toReturnData = new ArrayList<>();
-        List<RegistryPerson> candidates = refBookPersonDao.fetchDuplicates(id, pagingParams);
-        Map<Long, List<RegistryPerson>> candidatesGroupedByOldId = new HashMap<>();
-        for (RegistryPerson candidate : candidates) {
-            List<RegistryPerson> group = candidatesGroupedByOldId.get(candidate.getOldId());
+    public PagingResult<RegistryPersonDTO> fetchDuplicates(Long id, Date actualDate, PagingParams pagingParams) {
+        List<RegistryPersonDTO> toReturnData = new ArrayList<>();
+        List<RegistryPersonDTO> candidates = refBookPersonDao.fetchDuplicates(id, pagingParams);
+        Map<Long, List<RegistryPersonDTO>> candidatesGroupedByOldId = new HashMap<>();
+        for (RegistryPersonDTO candidate : candidates) {
+            List<RegistryPersonDTO> group = candidatesGroupedByOldId.get(candidate.getOldId());
             if (group == null) {
                 group = new ArrayList<>();
                 group.add(candidate);
@@ -93,8 +106,8 @@ public class PersonServiceImpl implements PersonService {
                 group.add(candidate);
             }
         }
-        for (List<RegistryPerson> groupContent : candidatesGroupedByOldId.values()) {
-            RegistryPerson person = resolveVersion(groupContent, actualDate);
+        for (List<RegistryPersonDTO> groupContent : candidatesGroupedByOldId.values()) {
+            RegistryPersonDTO person = resolveVersion(groupContent, actualDate);
             boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
             RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
             if (viewVipDataGranted) {
@@ -175,7 +188,7 @@ public class PersonServiceImpl implements PersonService {
     public ActionResult saveOriginalAndDuplicates(TAUserInfo userInfo, PersonOriginalAndDuplicatesAction data) {
         ActionResult result = new ActionResult();
         if (data.getAddedOriginal() != null && data.getAddedOriginalVersionId() != null) {
-            RegistryPerson original = refBookPersonDao.fetchPersonWithVersionInfo(data.getAddedOriginalVersionId());
+            RegistryPersonDTO original = refBookPersonDao.fetchPersonWithVersionInfo(data.getAddedOriginalVersionId());
             if (!original.getOldId().equals(original.getRecordId())) {
                 Logger logger = new Logger();
                 logger.error("ФЛ%s%s%s (Идентификатор ФЛАГ: %s) не может быть назначен оригиналом, так как сам является дубликатом другого ФЛ.",
@@ -249,9 +262,9 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public RegistryPerson fetchPerson(Long id) {
+    public RegistryPersonDTO fetchPerson(Long id) {
 
-        RegistryPerson person = refBookPersonDao.fetchPersonWithVersionInfo(id);
+        RegistryPersonDTO person = refBookPersonDao.fetchPersonWithVersionInfo(id);
         boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
         RefBook refBookIdDoc = refBookDao.get(RefBook.Id.ID_DOC.getId());
         RefBook refBookCountry = refBookDao.get(RefBook.Id.COUNTRY.getId());
@@ -356,102 +369,102 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @PreAuthorize("hasPermission(#person, T(com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission).VIEW_VIP_DATA)")
-    public void updateRegistryPerson(RegistryPerson person) {
-        RegistryPerson persistedPerson = fetchPerson(person.getId());
-        List<RegistryPerson.UpdatableField> personFieldsToUpdate = new ArrayList<>();
+    public void updateRegistryPerson(RegistryPersonDTO person) {
+        RegistryPersonDTO persistedPerson = fetchPerson(person.getId());
+        List<RegistryPersonDTO.UpdatableField> personFieldsToUpdate = new ArrayList<>();
         boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
 
         person.setVersion(SimpleDateUtils.toStartOfDay(person.getVersion()));
         persistedPerson.setVersion(SimpleDateUtils.toStartOfDay(persistedPerson.getVersion()));
 
         if (!person.getVersion().equals(persistedPerson.getVersion()))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.VERSION);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.VERSION);
         if (!Optional.fromNullable(person.getLastName()).equals(Optional.fromNullable(persistedPerson.getLastName())))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.LAST_NAME);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.LAST_NAME);
         if (!Optional.fromNullable(person.getFirstName()).equals(Optional.fromNullable(persistedPerson.getFirstName())))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.FIRST_NAME);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.FIRST_NAME);
         if (!Optional.fromNullable(person.getMiddleName()).equals(Optional.fromNullable(persistedPerson.getMiddleName())))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.MIDDLE_NAME);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.MIDDLE_NAME);
         if (!Optional.fromNullable(SimpleDateUtils.toStartOfDay(person.getBirthDate())).equals(Optional.fromNullable(SimpleDateUtils.toStartOfDay(persistedPerson.getBirthDate()))))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.BIRTH_DATE);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.BIRTH_DATE);
         if (!Optional.fromNullable(person.getCitizenship()).equals(Optional.fromNullable(persistedPerson.getCitizenship())))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.CITIZENSHIP);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.CITIZENSHIP);
         if (!Optional.fromNullable(person.getSource()).equals(Optional.fromNullable(persistedPerson.getSource())))
-            personFieldsToUpdate.add(RegistryPerson.UpdatableField.SOURCE);
+            personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.SOURCE);
         if (viewVipDataGranted) {
             if (!Optional.fromNullable(person.getReportDoc()).equals(Optional.fromNullable(persistedPerson.getReportDoc())))
-                personFieldsToUpdate.add(RegistryPerson.UpdatableField.REPORT_DOC);
+                personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.REPORT_DOC);
             if (!Optional.fromNullable(person.getInn()).equals(Optional.fromNullable(persistedPerson.getInn())))
-                personFieldsToUpdate.add(RegistryPerson.UpdatableField.INN);
+                personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.INN);
             if (!Optional.fromNullable(person.getInnForeign()).equals(Optional.fromNullable(persistedPerson.getInnForeign())))
-                personFieldsToUpdate.add(RegistryPerson.UpdatableField.INN_FOREIGN);
+                personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.INN_FOREIGN);
             if (!Optional.fromNullable(person.getSnils()).equals(Optional.fromNullable(persistedPerson.getSnils())))
-                personFieldsToUpdate.add(RegistryPerson.UpdatableField.SNILS);
+                personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.SNILS);
             if (!Optional.fromNullable(person.getTaxPayerState()).equals(Optional.fromNullable(persistedPerson.getTaxPayerState())))
-                personFieldsToUpdate.add(RegistryPerson.UpdatableField.TAX_PAYER_STATE);
+                personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.TAX_PAYER_STATE);
             if (!person.getVip() == persistedPerson.getVip())
-                personFieldsToUpdate.add(RegistryPerson.UpdatableField.VIP);
+                personFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.VIP);
         }
 
-        List<RegistryPerson.UpdatableField> addressFieldsToUpdate = new ArrayList<>();
+        List<RegistryPersonDTO.UpdatableField> addressFieldsToUpdate = new ArrayList<>();
         if (viewVipDataGranted) {
-            String newRegionCode = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.REGION_CODE.getAlias()).getStringValue() : null;
-            String oldRegionCode = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.REGION_CODE.getAlias()).getStringValue() : null;
-            String newPostalCode = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.POSTAL_CODE.getAlias()).getStringValue() : null;
-            String oldPostalCode = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.POSTAL_CODE.getAlias()).getStringValue() : null;
-            String newDistrict = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.DISTRICT.getAlias()).getStringValue() : null;
-            String oldDistrict = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.DISTRICT.getAlias()).getStringValue() : null;
-            String newCity = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.CITY.getAlias()).getStringValue() : null;
-            String oldCity = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.CITY.getAlias()).getStringValue() : null;
-            String newLocality = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.LOCALITY.getAlias()).getStringValue() : null;
-            String oldLocality = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.LOCALITY.getAlias()).getStringValue() : null;
-            String newStreet = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.STREET.getAlias()).getStringValue() : null;
-            String oldStreet = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.STREET.getAlias()).getStringValue() : null;
-            String newHouse = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.HOUSE.getAlias()).getStringValue() : null;
-            String oldHouse = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.HOUSE.getAlias()).getStringValue() : null;
-            String newBuild = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.BUILD.getAlias()).getStringValue() : null;
-            String oldBuild = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.BUILD.getAlias()).getStringValue() : null;
-            String newAppartment = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
-            String oldAppartment = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
-            Long newCountryId = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getReferenceValue() : null;
-            Long oldCountryId = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null && persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getValue() != null ? ((Map<String, RefBookValue>) persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.COUNTRY_ID.getAlias()).getValue()).get("id").getNumberValue().longValue() : null;
-            String newAddress = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPerson.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
-            String oldAddress = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPerson.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
+            String newRegionCode = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.REGION_CODE.getAlias()).getStringValue() : null;
+            String oldRegionCode = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.REGION_CODE.getAlias()).getStringValue() : null;
+            String newPostalCode = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.POSTAL_CODE.getAlias()).getStringValue() : null;
+            String oldPostalCode = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.POSTAL_CODE.getAlias()).getStringValue() : null;
+            String newDistrict = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.DISTRICT.getAlias()).getStringValue() : null;
+            String oldDistrict = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.DISTRICT.getAlias()).getStringValue() : null;
+            String newCity = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.CITY.getAlias()).getStringValue() : null;
+            String oldCity = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.CITY.getAlias()).getStringValue() : null;
+            String newLocality = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.LOCALITY.getAlias()).getStringValue() : null;
+            String oldLocality = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.LOCALITY.getAlias()).getStringValue() : null;
+            String newStreet = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.STREET.getAlias()).getStringValue() : null;
+            String oldStreet = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.STREET.getAlias()).getStringValue() : null;
+            String newHouse = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.HOUSE.getAlias()).getStringValue() : null;
+            String oldHouse = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.HOUSE.getAlias()).getStringValue() : null;
+            String newBuild = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.BUILD.getAlias()).getStringValue() : null;
+            String oldBuild = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.BUILD.getAlias()).getStringValue() : null;
+            String newAppartment = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
+            String oldAppartment = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.APPARTMENT.getAlias()).getStringValue() : null;
+            Long newCountryId = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.getAlias()).getReferenceValue() : null;
+            Long oldCountryId = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null && persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.getAlias()).getValue() != null ? ((Map<String, RefBookValue>) persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.getAlias()).getValue()).get("id").getNumberValue().longValue() : null;
+            String newAddress = person.getAddress() != null && person.getAddress().value() != null ? person.getAddress().value().get(RegistryPersonDTO.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
+            String oldAddress = persistedPerson.getAddress() != null && persistedPerson.getAddress().value() != null ? persistedPerson.getAddress().value().get(RegistryPersonDTO.UpdatableField.ADDRESS.getAlias()).getStringValue() : null;
 
 
             if ((newRegionCode != null && !newRegionCode.equalsIgnoreCase(oldRegionCode))
                     || (newRegionCode == null && oldRegionCode != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.REGION_CODE);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.REGION_CODE);
             if ((newPostalCode != null && !newPostalCode.equalsIgnoreCase(oldPostalCode))
                     || (newPostalCode == null && oldPostalCode != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.POSTAL_CODE);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.POSTAL_CODE);
             if ((newDistrict != null && !newDistrict.equalsIgnoreCase(oldDistrict))
                     || (newDistrict == null && oldDistrict != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.DISTRICT);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.DISTRICT);
             if ((newCity != null && !newCity.equalsIgnoreCase(oldCity))
                     || (newCity == null && oldCity != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.CITY);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.CITY);
             if ((newLocality != null && !newLocality.equalsIgnoreCase(oldLocality))
                     || (newLocality == null && oldLocality != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.LOCALITY);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.LOCALITY);
             if ((newStreet != null && !newStreet.equalsIgnoreCase(oldStreet))
                     || (newStreet == null && oldStreet != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.STREET);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.STREET);
             if ((newHouse != null && !newHouse.equalsIgnoreCase(oldHouse))
                     || (newHouse == null && oldHouse != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.HOUSE);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.HOUSE);
             if ((newBuild != null && !newBuild.equalsIgnoreCase(oldBuild))
                     || (newBuild == null && oldBuild != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.BUILD);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.BUILD);
             if ((newAppartment != null && !newAppartment.equalsIgnoreCase(oldAppartment))
                     || (newAppartment == null && oldAppartment != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.APPARTMENT);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.APPARTMENT);
             if ((newCountryId != null && !newCountryId.equals(oldCountryId))
                     || (newCountryId == null && oldCountryId != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.COUNTRY_ID);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.COUNTRY_ID);
             if ((newAddress != null && !newAddress.equalsIgnoreCase(oldAddress))
                     || (newAddress == null && oldAddress != null))
-                addressFieldsToUpdate.add(RegistryPerson.UpdatableField.ADDRESS);
+                addressFieldsToUpdate.add(RegistryPersonDTO.UpdatableField.ADDRESS);
         }
 
         if (person.getRecordVersionTo() != null) {
@@ -475,7 +488,7 @@ public class PersonServiceImpl implements PersonService {
             refBookPersonDao.updateRegistryPersonAddress(person.getAddress().value(), addressSql);
         }
 
-        if (personFieldsToUpdate.contains(RegistryPerson.UpdatableField.REPORT_DOC)) {
+        if (personFieldsToUpdate.contains(RegistryPersonDTO.UpdatableField.REPORT_DOC)) {
             Long oldRepDocId = persistedPerson.getReportDoc().value() != null ? persistedPerson.getReportDoc().value().get("id").getNumberValue().longValue() : null;
             Long newRepDocId = person.getReportDoc().value() != null ? person.getReportDoc().value().get("id").getNumberValue().longValue() : null;
             refBookPersonDao.updateRegistryPersonIncRepDocId(oldRepDocId, newRepDocId);
@@ -483,13 +496,13 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public void checkVersionOverlapping(RegistryPerson person) {
+    public void checkVersionOverlapping(RegistryPersonDTO person) {
         Date minDate = null, maxDate = new Date(0);
-        List<RegistryPerson> overlappingPersonList = new ArrayList<>();
+        List<RegistryPersonDTO> overlappingPersonList = new ArrayList<>();
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setId(person.getRecordId().toString());
-        List<RegistryPerson> relatedPersons = refBookPersonDao.fetchNonDuplicatesVersions(person.getRecordId());
-        for (RegistryPerson relatedPerson : relatedPersons) {
+        List<RegistryPersonDTO> relatedPersons = refBookPersonDao.fetchNonDuplicatesVersions(person.getRecordId());
+        for (RegistryPersonDTO relatedPerson : relatedPersons) {
             if (person.getId() == null || !person.getId().equals(relatedPerson.getId()) && person.getRecordId().equals(person.getOldId())) {
                 // Проверка пересечения существующей с исходной
                 if (!(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()) != null && SimpleDateUtils.toStartOfDay(person.getVersion()).after(SimpleDateUtils.toStartOfDay(relatedPerson.getRecordVersionTo()))
@@ -531,9 +544,9 @@ public class PersonServiceImpl implements PersonService {
         }
     }
 
-    private String makeOverlappingPersonsString(List<RegistryPerson> overlappingPersons) {
+    private String makeOverlappingPersonsString(List<RegistryPersonDTO> overlappingPersons) {
         List<String> overlappingPersonStrings = new ArrayList<>(overlappingPersons.size());
-        for (RegistryPerson overlappingPerson : overlappingPersons) {
+        for (RegistryPersonDTO overlappingPerson : overlappingPersons) {
             overlappingPersonStrings.add(String.format(
                     "[%s, период действия с %s по %s]",
                     overlappingPerson.getId(),
@@ -571,6 +584,32 @@ public class PersonServiceImpl implements PersonService {
         return persons;
     }
 
+    @Override
+    public void savePersons(List<RegistryPerson> personList) {
+        List<PersonDocument> idDocs = new ArrayList<>();
+        List<PersonIdentifier> idTaxPayers = new ArrayList<>();
+        List<PersonTb> personTbs = new ArrayList<>();
+
+        for (RegistryPerson person : personList) {
+            person.setId(dbUtils.getNextRefBookRecordIds(1).get(0));
+            Long recordId = dbUtils.getNextIds(DBUtils.Sequence.REF_BOOK_RECORD_ROW, 1).get(0);
+            person.setRecordId(recordId);
+            person.setOldId(recordId);
+
+            idDocs.addAll(person.getDocuments());
+            idTaxPayers.addAll(person.getPersonIdentityList());
+            personTbs.addAll(person.getPersonTbList());
+        }
+        refBookPersonDao.saveBatch(personList);
+        idDocDaoImpl.saveBatch(idDocs);
+        idTaxPayerDaoImpl.saveBatch(idTaxPayers);
+        personTbDaoImpl.saveBatch(personTbs);
+
+        refBookPersonDao.updateBatch(personList);
+
+
+    }
+
     /**
      * Подготавливает введенный текст для использования в SQL-запросе
      *
@@ -593,9 +632,9 @@ public class PersonServiceImpl implements PersonService {
      * @param actualDate        актуальная дата по которой выбирается фверсия ФЛ
      * @return Выбранная версия физлица
      */
-    private RegistryPerson resolveVersion(List<RegistryPerson> descSortedRecords, Date actualDate) {
-        RegistryPerson toReturn = null;
-        for (RegistryPerson record : descSortedRecords) {
+    private RegistryPersonDTO resolveVersion(List<RegistryPersonDTO> descSortedRecords, Date actualDate) {
+        RegistryPersonDTO toReturn = null;
+        for (RegistryPersonDTO record : descSortedRecords) {
             if (record.getVersion().compareTo(actualDate) <= 0) {
                 if (record.getState() == 0) {
                     toReturn = record;

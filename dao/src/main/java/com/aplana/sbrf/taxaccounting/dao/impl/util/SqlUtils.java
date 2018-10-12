@@ -428,4 +428,51 @@ public final class SqlUtils extends AbstractDao {
         }
         return false;
     }
+
+
+    public static String createInsert(String table, String seq, String[] columns, String[] fields) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("insert into ").append(table);
+        sb.append(toSqlString(columns));
+        sb.append(" VALUES ");
+        sb.append(toSqlParameters(fields, seq));
+        return sb.toString();
+    }
+
+    /**
+     * Метод преобразует массив {"a", "b", "c"} в строку "(a, b, c)"
+     *
+     * @param a исходный массив
+     * @return строка
+     */
+    public static String toSqlString(Object[] a) {
+        if (a == null) {
+            return "";
+        }
+        int iMax = a.length - 1;
+        if (iMax == -1) {
+            return "";
+        }
+        StringBuilder b = new StringBuilder();
+        b.append('(');
+        for (int i = 0; ; i++) {
+            b.append(a[i]);
+            if (i == iMax) {
+                return b.append(')').toString();
+            }
+            b.append(", ");
+        }
+    }
+
+    public static String toSqlParameters(String[] fields, String seq) {
+        List<String> result = new ArrayList<String>();
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].equals("id")) {
+                result.add(seq + ".nextval");
+            } else {
+                result.add(":" + fields[i]);
+            }
+        }
+        return toSqlString(result.toArray());
+    }
 }
