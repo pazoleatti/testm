@@ -467,11 +467,7 @@ public final class SqlUtils extends AbstractDao {
     public static String toSqlParameters(String[] fields, String seq) {
         List<String> result = new ArrayList<String>();
         for (int i = 0; i < fields.length; i++) {
-            if (fields[i].equals("id")) {
-                result.add(seq + ".nextval");
-            } else {
-                result.add(":" + fields[i]);
-            }
+            result.add(":" + fields[i]);
         }
         return toSqlString(result.toArray());
     }

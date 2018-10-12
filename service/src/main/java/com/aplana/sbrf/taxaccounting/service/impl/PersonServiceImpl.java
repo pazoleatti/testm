@@ -591,7 +591,6 @@ public class PersonServiceImpl implements PersonService {
         List<PersonTb> personTbs = new ArrayList<>();
 
         for (RegistryPerson person : personList) {
-            person.setId(dbUtils.getNextRefBookRecordIds(1).get(0));
             Long recordId = dbUtils.getNextIds(DBUtils.Sequence.REF_BOOK_RECORD_ROW, 1).get(0);
             person.setRecordId(recordId);
             person.setOldId(recordId);

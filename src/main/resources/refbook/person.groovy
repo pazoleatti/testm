@@ -425,8 +425,8 @@ class Person extends AbstractScriptClass {
                         " код страны гражданства (${(person as RegistryPersonExt).citizenshipCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
             }
             if (person.address.country != null) {
-                def countryCode = person.address.country.code
-                if (countryCode == null && (person.address as AddressExt).countryCode != null) {
+                def countryCode = (person.address as AddressExt).countryCode
+                if (countryCode && person.address.country.id == null) {
                     logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " код страны адреса за пределами РФ (${(person.address as AddressExt).countryCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
                 }
