@@ -40,6 +40,10 @@
 
                 $scope.searchFilter = {
                     params: getDefaultFilterParams(),
+                    filterName: 'registryFLFilter',
+                    onCreateComplete: function () {
+                        $scope.refreshGrid();
+                    },
                     resetFilterParams: function () {
                         $scope.searchFilter.params = getDefaultFilterParams();
                     },
