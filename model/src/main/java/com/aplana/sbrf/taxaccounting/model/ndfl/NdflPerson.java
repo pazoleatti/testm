@@ -124,9 +124,9 @@ public class NdflPerson extends NdflData<Long> {
 
     public NdflPerson() {
         super();
-        incomes = new ArrayList<NdflPersonIncome>();
-        deductions = new ArrayList<NdflPersonDeduction>();
-        prepayments = new ArrayList<NdflPersonPrepayment>();
+        incomes = new ArrayList<>();
+        deductions = new ArrayList<>();
+        prepayments = new ArrayList<>();
     }
 
     public static final String TABLE_NAME = "ndfl_person";
@@ -367,7 +367,9 @@ public class NdflPerson extends NdflData<Long> {
     }
 
     public void setIncomes(List<NdflPersonIncome> incomes) {
-        this.incomes = incomes;
+        if (incomes != null) {
+            this.incomes = incomes;
+        }
     }
 
     public List<NdflPersonDeduction> getDeductions() {
@@ -375,7 +377,9 @@ public class NdflPerson extends NdflData<Long> {
     }
 
     public void setDeductions(List<NdflPersonDeduction> deductions) {
-        this.deductions = deductions;
+        if (deductions != null) {
+            this.deductions = deductions;
+        }
     }
 
     public List<NdflPersonPrepayment> getPrepayments() {
@@ -383,7 +387,9 @@ public class NdflPerson extends NdflData<Long> {
     }
 
     public void setPrepayments(List<NdflPersonPrepayment> prepayments) {
-        this.prepayments = prepayments;
+        if (prepayments != null) {
+            this.prepayments = prepayments;
+        }
     }
 
     public Long getRecordId() {

@@ -46,11 +46,19 @@ public interface NdflPersonService {
     NdflPerson get(Long ndflPersonId);
 
     /**
-     * Найти все данные о доходах физ лица привязанные к декларации
+     * Возвращяет данные только 1ого раздела формы РНУ
      *
-     * @param declarationDataId идентификатор декларации
+     * @param declarationDataId идентификатор формы РНУ
      */
     List<NdflPerson> findNdflPerson(long declarationDataId);
+
+    /**
+     * Возвращяет данные все разделов формы РНУ
+     *
+     * @param declarationDataId идентификатор формы РНУ
+     * @return данные всех 4х разделов формы РНУ
+     */
+    List<NdflPerson> findNdflPersonWithOperations(long declarationDataId);
 
     /**
      * Найти все "Сведения о доходах физического лица" привязанные к декларации
@@ -71,6 +79,7 @@ public interface NdflPersonService {
 
     /**
      * Найти данные о доходах по КПП и ОКТМО для Физлица
+     *
      * @param ndflPersonId
      * @param kpp
      * @param oktmo
@@ -96,6 +105,7 @@ public interface NdflPersonService {
 
     /**
      * Найти сведения о доходах
+     *
      * @param ndflPersonId
      * @return
      */
@@ -119,6 +129,7 @@ public interface NdflPersonService {
 
     /**
      * Найти идентификаторы доходов относящиеся к ФЛ
+     *
      * @param ndflPersonId идентификатор фл формы
      * @return список идентификаторов доходов
      */
@@ -126,6 +137,7 @@ public interface NdflPersonService {
 
     /**
      * Найти идентификаторы вычетов относящиеся к ФЛ
+     *
      * @param ndflPersonId идентификатор фл формы
      * @return список идентификаторов вычетов
      */
@@ -133,6 +145,7 @@ public interface NdflPersonService {
 
     /**
      * Найти идентификаторы авансов относящиеся к ФЛ
+     *
      * @param ndflPersonId идентификатор фл формы
      * @return список идентификаторов авансов
      */
@@ -160,6 +173,7 @@ public interface NdflPersonService {
 
     /**
      * Найти количество NdflPerson по заданным параметрам
+     *
      * @param declarationDataId
      * @param parameters
      * @return
@@ -209,6 +223,7 @@ public interface NdflPersonService {
 
     /**
      * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате выплаты дохода
+     *
      * @param ndflPersonId
      * @param startDate
      * @param endDate
@@ -232,7 +247,7 @@ public interface NdflPersonService {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
+     * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
     List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
@@ -243,7 +258,7 @@ public interface NdflPersonService {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
+     * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
     List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1);
@@ -258,6 +273,7 @@ public interface NdflPersonService {
 
     /**
      * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
+     *
      * @param declarationDataId
      * @param kpp
      * @param oktmo
@@ -355,6 +371,7 @@ public interface NdflPersonService {
 
     /**
      * Поиск дублей по полю rownum
+     *
      * @param tableName
      * @param declarationDataId
      * @return
@@ -364,6 +381,7 @@ public interface NdflPersonService {
 
     /**
      * Поиск дублей по полю rownum
+     *
      * @param tableName
      * @param declarationDataId
      * @return
@@ -372,6 +390,7 @@ public interface NdflPersonService {
 
     /**
      * Поиск пропусков по полю rownum
+     *
      * @param tableName
      * @param declarationDataId
      * @return
@@ -380,6 +399,7 @@ public interface NdflPersonService {
 
     /**
      * Поиск пропусков по полю rownum
+     *
      * @param tableName
      * @param declarationDataId
      * @return
@@ -388,14 +408,16 @@ public interface NdflPersonService {
 
     /**
      * Найти идентификаторы операций в указанном диапазоне в алфавитном порядке
-     * @param startOperationId  начало диапазона
-     * @param endOperationId    конец диапазона
-     * @return  список идентификторов операций
+     *
+     * @param startOperationId начало диапазона
+     * @param endOperationId   конец диапазона
+     * @return список идентификторов операций
      */
     List<String> fetchIncomeOperationIdRange(String startOperationId, String endOperationId);
 
     /**
      * Найти идентификаторы доходов по иденитфикатору операции.
+     *
      * @param operationIdList список идентификаторов доходов
      * @return список найденных идентификаторов
      */
@@ -403,133 +425,160 @@ public interface NdflPersonService {
 
     /**
      * Удалить несколько доходов
+     *
      * @param ids список идентификаторов доходов
      */
     void deleteNdflPersonIncome(List<Long> ids);
 
     /**
      * Удалить несколько вычетов
+     *
      * @param ids список идентификаторов вычетов
      */
     void deleteNdflPersonDeduction(List<Long> ids);
 
     /**
      * Удалить несколько авансов
+     *
      * @param ids список идентификаторов авансов
      */
     void deleteNdflPersonPrepayment(List<Long> ids);
 
     /**
      * Удалить несколько фл
+     *
      * @param ids список идентификаторов фл
      */
     void deleteNdflPersonBatch(List<Long> ids);
 
     /**
      * Проеряет наличие дохода в налоговой форме
-     * @param ndflPersonIncomeId    идентификатор дохода
-     * @param declarationDataId     идентификатор налоговой формы
+     *
+     * @param ndflPersonIncomeId идентификатор дохода
+     * @param declarationDataId  идентификатор налоговой формы
      * @return true если существует
      */
     boolean checkIncomeExists(long ndflPersonIncomeId, long declarationDataId);
 
     /**
      * Проеряет наличие вычета в налоговой форме
-     * @param ndflPersonDeductionId   идентификатор вычета
-     * @param declarationDataId       идентификатор налоговой формы
+     *
+     * @param ndflPersonDeductionId идентификатор вычета
+     * @param declarationDataId     идентификатор налоговой формы
      * @return true если существует
      */
     boolean checkDeductionExists(long ndflPersonDeductionId, long declarationDataId);
 
     /**
      * Проеряет наличие аванса в налоговой форме
-     * @param ndflPersonPrepaymentId   идентификатор авнса
-     * @param declarationDataId        идентификатор налоговой формы
+     *
+     * @param ndflPersonPrepaymentId идентификатор авнса
+     * @param declarationDataId      идентификатор налоговой формы
      * @return true если существует
      */
     boolean checkPrepaymentExists(long ndflPersonPrepaymentId, long declarationDataId);
 
     /**
      * Сохраняет доходы
+     *
      * @param incomes список объектов доходов
      */
     void saveIncomes(List<NdflPersonIncome> incomes);
 
     /**
      * Сохраняет вычеты
+     *
      * @param deductions список объектов вычетов
      */
     void saveDeductions(List<NdflPersonDeduction> deductions);
 
     /**
      * Сохраняет авансы
+     *
      * @param prepayments список объектов авансов
      */
     void savePrepayments(List<NdflPersonPrepayment> prepayments);
 
     /**
      * Обновляет физлиц. Этот метод не обновляет доходы вычеты и авансы физлица
+     *
      * @param persons список физлиц
      */
     void updateNdflPersons(List<NdflPerson> persons);
 
     /**
      * Обновляет доходы
+     *
      * @param incomes список объектов доходов
      */
     void updateIncomes(List<NdflPersonIncome> incomes);
 
     /**
      * Обновляет вычеты
+     *
      * @param deductions список объектов вычетов
      */
     void updateDeductions(List<NdflPersonDeduction> deductions);
 
     /**
      * Обновляет авансы
+     *
      * @param prepayments список объектов авансов
      */
     void updatePrepayments(List<NdflPersonPrepayment> prepayments);
 
     /**
+     * Изменяет только rowNum у всех строк каждого раздела формы РНУ
+     *
+     * @param ndflPersons стркои первого раздела формы РНУ
+     */
+    void updateRowNum(List<NdflPerson> ndflPersons);
+
+    /**
      * Оюновляет номер строки у физлиц
+     *
      * @param persons список физлиц
      */
     void updateNdflPersonsRowNum(List<NdflPerson> persons);
 
     /**
      * Обновляет номер строки у доходов
+     *
      * @param incomes список объектов доходов
      */
     void updateIncomesRowNum(List<NdflPersonIncome> incomes);
 
     /**
      * Обновляет номер строки у вычетов
+     *
      * @param deductions список объектов вычетов
      */
     void updateDeductionsRowNum(List<NdflPersonDeduction> deductions);
 
     /**
      * Обновляет номер строки у авансов
+     *
      * @param prepayments список объектов авансов
      */
-    void updatePrepaymentsRowNum (List<NdflPersonPrepayment> prepayments);
+    void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments);
 
     /**
      * Найти количество ИНП по физлицам операции которых попадают в период
-     * @param ndflPersonIdList  список идентификаторов физлиц
-     * @param periodStartDate   дата начала периода
-     * @param periodEndDate     дата конца периода
-     * @return  количество найденных ИНП
+     *
+     * @param ndflPersonIdList список идентификаторов физлиц
+     * @param periodStartDate  дата начала периода
+     * @param periodEndDate    дата конца периода
+     * @return количество найденных ИНП
      */
     int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate);
 
     /**
      * Находит авансы имеющие ИНП, ИдОперации такие же как и доходы передаваемые в {@code ndflPersonIncomeIdList} и
      * если дата начисления дохода входит в период ограниченный параметрами {@code periodStartDate} и {@code periodEndDate}
-     * @param ndflPersonIncomeIdList    список идентификаторов доходов на основании которых будет производится выборка авансов
-     * @param periodStartDate           дата начала периода
-     * @param periodEndDate             дата окончания периода
+     *
+     * @param ndflPersonIncomeIdList список идентификаторов доходов на основании которых будет производится выборка авансов
+     * @param periodStartDate        дата начала периода
+     * @param periodEndDate          дата окончания периода
      * @return список объектов авансов
      */
     List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate);
@@ -544,13 +593,15 @@ public interface NdflPersonService {
 
     /**
      * Определяет список операций которые нужно включить в КНФ
+     *
      * @param searchData данные для поиска
-     * @return  список объектов доходов
+     * @return список объектов доходов
      */
     List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData);
 
     /**
      * Получает список вычетов которые нужно включить в КНФ. Поиск происходит по доходам включенных в КНФ.
+     *
      * @param incomeIds идентификаторы операций доходов
      * @return список объектов вычетов
      */
@@ -558,6 +609,7 @@ public interface NdflPersonService {
 
     /**
      * Получает список авансов которые нужно включить в КНФ. Поиск происходит по доходам включенных в КНФ.
+     *
      * @param incomeIds идентификаторы операций доходов
      * @return список объектов авансов
      */
@@ -565,6 +617,7 @@ public interface NdflPersonService {
 
     /**
      * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.
+     *
      * @param ndflPersonIdList список идентификаторов физических лиц
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
@@ -572,15 +625,17 @@ public interface NdflPersonService {
 
     /**
      * Получает доходы данные которых будут включены в формирование Приложения 2 к налогу на прибыль
-     * @param incomeCodes           список кодов доходов, операции которых будут отобраны
-     * @param declarationDataIds    список налоговых форм, операции которых будут отобраны
-     * @return  список объектов доходов
+     *
+     * @param incomeCodes        список кодов доходов, операции которых будут отобраны
+     * @param declarationDataIds список налоговых форм, операции которых будут отобраны
+     * @return список объектов доходов
      */
     List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds);
 
     /**
      * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.
      * Без учета версий.
+     *
      * @param personIdList список идентификаторов физических лиц из справочника
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */

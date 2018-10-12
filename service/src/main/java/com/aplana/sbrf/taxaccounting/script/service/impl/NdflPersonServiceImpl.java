@@ -10,11 +10,13 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -101,6 +103,33 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> findNdflPerson(long declarationDataId) {
         return ndflPersonDao.fetchByDeclarationData(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPerson> findNdflPersonWithOperations(long declarationDataId) {
+        List<NdflPerson> persons = ndflPersonDao.fetchByDeclarationData(declarationDataId);
+        Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId));
+        Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonDeductionByDeclarationData(declarationDataId));
+        Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId));
+        for (NdflPerson person : persons) {
+            person.setIncomes(incomesByPersonId.get(person.getId()));
+            person.setDeductions(deductionsByPersonId.get(person.getId()));
+            person.setPrepayments(prepaymentsByPersonId.get(person.getId()));
+        }
+        return persons;
+    }
+
+    private <T extends NdflPersonOperation> Map<Long, List<T>> groupByPersonId(List<T> operations) {
+        Map<Long, List<T>> operationsByPersonId = new HashMap<>();
+        for (T operation : operations) {
+            List<T> operationsOfPerson = operationsByPersonId.get(operation.getNdflPersonId());
+            if (operationsOfPerson == null) {
+                operationsOfPerson = new ArrayList<>();
+                operationsByPersonId.put(operation.getNdflPersonId(), operationsOfPerson);
+            }
+            operationsOfPerson.add(operation);
+        }
+        return operationsByPersonId;
     }
 
     @Override
@@ -330,6 +359,26 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public void updatePrepayments(List<NdflPersonPrepayment> prepayments) {
         ndflPersonDao.updatePrepayments(prepayments);
+    }
+
+    @Override
+    public void updateRowNum(List<NdflPerson> ndflPersons) {
+        updateNdflPersonsRowNum(ndflPersons);
+        List<NdflPersonIncome> incomes = new ArrayList<>();
+        for (NdflPerson ndflPerson : ndflPersons) {
+            incomes.addAll(ndflPerson.getIncomes());
+        }
+        updateIncomesRowNum(incomes);
+        List<NdflPersonDeduction> deductions = new ArrayList<>();
+        for (NdflPerson ndflPerson : ndflPersons) {
+            deductions.addAll(ndflPerson.getDeductions());
+        }
+        updateDeductionsRowNum(deductions);
+        List<NdflPersonPrepayment> prepayments = new ArrayList<>();
+        for (NdflPerson ndflPerson : ndflPersons) {
+            prepayments.addAll(ndflPerson.getPrepayments());
+        }
+        updatePrepaymentsRowNum(prepayments);
     }
 
     @Override
