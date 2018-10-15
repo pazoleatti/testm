@@ -1,16 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.google.common.collect.Lists;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,17 +17,13 @@ import java.util.*;
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 
-    @Autowired
-    DepartmentDao departmentDao;
+    private DepartmentDao departmentDao;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
-    @Autowired
-    DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    @Autowired
-    DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-
-    @Autowired
-    PeriodService periodService;
+    public DepartmentServiceImpl(DepartmentDao departmentDao, DepartmentReportPeriodDao departmentReportPeriodDao) {
+        this.departmentDao = departmentDao;
+        this.departmentReportPeriodDao = departmentReportPeriodDao;
+    }
 
     @Override
     public Department getDepartment(int departmentId) {
@@ -59,10 +52,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments) {
-        Map<Integer, Department> departmentMap = new HashMap<Integer, Department>();
+        Map<Integer, Department> departmentMap = new HashMap<>();
 
         List<Department> departmentList = availableDepartments == null ? this.listAll() :
-                departmentDao.getRequiredForTreeDepartments(new ArrayList<Integer>(availableDepartments));
+                departmentDao.getRequiredForTreeDepartments(new ArrayList<>(availableDepartments));
 
         for (Department department : departmentList) {
             departmentMap.put(department.getId(), department);
@@ -94,13 +87,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Integer> getAllChildrenIds(Integer depId) {
         if (depId == null)
-            return new ArrayList<Integer>(0);
+            return new ArrayList<>(0);
         return departmentDao.fetchAllChildrenIds(depId);
     }
 
     @Override
     public List<Department> getBADepartments(TAUser tAUser, TaxType taxType) {
-        List<Department> retList = new ArrayList<Department>();
+        List<Department> retList = new ArrayList<>();
 
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
@@ -116,7 +109,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getBADepartmentIds(TAUser tAUser) {
-        List<Integer> retList = new ArrayList<Integer>();
+        List<Integer> retList = new ArrayList<>();
 
         if (tAUser.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
@@ -132,7 +125,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> getTBDepartments(TAUser tAUser, TaxType taxType) {
-        List<Department> retList = new ArrayList<Department>();
+        List<Department> retList = new ArrayList<>();
 
         if (tAUser.hasRole(TARole.ROLE_ADMIN)
                 || tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
@@ -142,7 +135,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || tAUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
             if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.CSKO_PCP) {
-                List<Integer> departmentIds = departmentDao.getDepartmentIdsByExecutors(Arrays.asList(tAUser.getDepartmentId()));
+                List<Integer> departmentIds = departmentDao.getDepartmentIdsByExecutors(Collections.singletonList(tAUser.getDepartmentId()));
                 for (Integer depId : departmentIds) {
                     Department department = getParentTB(depId);
                     if (department != null) {
@@ -167,7 +160,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType, boolean addRoot) {
-        List<Integer> retList = new ArrayList<Integer>();
+        List<Integer> retList = new ArrayList<>();
 
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
             if (addRoot) {
@@ -207,9 +200,8 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Все подразделения из справочника подразделений
             retList.addAll(departmentDao.fetchAllIds());
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS)) {
-            Set<Integer> departments = new LinkedHashSet<>();
             // ТБ подразделения пользователя + все дочерние
-            departments.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+            Set<Integer> departments = new LinkedHashSet<>(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
             // ТБ + дочерние подразделения, для которых подразделение пользователя назначено исполнителем. Т.е сначала вверх до ТБ, а потом все дочерние
             List<Integer> forPerform = departmentDao.getTBDepartmentIdsByDeclarationPerformer(tAUser.getDepartmentId());
             for (Integer tbId : forPerform) {
@@ -219,13 +211,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
             // Дочерние подразделения для подразделения пользователя
             List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId());
-            // Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
-            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(userDepartmentChildrenIds);
-            List<Integer> declarationDepartmentsChildrenIds = departmentDao.fetchAllChildrenIds(declarationDepartmentsIds);
+            // Подразделения, исполнителями налоговых форм которых являются подразделение пользователя
+            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(Lists.newArrayList((Integer)tAUser.getDepartmentId()));
             // В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
-            // назначены исполнителями, их дочерние подразделения
+            // назначены исполнителями
             retList.addAll(userDepartmentChildrenIds);
-            retList.addAll(declarationDepartmentsChildrenIds);
+            retList.addAll(declarationDepartmentsIds);
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -237,14 +228,14 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> getDestinationDepartments(TaxType taxType, TAUser tAUser) {
-        List<Department> retList = new ArrayList<Department>();
+        List<Department> retList = new ArrayList<>();
         if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
         }
 
         // Результат выборки должен содержать только уникальные подразделения
-        Set<Department> setItems = new HashSet<Department>(retList);
+        Set<Department> setItems = new HashSet<>(retList);
         retList.clear();
         retList.addAll(setItems);
 
@@ -262,7 +253,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId) {
-        List<Integer> retList = new ArrayList<Integer>();
+        List<Integer> retList = new ArrayList<>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser);
         DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
@@ -274,7 +265,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.add(departmentReportPeriod.getDepartmentId());
         }
 
-        Set<Integer> setItems = new HashSet<Integer>(retList);
+        Set<Integer> setItems = new HashSet<>(retList);
         retList.clear();
         retList.addAll(setItems);
 
@@ -283,7 +274,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Map<Integer, Department> getDepartments(List<Integer> departmentId) {
-        Map<Integer, Department> result = new HashMap<Integer, Department>();
+        Map<Integer, Department> result = new HashMap<>();
         for (Integer depId : departmentId) {
             Department department = departmentDao.getDepartment(depId);
             result.put(department.getId(), department);

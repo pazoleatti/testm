@@ -10,24 +10,12 @@ import java.util.List;
  */
 public interface DeclarationDataSearchService {
 
-    Long getRowNumByFilter(DeclarationDataFilter declarationFilter);
-
 	/**
 	 * Данный метод, вызывает FormDataDao#findPage() для выполнения запроса к базе по заданным параметрам фильтра.
 	 * @param declarationFilter фильтр, по параметрам которого происходит поиск данных по декларациям
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска.
 	 */
 	PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter);
-
-	/**
-	 * Получить информацию о значениях, допустимых в фильтрах по декларациям для пользователя по виду налога
-	 * @param userInfo информация о пользователе
-	 * @param taxType вид налога
-	 * @param isReport
-	 * @return объект, содержащий информацию о допустимых значениях фильтров для поиска по декларациям
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет ролей, необходимых для поиска деклараций
-	 */
-	DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType, boolean isReport);
 
     /**
      * Получние id для всех деклараций по фильтру.

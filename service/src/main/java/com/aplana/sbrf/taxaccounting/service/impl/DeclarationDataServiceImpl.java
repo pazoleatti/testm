@@ -3,11 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -23,11 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -43,11 +35,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
@@ -81,7 +69,6 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1179,9 +1166,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
             // Отбираем подразделения (и соответственно их формы), доступные пользователю в соотстветствии с его ролями
+            List<Integer> availableDepartments = departmentService.getTaxFormDepartments(currentUser);
+            List<Integer> departmentIds = new ArrayList<>();
             if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
-                filter.setDepartmentIds(departmentService.getTaxFormDepartments(currentUser));
+                departmentIds = availableDepartments;
             }
+            else {
+                for (Integer departmentId : filter.getDepartmentIds()) {
+                    if (availableDepartments.contains(departmentId)) {
+                        departmentIds.add(departmentId);
+                    }
+                }
+            }
+            // Если доступных подразделений нет, то список будет состоять из 1 элемента (-1),
+            // который не может быть id существующего подразделения, чтобы не нашлась ни одна форма
+            if (departmentIds.isEmpty()) {
+                departmentIds.add(-1);
+            }
+            filter.setDepartmentIds(departmentIds);
 
             if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
                 List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();

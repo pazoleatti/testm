@@ -55,35 +55,11 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
         return refBookDepartmentDao.fetchDepartmentById(user.getDepartmentId());
     }
 
-    /**
-     * Получение доступных (согласно правам доступа пользователя)  значений справочника
-     *
-     * @param user Пользователь
-     * @return Список значений справочника
-     */
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
-    public List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user) {
-        List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user);
-        return refBookDepartmentDao.fetchDepartments(declarationDepartments);
-    }
-
-    /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
-     *
-     * @param user         Пользователь
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка значений справочника
-     */
-    @Override
-    @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
-    public PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams) {
-        List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user);
-        return refBookDepartmentDao.fetchDepartments(declarationDepartments, name, pagingParams);
+    public PagingResult<RefBookDepartment> findDepartments(String name, PagingParams pagingParams) {
+        return refBookDepartmentDao.findDepartments(name, pagingParams);
     }
 
     @Override

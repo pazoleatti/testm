@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,16 +34,9 @@ public class DepartmentServiceImplTest {
 
     @Before
     public void init() {
-        departmentService = new DepartmentServiceImpl();
         departmentDao = mock(DepartmentDao.class);
-        DepartmentDeclarationTypeDao departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
         DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
-        PeriodService periodService = mock(PeriodService.class);
-
-        ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
-        ReflectionTestUtils.setField(departmentService, "departmentReportPeriodDao", departmentReportPeriodDao);
-        ReflectionTestUtils.setField(departmentService, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
-        ReflectionTestUtils.setField(departmentService, "periodService", periodService);
+        departmentService = new DepartmentServiceImpl(departmentDao, departmentReportPeriodDao);
 
         root = new Department();
         root.setName("Bank");
@@ -72,35 +63,28 @@ public class DepartmentServiceImplTest {
         departmentOSB311.setId(departmentID[4]);
         departmentOSB311.setType(DepartmentType.CSKO_PCP);
 
-        // TODO data for исполнители
-
         // Подразделения
         when(departmentDao.getDepartment(root.getId())).thenReturn(root);
         when(departmentDao.getDepartment(departmentTB2.getId())).thenReturn(departmentTB2);
         when(departmentDao.getDepartment(departmentTB3.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartment(departmentGOSB31.getId())).thenReturn(departmentGOSB31);
         when(departmentDao.getDepartment(departmentOSB311.getId())).thenReturn(departmentOSB311);
-        // Иерархия подразделений (вверх)
-//        when(departmentDao.getParent(departmentTB2.getId())).thenReturn(root);
-//        when(departmentDao.getParent(departmentTB3.getId())).thenReturn(root);
-//        when(departmentDao.getParent(departmentGOSB31.getId())).thenReturn(departmentTB3);
-//        when(departmentDao.getParent(departmentOSB311.getId())).thenReturn(departmentGOSB31);
         // Иерархия подразделений (вниз)
         when(departmentDao.getAllChildren(root.getId())).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
-        when(departmentDao.getAllChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
+        when(departmentDao.getAllChildren(departmentTB2.getId())).thenReturn(Collections.singletonList(departmentTB2));
         when(departmentDao.getAllChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         // Все подразделения
         when(departmentDao.listDepartments()).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.fetchAllIds()).thenReturn(asList(root.getId(), departmentTB2.getId(), departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
         // Типы подразделений
-        when(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(asList(root));
+        when(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(Collections.singletonList(root));
         when(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(asList(departmentTB2, departmentTB3));
-        when(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode())).thenReturn(asList(departmentGOSB31));
-        when(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode())).thenReturn(asList(departmentOSB311));
-        when(departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(asList(root.getId()));
+        when(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode())).thenReturn(Collections.singletonList(departmentGOSB31));
+        when(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode())).thenReturn(Collections.singletonList(departmentOSB311));
+        when(departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(Collections.singletonList(root.getId()));
         when(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDao.getDepartmentIdsByType(DepartmentType.CSKO_PCP.getCode())).thenReturn(asList(departmentGOSB31.getId()));
-        when(departmentDao.getDepartmentIdsByType(DepartmentType.MANAGEMENT.getCode())).thenReturn(asList(departmentOSB311.getId()));
+        when(departmentDao.getDepartmentIdsByType(DepartmentType.CSKO_PCP.getCode())).thenReturn(Collections.singletonList(departmentGOSB31.getId()));
+        when(departmentDao.getDepartmentIdsByType(DepartmentType.MANAGEMENT.getCode())).thenReturn(Collections.singletonList(departmentOSB311.getId()));
         // ТБ для подразделения
         when(departmentDao.getDepartmentTB(root.getId())).thenReturn(null);
         when(departmentDao.getDepartmentTB(departmentTB2.getId())).thenReturn(departmentTB2);
@@ -108,21 +92,19 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmentTB(departmentGOSB31.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartmentTB(departmentOSB311.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartmentTBChildren(root.getId())).thenReturn(new ArrayList<Department>(0));
-        when(departmentDao.getDepartmentTBChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
+        when(departmentDao.getDepartmentTBChildren(departmentTB2.getId())).thenReturn(Collections.singletonList(departmentTB2));
         when(departmentDao.getDepartmentTBChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.getDepartmentTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.getDepartmentTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
 
-        when(periodService.fetchReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
-
         when(departmentDao.getDepartmentTBChildrenId(root.getId())).thenReturn(new ArrayList<Integer>(0));
-        when(departmentDao.getDepartmentTBChildrenId(departmentTB2.getId())).thenReturn(asList(departmentTB2.getId()));
+        when(departmentDao.getDepartmentTBChildrenId(departmentTB2.getId())).thenReturn(Collections.singletonList(departmentTB2.getId()));
         when(departmentDao.getDepartmentTBChildrenId(departmentTB3.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
         when(departmentDao.getDepartmentTBChildrenId(departmentGOSB31.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
         when(departmentDao.getDepartmentTBChildrenId(departmentOSB311.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
 
         // Роли
-        taRoles = new ArrayList<TARole>();
+        taRoles = new ArrayList<>();
         for (String alias : asList(TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             TARole taRole = new TARole();
             taRole.setAlias(alias);
@@ -139,7 +121,7 @@ public class DepartmentServiceImplTest {
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
-                List<DepartmentReportPeriod> result = new ArrayList<DepartmentReportPeriod>();
+                List<DepartmentReportPeriod> result = new ArrayList<>();
                 DepartmentReportPeriodFilter drpf = (DepartmentReportPeriodFilter) invocation.getArguments()[0];
                 Integer repId = drpf.getReportPeriodIdList().get(0);
                 for (final Integer depId : drpf.getDepartmentIdList()) {
@@ -157,8 +139,8 @@ public class DepartmentServiceImplTest {
         }).when(departmentReportPeriodDao).fetchAllByFilter(any(DepartmentReportPeriodFilter.class));
 
         // Доступность по связям
-        when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(311))).thenReturn(Arrays.asList(3));
-        when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(31))).thenReturn(Arrays.asList(3));
+        when(departmentDao.getDepartmentIdsByExecutors(Collections.singletonList(311))).thenReturn(Collections.singletonList(3));
+        when(departmentDao.getDepartmentIdsByExecutors(Collections.singletonList(31))).thenReturn(Collections.singletonList(3));
 
         when(departmentDao.getParentTBId(311)).thenReturn(3);
         when(departmentDao.getParentTBId(31)).thenReturn(3);
@@ -167,13 +149,13 @@ public class DepartmentServiceImplTest {
         // Для дерева
         when(departmentDao.getRequiredForTreeDepartments(anyListOf(Integer.class))).thenAnswer(new Answer<List<Department>>() {
             @Override
-            public List<Department> answer(InvocationOnMock invocation) throws Throwable {
+            public List<Department> answer(InvocationOnMock invocation) {
 
                 List<Integer> availableList = (List<Integer>) invocation.getArguments()[0];
-                Set<Department> retVal = new HashSet<Department>();
+                Set<Department> retVal = new HashSet<>();
 
                 if (availableList.contains(root.getId())) {
-                    retVal.addAll(Arrays.asList(root));
+                    retVal.addAll(Collections.singletonList(root));
                 }
                 if (availableList.contains(departmentTB2.getId())) {
                     retVal.addAll(Arrays.asList(departmentTB2, root));
@@ -188,19 +170,16 @@ public class DepartmentServiceImplTest {
                     retVal.addAll(Arrays.asList(departmentOSB311, departmentGOSB31, departmentTB3, root));
                 }
 
-                return new ArrayList<Department>(retVal);
+                return new ArrayList<>(retVal);
             }
         });
-
-        ArrayList<Department> departments = new ArrayList<Department>();
-        departments.add(root);
     }
 
     @Test
     public void depDaoTest() {
         Department department = new Department();
         DepartmentDao departmentDao = mock(DepartmentDao.class);
-        List<Department> listDep = new ArrayList<Department>();
+        List<Department> listDep = new ArrayList<>();
         listDep.add(new Department());
         listDep.add(new Department());
         listDep.add(new Department());
@@ -225,29 +204,29 @@ public class DepartmentServiceImplTest {
 
     @Test
     public void getRequiredForTreeDepartmentsTest() {
-        Set<Integer> available = new HashSet<Integer>(asList(departmentTB2.getId(), departmentTB3.getId()));
+        Set<Integer> available = new HashSet<>(asList(departmentTB2.getId(), departmentTB3.getId()));
 
         Collection<Department> result = departmentService.getRequiredForTreeDepartments(available).values();
         Assert.assertEquals(3, result.size());
-        Assert.assertEquals(true, result.contains(root));
-        Assert.assertEquals(true, result.contains(departmentTB2));
-        Assert.assertEquals(true, result.contains(departmentTB3));
+        Assert.assertTrue(result.contains(root));
+        Assert.assertTrue(result.contains(departmentTB2));
+        Assert.assertTrue(result.contains(departmentTB3));
 
-        available = new HashSet<Integer>(asList(departmentOSB311.getId()));
+        available = new HashSet<>(Collections.singletonList(departmentOSB311.getId()));
         result = departmentService.getRequiredForTreeDepartments(available).values();
         Assert.assertEquals(4, result.size());
-        Assert.assertEquals(true, result.contains(root));
-        Assert.assertEquals(true, result.contains(departmentTB3));
-        Assert.assertEquals(true, result.contains(departmentGOSB31));
-        Assert.assertEquals(true, result.contains(departmentOSB311));
+        Assert.assertTrue(result.contains(root));
+        Assert.assertTrue(result.contains(departmentTB3));
+        Assert.assertTrue(result.contains(departmentGOSB31));
+        Assert.assertTrue(result.contains(departmentOSB311));
 
         result = departmentService.getRequiredForTreeDepartments(null).values();
         Assert.assertEquals(5, result.size());
-        Assert.assertEquals(true, result.contains(root));
-        Assert.assertEquals(true, result.contains(departmentTB2));
-        Assert.assertEquals(true, result.contains(departmentTB3));
-        Assert.assertEquals(true, result.contains(departmentGOSB31));
-        Assert.assertEquals(true, result.contains(departmentOSB311));
+        Assert.assertTrue(result.contains(root));
+        Assert.assertTrue(result.contains(departmentTB2));
+        Assert.assertTrue(result.contains(departmentTB3));
+        Assert.assertTrue(result.contains(departmentGOSB31));
+        Assert.assertTrue(result.contains(departmentOSB311));
     }
 
     //@Test
@@ -341,7 +320,7 @@ public class DepartmentServiceImplTest {
 
         List<Department> result = departmentService.getTBDepartments(taUser, TaxType.NDFL);
         Assert.assertEquals(3, result.size());
-        Assert.assertEquals(true, result.contains(root) && result.contains(departmentTB2)
+        Assert.assertTrue(result.contains(root) && result.contains(departmentTB2)
                 && result.contains(departmentTB3));
 
         // REMOVE TARole.ROLE_CONTROL_UNP, TARole.ROLE_ADMIN
@@ -359,13 +338,8 @@ public class DepartmentServiceImplTest {
                 case 2:
                 case 3:
                     Assert.assertEquals(1, result.size());
-                    Assert.assertEquals(true, result.contains(departmentTB2) || result.contains(departmentTB3));
+                    Assert.assertTrue(result.contains(departmentTB2) || result.contains(departmentTB3));
                     break;
-                /*case 31:
-                case 311:
-                    Assert.assertEquals(1, result.size());
-                    Assert.assertEquals(true, result.contains(departmentTB3));
-                    break;*/
             }
         }
     }
@@ -377,7 +351,7 @@ public class DepartmentServiceImplTest {
 
         List<Integer> result = departmentService.getTBDepartmentIds(taUser, TaxType.NDFL, true);
         Assert.assertEquals(3, result.size());
-        Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
+        Assert.assertTrue(result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()));
 
         taUser.getRoles().remove(0);
@@ -393,12 +367,12 @@ public class DepartmentServiceImplTest {
                 case 2:
                 case 3:
                     Assert.assertEquals(1, result.size());
-                    Assert.assertEquals(true, result.contains(departmentTB2.getId()) || result.contains(departmentTB3.getId()));
+                    Assert.assertTrue(result.contains(departmentTB2.getId()) || result.contains(departmentTB3.getId()));
                     break;
                 case 31:
                 case 311:
                     Assert.assertEquals(1, result.size());
-                    Assert.assertEquals(true, result.contains(departmentTB3.getId()));
+                    Assert.assertTrue(result.contains(departmentTB3.getId()));
                     break;
             }
         }

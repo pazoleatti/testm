@@ -5,21 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAttachFileTypeService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService;
+import com.aplana.sbrf.taxaccounting.service.refbook.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
@@ -37,27 +26,19 @@ import java.util.List;
  */
 @RestController
 public class RefBookValuesController {
+
     private final RefBookAttachFileTypeService refBookAttachFileTypeService;
-
     private final RefBookAsnuService refBookAsnuService;
-
     private final RefBookDeclarationTypeService refBookDeclarationTypeService;
-
     private final RefBookDepartmentService refBookDepartmentService;
-
     private final PeriodService periodService;
-
     private final SecurityService securityService;
-
     private final RefBookOktmoService oktmoService;
-
-    private final DepartmentService departmentService;
-
     private final RefBookFormTypeService refBookFormTypeService;
 
     public RefBookValuesController(RefBookAttachFileTypeService refBookAttachFileTypeService, RefBookAsnuService refBookAsnuService,
                                    RefBookDeclarationTypeService refBookDeclarationTypeService, RefBookDepartmentService refBookDepartmentService,
-                                   PeriodService periodService, SecurityService securityService, DepartmentService departmentService, RefBookOktmoService oktmoService,
+                                   PeriodService periodService, SecurityService securityService, RefBookOktmoService oktmoService,
                                    RefBookFormTypeService refBookFormTypeService) {
         this.refBookAttachFileTypeService = refBookAttachFileTypeService;
         this.refBookAsnuService = refBookAsnuService;
@@ -65,7 +46,6 @@ public class RefBookValuesController {
         this.refBookDepartmentService = refBookDepartmentService;
         this.periodService = periodService;
         this.securityService = securityService;
-        this.departmentService = departmentService;
         this.oktmoService = oktmoService;
         this.refBookFormTypeService = refBookFormTypeService;
     }
@@ -81,7 +61,7 @@ public class RefBookValuesController {
     }
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
+     * Получение значений справочника подразделений с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
      *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
@@ -89,9 +69,8 @@ public class RefBookValuesController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=allDepartments")
-    public JqgridPagedList<RefBookDepartment> fetchAllDepartments(@RequestParam String name, @RequestParam PagingParams pagingParams) {
-        TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookDepartment> departments = refBookDepartmentService.fetchAvailableDepartments(user, name, pagingParams);
+    public JqgridPagedList<RefBookDepartment> findDepartments(@RequestParam String name, @RequestParam PagingParams pagingParams) {
+        PagingResult<RefBookDepartment> departments = refBookDepartmentService.findDepartments(name, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
     }
 

@@ -32,23 +32,14 @@ public interface RefBookDepartmentService {
     RefBookDepartment fetchUserDepartment(TAUser user);
 
     /**
-     * Получение доступных (согласно правам доступа пользователя)  значений справочника
+     * Получение значений справочника подразделений с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param user Пользователь
-     * @return Список значений справочника
-     */
-    List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user);
-
-    /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
-     *
-     * @param user         Пользователь
      * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
      *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
      * @param pagingParams Параметры пейджинга
      * @return Страница списка значений справочника
      */
-    PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams);
+    PagingResult<RefBookDepartment> findDepartments(String name, PagingParams pagingParams);
 
     /**
      * Возвращяет список ТБ с установленными дочерними подразделениями

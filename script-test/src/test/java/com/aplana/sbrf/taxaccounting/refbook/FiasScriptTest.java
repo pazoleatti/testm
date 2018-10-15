@@ -12,6 +12,7 @@ import net.sf.sevenzipjbinding.SevenZip;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.doAnswer;
  *
  * @author Andrey Drunk
  */
+@Ignore
 public class FiasScriptTest extends RefBookScriptTestBase {
 
     public static final Logger LOGGER = Logger.getLogger(FiasScriptTest.class.getName());

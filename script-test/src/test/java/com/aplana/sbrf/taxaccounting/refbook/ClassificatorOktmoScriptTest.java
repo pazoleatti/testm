@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -21,6 +22,7 @@ import java.util.Map;
  *
  * @author Emamedova
  */
+@Ignore
 public class ClassificatorOktmoScriptTest extends RefBookScriptTestBase {
 
     @Override

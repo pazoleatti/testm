@@ -105,17 +105,6 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     }
 
     /**
-     * Получение действующих значений справочника по идентификаторам
-     *
-     * @param ids Список идентификаторов
-     * @return Список значений справочника
-     */
-    @Override
-    public List<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids) {
-        return fetchDepartments(ids, true);
-    }
-
-    /**
      * Получение значений справочника по идентификаторам
      *
      * @param ids        Список идентификаторов
@@ -164,6 +153,35 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     public String fetchFullName(Integer departmentId) {
         return getJdbcTemplate().queryForObject("SELECT shortname AS full_name FROM department_fullpath WHERE id = ?",
                 String.class, departmentId);
+    }
+
+    @Override
+    public PagingResult<RefBookDepartment> findDepartments(String name, PagingParams pagingParams) {
+        String baseSql = REF_BOOK_DEPARTMENT_SELECT;
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        if (StringUtils.isNotBlank(name)) {
+            baseSql += "where (lower(dep.name) like :name or lower(df.shortname) like :name) ";
+            params.addValue("name", "%" + name.toLowerCase() + "%");
+        }
+
+        if (StringUtils.isNotBlank(pagingParams.getProperty()) && StringUtils.isNotBlank(pagingParams.getDirection())) {
+            baseSql += new Formatter().format("order by %s %s ",
+                    FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),
+                    pagingParams.getDirection()).toString();
+        }
+
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("count", pagingParams.getCount());
+
+        List<RefBookDepartment> departments = getNamedParameterJdbcTemplate().query(
+                "select * from ( select a.*, rownum rn from (\n" + baseSql + ") a \n) where rn > :startIndex and rowNum <= :count",
+                params,
+                new RefBookDepartmentRowMapper());
+
+        int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", params, Integer.class);
+        return new PagingResult<>(departments, totalCount);
     }
 
     /**
