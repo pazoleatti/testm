@@ -116,7 +116,9 @@ public class RefBookController {
      * @return значения справочника
      */
     @GetMapping(value = "/rest/refBook/{refBookId}/records")
-    public <T extends RefBookSimple> JqgridPagedList<T> fetchAllRecords(@PathVariable Long refBookId, @RequestParam String[] columns, @RequestParam String searchPattern, @RequestParam String filter, @RequestParam PagingParams pagingParams) {
+    public <T extends RefBookSimple> JqgridPagedList<T> fetchAllRecords(@PathVariable Long refBookId, @RequestParam String[] columns,
+                                                                        @RequestParam(required = false) String searchPattern, @RequestParam(required = false) String filter,
+                                                                        @RequestParam(required = false) PagingParams pagingParams) {
         PagingResult<T> result = commonRefBookService.fetchAllRecords(refBookId, Arrays.asList(columns), searchPattern, filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
     }

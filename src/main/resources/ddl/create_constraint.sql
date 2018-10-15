@@ -19,6 +19,7 @@ alter table declaration_type add constraint declaration_type_pk primary key (id)
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table department_report_period add constraint department_report_period_pk primary key(id);
+alter table ref_book_knf_type add constraint ref_book_knf_type_pk primary key (id);
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data_file add constraint form_data_file_pk primary key (blob_data_id, form_data_id);
@@ -92,6 +93,7 @@ alter table declaration_template add constraint declaration_tem_fk_blob_data for
 alter table declaration_template add constraint dec_tem_fk_blob_data_jrxml foreign key (jrxml) references blob_data(id);
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references department(id) on delete cascade;
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references report_period(id) on delete cascade;
+alter table declaration_data add constraint declaration_data_knf_type foreign key (knf_type_id) references ref_book_knf_type(id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template(id);
 alter table declaration_data add constraint decl_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);

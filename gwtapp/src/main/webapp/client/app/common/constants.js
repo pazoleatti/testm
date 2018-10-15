@@ -68,7 +68,8 @@
                 SIGNATORY_MARK: 35,
                 TAXPAYER_STATUS: 903,
                 DOC_TYPE: 360,
-                ID_DOC: 902
+                ID_DOC: 902,
+                KNF_TYPE: 909
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

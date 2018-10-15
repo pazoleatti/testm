@@ -904,7 +904,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public DeclarationResult fetchDeclarationData(TAUserInfo userInfo, long declarationDataId) {
         DeclarationResult result = new DeclarationResult();
         if (existDeclarationData(declarationDataId)) {
-            result.setDeclarationDataExistsTrue();
+            result.setDeclarationDataExists(true);
             DeclarationData declaration = get(declarationDataId, userInfo);
             result.setDepartment(departmentService.getParentsHierarchy(
                     declaration.getDepartmentId()));
@@ -935,6 +935,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
                 result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
             }
+            result.setKnfType(declaration.getKnfType());
 
             result.setCreationDate(logBusinessService.getFormCreationDate(declaration.getId()));
             result.setKpp(declaration.getKpp());
@@ -2130,8 +2131,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             } finally {
-                if (reportFile != null)
+                if (reportFile != null) {
                     reportFile.delete();
+                }
             }
         } else {
             File xlsxFile = null;

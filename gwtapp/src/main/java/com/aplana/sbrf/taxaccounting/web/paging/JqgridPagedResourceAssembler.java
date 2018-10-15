@@ -18,10 +18,15 @@ public class JqgridPagedResourceAssembler {
         JqgridPagedList<T> pagedList = new JqgridPagedList<T>();
         pagedList.getRows().addAll(collection);
 
-        pagedList.setPage(pagingParams.getPage());
         pagedList.setRecords(size);
-        Integer total = new Double(Math.ceil((double) size / pagingParams.getCount())).intValue();
-        pagedList.setTotal(total == 0 ? 1 : total);
+        if (pagingParams != null) {
+            pagedList.setPage(pagingParams.getPage());
+            Integer total = new Double(Math.ceil((double) size / pagingParams.getCount())).intValue();
+            pagedList.setTotal(total == 0 ? 1 : total);
+        } else {
+            pagedList.setPage(1);
+            pagedList.setTotal(collection.size());
+        }
 
         return pagedList;
     }

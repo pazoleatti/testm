@@ -121,4 +121,86 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-13" author="dnovikov">
+        <sql>
+            CREATE TABLE declaration_data_kpp (
+                declaration_data_id NUMBER(18) NOT NULL,
+                kpp                 VARCHAR2(9 CHAR) NOT NULL,
+                CONSTRAINT declaration_data_kpp_pk PRIMARY KEY (declaration_data_id, kpp)
+            ) organization INDEX;
+            COMMENT ON TABLE declaration_data_kpp IS 'Включаемые в КНФ КПП';
+            COMMENT ON column declaration_data_kpp.declaration_data_id IS 'Ид КНФ';
+            COMMENT ON column declaration_data_kpp.kpp IS 'Включаемые в КНФ КПП';
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-14" author="dnovikov">
+        <sql>
+            CREATE TABLE declaration_data_person (
+                declaration_data_id NUMBER(18) NOT NULL,
+                person_id           NUMBER(18) NOT NULL,
+                CONSTRAINT ref_book_knf_type PRIMARY KEY (declaration_data_id, person_id)
+            ) organization INDEX;
+            COMMENT ON TABLE declaration_data_person IS 'Включаемые в КНФ КПП';
+            COMMENT ON column declaration_data_person.declaration_data_id IS 'Ид КНФ';
+            COMMENT ON column declaration_data_person.person_id IS 'Включаемые в КНФ КПП';
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-15" author="dnovikov">
+        <sql>
+            CREATE TABLE ref_book_knf_type (
+                id   NUMBER(9) NOT NULL,
+                name VARCHAR2(2000 CHAR) NOT NULL,
+                status NUMBER(1,0) default 0,
+                CONSTRAINT ref_book_knf_type_pk PRIMARY KEY (id)
+            );
+            COMMENT ON TABLE ref_book_knf_type IS 'Типы КНФ';
+            COMMENT ON column ref_book_knf_type.id IS 'Код вычета';
+            COMMENT ON column ref_book_knf_type.name IS 'Наименование типа КНФ';
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-16" author="dnovikov">
+        <sql>
+            insert into ref_book(id, name, table_name, read_only, IS_VERSIONED) values (909, 'Типы КНФ', 'REF_BOOK_KNF_TYPE', 1, 0);
+            insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, precision, width, required, is_unique, max_length)
+            values(9091, 909, 'Код', 'ID', 2, 1, 0, 9, 1, 1, 9);
+            insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, width, required, is_unique, max_length)
+            values(9092, 909, 'Наименование', 'NAME', 1, 2, 9, 1, 0, 2000);
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-17" author="dnovikov">
+        <sql>
+            INSERT INTO ref_book_knf_type (id, name) VALUES (1, 'КНФ по всем данным');
+            INSERT INTO ref_book_knf_type (id, name) VALUES (2, 'КНФ по неудержанному налогу');
+            INSERT INTO ref_book_knf_type (id, name) VALUES (3, 'КНФ по обособленному подразделению');
+            INSERT INTO ref_book_knf_type (id, name) VALUES (4, 'КНФ по ФЛ');
+            INSERT INTO ref_book_knf_type (id, name) VALUES (5, 'КНФ для Приложения 2');
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-18" author="dnovikov">
+        <sql>
+            ALTER TABLE declaration_data ADD knf_type_id NUMBER(9);
+            COMMENT ON column declaration_data.knf_type_id IS 'Тип КНФ';
+            ALTER TABLE declaration_data ADD CONSTRAINT declaration_data_knf_type FOREIGN KEY(knf_type_id) REFERENCES ref_book_knf_type(id);
+            UPDATE declaration_data SET knf_type_id = 1 WHERE declaration_template_id = 101;
+            ALTER TABLE declaration_data ADD CONSTRAINT declaration_data_knf_type_ck CHECK (declaration_template_id = 101 AND knf_type_id IS NOT NULL OR declaration_template_id != 101 AND knf_type_id is null);
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-19" author="dnovikov">
+        <sql>
+            ALTER TABLE ref_book_income_type ADD app2_include NUMBER(1);
+            update ref_book_income_type set app2_include = 1;
+            ALTER TABLE ref_book_income_type MODIFY app2_include NOT NULL;
+            COMMENT ON column ref_book_income_type.app2_include IS 'Включается в Приложение 2';
+            insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, precision, width, required, is_unique, max_length)
+                values(9223, 922, 'Включается в Приложение 2', 'APP2_INCLUDE', 2, 3, 0, 9, 1, 0, 1);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

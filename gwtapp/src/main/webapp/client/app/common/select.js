@@ -201,7 +201,8 @@
             function ($scope, APP_CONSTANTS, GetSelectOption) {
                 var docStates = [APP_CONSTANTS.DOC_STATE.ACCEPTED, APP_CONSTANTS.DOC_STATE.REFUSED, APP_CONSTANTS.DOC_STATE.REVISION, APP_CONSTANTS.DOC_STATE.SUCCESSFUL, APP_CONSTANTS.DOC_STATE.ERROR];
                 $scope.docStateSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, docStates);
-            }])
+            }]
+        )
 
         /**
          * Контроллер для выбора АСНУ
@@ -226,13 +227,38 @@
                     });
                 };
 
-                /**
-                 *
-                 */
                 $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, department) {
                     $scope.initSelectWithReportDeclarationTypesForCreate(period, department)
                 });
-            }])
+            }]
+        )
+
+        /**
+         * Контроллер для выбора АСНУ
+         */
+        .controller('SelectKnfTypeCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource', '$http',
+            function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, $http) {
+
+                $scope.initMultipleSelectKnfType = function () {
+                    $scope.knfTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/refBook/" + APP_CONSTANTS.REFBOOK.KNF_TYPE + "/records",
+                        params: {
+                            columns: ["NAME", "CODE"],
+                            searchPattern: "",
+                            filter: "",
+                            pagingParams: null
+                        }
+                    }).success(function (data) {
+                        $scope.knfTypeSelect.options.data.results = data.rows;
+                    });
+                    /*RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.KNF_TYPE}, function (data) {
+                        $scope.knfTypeSelect.options.data.results = data;
+                    });*/
+                };
+            }]
+        )
 
         /**
          * Контроллер для выбора вида формы

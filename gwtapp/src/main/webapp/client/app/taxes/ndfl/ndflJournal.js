@@ -109,7 +109,8 @@
                                     formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
                                     fileName: $scope.searchFilter.params.file,
                                     correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
-                                    reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
+                                    reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
+                                    knfTypeIds: $filter('idExtractor')($scope.searchFilter.params.knfTypes)
                                 })
                             };
                         },
@@ -120,6 +121,7 @@
                             $filter('translate')('ndflJournal.grid.columnName.declarationType'),
                             $filter('translate')('ndflJournal.grid.columnName.department'),
                             $filter('translate')('ndflJournal.grid.columnName.asnu'),
+                            $filter('translate')('ndflJournal.grid.columnName.knfType'),
                             $filter('translate')('ndflJournal.grid.columnName.period'),
                             $filter('translate')('ndflJournal.grid.columnName.state'),
                             $filter('translate')('ndflJournal.grid.columnName.tfFile'),
@@ -136,6 +138,7 @@
                             },
                             {name: 'department', index: 'department', width: 150},
                             {name: 'asnuName', index: 'asnuName', width: 176},
+                            {name: 'knfTypeName', index: 'asnuName', width: 176},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 110},
                             {name: 'state', index: 'state', width: 100},
                             {

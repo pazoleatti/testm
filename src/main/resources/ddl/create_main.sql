@@ -351,11 +351,20 @@ comment on column declaration_template.form_kind is 'Тип налоговой �
 comment on column declaration_template.form_kind is 'Вид налоговой формы';
 
 create sequence seq_declaration_template start with 10000;
-
+-----------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE ref_book_knf_type (
+  id   NUMBER(9) NOT NULL,
+  name VARCHAR2(2000 CHAR) NOT NULL,
+  status NUMBER(1,0) default 0
+);
+COMMENT ON TABLE ref_book_knf_type IS 'Типы КНФ';
+COMMENT ON column ref_book_knf_type.id IS 'Код вычета';
+COMMENT ON column ref_book_knf_type.name IS 'Наименование типа КНФ';
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_data (
   id                          number(18) not null,
   declaration_template_id     number(9) not null,
+  knf_type_id                 number(9),
   tax_organ_code              varchar2(4 char),
   kpp                         varchar2(9 char),
   oktmo                       varchar2(11 char),
@@ -370,10 +379,10 @@ create table declaration_data (
   adjust_negative_values      number(1) default 0 not null
 );
 
-
 comment on table declaration_data is 'Налоговые формы';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон налоговой формы';
+comment on column declaration_data.knf_type_id IS 'Тип КНФ';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.oktmo is 'ОКТМО';
@@ -386,6 +395,24 @@ comment on column declaration_data.doc_state_id is 'Состояние ЭД';
 comment on column declaration_data.manually_created is 'Создана вручную (0-нет, 1-да)';
 
 create sequence seq_declaration_data start with 10000;
+------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE declaration_data_kpp (
+  declaration_data_id NUMBER(18) NOT NULL,
+  kpp                 VARCHAR2(9 CHAR) NOT NULL,
+  CONSTRAINT declaration_data_kpp_pk PRIMARY KEY (declaration_data_id, kpp)
+);
+COMMENT ON TABLE declaration_data_kpp IS 'Включаемые в КНФ КПП';
+COMMENT ON column declaration_data_kpp.declaration_data_id IS 'Ид КНФ';
+COMMENT ON column declaration_data_kpp.kpp IS 'Включаемые в КНФ КПП';
+------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE declaration_data_person (
+  declaration_data_id NUMBER(18) NOT NULL,
+  person_id           NUMBER(18) NOT NULL,
+  CONSTRAINT ref_book_knf_type PRIMARY KEY (declaration_data_id, person_id)
+);
+COMMENT ON TABLE declaration_data_person IS 'Включаемые в КНФ КПП';
+COMMENT ON column declaration_data_person.declaration_data_id IS 'Ид КНФ';
+COMMENT ON column declaration_data_person.person_id IS 'Включаемые в КНФ КПП';
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
   id                          number(18)          not null,

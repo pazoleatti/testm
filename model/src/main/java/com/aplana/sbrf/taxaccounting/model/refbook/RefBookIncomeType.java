@@ -10,6 +10,8 @@ public class RefBookIncomeType extends RefBookSimple<Long> {
     private String code;
     //Наименование дохода
     private String name;
+    //Включается в Приложение 2
+    private boolean app2Include;
 
     public String getCode() {
         return code;
@@ -25,5 +27,13 @@ public class RefBookIncomeType extends RefBookSimple<Long> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isApp2Include() {
+        return app2Include;
+    }
+
+    public void setApp2Include(boolean app2Include) {
+        this.app2Include = app2Include;
     }
 }

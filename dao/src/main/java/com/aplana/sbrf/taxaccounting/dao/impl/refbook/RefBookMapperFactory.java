@@ -43,6 +43,8 @@ public class RefBookMapperFactory {
             return new SignatoryMarkMapper();
         } else if (RefBook.Id.REORGANIZATION.getId() == refBookId) {
             return new ReorganizationMapper();
+        } else if (RefBook.Id.KNF_TYPE.getId() == refBookId) {
+            return new KnfTypeMapper();
         }
         throw new IllegalArgumentException("Unknown mapper for refBook = " + refBookId);
     }
@@ -122,6 +124,7 @@ public class RefBookMapperFactory {
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
             result.setCode(rs.getString("code"));
+            result.setApp2Include(rs.getBoolean("APP2_INCLUDE"));
             return result;
         }
     }
@@ -208,6 +211,16 @@ public class RefBookMapperFactory {
             RefBookReorganization result = new RefBookReorganization();
             result.setId(resultSet.getLong("id"));
             result.setCode(resultSet.getString("code"));
+            result.setName(resultSet.getString("name"));
+            return result;
+        }
+    }
+
+    public class KnfTypeMapper<T> implements RowMapper<RefBookKnfType> {
+        @Override
+        public RefBookKnfType mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookKnfType result = new RefBookKnfType();
+            result.setId(resultSet.getInt("id"));
             result.setName(resultSet.getString("name"));
             return result;
         }
