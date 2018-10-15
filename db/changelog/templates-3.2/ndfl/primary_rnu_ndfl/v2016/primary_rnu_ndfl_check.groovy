@@ -605,7 +605,7 @@ class Check extends AbstractScriptClass {
                     def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
                     if (ndflPerson.status != null && !ndflPerson.status.equals(taxpayerStatus)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует Реестру физических лиц", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Статус налогоплательщика не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: ""))
                     }
                 }
