@@ -402,8 +402,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
-        return ndflPersonDao.findInpCountForPersonsAndIncomeAccruedDatePeriod(ndflPersonIdList, periodStartDate, periodEndDate);
+    public int findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
+        return ndflPersonDao.findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(ndflPersonIdList, periodStartDate, periodEndDate);
     }
 
     @Override

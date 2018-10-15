@@ -1133,7 +1133,7 @@ public class NdflPersonDaoTest {
         startDate.set(2005, 0, 1);
         Calendar endDate = Calendar.getInstance();
         endDate.set(2005, 11, 31);
-        int result = ndflPersonDao.findInpCountForPersonsAndIncomeAccruedDatePeriod(asList(101L, 102L), startDate.getTime(), endDate.getTime());
+        int result = ndflPersonDao.findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(asList(101L, 102L), startDate.getTime(), endDate.getTime());
         Assert.assertEquals(2, result);
     }
 

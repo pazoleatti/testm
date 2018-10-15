@@ -563,14 +563,14 @@ public interface NdflPersonService {
     void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments);
 
     /**
-     * Найти количество ИНП по физлицам операции которых попадают в период
+     * Найти количество ИНП по физлицам, операции которых попадают в период и сумма их доходов > 0
      *
      * @param ndflPersonIdList список идентификаторов физлиц
      * @param periodStartDate  дата начала периода
      * @param periodEndDate    дата конца периода
      * @return количество найденных ИНП
      */
-    int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate);
+    int findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate);
 
     /**
      * Находит авансы имеющие ИНП, ИдОперации такие же как и доходы передаваемые в {@code ndflPersonIncomeIdList} и

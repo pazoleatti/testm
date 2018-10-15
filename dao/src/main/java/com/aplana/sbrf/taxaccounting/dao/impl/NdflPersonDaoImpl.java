@@ -259,7 +259,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(filter.getDeduction().getAsnu() != null && !filter.getDeduction().getAsnu().isEmpty() ? "and " + SqlUtils.transformToSqlInStatementById("outer_npd.asnu_id", filter.getDeduction().getAsnu()) : "" );
+        queryBuilder.append(filter.getDeduction().getAsnu() != null && !filter.getDeduction().getAsnu().isEmpty() ? "and " + SqlUtils.transformToSqlInStatementById("outer_npd.asnu_id", filter.getDeduction().getAsnu()) : "");
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
@@ -1073,30 +1073,30 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonDeduction> fetchNdflPersonDeductionByNdflPerson(long ndflPersonId) {
         try {
-            return getJdbcTemplate().query(
-                    "select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp, rba.NAME as asnu_name " +
-                    "from ndfl_person_deduction npd " +
-                    "left join ref_book_asnu rba on npd.asnu_id = rba.id " +
-                    "where npd.ndfl_person_id = ?",
+            return getJdbcTemplate().query("" +
+                            "select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp, rba.NAME as asnu_name " +
+                            "from ndfl_person_deduction npd " +
+                            "   left join ref_book_asnu rba on npd.asnu_id = rba.id " +
+                            "where npd.ndfl_person_id = ?",
                     new Object[]{ndflPersonId},
                     new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonDeduction>();
+            return new ArrayList<>();
         }
     }
 
     @Override
     public List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByNdflPerson(long ndflPersonId) {
         try {
-            return getJdbcTemplate().query(
-                    "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", null inp, rba.NAME as asnu_name " +
-                    "from ndfl_person_prepayment npp " +
-                            " left join ref_book_asnu rba on npp.asnu_id = rba.id " +
+            return getJdbcTemplate().query("" +
+                            "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", null inp, rba.NAME as asnu_name " +
+                            "from ndfl_person_prepayment npp " +
+                            "   left join ref_book_asnu rba on npp.asnu_id = rba.id " +
                             "where npp.ndfl_person_id = ?",
                     new Object[]{ndflPersonId},
                     new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonPrepayment>();
+            return new ArrayList<>();
         }
     }
 
@@ -2191,18 +2191,26 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public int findInpCountForPersonsAndIncomeAccruedDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
-        String query = "select inp " +
-                "from ndfl_person np join ndfl_person_income npi " +
-                "on np.id = npi.ndfl_person_id " +
-                "where np.id in (:ndflPersonIdList) " +
-                "and npi.income_accrued_date between :periodStartDate and :periodEndDate " +
-                "group by np.inp";
-        Map<String, Object> params = new HashMap<String, Object>();
+    public int findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
+        //language=sql
+        String query = "" +
+                "select count(*) \n" +
+                "from ( \n" +
+                "   select person.inp, sum(income.income_accrued_summ) as income_sum \n" +
+                "   from ndfl_person person \n" +
+                "       join ndfl_person_income income on person.id = income.ndfl_person_id \n" +
+                "   where person.id in (:ndflPersonIdList) \n" +
+                "       and income.income_accrued_date between :periodStartDate and :periodEndDate \n" +
+                "   group by person.inp \n" +
+                ") \n" +
+                "where income_sum > 0";
+
+        Map<String, Object> params = new HashMap<>();
         params.put("ndflPersonIdList", ndflPersonIdList);
         params.put("periodStartDate", periodStartDate);
         params.put("periodEndDate", periodEndDate);
-        return getCount(query, params);
+
+        return getNamedParameterJdbcTemplate().queryForObject(query, params, Integer.class);
     }
 
     @Override
