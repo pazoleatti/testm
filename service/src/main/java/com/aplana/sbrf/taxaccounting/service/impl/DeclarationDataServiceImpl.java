@@ -992,7 +992,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } catch (Exception ignored) {
                 }
                 SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-                AsyncTaskData acceptTaskData = asyncTaskDao.getLightTaskData(lockDataAccept.getTaskId());
+                AsyncTaskData acceptTaskData = asyncTaskDao.findByIdLight(lockDataAccept.getTaskId());
                 logger.error(
                         String.format(
                                 AsyncTask.LOCK_CURRENT,
@@ -1055,7 +1055,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             asyncManager.addUserWaitingForTask(lockDataAccept.getTaskId(), userInfo.getUser().getId());
                         } catch (Exception e) {
                         }
-                        AsyncTaskData acceptTaskData = asyncTaskDao.getLightTaskData(lockDataAccept.getTaskId());
+                        AsyncTaskData acceptTaskData = asyncTaskDao.findByIdLight(lockDataAccept.getTaskId());
                         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
                         logger.error(
                                 String.format(
@@ -2581,7 +2581,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private boolean checkExistTasks(long declarationDataId, DeclarationDataReportType ddReportType, Logger logger) {
         LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
         if (lock != null) {
-            AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lock.getTaskId());
+            AsyncTaskData taskData = asyncTaskDao.findByIdLight(lock.getTaskId());
             if (taskData != null) {
                 if (AsyncTaskState.IN_QUEUE == taskData.getState()) {
                     logger.info(AsyncTask.CANCEL_TASK_NOT_PROGRESS,

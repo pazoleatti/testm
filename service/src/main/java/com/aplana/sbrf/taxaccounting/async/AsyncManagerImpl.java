@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Реализация менеджера асинхронных задач на Spring и без использования ejb и jms
- * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer.AsyncTaskLongQueueProcessor} или {@link AsyncTaskThreadContainer.AsyncTaskShortQueueProcessor}
+ * Реализация менеджера асинхронных задач на Spring
+ * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer}
  *
  * @author dloshkarev
  */
@@ -96,7 +96,7 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public AsyncTaskData getLightTaskData(long taskId) {
-        return asyncTaskDao.getLightTaskData(taskId);
+        return asyncTaskDao.findByIdLight(taskId);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 }
                 // Сохранение в очереди асинхронных задач - запись в БД
                 String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                AsyncTaskData taskData = asyncTaskDao.addTask(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
+                AsyncTaskData taskData = asyncTaskDao.create(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
                 lockDataService.bindTask(lockKey, taskData.getId());
 
                 LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
@@ -176,7 +176,7 @@ public class AsyncManagerImpl implements AsyncManager {
                             taskData = executeTask(lockKey, taskType, user, params);
 
                             //Выполнение пост-обработки
-                            handler.postTaskScheduling(taskData, logger);
+                            handler.afterTaskCreated(taskData, logger);
                             return taskData;
                         } catch (Exception e) {
                             if (taskData != null) {
@@ -211,7 +211,7 @@ public class AsyncManagerImpl implements AsyncManager {
         LOG.info(String.format("AsyncManagerImpl.restartTask by %s. lockKey: %s; force: %s", user, lockKey, force));
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null) {
-            AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lockData.getTaskId());
+            AsyncTaskData taskData = asyncTaskDao.findByIdLight(lockData.getTaskId());
             if (taskData != null) {
                 if (taskData.getUserId() == user.getUser().getId()) {
                     if (force) {
@@ -238,7 +238,7 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     public void interruptTask(final long taskId, final TAUserInfo user, final TaskInterruptCause cause) {
-        final AsyncTaskData taskData = asyncTaskDao.getLightTaskData(taskId);
+        final AsyncTaskData taskData = asyncTaskDao.findByIdLight(taskId);
         interruptTask(taskData, user, cause);
     }
 
@@ -268,9 +268,9 @@ public class AsyncManagerImpl implements AsyncManager {
                                                            }
                                                            notificationService.create(notifications);
                                                        }
-                                                       asyncTaskDao.cancelTask(taskData.getId());
+                                                       asyncTaskDao.updateState(taskData.getId(), AsyncTaskState.CANCELLED);
                                                    } else {
-                                                       asyncTaskDao.finishTask(taskData.getId());
+                                                       asyncTaskDao.delete(taskData.getId());
                                                    }
                                                } catch (Exception e) {
                                                    throw new ServiceException("Не удалось прервать задачу", e);
@@ -286,7 +286,7 @@ public class AsyncManagerImpl implements AsyncManager {
     public void interruptTask(String lockKey, TAUserInfo user, TaskInterruptCause cause) {
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null) {
-            final AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lockData.getTaskId());
+            final AsyncTaskData taskData = asyncTaskDao.findByIdLight(lockData.getTaskId());
             interruptTask(taskData, user, cause);
         }
     }
@@ -299,7 +299,7 @@ public class AsyncManagerImpl implements AsyncManager {
             public Object execute() {
                 try {
                     synchronized (AsyncManagerImpl.class) {
-                        asyncTaskDao.finishTask(taskId);
+                        asyncTaskDao.delete(taskId);
                         lockDataService.unlockAllByTask(taskId);
                     }
                 } catch (Exception e) {
@@ -351,7 +351,7 @@ public class AsyncManagerImpl implements AsyncManager {
         LOG.info(String.format("AsyncManagerImpl.addUserWaitingForTask. taskId: %s; userId: %s",
                 taskId, userId));
         if (asyncTaskDao.isTaskExists(taskId)) {
-            if (!asyncTaskDao.getUsersWaitingForTask(taskId).contains(userId)) {
+            if (!asyncTaskDao.findUserIdsWaitingForTask(taskId).contains(userId)) {
                 asyncTaskDao.addUserWaitingForTask(taskId, userId);
             }
         } else {
@@ -361,12 +361,12 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public List<Integer> getUsersWaitingForTask(long taskId) {
-        return asyncTaskDao.getUsersWaitingForTask(taskId);
+        return asyncTaskDao.findUserIdsWaitingForTask(taskId);
     }
 
     @Override
     public PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams) {
-        return asyncTaskDao.getTasks(filter, pagingParams);
+        return asyncTaskDao.findAll(filter, pagingParams);
     }
 
     @Override
@@ -376,7 +376,7 @@ public class AsyncManagerImpl implements AsyncManager {
         if (applicationInfo.isProductionMode()) {
             asyncTaskDao.releaseNodeTasks(currentNode);
         } else {
-            List<Long> taskIds = asyncTaskDao.getTasksByPriorityNode(currentNode);
+            List<Long> taskIds = asyncTaskDao.findAllByPriorityNode(currentNode);
             for (Long id : taskIds) {
                 finishTask(id);
             }

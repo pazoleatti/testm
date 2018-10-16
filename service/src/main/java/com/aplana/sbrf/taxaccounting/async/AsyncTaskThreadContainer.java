@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,25 +36,29 @@ public class AsyncTaskThreadContainer {
     // Таймаут, после которого задача считается упавшей и ее выполнение надо передать другому узлу (ч)
     private static final int TASK_TIMEOUT = 10;
 
-    @Autowired
     private AsyncManager asyncManager;
-    @Autowired
     private ServerInfo serverInfo;
-    @Autowired
     private TAUserService taUserService;
-    @Autowired
     private ApplicationInfo applicationInfo;
-    @Autowired
     private ExecutorService asyncTaskPool;
-    @Autowired
     private ExecutorService asyncTaskMonitorPool;
+
+    public AsyncTaskThreadContainer(AsyncManager asyncManager, ServerInfo serverInfo, TAUserService taUserService,
+                                    ApplicationInfo applicationInfo, ExecutorService asyncTaskPool, ExecutorService asyncTaskMonitorPool) {
+        this.asyncManager = asyncManager;
+        this.serverInfo = serverInfo;
+        this.taUserService = taUserService;
+        this.applicationInfo = applicationInfo;
+        this.asyncTaskPool = asyncTaskPool;
+        this.asyncTaskMonitorPool = asyncTaskMonitorPool;
+    }
 
     /**
      * Метод запускает потоки обработки асинхронных задач для каждой очереди
      */
     public void processQueues() {
-        new AsyncTaskShortQueueProcessor().processQueue();
-        new AsyncTaskLongQueueProcessor().processQueue();
+        new QueueProcessor(AsyncQueue.SHORT, 3).processQueue();
+        new QueueProcessor(AsyncQueue.LONG, 3).processQueue();
     }
 
     /**
@@ -65,27 +68,33 @@ public class AsyncTaskThreadContainer {
      * - Резервирование задачи на текущий узел кластера
      * - Запуск выполнения задачи
      */
-    private abstract class AbstractQueueProcessor {
+    private final class QueueProcessor {
+        // Очередь
+        private final AsyncQueue asyncQueue;
+
+        // Количество потоков, обрабатывающих задачи из очереди
+        private final int threadCount;
+
+        private QueueProcessor(AsyncQueue asyncQueue, int threadCount) {
+            this.asyncQueue = asyncQueue;
+            this.threadCount = threadCount;
+        }
 
         /**
          * Возвращает следующую в очереди задачу на выполнение
          *
          * @return данные задачи
          */
-        protected abstract AsyncTaskData getNextTask();
-
-        /**
-         * Возвращает количество потоков, обрабатывающих задачи из очереди
-         *
-         * @return количество потоков
-         */
-        protected abstract int getThreadCount();
+        private AsyncTaskData getNextTask() {
+            String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
+            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT, asyncQueue, threadCount);
+        }
 
         /**
          * Запускает обработку задач в очереди, каждая задача выполняется в отдельном потоке
          */
         public void processQueue() {
-            for (int i = 0; i < getThreadCount(); i++) {
+            for (int i = 0; i < threadCount; i++) {
                 //Получаем первую в списке незарезирвированную задачу и резервируем ее под текущий узел
                 final AsyncTaskData taskData = getNextTask();
                 if (taskData == null) {
@@ -106,11 +115,14 @@ public class AsyncTaskThreadContainer {
                                 //Запускаем задачу под нужным пользователем
                                 TAUser user = taUserService.getUser(taskData.getUserId());
                                 MDC.put("userInfo", String.format("%s ", user.getLogin()));
-                                List<String> roles = new ArrayList<String>();
+                                //Формируем и передаём в контекст спринга параметры аутентификации (пользователь и его роли)
+                                //чтобы корректно работала security в данном потоке
+                                List<String> roles = new ArrayList<>();
                                 for (TARole role : user.getRoles()) {
                                     roles.add(role.getAlias());
                                 }
-                                Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[roles.size()]));
+                                Collection<GrantedAuthority> authorities;
+                                authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[0]));
                                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                                         new User(user.getLogin(), "user", authorities),
                                         user.getLogin(),
@@ -168,38 +180,6 @@ public class AsyncTaskThreadContainer {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Класс управляющий обработкой очереди коротких асинхронных задач.
-     */
-    private final class AsyncTaskShortQueueProcessor extends AbstractQueueProcessor {
-        @Override
-        protected AsyncTaskData getNextTask() {
-            String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT, AsyncQueue.SHORT, getThreadCount());
-        }
-
-        @Override
-        protected int getThreadCount() {
-            return 3;
-        }
-    }
-
-    /**
-     * Класс управляющий обработкой очереди коротких асинхронных задач.
-     */
-    private final class AsyncTaskLongQueueProcessor extends AbstractQueueProcessor {
-        @Override
-        protected AsyncTaskData getNextTask() {
-            String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT, AsyncQueue.LONG, getThreadCount());
-        }
-
-        @Override
-        protected int getThreadCount() {
-            return 3;
         }
     }
 }

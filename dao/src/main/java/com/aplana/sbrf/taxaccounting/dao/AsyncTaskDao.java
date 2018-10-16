@@ -19,11 +19,20 @@ import java.util.Map;
 public interface AsyncTaskDao {
 
     /**
-     * Возвращяет все ассинхронные задачи
+     * Возвращяет все асинхронные задачи
      *
-     * @return список ассинхронных задач
+     * @return список асинхронных задач
      */
     List<AsyncTaskData> findAll();
+
+    /**
+     * Постраничная выборка асинхронных задач с учётом фильтрации.
+     *
+     * @param filter       ограничение по имени пользователя или ключу. Необязательный параметр. Может быть null
+     * @param pagingParams параметры пэйджинга. Обязательный параметр
+     * @return страница {@link AsyncTaskDTO}
+     */
+    PagingResult<AsyncTaskDTO> findAll(String filter, PagingParams pagingParams);
 
     /**
      * Сохраняет в БД информацию о новой асинхронной задаче
@@ -37,94 +46,71 @@ public interface AsyncTaskDao {
      * @param params       параметры для выполнения задачи. Сериализуются и сохраняются в БД
      * @return идентификатор задачи
      */
-    AsyncTaskData addTask(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode, AsyncTaskGroup taskGroup, Map<String, Object> params);
+    AsyncTaskData create(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode,
+                         AsyncTaskGroup taskGroup, Map<String, Object> params);
 
     /**
-     * Резервирует задачу с минимальной датой создания, которая не назначена ни одному из узлов либо,
+     * Резервирует задачу с минимальной датой создания, которая не назначена ни одному из узлов,
      * либо обработка которой превысила указанный таймаут и значит обрабатывающий ее узел упал, и возвращяет её
      *
      * @param node            узел, для которого будет зарезервирована задача
      * @param priorityNode    узел, для которого будут принудительно отбираться задачи. Используется для dev-moda - отбираются задачи только с этим узлом
-     * @param timeout         таймаут на выполнение задач (часов)
+     * @param timeoutHours    таймаут на выполнение задач (часов)
      * @param queue           тип очереди из которой будет выбрана задача: коротких или длинных задач
      * @param maxTasksPerNode максимальное количество задач, которое параллельно может обрабатываться в этой очереди на одном узле
-     * @return зарезервированная задача
+     * @return зарезервированная задача либо null
      */
-    AsyncTaskData reserveTask(String node, String priorityNode, int timeout, AsyncQueue queue, int maxTasksPerNode);
+    AsyncTaskData reserveTask(String node, String priorityNode, int timeoutHours, AsyncQueue queue, int maxTasksPerNode);
 
     /**
      * Возвращает данные задачи по ее идентификатору
      *
-     * @param taskId идентификатор задачи
+     * @param id идентификатор задачи
      * @return данные конкретной задачи либо null, если подходящая задача не найдена
      */
-    AsyncTaskData getTaskData(long taskId);
+    AsyncTaskData findById(long id);
 
     /**
      * Возвращает данные задачи по ее идентификатору. Не извлекает сериализованные параметры
      *
-     * @param taskId идентификатор задачи
+     * @param id идентификатор задачи
      * @return данные конкретной задачи либо null, если подходящая задача не найдена
      */
-    AsyncTaskData getLightTaskData(long taskId);
+    AsyncTaskData findByIdLight(long id);
 
     /**
      * Обновляет статус выполнения асинхронной задачи
      *
-     * @param taskId идентификатор задачи
-     * @param state  новый статус
+     * @param id    идентификатор задачи
+     * @param state новый статус
      */
-    void updateState(long taskId, AsyncTaskState state);
+    void updateState(long id, AsyncTaskState state);
 
     /**
      * Удаляет задачу
      *
-     * @param taskId идентификатор задачи
+     * @param id идентификатор задачи
      */
-    void finishTask(long taskId);
-
-    /**
-     * Отменяет задачу (проставляет статус CANCELLED)
-     *
-     * @param taskId идентификатор задачи
-     */
-    void cancelTask(long taskId);
-
-    /**
-     * Проверяет, активна ли задача с указанным идентификатором
-     *
-     * @param taskId идентификатор задачи
-     * @return задача активна?
-     */
-    boolean isTaskActive(long taskId);
+    void delete(long id);
 
     /**
      * Возвращает список идентификаторов пользователей, которые ожидают выполнения указанной задачи
      *
-     * @param taskId идентификатор задачи
+     * @param id идентификатор задачи
      * @return список идентификаторов пользователей
      */
-    List<Integer> getUsersWaitingForTask(long taskId);
+    List<Integer> findUserIdsWaitingForTask(long id);
 
     /**
      * Добавляет пользователя в список ожидающих выполнения указанной задачи
      *
-     * @param taskId идентификатор задачи
-     * @param userId идентификатор пользователя
+     * @param asyncTaskId идентификатор задачи
+     * @param userId      идентификатор пользователя
      */
-    void addUserWaitingForTask(long taskId, int userId);
+    void addUserWaitingForTask(long asyncTaskId, int userId);
 
     /**
-     * Получает список асинхронных задач + пейджинг. Используется на форме списка асинхронных задач.
-     *
-     * @param filter       ограничение по имени пользователя или ключу. Необязательный параметр. Может быть null
-     * @param pagingParams параметры пэйджинга. Обязательный параметр
-     * @return все блокировки
-     */
-    PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams);
-
-    /**
-     * Очищает поле ASYNC_TASK.NODE и проставляет статус "В очереди на выполнение" для всех задач, выполняющихя на узле
+     * Для всех задач с указанным узлом (Node) проставляет статус AsyncTaskState.IN_QUEUE ("В очереди на выполнение") и затем очищает поле Node.
      *
      * @param node узел
      */
@@ -134,15 +120,23 @@ public interface AsyncTaskDao {
      * Получает список идентификаторов задач, привязанных к указанному узлу. Используется только в dev-моде
      *
      * @param priorityNode узел, назначенный для выполнения
-     * @return список идентификаторов
+     * @return список идентификаторов задач
      */
-    List<Long> getTasksByPriorityNode(String priorityNode);
+    List<Long> findAllByPriorityNode(String priorityNode);
 
     /**
      * Проверяет существование задачи по ее id
      *
-     * @param taskId идентификатор задачи
-     * @return задача существует?
+     * @param id идентификатор задачи
+     * @return true если задача существует
      */
-    boolean isTaskExists(long taskId);
+    boolean isTaskExists(long id);
+
+    /**
+     * Проверяет, активна ли задача с указанным идентификатором
+     *
+     * @param id идентификатор задачи
+     * @return true если задача существует и имеет статус отличный от AsyncTaskState.CANCELLED
+     */
+    boolean isTaskActive(long id);
 }

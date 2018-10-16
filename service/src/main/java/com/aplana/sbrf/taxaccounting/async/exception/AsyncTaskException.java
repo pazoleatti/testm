@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.async.exception;
 
 /**
  * Общее исключение, выбрасываемое при работе с асихнронными задачами
+ *
  * @author dloshkarev
  */
 public class AsyncTaskException extends Exception {

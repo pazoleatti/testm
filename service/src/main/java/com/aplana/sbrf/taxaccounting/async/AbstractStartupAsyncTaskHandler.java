@@ -7,7 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 /**
- * Обработчик для разных этапов в ходе постановки в очередь асинхронной задачи. Выполняет логику, специфичную для разных типов асинхронных задач
+ * Обработчик для разных этапов в ходе постановки в очередь асинхронной задачи.
+ * Выполняет логику, специфичную для разных типов асинхронных задач.
  *
  * @author dloshkarev
  */
@@ -29,7 +30,7 @@ public abstract class AbstractStartupAsyncTaskHandler {
      * @param taskType тип асинхронной задачи, которая будет выполнена
      * @param user     пользователь, который инициировал операцию
      * @param logger   логгер с сообщениями о ходе выполнения операции
-     * @return задачи существуют?
+     * @return true, если задачи существуют
      */
     protected boolean checkExistTasks(AsyncTaskType taskType, TAUserInfo user, Logger logger) {
         return false;
@@ -39,7 +40,6 @@ public abstract class AbstractStartupAsyncTaskHandler {
      * Выполняет специфичную логику, которая необходима в случае наличия задач, мешающих постановке в очередь текущей асинхронной задаче
      */
     protected void postCheckProcessing() {
-
     }
 
     /**
@@ -49,24 +49,21 @@ public abstract class AbstractStartupAsyncTaskHandler {
      * @param user     пользователь, который инициировал операцию
      */
     protected void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
-
     }
 
     /**
-     * Выполняет логику после постановки задачи в очередь
+     * Выполняет логику после создания задачи
      *
      * @param taskData данные выполняемой задачи
      * @param logger   логгер с сообщениями о ходе выполнения операции
      */
-    protected void postTaskScheduling(AsyncTaskData taskData, Logger logger) {
+    void afterTaskCreated(AsyncTaskData taskData, Logger logger) {
         // в будущем все сообщения будут соответствовать одному шаблону
         String template;
-        switch (taskData.getType()) {
-            case IDENTIFY_PERSON:
-                template = AsyncTask.CREATE_IDETNTIFY_TASK;
-                break;
-            default:
-                template = AsyncTask.CREATE_TASK;
+        if (taskData.getType() == AsyncTaskType.IDENTIFY_PERSON) {
+            template = AsyncTask.CREATE_IDETNTIFY_TASK;
+        } else {
+            template = AsyncTask.CREATE_TASK;
         }
         String message = String.format(template, taskData.getDescription());
         logger.info(message.replaceAll("\"\"", "\""));
