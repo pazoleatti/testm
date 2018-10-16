@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
@@ -90,6 +89,16 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public List<DeclarationData> getDeclarationData(List<Long> declarationDataIds) {
         return declarationDataDao.get(declarationDataIds);
+    }
+
+    @Override
+    public List<String> getDeclarationDataKppList(long declarationDataId) {
+        return declarationDataDao.getDeclarationDataKppList(declarationDataId);
+    }
+
+    @Override
+    public List<Long> getDeclarationDataPersonIds(long declarationDataId) {
+        return declarationDataDao.getDeclarationDataPersonIds(declarationDataId);
     }
 
     @Override

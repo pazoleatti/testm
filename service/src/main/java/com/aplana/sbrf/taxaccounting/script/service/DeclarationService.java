@@ -38,6 +38,22 @@ public interface DeclarationService {
     List<DeclarationData> getDeclarationData(List<Long> declarationDataIds);
 
     /**
+     * Возвращяет список КПП, включаемые в КНФ
+     *
+     * @param declarationDataId ид КНФ
+     * @return список КПП
+     */
+    List<String> getDeclarationDataKppList(long declarationDataId);
+
+    /**
+     * Возвращяет список ид ФЛ, включаемые в КНФ
+     *
+     * @param declarationDataId ид КНФ
+     * @return список ид ФЛ
+     */
+    List<Long> getDeclarationDataPersonIds(long declarationDataId);
+
+    /**
      * Поиск декларации в отчетном периоде подразделения
      */
     List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
@@ -514,15 +530,17 @@ public interface DeclarationService {
 
     /**
      * Получить дату создания налоговой формы
+     *
      * @param declarationDataId иденитфикатор налоговой формы
-     * @return  дата
+     * @return дата
      */
     Date getDeclarationDataCreationDate(Long declarationDataId);
 
     /**
      * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП
-     * @param reportYear    отчетный год
-     * @return  идентификаторы найденых налоговых форм
+     *
+     * @param reportYear отчетный год
+     * @return идентификаторы найденых налоговых форм
      */
     List<Long> findApplication2DeclarationDataId(int reportYear);
 }

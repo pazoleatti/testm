@@ -13,12 +13,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -89,6 +91,52 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             );
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не удалось удалить налоговые формы");
+        }
+    }
+
+    @Override
+    public List<String> getDeclarationDataKppList(long declarationDataId) {
+        return getJdbcTemplate().queryForList("select kpp from declaration_data_kpp where declaration_data_id = ?", String.class, declarationDataId);
+    }
+
+    @Override
+    public void saveDeclarationDataKppList(final long declarationDataId, final List<String> kppList) {
+        if (kppList != null && !kppList.isEmpty()) {
+            getJdbcTemplate().batchUpdate("insert into declaration_data_kpp(declaration_data_id, kpp) values(?, ?)", new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setLong(1, declarationDataId);
+                    ps.setString(2, kppList.get(i));
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return kppList.size();
+                }
+            });
+        }
+    }
+
+    @Override
+    public List<Long> getDeclarationDataPersonIds(long declarationDataId) {
+        return getJdbcTemplate().queryForList("select person_id from declaration_data_person where declaration_data_id = ?", Long.class, declarationDataId);
+    }
+
+    @Override
+    public void saveDeclarationDataPersonIds(final long declarationDataId, final List<Long> personsIds) {
+        if (personsIds != null && !personsIds.isEmpty()) {
+            getJdbcTemplate().batchUpdate("insert into declaration_data_person(declaration_data_id, person_id) values(?, ?)", new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setLong(1, declarationDataId);
+                    ps.setLong(2, personsIds.get(i));
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return personsIds.size();
+                }
+            });
         }
     }
 

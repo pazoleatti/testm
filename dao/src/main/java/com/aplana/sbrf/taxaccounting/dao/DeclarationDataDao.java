@@ -40,6 +40,38 @@ public interface DeclarationDataDao extends PermissionDao {
     List<DeclarationData> get(List<Long> declarationDataIds);
 
     /**
+     * Возвращяет список КПП, включаемые в КНФ
+     *
+     * @param declarationDataId ид КНФ
+     * @return список КПП
+     */
+    List<String> getDeclarationDataKppList(long declarationDataId);
+
+    /**
+     * Сохраняет список КПП, включаемые в КНВ
+     *
+     * @param declarationDataId ид КНФ
+     * @param kppList           список КПП
+     */
+    void saveDeclarationDataKppList(final long declarationDataId, final List<String> kppList);
+
+    /**
+     * Возвращяет список ид ФЛ, включаемые в КНФ
+     *
+     * @param declarationDataId ид КНФ
+     * @return список ид ФЛ из реестра
+     */
+    List<Long> getDeclarationDataPersonIds(long declarationDataId);
+
+    /**
+     * Сохраняет список ид ФЛ, включаемые в КНВ
+     *
+     * @param declarationDataId ид КНФ
+     * @param personIds         ид ФЛ из реестра
+     */
+    void saveDeclarationDataPersonIds(final long declarationDataId, final List<Long> personIds);
+
+    /**
      * Сохраняет новую декларацию в БД.
      * Этот метод позволяет сохранять только новые декларации (т.е. те, у которых id == null).
      * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
@@ -268,8 +300,9 @@ public interface DeclarationDataDao extends PermissionDao {
 
     /**
      * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП
-     * @param reportYear    отчетный год
-     * @return  идентификаторы найденных налоговых форм
+     *
+     * @param reportYear отчетный год
+     * @return идентификаторы найденных налоговых форм
      */
     List<Long> findApplication2DeclarationDataId(int reportYear);
 }

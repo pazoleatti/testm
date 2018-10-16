@@ -30,6 +30,7 @@ import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.CONSOLIDATED;
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.PRIMARY;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -247,10 +248,10 @@ public class DeclarationDataDaoTest {
     @Test
     public void findPage_filter2() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDepartmentIds(Arrays.asList(1, 2));
-        filter.setFormKindIds(Arrays.asList(PRIMARY.getId(), CONSOLIDATED.getId()));
-        filter.setDeclarationTypeIds(Arrays.asList(1L, 2L));
-        filter.setReportPeriodIds(Arrays.asList(20, 3));
+        filter.setDepartmentIds(asList(1, 2));
+        filter.setFormKindIds(asList(PRIMARY.getId(), CONSOLIDATED.getId()));
+        filter.setDeclarationTypeIds(asList(1L, 2L));
+        filter.setReportPeriodIds(asList(20, 3));
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(1, Integer.MAX_VALUE));
         assertEquals(1, page.size());
         assertEquals(3L, page.get(0).getDeclarationDataId().longValue());
@@ -324,7 +325,7 @@ public class DeclarationDataDaoTest {
 
     @Test
     public void getDeclarationIdsTest() {
-        Assert.assertEquals(Arrays.asList(1L, 3L), declarationDataDao.getDeclarationIds(1, 1));
+        Assert.assertEquals(asList(1L, 3L), declarationDataDao.getDeclarationIds(1, 1));
         Assert.assertEquals(new ArrayList<Long>(), declarationDataDao.getDeclarationIds(222, 222));
     }
 
@@ -343,7 +344,7 @@ public class DeclarationDataDaoTest {
 
     @Test
     public void fetchAllDeclarationData() {
-        List<DeclarationData> declarationDataList = declarationDataDao.fetchAllDeclarationData(1, Arrays.asList(4, 5), 1);
+        List<DeclarationData> declarationDataList = declarationDataDao.fetchAllDeclarationData(1, asList(4, 5), 1);
         Assert.assertNotNull(declarationDataList);
         Assert.assertEquals(2, declarationDataList.size());
     }
@@ -400,5 +401,19 @@ public class DeclarationDataDaoTest {
     @Test
     public void testSetDocStateId() {
         declarationDataDao.setDocStateId(1L, 268558099L);
+    }
+
+    @Test
+    public void getSaveDeclarationDataKppList() {
+        assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataKppList(1L));
+        declarationDataDao.saveDeclarationDataKppList(1L, asList("1", "2", "3"));
+        assertEquals(asList("1", "2", "3"), declarationDataDao.getDeclarationDataKppList(1L));
+    }
+
+    @Test
+    public void getSaveDeclarationDataPersonIds() {
+        assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataPersonIds(1L));
+        declarationDataDao.saveDeclarationDataPersonIds(1L, asList(1L, 2L, 3L));
+        assertEquals(asList(1L, 2L, 3L), declarationDataDao.getDeclarationDataPersonIds(1L));
     }
 }
