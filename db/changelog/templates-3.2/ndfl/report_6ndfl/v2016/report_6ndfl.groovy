@@ -45,7 +45,7 @@ class Report6Ndfl extends AbstractScriptClass {
     FormSources sources
     ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
     DepartmentReportPeriodService departmentReportPeriodService
-    FileWriter xml
+    Writer xml
     RefBookService refBookService
     Map<String, Object> calculateParams
     BlobDataService blobDataServiceDaoImpl
@@ -106,7 +106,7 @@ class Report6Ndfl extends AbstractScriptClass {
             this.sources = (FormSources) scriptClass.getProperty("sources")
         }
         if (scriptClass.getBinding().hasVariable("xml")) {
-            this.xml = (FileWriter) scriptClass.getProperty("xml")
+            this.xml = (Writer) scriptClass.getProperty("xml")
         }
         if (scriptClass.getBinding().hasVariable("refBookService")) {
             this.refBookService = (RefBookService) scriptClass.getBinding().getProperty("refBookService")
