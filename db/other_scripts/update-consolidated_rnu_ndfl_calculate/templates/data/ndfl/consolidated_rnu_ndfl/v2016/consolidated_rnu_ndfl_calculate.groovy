@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
@@ -86,6 +85,7 @@ class Calculate extends AbstractScriptClass {
                     consolidation()
             }
         } catch (Throwable e) {
+            e.printStackTrace()
             logger.error(e.toString())
         }
     }
@@ -136,47 +136,13 @@ class Calculate extends AbstractScriptClass {
         time = System.currentTimeMillis()
 
         Map<Pair<String, Long>, List<ConsolidationIncome>> incomesGroupedByOperationIdAndAsnu = [:]
-        List<String> kppList = null
-        List<Long> declarationDataPersonIds = null
-        Map<Long, List<NdflPerson>> ndflPersonById = null
-        Set<String> incomeCodesApp2Included = null
         for (ConsolidationIncome income : operationsForConsolidationList) {
-            if (declarationData.getKnfType() == RefBookKnfType.BY_KPP) {
-                if (kppList == null) {
-                    kppList = declarationService.getDeclarationDataKppList(declarationData.id)
-                }
-                if (kppList && !kppList.contains(income.kpp)) {
-                    continue
-                }
-            } else if (declarationData.getKnfType() == RefBookKnfType.BY_PERSON) {
-                if (ndflPersonById == null) {
-                    ndflPersonById = ndflPersonService.findByIdList(operationsForConsolidationList.collect {
-                        it.ndflPersonId
-                    }).collectEntries { [it.id, it] }
-                }
-                if (declarationDataPersonIds == null) {
-                    declarationDataPersonIds = declarationService.getDeclarationDataPersonIds(declarationData.id)
-                }
-                if (declarationDataPersonIds && !declarationDataPersonIds.contains(ndflPersonById.get(income.ndflPersonId).personId)) {
-                    continue
-                }
-            } else if (declarationData.getKnfType() == RefBookKnfType.FOR_APP2) {
-                if (incomeCodesApp2Included == null) {
-                    def incomeCodeRecords = refBookFactory.getDataProvider(RefBook.Id.INCOME_CODE.getId()).getRecordDataWhere(" status = 0 and app2_include = 1 ")
-                    incomeCodesApp2Included = incomeCodeRecords.collect { key, value -> value."CODE".stringValue }.toSet()
-                }
-                if (!incomeCodesApp2Included.contains(income.incomeCode)) {
-                    continue
-                }
-            }
-            if (!income.isDummy()) {
-                Pair<String, Long> operationAsnu = new Pair(income.operationId, income.asnuId)
-                List<ConsolidationIncome> group = incomesGroupedByOperationIdAndAsnu.get(operationAsnu)
-                if (group == null) {
-                    incomesGroupedByOperationIdAndAsnu.put(operationAsnu, [income])
-                } else {
-                    group << income
-                }
+            Pair<String, Long> operationAsnu = new Pair(income.operationId, income.asnuId)
+            List<ConsolidationIncome> group = incomesGroupedByOperationIdAndAsnu.get(operationAsnu)
+            if (group == null) {
+                incomesGroupedByOperationIdAndAsnu.put(operationAsnu, [income])
+            } else {
+                group << income
             }
         }
 
@@ -185,6 +151,22 @@ class Calculate extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
 
         time = System.currentTimeMillis()
+
+        // Избавляемся от фиктивных строк. Чтобы не перепроверять все строки выбираем только те, у которых идОперации = 0
+        List<ConsolidationIncome> dummyRowsCandidates = []
+        for (Long asnuId : getAsnuCache()) {
+            dummyRowsCandidates.addAll(incomesGroupedByOperationIdAndAsnu.get(new Pair("0", asnuId)))
+        }
+
+        // Проверяем и удаляем фиктивные строки
+        for (ConsolidationIncome dummyRowCandidate : dummyRowsCandidates) {
+            if (dummyRowCandidate.taxBase == new BigDecimal("0") && dummyRowCandidate.taxRate == 0) {
+                if ((dummyRowCandidate.incomeAccruedSumm == new BigDecimal("0") && dummyRowCandidate.calculatedTax == new BigDecimal("0"))
+                        || (dummyRowCandidate.incomePayoutSumm == new BigDecimal("0") && dummyRowCandidate.withholdingTax == new BigDecimal("0"))) {
+                    incomesGroupedByOperationIdAndAsnu.get(new Pair("0", dummyRowCandidate.asnuId)).remove(dummyRowCandidate)
+                }
+            }
+        }
 
         // Группруем идентификаторы источников по состоянию: Принята/Не принята. Далее они понадобятся при формировании уведомлений
         Map<Boolean, Set<Long>> acceptedSources = [:]
@@ -253,15 +235,6 @@ class Calculate extends AbstractScriptClass {
                 }
             }
 
-            if (transitionalRows && declarationData.getKnfType() == RefBookKnfType.BY_NONHOLDING_TAX) {
-                BigDecimal НачисленныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.calculatedTax ?: 0 } ?: 0
-                BigDecimal УдержанныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.withholdingTax ?: 0 } ?: 0
-                BigDecimal НеУдержанныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.notHoldingTax ?: 0 } ?: 0
-                BigDecimal ИзлишнеУдержанныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.overholdingTax ?: 0 } ?: 0
-                if (НачисленныйНалогПоОперации == УдержанныйНалогПоОперации && НеУдержанныйНалогПоОперации == ИзлишнеУдержанныйНалогПоОперации) {
-                    continue
-                }
-            }
             for (List<ConsolidationIncome> passedIncomes : transitionalRows.values()) {
                 pickedRows.addAll(passedIncomes)
             }
@@ -302,7 +275,7 @@ class Calculate extends AbstractScriptClass {
         List<Long> incomeIdsForFetchingDeductionsAndPrepayments = []
 
         // Идентификаторы доходов для получения вычетов и авансов
-        for (List<ConsolidationIncome> incomes : incomesGroupedByOperationAndPerson.values()) {
+        for (List<NdflPersonIncome> incomes : incomesGroupedByOperationAndPerson.values()) {
             incomeIdsForFetchingDeductionsAndPrepayments << incomes.get(0).id
         }
 
@@ -366,7 +339,7 @@ class Calculate extends AbstractScriptClass {
         }
 
         for (NdflPerson ndflPerson : ndflPersonList) {
-            ndflPerson.incomes = incomesGroupedByPerson.get(ndflPerson.id) as List<NdflPersonIncome>
+            ndflPerson.incomes = incomesGroupedByPerson.get(ndflPerson.id)
             ndflPerson.deductions = deductionsGroupedByPerson.get(ndflPerson.id)
             ndflPerson.prepayments = prepaymentsGroupedByPerson.get(ndflPerson.id)
         }
@@ -490,9 +463,9 @@ class Calculate extends AbstractScriptClass {
          */
 
         if (!withoutDulPersonList.isEmpty()) {
+            RefBookDataProvider idDocProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.id)
             for (NdflPerson person : withoutDulPersonList) {
-                RefBookDataProvider provider = getProvider(RefBook.Id.ID_DOC.id)
-                int count = provider.getRecordsCount(new Date(), "PERSON_ID = ${person.personId}")
+                int count = idDocProvider.getRecordsCount(new Date(), "PERSON_ID = ${person.personId}")
                 if (count == 0) {
                     logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность",
                             "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
@@ -630,18 +603,6 @@ class Calculate extends AbstractScriptClass {
     }
 
     /**
-     * Получение провайдера с использованием кеширования.
-     * @param providerId
-     * @return
-     */
-    RefBookDataProvider getProvider(long providerId) {
-        if (!providerCache.containsKey(providerId)) {
-            providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
-        }
-        return providerCache.get(providerId)
-    }
-
-    /**
      * Получить дату создания налоговой формы
      * @param declarationDataId идентификатор налоговой формы
      * @return  дата создания налоговой формы
@@ -679,4 +640,33 @@ class Calculate extends AbstractScriptClass {
         }
         return result
     }
+
+    /**
+     * Получить дату действия
+     * @param income объект строки дохода
+     * @return  вычисленная дата действия
+     */
+    static Date getActionDate(NdflPersonIncome income) {
+        if (income.taxDate != null) {
+            return income.taxDate
+        } else {
+            return income.paymentDate
+        }
+    }
+
+    /**
+     * Получить тип строки дохода
+     * @param income объект строки дохода
+     * @return  значение типа
+     */
+    static Integer getRowType(NdflPersonIncome income) {
+        if (income.incomeAccruedDate != null) {
+            return 100
+        } else if (income.incomePayoutDate != null) {
+            return 200
+        }
+        return 300
+
+    }
+
 }
