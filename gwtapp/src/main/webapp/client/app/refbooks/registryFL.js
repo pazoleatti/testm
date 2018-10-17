@@ -40,6 +40,7 @@
 
                 $scope.searchFilter = {
                     params: getDefaultFilterParams(),
+                    ajaxFilter: [],
                     filterName: 'registryFLFilter',
                     onCreateComplete: function () {
                         $scope.refreshGrid();
@@ -216,7 +217,8 @@
                         ],
                         rowNum: 100,
                         rowList: [5, 10, 50, 100, 200, 300],
-                        viewrecords: true
+                        viewrecords: true,
+                        disableAutoLoad: true
                     }
                 };
 
