@@ -238,4 +238,14 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5080 новые виды КНФ-->
+    <changeSet id="3.2-dnovikov-21" author="dnovikov">
+        <sql>
+            update ref_book_income_type set app2_include = case when
+                code in ('1010','1011','1110','1120','1530','1531','1532','1533','1535','1536','1537','1538','1539','1540','1541','1542','1544','1545','1546','1547','1548','1549','1550','1551','1552','1553','1554','2640','2641','3023')
+                then 1
+                else 0 end;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
