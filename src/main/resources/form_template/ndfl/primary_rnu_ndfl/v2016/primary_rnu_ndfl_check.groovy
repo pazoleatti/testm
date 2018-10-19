@@ -779,18 +779,10 @@ class Check extends AbstractScriptClass {
             boolean checkLastName = checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Фамилия")
             boolean checkFirstName = checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Имя")
             checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Дата рождения")
-            boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
+            checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
             boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "ДУЛ Код")
             boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "ДУЛ Номер")
             checkRequiredAttribute(ndflPerson, fioAndInp, "status", C_STATUS)
-            if (checkCitizenship) {
-                if (ndflPerson.citizenship == "643") {
-                    checkRequiredAttribute(ndflPerson, fioAndInp, "regionCode", "Код субъекта")
-                } else {
-                    checkRequiredAttribute(ndflPerson, fioAndInp, "countryCode", "Код страны проживания вне РФ")
-                    checkRequiredAttribute(ndflPerson, fioAndInp, "address", "Адрес проживания вне РФ ")
-                }
-            }
 
             if (checkLastName) {
                 List<String> errorMessages = ScriptUtils.checkLastName(ndflPerson.lastName, ndflPerson.citizenship)

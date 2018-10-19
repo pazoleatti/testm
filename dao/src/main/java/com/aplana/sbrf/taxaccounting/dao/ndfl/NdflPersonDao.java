@@ -621,7 +621,7 @@ public interface NdflPersonDao {
     void updatePrepaymentsRowNum (List<NdflPersonPrepayment> prepayments);
 
     /**
-     * Найти количество ИНП по физлицам операции которых попадают в период
+     * Найти количество ИНП по физлицам операции которых попадают в период и сумма их доходов > 0
      * @param ndflPersonIdList  список идентификаторов физлиц
      * @param periodStartDate   дата начала периода
      * @param periodEndDate     дата конца периода
