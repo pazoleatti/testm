@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.permissions.UserPermission;
 import com.aplana.sbrf.taxaccounting.permissions.UserPermissionSetter;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.UserDataModel;
@@ -21,14 +19,12 @@ public class UserDataController {
     private SecurityService securityService;
     private UserPermissionSetter userPermissionSetter;
     private RefBookDepartmentService refBookDepartmentService;
-    private DepartmentService departmentService;
 
     public UserDataController(SecurityService securityService, RefBookDepartmentService refBookDepartmentService,
-                              UserPermissionSetter userPermissionSetter, DepartmentService departmentService) {
+                              UserPermissionSetter userPermissionSetter) {
         this.securityService = securityService;
         this.userPermissionSetter = userPermissionSetter;
         this.refBookDepartmentService = refBookDepartmentService;
-        this.departmentService = departmentService;
     }
 
     /**
@@ -41,7 +37,7 @@ public class UserDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         TAUser user = userInfo.getUser();
         RefBookDepartment userDepartment = refBookDepartmentService.fetchUserDepartment(user);
-        Department userTB = departmentService.getParentTB(userDepartment.getId());
+        RefBookDepartment userTB = refBookDepartmentService.findParentTB(userDepartment.getId());
         userPermissionSetter.setPermissions(user, UserPermission.VIEW_TAXES, UserPermission.VIEW_TAXES_NDFL, UserPermission.VIEW_TAXES_NDFL_SETTINGS,
                 UserPermission.VIEW_TAXES_NDFL_REPORTS, UserPermission.VIEW_TAXES_GENERAL, UserPermission.VIEW_NSI,
                 UserPermission.VIEW_ADMINISTRATION_BLOCK, UserPermission.VIEW_ADMINISTRATION_CONFIG, UserPermission.VIEW_ADMINISTRATION_SETTINGS,

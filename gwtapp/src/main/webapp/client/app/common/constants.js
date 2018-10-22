@@ -295,6 +295,11 @@
                 EDIT: "EDIT",
                 ORIGINAL: "ORIGINAL",
                 DUPLICATE: "DUPLICATE"
+            },
+            KNF_TYPE: {
+                ALL: {id: 1, name: "КНФ по всем данным"},
+                BY_NONHOLDING_TAX: {id: 2, name: "КНФ по неудержанному налогу"},
+                BY_KPP: {id: 3, name: "КНФ по обособленному подразделению"}
             }
         });
 }());

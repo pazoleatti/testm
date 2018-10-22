@@ -43,12 +43,7 @@ alter table ref_book_person add constraint fk_ref_book_person_source foreign key
 alter table ref_book_income_kind add constraint fk_ref_book_inckind_inctype foreign key (income_type_id) references ref_book_income_type(id);
 alter table declaration_data_file add constraint fk_decl_data_file_type_id foreign key (file_type_id) references ref_book_attach_file_type(id);
 alter table ref_book_ndfl add constraint fk_ref_book_ndfl_depart foreign key(department_id) references department(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_parent foreign key(ref_book_ndfl_id) references ref_book_ndfl(id) on delete cascade;
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_okved foreign key(okved) references ref_book_okved(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_region foreign key(region) references ref_book_region(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oblig foreign key(obligation) references ref_book_detach_tax_pay(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_type foreign key(type) references ref_book_make_calc(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_depart foreign key (department_id) references department(id);
@@ -112,5 +107,4 @@ alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priori
 --------------------------------------------------------------------------------------------------------------------------
 --indexes
 create index i_ref_book_oktmo_code on ref_book_oktmo (code);
---create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndfl_id,tax_organ_code,kpp);
 --create unique index i_ref_book_oktmo_record_id on ref_book_oktmo (record_id,version);

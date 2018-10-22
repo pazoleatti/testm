@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
@@ -66,6 +67,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     private DepartmentService departmentService;
     @Autowired
     private RefBookScriptingService refBookScriptingService;
+    @Autowired
+    private DepartmentConfigDao departmentConfigDao;
 
     @Override
     public PagingResult<DepartmentConfig> fetchAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
@@ -130,6 +133,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(
                 null, null, filter, null);
         return convertToDepartmentConfigs(records);
+    }
+
+    @Override
+    public PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams) {
+        return departmentConfigDao.findAllKppByDepartmentIdAndKpp(departmentId, kpp, pagingParams);
     }
 
     @Override

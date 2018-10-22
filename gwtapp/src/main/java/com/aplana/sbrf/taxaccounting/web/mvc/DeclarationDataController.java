@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
@@ -84,6 +85,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(LogBusiness.class, new RequestParamEditor(LogBusiness.class));
         binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
+        binder.registerCustomEditor(RefBookKnfType.class, new RequestParamEditor(RefBookKnfType.class));
     }
 
     /**

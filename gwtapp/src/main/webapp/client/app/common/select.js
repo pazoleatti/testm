@@ -120,7 +120,11 @@
                         //Добавить в запрос поля для фильтрации данных
                         if (select.options.dataFilter) {
                             angular.forEach(select.options.dataFilter, function (value, key) {
-                                dataObject[key] = value;
+                                if (angular.isObject(value)) {
+                                    dataObject[key] = JSON.stringify(value);
+                                } else {
+                                    dataObject[key] = value;
+                                }
                             });
                         }
                         return dataObject;
@@ -146,7 +150,7 @@
              * @param searchField   поле, по которому выполняется поиск. Значение по умолчанию: name
              */
             this.getAjaxAdditionalFilterSelectOptions = function (isMultiple, allowClear, url, filterColumns, filter, sortParams, formatter, searchField) {
-                var select = this.getAjaxSelectOptions(isMultiple, allowClear, url, filterColumns, sortParams, formatter, searchField)
+                var select = this.getAjaxSelectOptions(isMultiple, allowClear, url, filterColumns, sortParams, formatter, searchField);
                 select.options.dataFilter.filter = filter;
                 return select;
             };
@@ -234,13 +238,22 @@
         )
 
         /**
-         * Контроллер для выбора АСНУ
+         * Контроллер для выбора типов КНФ
          */
-        .controller('SelectKnfTypeCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource', '$http',
-            function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, $http) {
+        .controller('SelectKnfTypeCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', '$http',
+            function ($scope, APP_CONSTANTS, GetSelectOption, $http) {
 
                 $scope.initMultipleSelectKnfType = function () {
                     $scope.knfTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                    loadKnfTypes();
+                };
+
+                $scope.initSingleSelectKnfType = function () {
+                    $scope.knfTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                    loadKnfTypes();
+                };
+
+                function loadKnfTypes() {
                     $http({
                         method: "GET",
                         url: "controller/rest/refBook/" + APP_CONSTANTS.REFBOOK.KNF_TYPE + "/records",
@@ -253,10 +266,7 @@
                     }).success(function (data) {
                         $scope.knfTypeSelect.options.data.results = data.rows;
                     });
-                    /*RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.KNF_TYPE}, function (data) {
-                        $scope.knfTypeSelect.options.data.results = data;
-                    });*/
-                };
+                }
             }]
         )
 
@@ -264,8 +274,8 @@
          * Контроллер для выбора вида формы
          */
         .controller('SelectDeclarationTypeCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
-            'RefBookValuesResource', 'DeclarationTypeForCreateResource',
-            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource) {
+            'RefBookValuesResource', 'DeclarationTypeForCreateResource', 'PermissionChecker',
+            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource, PermissionChecker) {
                 $scope.declarationTypeSelect = {};
 
                 //TODO: https://jira.aplana.com/browse/SBRFNDFL-2358 Сделать селекты, общие для отчетных и налоговых форм, убрать лишние функции
@@ -307,34 +317,18 @@
 
                 /**
                  * Инициализировать список с видами форм, которые можно создать
-                 * @param declarationKind Тип налоговой формы
-                 * @param periodObject Выражение из scope, по которому отслеживается изменение периода
-                 * @param departmentObject Выражение из scope, по которому отслеживается изменение подразделения
+                 * @param modelPath путь к объекту в scope, содержащем значение типа, для установки его значения через _.deep
                  */
-                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
-                $scope.initSelectWithDeclarationTypesForCreate = function (declarationKind, periodObject, departmentObject) {
-                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
-                    //Список обновляется при изменении отчетного периода и подразделения
-                    $scope.$watchGroup([periodObject, departmentObject], function (newValues) {
-                        var period = newValues[0];
-                        var department = newValues[1];
-                        if (declarationKind && period && department) {
-                            DeclarationTypeForCreateResource.query({
-                                formDataKindIdList: declarationKind,
-                                departmentId: department.id,
-                                periodId: period.id,
-                                nooverlay: true
-                            }, function (data) {
-                                data = data.filter(function (declarationType) {
-                                    if (declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id) {
-                                        return isTaxForm(declarationType) && $rootScope.declarationPrimaryCreateAllowed;
-                                    }
-                                    return isTaxForm(declarationType) && $rootScope.declarationConsolidatedCreateAllowed;
-                                });
-                                $scope.declarationTypeSelect.options.data.results = data;
-                            });
-                        }
-                    });
+                $scope.initSelectWithDeclarationTypesForCreate = function (modelPath) {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.declarationTypeSelect.options.data.results = [];
+                    if (PermissionChecker.check($scope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY)) {
+                        _.deep($scope, modelPath, APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY);
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY);
+                    }
+                    if (PermissionChecker.check($scope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED)) {
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED);
+                    }
                 };
 
                 /**
@@ -435,37 +429,50 @@
                 /**
                  * Инициализировать выпадающий список периодами, коорые активны и открыты для определенного подразделения
                  * @param departmentId идентификатор подразделения
-                 * @param periodObject объект периода который будет выделен в списке
+                 * @param modelPath путь до объекта в scope, содержащем значение периода, для установки его значения через _.deep
                  */
-                $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, periodObject) {
-                    if (typeof(departmentId) !== 'undefined' && departmentId != null) {
-                        $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatterWithCorrectionDate');
-                        $scope.periodSelect.options.data = function () {
-                            return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
-                        };
+                $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, modelPath) {
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatterWithCorrectionDate');
+                    $scope.periodSelect.options.data = function () {
+                        // select2 копирует results и его потом изменить уже нельзя, поэтому используем функцию, возвращяющую последние запрошенные данные
+                        return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
+                    };
+                    loadPeriods(departmentId, modelPath);
+                    // При событии выбора подразделения из списка обновляет периоды
+                    $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId) {
+                        loadPeriods(departmentId, modelPath);
+                    });
+                };
+
+                function loadPeriods(departmentId, modelPath) {
+                    if (departmentId) {
                         ReportPeriodResource.query({
                             projection: "forDepartment",
                             departmentId: departmentId
-                        }, function (data) {
-                            $scope.results = data;
-                            if (periodObject && data && data.length > 0) {
-                                periodObject.period = data[0];
-                                angular.forEach(data, function (period) {
+                        }, function (departments) {
+                            $scope.results = departments;
+                            if (departments && departments.length > 0) {
+                                angular.forEach(departments, function (period) {
+                                    // поиск работает по полю text
                                     period.text = $filter('periodFormatterWithCorrectionDate')(period);
-                                    if (Date.parse(periodObject.period.endDate) <= Date.parse(period.endDate)) {
-                                        periodObject.period = period;
-                                    }
                                 });
+                                // если выбранный период есть в списке, то оставляем, иначе установливаем самый последний
+                                var currentValue = _.deep($scope, modelPath);
+                                if (!currentValue || !_.find(departments, function (department) {
+                                        return department.id === currentValue.id;
+                                    })) {
+                                    var defaultValue = departments[0];
+                                    _.deep($scope, modelPath, defaultValue);
+                                    angular.forEach(departments, function (period) {
+                                        if (Date.parse(defaultValue.endDate) <= Date.parse(period.endDate)) {
+                                            defaultValue = period;
+                                        }
+                                    });
+                                }
                             }
                         });
                     }
-
-                };
-
-                // При событии выбора подразделения из списка, получает назначенные подразделению периоды и выбирает последний
-                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId, latestPeriod) {
-                    $scope.initSelectWithOpenDepartmentPeriods(departmentId, latestPeriod);
-                });
+                }
             }])
 
         /**
@@ -527,18 +534,14 @@
 
                 /**
                  * Инициализировать список с загрузкой подразделений с открытым периодом через ajax
-                 * @param periodObject Выражение из scope, по которому отслеживается изменение периода
+                 * @param departmentFilter дополнительные параметры запроса
                  */
-                $scope.initActiveDepartmentSelectWithOpenPeriod = function (periodObject) {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=activeDepartmentsWithOpenPeriod", {}, {
-                        property: "fullName",
-                        direction: "asc"
-                    }, "fullNameFormatter");
-                    $scope.$watch(periodObject, function (period) {
-                        if (period) {
-                            $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};
-                        }
-                    });
+                $scope.initActiveDepartmentSelectWithOpenPeriod = function (departmentFilter) {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allByFilter",
+                        {filter: departmentFilter}, {
+                            property: "fullName",
+                            direction: "asc"
+                        }, "fullNameFormatter");
                 };
 
                 /**
@@ -861,6 +864,18 @@
                 };
             }
         ])
+
+        /**
+         * Контроллер для выбора АСНУ
+         */
+        .controller('SelectFormKppCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', '$http',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                $scope.initSelectFormKpp = function (filter) {
+                    $scope.select = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/departmentConfig/kppSelect",
+                        filter, {}, 'kppSelectFormatter', "kpp");
+                };
+            }]
+        )
 
         /**
          * Контроллер для выбора типов налоговых форм

@@ -277,7 +277,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         if (departmentReportPeriod.isActive()) {
                             DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
                             if (declarationKind == DeclarationFormKind.PRIMARY &&
-                                    targetDomainObject.getManuallyCreated() &&
+                                    targetDomainObject.isManuallyCreated() &&
                                     targetDomainObject.getLastDataModifiedDate() == null) {
                                 return false;
                             }

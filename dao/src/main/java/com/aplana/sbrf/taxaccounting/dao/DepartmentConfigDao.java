@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
@@ -19,4 +22,14 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @return список пар КПП и ОКТМО
      */
     List<Pair<String, String>> fetchKppOktmoPairs(List<Integer> departmentIds, Date relevanceDate);
+
+    /**
+     * Возвращяет страницу из значений КПП тербанка по фильтру
+     *
+     * @param departmentId тербанк, из настроек которого будут браться КПП
+     * @param kpp          фильтр поиска
+     * @param pagingParams данные пагинатора
+     * @return страница из значений КПП тербанка
+     */
+    PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams);
 }

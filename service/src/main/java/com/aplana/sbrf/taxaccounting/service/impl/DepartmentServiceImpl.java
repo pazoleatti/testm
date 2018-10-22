@@ -4,14 +4,20 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.google.common.collect.Lists;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -212,7 +218,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Дочерние подразделения для подразделения пользователя
             List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId());
             // Подразделения, исполнителями налоговых форм которых являются подразделение пользователя
-            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(Lists.newArrayList((Integer)tAUser.getDepartmentId()));
+            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(Lists.newArrayList((Integer) tAUser.getDepartmentId()));
             // В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
             // назначены исполнителями
             retList.addAll(userDepartmentChildrenIds);
@@ -248,27 +254,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.fetchAllIds());
         }
-        return retList;
-    }
-
-    @Override
-    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId) {
-        List<Integer> retList = new ArrayList<>();
-        // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
-        List<Integer> list = getTaxFormDepartments(tAUser);
-        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setIsActive(true);
-        departmentReportPeriodFilter.setDepartmentIdList(list);
-        departmentReportPeriodFilter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            retList.add(departmentReportPeriod.getDepartmentId());
-        }
-
-        Set<Integer> setItems = new HashSet<>(retList);
-        retList.clear();
-        retList.addAll(setItems);
-
         return retList;
     }
 

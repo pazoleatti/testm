@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Налоговая/Отчетная форма.
@@ -74,7 +75,7 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
     /**
      * Создана в ручную
      */
-    private Boolean manuallyCreated = false;
+    private boolean manuallyCreated = false;
     /**
      * Дата последних изменений данных формы
      */
@@ -83,5 +84,22 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * Признак, показывающий необходимость корректировки отрицательных значений
      */
     private boolean isAdjustNegativeValues;
+    /**
+     * КПП, включаемые в КНФ для обособленного подразделения (см {@link RefBookKnfType})
+     */
+    private Set<String> includedKpps;
 
+    /**
+     * Тип КНФ, используется только для консолидированных форм, по-умолчанию тип = "По всем данным"
+     */
+    public RefBookKnfType getKnfType() {
+        if (declarationTemplateId == DeclarationType.NDFL_CONSOLIDATE) {
+            if (knfType == null) {
+                knfType = RefBookKnfType.ALL;
+            }
+        } else {
+            knfType = null;
+        }
+        return knfType;
+    }
 }

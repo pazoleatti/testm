@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.CONSOLIDATED;
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.PRIMARY;
@@ -137,7 +143,7 @@ public class DeclarationDataDaoTest {
         d.setTaxOrganCode(taxOrganCode);
         d.setKpp(kpp);
 
-        long id = declarationDataDao.saveNew(d);
+        long id = declarationDataDao.create(d);
 
         DeclarationData d2 = declarationDataDao.get(id);
         assertEquals(1, d2.getDeclarationTemplateId());
@@ -149,14 +155,14 @@ public class DeclarationDataDaoTest {
         Assert.assertEquals(kpp, d2.getKpp());
     }
 
-    @Test(expected = DaoException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testSaveNewWithId() {
         DeclarationData d = new DeclarationData();
         d.setId(1000l);
         d.setState(State.ACCEPTED);
         d.setDeclarationTemplateId(1);
         d.setDepartmentReportPeriodId(111);
-        declarationDataDao.saveNew(d);
+        declarationDataDao.create(d);
     }
 
     @Test
@@ -277,7 +283,7 @@ public class DeclarationDataDaoTest {
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
-        declarationDataDao.saveNew(declarationData);
+        declarationDataDao.create(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, null, null, null);
         assertNotNull(declaration);
@@ -292,7 +298,7 @@ public class DeclarationDataDaoTest {
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
-        declarationDataDao.saveNew(declarationData);
+        declarationDataDao.create(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, null, null, null, null, null);
         assertNotNull(declaration);
@@ -307,7 +313,7 @@ public class DeclarationDataDaoTest {
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
-        declarationDataDao.saveNew(declarationData);
+        declarationDataDao.create(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, "CD12", null, null);
         assertNotNull(declaration);
@@ -406,14 +412,14 @@ public class DeclarationDataDaoTest {
     @Test
     public void getSaveDeclarationDataKppList() {
         assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataKppList(1L));
-        declarationDataDao.saveDeclarationDataKppList(1L, asList("1", "2", "3"));
+        declarationDataDao.createDeclarationDataKppList(1L, Sets.newHashSet("1", "2", "3"));
         assertEquals(asList("1", "2", "3"), declarationDataDao.getDeclarationDataKppList(1L));
     }
 
     @Test
     public void getSaveDeclarationDataPersonIds() {
         assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataPersonIds(1L));
-        declarationDataDao.saveDeclarationDataPersonIds(1L, asList(1L, 2L, 3L));
+        declarationDataDao.createDeclarationDataPersonIds(1L, Sets.newHashSet(1L, 2L, 3L));
         assertEquals(asList(1L, 2L, 3L), declarationDataDao.getDeclarationDataPersonIds(1L));
     }
 }

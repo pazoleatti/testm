@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
-@Service
+@Service("logBusinessService")
 @Transactional(readOnly = true)
 public class LogBusinessServiceImpl implements LogBusinessService {
 

@@ -43,7 +43,7 @@
                     <div data-aplana-field >
                         <div style="width: 375px;" data-ng-controller="SelectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
-                             data-ng-init="initSelectWithOpenDepartmentPeriods(reportData.department.id, selectedReportPeriod)"
+                             data-ng-init="initSelectWithOpenDepartmentPeriods(reportData.department.id, 'reportData.period')"
                              data-ng-model="reportData.period"
                              data-ng-disabled="depErased">
                         </div>

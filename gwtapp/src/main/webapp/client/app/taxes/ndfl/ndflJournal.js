@@ -25,9 +25,9 @@
          */
         .controller('ndflJournalCtrl', [
             '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS',
-            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage', '$timeout',
+            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage',
             function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS,
-                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage, $timeout) {
+                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage) {
                 $rootScope.declarationPrimaryCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY);
                 $rootScope.declarationConsolidatedCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
                 $rootScope.declarationCreateAllowed = $rootScope.declarationPrimaryCreateAllowed || $rootScope.declarationConsolidatedCreateAllowed;
@@ -138,7 +138,7 @@
                             },
                             {name: 'department', index: 'department', width: 150},
                             {name: 'asnuName', index: 'asnuName', width: 176},
-                            {name: 'knfTypeName', index: 'asnuName', width: 176},
+                            {name: 'knfTypeName', index: 'knfTypeName', width: 176},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 110},
                             {name: 'state', index: 'state', width: 100},
                             {

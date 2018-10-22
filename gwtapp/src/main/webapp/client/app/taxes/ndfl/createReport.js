@@ -17,7 +17,6 @@
 
                 $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
                 $scope.userTBDepartment = {};
-                $scope.selectedReportPeriod = {};
 
                 $scope.hasLoaded = false;
 
@@ -31,15 +30,9 @@
                     }
                 });
 
-                $scope.$watch("selectedReportPeriod.period", function (period) {
-                    if (typeof(period) !== 'undefined' && period != null) {
-                        $scope.reportData.period = period;
-                    }
-                });
-
                 $scope.$watch("reportData.department", function (department) {
                     if (typeof(department) !== 'undefined' && department != null) {
-                        $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.reportData.department.id, $scope.selectedReportPeriod);
+                        $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.reportData.department.id);
                         $scope.depErased = false;
                         $scope.showDepError = false;
                         $scope.showFormError = false

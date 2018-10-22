@@ -42,21 +42,14 @@ public interface DeclarationDataService {
     /**
      * Создание декларации в заданном отчетном периоде подразделения
      *
-     * @param logger                 объект журнала
-     * @param declarationTemplateId  идентификатор шаблона декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
+     * @param newDeclaration         данные формы
      * @param departmentReportPeriod отчетный период подразделения
-     * @param taxOrganCode           налоговый орган (для налога на имущество)
-     * @param taxOrganKpp            КПП (для налога на имущество)
-     * @param oktmo                  ОКТМО, для НДФЛ
-     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
-     * @param fileName               наименование ТФ файла
-     * @param note                   Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"
+     * @param logger                 объект журнала
+     * @param userInfo               информация о пользователе, выполняющего действие
+     * @param writeAudit             надо ли писать в ЖА
      * @return идентификатор созданной декларации
      */
-    Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
-                Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit);
+    Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit);
 
     /**
      * Идентифицировать ФЛ

@@ -7,8 +7,8 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -30,12 +31,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Repository
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
-    /**
-     * Получение значения справочника по идентификатору
-     *
-     * @param id Идентификатор подразделения
-     * @return Значение справочника
-     */
     @Override
     public RefBookDepartment fetchDepartmentById(Integer id) {
         String query = "SELECT * FROM ( " +
@@ -43,6 +38,15 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
                 "WHERE dep.is_active = 1 AND dep.id = ? " +
                 ") WHERE rownum = 1";
         return getJdbcTemplate().queryForObject(query, new Object[]{id}, new RefBookDepartmentRowMapper());
+    }
+
+    @Override
+    public RefBookDepartment findParentTB(int departmentId) {
+        return getJdbcTemplate().queryForObject("" +
+                        REF_BOOK_DEPARTMENT_SELECT +
+                        "WHERE dep.parent_id = 0 AND dep.type = 2 " +
+                        "START WITH dep.id = ? CONNECT BY dep.id = PRIOR dep.parent_id ",
+                new RefBookDepartmentRowMapper(), departmentId);
     }
 
     @Override
@@ -93,55 +97,62 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         return rootDepartments;
     }
 
-    /**
-     * Получение значений справочника по идентификаторам
-     *
-     * @param ids Список идентификаторов
-     * @return Список значений справочника
-     */
     @Override
     public List<RefBookDepartment> fetchDepartments(Collection<Integer> ids) {
         return fetchDepartments(ids, false);
     }
 
-    /**
-     * Получение значений справочника по идентификаторам
-     *
-     * @param ids        Список идентификаторов
-     * @param activeOnly Искать только действующие подразделения
-     * @return Список значений справочника
-     */
     private List<RefBookDepartment> fetchDepartments(Collection<Integer> ids, boolean activeOnly) {
         String sql = REF_BOOK_DEPARTMENT_SELECT + "where dep.is_active = 1 AND dep.id IN (:ids)";
         return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("ids", ids), new RefBookDepartmentRowMapper());
     }
 
-    /**
-     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
-     *
-     * @param ids          Список идентификаторов
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка значений справочника
-     */
     @Override
     public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
         return fetchDepartments(ids, name, false, pagingParams);
     }
 
-    /**
-     * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
-     *
-     * @param ids          Список идентификаторов
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка значений справочника
-     */
     @Override
-    public PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
-        return fetchDepartments(ids, name, true, pagingParams);
+    public PagingResult<RefBookDepartment> findAllByFilter(DepartmentFilter filter, PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        String baseSql = REF_BOOK_DEPARTMENT_SELECT;
+        if (filter.getReportPeriodId() != null) {
+            // фильтруем по наличию открытого периода
+            baseSql += "join department_report_period drp on drp.department_id = dep.id and drp.is_active = 1 and drp.report_period_id = :reportPeriodId ";
+            params.addValue("reportPeriodId", filter.getReportPeriodId());
+        }
+        if (filter.getAssignedToDeclarationTypeId() != null) {
+            // фильтруем по наличию назначения подразделения типу формы
+            baseSql += "join department_declaration_type ddt on ddt.department_id = dep.id and ddt.declaration_type_id = :declarationTypeId ";
+            params.addValue("declarationTypeId", filter.getAssignedToDeclarationTypeId());
+        }
+        baseSql += "where dep.is_active = 1 ";
+        if (filter.getIds() != null && !filter.getIds().isEmpty()) {
+            baseSql += " and " + SqlUtils.transformToSqlInStatement("dep.id", filter.getIds());
+        }
+        if (filter.isOnlyTB()) {
+            baseSql += " and dep.type = 2 ";
+        }
+        if (isNotBlank(filter.getName())) {
+            baseSql += " and (lower(dep.name) like :name or lower(df.shortname) like :name) ";
+            params.addValue("name", "%" + filter.getName().toLowerCase() + "%");
+        }
+        if (isNotBlank(pagingParams.getProperty()) && isNotBlank(pagingParams.getDirection())) {
+            baseSql += new Formatter().format(" order by %s %s ",
+                    FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),
+                    pagingParams.getDirection()).toString();
+        }
+
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("count", pagingParams.getCount());
+        List<RefBookDepartment> departments = getNamedParameterJdbcTemplate().query(
+                "select * from ( select a.*, rownum rn from (\n" + baseSql + ") a \n) where rn > :startIndex and rowNum <= :count",
+                params,
+                new RefBookDepartmentRowMapper());
+
+        int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (\n" + baseSql + ")", params, Integer.class);
+        return new PagingResult<>(departments, totalCount);
     }
 
     @Override
@@ -161,12 +172,12 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
         MapSqlParameterSource params = new MapSqlParameterSource();
 
-        if (StringUtils.isNotBlank(name)) {
+        if (isNotBlank(name)) {
             baseSql += "where (lower(dep.name) like :name or lower(df.shortname) like :name) ";
             params.addValue("name", "%" + name.toLowerCase() + "%");
         }
 
-        if (StringUtils.isNotBlank(pagingParams.getProperty()) && StringUtils.isNotBlank(pagingParams.getDirection())) {
+        if (isNotBlank(pagingParams.getProperty()) && isNotBlank(pagingParams.getDirection())) {
             baseSql += new Formatter().format("order by %s %s ",
                     FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),
                     pagingParams.getDirection()).toString();
@@ -201,7 +212,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
         MapSqlParameterSource params = new MapSqlParameterSource();
 
-        if (StringUtils.isNotBlank(name)) {
+        if (isNotBlank(name)) {
             baseSql += " and (lower(dep.name) like :name or lower(df.shortname) like :name) ";
             params.addValue("name", "%" + name.toLowerCase() + "%");
         }
@@ -209,7 +220,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             baseSql += " and dep.is_active = 1 ";
         }
 
-        if (StringUtils.isNotBlank(pagingParams.getProperty()) && StringUtils.isNotBlank(pagingParams.getDirection())) {
+        if (isNotBlank(pagingParams.getProperty()) && isNotBlank(pagingParams.getDirection())) {
             baseSql += new Formatter().format(" order by %s %s ",
                     FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),
                     pagingParams.getDirection()).toString();

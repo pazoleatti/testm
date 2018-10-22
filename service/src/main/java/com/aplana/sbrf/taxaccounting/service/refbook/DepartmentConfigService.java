@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -46,6 +47,16 @@ public interface DepartmentConfigService {
      * @return список настроек подразделений
      */
     List<DepartmentConfig> fetchAllByKppAndOktmo(String kpp, String oktmoCode);
+
+    /**
+     * Возвращяет страницу из значений КПП тербанка по фильтру
+     *
+     * @param departmentId тербанк, из настроек которого будут браться КПП
+     * @param kpp          фильтр поиска
+     * @param pagingParams данные пагинатора
+     * @return страница из значений КПП тербанка
+     */
+    PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams);
 
     /**
      * Возвращяет кол-во записей настроек подразделений по фильтру

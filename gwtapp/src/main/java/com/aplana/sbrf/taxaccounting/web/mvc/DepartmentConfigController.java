@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -82,6 +83,25 @@ public class DepartmentConfigController {
             departmentConfigPermissionSetter.setPermissions(departmentConfig,
                     DepartmentConfigPermission.UPDATE, DepartmentConfigPermission.DELETE);
         }
+    }
+
+    /**
+     * Возвращяет страницу КПП, полученных из настроек Тербанка
+     *
+     * @param departmentId тербанк, из настроек которого будут браться КПП
+     * @param kpp          значение поиска по КПП
+     * @param pagingParams параметры пагинации
+     * @return возвращает список настроек подразделений
+     */
+    @GetMapping(value = "/rest/departmentConfig/kppSelect")
+    public JqgridPagedList<KppSelect> findAllKppByDepartmentIdAndKpp(@RequestParam String kpp, @RequestParam int departmentId, @RequestParam PagingParams pagingParams) {
+        PagingResult<KppSelect> result = departmentConfigService.findAllKppByDepartmentIdAndKpp(departmentId, kpp, pagingParams);
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                result,
+                result.getTotalCount(),
+                pagingParams
+        );
     }
 
     /**

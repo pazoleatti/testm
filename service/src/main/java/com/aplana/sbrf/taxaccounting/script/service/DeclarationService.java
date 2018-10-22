@@ -251,8 +251,7 @@ public interface DeclarationService {
 
     DeclarationType getTemplateType(int declarationTypeId);
 
-    Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit);
+    Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit);
 
     void delete(long declarationDataId, TAUserInfo userInfo);
 

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
@@ -22,6 +23,14 @@ public interface RefBookDepartmentService {
      * @return значение справочника
      */
     RefBookDepartment fetch(Integer id);
+
+    /**
+     * Возвращяет родительский ТБ
+     *
+     * @param departmentId подразделение
+     * @return ТБ
+     */
+    RefBookDepartment findParentTB(int departmentId);
 
     /**
      * Получение подразделения пользователя
@@ -76,14 +85,12 @@ public interface RefBookDepartmentService {
      * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param user           Пользователь
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param reportPeriodId ID отчетного периода, который должен быть открыт
-     * @param pagingParams   Параметры пейджинга
+     * @param filter       фильтр
+     * @param pagingParams Параметры пейджинга
+     * @param user         Пользователь
      * @return Страница списка значений справочника
      */
-    PagingResult<RefBookDepartment> fetchActiveDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
+    PagingResult<RefBookDepartment> findAllByFilter(DepartmentFilter filter, PagingParams pagingParams, TAUser user);
 
     /**
      * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.

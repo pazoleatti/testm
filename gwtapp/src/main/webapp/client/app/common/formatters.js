@@ -118,7 +118,6 @@
             };
         })
 
-
         /**
          * @description Форматтер для получения наименования сущности
          * @param entity Сущность
@@ -136,6 +135,16 @@
         .filter('fullNameFormatter', function () {
             return function (entity) {
                 return entity ? entity.fullName : "";
+            };
+        })
+
+        /**
+         * @description Форматтер для получения наименования сущности
+         * @param entity Сущность
+         */
+        .filter('kppSelectFormatter', function () {
+            return function (kppModel) {
+                return kppModel ? kppModel.kpp : "";
             };
         })
 

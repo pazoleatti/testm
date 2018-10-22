@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
 import java.util.Collection;
@@ -19,6 +20,14 @@ public interface RefBookDepartmentDao {
      * @return значение справочника
      */
     RefBookDepartment fetchDepartmentById(Integer id);
+
+    /**
+     * Возвращяет родительский ТБ
+     *
+     * @param departmentId подразделение
+     * @return ТБ
+     */
+    RefBookDepartment findParentTB(int departmentId);
 
     /**
      * Возвращяет список подразделений по наименованию (через оператор like), включая родительские подразделения у найденных
@@ -70,13 +79,11 @@ public interface RefBookDepartmentDao {
     /**
      * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param ids          список идентификаторов
-     * @param name         параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param filter       фильтр
      * @param pagingParams параметры пейджинга
      * @return страница списка значений справочника
      */
-    PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
+    PagingResult<RefBookDepartment> findAllByFilter(DepartmentFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет список активных подразделений по типу

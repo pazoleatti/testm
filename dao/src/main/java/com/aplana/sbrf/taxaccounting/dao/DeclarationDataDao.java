@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Dao-объект для работы с {@link DeclarationData декларациями}
@@ -51,9 +52,9 @@ public interface DeclarationDataDao extends PermissionDao {
      * Сохраняет список КПП, включаемые в КНВ
      *
      * @param declarationDataId ид КНФ
-     * @param kppList           список КПП
+     * @param kppSet            набор включаемых в КНФ КПП
      */
-    void saveDeclarationDataKppList(final long declarationDataId, final List<String> kppList);
+    void createDeclarationDataKppList(final long declarationDataId, final Set<String> kppSet);
 
     /**
      * Возвращяет список ид ФЛ, включаемые в КНФ
@@ -69,7 +70,7 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param declarationDataId ид КНФ
      * @param personIds         ид ФЛ из реестра
      */
-    void saveDeclarationDataPersonIds(final long declarationDataId, final List<Long> personIds);
+    void createDeclarationDataPersonIds(final long declarationDataId, final Set<Long> personIds);
 
     /**
      * Сохраняет новую декларацию в БД.
@@ -80,7 +81,7 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return идентификатор сохранённой записи
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если передана декларация с непустым id
      */
-    long saveNew(DeclarationData declarationData);
+    long create(DeclarationData declarationData);
 
     /**
      * Установить статус налоговой формы

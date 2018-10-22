@@ -199,8 +199,8 @@ INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (7
 insert into REF_BOOK_NDFL(id,department_id,record_id,version,status) values(-1,7,-1,to_date('01.01.2016', 'DD.MM.YYYY'),0);
 insert into REF_BOOK_NDFL(id,department_id,record_id,version,status) values(-2,2,-1,to_date('01.01.2016', 'DD.MM.YYYY'),0);
 
-insert into REF_BOOK_NDFL_DETAIL(id,ref_book_ndfl_id,record_id,version,status,row_ord,department_id, kpp, oktmo) values(10,-1,1,to_date('01.01.2016', 'DD.MM.YYYY'),0,1,7, '000000001', 1);
-insert into REF_BOOK_NDFL_DETAIL(id,ref_book_ndfl_id,record_id,version,status,row_ord,department_id, kpp, oktmo) values(20,-1,2,to_date('01.01.2016', 'DD.MM.YYYY'),0,2,7, '000000002', 2);
-insert into REF_BOOK_NDFL_DETAIL(id,ref_book_ndfl_id,record_id,version,status,row_ord,department_id, kpp, oktmo) values(30,-2,3,to_date('01.01.2016', 'DD.MM.YYYY'),0,3,2, '000000003', 7);
-insert into REF_BOOK_NDFL_DETAIL(id,ref_book_ndfl_id,record_id,version,status,row_ord,department_id, kpp, oktmo) values(40,-1,1,to_date('01.01.2017', 'DD.MM.YYYY'),2,1,7, '000000001', 1);
-insert into REF_BOOK_NDFL_DETAIL(id,ref_book_ndfl_id,record_id,version,status,row_ord,department_id, kpp, oktmo) values(50,-1,1,to_date('01.01.2017', 'DD.MM.YYYY'),0,4,7, '000000004', 1);
+insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(10,1,to_date('01.01.2016', 'DD.MM.YYYY'),0,7, '000000001', 1);
+insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(20,2,to_date('01.01.2016', 'DD.MM.YYYY'),0,7, '000000002', 2);
+insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(30,3,to_date('01.01.2016', 'DD.MM.YYYY'),0,2, '000000003', 7);
+insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(40,1,to_date('01.01.2017', 'DD.MM.YYYY'),2,7, '000000001', 1);
+insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(50,1,to_date('01.01.2017', 'DD.MM.YYYY'),0,7, '000000004', 1);

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.Assert;
@@ -412,27 +413,6 @@ public class DepartmentServiceImplTest {
     @Test
     public void getPrintFormDepartmentsTest() {
         // TODO Дописать тест после реализации getExecutorsDepartments http://jira.aplana.com/browse/SBRFACCTAX-5397
-    }
-
-    @Test
-    public void getOpenPeriodDepartmentsTest() {
-        TAUser taUser = new TAUser();
-        taUser.setRoles(taRoles);
-
-        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, TaxType.NDFL, 0);
-        Assert.assertEquals(3, result.size());
-        Assert.assertTrue(result.containsAll(asList(root.getId(), departmentTB2.getId(), departmentOSB311.getId())));
-
-        result = departmentService.getOpenPeriodDepartments(taUser, TaxType.NDFL, 1);
-        Assert.assertEquals(0, result.size());
-
-        // TODO
-        taUser.getRoles().remove(0);
-        //test for ROLE_CONTROL_NS
-        taUser.getRoles().remove(0);
-        // test for ROLE_CONTROL
-        taUser.getRoles().remove(0);
-        // test for ROLE_OPER
     }
 
     @Test

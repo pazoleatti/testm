@@ -11,61 +11,55 @@
      * @description Контроллер МО Создания налоговой формы
      */
         .controller('createDeclarationFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams', "$modalInstance", "$filter",
-            "RefBookValuesResource", 'DeclarationTypeForCreateResource', "APP_CONSTANTS",
+            "RefBookValuesResource", "APP_CONSTANTS",
             '$shareData', '$dialogs', '$webStorage',
             function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter,
-                      RefBookValuesResource, DeclarationTypeForCreateResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage) {
-                //По нажатию на кнопку пользователь может создать только консолидированную форму
-                $scope.declarationKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.id, APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.id];
+                      RefBookValuesResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage) {
 
-                //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
-                $scope.latestReportPeriod = {};
-
+                $scope.selectedReportPeriod = {};
                 $scope.declarationData = {
-                    department: $rootScope.user.department
+                    department: $rootScope.user.department,
+                    knfType: APP_CONSTANTS.KNF_TYPE.ALL
                 };
 
-                if ($shareData.latestSelectedPeriod) {
-                    $scope.declarationData.period = $shareData.latestSelectedPeriod;
-                } else {
-                    $scope.$watch("latestReportPeriod.period", function (value) {
-                        $scope.declarationData.period = value;
-                    });
-                }
+                $scope.$watch("selectedReportPeriod.period", function (period) {
+                    if (period) {
+                        $scope.declarationData.period = period;
+                    }
+                });
 
-                /**
-                 * Выполняет запрос на сохранение
-                 * @param params
-                 */
-                function performSave(params) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/create",
-                        params: params
-                    }).then(function (response) {
-                        $modalInstance.close(response);
-                    }).catch(function() {
-                        $modalInstance.close();
-                    });
-                }
+                $scope.departmentSelectFilter = {};
+                $scope.kppSelectFilter = {departmentId: $scope.declarationData.department.id};
 
-                /**
-                 * Проверка, является ли выбранный период корректирующим
-                 */
-                $scope.$watchGroup(['declarationData.period', 'declarationData.department'], function (newValues) {
-                    if ($scope.declarationData.period && $scope.declarationData.department) {
-                        $http({
-                            method: "GET",
-                            url: "controller//rest/departmentReportPeriod",
-                            params: {
-                                projection: "fetchLast",
-                                departmentId: $scope.declarationData.department.id,
-                                reportPeriodId: $scope.declarationData.period.id
+                $scope.$watch("declarationData.declarationType", function (newValue, oldValue) {
+                    if (newValue) {
+                        var isKnf = $scope.declarationData.declarationType && $scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id;
+                        $scope.departmentSelectFilter.assignedToDeclarationTypeId = $scope.declarationData.declarationType.id;
+                        $scope.departmentSelectFilter.onlyTB = isKnf;
+                        if (isKnf) {
+                            if (!$scope.isTerBank($scope.declarationData.department)) {
+                                $scope.declarationData.department = $rootScope.user.terBank;
                             }
-                        }).success(function (departmentPeportPeriod) {
-                            $scope.correctionDate = departmentPeportPeriod.correctionDate;
-                            $scope.correctionPeriod = departmentPeportPeriod.correctionDate !== undefined && departmentPeportPeriod.correctionDate !== null;
-                        });
+                        }
+                    }
+                    if (!newValue || oldValue && newValue.id !== oldValue.id) {
+                        // обнуляем все последующие поля
+                        $scope.declarationData.knfType = APP_CONSTANTS.KNF_TYPE.ALL;
+                        $scope.declarationData.kppList = [];
+                        $scope.declarationData.asnu = null;
+                    }
+                });
+
+                $scope.$watch("declarationData.department", function (newValue, oldValue) {
+                    if (newValue) {
+                        $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.declarationData.department.id);
+                        $scope.kppSelectFilter.departmentId = newValue.id;
+                    }
+                });
+
+                $scope.$watch("declarationData.knfType", function (newValue, oldValue) {
+                    if (!newValue || oldValue && newValue.id !== oldValue.id) {
+                        $scope.declarationData.kppList = [];
                     }
                 });
 
@@ -83,16 +77,37 @@
                         declarationTypeId: $scope.declarationData.declarationType.id,
                         departmentId: $scope.declarationData.department.id,
                         periodId: $scope.declarationData.period.id,
-                        manuallyCreated: true,
                         asnuId: $scope.declarationData.asnu != null ? $scope.declarationData.asnu.id : null
                     };
                     if ($scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id && asnuId != null) {
                         params.asnuId = asnuId;
                         performSave(params);
                     } else if ($scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id) {
+                        params.knfType = $scope.declarationData.knfType;
+                        if ($scope.declarationData.knfType.id === APP_CONSTANTS.KNF_TYPE.BY_KPP.id) {
+                            params.kppList = $scope.declarationData.kppList.map(function (kppSelect) {
+                                return kppSelect.kpp;
+                            });
+                        }
                         performSave(params);
                     }
                 };
+
+                /**
+                 * Выполняет запрос на сохранение
+                 * @param params
+                 */
+                function performSave(params) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/create",
+                        params: params
+                    }).then(function (response) {
+                        $modalInstance.close(response);
+                    }).catch(function () {
+                        $modalInstance.close();
+                    });
+                }
 
                 /**
                  * Закрытие окна
@@ -109,12 +124,12 @@
                     });
                 };
 
-                /**
-                 * Условие выбора АСНУ
-                 */
-                $scope.allowSetAsnu = function () {
-                    return !!($scope.declarationData.declarationType && $scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id);
+                $scope.notEmpty = function (list) {
+                    return list && list.length > 0;
+                };
 
+                $scope.isTerBank = function (department) {
+                    return department && department.type.code === 2;
                 };
             }]);
 }());

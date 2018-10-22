@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * Сервис для работы с историей событий налоговых форм/деклараций
  */
+@ScriptExposed
 public interface LogBusinessService {
     /**
      * Получить информацию об истории событий деклараций

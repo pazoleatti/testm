@@ -492,8 +492,6 @@ create table ref_book_ndfl_detail
   record_id           number(9)           not null,
   version             date                not null,
   status              number(1) default 0 not null,
-  ref_book_ndfl_id    number(18)          not null,
-  row_ord             number(4)           not null,
   department_id       number(18)          not null,
   --Строка сведений о налогоплательщике
   tax_organ_code      varchar2(4 char),
@@ -501,12 +499,8 @@ create table ref_book_ndfl_detail
   tax_organ_code_mid  varchar2(4 char),
   present_place       number(18),
   name                varchar2(1000 char),
-  okved               number(18),
-  region              number(18),
   oktmo               number(18),
   phone               varchar2(25 char),
-  obligation          number(18),
-  type                number(18),
   --Сведения о реорганизации
   reorg_form_code     number(18),
   reorg_inn           varchar2(12 char),
@@ -525,20 +519,14 @@ comment on column ref_book_ndfl_detail.id is 'Уникальный иденти�
 comment on column ref_book_ndfl_detail.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_ndfl_detail.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_ndfl_detail.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
-comment on column ref_book_ndfl_detail.ref_book_ndfl_id is 'Ссылка на родительскую запись';
-comment on column ref_book_ndfl_detail.row_ord is 'Порядок следования';
 comment on column ref_book_ndfl_detail.department_id is 'Код обособленного подразделения';
 comment on column ref_book_ndfl_detail.tax_organ_code is 'Код налогового органа конечного';
 comment on column ref_book_ndfl_detail.kpp is 'КПП';
 comment on column ref_book_ndfl_detail.tax_organ_code_mid is 'Код налогового органа промежуточного';
 comment on column ref_book_ndfl_detail.present_place is 'Место, по которому представляется документ.';
 comment on column ref_book_ndfl_detail.name is 'Наименование для титульного листа';
-comment on column ref_book_ndfl_detail.okved is 'Вид экономической деятельности и по классификатору ОКВЭД';
-comment on column ref_book_ndfl_detail.region is 'Субъект Российской Федерации';
 comment on column ref_book_ndfl_detail.oktmo is 'ОКТМО';
 comment on column ref_book_ndfl_detail.phone is 'Номер контактного телефона';
-comment on column ref_book_ndfl_detail.obligation is 'Обязанность по уплате налога';
-comment on column ref_book_ndfl_detail.type is 'Признак расчета';
 comment on column ref_book_ndfl_detail.reorg_form_code is 'Код формы реорганизации и ликвидации';
 comment on column ref_book_ndfl_detail.reorg_inn is 'ИНН реорганизованного обособленного подразделения';
 comment on column ref_book_ndfl_detail.reorg_kpp is 'КПП реорганизованного обособленного подразделения';

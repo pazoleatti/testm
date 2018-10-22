@@ -1,65 +1,24 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
+
+/**
+ * Параметры для создания формы из GUI
+ */
+@Getter
+@Setter
+@ToString
 public class CreateDeclarationDataAction {
 
     private Long declarationTypeId;
-
     private Integer departmentId;
-
     private Integer periodId;
-
-    private Boolean manuallyCreated = false;
-
     private Long asnuId;
-
-    public Long getDeclarationTypeId() {
-        return declarationTypeId;
-    }
-
-    public void setDeclarationTypeId(Long declarationTypeId) {
-        this.declarationTypeId = declarationTypeId;
-    }
-
-    public Integer getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public Integer getPeriodId() {
-        return periodId;
-    }
-
-    public void setPeriodId(Integer periodId) {
-        this.periodId = periodId;
-    }
-
-    public Boolean getManuallyCreated() {
-        return manuallyCreated;
-    }
-
-    public void setManuallyCreated(Boolean manuallyCreated) {
-        this.manuallyCreated = manuallyCreated;
-    }
-
-    public Long getAsnuId() {
-        return asnuId;
-    }
-
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
-    }
-
-    @Override
-    public String toString() {
-        return "CreateDeclarationDataAction{" +
-                "declarationTypeId=" + declarationTypeId +
-                ", departmentId=" + departmentId +
-                ", periodId=" + periodId +
-                ", manuallyCreated=" + manuallyCreated +
-                ", asnuId=" + asnuId +
-                '}';
-    }
+    private RefBookKnfType knfType;
+    private List<String> kppList;
 }

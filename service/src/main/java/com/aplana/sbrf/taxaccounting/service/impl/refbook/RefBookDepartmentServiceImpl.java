@@ -7,8 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -43,12 +43,11 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
         return refBookDepartmentDao.fetchDepartmentById(id);
     }
 
-    /**
-     * Получение подразделения пользователя
-     *
-     * @param user Пользователь
-     * @return Подразделение
-     */
+    @Override
+    public RefBookDepartment findParentTB(int departmentId) {
+        return refBookDepartmentDao.findParentTB(departmentId);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public RefBookDepartment fetchUserDepartment(TAUser user) {
@@ -72,15 +71,6 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
         return dtoList;
     }
 
-    /**
-     * Получение доступных (согласно правам доступа пользователя) для бизнес-администрирования подразделений с фильтрацией по наименованию и пейджингом
-     *
-     * @param user         Пользователь
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка значений справочника
-     */
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
@@ -89,15 +79,6 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
         return refBookDepartmentDao.fetchDepartments(declarationDepartments, name, pagingParams);
     }
 
-    /**
-     * Получение подразделений, доступных (согласно правам доступа пользователя) для назначения исполнителями, с фильтрацией по наименованию и пейджингом
-     *
-     * @param user         Пользователь
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка значений справочника
-     */
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
@@ -106,23 +87,13 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
         return refBookDepartmentDao.fetchDepartments(declarationDepartments, name, pagingParams);
     }
 
-    /**
-     * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
-     * с фильтрацией по наименованию подразделения и пейджингом
-     *
-     * @param user           Пользователь
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param reportPeriodId ID отчетного периода, который должен быть открыт
-     * @param pagingParams   Параметры пейджинга
-     * @return Страница списка значений справочника
-     */
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
-    public PagingResult<RefBookDepartment> fetchActiveDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams) {
-        List<Integer> departmentsWithOpenPeriod = departmentService.getOpenPeriodDepartments(user, TaxType.NDFL, reportPeriodId);
-        return refBookDepartmentDao.fetchActiveDepartments(departmentsWithOpenPeriod, name, pagingParams);
+    public PagingResult<RefBookDepartment> findAllByFilter(DepartmentFilter filter, PagingParams pagingParams, TAUser user) {
+        List<Integer> availableForUserDepartmentIds = departmentService.getTaxFormDepartments(user);
+        filter.setIds(availableForUserDepartmentIds);
+        return refBookDepartmentDao.findAllByFilter(filter, pagingParams);
     }
 
     @Override

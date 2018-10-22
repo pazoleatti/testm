@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,8 +29,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -100,18 +103,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public void saveDeclarationDataKppList(final long declarationDataId, final List<String> kppList) {
-        if (kppList != null && !kppList.isEmpty()) {
+    public void createDeclarationDataKppList(final long declarationDataId, final Set<String> kppSet) {
+        if (kppSet != null && !kppSet.isEmpty()) {
+            final Iterator<String> iterator = kppSet.iterator();
             getJdbcTemplate().batchUpdate("insert into declaration_data_kpp(declaration_data_id, kpp) values(?, ?)", new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     ps.setLong(1, declarationDataId);
-                    ps.setString(2, kppList.get(i));
+                    ps.setString(2, iterator.next());
                 }
 
                 @Override
                 public int getBatchSize() {
-                    return kppList.size();
+                    return kppSet.size();
                 }
             });
         }
@@ -123,13 +127,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public void saveDeclarationDataPersonIds(final long declarationDataId, final List<Long> personsIds) {
+    public void createDeclarationDataPersonIds(final long declarationDataId, final Set<Long> personsIds) {
         if (personsIds != null && !personsIds.isEmpty()) {
+            final Iterator<Long> iterator = personsIds.iterator();
             getJdbcTemplate().batchUpdate("insert into declaration_data_person(declaration_data_id, person_id) values(?, ?)", new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     ps.setLong(1, declarationDataId);
-                    ps.setLong(2, personsIds.get(i));
+                    ps.setLong(2, iterator.next());
                 }
 
                 @Override
@@ -227,7 +232,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId) {
         StringBuilder sql = new StringBuilder("select rn from (select dat.*, rownum as rn from (");
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         appendSelectClause(sql);
         appendFromAndWhereClause(sql, values, filter);
         appendOrderByClause(sql, ordering, ascSorting);
@@ -247,7 +252,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
                                                                   boolean ascSorting, PagingParams pageParams) {
         StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         appendSelectClause(sql);
         appendFromAndWhereClause(sql, values, declarationFilter);
         appendOrderByClause(sql, ordering, ascSorting);
@@ -260,7 +265,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 values,
                 new DeclarationDataSearchResultItemMapper()
         );
-        return new PagingResult<DeclarationDataSearchResultItem>(records, getCount(declarationFilter));
+        return new PagingResult<>(records, getCount(declarationFilter));
     }
 
     @Override
@@ -392,7 +397,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
         StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         appendSelectClause(sql);
         appendFromAndWhereClause(sql, values, declarationDataFilter);
         appendOrderByClause(sql, ordering, ascSorting);
@@ -410,46 +415,45 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public long saveNew(DeclarationData declarationData) {
-        JdbcTemplate jt = getJdbcTemplate();
+    public long create(DeclarationData declarationData) {
+        Assert.isTrue(declarationData.getId() == null, "Произведена попытка перезаписать уже сохранённую налоговую форму!");
+        Assert.isTrue(!existDeclarationData(declarationData), "Налоговая форма с заданными параметрами уже существует!");
 
-        Long id = declarationData.getId();
-        if (id != null) {
-            throw new DaoException("Произведена попытка перезаписать уже сохранённую налоговую форму!");
+        long id = generateId("seq_declaration_data", Long.class);
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        params.addValue("declaration_template_id", declarationData.getDeclarationTemplateId());
+        params.addValue("department_report_period_id", declarationData.getDepartmentReportPeriodId());
+        params.addValue("state", declarationData.getState().getId());
+        params.addValue("tax_organ_code", declarationData.getTaxOrganCode());
+        params.addValue("kpp", declarationData.getKpp());
+        params.addValue("oktmo", declarationData.getOktmo());
+        params.addValue("asnu_id", declarationData.getAsnuId());
+        params.addValue("knf_type_id", declarationData.getKnfType() != null ? declarationData.getKnfType().getId() : null);
+        params.addValue("note", declarationData.getNote());
+        params.addValue("file_name", declarationData.getFileName());
+        params.addValue("doc_state_id", declarationData.getDocState());
+        params.addValue("manually_created", declarationData.isManuallyCreated());
+        params.addValue("last_data_modified", declarationData.isManuallyCreated() ? null : new Date());
+        params.addValue("adjust_negative_values", declarationData.isAdjustNegativeValues());
+
+        getNamedParameterJdbcTemplate().update("" +
+                        "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
+                        "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values) " +
+                        "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
+                        "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values)",
+                params);
+
+        if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
+            createDeclarationDataKppList(id, declarationData.getIncludedKpps());
         }
-
-        if (existDeclarationData(declarationData)) {
-            throw new DaoException("Налоговая форма с заданными параметрами уже существует!");
-        }
-
-        id = generateId("seq_declaration_data", Long.class);
-        jt.update(
-                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
-                        "oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values) " +
-                        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                id,
-                declarationData.getDeclarationTemplateId(),
-                declarationData.getDepartmentReportPeriodId(),
-                declarationData.getState().getId(),
-                declarationData.getTaxOrganCode(),
-                declarationData.getKpp(),
-                declarationData.getOktmo(),
-                declarationData.getAsnuId(),
-                declarationData.getDeclarationTemplateId() == DeclarationType.NDFL_CONSOLIDATE ? 1 : null,
-                declarationData.getNote(),
-                declarationData.getFileName(),
-                declarationData.getDocState(),
-                declarationData.getManuallyCreated(),
-                declarationData.getManuallyCreated() ? null : new Date(),
-                declarationData.isAdjustNegativeValues()
-        );
         declarationData.setId(id);
-        return id.longValue();
+        return id;
     }
 
     @Override
     public void setStatus(long declarationDataId, State state) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("state", state.getId());
         values.put("declarationDataId", declarationDataId);
         int count = getNamedParameterJdbcTemplate().update(
@@ -463,7 +467,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public void setDocStateId(long declarationDataId, Long docStateId) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("docStateId", docStateId);
         values.put("declarationDataId", declarationDataId);
         int count = getNamedParameterJdbcTemplate().update(
@@ -477,7 +481,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public void setFileName(long declarationDataId, String fileName) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("fileName", fileName);
         values.put("declarationDataId", declarationDataId);
         int count = getNamedParameterJdbcTemplate().update(
@@ -492,7 +496,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public int getCount(DeclarationDataFilter filter) {
         StringBuilder sql = new StringBuilder("select count(*)");
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         appendFromAndWhereClause(sql, values, filter);
         return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), values, Integer.class);
     }
@@ -560,10 +564,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionDate() != null) {
-                sql.append(" and drp.correction_date = '" + new SimpleDateFormat("dd.MM.yyyy").format(filter.getCorrectionDate()) + "\'");
+                sql.append(" and drp.correction_date = '").append(new SimpleDateFormat("dd.MM.yyyy").format(filter.getCorrectionDate())).append("\'");
             } else {
-                sql.append(" and drp.correction_date is " +
-                        (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
+                sql.append(" and drp.correction_date is ").append(Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "").append("null");
             }
         }
 
@@ -618,12 +621,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
-                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,")
-                .append(" (select lb.log_date from log_business lb where lb.event_id = " + FormDataEvent.CREATE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date,")
-                .append(" (select su.name from log_business lb join sec_user su on su.login=lb.user_login where lb.event_id = " + FormDataEvent.CREATE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_name");
+                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,").append(" (select lb.log_date from log_business lb where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date,")
+                .append(" (select su.name from log_business lb join sec_user su on su.login=lb.user_login where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_name");
     }
 
-    public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
+    private void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
         sql.append(" order by ");
 
         String column = null;
@@ -708,7 +710,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     Long.class
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Long>();
+            return new ArrayList<>();
         } catch (DataAccessException e) {
             LOG.error(String.format("Ошибка поиска налоговых форм для заданного шаблона %d", templateId), e);
             throw new DaoException("Ошибка поиска налоговых форм для заданного шаблона %d", templateId);
@@ -735,7 +737,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     Long.class
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Long>();
+            return new ArrayList<>();
         } catch (DataAccessException e) {
             String errorMsg = String.format("Ошибка при поиске налоговых форм по заданному сочетанию параметров: declarationTypeId = %d, departmentId = %d", declarationTypeId, departmentId);
             LOG.error(errorMsg, e);
@@ -771,18 +773,18 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate) {
         try {
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
             params.put("decTemplateId", decTemplateId);
             params.put("startDate", startDate);
             params.put("endDate", endDate);
             return getNamedParameterJdbcTemplate().queryForList(FIND_DD_BY_RANGE_IN_RP, params, Integer.class);
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>(0);
+            return new ArrayList<>(0);
         }
     }
 
     public void updateNote(long declarationDataId, String note) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("declarationDataId", declarationDataId);
         values.put("note", note);
         getNamedParameterJdbcTemplate().update("UPDATE declaration_data SET note = :note WHERE id = :declarationDataId", values);
@@ -790,14 +792,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public String getNote(long declarationDataId) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("declarationDataId", declarationDataId);
         return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM declaration_data WHERE id = :declarationDataId", values, String.class);
     }
 
     @Override
     public void updateLastDataModified(long declarationDataId) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("declarationDataId", declarationDataId);
         values.put("last_data_modified", new Date());
         getNamedParameterJdbcTemplate().update("UPDATE declaration_data SET last_data_modified = :last_data_modified WHERE id = :declarationDataId", values);
@@ -896,7 +898,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public boolean existDeclarationData(long declarationDataId) {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        HashMap<String, Object> values = new HashMap<>();
         values.put("declarationDataId", declarationDataId);
         try {
             return getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM declaration_data WHERE id = :declarationDataId", values, Long.class) > 0;
@@ -923,7 +925,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<DeclarationData>();
+            return new ArrayList<>();
         }
     }
 
@@ -998,7 +1000,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         Integer.class);
                 break;
             case DeclarationType.NDFL_PRIMARY:
-                if (declarationData.getManuallyCreated()) {
+                if (declarationData.isManuallyCreated()) {
                     countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
                                     " AND department_report_period_id = ? AND manually_created = ? AND asnu_id = ?",
                             new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), 1, declarationData.getAsnuId()},

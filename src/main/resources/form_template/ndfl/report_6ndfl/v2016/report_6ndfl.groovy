@@ -952,8 +952,13 @@ class Report6Ndfl extends AbstractScriptClass {
                 List<Long> npGropSourcesIdList = npGroup.value.id
                 Long ddId
                 params = new HashMap<String, Object>()
-                ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                        departmentReportPeriod, taxOrganCode, kpp.toString(), oktmo.toString(), null, null, isAdjustNegativeValues, null, false)
+                DeclarationData newDeclaratinoData = new DeclarationData()
+                newDeclaratinoData.declarationTemplateId = declarationData.declarationTemplateId
+                newDeclaratinoData.taxOrganCode = taxOrganCode
+                newDeclaratinoData.kpp = kpp.toString()
+                newDeclaratinoData.oktmo = oktmo.toString()
+                newDeclaratinoData.isAdjustNegativeValues = isAdjustNegativeValues
+                ddId = declarationService.create(newDeclaratinoData, departmentReportPeriod, logger, userInfo, false)
 
                 params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
                 formMap.put(ddId, params)

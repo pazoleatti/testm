@@ -1,10 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -59,5 +63,33 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                         return new Pair<>(rs.getString("kpp"), rs.getString("oktmo"));
                     }
                 });
+    }
+
+    @Override
+    public PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("departmentId", departmentId);
+        String baseSelect = "select distinct kpp from ref_book_ndfl_detail where department_id = :departmentId";
+        if (!StringUtils.isEmpty(kpp)) {
+            baseSelect += " and kpp like '%' || :kpp || '%'";
+            params.addValue("kpp", kpp);
+        }
+
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("count", pagingParams.getCount());
+        List<KppSelect> kppSelects = getNamedParameterJdbcTemplate().query("" +
+                        "select * from (\n" +
+                        "   select rownum rn, t.* from (" + baseSelect + " order by kpp) t\n" +
+                        ") where rn > :startIndex and rownum <= :count",
+                params, new RowMapper<KppSelect>() {
+                    @Override
+                    public KppSelect mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new KppSelect(rs.getInt("rn"),
+                                rs.getString("kpp"));
+                    }
+                });
+
+        int count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSelect + ")", params, Integer.class);
+        return new PagingResult<>(kppSelects, count);
     }
 }

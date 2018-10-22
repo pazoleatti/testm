@@ -3,7 +3,11 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -19,7 +23,11 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -35,7 +43,11 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
@@ -239,23 +251,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    /**
-     * Создание декларации в заданном отчетном периоде подразделения
-     *
-     * @param userInfo Информация о текущем пользователе
-     * @param action
-     * @return Модель {@link CreateResult}, в которой содержится ID налоговой формы
-     */
     @Override
-    //TODO:https://jira.aplana.com/browse/SBRFNDFL-2071
     public CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action) {
-        CreateResult<Long> result = new CreateResult<Long>();
+        CreateResult<Long> result = new CreateResult<>();
         Logger logger = new Logger();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
         if (departmentReportPeriod != null) {
             int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(action.getDeclarationTypeId().intValue(), action.getPeriodId());
             try {
-                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, action.getAsnuId(), null, false, null, true, action.getManuallyCreated());
+                DeclarationData newDeclarationData = new DeclarationData();
+                newDeclarationData.setDeclarationTemplateId(activeTemplateId);
+                newDeclarationData.setAsnuId(action.getAsnuId());
+                newDeclarationData.setManuallyCreated(true);
+                newDeclarationData.setKnfType(action.getKnfType());
+                if (action.getKppList() != null) {
+                    newDeclarationData.setIncludedKpps(new HashSet<>(action.getKppList()));
+                }
+                Long declarationId = doCreate(newDeclarationData, departmentReportPeriod, logger, userInfo, true);
                 result.setEntityId(declarationId);
             } catch (DaoException e) {
                 throw new ServiceException(e.getMessage());
@@ -272,72 +284,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     /**
      * Логика создания вынесена в отдельный метод, для решения проблем с транзакциями при вызове из других транзакционных методов
      */
-    private Long doCreate(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                          DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
-                          String oktmo, Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit, boolean manuallyCreated) {
+    private Long doCreate(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
         LOG.info(String.format("DeclarationDataServiceImpl.doCreate by %s. declarationTemplateId: %s; departmentReportPeriod: %s; taxOrganCode: %s; taxOrganKpp: %s; oktmo: %s; asunId: %s; fileName: %s; note: %s; writeAudit: %s; manuallyCreated: %s",
-                userInfo, declarationTemplateId, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit, manuallyCreated));
-        String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+                userInfo, newDeclaration.getDeclarationTemplateId(), departmentReportPeriod, newDeclaration.getTaxOrganCode(), newDeclaration.getKpp(), newDeclaration.getOktmo(), newDeclaration.getAsnuId(), newDeclaration.getFileName(), newDeclaration.getNote(), writeAudit, newDeclaration.isManuallyCreated()));
+
+        newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+        newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
+        newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
+        newDeclaration.setState(State.CREATED);
+
+        String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + newDeclaration.getDeclarationTemplateId() + "_" + departmentReportPeriod.getId() + "_" + newDeclaration.getKpp() + "_" + newDeclaration.getTaxOrganCode() + "_" + newDeclaration.getFileName();
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(newDeclaration.getDeclarationTemplateId());
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
-        if (lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(DescriptionTemplate.DECLARATION.getText(),
-                        "Создание налоговой формы",
-                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        departmentReportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
-                                : "",
-                        department.getName(),
-                        declarationTemplate.getType().getName(),
-                        taxOrganCode != null
-                                ? ", Налоговый орган: \"" + taxOrganCode + "\""
-                                : "",
-                        taxOrganKpp != null
-                                ? ", КПП: \"" + taxOrganKpp + "\""
-                                : "",
-                        oktmo != null
-                                ? ", ОКТМО: \"" + oktmo + "\""
-                                : "",
-                        asunId != null
-                                ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
-                                : "",
-                        fileName != null
-                                ? ", Имя файла: \"" + fileName + "\""
-                                : "")
-        ) == null) {
+        if (lockDataService.lock(key, userInfo.getUser().getId(), makeDeclarationLockDescription(newDeclaration, declarationTemplate, departmentReportPeriod, department)) == null) {
             //Если блокировка успешно установлена
             try {
-                /*
-                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, oktmo, taxOrganCode, asunId, fileName);
-                if (declarationData != null) {
-                    String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
-                            "Уведомление с заданными параметрами уже существует" :
-                            "Налоговая форма с заданными параметрами уже существует");
-                    throw new ServiceLoggerException(msg, null);
-                }*/
-
-                canCreate(userInfo, declarationTemplateId, departmentReportPeriod, asunId, logger);
+                canCreate(userInfo, newDeclaration.getDeclarationTemplateId(), departmentReportPeriod, newDeclaration.getAsnuId(), logger);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
 
-                DeclarationData newDeclaration = new DeclarationData();
-                newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
-                newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
-                newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
-                newDeclaration.setState(State.CREATED);
-                newDeclaration.setDeclarationTemplateId(declarationTemplateId);
-                newDeclaration.setTaxOrganCode(taxOrganCode);
-                newDeclaration.setKpp(taxOrganKpp);
-                newDeclaration.setOktmo(oktmo);
-                newDeclaration.setAsnuId(asunId);
-                newDeclaration.setFileName(fileName);
-                newDeclaration.setNote(note);
-                newDeclaration.setManuallyCreated(manuallyCreated);
-                newDeclaration.setAdjustNegativeValues(isAdjustNegativeValues);
-
-                if (manuallyCreated && declarationDataDao.existDeclarationData(newDeclaration)) {
+                if (newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
                     if (departmentReportPeriod.getCorrectionDate() != null) {
                         SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
@@ -361,7 +328,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
 
                 // Вызываем событие скрипта CREATE
-
                 declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(
@@ -377,8 +343,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             logEntryService.save(logger.getEntries()));
                 }
 
-                long id = declarationDataDao.saveNew(newDeclaration);
-                declarationDataDao.updateNote(id, note);
+                long id = declarationDataDao.create(newDeclaration);
 
                 logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
                 if (writeAudit) {
@@ -391,6 +356,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else {
             throw new ServiceException("Создание налоговой формы с указанными параметрами уже выполняется!");
         }
+    }
+
+    private String makeDeclarationLockDescription(DeclarationData declarationData, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Department department) {
+        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
+        return String.format(DescriptionTemplate.DECLARATION.getText(),
+                "Создание налоговой формы",
+                departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                departmentReportPeriod.getCorrectionDate() != null
+                        ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
+                        : "",
+                department.getName(),
+                declarationTemplate.getType().getName(),
+                declarationData.getTaxOrganCode() != null
+                        ? ", Налоговый орган: \"" + declarationData.getTaxOrganCode() + "\""
+                        : "",
+                declarationData.getKpp() != null
+                        ? ", КПП: \"" + declarationData.getKpp() + "\""
+                        : "",
+                declarationData.getOktmo() != null
+                        ? ", ОКТМО: \"" + declarationData.getOktmo() + "\""
+                        : "",
+                declarationData.getAsnuId() != null
+                        ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue() + "\""
+                        : "",
+                declarationData.getFileName() != null
+                        ? ", Имя файла: \"" + declarationData.getFileName() + "\""
+                        : "");
     }
 
     /**
@@ -508,9 +500,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, boolean isAdjustNegativeValues, String note, boolean writeAudit) {
-        return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, isAdjustNegativeValues, note, writeAudit, false);
+    public Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
+        return doCreate(newDeclaration, departmentReportPeriod, logger, userInfo, writeAudit);
     }
 
     @Override
@@ -910,7 +901,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declaration.getDepartmentId()));
 
             result.setState(declaration.getState().getTitle());
-            result.setManuallyCreated(declaration.getManuallyCreated());
+            result.setManuallyCreated(declaration.isManuallyCreated());
             result.setLastDataModifiedDate(declaration.getLastDataModifiedDate());
             result.setActualDataDate(new Date());
             result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
@@ -1171,8 +1162,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             List<Integer> departmentIds = new ArrayList<>();
             if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
                 departmentIds = availableDepartments;
-            }
-            else {
+            } else {
                 for (Integer departmentId : filter.getDepartmentIds()) {
                     if (availableDepartments.contains(departmentId)) {
                         departmentIds.add(departmentId);

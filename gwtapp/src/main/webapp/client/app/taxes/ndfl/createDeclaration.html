@@ -1,60 +1,19 @@
 <form class="form-horizontal" name="createDeclarationForm" data-aplana-submit-valid="save()">
     <div class="modal-body" style="min-height: 155px">
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
-               style="height: 100px;">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
             <tbody>
-            <tr>
-                <td>
-                    <label class="control-label">{{::'createDeclaration.period' | translate}}:</label>
-                </td>
-                <td>
-                    <div data-aplana-field>
-                        <div style="width: 355px;"
-                             data-ng-controller="SelectPeriodCtrl"
-                             data-ui-select2="periodSelect.options"
-                             data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
-                             data-ng-model="declarationData.period"
-                             data-required>
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label class="control-label">{{::'createDeclaration.department' | translate}}:</label>
-                </td>
-                <td>
-                    <div data-ng-if="declarationData.period">
-                        <div data-aplana-field>
-                            <div style="width: 355px;"
-                                 data-ng-controller="SelectDepartmentCtrl"
-                                 data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initActiveDepartmentSelectWithOpenPeriod('declarationData.period')"
-                                 data-ng-model="declarationData.department"
-                                 data-required>
-                            </div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
             <tr>
                 <td>
                     <label class="control-label">{{::'createDeclaration.declarationType' |
                         translate}}:</label>
                 </td>
                 <td>
-                    <div data-ng-if="declarationData.department && declarationData.period">
+                    <div>
                         <div data-aplana-field>
                             <div style="width: 355px;"
                                  data-ng-controller="SelectDeclarationTypeCtrl"
                                  data-ui-select2="declarationTypeSelect.options"
-                                 data-ng-init="initSelectWithDeclarationTypesForCreate(declarationKind, 'declarationData.period', 'declarationData.department')"
+                                 data-ng-init="initSelectWithDeclarationTypesForCreate('declarationData.declarationType')"
                                  data-ng-model="declarationData.declarationType"
                                  data-required>
                             </div>
@@ -65,9 +24,51 @@
                     </div>
                 </td>
             </tr>
-            <tr data-ng-if="allowSetAsnu()">
+            <tr>
                 <td>
-                    <label class="control-label">{{::'createDeclaration.asnu' | translate}}</label>
+                    <label class="control-label">{{::'createDeclaration.department' | translate}}:</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initActiveDepartmentSelectWithOpenPeriod(departmentSelectFilter)"
+                                 data-ng-model="declarationData.department"
+                                 data-required>
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr data-ng-if="declarationData.department">
+                <td>
+                    <label class="control-label">{{::'createDeclaration.period' | translate}}:</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectPeriodCtrl"
+                                 data-ui-select2="periodSelect.options"
+                                 data-ng-init="initSelectWithOpenDepartmentPeriods(declarationData.department.id, 'declarationData.period')"
+                                 data-ng-model="declarationData.period"
+                                 data-required>
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr data-ng-if="declarationData.department && declarationData.declarationType && declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                <td>
+                    <label class="control-label">{{::'createDeclaration.asnu' | translate}}:</label>
                 </td>
                 <td>
                     <div>
@@ -86,10 +87,48 @@
                     </div>
                 </td>
             </tr>
+            <tr data-ng-if="declarationData.department && declarationData.declarationType && declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                <td>
+                    <label class="control-label">{{::'createDeclaration.knfType' | translate}}:</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectFromArrayCtrl"
+                                 data-ui-select2="selectFromArray.options"
+                                 data-ng-init="init([APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX, APP_CONSTANTS.KNF_TYPE.BY_KPP])"
+                                 data-ng-model="declarationData.knfType"
+                                 data-required>
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr data-ng-if="declarationData.department && declarationData.declarationType && declarationData.knfType && declarationData.knfType.id === APP_CONSTANTS.KNF_TYPE.BY_KPP.id">
+                <td>
+                    <label class="control-label">{{::'createDeclaration.kpp' | translate}}:</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectFormKppCtrl"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initSelectFormKpp(kppSelectFilter)"
+                                 data-ng-model="declarationData.kppList"
+                                 data-ui-validate="{notEmpty : 'notEmpty($value)'}">
+                            </div>
+                            <div data-aplana-validator data-key='notEmpty'>{{::'common.validation.required' | translate}}</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
             </tbody>
         </table>
-
-        <label class="control-label correction-message" data-ng-show="correctionPeriod">{{::'createDeclaration.correctionMessage' | translate}} {{correctionDate | dateFormatter}}</label>
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-default iconed-btn" id="saveButton">

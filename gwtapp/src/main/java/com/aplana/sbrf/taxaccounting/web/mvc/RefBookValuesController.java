@@ -4,11 +4,22 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.refbook.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAttachFileTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
@@ -58,6 +69,7 @@ public class RefBookValuesController {
     @InitBinder
     public void init(WebDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(DepartmentFilter.class, new RequestParamEditor(DepartmentFilter.class));
     }
 
     /**
@@ -118,19 +130,18 @@ public class RefBookValuesController {
     }
 
     /**
-     * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
-     * с фильтрацией по наименованию подразделения и пейджингом
+     * Возвращяет страницу подразделений по фильтру
      *
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param reportPeriodId ID отчетного периода
-     * @param pagingParams   Параметры пейджинга
-     * @return Страница списка значений справочника
+     * @param filter       фильтр
+     * @param name         значение поиска из select2, отдельно от фильтра, т.к. select2 иначе не умеет
+     * @param pagingParams параметры пейджинга
+     * @return страница подразделений
      */
-    @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeDepartmentsWithOpenPeriod")
-    public JqgridPagedList<RefBookDepartment> fetchActiveDepartmentsWithOpenPeriod(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=allByFilter")
+    public JqgridPagedList<RefBookDepartment> findAllByFilter(@RequestParam DepartmentFilter filter, @RequestParam String name, @RequestParam PagingParams pagingParams) {
         TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookDepartment> departments = refBookDepartmentService.fetchActiveDepartmentsWithOpenPeriod(user, name, reportPeriodId, pagingParams);
+        filter.setName(name);
+        PagingResult<RefBookDepartment> departments = refBookDepartmentService.findAllByFilter(filter, pagingParams, user);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
     }
 
@@ -139,7 +150,6 @@ public class RefBookValuesController {
      *
      * @return Список значений справочника
      */
-
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeAvailableTB")
     public List<RefBookDepartment> fetchActiveAvailableTB() {
         return refBookDepartmentService.fetchActiveAvailableTB(securityService.currentUserInfo().getUser());

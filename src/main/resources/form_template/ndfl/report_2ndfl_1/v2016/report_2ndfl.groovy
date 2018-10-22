@@ -1375,9 +1375,14 @@ class Report2Ndfl extends AbstractScriptClass {
                     Integer indexFrom1 = ++index
                     def note = "Часть ${indexFrom1} из ${partTotal}"
                     params = new HashMap<String, Object>()
-                    ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                            departmentReportPeriod, taxOrganCode, kpp.toString(), oktmo.toString(), null, null, false, note.toString(), false)
-                    //appendNdflPersonsToDeclarationData(ddId, part)
+                    DeclarationData newDeclaratinoData = new DeclarationData()
+                    newDeclaratinoData.declarationTemplateId = declarationData.declarationTemplateId
+                    newDeclaratinoData.taxOrganCode = taxOrganCode
+                    newDeclaratinoData.kpp = kpp.toString()
+                    newDeclaratinoData.oktmo = oktmo.toString()
+                    newDeclaratinoData.note = note.toString()
+                    ddId = declarationService.create(newDeclaratinoData, departmentReportPeriod, logger, userInfo, false)
+
                     params.put(PART_NUMBER, indexFrom1)
                     params.put(PART_TOTAL, partTotal)
                     params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)

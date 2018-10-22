@@ -1,6 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentName;
+import com.aplana.sbrf.taxaccounting.model.DepartmentShortInfo;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.util.List;
 import java.util.Map;
@@ -158,17 +164,6 @@ public interface DepartmentService {
      * @return Список id подразделений для назначения исполнителей
      */
     List<Integer> getDestinationDepartmentIds(TAUser tAUser);
-
-    /**
-     * 80 - Выборка id подразделений по открытым периодам
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11383234">Аналитика</a>
-     *
-     * @param tAUser         пользователь
-     * @param taxType        Типы налога
-     * @param reportPeriodId id периода
-     * @return
-     */
-    List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId);
 
     /**
      * Получить подразделения по списку идентификаторов
