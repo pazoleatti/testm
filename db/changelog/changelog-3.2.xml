@@ -204,4 +204,24 @@
                  splitStatements="false"/>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5792 Изменение процедур по идентификации для новой структуры хранения реестра ФЛ-->
+    <changeSet id="3.2-amandzyak-2" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg7.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5792 Изменение процедур по идентификации для новой структуры хранения реестра ФЛ-->
+    <changeSet id="3.2-amandzyak-3" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body13.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
