@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Класс для запуска периодических задач по расписанию
@@ -114,7 +116,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @Bean(destroyMethod = "shutdown")
     public Executor taskExecutor() {
-        return Executors.newScheduledThreadPool(10);
+        ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("scheduler-thread-%d").build();
+        return Executors.newScheduledThreadPool(10, namedThreadFactory);
     }
 
     @Override

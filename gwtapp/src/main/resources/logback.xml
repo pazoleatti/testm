@@ -18,4 +18,6 @@
 	<logger name="com.aplana.sbrf.taxaccounting" level="info"/>
 	<!-- Логируем sql запросы -->
 	<logger name="net.ttddyy.dsproxy.listener.logging.CommonsQueryLoggingListener" level="DEBUG"/>
+	<!-- Чтобы убрать сообщения WARN bitronix.tm.twopc.Preparer executing transaction with 0 enlisted resource при локальном запуске -->
+    <logger name="bitronix.tm.twopc.Preparer" level="error"/>
 </configuration>
