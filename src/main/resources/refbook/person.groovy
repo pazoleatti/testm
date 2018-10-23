@@ -5,12 +5,12 @@ import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.identification.DocType
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType
 import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.Address
 import com.aplana.sbrf.taxaccounting.model.refbook.Country
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
@@ -130,7 +130,7 @@ class Person extends AbstractScriptClass {
     // Кэш код статуса налогоплательщика - сам статус
     Map<String, TaxpayerStatus> taxpayerStatusessCache = new HashMap<>()
     // Кэш код типа документа - сам тип
-    Map<String, DocType> docTypesCache = new HashMap<>()
+    Map<String, RefBookDocType> docTypesCache = new HashMap<>()
     // Кэш АСНУ
     Map<String, RefBookAsnu> asnuCache = new HashMap<>()
 
@@ -145,7 +145,7 @@ class Person extends AbstractScriptClass {
     // Маппа неопределенных АСНУ, где ключ ФЛ, значение - неопределнные АСНУ для ФЛ
     Map<RegistryPerson, List<PersonIdentifier>> undefinedAsnu = [:]
     // Маппа неопределенных Видов документов, где ключ ФЛ, значение - ДУЛы у которых не определен вид
-    Map<RegistryPerson, List<PersonDocument>> undefinedIdDocTypes = [:]
+    Map<RegistryPerson, List<IdDoc>> undefinedIdDocTypes = [:]
 
     void importData() {
         defineTB()
@@ -215,7 +215,7 @@ class Person extends AbstractScriptClass {
                         if ('АнкетДаннФЛ' == tag) {
                             parsePersonInfo(reader, person)
                         } else if ('УдЛичнФЛ' == tag) {
-                            PersonDocument document = parseDocumentInfo(reader, person)
+                            IdDoc document = parseDocumentInfo(reader, person)
                             if (document) {
                                 person.getDocuments().add(document)
                             }
@@ -267,9 +267,9 @@ class Person extends AbstractScriptClass {
         person.inn = getAttrValue(reader, "ИННФЛ")
         person.innForeign = getAttrValue(reader, "ИННИно")
         person.taxPayerStatusCode = getAttrValue(reader, "СтатусФЛ")
-        person.taxPayerStatus = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new TaxpayerStatus()
+        person.taxPayerState = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new TaxpayerStatus()
         person.address = parseAddress(reader)
-        person.reportDoc = new PersonDocument()
+        person.reportDoc = new IdDoc()
     }
 
     AddressExt parseAddress(XMLStreamReader reader) {
@@ -289,11 +289,11 @@ class Person extends AbstractScriptClass {
         return address
     }
 
-    PersonDocument parseDocumentInfo(XMLStreamReader reader, RegistryPerson person) {
-        PersonDocument document = new PersonDocumentExt()
+    IdDoc parseDocumentInfo(XMLStreamReader reader, RegistryPerson person) {
+        IdDoc document = new PersonDocumentExt()
         document.docTypeCode = getAttrValue(reader, "УдЛичнФЛВид")
-        DocType docType = getDocTypeByCode(document.docTypeCode)
-        document.docType = docType ?: new DocType()
+        RefBookDocType docType = getDocTypeByCode(document.docTypeCode)
+        document.docType = docType ?: new RefBookDocType()
         document.documentNumber = getAttrValue(reader, "УдЛичнФЛНом")
         document.incRepStr = getAttrValue(reader, "УдЛичнФЛГл")
         document.incRep = toInteger(document.incRepStr)
@@ -403,9 +403,9 @@ class Person extends AbstractScriptClass {
                 logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                         " невозможно определить систему-источник. Атрибут \"Система-источник\" не был заполнен.")
             }
-            List<PersonDocument> idDocTypes = this.undefinedIdDocTypes.get(person)
+            List<IdDoc> idDocTypes = this.undefinedIdDocTypes.get(person)
             if (idDocTypes != null) {
-                for (PersonDocument document : idDocTypes) {
+                for (IdDoc document : idDocTypes) {
                     def docTypeCode = (document as PersonDocumentExt).docTypeCode
                     if (docTypeCode && document.docType.id == null) {
                         logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
@@ -415,7 +415,7 @@ class Person extends AbstractScriptClass {
             }
 
             def taxPayerStatusCode = (person as RegistryPersonExt).taxPayerStatusCode
-            if (taxPayerStatusCode && person.taxPayerStatus.id == null) {
+            if (taxPayerStatusCode && person.taxPayerState.id == null) {
                 logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"${person.reportDoc?.documentNumber ?: "(документ не определен)"}\"" +
                         " cтатус налогоплательщика ($taxPayerStatusCode) не найден в справочнике \"Статусы налогоплательщика\".")
             }
@@ -617,7 +617,7 @@ class Person extends AbstractScriptClass {
         String countryCode
     }
 
-    class PersonDocumentExt extends PersonDocument {
+    class PersonDocumentExt extends IdDoc {
         String docTypeCode
         String incRepStr
     }
@@ -713,15 +713,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет вид документа по коду
      */
-    DocType getDocTypeByCode(String code) {
-        DocType docType = null
+    RefBookDocType getDocTypeByCode(String code) {
+        RefBookDocType docType = null
         if (code) {
             docType = docTypesCache.get(code)
             if (!docType) {
                 def recordData = getProvider(RefBook.Id.DOCUMENT_CODES.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    docType = new DocType()
+                    docType = new RefBookDocType()
                     docType.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     docType.setCode(record.get("CODE").getStringValue())
                     docTypesCache.put(code, docType)

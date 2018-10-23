@@ -2140,15 +2140,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
         String sql = "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
-                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc.code AS country_code, rba.address " +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, " +
+                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, " +
+                "rbp.appartment, rbp.address_foreign as address, rbc.code AS country_code " +
                 "FROM ref_book_person rbp " +
                 "LEFT JOIN ndfl_person np ON rbp.id = np.person_id " +
                 "LEFT JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
-                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
                 "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +

@@ -16,10 +16,10 @@ import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEventTy
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeListener
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener
 import com.aplana.sbrf.taxaccounting.model.refbook.Country
-import com.aplana.sbrf.taxaccounting.model.identification.DocType
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb
 import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
@@ -104,7 +104,7 @@ class Calculate extends AbstractScriptClass {
     final String R_ID_DOC_TYPE = "Коды документов"
 
     List<Country> countryRefBookCache = []
-    List<DocType> docTypeRefBookCache = []
+    List<RefBookDocType> docTypeRefBookCache = []
     List<TaxpayerStatus> taxpayerStatusRefBookCache = []
 
     Map<Long, Map<String, String>> refBookAttrCache = new HashMap<Long, Map<String, String>>()
@@ -267,11 +267,11 @@ class Calculate extends AbstractScriptClass {
         final Logger localLogger = logger
         NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper() {
             @Override
-            public DocType getDocTypeByCode(String code, NaturalPerson ndflPerson) {
+            public RefBookDocType getDocTypeByCode(String code, NaturalPerson ndflPerson) {
                 if (docTypeCodeMap == null) {
                     throw new ServiceException("Не проинициализирован кэш справочника 'Коды документов'!") as Throwable
                 }
-                DocType result = docTypeCodeMap.get(code)
+                RefBookDocType result = docTypeCodeMap.get(code)
                 String fio = buildFio(ndflPerson)
                 String inp = ndflPerson.getPersonIdentifier()?.inp ?: ""
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
@@ -306,7 +306,7 @@ class Calculate extends AbstractScriptClass {
             [it.code, it]
         })
 
-        List<DocType> docTypeList = getDocTypeRefBookList()
+        List<RefBookDocType> docTypeList = getDocTypeRefBookList()
         naturalPersonRowMapper.setDocTypeCodeMap(docTypeList.collectEntries {
             [it.code, it]
         })
@@ -332,11 +332,11 @@ class Calculate extends AbstractScriptClass {
         return countryRefBookCache
     }
 
-    List<DocType> getDocTypeRefBookList() {
+    List<RefBookDocType> getDocTypeRefBookList() {
         if (docTypeRefBookCache.isEmpty()) {
             List<Map<String, RefBookValue>> refBookRecords = getRefBookAll(RefBook.Id.DOCUMENT_CODES.getId())
             refBookRecords.each { Map<String, RefBookValue> refBookValueMap ->
-                DocType docType = new DocType()
+                RefBookDocType docType = new RefBookDocType()
                 docType.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue())
                 docType.setName(refBookValueMap?.get("NAME")?.getStringValue())
                 docType.setCode(refBookValueMap?.get("CODE")?.getStringValue())
@@ -409,8 +409,8 @@ class Calculate extends AbstractScriptClass {
         Map<String, NaturalPerson> innForeignMatchedMap = new HashMap<>()
         Map<String, List<NaturalPerson>> innForeignReducedMatchedMap = new HashMap<>()
 
-        Map<PersonDocument, NaturalPerson> idDocMatchedMap = new HashMap<>()
-        Map<PersonDocument, List<NaturalPerson>> idDocReducedMatchedMap = new HashMap<>()
+        Map<IdDoc, NaturalPerson> idDocMatchedMap = new HashMap<>()
+        Map<IdDoc, List<NaturalPerson>> idDocReducedMatchedMap = new HashMap<>()
 
         Map<PersonalData, NaturalPerson> personalDataMatchedMap = new HashMap<>()
         Map<PersonalData, List<NaturalPerson>> personalDataReducedMatchedMap = new HashMap<>()
@@ -420,7 +420,7 @@ class Calculate extends AbstractScriptClass {
             String snils = person.snils?.replaceAll("[\\s-]", "")?.toLowerCase()
             String inn = person.inn
             String innForeign = person.innForeign
-            PersonDocument personDocument = null
+            IdDoc personDocument = null
             if (!person?.personDocumentList.isEmpty()) {
                 person.personDocumentList.get(0)
             }
@@ -561,7 +561,7 @@ class Calculate extends AbstractScriptClass {
             performPrimaryPersonDuplicates()
 
             List<Address> addressList = new ArrayList<>()
-            List<PersonDocument> documentList = new ArrayList<>()
+            List<IdDoc> documentList = new ArrayList<>()
             List<PersonIdentifier> identifierList = new ArrayList<>()
             List<PersonTb> personTbList = new ArrayList<>()
 
@@ -574,7 +574,7 @@ class Calculate extends AbstractScriptClass {
                     addressList.add(address)
                 }
 
-                PersonDocument personDocument = person.getMajorDocument()
+                IdDoc personDocument = person.getMajorDocument()
                 if (personDocument != null && personDocument.docType != null) {
                     personDocument.documentNumber = performDocNumber(personDocument)
                     documentList.add(personDocument)
@@ -605,7 +605,7 @@ class Calculate extends AbstractScriptClass {
             })
 
             //insert documents batch
-            insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentList, { PersonDocument personDocument ->
+            insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentList, { IdDoc personDocument ->
                 mapPersonDocumentAttr(personDocument)
             })
 
@@ -653,7 +653,7 @@ class Calculate extends AbstractScriptClass {
             [it.id, it]
         })
 
-        List<DocType> docTypeList = getDocTypeRefBookList()
+        List<RefBookDocType> docTypeList = getDocTypeRefBookList()
         refbookHandler.setDocTypeMap(docTypeList.collectEntries {
             [it.id, it]
         })
@@ -679,7 +679,7 @@ class Calculate extends AbstractScriptClass {
         List<Address> insertAddressList = new ArrayList<Address>()
         List<Map<String, RefBookValue>> updateAddressList = new ArrayList<Map<String, RefBookValue>>()
 
-        List<PersonDocument> updateDocumentList = new ArrayList<PersonDocument>()
+        List<IdDoc> updateDocumentList = new ArrayList<IdDoc>()
 
         List<PersonIdentifier> insertIdentifierList = new ArrayList<PersonIdentifier>()
         List<Map<String, RefBookValue>> updateIdentifierList = new ArrayList<Map<String, RefBookValue>>()
@@ -746,7 +746,7 @@ class Calculate extends AbstractScriptClass {
         maxMsgCnt = 0
         for (Map.Entry<Long, NaturalPerson> entry : conformityMap.entrySet()) {
 
-            List<PersonDocument> insertDocumentList = new ArrayList<PersonDocument>()
+            List<IdDoc> insertDocumentList = new ArrayList<IdDoc>()
 
             long inTime = System.currentTimeMillis()
 
@@ -788,10 +788,10 @@ class Calculate extends AbstractScriptClass {
                 }
 
                 //documents
-                PersonDocument primaryPersonDocument = primaryPerson.getMajorDocument()
+                IdDoc primaryPersonDocument = primaryPerson.getMajorDocument()
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null
-                    PersonDocument personDocument = BaseWeightCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber())
+                    IdDoc personDocument = BaseWeightCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber())
 
                     if (personDocument == null) {
                         if (primaryPersonDocument.docType != null) {
@@ -804,7 +804,7 @@ class Calculate extends AbstractScriptClass {
                     }
                 }
 
-                insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { PersonDocument personDocument ->
+                insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { IdDoc personDocument ->
                     mapPersonDocumentAttr(personDocument)
                 })
 
@@ -875,7 +875,7 @@ class Calculate extends AbstractScriptClass {
 
         List<Map<String, RefBookValue>> refBookDocumentList = new ArrayList<Map<String, RefBookValue>>()
 
-        for (PersonDocument personDoc : updateDocumentList) {
+        for (IdDoc personDoc : updateDocumentList) {
             ScriptUtils.checkInterrupted()
             Map<String, RefBookValue> values = mapPersonDocumentAttr(personDoc)
             fillSystemAliases(values, personDoc)
@@ -912,8 +912,8 @@ class Calculate extends AbstractScriptClass {
 
     }
 
-    String performDocNumber(PersonDocument personDocument) {
-        List<DocType> docTypes = getDocTypeRefBookList()
+    String performDocNumber(IdDoc personDocument) {
+        List<RefBookDocType> docTypes = getDocTypeRefBookList()
         String toReturn = personDocument.documentNumber
         if (docTypes.contains(personDocument.docType)) {
             String docNumber = personDocument.documentNumber
@@ -965,7 +965,7 @@ class Calculate extends AbstractScriptClass {
     /**
      * Метод устанавливает признак включения в отчетность на основе приоритета
      */
-    boolean checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateDocumentList, StringBuilder messageBuilder) {
+    boolean checkIncReportFlag(NaturalPerson naturalPerson, List<IdDoc> updateDocumentList, StringBuilder messageBuilder) {
         boolean toReturn = false
         List personDocumentList = naturalPerson.getDocuments()
 
@@ -976,7 +976,7 @@ class Calculate extends AbstractScriptClass {
             for (int i = 0; i < personDocumentList.size(); i++) {
 
                 //noinspection GroovyUncheckedAssignmentOfMemberOfRawType
-                PersonDocument personDocument = personDocumentList.get(i)
+                IdDoc personDocument = personDocumentList.get(i)
 
                 if (i == incRepIndex) {
                     if (naturalPerson?.majorDocument != null && naturalPerson.majorDocument.getId() != personDocument?.getId()) {
@@ -1025,7 +1025,7 @@ class Calculate extends AbstractScriptClass {
         putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), null, attributeChangeListener)
         putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), null, attributeChangeListener)
         putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), null, attributeChangeListener)
-        putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), { Long val -> findTaxpayerStatusById(val) }, attributeChangeListener)
+        putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerState()?.getId(), { Long val -> findTaxpayerStatusById(val) }, attributeChangeListener)
     }
 
     static Map<String, RefBookValue> mapAddressAttr(Address address) {
@@ -1059,7 +1059,7 @@ class Calculate extends AbstractScriptClass {
         putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null)
         putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId())
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId())
-        putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId())
+        putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerState()?.getId())
         putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId)
         putValue(values, "REPORT_DOC", RefBookAttributeType.REFERENCE, person.getMajorDocument()?.getId())
         return values
@@ -1102,7 +1102,7 @@ class Calculate extends AbstractScriptClass {
         }
     }
 
-    static Map<String, RefBookValue> mapPersonDocumentAttr(PersonDocument personDocument) {
+    static Map<String, RefBookValue> mapPersonDocumentAttr(IdDoc personDocument) {
         Map<String, RefBookValue> values = new HashMap<>()
         putValue(values, "PERSON_ID", RefBookAttributeType.REFERENCE, personDocument.getNaturalPerson().getId())
         putValue(values, "DOC_NUMBER", RefBookAttributeType.STRING, personDocument.getDocumentNumber())
@@ -1421,15 +1421,15 @@ class Calculate extends AbstractScriptClass {
     /**
      * Для документов, включаемых в отчетность, добавляем взаимную ссылку в REF_BOOK_PERSON
      */
-    void addReportDocsToPersons(List<PersonDocument> documents) {
-        documents.each { PersonDocument document ->
+    void addReportDocsToPersons(List<IdDoc> documents) {
+        documents.each { IdDoc document ->
             if (document.isIncludeReport() && document.naturalPerson) {
                 addDocToItsPerson(document)
             }
         }
     }
 
-    void addDocToItsPerson(PersonDocument document) {
+    void addDocToItsPerson(IdDoc document) {
         Long personId = document.naturalPerson.id
         setPersonReportDoc(personId, document.id)
     }

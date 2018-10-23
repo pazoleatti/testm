@@ -76,16 +76,15 @@ public interface RefBookPersonDao {
      * @param id идентификатро версии ФЛ
      * @return Оригинал ФЛ
      */
-    List<RegistryPersonDTO> fetchOriginal(Long id);
+    List<RegistryPerson> fetchOriginal(Long id);
 
     /**
      * Получение дубликатов ФЛ
      *
      * @param id           идентификатор версии ФЛ
-     * @param pagingParams параметры пейджинга
      * @return список дубликатов ФЛ
      */
-    List<RegistryPersonDTO> fetchDuplicates(Long id, PagingParams pagingParams);
+    List<RegistryPerson> fetchDuplicates(Long id);
 
     /**
      * Получает список идентификаторов ФЛ, являющихся дуликатами указанных ФЛ
@@ -115,7 +114,7 @@ public interface RefBookPersonDao {
      * @param filter       параметры фильтрации результатов
      * @return страница списка ФЛ, подходящих под фильтр
      */
-    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
+    PagingResult<RegistryPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
      * Возвращяет кол-во ФЛ по фильтру
@@ -137,21 +136,13 @@ public interface RefBookPersonDao {
      * @param id идентификатор версии
      * @return объект версии ФЛ
      */
-    RegistryPersonDTO fetchPersonWithVersionInfo(Long id);
+    RegistryPerson fetchPersonVersion(Long id);
 
     /**
      * Обновить данные записи реестра ФЛ
      * @param person    данные ФЛ
-     * @param query     запрос
      */
-    void updateRegistryPerson(RegistryPersonDTO person, String query);
-
-    /**
-     * Обновить данные адреса записи реестра ФЛ
-     * @param address   данные адреса
-     * @param query     запрос
-     */
-    void updateRegistryPersonAddress(Map<String, RefBookValue> address, String query);
+    void updateRegistryPerson(RegistryPerson person);
 
     /**
      * Обновить флаг "включается в отчетность"
@@ -177,7 +168,7 @@ public interface RefBookPersonDao {
      * @param recordId идентификатор ФЛ
      * @return список объектов найденных версий
      */
-    List<RegistryPersonDTO> fetchNonDuplicatesVersions(long recordId);
+    List<RegistryPerson> fetchNonDuplicatesVersions(long recordId);
 
     /**
      * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
@@ -185,7 +176,7 @@ public interface RefBookPersonDao {
      * @param pagingParams  параметры постраничной выдачи
      * @return  Страница списка записей
      */
-    PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
+    PagingResult<RegistryPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
      * Сохранить группу Физлиц.

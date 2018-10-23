@@ -1,21 +1,25 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
 /**
  * Класс содержащий данные о назначенном фзлицу Тербанке
  */
+@Getter @Setter
 public class PersonTb extends IdentityObject<Long> {
     /**
      * Физлицо
      */
     private RegistryPerson person;
     /**
-     * Ссылка на тербанк назначеннный физлицу
+     * Тербанк назначеннный физлицу
      */
-    private int tbDepartmentId;
+    private Department tbDepartment;
     /**
      * Время выгрузки данных
      */
@@ -28,29 +32,6 @@ public class PersonTb extends IdentityObject<Long> {
     /**
      * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
      */
-    public static final String[] FIELDS = {"id", "person.id", "tbDepartmentId", "importDate"};
+    public static final String[] FIELDS = {"id", "person.id", "tbDepartment.id", "importDate"};
 
-    public RegistryPerson getPerson() {
-        return person;
-    }
-
-    public void setPerson(RegistryPerson person) {
-        this.person = person;
-    }
-
-    public int getTbDepartmentId() {
-        return tbDepartmentId;
-    }
-
-    public void setTbDepartmentId(int tbDepartmentId) {
-        this.tbDepartmentId = tbDepartmentId;
-    }
-
-    public Date getImportDate() {
-        return importDate;
-    }
-
-    public void setImportDate(Date importDate) {
-        this.importDate = importDate;
-    }
 }

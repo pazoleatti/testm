@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.Address;
-import com.aplana.sbrf.taxaccounting.model.refbook.Country;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 
 import java.util.Date;
 
@@ -26,9 +27,9 @@ public interface IdentityPerson {
 
     String getSnils();
 
-    TaxpayerStatus getTaxPayerStatus();
+    RefBookTaxpayerState getTaxPayerState();
 
-    Country getCitizenship();
+    RefBookCountry getCitizenship();
 
     Date getBirthDate();
 

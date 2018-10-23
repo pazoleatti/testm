@@ -4,18 +4,18 @@
             translate}}
         </div>
         <div style="padding-left: 20px">
-            <a href="index.html#/personRegistry/personCard/{{original.id}}" target="_blank">{{original | originalFormatter}}</a>
+            <a href="index.html#/personRegistry/personCard/{{person.original.id}}" target="_blank">{{person.original | originalFormatter}}</a>
         </div>
         <div class="row">
             <div class="pull-left">
                 <div class="row-fluid" style="margin-left: 20px">
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT' || original"
+                            data-ng-disabled="mode !== 'EDIT' || personParam.original"
                             data-ng-click="addOriginal()">
                         <span>{{::'refBook.fl.card.button.choose' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT' || !original"
+                            data-ng-disabled="mode !== 'EDIT' || !personParam.original"
                             data-ng-click="deleteOriginal()">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>

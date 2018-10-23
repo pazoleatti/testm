@@ -41,13 +41,13 @@
             <div class="row-fluid form-group-view">
                 <div class="span5" style="text-align: right">{{::'refBook.fl.card.label.versionFrom' | translate}}</div>
                 <div class="span7 person-card-data"
-                     data-ng-show="mode == 'VIEW'">{{person.version | dateFormatter}}
+                     data-ng-show="mode == 'VIEW'">{{person.startDate | dateFormatter}}
                 </div>
                 <div class="span7" data-ng-show="mode == 'EDIT'">
                     <div data-aplana-field>
                         <div data-aplana-datepicker
-                             data-max-date="person.recordVersionTo"
-                             data-ng-model="person.version"
+                             data-max-date="personParam.endDate"
+                             data-ng-model="personParam.startDate"
                              required>
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
@@ -61,12 +61,12 @@
             <div class="row-fluid form-group-view" >
                 <div class="span3" style="text-align: right">{{::'refBook.fl.card.label.versionTo' | translate}}</div>
                 <div class="span9 person-card-data" data-ng-show="mode == 'VIEW'">
-                    {{person.recordVersionTo ? (person.recordVersionTo | dateFormatter) : " -"}}
+                    {{person.endDate ? (person.endDate | dateFormatter) : " -"}}
                 </div>
                 <div class="span8" data-ng-show="mode == 'EDIT'">
                     <div data-aplana-field>
                         <div data-aplana-datepicker
-                             data-ng-model="person.recordVersionTo">
+                             data-ng-model="personParam.endDate">
                         </div>
                     </div>
                 </div>

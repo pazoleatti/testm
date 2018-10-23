@@ -22,7 +22,7 @@ public class RefBookMapperFactory {
         } else if (RefBook.Id.COUNTRY.getId() == refBookId) {
             return new CountryMapper();
         } else if (RefBook.Id.DOCUMENT_CODES.getId() == refBookId) {
-            return new DepartmentDocTypeMapper();
+            return new DocTypeMapper();
         } else if (RefBook.Id.ASNU.getId() == refBookId) {
             return new AsnuMapper();
         } else if (RefBook.Id.PERSON.getId() == refBookId) {
@@ -72,7 +72,7 @@ public class RefBookMapperFactory {
         }
     }
 
-    public class DepartmentDocTypeMapper<T> implements RowMapper<RefBookDocType> {
+    public class DocTypeMapper<T> implements RowMapper<RefBookDocType> {
 
         @Override
         public RefBookDocType mapRow(ResultSet rs, int rowNum) throws SQLException {

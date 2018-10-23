@@ -1,8 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * Результат операции. Содержит uuid, по которому можно получить сообщения в журнале
  */
+@Setter
+@Getter
+@NoArgsConstructor
 public class ActionResult {
     //UUID группы сообщений в журнале
     private String uuid;
@@ -10,9 +17,6 @@ public class ActionResult {
     private boolean success;
     //Сообщение об ошибке
     private String error;
-
-    public ActionResult() {
-    }
 
     public ActionResult(String uuid) {
         this.uuid = uuid;
@@ -26,29 +30,5 @@ public class ActionResult {
     public ActionResult uuid(String uuid) {
         this.uuid = uuid;
         return this;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
     }
 }

@@ -1288,15 +1288,23 @@ create table ref_book_person
   birth_place    varchar2(255 char),
   citizenship    number(18),
   report_doc     number(18),
-  address        number(18),
-  employee       number(1) default 2,
+  region_code    varchar2(2 char),
+  postal_code    varchar2(6 char),
+  district       varchar2(50 char),
+  city           varchar2(50 char),
+  locality       varchar2(50 char),
+  street         varchar2(50 char),
+  house          varchar2(20 char),
+  build          varchar2(20 char),
+  appartment     varchar2(20 char),
+  country_id     number(18),
+  address_foreign       varchar2(255 char),
   vip            number(1) default 0 not null,
   record_id      number(18)          not null,
-  version        date                not null,
-  status         number(1) default 0 not null,
+  start_date     date                not null,
+  end_date       date,
   source_id      number(18),
   old_id         number(18),
-  old_status     number(1)
 );
 
 comment on table ref_book_person is 'Физические лица';
@@ -1312,15 +1320,24 @@ comment on column ref_book_person.birth_date is 'Дата рождения';
 comment on column ref_book_person.birth_place is 'Место рождения';
 comment on column ref_book_person.citizenship is 'Гражданство';
 comment on column ref_book_person.report_doc is 'Ссылка на ДУЛ, который должен включаться в отчетность';
-comment on column ref_book_person.address is 'Место жительства';
-comment on column ref_book_person.employee is 'Признак, показывающий, является ли ФЛ сотрудником Сбербанка. Возможные значения: 1 - является; 2 - не является';
+comment on column ref_book_person.region_code is 'Код региона';
+comment on column ref_book_person.postal_code is 'Почтовый индекс';
+comment on column ref_book_person.district is 'Район';
+comment on column ref_book_person.city is 'Город';
+comment on column ref_book_person.locality is 'Населенный пункт (село, поселок)';
+comment on column ref_book_person.street is 'Улица (проспект, переулок)';
+comment on column ref_book_person.house is 'Номер дома (владения)';
+comment on column ref_book_person.build is 'Номер корпуса (строения)';
+comment on column ref_book_person.appartment is 'Номер квартиры';
+comment on column ref_book_person.country_id is 'Страна проживания';
+comment on column ref_book_person.address_foreign is 'Адрес за пределами Российской Федерации';
 comment on column ref_book_person.vip is 'Признак, показывающий, является ли ФЛ VIP-ом (0 - Не VIP, 1 - VIP)';
 comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
-comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_person.start_date is 'Дата начала действия';
+comment on column ref_book_person.end_date is 'Дата окончания действия';
 comment on column ref_book_person.old_id is 'Старый идентификатор ФЛ';
 comment on column ref_book_person.source_id is 'Система-источник: ссылка на справочник кодов АС НУ';
-comment on column ref_book_person.old_status is 'Старый статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+
 
 create table ref_book_id_doc
 (

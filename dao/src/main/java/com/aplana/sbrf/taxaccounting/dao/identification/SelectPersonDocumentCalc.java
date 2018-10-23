@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.Country;
-import com.aplana.sbrf.taxaccounting.model.identification.DocType;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList список документов ФЛ
      * @return индекс главного документа в списке
      */
-    public static PersonDocument selectIncludeReportDocument(NaturalPerson naturalPerson, List<PersonDocument> personDocumentList) {
+    public static IdDoc selectIncludeReportDocument(NaturalPerson naturalPerson, List<IdDoc> personDocumentList) {
 
         if (personDocumentList == null || personDocumentList.isEmpty()) {
             return null;
@@ -72,11 +72,11 @@ public class SelectPersonDocumentCalc {
         }
 
         //гражданство (необяз.)
-        Country citizenship = naturalPerson.getCitizenship();
+        RefBookCountry citizenship = naturalPerson.getCitizenship();
         String citizenshipCode = citizenship != null ? citizenship.getCode() : null;
 
         //статус (обяз.) по умолчанию = 1 (резидент РФ)
-        String taxPayerStatusCode = naturalPerson.getTaxPayerStatus() != null ? naturalPerson.getTaxPayerStatus().getCode() : null;
+        String taxPayerStatusCode = naturalPerson.getTaxPayerState() != null ? naturalPerson.getTaxPayerState().getCode() : null;
 
         if (citizenshipCode == null || citizenshipCode.isEmpty()) {
             //4. Если ЗСФЛ."Гражданство" пуст
@@ -102,9 +102,9 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList
      * @return
      */
-    private static PersonDocument selectRussianCitizenshipDocuments(List<PersonDocument> personDocumentList) {
+    private static IdDoc selectRussianCitizenshipDocuments(List<IdDoc> personDocumentList) {
 
-        List<PersonDocument> rusPassports = findDocumentsByTypeCode(personDocumentList, RUS_PASSPORT_21);
+        List<IdDoc> rusPassports = findDocumentsByTypeCode(personDocumentList, RUS_PASSPORT_21);
 
         if (rusPassports.size() == 1) {
             //а. Если есть один <ДУЛ>."Код ДУЛ" = 21, то у данной записи устанавливаем <ДУЛ>."Включается в отчетность" = 1
@@ -112,7 +112,7 @@ public class SelectPersonDocumentCalc {
             return rusPassports.get(0);
         } else if (rusPassports.size() > 1) {
             //b. Если есть несколько <ДУЛ>."Код ДУЛ" = 21
-            List<PersonDocument> maximumPassportSeriesNum = selectMaximumPassportSeriesNum(rusPassports);
+            List<IdDoc> maximumPassportSeriesNum = selectMaximumPassportSeriesNum(rusPassports);
             if (maximumPassportSeriesNum.size() == 1) {
                 //Если вторые две цифры у <ДУЛ> не равны -> выбрать запись, у которой вторые две цифры больше
                 return maximumPassportSeriesNum.get(0);
@@ -121,7 +121,7 @@ public class SelectPersonDocumentCalc {
             return selectMaximumPassportDocumentNum(rusPassports);
         } else {
             //c. Иначе ( <ДУЛ>."Код ДУЛ ≠ 21)
-            List<PersonDocument> rusPassportsTemp = findDocumentsByTypeCode(personDocumentList, RUS_PASSPORT_TEMP_14);
+            List<IdDoc> rusPassportsTemp = findDocumentsByTypeCode(personDocumentList, RUS_PASSPORT_TEMP_14);
             if (rusPassportsTemp.size() == 1) {
                 //i. Если есть один <ДУЛ>."Код ДУЛ = 14
                 return rusPassportsTemp.get(0);
@@ -142,16 +142,16 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList
      * @return
      */
-    private static PersonDocument selectNonRussianDocuments(List<PersonDocument> personDocumentList) {
-        PersonDocument documentCode10 = selectDocumentByCode(personDocumentList, DOC_CODE_10);
+    private static IdDoc selectNonRussianDocuments(List<IdDoc> personDocumentList) {
+        IdDoc documentCode10 = selectDocumentByCode(personDocumentList, DOC_CODE_10);
         if (documentCode10 != null) {
             return documentCode10;
         } else {
-            PersonDocument documentCode12 = selectDocumentByCode(personDocumentList, DOC_CODE_12);
+            IdDoc documentCode12 = selectDocumentByCode(personDocumentList, DOC_CODE_12);
             if (documentCode12 != null) {
                 return documentCode12;
             } else {
-                PersonDocument documentCode15 = selectDocumentByCode(personDocumentList, DOC_CODE_15);
+                IdDoc documentCode15 = selectDocumentByCode(personDocumentList, DOC_CODE_15);
                 if (documentCode15 != null) {
                     return documentCode15;
                 } else {
@@ -167,16 +167,16 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList
      * @return
      */
-    private static PersonDocument selectNonRussianTaxpayerDocuments(List<PersonDocument> personDocumentList) {
-        PersonDocument documentCode13 = selectDocumentByCode(personDocumentList, DOC_CODE_13);
+    private static IdDoc selectNonRussianTaxpayerDocuments(List<IdDoc> personDocumentList) {
+        IdDoc documentCode13 = selectDocumentByCode(personDocumentList, DOC_CODE_13);
         if (documentCode13 != null) {
             return documentCode13;
         } else {
-            PersonDocument documentCode11 = selectDocumentByCode(personDocumentList, DOC_CODE_11);
+            IdDoc documentCode11 = selectDocumentByCode(personDocumentList, DOC_CODE_11);
             if (documentCode11 != null) {
                 return documentCode11;
             } else {
-                PersonDocument documentCode18 = selectDocumentByCode(personDocumentList, DOC_CODE_18);
+                IdDoc documentCode18 = selectDocumentByCode(personDocumentList, DOC_CODE_18);
                 if (documentCode18 != null) {
                     return documentCode18;
                 } else {
@@ -192,12 +192,12 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList
      * @return
      */
-    private static PersonDocument selectEmptyCitezenship(List<PersonDocument> personDocumentList) {
-        PersonDocument documentCode12 = selectDocumentByCode(personDocumentList, DOC_CODE_12);
+    private static IdDoc selectEmptyCitezenship(List<IdDoc> personDocumentList) {
+        IdDoc documentCode12 = selectDocumentByCode(personDocumentList, DOC_CODE_12);
         if (documentCode12 != null) {
             return documentCode12;
         } else {
-            PersonDocument documentCode15 = selectDocumentByCode(personDocumentList, DOC_CODE_15);
+            IdDoc documentCode15 = selectDocumentByCode(personDocumentList, DOC_CODE_15);
             if (documentCode15 != null) {
                 return documentCode15;
             } else {
@@ -213,8 +213,8 @@ public class SelectPersonDocumentCalc {
      * @param code
      * @return
      */
-    private static PersonDocument selectDocumentByCode(List<PersonDocument> personDocumentList, String code) {
-        List<PersonDocument> selectedDocumentsList = findDocumentsByTypeCode(personDocumentList, code);
+    private static IdDoc selectDocumentByCode(List<IdDoc> personDocumentList, String code) {
+        List<IdDoc> selectedDocumentsList = findDocumentsByTypeCode(personDocumentList, code);
         if (selectedDocumentsList.size() == 1) {
             //Если есть один <ДУЛ>."Код ДУЛ = code, то
             return selectedDocumentsList.get(0);
@@ -232,10 +232,10 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList список документов
      * @return
      */
-    private static boolean isSeriesNumEquals(List<PersonDocument> personDocumentList) {
+    private static boolean isSeriesNumEquals(List<IdDoc> personDocumentList) {
         Integer currentSeriesDocNumber = extractSeriesDigits(personDocumentList.get(0).getDocumentNumber());
         if (currentSeriesDocNumber != null) {
-            for (PersonDocument personDocument : personDocumentList) {
+            for (IdDoc personDocument : personDocumentList) {
                 Integer seriesDocNumber = extractSeriesDigits(personDocument.getDocumentNumber());
                 if (!currentSeriesDocNumber.equals(seriesDocNumber)) {
                     return false;
@@ -254,10 +254,10 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList список объектов ДУЛ для сравнения
      * @return  список объектов ДУЛ у которых самые большие 2 цифры
      */
-    private static List<PersonDocument> selectMaximumPassportSeriesNum(List<PersonDocument> personDocumentList) {
-        Collections.sort(personDocumentList, new Comparator<PersonDocument>() {
+    private static List<IdDoc> selectMaximumPassportSeriesNum(List<IdDoc> personDocumentList) {
+        Collections.sort(personDocumentList, new Comparator<IdDoc>() {
             @Override
-            public int compare(PersonDocument o1, PersonDocument o2) {
+            public int compare(IdDoc o1, IdDoc o2) {
                 Integer o2Series = extractSeriesDigits(o2.getDocumentNumber());
                 Integer o1Series = extractSeriesDigits(o1.getDocumentNumber());
                 if (o1Series == null && o2Series == null) {
@@ -271,9 +271,9 @@ public class SelectPersonDocumentCalc {
             }
         });
         Integer maxSeriesNumber = extractSeriesDigits(personDocumentList.get(0).getDocumentNumber());
-        List<PersonDocument> toReturn = new ArrayList<>();
+        List<IdDoc> toReturn = new ArrayList<>();
 
-        for (PersonDocument personDocument : personDocumentList) {
+        for (IdDoc personDocument : personDocumentList) {
             Integer docSeries = extractSeriesDigits(personDocument.getDocumentNumber());
             if (docSeries != null && (docSeries.equals(maxSeriesNumber))) {
                 toReturn.add(personDocument);
@@ -307,12 +307,12 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList
      * @return
      */
-    private static PersonDocument selectMaximumPassportDocumentNum(List<PersonDocument> personDocumentList) {
+    private static IdDoc selectMaximumPassportDocumentNum(List<IdDoc> personDocumentList) {
 
-        PersonDocument maxNumberPersonDocument = null;
+        IdDoc maxNumberPersonDocument = null;
         Integer maxDocNumber = null;
 
-        for (PersonDocument personDocument : personDocumentList) {
+        for (IdDoc personDocument : personDocumentList) {
             if (maxNumberPersonDocument == null || maxDocNumber == null) {
                 maxNumberPersonDocument = personDocument;
                 maxDocNumber = extractPassportDocumentsDigits(personDocument.getDocumentNumber());
@@ -349,12 +349,12 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList
      * @return
      */
-    private static PersonDocument selectMaximumDocumentNumber(List<PersonDocument> personDocumentList) {
+    private static IdDoc selectMaximumDocumentNumber(List<IdDoc> personDocumentList) {
 
-        PersonDocument maxNumberPersonDocument = null;
+        IdDoc maxNumberPersonDocument = null;
         BigInteger maxDocNumber = null;
 
-        for (PersonDocument personDocument : personDocumentList) {
+        for (IdDoc personDocument : personDocumentList) {
             //initialize
             if (maxNumberPersonDocument == null || maxDocNumber == null) {
                 maxNumberPersonDocument = personDocument;
@@ -379,10 +379,10 @@ public class SelectPersonDocumentCalc {
      * @param docTypeCode
      * @return
      */
-    private static List<PersonDocument> findDocumentsByTypeCode(List<PersonDocument> personDocumentList, String docTypeCode) {
-        List<PersonDocument> result = new ArrayList<PersonDocument>();
-        for (PersonDocument personDocument : personDocumentList) {
-            DocType docType = personDocument.getDocType();
+    private static List<IdDoc> findDocumentsByTypeCode(List<IdDoc> personDocumentList, String docTypeCode) {
+        List<IdDoc> result = new ArrayList<IdDoc>();
+        for (IdDoc personDocument : personDocumentList) {
+            RefBookDocType docType = personDocument.getDocType();
             if (docType != null && docType.getCode() != null && docTypeCode.equals(docType.getCode())) {
                 result.add(personDocument);
             }
@@ -412,11 +412,11 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList должно выполнятся условие, список не пустой и в нем более 1 документа
      * @return
      */
-    private static PersonDocument selectMinimalPriorityDocument(List<PersonDocument> personDocumentList) {
+    private static IdDoc selectMinimalPriorityDocument(List<IdDoc> personDocumentList) {
 
-        PersonDocument minimalPriorPersonDocument = null;
+        IdDoc minimalPriorPersonDocument = null;
 
-        for (PersonDocument personDocument : personDocumentList) {
+        for (IdDoc personDocument : personDocumentList) {
 
             if (personDocument.getDocType() != null && personDocument.getDocType().getPriority() != null) {
 

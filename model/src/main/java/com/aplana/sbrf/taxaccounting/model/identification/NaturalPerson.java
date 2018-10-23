@@ -2,10 +2,13 @@ package com.aplana.sbrf.taxaccounting.model.identification;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Andrey Drunk
  */
+@Getter @Setter
 public class NaturalPerson extends RegistryPerson implements IdentityPerson {
 
     /**
@@ -28,40 +31,6 @@ public class NaturalPerson extends RegistryPerson implements IdentityPerson {
      */
     private Long sourceId;
 
-    public Long getPrimaryPersonId() {
-        return primaryPersonId;
-    }
-
-    public void setPrimaryPersonId(Long primaryPersonId) {
-        this.primaryPersonId = primaryPersonId;
-    }
-
-    @Override
-    public Double getWeight() {
-        return weight;
-    }
-
-    @Override
-    public void setWeight(Double weight) {
-        this.weight = weight;
-    }
-
-    public boolean isNeedUpdate() {
-        return needUpdate;
-    }
-
-    public void setNeedUpdate(boolean needUpdate) {
-        this.needUpdate = needUpdate;
-    }
-
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
     /**
      * Получить идентификатор ФЛ, данный метод используется при работе с ФЛ из первичных форм, так как там может быть не более одного идентификатора
      *
@@ -73,4 +42,6 @@ public class NaturalPerson extends RegistryPerson implements IdentityPerson {
         }
         return null;
     }
+
+
 }

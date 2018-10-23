@@ -1,14 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Модель физлица для работы с реестром физлиц. Записи реестра физлиц содержат ссылки на таблицы справочники.
  * Чтобы работать с таким ссылками как с объектами, ссылки разыменовываются и объекты представляются в виде Мапы строка-значение справочника.
  */
+@Getter @Setter
 public class RegistryPersonDTO extends PermissivePerson {
 
     /**
@@ -21,10 +26,12 @@ public class RegistryPersonDTO extends PermissivePerson {
      */
     private Integer state;
 
+    private Date startDate;
+
     /**
      * Окончание даты действия версии
      */
-    private Date recordVersionTo;
+    private Date endDate;
 
     /**
      * Фамилия
@@ -46,15 +53,17 @@ public class RegistryPersonDTO extends PermissivePerson {
      */
     private Date birthDate;
 
+    private String birthPlace;
+
     /**
      * Гражданство
      */
-    private Permissive<Map<String, RefBookValue>> citizenship;
+    private Permissive<RefBookCountry> citizenship;
 
     /**
      * Документ включаемый в отчетность
      */
-    private Permissive<Map<String, RefBookValue>> reportDoc;
+    private Permissive<IdDoc> reportDoc;
 
     /**
      * ИНН
@@ -74,144 +83,32 @@ public class RegistryPersonDTO extends PermissivePerson {
     /**
      * Статус налогоплательщика
      */
-    private Permissive<Map<String, RefBookValue>> taxPayerState;
+    private Permissive<RefBookTaxpayerState> taxPayerState;
 
     /**
      * Система-источник
      */
-    private Map<String, RefBookValue> source;
+    private RefBookAsnu source;
 
     /**
      * Адрес
      */
-    private Permissive<Map<String, RefBookValue>> address;
+    private Permissive<Address> address;
 
-    public Long getId() {
-        return id;
-    }
+    private Permissive<List<IdDoc>> documents;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private List<PersonIdentifier> personIdentityList;
 
-    public Long getOldId() {
-        return oldId;
-    }
+    private List<PersonTb> personTbList;
 
-    public void setOldId(Long oldId) {
-        this.oldId = oldId;
-    }
+    private List<RegistryPersonDTO> duplicates;
 
-    public Integer getState() {
-        return state;
-    }
+    private RegistryPersonDTO original;
 
-    public void setState(Integer state) {
-        this.state = state;
-    }
-
-    public Date getRecordVersionTo() {
-        return recordVersionTo;
-    }
-
-    public void setRecordVersionTo(Date recordVersionTo) {
-        this.recordVersionTo = recordVersionTo;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public Date getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public Permissive<Map<String, RefBookValue>> getCitizenship() {
-        return citizenship;
-    }
-
-    public void setCitizenship(Permissive<Map<String, RefBookValue>> citizenship) {
-        this.citizenship = citizenship;
-    }
-
-    public Permissive<Map<String, RefBookValue>> getReportDoc() {
-        return reportDoc;
-    }
-
-    public void setReportDoc(Permissive<Map<String, RefBookValue>> reportDoc) {
-        this.reportDoc = reportDoc;
-    }
-
-    public Permissive<String> getInn() {
-        return inn;
-    }
-
-    public void setInn(Permissive<String> inn) {
-        this.inn = inn;
-    }
-
-    public Permissive<String> getInnForeign() {
-        return innForeign;
-    }
-
-    public void setInnForeign(Permissive<String> innForeign) {
-        this.innForeign = innForeign;
-    }
-
-    public Permissive<String> getSnils() {
-        return snils;
-    }
-
-    public void setSnils(Permissive<String> snils) {
-        this.snils = snils;
-    }
-
-    public Permissive<Map<String, RefBookValue>> getTaxPayerState() {
-        return taxPayerState;
-    }
-
-    public void setTaxPayerState(Permissive<Map<String, RefBookValue>> taxPayerState) {
-        this.taxPayerState = taxPayerState;
-    }
-
-    public Map<String, RefBookValue> getSource() {
-        return source;
-    }
-
-    public void setSource(Map<String, RefBookValue> source) {
-        this.source = source;
-    }
-
-    public Permissive<Map<String, RefBookValue>> getAddress() {
-        return address;
-    }
-
-    public void setAddress(Permissive<Map<String, RefBookValue>> address) {
-        this.address = address;
+    public RegistryPersonDTO() {
+        this.personIdentityList = new ArrayList<>();
+        this.personTbList = new ArrayList<>();
+        this.duplicates = new ArrayList<>();
     }
 
     @Override
@@ -222,7 +119,7 @@ public class RegistryPersonDTO extends PermissivePerson {
         RegistryPersonDTO that = (RegistryPersonDTO) o;
 
         if (getState() != null ? !getState().equals(that.getState()) : that.getState() != null) return false;
-        if (getRecordVersionTo() != null ? !getRecordVersionTo().equals(that.getRecordVersionTo()) : that.getRecordVersionTo() != null)
+        if (getEndDate() != null ? !getEndDate().equals(that.getEndDate()) : that.getEndDate() != null)
             return false;
         if (getLastName() != null ? !getLastName().equals(that.getLastName()) : that.getLastName() != null)
             return false;
@@ -249,7 +146,7 @@ public class RegistryPersonDTO extends PermissivePerson {
     @Override
     public int hashCode() {
         int result = getState() != null ? getState().hashCode() : 0;
-        result = 31 * result + (getRecordVersionTo() != null ? getRecordVersionTo().hashCode() : 0);
+        result = 31 * result + (getEndDate() != null ? getEndDate().hashCode() : 0);
         result = 31 * result + (getLastName() != null ? getLastName().hashCode() : 0);
         result = 31 * result + (getFirstName() != null ? getFirstName().hashCode() : 0);
         result = 31 * result + (getMiddleName() != null ? getMiddleName().hashCode() : 0);
@@ -265,44 +162,27 @@ public class RegistryPersonDTO extends PermissivePerson {
         return result;
     }
 
-    /**
-     * Перечисление обновляемых полей записи реестра ФЛ
+    /*
+     * Набор методов для сериализации объекта в JSON
      */
-    public enum UpdatableField {
-        VERSION("version"),
-        LAST_NAME("lastName"),
-        FIRST_NAME("firstName"),
-        MIDDLE_NAME("middleName"),
-        BIRTH_DATE("birthDate"),
-        CITIZENSHIP("citizenship"),
-        REPORT_DOC("reportDoc"),
-        INN("inn"),
-        INN_FOREIGN("innForeign"),
-        SNILS("snils"),
-        TAX_PAYER_STATE("taxPayerState"),
-        SOURCE("source"),
-        REGION_CODE("REGION_CODE"),
-        POSTAL_CODE("POSTAL_CODE"),
-        DISTRICT("DISTRICT"),
-        CITY("CITY"),
-        LOCALITY("LOCALITY"),
-        STREET("STREET"),
-        HOUSE("HOUSE"),
-        BUILD("BUILD"),
-        APPARTMENT("APPARTMENT"),
-        COUNTRY_ID("COUNTRY_ID"),
-        ADDRESS("ADDRESS"),
-        VIP("vip");
 
-        private String alias;
-
-        UpdatableField(String alias) {
-            this.alias = alias;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
+    @JsonProperty("inn")
+    public Permissive<String> getInnForJson() {
+        return inn;
     }
 
+    @JsonProperty("innForeign")
+    public Permissive<String> getInnForeignForJson() {
+        return innForeign;
+    }
+
+    @JsonProperty("snils")
+    public Permissive<String> getSnilsForJson() {
+        return snils;
+    }
+
+    @JsonProperty("address")
+    public Permissive<Address> getAddressForJson() {
+        return address;
+    }
 }

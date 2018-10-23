@@ -29,7 +29,7 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generateFilteredQuery_noFilter() {
         generator = new SelectPersonQueryGenerator(null);
         String query = generator.generateFilteredQuery();
-        assertThat(query).endsWith("where person.status = 0");
+        assertThat(query).endsWith("asnu.id = person.source_id");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class SelectPersonQueryGeneratorTest {
 
         String query = generator.generateFilteredQuery();
 
-        assertThat(query).endsWith("where person.status = 0");
+        assertThat(query).endsWith("1 = 1");
     }
 
     @Test
@@ -178,7 +178,7 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generateFilteredQuery_filterByForeignAddress() {
         filter.setForeignAddress("г. Алматы, ул. Пушкина");
         String query = generator.generateFilteredQuery();
-        assertThat(query).contains("and lower(address.address) like '%г. алматы, ул. пушкина%'");
+        assertThat(query).contains("and lower(person.address_foreign) like '%г. алматы, ул. пушкина%'");
     }
 
     @Test
@@ -199,7 +199,7 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generateFilteredQuery_filterByAllVersions() {
         filter.setAllVersions(true);
         String query = generator.generateFilteredQuery();
-        assertThat(query).endsWith("where person.status = 0");
+        assertThat(query).endsWith("1 = 1");
     }
 
     @Test
@@ -211,7 +211,7 @@ public class SelectPersonQueryGeneratorTest {
 
         String query = generator.generateFilteredQuery();
 
-        assertThat(query).endsWith("where version <= date '2000-01-01' and (version_to >= date '2000-01-01' or version_to is null)");
+        assertThat(query).endsWith("where start_date <= date '2000-01-01' and (end_date >= date '2000-01-01' or end_date is null)");
     }
 
 
@@ -219,7 +219,7 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generatePagedAndFilteredQuery_noPagingParams() {
         generator = new SelectPersonQueryGenerator(null, null);
         String query = generator.generatePagedAndFilteredQuery();
-        assertThat(query).endsWith("where person.status = 0");
+        assertThat(query).endsWith("asnu.id = person.source_id");
     }
 
     @Test

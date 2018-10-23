@@ -3,8 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -14,7 +13,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +50,15 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private TAUserService userService;
+    @Autowired
+    private TaxPayerStateDao taxPayerStateDao;
+    @Autowired
+    private RefBookAsnuDao refBookAsnuDao;
+    @Autowired
+    private RefBookCountryDao refBookCountryDao;
+    @Autowired
+    private RefBookDocTypeDao refBookDocTypeDao;
+
 
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -584,6 +595,30 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             }
         }
         return records;
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    public List<RefBookTaxpayerState> findAllTaxPayerStateActive(TAUserInfo userInfo) {
+        return taxPayerStateDao.findAllActive();
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    public List<RefBookAsnu> findAllAsnuActive(TAUserInfo userInfo) {
+        return refBookAsnuDao.fetchAll();
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    public List<RefBookCountry> findAllCountryActive(TAUserInfo userInfo) {
+        return refBookCountryDao.findAllActive();
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    public List<RefBookDocType> findAllDocTypeActive(TAUserInfo userInfo) {
+        return refBookDocTypeDao.findAllActive();
     }
 
     private String createSearchFilter(Long refBookId, Map<String, String> extraParams, String searchPattern, Boolean exactSearch) {

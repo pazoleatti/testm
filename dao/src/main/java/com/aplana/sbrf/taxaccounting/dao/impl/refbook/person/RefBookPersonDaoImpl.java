@@ -52,35 +52,36 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setRecordId(rs.getLong("record_id"));
             result.setOldId(rs.getLong("old_id"));
             result.setVersion(rs.getDate("version"));
-            result.setRecordVersionTo(rs.getDate("record_version_to"));
+            result.setEndDate(rs.getDate("record_version_to"));
             result.setLastName(rs.getString("last_name"));
             result.setFirstName(rs.getString("first_name"));
             result.setMiddleName(rs.getString("middle_name"));
             result.setBirthDate(rs.getDate("birth_date"));
             result.setVip(rs.getBoolean("vip"));
-            Map<String, RefBookValue> source = new HashMap<>();
-            source.put("SOURCE_ID", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("SOURCE_ID")));
+            RefBookAsnu source = new RefBookAsnu();
+            source.setId(rs.getLong("SOURCE_ID"));
             result.setSource(source);
 
-            Map<String, RefBookValue> citizenship = new HashMap<>();
+            /*Country citizenship = new Country();
+            citizenship.setCode();
             citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
-            result.setCitizenship(Permissive.of(citizenship));
+            result.setCitizenship(Permissive.of(citizenship));*/
 
-            Map<String, RefBookValue> reportDoc = new HashMap<>();
+            /*Map<String, RefBookValue> reportDoc = new HashMap<>();
             reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-            result.setReportDoc(Permissive.of(reportDoc));
+            result.setReportDoc(Permissive.of(reportDoc));*/
 
             result.setInn(Permissive.of(rs.getString("inn")));
             result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
             result.setSnils(Permissive.of(rs.getString("snils")));
 
-            Map<String, RefBookValue> taxPayerState = new HashMap<>();
-            taxPayerState.put("TAXPAYER_STATE", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("TAXPAYER_STATE")));
+            RefBookTaxpayerState taxPayerState = new RefBookTaxpayerState();
+            taxPayerState.setId(rs.getLong("TAXPAYER_STATE"));
             result.setTaxPayerState(Permissive.of(taxPayerState));
 
-            Map<String, RefBookValue> address = new HashMap<>();
+            /*Map<String, RefBookValue> address = new HashMap<>();
             address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
-            result.setAddress(Permissive.of(address));
+            result.setAddress(Permissive.of(address));*/
 
             return result;
         }
@@ -119,7 +120,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             result.setVip(rs.getBoolean("vip"));
             Map<String, RefBookValue> reportDoc = new HashMap<>();
             reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-            result.setReportDoc(Permissive.of(reportDoc));
+            /*result.setReportDoc(Permissive.of(reportDoc));*/
             result.setInn(Permissive.of(rs.getString("inn")));
             result.setSnils(Permissive.of(rs.getString("snils")));
 
@@ -259,11 +260,11 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
+    public PagingResult<RegistryPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter) {
 
         SelectPersonQueryGenerator selectPersonQueryGenerator = new SelectPersonQueryGenerator(filter, pagingParams);
         String query = selectPersonQueryGenerator.generatePagedAndFilteredQuery();
-        List<RefBookPerson> persons = getJdbcTemplate().query(query, new RefBookPersonMapper());
+        List<RegistryPerson> persons = getJdbcTemplate().query(query, new RegistryPersonMapper());
 
         int count = getPersonsCount(filter);
 
@@ -343,130 +344,52 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<RegistryPersonDTO> fetchOriginal(Long id) {
+    public List<RegistryPerson> fetchOriginal(Long id) {
+        String sql = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
+                "where person.old_id = person.record_id and \n" +
+                "person.record_id = (select record_id from ref_book_person where id = :id)\n" +
+                "and old_id <> (select old_id from ref_book_person where id = :id)\n" +
+                "order by person.start_date desc";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         try {
-            return getNamedParameterJdbcTemplate().query("select * from ref_book_person where old_id = record_id and record_id = (select record_id from ref_book_person where id = :id) and status in (0,2) order by version desc", params, REGISTRY_CARD_PERSON_ORIGINAL_MAPPER);
+            return getNamedParameterJdbcTemplate().query(sql, params, new RegistryPersonMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
     }
 
     @Override
-    public List<RegistryPersonDTO> fetchDuplicates(Long id, PagingParams pagingParams) {
+    public List<RegistryPerson> fetchDuplicates(Long id) {
+        String sql = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
+                "where person.old_id <> person.record_id and \n" +
+                "person.record_id = (select record_id from ref_book_person where id = :id)\n" +
+                "and person.id <> :id\n" +
+                "order by person.start_date desc";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
-        params.addValue("startIndex", pagingParams.getStartIndex());
-        params.addValue("endIndex", pagingParams.getStartIndex() + pagingParams.getCount());
         try {
-            return getNamedParameterJdbcTemplate().query("SELECT * FROM (SELECT r.*, row_number() over (order by id asc) as rn FROM (\n" +
-                    "SELECT * from ref_book_person WHERE old_id <> record_id and record_id = (SELECT record_id from ref_book_person WHERE id = :id) and status in (0,2) order by version desc\n" +
-                    ") r ) WHERE rn between :startIndex and :endIndex", params, REGISTRY_CARD_PERSON_DUPLICATE_MAPPER);
+            return getNamedParameterJdbcTemplate().query(sql, params, new RegistryPersonMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
     }
 
     @Override
-    public RegistryPersonDTO fetchPersonWithVersionInfo(Long id) {
-        String sql = "SELECT r.*, " +
-                (isSupportOver() ? "row_number() over (order by id asc)" : "ROWNUM") +
-                " as rn FROM (" +
-                "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM REF_BOOK_PERSON WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to " +
-                "FROM (" +
-                " SELECT frb.* FROM REF_BOOK_PERSON frb " +
-                " WHERE id = :id " +
-                " ) p " +
-                ") r";
+    public RegistryPerson fetchPersonVersion(Long id) {
+        String sql = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
+                "WHERE person.id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource("id", id);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject(sql, params, REGISTRY_CARD_PERSON_MAPPER);
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new RegistryPersonMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }
 
     @Override
-    public void updateRegistryPerson(RegistryPersonDTO person, String query) {
-        MapSqlParameterSource personParams = new MapSqlParameterSource();
-        personParams.addValue("id", person.getId())
-                .addValue(RegistryPersonDTO.UpdatableField.VERSION.getAlias(), person.getVersion())
-                .addValue(RegistryPersonDTO.UpdatableField.LAST_NAME.getAlias(), person.getLastName())
-                .addValue(RegistryPersonDTO.UpdatableField.FIRST_NAME.getAlias(), person.getFirstName())
-                .addValue(RegistryPersonDTO.UpdatableField.MIDDLE_NAME.getAlias(), person.getMiddleName())
-                .addValue(RegistryPersonDTO.UpdatableField.BIRTH_DATE.getAlias(), person.getBirthDate());
-        if (person.getCitizenship().value() != null && person.getCitizenship().value().get("id") != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.CITIZENSHIP.getAlias(), person.getCitizenship().value().get("id").getNumberValue());
-        } else {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.CITIZENSHIP.getAlias(), null);
-        }
-        if (person.getReportDoc().value() != null && person.getReportDoc().value().get("id") != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.REPORT_DOC.getAlias(), person.getReportDoc().value().get("id").getNumberValue());
-        } else {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.REPORT_DOC.getAlias(), null);
-        }
-        if (person.getInn().value() != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.INN.getAlias(), person.getInn().value());
-        }
-        if (person.getInnForeign().value() != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.INN_FOREIGN.getAlias(), person.getInnForeign().value());
-        }
-        if (person.getSnils().value() != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.SNILS.getAlias(), person.getSnils().value());
-        }
-        if (person.getTaxPayerState().value() != null && person.getTaxPayerState().value().get("id") != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.TAX_PAYER_STATE.getAlias(), person.getTaxPayerState().value().get("id").getNumberValue());
-        } else {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.TAX_PAYER_STATE.getAlias(), null);
-        }
-        if (person.getSource() != null && person.getSource().get("id") != null) {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.SOURCE.getAlias(), person.getSource().get("id").getNumberValue());
-        } else {
-            personParams.addValue(RegistryPersonDTO.UpdatableField.SOURCE.getAlias(), null);
-        }
-        personParams.addValue(RegistryPersonDTO.UpdatableField.VIP.getAlias(), person.getVip());
-        getNamedParameterJdbcTemplate().update(query, personParams);
-    }
-
-    @Override
-    public void updateRegistryPersonAddress(Map<String, RefBookValue> address, String query) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("id", address.get("id").getNumberValue());
-        if (address.get(RegistryPersonDTO.UpdatableField.REGION_CODE.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.REGION_CODE.getAlias(), address.get(RegistryPersonDTO.UpdatableField.REGION_CODE.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.POSTAL_CODE.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.POSTAL_CODE.getAlias(), address.get(RegistryPersonDTO.UpdatableField.POSTAL_CODE.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.DISTRICT.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.DISTRICT.getAlias(), address.get(RegistryPersonDTO.UpdatableField.DISTRICT.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.CITY.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.CITY.getAlias(), address.get(RegistryPersonDTO.UpdatableField.CITY.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.LOCALITY.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.LOCALITY.getAlias(), address.get(RegistryPersonDTO.UpdatableField.LOCALITY.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.STREET.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.STREET.getAlias(), address.get(RegistryPersonDTO.UpdatableField.STREET.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.HOUSE.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.HOUSE.getAlias(), address.get(RegistryPersonDTO.UpdatableField.HOUSE.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.BUILD.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.BUILD.getAlias(), address.get(RegistryPersonDTO.UpdatableField.BUILD.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.APPARTMENT.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.APPARTMENT.getAlias(), address.get(RegistryPersonDTO.UpdatableField.APPARTMENT.name()).getStringValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.COUNTRY_ID.getAlias(), address.get(RegistryPersonDTO.UpdatableField.COUNTRY_ID.name()).getReferenceValue());
-        }
-        if (address.get(RegistryPersonDTO.UpdatableField.ADDRESS.name()) != null) {
-            params.addValue(RegistryPersonDTO.UpdatableField.ADDRESS.getAlias(), address.get(RegistryPersonDTO.UpdatableField.ADDRESS.name()).getStringValue());
-        }
-        getNamedParameterJdbcTemplate().update(query, params);
+    public void updateRegistryPerson(RegistryPerson person) {
+        updateObjects(Collections.singletonList(person), RegistryPerson.TABLE_NAME, RegistryPerson.COLUMNS, RegistryPerson.FIELDS);
     }
 
     @Override
@@ -498,7 +421,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         String query = "INSERT INTO ref_book_person(id, version, status, record_id, old_id, vip) VALUES(:id, :version, :status, :recordId, :oldId, :vip)";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", dbUtils.getNextRefBookRecordIds(1).get(0))
-                .addValue("version", DateUtils.addDays(person.getRecordVersionTo(), 1))
+                .addValue("version", DateUtils.addDays(person.getEndDate(), 1))
                 .addValue("status", 2)
                 .addValue("recordId", person.getRecordId())
                 .addValue("oldId", person.getRecordId())
@@ -506,28 +429,22 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         getNamedParameterJdbcTemplate().update(query, params);
     }
 
-    public List<RegistryPersonDTO> fetchNonDuplicatesVersions(long recordId) {
-        String query = "select person.*, " +
-                "(select min(version) - interval '1' day \n" +
-                "from ref_book_person p \n" +
-                "where status in (0, 2) \n" +
-                "and p.version > person.version \n" +
-                "and p.record_id = person.record_id \n" +
-                ") as record_version_to \n" +
-                "from ref_book_person person \n" +
-                "where person.status = 0\n" +
-                "and person.record_id = :recordId\n" +
-                "and old_id = record_id";
+    public List<RegistryPerson> fetchNonDuplicatesVersions(long recordId) {
+        Date actualDate = new Date();
+        String query = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
+                        "where person.record_id = :recordId\n" +
+                        "and person.old_id = person.record_id";
         MapSqlParameterSource params = new MapSqlParameterSource("recordId", recordId);
-        return getNamedParameterJdbcTemplate().query(query, params, REGISTRY_CARD_PERSON_MAPPER);
+        params.addValue("actualDate" , actualDate);
+        return getNamedParameterJdbcTemplate().query(query, params, new RegistryPersonMapper());
     }
 
     @Override
-    public PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter) {
+    public PagingResult<RegistryPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter) {
 
         SelectPersonQueryGenerator selectPersonQueryGenerator = new SelectPersonOriginalDuplicatesQueryGenerator(filter, pagingParams);
         String query = selectPersonQueryGenerator.generatePagedAndFilteredQuery();
-        List<RefBookPerson> persons = getJdbcTemplate().query(query, new RefBookPersonMapper());
+        List<RegistryPerson> persons = getJdbcTemplate().query(query, new RegistryPersonMapper());
 
         selectPersonQueryGenerator.setPagingParams(null);
         int count = selectCountOfQueryResults(selectPersonQueryGenerator.generatePagedAndFilteredQuery());
@@ -549,9 +466,9 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             sql.append(RegistryPerson.COLUMNS[i])
                     .append(" = :")
                     .append(RegistryPerson.FIELDS[i]);
-                    if (RegistryPerson.FIELDS.length - i > 1) {
-                        sql.append(", ");
-                    }
+            if (RegistryPerson.FIELDS.length - i > 1) {
+                sql.append(", ");
+            }
         }
         sql.append(" WHERE id = :id");
         BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[persons.size()];

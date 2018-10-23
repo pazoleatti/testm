@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.Country;
-import com.aplana.sbrf.taxaccounting.model.identification.DocType;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,12 +43,12 @@ public class SelectPersonDocumentCalcTest {
     @Test
     public void selectIncludeReportDocumentCode21Test() {
         NaturalPerson person = new NaturalPerson();
-        person.setCitizenship(new Country(0L, SelectPersonDocumentCalc.RUS_CODE));
-        List<PersonDocument> personDocumentList = new ArrayList<>();
-        PersonDocument doc1 = new PersonDocument();
-        PersonDocument doc2 = new PersonDocument();
-        PersonDocument doc3 = new PersonDocument();
-        DocType docType = new DocType(0L, SelectPersonDocumentCalc.RUS_PASSPORT_21);
+        person.setCitizenship(new RefBookCountry(0L, SelectPersonDocumentCalc.RUS_CODE));
+        List<IdDoc> personDocumentList = new ArrayList<>();
+        IdDoc doc1 = new IdDoc();
+        IdDoc doc2 = new IdDoc();
+        IdDoc doc3 = new IdDoc();
+        RefBookDocType docType = new RefBookDocType(0L, SelectPersonDocumentCalc.RUS_PASSPORT_21);
         doc1.setDocType(docType);
         doc1.setDocumentNumber("60 56 183620");
         doc2.setDocType(docType);
@@ -56,7 +56,7 @@ public class SelectPersonDocumentCalcTest {
         doc3.setDocType(docType);
         doc3.setDocumentNumber("60 56 283620");
         personDocumentList.addAll(Arrays.asList(doc1, doc2, doc3));
-        PersonDocument result = SelectPersonDocumentCalc.selectIncludeReportDocument(person, personDocumentList);
+        IdDoc result = SelectPersonDocumentCalc.selectIncludeReportDocument(person, personDocumentList);
         Assert.assertEquals("60 56 283620", result.getDocumentNumber());
     }
 }

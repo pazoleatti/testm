@@ -1,14 +1,20 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.identification.DocType;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author Andrey Drunk
  */
-public class PersonDocument extends IdentityObject<Long> {
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
+public class IdDoc extends IdentityObject<Long> {
 
     /**
      * Ссылка на ФЛ
@@ -18,7 +24,7 @@ public class PersonDocument extends IdentityObject<Long> {
     /**
      * Тип документа
      */
-    private DocType docType;
+    private RefBookDocType docType;
 
     /**
      * Номер документа
@@ -39,49 +45,12 @@ public class PersonDocument extends IdentityObject<Long> {
      */
     public static final String[] FIELDS = {"id", "person.id", "docType.id", "documentNumber", "incRep"};
 
-
-    public DocType getDocType() {
-        return docType;
-    }
-
-    public void setDocType(DocType docType) {
-        this.docType = docType;
-    }
-
-    public RegistryPerson getPerson() {
-        return person;
-    }
-
-    public void setPerson(RegistryPerson person) {
-        this.person = person;
-    }
-
-    public String getDocumentNumber() {
-        return documentNumber;
-    }
-
-    public void setDocumentNumber(String documentNumber) {
-        this.documentNumber = documentNumber;
-    }
-
-    public Integer getIncRep() {
-        return incRep;
-    }
-
-    public void setIncRep(Integer incRep) {
-        this.incRep = incRep;
-    }
-
-    public boolean isIncludeReport() {
-        return incRep != null && incRep.equals(1);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PersonDocument that = (PersonDocument) o;
+        IdDoc that = (IdDoc) o;
 
         if (!docType.equals(that.docType)) return false;
         return documentNumber.replaceAll("[^А-Яа-я\\w]", "").equals(that.documentNumber.replaceAll("[^А-Яа-я\\w]", ""));
@@ -93,16 +62,4 @@ public class PersonDocument extends IdentityObject<Long> {
         result = 31 * result + documentNumber.replaceAll("[^А-Яа-я\\w]", "").hashCode();
         return result;
     }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", id)
-                .append("docType", docType)
-                .append("documentNumber", documentNumber)
-                .append("incRep", incRep)
-                .toString();
-    }
-
-
 }

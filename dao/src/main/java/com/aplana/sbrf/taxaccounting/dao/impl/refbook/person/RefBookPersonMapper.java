@@ -22,8 +22,8 @@ class RefBookPersonMapper implements RowMapper<RefBookPerson> {
         result.setMiddleName(rs.getString("middle_name"));
         result.setBirthDate(rs.getDate("birth_date"));
         result.setBirthPlace(rs.getString("birth_place"));
-        result.setVersion(rs.getDate("version"));
-        result.setVersionEnd(rs.getDate("version_to"));
+        result.setVersion(rs.getDate("start_date"));
+        result.setVersionEnd(rs.getDate("end_date"));
         result.setInn(Permissive.of(rs.getString("inn")));
         result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
         result.setSnils(Permissive.of(rs.getString("snils")));

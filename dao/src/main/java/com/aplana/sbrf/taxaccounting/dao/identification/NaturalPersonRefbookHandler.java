@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.collections4.map.HashedMap;
 
@@ -33,22 +34,22 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     /**
      * Карта для создания документов ФЛ
      */
-    private Map<Long, Map<Long, PersonDocument>> documentsMap;
+    private Map<Long, Map<Long, IdDoc>> documentsMap;
 
     /**
      * Кэш справочника страны
      */
-    private Map<Long, Country> countryMap;
+    private Map<Long, RefBookCountry> countryMap;
 
     /**
      * Кэш справочника статусы Налогоплателищика
      */
-    private Map<Long, TaxpayerStatus> taxpayerStatusMap;
+    private Map<Long, RefBookTaxpayerState> taxpayerStatusMap;
 
     /**
      * Кэш справочника типы документов
      */
-    private Map<Long, DocType> docTypeMap;
+    private Map<Long, RefBookDocType> docTypeMap;
 
     /**
      *
@@ -131,18 +132,18 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
         Long refBookPersonId = naturalPerson.getId();
         Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
-        Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
+        Map<Long, IdDoc> pesonDocumentMap = documentsMap.get(refBookPersonId);
         Integer docStatus = SqlUtils.getInteger(rs, "doc_status");
 
         if (pesonDocumentMap == null) {
-            pesonDocumentMap = new HashMap<Long, PersonDocument>();
+            pesonDocumentMap = new HashMap<Long, IdDoc>();
             documentsMap.put(refBookPersonId, pesonDocumentMap);
         }
 
         if (docId != null && !pesonDocumentMap.containsKey(docId) && docStatus == 0) {
             Long docTypeId = SqlUtils.getLong(rs, "doc_id");
-            DocType docType = getDocTypeById(docTypeId);
-            PersonDocument personDocument = new PersonDocument();
+            RefBookDocType docType = getDocTypeById(docTypeId);
+            IdDoc personDocument = new IdDoc();
             personDocument.setId(docId);
 
             personDocument.setDocType(docType);
@@ -156,7 +157,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     private void initReportDoc(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
         Long reportDocId = rs.getLong("report_doc");
-        PersonDocument personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
+        IdDoc personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
         naturalPerson.setReportDoc(personDocument);
     }
 
@@ -174,7 +175,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (personTbId != null && !tbMap.containsKey(personTbId) && tbStatus == 0) {
             PersonTb personTb = new PersonTb();
             personTb.setId(personTbId);
-            personTb.setTbDepartmentId(rs.getInt("tb_department_id"));
+            /*personTb.setTbDepartmentId(rs.getInt("tb_department_id"));*/
             personTb.setImportDate(rs.getDate("import_date"));
             personTb.setPerson(naturalPerson);
             tbMap.put(personTbId, personTb);
@@ -206,7 +207,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             person.setBirthDate(rs.getDate("birth_date"));
 
             //ссылки на справочники
-            person.setTaxPayerStatus(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
+            person.setTaxPayerState(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
             person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
             //additional
@@ -226,7 +227,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (addrId != null) {
             Address address = new Address();
 
-            address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
+            //address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
             address.setRegionCode(rs.getString("region_code"));
             address.setPostalCode(rs.getString("postal_code"));
             address.setDistrict(rs.getString("district"));
@@ -243,49 +244,49 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         }
     }
 
-    public Map<Long, Country> getCountryMap() {
+    public Map<Long, RefBookCountry> getCountryMap() {
         return countryMap;
     }
 
-    public void setCountryMap(Map<Long, Country> countryMap) {
+    public void setCountryMap(Map<Long, RefBookCountry> countryMap) {
         this.countryMap = countryMap;
     }
 
-    public Map<Long, TaxpayerStatus> getTaxpayerStatusMap() {
+    public Map<Long, RefBookTaxpayerState> getTaxpayerStatusMap() {
         return taxpayerStatusMap;
     }
 
-    public void setTaxpayerStatusMap(Map<Long, TaxpayerStatus> taxpayerStatusMap) {
+    public void setTaxpayerStatusMap(Map<Long, RefBookTaxpayerState> taxpayerStatusMap) {
         this.taxpayerStatusMap = taxpayerStatusMap;
     }
 
-    public Map<Long, DocType> getDocTypeMap() {
+    public Map<Long, RefBookDocType> getDocTypeMap() {
         return docTypeMap;
     }
 
-    public void setDocTypeMap(Map<Long, DocType> docTypeMap) {
+    public void setDocTypeMap(Map<Long, RefBookDocType> docTypeMap) {
         this.docTypeMap = docTypeMap;
     }
 
-    private TaxpayerStatus getTaxpayerStatusById(Long taxpayerStatusId) {
+    private RefBookTaxpayerState getTaxpayerStatusById(Long taxpayerStatusId) {
         if (taxpayerStatusId != null) {
-            return taxpayerStatusMap != null ? taxpayerStatusMap.get(taxpayerStatusId) : new TaxpayerStatus(taxpayerStatusId, null);
+            return taxpayerStatusMap != null ? taxpayerStatusMap.get(taxpayerStatusId) : new RefBookTaxpayerState(taxpayerStatusId, null);
         } else {
             return null;
         }
     }
 
-    private Country getCountryById(Long countryId) {
+    private RefBookCountry getCountryById(Long countryId) {
         if (countryId != null) {
-            return countryMap != null ? countryMap.get(countryId) : new Country(countryId, null);
+            return countryMap != null ? countryMap.get(countryId) : new RefBookCountry(countryId, null);
         } else {
             return null;
         }
     }
 
-    private DocType getDocTypeById(Long docTypeId) {
+    private RefBookDocType getDocTypeById(Long docTypeId) {
         if (docTypeId != null) {
-            return docTypeMap != null ? docTypeMap.get(docTypeId) : new DocType(docTypeId, null);
+            return docTypeMap != null ? docTypeMap.get(docTypeId) : new RefBookDocType(docTypeId, null);
         } else {
             return null;
         }

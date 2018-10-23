@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.identification.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.Country;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,10 +18,10 @@ import java.util.Map;
  */
 public class IdentificationUtilsTest {
 
-    public static Map<String, DocType> documentTypeMap =  createDocTypeMap();
+    public static Map<String, RefBookDocType> documentTypeMap =  createDocTypeMap();
 
     public static Map createDocTypeMap(){
-        Map<String, DocType> map = new HashMap<String, DocType>();
+        Map<String, RefBookDocType> map = new HashMap<String, RefBookDocType>();
         map.put("21", createDocType("21", "Паспорт гражданина Российской Федерации", 1));
         map.put("03", createDocType("03", "Свидетельство о рождении", 2));
         map.put("07", createDocType("07", "Военный билет", 3));
@@ -40,12 +42,12 @@ public class IdentificationUtilsTest {
     @Test
     public void testError(){
         Assert.assertEquals(-1, IdentificationUtils.selectIncludeReportDocumentIndex(null, null));
-        Assert.assertEquals(-1, IdentificationUtils.selectIncludeReportDocumentIndex(createNaturalPerson("643", "5"), new ArrayList<PersonDocument>()));
+        Assert.assertEquals(-1, IdentificationUtils.selectIncludeReportDocumentIndex(createNaturalPerson("643", "5"), new ArrayList<IdDoc>()));
     }
 
     @Test
     public void testSingleDocuments(){
-        List<PersonDocument> personDocumentList = new ArrayList<PersonDocument>();
+        List<IdDoc> personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("100000 DDFF", "07"));
         Assert.assertEquals(0, IdentificationUtils.selectIncludeReportDocumentIndex(createNaturalPerson("643", "5"), personDocumentList));
     }
@@ -57,14 +59,14 @@ public class IdentificationUtilsTest {
     public void testRussianCitizenshipDocuments(){
 
         //по номеру серии
-        List<PersonDocument> personDocumentList = new ArrayList<PersonDocument>();
+        List<IdDoc> personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "21"));
         personDocumentList.add(createPersonDocument("80 01 735634", "21"));
         personDocumentList.add(createPersonDocument("80 08 535634", "21"));
         Assert.assertEquals(2, IdentificationUtils.selectIncludeReportDocumentIndex(createNaturalPerson("643", "5"), personDocumentList));
 
         //по 6 значному номеру паспорта
-        personDocumentList = new ArrayList<PersonDocument>();
+        personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "21"));
         personDocumentList.add(createPersonDocument("80 03 735634", "21"));
         personDocumentList.add(createPersonDocument("80 03 535634", "21"));
@@ -72,14 +74,14 @@ public class IdentificationUtilsTest {
 
 
         //по номеру временного уд.
-        personDocumentList = new ArrayList<PersonDocument>();
+        personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "14"));
         personDocumentList.add(createPersonDocument("80 03 735634", "14"));
         personDocumentList.add(createPersonDocument("80 03 535634", "14"));
         Assert.assertEquals(1, IdentificationUtils.selectIncludeReportDocumentIndex(createNaturalPerson("643", "5"), personDocumentList));
 
         //с минимальным приоритетом
-        personDocumentList = new ArrayList<PersonDocument>();
+        personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "01"));
         personDocumentList.add(createPersonDocument("80 03 735634", "11"));
 
@@ -105,7 +107,7 @@ public class IdentificationUtilsTest {
      */
     @Test
     public void testNonRussianDocuments(){
-        List<PersonDocument> personDocumentList = new ArrayList<PersonDocument>();
+        List<IdDoc> personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "08"));
         personDocumentList.add(createPersonDocument("80 01 735634", "21"));
         personDocumentList.add(createPersonDocument("90 08 535634", "21"));
@@ -117,7 +119,7 @@ public class IdentificationUtilsTest {
      */
     @Test
     public void testNonRussianTaxpayerDocuments(){
-        List<PersonDocument> personDocumentList = new ArrayList<PersonDocument>();
+        List<IdDoc> personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "08"));
         personDocumentList.add(createPersonDocument("80 01 735634", "91"));
         personDocumentList.add(createPersonDocument("90 08 535634", "21"));
@@ -129,7 +131,7 @@ public class IdentificationUtilsTest {
      */
     @Test
     public void testEmptyCitezenship(){
-        List<PersonDocument> personDocumentList = new ArrayList<PersonDocument>();
+        List<IdDoc> personDocumentList = new ArrayList<IdDoc>();
         personDocumentList.add(createPersonDocument("80 03 635634", "08"));
         personDocumentList.add(createPersonDocument("80 01 735634", "91"));
         personDocumentList.add(createPersonDocument("90 08 535634", "21"));
@@ -142,21 +144,21 @@ public class IdentificationUtilsTest {
         NaturalPerson person = new NaturalPerson();
 
         if (citizenshipCode != null){
-            Country citizenship = new Country();
+            RefBookCountry citizenship = new RefBookCountry();
             citizenship.setCode(citizenshipCode);
             person.setCitizenship(citizenship);
         }
 
 
-        TaxpayerStatus taxpayerStatus = new TaxpayerStatus();
+        RefBookTaxpayerState taxpayerStatus = new RefBookTaxpayerState();
         taxpayerStatus.setCode(taxpayerStatusCode);
-        person.setTaxPayerStatus(taxpayerStatus);
+        person.setTaxPayerState(taxpayerStatus);
 
         return person;
     }
 
-    public static DocType createDocType(String code, String name, Integer prior){
-        DocType docType = new DocType();
+    public static RefBookDocType createDocType(String code, String name, Integer prior){
+        RefBookDocType docType = new RefBookDocType();
         docType.setCode(code);
         docType.setName(name);
         docType.setPriority(prior);
@@ -164,8 +166,8 @@ public class IdentificationUtilsTest {
     }
 
 
-    public static PersonDocument createPersonDocument(String number, String typeCode){
-        PersonDocument document = new PersonDocument();
+    public static IdDoc createPersonDocument(String number, String typeCode){
+        IdDoc document = new IdDoc();
         document.setDocumentNumber(number);
         document.setDocType(documentTypeMap.get(typeCode));
         return document;

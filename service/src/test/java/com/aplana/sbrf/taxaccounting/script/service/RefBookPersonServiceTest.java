@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
@@ -207,10 +208,10 @@ public class RefBookPersonServiceTest {
         return personIdentifier;
     }
 
-    private PersonDocument createPersonDocument(Long docTypeId, Integer incRep, String documentNumber) {
-        DocType docTypeObject = new DocType();
+    private IdDoc createPersonDocument(Long docTypeId, Integer incRep, String documentNumber) {
+        RefBookDocType docTypeObject = new RefBookDocType();
         docTypeObject.setId(5L);
-        PersonDocument personDocument = new PersonDocument();
+        IdDoc personDocument = new IdDoc();
         personDocument.setDocType(docTypeObject);
         personDocument.setIncRep(1);
         personDocument.setDocumentNumber(documentNumber);

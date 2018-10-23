@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.refbook.Address;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 
 import java.sql.ResultSet;
@@ -59,14 +59,14 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         String documentNumber = rs.getString("id_doc_number");
 
         if (documentNumber != null && documentTypeCode != null) {
-            PersonDocument personDocument = new PersonDocument();
+            IdDoc personDocument = new IdDoc();
             personDocument.setPerson(person);
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
             personDocument.setIncRep(1);
         }
 
-        person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
+        person.setTaxPayerState(getTaxpayerStatusByCode(rs.getString("status")));
 
         //Используются все адреса, а не только те, которые прошли проверку по ФИАС
         person.setAddress(buildAddress(rs));
@@ -77,7 +77,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
     public Address buildAddress(ResultSet rs) throws SQLException {
         Address address = new Address();
-        address.setCountry(getCountryByCode(rs.getString("country_code")));
+        //address.setCountry(getCountryByCode(rs.getString("country_code")));
         address.setRegionCode(rs.getString("region_code"));
         address.setPostalCode(rs.getString("post_index"));
         address.setDistrict(rs.getString("area"));

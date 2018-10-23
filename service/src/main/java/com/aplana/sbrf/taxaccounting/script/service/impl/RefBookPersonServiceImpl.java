@@ -6,8 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.Address;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
@@ -274,8 +275,8 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeightCalculator<IdentityPerson>("Статус налогоплательщика", weightsByCode.get(WEIGHT_TAX_PAYER_STATUS.name())) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
-                TaxpayerStatus a = personA.getTaxPayerStatus();
-                TaxpayerStatus b = personB.getTaxPayerStatus();
+                RefBookTaxpayerState a = personA.getTaxPayerState();
+                RefBookTaxpayerState b = personB.getTaxPayerState();
 
                 if (a != null && b != null) {
                     return compareNumber(a.getId(), b.getId());
@@ -296,11 +297,11 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 //Запись справочника физлиц
                 NaturalPerson refBookPerson = (NaturalPerson) b;
 
-                PersonDocument primaryPersonDocument = primaryPerson.getReportDoc();
+                IdDoc primaryPersonDocument = primaryPerson.getReportDoc();
 
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
-                    PersonDocument personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
+                    IdDoc personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
                     return (personDocument != null) ? weight : 0D;
                 } else {
                     return weight;

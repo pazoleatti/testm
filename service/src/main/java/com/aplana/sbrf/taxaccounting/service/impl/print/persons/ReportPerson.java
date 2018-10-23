@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.persons;
 
 import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAddress;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.refbook.Address;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.time.FastDateFormat;
 
@@ -17,9 +18,9 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * Обертка над {@link RefBookPerson} для получения данных отображаемых в отчете
  */
 public class ReportPerson {
-    private RefBookPerson person;
+    private RegistryPersonDTO person;
 
-    ReportPerson(RefBookPerson person) {
+    ReportPerson(RegistryPersonDTO person) {
         this.person = person;
     }
 
@@ -31,7 +32,7 @@ public class ReportPerson {
     }
 
     String getVip() {
-        return person.isVip() != null && person.isVip() ? "VIP" : "Не VIP";
+        return person.getVip() ? "VIP" : "Не VIP";
     }
 
     String getLastName() {
@@ -51,10 +52,10 @@ public class ReportPerson {
     }
 
     String getDocName() {
-        Permissive<RefBookDocType> docType = person.getDocTypeForJson();
+        RefBookDocType docType = person.getReportDoc().value().getDocType();
         try {
-            if (docType.hasPermission()) {
-                return "(" + docType.value().getCode() + ") " + docType.value().getName();
+            if (person.getReportDoc().hasPermission()) {
+                return "(" + docType.getCode() + ") " + docType.getName();
             } else {
                 return "Доступ ограничен";
             }
@@ -64,15 +65,15 @@ public class ReportPerson {
     }
 
     String getDocNumber() {
-        return getPermissiveValue(person.getDocNumberForJson());
+        return getPermissiveValue(Permissive.<String>forbidden());
     }
 
     String getCitizenship() {
-        return person.getCitizenship() != null ? "(" + person.getCitizenship().getCode() + ") " + person.getCitizenship().getName() : null;
+        return person.getCitizenship().value() != null ? "(" + person.getCitizenship().value().getCode() + ") " + person.getCitizenship().value().getName() : null;
     }
 
     String getTaxpayerState() {
-        return person.getTaxpayerState() != null ? person.getTaxpayerState().getCode() : null;
+        return person.getTaxPayerState().value() != null ? person.getTaxPayerState().value().getCode() : null;
     }
 
     String getInn() {
@@ -97,18 +98,7 @@ public class ReportPerson {
     String getRussianAddress() {
         if (person.getAddress() != null) {
             if (person.getAddressForJson().hasPermission()) {
-                return person.getAddress().getAddressType() == 0 ? getAddressString(person.getAddress()) : null;
-            } else {
-                return "Доступ ограничен";
-            }
-        }
-        return null;
-    }
-
-    String getForeignAddress() {
-        if (person.getAddress() != null) {
-            if (person.getAddressForJson().hasPermission()) {
-                return person.getAddress().getAddressType() == 1 ? getAddressString(person.getAddress()) : null;
+                return person.getAddress().value() != null ? getAddressString(person.getAddress().value()) : null;
             } else {
                 return "Доступ ограничен";
             }
@@ -132,9 +122,8 @@ public class ReportPerson {
         return person.getId();
     }
 
-    private String getAddressString(RefBookAddress address) {
+    private String getAddressString(Address address) {
         List<String> values = new ArrayList<>();
-        if (address.getAddressType() == 0) {
             addIfNotEmpty(values, address.getPostalCode());
             addIfNotEmpty(values, address.getRegionCode());
             addIfNotEmpty(values, address.getDistrict());
@@ -143,13 +132,12 @@ public class ReportPerson {
             addIfNotEmpty(values, address.getStreet());
             addIfNotEmpty(values, address.getHouse());
             addIfNotEmpty(values, address.getBuild());
-            addIfNotEmpty(values, address.getApartment());
-        } else {
-            if (address.getCountry() != null) {
+            addIfNotEmpty(values, address.getAppartment());
+
+        if (address.getCountry() != null) {
                 addIfNotEmpty(values, address.getCountry().getName());
-            }
-            addIfNotEmpty(values, address.getAddress());
         }
+        addIfNotEmpty(values, address.getAddressIno());
         return Joiner.on(", ").join(values);
     }
 

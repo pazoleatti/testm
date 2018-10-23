@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -14,13 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -224,5 +219,45 @@ public class RefBookController {
                                            @RequestBody(required = false) Map<String, String> extraParams) {
         return commonRefBookService.createReport(securityService.currentUserInfo(), refBookId, version, pagingParams,
                 searchPattern, exactSearch, extraParams, AsyncTaskType.CSV_REF_BOOK);
+    }
+
+    /**
+     * Найти все действующие записи справочника Статусы налогоплательщика
+     * @return список записей справочника Статусы налогоплательщика
+     */
+    @GetMapping(value = "/rest/refBook/903", params = "projection=findAllActive")
+    public List<RefBookTaxpayerState> findAllActiveTaxPayerState() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return commonRefBookService.findAllTaxPayerStateActive(userInfo);
+    }
+
+    /**
+     * Найти все действующие записи справочника АСНУ
+     * @return список записей справочника АСНУ
+     */
+    @GetMapping(value = "/rest/refBook/900", params = "projection=findAllActive")
+    public List<RefBookAsnu> findAllActiveAsnu() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return commonRefBookService.findAllAsnuActive(userInfo);
+    }
+
+    /**
+     * Найти все действующие записи справочника ОКСМ
+     * @return список записей справочника ОКСМ
+     */
+    @GetMapping(value = "/rest/refBook/10", params = "projection=findAllActive")
+    public List<RefBookCountry> findAllActiveCountry() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return commonRefBookService.findAllCountryActive(userInfo);
+    }
+
+    /**
+     * Найти все действующие записи справочника Коды документов
+     * @return список записей справочника Коды документов
+     */
+    @GetMapping(value = "/rest/refBook/360", params = "projection=findAllActive")
+    public List<RefBookDocType> findAllActiveDocType() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return commonRefBookService.findAllDocTypeActive(userInfo);
     }
 }

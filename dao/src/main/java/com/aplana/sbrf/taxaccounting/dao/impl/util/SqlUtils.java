@@ -439,6 +439,28 @@ public final class SqlUtils extends AbstractDao {
         return sb.toString();
     }
 
+    public static String createUpdate(String table, String[] columns, String[] fields) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("update ")
+                .append(table)
+                .append(" set ");
+        if (columns.length != fields.length) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < columns.length; i++) {
+            if (!columns[i].equals("id")) {
+                sb.append(columns[i])
+                        .append(" = :")
+                        .append(fields[i])
+                        .append(", ");
+            }
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append(" ")
+                .append("where id = :id");
+        return sb.toString();
+    }
+
     /**
      * Метод преобразует массив {"a", "b", "c"} в строку "(a, b, c)"
      *

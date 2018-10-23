@@ -109,7 +109,7 @@ public abstract class AbstractDao {
     }
 
     /**
-     * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
+     * Метод сохраняет новые объекты в БД
      *
      * @param identityObjects объекты обладающий суррогатным ключом
      * @param table           наименование таблицы используемой для хранения данных объекта
@@ -129,5 +129,25 @@ public abstract class AbstractDao {
             i++;
         }
         getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
+    }
+
+    /**
+     * Метод обновляет объекты в БД
+     *
+     * @param identityObjects объекты обладающий суррогатным ключом
+     * @param table           наименование таблицы используемой для хранения данных объекта
+     * @param columns         массив содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields          массив содержащий наименования параметров соответствующих столбцам
+     * @param <E>             тип объекта
+     */
+    protected  <E extends IdentityObject> void updateObjects(Collection<E> identityObjects, String table, String[] columns, String[] fields) {
+        String update = SqlUtils.createUpdate(table, columns, fields);
+        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
+        int i = 0;
+        for (E identityObject : identityObjects) {
+            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
+            i++;
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(update, batchArgs);
     }
 }

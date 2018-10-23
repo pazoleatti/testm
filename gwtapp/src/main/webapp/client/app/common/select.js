@@ -883,17 +883,25 @@
         /**
          * Контроллер для карточки реестра ФЛ
          */
-        .controller('SelectRegistryPersonController', ['$scope', 'GetSelectOption', '$http', 'APP_CONSTANTS', 'RefBookRecordResource', 'RefBookValuesResource',
-            function ($scope, GetSelectOption, $http, APP_CONSTANTS, RefBookRecordResource, RefBookValuesResource) {
+        .controller('SelectRegistryPersonController', ['$scope', 'GetSelectOption', '$http', 'APP_CONSTANTS',
+            'RefBookRecordResource', 'TaxPayerStateResource', 'RefBookAsnuResource', 'RefBookCountryResource',
+            'RefBookDocTypeResource',
+            function ($scope, GetSelectOption, $http, APP_CONSTANTS, RefBookRecordResource,
+                      TaxPayerStateResource, RefBookAsnuResource, RefBookCountryResource, RefBookDocTypeResource) {
 
-                var performInitialization = function (idDocs, person) {
-                    idDocs.sort(function (obj1, obj2) {
-                        var priority1 = obj1.DOC_ID.referenceObject.PRIORITY.value;
-                        var priority2 = obj2.DOC_ID.referenceObject.PRIORITY.value;
-                        var doc_code1 = obj1.DOC_ID.referenceObject.CODE.value;
-                        var doc_code2 = obj2.DOC_ID.referenceObject.CODE.value;
-                        var doc_number1 = obj1.DOC_NUMBER.value;
-                        var doc_number2 = obj2.DOC_NUMBER.value;
+                /**
+                 * Инициализировать выпадашку для выбора главного ДУЛ
+                 * @param person изменяемое ФЛ
+                 */
+                $scope.initIdDocs = function (person) {
+                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'idDocFormatter');
+                    person.documents.value.sort(function (obj1, obj2) {
+                        var priority1 = obj1.docType.priority;
+                        var priority2 = obj2.docType.priority;
+                        var doc_code1 = obj1.docType.code;
+                        var doc_code2 = obj2.docType.code;
+                        var doc_number1 = obj1.documentNumber;
+                        var doc_number2 = obj2.documentNumber;
                         if (priority1 < priority2) {
                             return -1
                         }
@@ -914,65 +922,31 @@
                         }
                         return 0;
                     });
-                    if ($scope.selectedDocs) {
-                        $scope.selectedDocs.options.data.results = idDocs;
+                    $scope.selectedDocs.options.data.results = person.documents.value;
+                    /*if ($scope.selectedDocs) {
+                        $scope.selectedDocs.options.data.results = person.documents.value;
                         angular.forEach($scope.selectedDocs.options.data.results, function (value) {
                             if (person.reportDoc && person.reportDoc.value
-                                && value.id.value === person.reportDoc.value.id.value) {
+                                && value.id === person.reportDoc.value.id) {
                                 person.reportDoc.value = value
                             }
                         })
-                    }
+                    }*/
                 };
 
-                /**
-                 * Инициализировать выпадашку для выбора главного ДУЛ
-                 * @param idDocs список ДУЛ
-                 * @param person изменяемое ФЛ
-                 */
-                $scope.initIdDocs = function (idDocs, person) {
-                    $scope.selectedDocs = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'idDocFormatter');
-                    if (idDocs) {
-                        performInitialization(idDocs, person)
-                    } else {
-                        $http({
-                            method: "GET",
-                            url: "controller/actions/refBookFL/fetchIdDocs/" + person.recordId,
-                            params: {
-                                pagingParams: JSON.stringify({
-                                    page: 1,
-                                    count: 100000,
-                                    startIndex: 0
-                                })
-                            }
-                        }).success(function (response) {
-                            performInitialization(response.rows, person);
-                        });
-                    }
-                };
-
-                $scope.$on("addIdDoc", function (event, idDocs, person) {
-                    performInitialization(idDocs, person)
+                $scope.$on("addIdDoc", function (event, person) {
+                    $scope.initIdDocs(person)
                 });
 
                 /**
                  * Инициализировать выпадашку для выбора статуса Налогоплательщика
                  */
                 $scope.initTaxPayerState = function () {
-                    $scope.taxPayerStateSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'taxPayerStateFormatter');
-                    RefBookRecordResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS,
-                        recordId: null,
-                        version: null,
-                        searchPattern: null,
-                        exactSearch: null,
-                        pagingParams: JSON.stringify({
-                            page: 1,
-                            count: 100000,
-                            startIndex: 0
-                        })
+                    $scope.taxPayerStateSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'codeNameFormatter');
+                    TaxPayerStateResource.query({
+                        projection: "findAllActive"
                     }, function (data) {
-                        $scope.taxPayerStateSelected.options.data.results = data.rows;
+                        $scope.taxPayerStateSelected.options.data.results = data;
                     });
                 };
 
@@ -980,20 +954,11 @@
                  * Инициализировать выпадашку для выбора АСНУ
                  */
                 $scope.initAsnu = function () {
-                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'asnuFormatter');
-                    RefBookRecordResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.ASNU,
-                        recordId: null,
-                        version: null,
-                        searchPattern: null,
-                        exactSearch: null,
-                        pagingParams: JSON.stringify({
-                            page: 1,
-                            count: 100000,
-                            startIndex: 0
-                        })
+                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'codeNameFormatter');
+                    RefBookAsnuResource.query({
+                        projection: "findAllActive"
                     }, function (data) {
-                        $scope.asnuSelect.options.data.results = data.rows;
+                        $scope.asnuSelect.options.data.results = data;
                     });
                 };
 
@@ -1018,21 +983,11 @@
                  * Инициализировать выпадашку со списком стран для выбора гражданста
                  */
                 $scope.initCitizenship = function () {
-                    $scope.citizenshipSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'countryFormatter');
-                    RefBookRecordResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
-                        recordId: null,
-                        version: null,
-                        searchPattern: null,
-                        exactSearch: null,
-                        pagingParams: JSON.stringify({
-                            page: 1,
-                            count: 100000,
-                            startIndex: 0,
-                            property: 'CODE'
-                        })
+                    $scope.citizenshipSelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'codeNameFormatter');
+                    RefBookCountryResource.query({
+                        projection: "findAllActive"
                     }, function (data) {
-                        $scope.citizenshipSelected.options.data.results = data.rows;
+                        $scope.citizenshipSelected.options.data.results = data;
                     });
                 };
 
@@ -1042,44 +997,23 @@
                  * @param person изменяемое ФЛ
                  */
                 $scope.initCountry = function (person) {
-                    $scope.countrySelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'countryFormatter');
-                    RefBookRecordResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.COUNTRY,
-                        recordId: null,
-                        version: null,
-                        searchPattern: null,
-                        exactSearch: null,
-                        pagingParams: JSON.stringify({
-                            page: 1,
-                            count: 100000,
-                            startIndex: 0,
-                            property: 'CODE'
-                        })
+                    $scope.countrySelected = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'codeNameFormatter');
+                    RefBookCountryResource.query({
+                        projection: "findAllActive"
                     }, function (data) {
-                        $scope.countrySelected.options.data.results = data.rows;
+                        $scope.countrySelected.options.data.results = data;
                     });
                 };
 
                 /**
                  * Инициализировать выпадашку с кодами документов
-                 * @param idDoc
                  */
-                $scope.initDocType = function (idDoc) {
-                    $scope.docTypeSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'idDocCodeFormatter');
-                    RefBookRecordResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.DOC_TYPE,
-                        recordId: null,
-                        version: null,
-                        searchPattern: null,
-                        exactSearch: null,
-                        pagingParams: JSON.stringify({
-                            page: 1,
-                            count: 100000,
-                            startIndex: 0,
-                            property: 'CODE'
-                        })
+                $scope.initDocType = function () {
+                    $scope.docTypeSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'codeNameFormatter');
+                    RefBookDocTypeResource.query({
+                        projection: "findAllActive"
                     }, function (data) {
-                        $scope.docTypeSelect.options.data.results = data.rows;
+                        $scope.docTypeSelect.options.data.results = data;
                     });
                 }
             }])

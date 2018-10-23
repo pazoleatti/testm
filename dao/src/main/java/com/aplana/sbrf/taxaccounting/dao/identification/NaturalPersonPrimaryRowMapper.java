@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.Country;
-import com.aplana.sbrf.taxaccounting.model.identification.DocType;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Map;
@@ -16,35 +16,35 @@ import java.util.Map;
  */
 public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<NaturalPerson> {
 
-    private Map<String, Country> countryCodeMap;
+    private Map<String, RefBookCountry> countryCodeMap;
 
-    private Map<String, TaxpayerStatus> taxpayerStatusCodeMap;
+    private Map<String, RefBookTaxpayerState> taxpayerStatusCodeMap;
 
-    private Map<String, DocType> docTypeCodeMap;
+    private Map<String, RefBookDocType> docTypeCodeMap;
 
     protected Logger logger = new Logger();
 
-    public Map<String, Country> getCountryCodeMap() {
+    public Map<String, RefBookCountry> getCountryCodeMap() {
         return countryCodeMap;
     }
 
-    public void setCountryCodeMap(Map<String, Country> countryCodeMap) {
+    public void setCountryCodeMap(Map<String, RefBookCountry> countryCodeMap) {
         this.countryCodeMap = countryCodeMap;
     }
 
-    public Map<String, TaxpayerStatus> getTaxpayerStatusCodeMap() {
+    public Map<String, RefBookTaxpayerState> getTaxpayerStatusCodeMap() {
         return taxpayerStatusCodeMap;
     }
 
-    public void setTaxpayerStatusCodeMap(Map<String, TaxpayerStatus> taxpayerStatusCodeMap) {
+    public void setTaxpayerStatusCodeMap(Map<String, RefBookTaxpayerState> taxpayerStatusCodeMap) {
         this.taxpayerStatusCodeMap = taxpayerStatusCodeMap;
     }
 
-    public Map<String, DocType> getDocTypeCodeMap() {
+    public Map<String, RefBookDocType> getDocTypeCodeMap() {
         return docTypeCodeMap;
     }
 
-    public void setDocTypeCodeMap(Map<String, DocType> docTypeCodeMap) {
+    public void setDocTypeCodeMap(Map<String, RefBookDocType> docTypeCodeMap) {
         this.docTypeCodeMap = docTypeCodeMap;
     }
 
@@ -56,7 +56,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
         this.logger = logger;
     }
 
-    public Country getCountryByCode(String code) {
+    public RefBookCountry getCountryByCode(String code) {
         if (code != null) {
 
             if (countryCodeMap == null) {
@@ -64,7 +64,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
                 return null;
             }
 
-            Country result = countryCodeMap.get(code);
+            RefBookCountry result = countryCodeMap.get(code);
 
             if (result == null) {
                 logger.warn("В справочнике 'ОК 025-2001 (Общероссийский классификатор стран мира)' не найдена страна с кодом: " + code);
@@ -76,7 +76,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
         }
     }
 
-    public TaxpayerStatus getTaxpayerStatusByCode(String code) {
+    public RefBookTaxpayerState getTaxpayerStatusByCode(String code) {
 
         if (code != null) {
 
@@ -85,7 +85,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
                 return null;
             }
 
-            TaxpayerStatus result = taxpayerStatusCodeMap.get(code);
+            RefBookTaxpayerState result = taxpayerStatusCodeMap.get(code);
             if (result == null) {
                 logger.warn("В справочнике 'Статусы налогоплательщика' не найден статус с кодом: " + code);
             }
@@ -96,7 +96,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
         }
     }
 
-    public DocType getDocTypeByCode(String code, NaturalPerson person) {
+    public RefBookDocType getDocTypeByCode(String code, NaturalPerson person) {
         if (code != null) {
 
             if (docTypeCodeMap == null) {
@@ -104,7 +104,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
                 return null;
             }
 
-            DocType result = docTypeCodeMap.get(code);
+            RefBookDocType result = docTypeCodeMap.get(code);
 
             if (result == null) {
                 logger.warn("В справочнике 'Коды документов' не найден документ с кодом: " + code);

@@ -443,5 +443,49 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Справочник "Статусы налогоплательщика"
+         */
+        .factory('TaxPayerStateResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/903?projection=:projection', {}, {
+                query: {
+                    method: 'GET', isArray: true, cache: false
+                }
+            });
+        }])
+
+        /**
+         * @description Справочник "АСНУ"
+         */
+        .factory('RefBookAsnuResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/900?projection=:projection', {}, {
+                query: {
+                    method: 'GET', isArray: true, cache: false
+                }
+            });
+        }])
+
+        /**
+         * @description Справочник "ОКСМ"
+         */
+        .factory('RefBookCountryResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/10?projection=:projection', {}, {
+                query: {
+                    method: 'GET', isArray: true, cache: false
+                }
+            });
+        }])
+
+        /**
+         * @description Справочник "Коды документов"
+         */
+        .factory('RefBookDocTypeResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/360?projection=:projection', {}, {
+                query: {
+                    method: 'GET', isArray: true, cache: false
+                }
+            });
+        }])
     ;
 }());

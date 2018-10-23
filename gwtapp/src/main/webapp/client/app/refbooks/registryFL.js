@@ -151,21 +151,21 @@
                                 width: 80
                             },
                             {
-                                name: 'docType',
+                                name: 'reportDoc',
                                 formatter: $filter('docTypeFormatter'),
                                 width: 250
                             },
                             {
-                                name: 'docNumber',
-                                formatter: $filter('permissiveFormatter')
+                                name: 'reportDoc',
+                                formatter: $filter('docNumberFormatter')
                             },
                             {
                                 name: 'citizenship',
-                                formatter: $filter('codeNameFormatter')
+                                formatter: $filter('permissiveCodeFormatter')
                             },
                             {
-                                name: 'taxpayerState',
-                                formatter: $filter('codeFormatter'),
+                                name: 'taxPayerState',
+                                formatter: $filter('permissiveCodeFormatter'),
                                 width: 50
                             },
                             {
@@ -188,7 +188,7 @@
                                 width: 400
                             },
                             {
-                                name: 'foreignAddress',
+                                name: 'address',
                                 formatter: $filter('foreignAddressFormatter'),
                                 width: 300
                             },
@@ -197,12 +197,12 @@
                                 formatter: $filter('codeNameFormatter')
                             },
                             {
-                                name: 'version',
+                                name: 'startDate',
                                 formatter: $filter('dateFormatter'),
                                 width: 80
                             },
                             {
-                                name: 'versionEnd',
+                                name: 'endDate',
                                 formatter: $filter('dateFormatter'),
                                 width: 80
                             },

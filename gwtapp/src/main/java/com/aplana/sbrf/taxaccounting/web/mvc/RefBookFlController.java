@@ -3,12 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.action.PersonOriginalAndDuplicatesAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
@@ -26,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Контроллер для работы с записями реестра физических лиц
@@ -63,10 +57,9 @@ public class RefBookFlController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookFL", params = "projection=common")
-    public JqgridPagedList<RefBookPerson> fetchRefBookRecords(@RequestParam(required = false) RefBookPersonFilter filter,
+    public JqgridPagedList<RegistryPersonDTO> fetchRefBookRecords(@RequestParam(required = false) RefBookPersonFilter filter,
                                                               @RequestParam(required = false) PagingParams pagingParams) {
-        TAUser currentUser = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookPerson> records = personService.getPersons(pagingParams, filter, currentUser);
+        PagingResult<RegistryPersonDTO> records = personService.getPersonsData(pagingParams, filter);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 
@@ -78,61 +71,11 @@ public class RefBookFlController {
      * @return Страница списка записей
      */
     @GetMapping(value = "/rest/refBookFL", params = "projection=originalAndDuplicates")
-    public JqgridPagedList<RefBookPerson> fetchOriginalDuplicatesCandidates(@RequestParam(required = false) RefBookPersonFilter filter,
+    public JqgridPagedList<RegistryPersonDTO> fetchOriginalDuplicatesCandidates(@RequestParam(required = false) RefBookPersonFilter filter,
                                                                             @RequestParam(required = false) PagingParams pagingParams) {
         TAUser currentUser = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookPerson> records = personService.fetchOriginalDuplicatesCandidates(pagingParams, filter, currentUser);
+        PagingResult<RegistryPersonDTO> records = personService.fetchOriginalDuplicatesCandidates(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
-    }
-
-
-    /**
-     * Получение списка ДУЛ для всех версий физлица, в т.ч. и дубликатов
-     *
-     * @param personId     идентификатор ФЛ
-     * @param pagingParams параметры пейджинга
-     * @return Страница списка значений справочника
-     */
-    @GetMapping(value = "/actions/refBookFL/fetchIdDocs/{personId}")
-    public JqgridPagedList<Map<String, RefBookValue>> fetchIdDocs(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
-        PagingResult<Map<String, RefBookValue>> resultData = personService.fetchReferencesList(personId, RefBook.Id.ID_DOC.getId(), pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(resultData, resultData.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Получение списка ИНП для всех версий физлица, в т.ч. и дубликатов
-     *
-     * @param personId     идентификатор ФЛ
-     * @param pagingParams параметры пейджинга
-     * @return Страница списка значений справочника
-     */
-    @GetMapping(value = "/actions/refBookFL/fetchInp/{personId}")
-    public JqgridPagedList<Map<String, RefBookValue>> fetchInp(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
-        PagingResult<Map<String, RefBookValue>> resultData = personService.fetchReferencesList(personId, RefBook.Id.ID_TAX_PAYER.getId(), pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(resultData, resultData.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Получение списка Тербанков для всех версий физлица, в т.ч. и дубликатов
-     *
-     * @param personId     идентификатор ФЛ
-     * @param pagingParams параметры пейджинга
-     * @return Страница списка значений справочника
-     */
-    @GetMapping(value = "/actions/refBookFL/fetchTb/{personId}")
-    public JqgridPagedList<Map<String, RefBookValue>> fetchTb(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
-        PagingResult<Map<String, RefBookValue>> resultData = personService.fetchReferencesList(personId, RefBook.Id.PERSON_TB.getId(), pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(resultData, resultData.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Получение оригинала ФЛ
-     *
-     * @return оригинал ФЛ
-     */
-    @GetMapping(value = "/actions/refBookFL/fetchOriginal/{id}")
-    public RegistryPersonDTO fetchOriginal(@PathVariable Long id) {
-        return personService.fetchOriginal(id, new Date());
     }
 
     /**
@@ -143,31 +86,7 @@ public class RefBookFlController {
      */
     @GetMapping(value = "/rest/personRegistry/fetch/{id}")
     public RegistryPersonDTO fetchPerson(@PathVariable Long id) {
-        return personService.fetchPerson(id);
-    }
-
-    /**
-     * Получение списка дубликатов ФЛ
-     *
-     * @param personId     Идентификатор ФЛ (RECORD_ID)
-     * @param pagingParams Параметры пейджинга
-     * @return Страница списка дубликатов ФЛ
-     */
-    @GetMapping(value = "/actions/refBookFL/fetchDuplicates/{personId}")
-    public JqgridPagedList<RegistryPersonDTO> fetchDuplicates(@PathVariable Long personId, @RequestParam PagingParams pagingParams) {
-        PagingResult<RegistryPersonDTO> duplicates = personService.fetchDuplicates(personId, new Date(), pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(duplicates, duplicates.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Сохраняет изменения списке дубликатов и оригинале ФЛ
-     *
-     * @param data данные дубликатов и оригинала
-     * @return результат действия
-     */
-    @PostMapping(value = "/actions/refBookFL/saveOriginalAndDuplicates")
-    public ActionResult saveOriginalAndDuplicates(@RequestBody PersonOriginalAndDuplicatesAction data) {
-        return personService.saveOriginalAndDuplicates(securityService.currentUserInfo(), data);
+        return personService.fetchPersonData(id);
     }
 
     @PostMapping(value = "/actions/refBookFL/export/excel")
@@ -188,18 +107,6 @@ public class RefBookFlController {
     }
 
     /**
-     * Проверть пересечение сохраняемого версий ФЛ
-     *
-     * @param person объект ФЛ
-     * @return стандартный ответ сервера
-     */
-    @PostMapping(value = "/actions/registryPerson/checkVersionOverlapping")
-    public ResponseEntity checkVersionOverlapping(@RequestBody RegistryPersonDTO person) {
-        personService.checkVersionOverlapping(person);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
      * Проверить корректность введенного ДУЛ
      *
      * @param docCode   код документа
@@ -209,15 +116,5 @@ public class RefBookFlController {
     @PostMapping(value = "/actions/checkDul")
     public CheckDulResult checkDul(@RequestParam String docCode, @RequestParam String docNumber) {
         return personService.checkDul(docCode, docNumber);
-    }
-
-    /**
-     * Удаление ДУЛ-ов.
-     */
-    @PostMapping("/actions/refBookFL/deleteIdDocs")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteIdDocs(@RequestBody List<Long> docIds) {
-        TAUser currentUser = securityService.currentUserInfo().getUser();
-        idDocService.deleteByIds(docIds, currentUser);
     }
 }

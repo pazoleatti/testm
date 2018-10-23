@@ -22,37 +22,29 @@ class SelectPersonQueryGenerator {
     private static final String DEFAULT_SORT_PROPERTY = "id";
 
     @Language("SQL")
-    private static final String SELECT_FULL_PERSON = "" +
+    public static final String SELECT_FULL_PERSON = "" +
             // Используем параллельный запрос для ускорения работы, с разрешения БД-разработчиков.
-            "select /*+ parallel(person,8) first_rows(1)*/ \n" +
-            "       person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
-            "       person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, \n" +
-            "       person.inn_foreign, person.snils, person.version, \n" +
-            "       (   select min(version) - interval '1' day \n" +
-            "           from ref_book_person p \n" +
-            "           where status in (0, 2) \n" +
-            "               and p.version > person.version \n" +
-            "               and p.record_id = person.record_id \n" +
-            "       ) as version_to, \n" +
-            "       doc.doc_number, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, \n" +
-            "       citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, \n" +
-            "       citizenship_country.name citizenship_country_name, \n" +
-            "       state.id state_id, state.code state_code, state.name state_name, \n" +
-            "       address.id address_id, address.address_type, address.postal_code, address.region_code, \n" +
-            "       address.district, address.city, address.locality, address.street, address.house, \n" +
-            "       address.build building, address.appartment apartment, address.address, \n" +
-            "       address_country.id address_country_id, address_country.code address_country_code, \n" +
-            "       address_country.name address_country_name, \n" +
-            "       asnu.id asnu_id, asnu.code asnu_code, asnu.name asnu_name, asnu.type asnu_type, asnu.priority asnu_priority \n" +
+            "select /*+ parallel(person,8) first_rows(1)*/\n" +
+            "person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
+            "person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, \n" +
+            "person.inn_foreign, person.snils, person.start_date, person.end_date,\n" +
+            "doc.id d_id, doc.doc_number, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, doc_type.priority doc_type_priority, \n" +
+            "citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, \n" +
+            "citizenship_country.name citizenship_country_name, \n" +
+            "state.id state_id, state.code state_code, state.name state_name, \n" +
+            "person.postal_code, person.region_code, \n" +
+            "person.district, person.city, person.locality, person.street, person.house, \n" +
+            "person.build building, person.appartment apartment, person.address_foreign, \n" +
+            "address_country.id address_country_id, address_country.code address_country_code, \n" +
+            "address_country.name address_country_name, \n" +
+            "asnu.id asnu_id, asnu.code asnu_code, asnu.name asnu_name, asnu.type asnu_type, asnu.priority asnu_priority \n" +
             "from ref_book_person person \n" +
-            "   left join ref_book_id_doc doc on doc.id = person.report_doc \n" +
-            "   left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id \n" +
-            "   left join ref_book_country citizenship_country on citizenship_country.id = person.citizenship \n" +
-            "   left join ref_book_taxpayer_state state on state.id = person.taxpayer_state \n" +
-            "   left join ref_book_address address on address.id = person.address \n" +
-            "   left join ref_book_country address_country on address_country.id = address.country_id \n" +
-            "   left join ref_book_asnu asnu on asnu.id = person.source_id \n" +
-            "where person.status = 0";
+            "left join ref_book_id_doc doc on doc.id = person.report_doc \n" +
+            "left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id \n" +
+            "left join ref_book_country citizenship_country on citizenship_country.id = person.citizenship \n" +
+            "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state  \n" +
+            "left join ref_book_country address_country on address_country.id = person.country_id \n" +
+            "left join ref_book_asnu asnu on asnu.id = person.source_id";
 
     /**
      * Список полей, по которым сортировать, в зависимости от того, чему равно pagingParams.getProperty()
@@ -132,6 +124,7 @@ class SelectPersonQueryGenerator {
 
     protected void addWhereConditions() {
         if (filter != null) {
+            query = query + "\n" + "where 1 = 1";
             addLike("person.old_id", filter.getId());
             addVipCondition();
             addLikeIgnoreCase("person.last_name", filter.getLastName());
@@ -236,7 +229,7 @@ class SelectPersonQueryGenerator {
     }
 
     private void addForeignAddressConditions() {
-        addLikeIgnoreCase("address.address", filter.getForeignAddress());
+        addLikeIgnoreCase("person.address_foreign", filter.getForeignAddress());
         addSearchIn("address_country.id", filter.getCountries());
     }
 
@@ -254,7 +247,7 @@ class SelectPersonQueryGenerator {
             query = "" +
                     "select * \n" +
                     "from (" + query + ") \n" +
-                    "where version <= " + versionStr + " and (version_to >= " + versionStr + " or version_to is null)";
+                    "where start_date <= " + versionStr + " and (end_date >= " + versionStr + " or end_date is null)";
         }
     }
 
