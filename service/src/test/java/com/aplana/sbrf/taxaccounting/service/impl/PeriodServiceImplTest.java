@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
-import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuidler;
+import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuilder;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -129,7 +129,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void open() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
         when(reportPeriodService.fetchOrCreate(any(TaxPeriod.class), any(ReportPeriodType.class))).thenReturn(departmentReportPeriod.getReportPeriod());
 
@@ -143,7 +143,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void openExists() {
-        DepartmentReportPeriodBuidler departmentReportPeriodBuilder = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriodBuilder departmentReportPeriodBuilder = new DepartmentReportPeriodBuilder()
                 .department(1).year(2018).dictTaxPeriodId(1L);
 
         DepartmentReportPeriod existDepartmentReportPeriod = departmentReportPeriodBuilder.but()
@@ -158,7 +158,7 @@ public class PeriodServiceImplTest {
 
     @Test(expected = ServiceException.class)
     public void openDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
         when(reportPeriodService.fetchOrCreate(any(TaxPeriod.class), any(ReportPeriodType.class))).thenReturn(departmentReportPeriod.getReportPeriod());
         doThrow(new DaoException("123")).when(departmentReportPeriodService).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
@@ -173,7 +173,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void openCorrection() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriodBuilder mainPeriodBuilder = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
@@ -189,7 +189,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void openCorrectionExists() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriodBuilder mainPeriodBuilder = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).build();
@@ -203,7 +203,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void openCorrectionWhenOpenedCorrectionPeriodExists() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriodBuilder mainPeriodBuilder = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 11, 1)).active(true).build();
@@ -216,7 +216,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void openCorrectionWhenLaterCorrectionPeriodExists() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriodBuilder mainPeriodBuilder = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
@@ -230,7 +230,7 @@ public class PeriodServiceImplTest {
 
     @Test(expected = ServiceException.class)
     public void openCorrectionDaoException() {
-        DepartmentReportPeriodBuidler mainPeriodBuilder = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriodBuilder mainPeriodBuilder = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L);
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
@@ -247,7 +247,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void close() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
@@ -263,7 +263,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void closeClosed() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
 
@@ -274,7 +274,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void closeHasBlockedForms() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         DeclarationData declarationData = new DeclarationData();
@@ -291,7 +291,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void closeHasNotAcceptedForms() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         DeclarationData declarationData = new DeclarationData();
@@ -312,7 +312,7 @@ public class PeriodServiceImplTest {
 
     @Test(expected = ServiceException.class)
     public void closeDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
@@ -334,7 +334,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void reopen() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
@@ -356,7 +356,7 @@ public class PeriodServiceImplTest {
 
     @Test(expected = ServiceException.class)
     public void reopenDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).dictTaxPeriodId(1L).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
@@ -378,7 +378,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void reopenOpened() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(true).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
 
@@ -389,7 +389,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void reopenWhenCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
@@ -401,7 +401,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void reopenWhenLaterCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).correctionDate(new Date(2018 - 1900, 0, 1)).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
@@ -413,7 +413,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void delete() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).department(1).year(2018).reportPeriodId(1).taxPeriodId(1).reportPeriodName("reportPeriodName").build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
@@ -434,7 +434,7 @@ public class PeriodServiceImplTest {
 
     @Test(expected = ServiceException.class)
     public void deleteDaoException() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).department(1).year(2018).reportPeriodId(1).taxPeriodId(1).reportPeriodName("reportPeriodName").build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
@@ -456,7 +456,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void deleteWhenCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
@@ -468,7 +468,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void deleteWhenLaterCorrectionPeriodExists() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .active(false).correctionDate(new Date(2018 - 1900, 0, 1)).reportPeriodId(1).reportPeriodName("reportPeriodName").department(1).year(2018).build();
         when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);

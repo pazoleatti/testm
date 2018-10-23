@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuidler;
+import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuilder;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
@@ -176,16 +176,16 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void saveBatchTest2() {
-        departmentReportPeriodDao.create(new DepartmentReportPeriodBuidler().department(5).reportPeriodId(11).active(false).build());
+        departmentReportPeriodDao.create(new DepartmentReportPeriodBuilder().department(5).reportPeriodId(11).active(false).build());
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setReportPeriodIdList(asList(11, 12, 13));
         filter.setDepartmentId(5);
         assertEquals(1, departmentReportPeriodDao.fetchAllByFilter(filter).size());
 
         List<DepartmentReportPeriod> departmentReportPeriods = new ArrayList<>();
-        departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(11).active(false).build());
-        departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(12).active(true).build());
-        departmentReportPeriods.add(new DepartmentReportPeriodBuidler().reportPeriodId(13).active(true).build());
+        departmentReportPeriods.add(new DepartmentReportPeriodBuilder().reportPeriodId(11).active(false).build());
+        departmentReportPeriods.add(new DepartmentReportPeriodBuilder().reportPeriodId(12).active(true).build());
+        departmentReportPeriods.add(new DepartmentReportPeriodBuilder().reportPeriodId(13).active(true).build());
 
         departmentReportPeriodDao.merge(departmentReportPeriods, 5);
 
@@ -231,7 +231,7 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void existLargeCorrectionTest() throws ParseException {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuidler()
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .department(1).reportPeriodId(20).correctionDate(SIMPLE_DATE_FORMAT.parse("01.01.2011")).build();
         Assert.assertTrue(departmentReportPeriodDao.isLaterCorrectionPeriodExists(departmentReportPeriod));
     }

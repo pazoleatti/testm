@@ -6,58 +6,58 @@ import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 
 import java.util.Date;
 
-public class DepartmentReportPeriodBuidler {
+public class DepartmentReportPeriodBuilder {
     private DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 
-    public DepartmentReportPeriodBuidler() {
+    public DepartmentReportPeriodBuilder() {
         TaxPeriod taxPeriod = new TaxPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(taxPeriod);
         departmentReportPeriod.setReportPeriod(reportPeriod);
     }
     
-    public DepartmentReportPeriodBuidler reportPeriodId(Integer id) {
+    public DepartmentReportPeriodBuilder reportPeriodId(Integer id) {
         departmentReportPeriod.getReportPeriod().setId(id);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler taxPeriodId(Integer id) {
+    public DepartmentReportPeriodBuilder taxPeriodId(Integer id) {
         departmentReportPeriod.getReportPeriod().getTaxPeriod().setId(id);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler reportPeriodName(String name) {
+    public DepartmentReportPeriodBuilder reportPeriodName(String name) {
         departmentReportPeriod.getReportPeriod().setName(name);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler correctionDate(Date correctionDate) {
+    public DepartmentReportPeriodBuilder correctionDate(Date correctionDate) {
         departmentReportPeriod.setCorrectionDate(correctionDate);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler department(int departmentId) {
+    public DepartmentReportPeriodBuilder department(int departmentId) {
         departmentReportPeriod.setDepartmentId(departmentId);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler active(boolean active) {
+    public DepartmentReportPeriodBuilder active(boolean active) {
         departmentReportPeriod.setIsActive(active);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler year(int year) {
+    public DepartmentReportPeriodBuilder year(int year) {
         departmentReportPeriod.getReportPeriod().getTaxPeriod().setYear(year);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler dictTaxPeriodId(long dictTaxPeriodId) {
+    public DepartmentReportPeriodBuilder dictTaxPeriodId(long dictTaxPeriodId) {
         departmentReportPeriod.getReportPeriod().setDictTaxPeriodId(dictTaxPeriodId);
         return this;
     }
 
-    public DepartmentReportPeriodBuidler but() {
-        return new DepartmentReportPeriodBuidler()
+    public DepartmentReportPeriodBuilder but() {
+        return new DepartmentReportPeriodBuilder()
                 .reportPeriodId(departmentReportPeriod.getReportPeriod().getId())
                 .taxPeriodId(departmentReportPeriod.getReportPeriod().getTaxPeriod().getId())
                 .reportPeriodName(departmentReportPeriod.getReportPeriod().getName())
