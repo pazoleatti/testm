@@ -7,9 +7,11 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +25,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Класс-контейнер для запуска потоков обработки асинхронных задач
@@ -31,10 +35,10 @@ import java.util.concurrent.Future;
  * @author dloshkarev
  */
 @Component
-public class AsyncTaskThreadContainer {
+public class AsyncTaskThreadContainer implements DisposableBean {
     private static final Log LOG = LogFactory.getLog(AsyncTaskThreadContainer.class);
     // Таймаут, после которого задача считается упавшей и ее выполнение надо передать другому узлу (ч)
-    private static final int TASK_TIMEOUT = 10;
+    private static final int TASK_TIMEOUT_HOURS = 10;
 
     private AsyncManager asyncManager;
     private ServerInfo serverInfo;
@@ -44,13 +48,17 @@ public class AsyncTaskThreadContainer {
     private ExecutorService asyncTaskMonitorPool;
 
     public AsyncTaskThreadContainer(AsyncManager asyncManager, ServerInfo serverInfo, TAUserService taUserService,
-                                    ApplicationInfo applicationInfo, ExecutorService asyncTaskPool, ExecutorService asyncTaskMonitorPool) {
+                                    ApplicationInfo applicationInfo) {
         this.asyncManager = asyncManager;
         this.serverInfo = serverInfo;
         this.taUserService = taUserService;
         this.applicationInfo = applicationInfo;
-        this.asyncTaskPool = asyncTaskPool;
-        this.asyncTaskMonitorPool = asyncTaskMonitorPool;
+
+        ThreadFactory asyncTaskPoolNamedThreadFactory = new ThreadFactoryBuilder().setNameFormat("async_task_pool-thread-%d").build();
+        this.asyncTaskPool = Executors.newCachedThreadPool(asyncTaskPoolNamedThreadFactory);
+
+        ThreadFactory asyncTaskMonitorPoolNamedThreadFactory = new ThreadFactoryBuilder().setNameFormat("async_task_monitor_pool-thread-%d").build();
+        this.asyncTaskMonitorPool = Executors.newCachedThreadPool(asyncTaskMonitorPoolNamedThreadFactory);
     }
 
     /**
@@ -59,6 +67,13 @@ public class AsyncTaskThreadContainer {
     public void processQueues() {
         new QueueProcessor(AsyncQueue.SHORT, 3).processQueue();
         new QueueProcessor(AsyncQueue.LONG, 3).processQueue();
+    }
+
+    @Override
+    public void destroy() {
+        LOG.info("Shutdown ...");
+        asyncTaskMonitorPool.shutdownNow();
+        asyncTaskPool.shutdownNow();
     }
 
     /**
@@ -87,7 +102,7 @@ public class AsyncTaskThreadContainer {
          */
         private AsyncTaskData getNextTask() {
             String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT, asyncQueue, threadCount);
+            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT_HOURS, asyncQueue, threadCount);
         }
 
         /**

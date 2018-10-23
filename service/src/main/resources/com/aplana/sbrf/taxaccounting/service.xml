@@ -11,12 +11,4 @@
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.refbook.impl"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.async"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.async.task"/>
-
-    <bean id="asyncTaskPool" class="java.util.concurrent.Executors"
-          factory-method="newCachedThreadPool"
-          destroy-method="shutdownNow" />
-
-    <bean id="asyncTaskMonitorPool" class="java.util.concurrent.Executors"
-          factory-method="newCachedThreadPool"
-          destroy-method="shutdownNow" />
 </beans>

@@ -2,13 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,11 +20,13 @@ import java.util.Arrays;
 @RestController
 public class AsyncTaskController {
 
-    @Autowired
     private AsyncManager asyncManager;
-
-    @Autowired
     private SecurityService securityService;
+
+    public AsyncTaskController(AsyncManager asyncManager, SecurityService securityService) {
+        this.asyncManager = asyncManager;
+        this.securityService = securityService;
+    }
 
     /**
      * Привязка данных из параметров запроса
@@ -39,8 +39,10 @@ public class AsyncTaskController {
     }
 
     /**
+     * Получение страницы асинхронных задач {@link AsyncTaskDTO}
+     *
      * @param pagingParams параметры пагинации
-     * @return список {@link JqgridPagedList} блокировок {@link AsyncTaskDTO}
+     * @return страница асинхронных задач
      */
     @GetMapping(value = "/rest/async")
     public JqgridPagedList<AsyncTaskDTO> fetchAsyncs(@RequestParam(required = false) String filter, @RequestParam PagingParams pagingParams) {
@@ -53,9 +55,9 @@ public class AsyncTaskController {
     }
 
     /**
-     * Удаление блокировок
+     * Прерывание задач по идентификаторам
      *
-     * @param ids идентификаторы блокировок
+     * @param ids идентификаторы асинхронных задач
      */
     @PostMapping(value = "/actions/async/interrupt")
     public void interruptTask(@RequestParam Long[] ids) {
