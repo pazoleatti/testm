@@ -321,9 +321,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                     if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
                         message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
-                                        " Вид налоговой формы: \"%s\" уже существует!",
+                                        " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" уже существует!",
                                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                                department.getName(), declarationTemplate.getDeclarationFormKind().getTitle());
+                                department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                     }
                     logger.error(message);
                 }

@@ -1012,19 +1012,15 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         switch (declarationData.getDeclarationTemplateId()) {
             case DeclarationType.NDFL_CONSOLIDATE:
-                countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
-                                " AND department_report_period_id = ? ",
-                        new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId()},
-                        new int[]{Types.INTEGER, Types.INTEGER},
-                        Integer.class);
+                countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data " +
+                                "WHERE declaration_template_id = ? AND department_report_period_id = ? AND knf_type_id = ?",
+                        Integer.class, declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), declarationData.getKnfType().getId());
                 break;
             case DeclarationType.NDFL_PRIMARY:
                 if (declarationData.isManuallyCreated()) {
                     countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
                                     " AND department_report_period_id = ? AND manually_created = ? AND asnu_id = ?",
-                            new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), 1, declarationData.getAsnuId()},
-                            new int[]{Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.NUMERIC},
-                            Integer.class);
+                            Integer.class, declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), 1, declarationData.getAsnuId());
                 }
                 break;
             default:
