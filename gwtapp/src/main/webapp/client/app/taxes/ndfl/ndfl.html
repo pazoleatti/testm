@@ -61,6 +61,14 @@
                                 | translate}}</a>
                         </div>
                     </li>
+                    <li role="menuitem"
+                        ng-show="canCreateNdflReport()">
+                        <hr style="margin: 0;">
+                        <div class="row menuitem">
+                            <a ng-click="createNdflReport()">{{::'link.ndfl.reporting.createNdflReport' |
+                                translate}}</a>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -83,7 +83,7 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
     /**
      * Признак, показывающий необходимость корректировки отрицательных значений
      */
-    private boolean isAdjustNegativeValues;
+    private boolean adjustNegativeValues;
     /**
      * КПП, включаемые в КНФ для обособленного подразделения (см {@link RefBookKnfType})
      */

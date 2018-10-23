@@ -17,9 +17,21 @@ public class DeclarationResult {
      */
     private boolean declarationDataExists;
     /**
+     * Ид формы
+     */
+    private long id;
+    /**
+     * Ид подразделения
+     */
+    private int departmentId;
+    /**
      * Подразделение
      */
     private String department;
+    /**
+     * Ид периода
+     */
+    private int reportPeriodId;
     /**
      * Период
      */
@@ -99,6 +111,6 @@ public class DeclarationResult {
     /**
      * Признак, показывающий необходимость корректировки отрицательных значений
      */
-    private boolean isAdjustNegativeValues;
+    private boolean adjustNegativeValues;
 
 }

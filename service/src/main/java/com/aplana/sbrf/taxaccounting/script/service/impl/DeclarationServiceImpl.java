@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.script.service.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
@@ -10,13 +8,11 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
-import com.aplana.sbrf.taxaccounting.service.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.*;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
@@ -33,9 +29,21 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 /*
@@ -43,14 +51,9 @@ import java.util.zip.ZipInputStream;
  */
 @Service("declarationService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder {
+public class DeclarationServiceImpl implements DeclarationService {
 
     private static final Log LOG = LogFactory.getLog(DeclarationService.class);
-
-    private static final String CHECK_UNIQUE_ERROR = "Налоговая форма с заданными параметрами уже существует!";
-    private static final String CHECK_UNIQUE_NOTIFICATION_ERROR = "Уведомление с заданными параметрами уже существует!";
-
-    private ScriptComponentContext context;
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -104,6 +107,16 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
+    }
+
+    @Override
+    public DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId) {
+        return declarationDataDao.findConsolidated(knfType, departmentReportPeriodId);
+    }
+
+    @Override
+    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
     }
 
     @Override
@@ -205,25 +218,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         PagingResult<DeclarationDataSearchResultItem> result = declarationDataSearchService.search(declarationFilter);
         return (result != null && !result.isEmpty());
     }
-
-    @Override
-    public void setScriptComponentContext(ScriptComponentContext context) {
-        this.context = context;
-    }
-
-    /*@Override
-    public boolean checkUnique(DeclarationData declarationData, Logger logger) {
-        DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-        DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
-                declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getOktmo(), declarationData.getTaxOrganCode(),
-                declarationData.getAsnuId(), declarationData.getFileName());
-        // форма найдена
-        if (existingDeclarationData != null) {
-            logger.error(template.getType().getTaxType() == TaxType.DEAL ? CHECK_UNIQUE_NOTIFICATION_ERROR : CHECK_UNIQUE_ERROR);
-            return false;
-        }
-        return true;
-    }*/
 
     @Override
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
@@ -484,26 +478,26 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     @Transactional
-    public List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo) {
-        List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<Pair<Long, DeclarationDataReportType>>();
+    public List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs, Logger logger, TAUserInfo userInfo) {
+        List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<>();
 
         // Список ранее созданных отчетных форм
-        List<DeclarationData> deletedDeclarationDataList = find(declarationTypeId, departmentReportPeriodId);
+        List<DeclarationData> deletedDeclarationDataList = find(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
         // Список блокировок на удаление форм
-        List<LockData> lockList = new ArrayList<LockData>();
+        List<LockData> lockList = new ArrayList<>();
         try {
             for (DeclarationData deletedDeclarationData : deletedDeclarationDataList) {
                 Map<DeclarationDataReportType, LockData> taskTypeMap = getLockTaskType(deletedDeclarationData.getId());
                 if (!taskTypeMap.isEmpty()) {
                     for (DeclarationDataReportType declarationDataReportType : taskTypeMap.keySet()) {
-                        result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), declarationDataReportType));
+                        result.add(new Pair<>(deletedDeclarationData.getId(), declarationDataReportType));
                     }
                 } else {
                     LockData deleteLock = createDeleteLock(deletedDeclarationData.getId(), userInfo);
                     if (deleteLock != null) {
                         lockList.add(deleteLock);
                     } else {
-                        result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
+                        result.add(new Pair<>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
                     }
                 }
             }
@@ -514,7 +508,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                         delete(deletedDeclarationData.getId(), userInfo);
                     } catch (ServiceException e) {
                         LOG.error(e);
-                        result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
+                        result.add(new Pair<>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
                         break;
                     }
                 }

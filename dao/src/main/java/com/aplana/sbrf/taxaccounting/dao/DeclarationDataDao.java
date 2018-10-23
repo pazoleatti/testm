@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
@@ -146,9 +147,32 @@ public interface DeclarationDataDao extends PermissionDao {
     PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter declarationDataFilter, PagingParams pagingParams);
 
     /**
-     * Декларация по типу и отчетному периоду подразделения
+     * Возвращяет список форм по типу и отчетному периоду подразделения
+     *
+     * @param declarationTypeId        типу формы
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @return список форм
      */
     List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
+
+    /**
+     * Возвращяет консолидированную форму в отчетном периоде подразделения и по типу КНФ
+     *
+     * @param knfType                  типу КНФ
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @return консолидированная форм
+     */
+    DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId);
+
+    /**
+     * Возвращяет список форм по типу и отчетному периоду подразделения и списку пар кпп/октмо
+     *
+     * @param declarationTypeId        типу формы
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @param kppOktmoPairs            список пар кпп/октмо
+     * @return список форм
+     */
+    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs);
 
     /**
      * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID

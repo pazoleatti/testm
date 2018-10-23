@@ -1,7 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CheckDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.MoveToCreateAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -11,7 +17,12 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -25,7 +36,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +53,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -329,15 +351,12 @@ public class DeclarationDataController {
     /**
      * Создание отчётности
      *
-     * @param declarationTypeId      идентификатор типа отчётности
-     * @param departmentId           идентификатор подразделения
-     * @param periodId               идентификатор периода
-     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
+     * @param action параметры создания отчетности
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
     @PostMapping(value = "/actions/declarationData/createReport")
-    public CreateDeclarationReportResult createReport(Integer declarationTypeId, Integer departmentId, Integer periodId, boolean isAdjustNegativeValues) {
-        return declarationService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId, isAdjustNegativeValues);
+    public CreateDeclarationReportResult createReport(@RequestBody CreateDeclarationReportAction action) {
+        return declarationService.createReports(action, securityService.currentUserInfo());
     }
 
     /**

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
@@ -33,6 +34,7 @@ new Report2Ndfl(this).run()
 @SuppressWarnings("GrMethodMayBeStatic")
 class Report2Ndfl extends AbstractScriptClass {
 
+    Long knfId
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
@@ -147,6 +149,9 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
             this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
+        }
+        if (scriptClass.getBinding().hasVariable("knfId")) {
+            this.knfId = (Long) scriptClass.getBinding().getProperty("knfId")
         }
         reportType = declarationData.declarationTemplateId == DeclarationType.NDFL_2_1 ? DeclarationType.NDFL_2_1_NAME : DeclarationType.NDFL_2_2_NAME
     }
@@ -1336,7 +1341,10 @@ class Report2Ndfl extends AbstractScriptClass {
             Map<PairKppOktmo, List<NdflPerson>> ndflPersonsIdGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
 
             // Удаление ранее созданных отчетных форм
-            List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTemplate.type.id, declarationData.departmentReportPeriodId, logger, userInfo)
+            List<Pair<String, String>> kppOktmoPairs = ndflPersonsIdGroupedByKppOktmo.keySet().collect {
+                return new Pair<String, String>(it.kpp, it.oktmo)
+            }
+            List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTemplate.type.id, declarationData.departmentReportPeriodId, kppOktmoPairs, logger, userInfo)
             if (!notDeletedDeclarationPair.isEmpty()) {
                 logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
                 notDeletedDeclarationPair.each() {
@@ -1657,20 +1665,18 @@ class Report2Ndfl extends AbstractScriptClass {
         return prevDepartmentReportPeriod
     }
 
-    DeclarationData findConsolidatedDeclaration() {
-        def foundDeclarations = declarationService.find(RNU_NDFL_DECLARATION_TYPE, departmentReportPeriod.id)
-        if (foundDeclarations != null && !foundDeclarations.isEmpty()) {
-            return foundDeclarations.get(0)
-        }
-        return null
-    }
-
     DeclarationData findConsolidatedDeclarationForReport() {
-        DeclarationData consolidatedDeclaration = findConsolidatedDeclaration()
-        if (consolidatedDeclaration == null) {
-            logger.error("Отчетность $reportType для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                    " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
-            return null
+        DeclarationData consolidatedDeclaration
+        if (knfId != null) {
+            consolidatedDeclaration = declarationService.getDeclarationData(knfId)
+        } else {
+            def knfType = declarationData.declarationTemplateId == DeclarationType.NDFL_2_1 ? RefBookKnfType.ALL : RefBookKnfType.BY_NONHOLDING_TAX
+            consolidatedDeclaration = declarationService.findConsolidated(knfType, departmentReportPeriod.id)
+            if (consolidatedDeclaration == null) {
+                logger.error("Отчетность $reportType для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
+                        " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
+                return null
+            }
         }
         if (consolidatedDeclaration.state != State.ACCEPTED) {
             logger.error("Отчетность $reportType для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +

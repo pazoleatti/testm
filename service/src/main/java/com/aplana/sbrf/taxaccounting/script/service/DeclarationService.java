@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -54,9 +55,32 @@ public interface DeclarationService {
     List<Long> getDeclarationDataPersonIds(long declarationDataId);
 
     /**
-     * Поиск декларации в отчетном периоде подразделения
+     * Возвращяет список форм по типу и отчетному периоду подразделения
+     *
+     * @param declarationTypeId        типу формы
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @return список форм
      */
     List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
+
+    /**
+     * Возвращяет консолидированную форму в отчетном периоде подразделения и по типу КНФ
+     *
+     * @param knfType                  типу КНФ
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @return консолидированная форм
+     */
+    DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId);
+
+    /**
+     * Возвращяет список форм по типу и отчетному периоду подразделения и списку пар кпп/октмо
+     *
+     * @param declarationTypeId        типу формы
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @param kppOktmoPairs            список пар кпп/октмо
+     * @return список форм
+     */
+    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs);
 
     /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
@@ -493,11 +517,12 @@ public interface DeclarationService {
      *
      * @param declarationTypeId        вид НФ
      * @param departmentReportPeriodId отчетный период
+     * @param kppOktmoPairs            пары КПП/ОКТМО, по которым нужно удалять формы
      * @param logger
      * @param userInfo
      * @return если удаление прошло успешно, то возвращает пустой список, иначе список Pair<id-формы, типа блокировки>, по которым существует блокировка или произошла ошибка удаления
      */
-    List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo);
+    List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs, Logger logger, TAUserInfo userInfo);
 
     /**
      * метод запускает скрипты с событием проверить

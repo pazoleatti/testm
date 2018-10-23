@@ -6,13 +6,15 @@
                 <col style="width:65%">
             </colgroup>
             <tbody>
-
             <tr>
                 <td>
                     <label class="control-label">{{::'createReport.department' | translate}}:</label>
                 </td>
                 <td>
-                    <div data-aplana-field>
+                    <div data-ng-if="knf">
+                        <label class="bold-text">{{knf.department}}</label>
+                    </div>
+                    <div data-ng-if="!knf" data-aplana-field>
                         <div style="width: 375px;" data-ng-controller="SelectDepartmentCtrl"
                              data-ui-select2="departmentsSelect.options"
                              data-ng-init="initAvailableTBSelect(userTBDepartment)"
@@ -40,7 +42,10 @@
                     <label class="control-label">{{::'createReport.period' | translate}}:</label>
                 </td>
                 <td>
-                    <div data-aplana-field >
+                    <div data-ng-if="knf">
+                        <label class="bold-text" data-ng-bind-html="knf | ndflPeriodFormatter"></label>
+                    </div>
+                    <div data-ng-if="!knf" data-aplana-field>
                         <div style="width: 375px;" data-ng-controller="SelectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenDepartmentPeriods(reportData.department.id, 'reportData.period')"
@@ -73,7 +78,7 @@
                         <div style="width: 375px;" data-ng-controller="SelectDeclarationTypeCtrl"
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-model="reportData.declarationType"
-                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportData.period.id, reportData.department.id)"
+                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportData.period.id, reportData.department.id, knf)"
                              data-ng-disabled="depErased || reportErased">
                         </div>
                         <div class="control-group"

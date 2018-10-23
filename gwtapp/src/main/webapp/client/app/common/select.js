@@ -349,9 +349,10 @@
                  * Инициализировать список с видами отчетных форм, которые можно создать
                  * @param periodId Выражение из scope, по которому отслеживается изменение периода
                  * @param departmentId Выражение из scope, по которому отслеживается изменение подразделения
+                 * @param knf КНФ, по которой создаётся отчетность
                  */
                 //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
-                $scope.initSelectWithReportDeclarationTypesForCreate = function (periodId, departmentId) {
+                $scope.initSelectWithReportDeclarationTypesForCreate = function (periodId, departmentId, knf) {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
                     DeclarationTypeForCreateResource.query({
                         formDataKindIdList: APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id,
@@ -359,17 +360,24 @@
                         periodId: periodId
                     }, function (data) {
                         data = data.filter(function (declarationType) {
-                            return isReportForm(declarationType);
+                            return isReportForm(declarationType) && (!knf || isReportTypeAvailableByKnfType(declarationType, knf.knfType));
                         });
                         $scope.declarationTypeSelect.options.data.results = data;
                     });
                 };
 
                 /**
+                 * Определение доступности вида отчетности по типу КНФ
+                 */
+                function isReportTypeAvailableByKnfType(declarationType, knfType) {
+                    return knfType.id !== APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id
+                }
+
+                /**
                  * Событие возникающие при выборе подразделения и периода
                  */
-                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, department) {
-                    $scope.initSelectWithReportDeclarationTypesForCreate(period, department)
+                $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, departmentId) {
+                    $scope.initSelectWithReportDeclarationTypesForCreate(period, departmentId)
                 });
             }])
 

@@ -50,8 +50,9 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         Map<String, Object> params = taskData.getParams();
         Integer declarationTypeId = (Integer) params.get("declarationTypeId");
+        Long knfId = (Long) params.get("knfId");
         Integer departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
-        boolean isAdjustNegativeValues = (Boolean) params.get("isAdjustNegativeValues");
+        boolean adjustNegativeValues = (Boolean) params.get("adjustNegativeValues");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
@@ -61,12 +62,12 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
             throw new ServiceException("Не удалось определить налоговый период.");
         }
 
-        declarationDataService.createReportForms(logger, userInfo, departmentReportPeriod, declarationTypeId, isAdjustNegativeValues, new LockStateLogger() {
+        declarationDataService.createReportForms(knfId, departmentReportPeriod, declarationTypeId, adjustNegativeValues, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 asyncManager.updateState(taskData.getId(), state);
             }
-        });
+        }, logger, userInfo);
         return new BusinessLogicResult(true, null);
     }
 

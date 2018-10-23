@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.model.util.Pair
@@ -30,6 +31,7 @@ new Report6Ndfl(this).run()
 @SuppressWarnings("GrMethodMayBeStatic")
 class Report6Ndfl extends AbstractScriptClass {
 
+    Long knfId
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
@@ -57,7 +59,7 @@ class Report6Ndfl extends AbstractScriptClass {
     State stateRestriction
     String applicationVersion
     Map<String, Object> paramMap
-    boolean isAdjustNegativeValues
+    boolean adjustNegativeValues
 
     private Report6Ndfl() {
     }
@@ -141,8 +143,11 @@ class Report6Ndfl extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("paramMap")) {
             this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
         }
-        if (scriptClass.getBinding().hasVariable("isAdjustNegativeValues")) {
-            this.isAdjustNegativeValues = (Boolean) scriptClass.getBinding().getProperty("isAdjustNegativeValues")
+        if (scriptClass.getBinding().hasVariable("knfId")) {
+            this.knfId = (Long) scriptClass.getBinding().getProperty("knfId")
+        }
+        if (scriptClass.getBinding().hasVariable("adjustNegativeValues")) {
+            this.adjustNegativeValues = (Boolean) scriptClass.getBinding().getProperty("adjustNegativeValues")
         }
     }
 
@@ -533,7 +538,7 @@ class Report6Ndfl extends AbstractScriptClass {
                                 def value = section2Entry.value
 
                                 // Корректировка отрицательных значений
-                                if (isAdjustNegativeValues) {
+                                if (adjustNegativeValues) {
                                     if (value.incomeSum > 0) {
                                         def tmp = value.incomeSum
                                         value.incomeSum += minusIncome
@@ -926,7 +931,10 @@ class Report6Ndfl extends AbstractScriptClass {
             // Список физлиц для каждой пары КПП и ОКТМО
             Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
             // Удаление ранее созданных отчетных форм
-            List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTemplate.type.id, declarationData.departmentReportPeriodId, logger, userInfo)
+            List<Pair<String, String>> kppOktmoPairs = ndflPersonsGroupedByKppOktmo.keySet().collect {
+                return new Pair<String, String>(it.kpp, it.oktmo)
+            }
+            List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTemplate.type.id, declarationData.departmentReportPeriodId, kppOktmoPairs, logger, userInfo)
             if (!notDeletedDeclarationPair.isEmpty()) {
                 logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
                 notDeletedDeclarationPair.each() {
@@ -957,7 +965,7 @@ class Report6Ndfl extends AbstractScriptClass {
                 newDeclaratinoData.taxOrganCode = taxOrganCode
                 newDeclaratinoData.kpp = kpp.toString()
                 newDeclaratinoData.oktmo = oktmo.toString()
-                newDeclaratinoData.isAdjustNegativeValues = isAdjustNegativeValues
+                newDeclaratinoData.adjustNegativeValues = adjustNegativeValues
                 ddId = declarationService.create(newDeclaratinoData, departmentReportPeriod, logger, userInfo, false)
 
                 params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
@@ -982,20 +990,17 @@ class Report6Ndfl extends AbstractScriptClass {
         return provider.getRecordData(idList)
     }
 
-    DeclarationData findConsolidatedDeclaration() {
-        def foundDeclarations = declarationService.find(DeclarationType.NDFL_CONSOLIDATE, departmentReportPeriod.id)
-        if (foundDeclarations != null && !foundDeclarations.isEmpty()) {
-            return foundDeclarations.get(0)
-        }
-        return null
-    }
-
     DeclarationData findConsolidatedDeclarationForReport() {
-        DeclarationData consolidatedDeclaration = findConsolidatedDeclaration()
-        if (consolidatedDeclaration == null) {
-            logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                    " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
-            return null
+        DeclarationData consolidatedDeclaration
+        if (knfId != null) {
+            consolidatedDeclaration = declarationService.getDeclarationData(knfId)
+        } else {
+            consolidatedDeclaration = declarationService.findConesolidated(RefBookKnfType.ALL, departmentReportPeriod.id)
+            if (consolidatedDeclaration == null) {
+                logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
+                        " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
+                return null
+            }
         }
         if (consolidatedDeclaration.state != State.ACCEPTED) {
             logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +

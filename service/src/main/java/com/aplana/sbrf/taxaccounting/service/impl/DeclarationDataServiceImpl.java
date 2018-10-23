@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -897,6 +898,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (existDeclarationData(declarationDataId)) {
             result.setDeclarationDataExists(true);
             DeclarationData declaration = get(declarationDataId, userInfo);
+            result.setId(declarationDataId);
+            result.setDepartmentId(declaration.getDepartmentId());
             result.setDepartment(departmentService.getParentsHierarchy(
                     declaration.getDepartmentId()));
 
@@ -916,8 +919,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setDeclarationType(declarationTemplate.getType().getId());
             result.setDeclarationTypeName(declarationTemplate.getType().getName());
 
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(
-                    declaration.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
+            result.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
             result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
             result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
             result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
@@ -2468,11 +2471,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String generateAsyncTaskKey(int declarationTypeId, int reportPeriodId, int departmentId) {
-        return LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTypeId + "_" + reportPeriodId + "_" + departmentId;
-    }
-
-    @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
         LockData lockData = doLock(declarationDataId, userInfo);
@@ -2986,15 +2984,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void createReportForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger) {
+    public void createReportForms(Long knfId, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean adjustNegativeValues, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
                 userInfo, departmentReportPeriod, declarationTypeId));
-        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
+        Map<String, Object> additionalParameters = new HashMap<>();
+        Map<Long, Map<String, Object>> formMap = new HashMap<>();
         additionalParameters.put("formMap", formMap);
-        Map<String, Object> scriptParams = new HashMap<String, Object>();
+        Map<String, Object> scriptParams = new HashMap<>();
         additionalParameters.put("scriptParams", scriptParams);
-        additionalParameters.put("isAdjustNegativeValues", isAdjustNegativeValues);
+        additionalParameters.put("knfId", knfId);
+        additionalParameters.put("adjustNegativeValues", adjustNegativeValues);
         DeclarationData declarationDataTemp = new DeclarationData();
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
@@ -3010,7 +3009,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             boolean createForm = true;
             try {
                 Map<String, Object> exchangeParams = entry.getValue();
-                exchangeParams.put("isAdjustNegativeValues", isAdjustNegativeValues);
+                exchangeParams.put("adjustNegativeValues", adjustNegativeValues);
                 createForm = createReportFormXml(scriptLogger, createdReportForm, new Date(), userInfo, exchangeParams, stateLogger);
             } catch (Exception e) {
                 createForm = false;
@@ -3139,25 +3138,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId, boolean isAdjustNegativeValues) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. declarationTypeId: %s; departmentId: %s; periodId: %s",
-                userInfo, declarationTypeId, departmentId, periodId));
+    public CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. action: %s", userInfo, action));
         // логика взята из CreateFormsDeclarationHandler
         Logger logger = new Logger();
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         final AsyncTaskType reportType = AsyncTaskType.CREATE_FORMS_DEC;
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService
-                .fetchLast(departmentId, periodId);
-        if (departmentReportPeriod == null) {
-            throw new ServiceException("Не удалось определить налоговый период.");
+        String keyTask;
+        final Map<String, Object> params = new HashMap<>();
+        params.put("declarationTypeId", action.getDeclarationTypeId());
+        params.put("adjustNegativeValues", action.isAdjustNegativeValues());
+        int departmentReportPeriodId;
+        if (action.getKnfId() == null) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
+            if (departmentReportPeriod == null) {
+                throw new ServiceException("Не удалось определить налоговый период.");
+            }
+            departmentReportPeriodId = departmentReportPeriod.getId();
+            keyTask = LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getDeclarationTypeId() + "_" + action.getPeriodId() + "_" + action.getDepartmentId();
+        } else {
+            departmentReportPeriodId = declarationDataDao.get(action.getKnfId()).getDepartmentReportPeriodId();
+            params.put("knfId", action.getKnfId());
+            keyTask = LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getKnfId();
         }
-        final Map<String, Object> params = new HashMap<String, Object>();
-        params.put("declarationTypeId", declarationTypeId);
-        params.put("departmentReportPeriodId", departmentReportPeriod.getId());
-        params.put("isAdjustNegativeValues", isAdjustNegativeValues);
-
-        String keyTask = generateAsyncTaskKey(declarationTypeId, periodId, departmentId);
+        params.put("departmentReportPeriodId", departmentReportPeriodId);
         Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
         if (restartStatus != null && restartStatus.getFirst()) {
             // TODO: Реализовать логику случая, когда задача уже запущена.

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -489,13 +490,6 @@ public interface DeclarationDataService {
     String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
 
     /**
-     * Генерация ключа блокировки для асинхронных задач по декларациям
-     *
-     * @return код блокировки
-     */
-    String generateAsyncTaskKey(int declarationTypeId, int reportPeriodId, int departmentId);
-
-    /**
      * Заблокировать DeclarationData.
      *
      * @param declarationDataId идентификатор декларации
@@ -665,11 +659,12 @@ public interface DeclarationDataService {
     /**
      * Создание экземпляров отчетных форм
      *
-     * @param departmentReportPeriod отчетный период
+     * @param knfId                  ид КНФ, по которой будет создана отчетность. Может быть не задан, тогда КНФ будет искаться в заданном периоде
+     * @param departmentReportPeriod если knfId не задан, то отчетный период, в котором будет искаться КНФ
      * @param declarationTypeId      идентификатор типа декларации
-     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
+     * @param adjustNegativeValues   надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
      */
-    void createReportForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean isAdjustNegativeValues, LockStateLogger stateLogger);
+    void createReportForms(Long knfId, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean adjustNegativeValues, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
 
     /**
      * Создание отчетности для выгрузки
@@ -717,14 +712,11 @@ public interface DeclarationDataService {
     /**
      * Создание отчётности
      *
-     * @param userInfo               информация о пользователе
-     * @param declarationTypeId      идентификатор типа отчётности
-     * @param departmentId           идентификатор подразделения
-     * @param periodId               идентификатор периода
-     * @param isAdjustNegativeValues надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
+     * @param action   параметры создания отчетности
+     * @param userInfo информация о пользователе
      * @return результат создания отчетности
      */
-    CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId, boolean isAdjustNegativeValues);
+    CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo);
 
     /**
      * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки

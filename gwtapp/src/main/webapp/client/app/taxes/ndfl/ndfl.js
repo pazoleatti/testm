@@ -72,10 +72,10 @@
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
             '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
-            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload',
+            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload', 'PermissionChecker',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
-                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload) {
+                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload, PermissionChecker) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -113,10 +113,12 @@
                 }
 
                 var updateDeclarationInfoInterval;
+
                 function startUpdateDeclarationInfoInterval() {
                     updateDeclarationInfoInterval = $interval(updateDeclarationInfo, 3000);
                     updateDeclarationInfo();
                 }
+
                 startUpdateDeclarationInfoInterval();
 
                 function cancelUpdateDeclarationInfoInterval() {
@@ -150,12 +152,14 @@
                 }
 
                 var updateAvailableReportsInterval;
+
                 function startUpdateAvailableReportsInterval() {
                     updateAvailableReportsInterval = $interval(function () {
                         updateAvailableReports();
                     }, 10000);
                     updateAvailableReports();
                 }
+
                 startUpdateAvailableReportsInterval();
 
                 function cancelUpdateAvailableReportsInterval() {
@@ -244,7 +248,7 @@
                 };
 
                 function isEmpty(object) {
-                    return Object.keys(object).every(function(key) {
+                    return Object.keys(object).every(function (key) {
                         return !object[key];
                     });
                 }
@@ -780,6 +784,34 @@
                     });
                 };
 
+                $scope.canCreateNdflReport = function () {
+                    return $scope.declarationData && $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id &&
+                        $scope.ndfFLTab.getGrid && $scope.ndfFLTab.getGrid().ctrl && $scope.ndfFLTab.getGrid().ctrl.getCountRecords &&
+                        $scope.ndfFLTab.getGrid().ctrl.getCountRecords() > 0 &&
+                        PermissionChecker.check($scope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
+                };
+
+                $scope.createNdflReport = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.creatingReport'),
+                        templateUrl: 'client/app/taxes/ndfl/createReport.html',
+                        controller: 'createReportCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    knf: $scope.declarationData
+                                };
+                            }
+                        }
+                    }).result.then(function (response) {
+                        if (response) {
+                            if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
+                        }
+                    });
+                };
             }]
         );
 }());

@@ -13,49 +13,55 @@
             '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage',
             function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
 
+                $scope.knf = $shareData.knf;
                 $scope.reportData = {negativeValuesAdjustment: APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT};
 
-                $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
-                $scope.userTBDepartment = {};
+                if ($scope.knf) {
+                    $scope.reportData.department = {id: $scope.knf.departmentId, name: $scope.knf.department};
+                    $scope.reportData.period = {id: $scope.knf.reportPeriodId, name: $scope.knf.reportPeriod};
+                } else {
+                    $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
+                    $scope.userTBDepartment = {};
 
-                $scope.hasLoaded = false;
+                    $scope.hasLoaded = false;
 
-                $scope.depErased = false;
-                $scope.reportErased = false;
+                    $scope.depErased = false;
+                    $scope.reportErased = false;
 
 
-                $scope.$watch("userTBDepartment.department", function (department) {
-                    if (typeof(department) !== 'undefined' && department != null) {
-                        $scope.reportData.department = department;
-                    }
-                });
+                    $scope.$watch("userTBDepartment.department", function (department) {
+                        if (typeof(department) !== 'undefined' && department != null) {
+                            $scope.reportData.department = department;
+                        }
+                    });
 
-                $scope.$watch("reportData.department", function (department) {
-                    if (typeof(department) !== 'undefined' && department != null) {
-                        $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.reportData.department.id);
-                        $scope.depErased = false;
-                        $scope.showDepError = false;
-                        $scope.showFormError = false
-                    } else if (department === null){
-                        $scope.depErased = true;
-                        $scope.reportData.period = null;
-                        $scope.reportData.declarationType = null;
-                    }
-                });
+                    $scope.$watch("reportData.department", function (department) {
+                        if (typeof(department) !== 'undefined' && department != null) {
+                            $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.reportData.department.id);
+                            $scope.depErased = false;
+                            $scope.showDepError = false;
+                            $scope.showFormError = false
+                        } else if (department === null) {
+                            $scope.depErased = true;
+                            $scope.reportData.period = null;
+                            $scope.reportData.declarationType = null;
+                        }
+                    });
 
-                $scope.$watch("reportData.period", function (period) {
-                    if (typeof(period) !== 'undefined' && period != null) {
-                        $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, $scope.reportData.period.id, $scope.reportData.department.id);
-                        $scope.hasLoaded = true;
-                        $scope.reportErased = false;
-                        $scope.showPeriodError= false;
-                        $scope.showFormError = false
-                    } else if (period === null){
-                        $scope.reportErased = true;
-                        $scope.reportData.declarationType = null;
-                    }
+                    $scope.$watch("reportData.period", function (period) {
+                        if (typeof(period) !== 'undefined' && period != null) {
+                            $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, $scope.reportData.period.id, $scope.reportData.department.id);
+                            $scope.hasLoaded = true;
+                            $scope.reportErased = false;
+                            $scope.showPeriodError = false;
+                            $scope.showFormError = false
+                        } else if (period === null) {
+                            $scope.reportErased = true;
+                            $scope.reportData.declarationType = null;
+                        }
 
-                });
+                    });
+                }
 
                 $scope.$watch("reportData.declarationType", function (declarationType) {
                     if (typeof(declarationType) !== 'undefined' && declarationType != null) {
@@ -78,15 +84,16 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/createReport",
-                        params: {
+                        data: {
+                            knfId: $scope.knf ? $scope.knf.id : undefined,
                             declarationTypeId: $scope.reportData.declarationType.id,
-                            departmentId: $scope.reportData.department.id,
-                            periodId: $scope.reportData.period.id,
-                            isAdjustNegativeValues: $scope.reportData.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT
+                            departmentId: $scope.knf ? undefined : $scope.reportData.department.id,
+                            periodId: $scope.knf ? undefined : $scope.reportData.period.id,
+                            adjustNegativeValues: $scope.reportData.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT
                         }
                     }).then(function (response) {
                         $modalInstance.close(response);
-                    }).catch(function() {
+                    }).catch(function () {
                         $modalInstance.close();
                     });
                 };
@@ -110,22 +117,11 @@
                  * @param validatedValue проверяемое значение
                  * @returns {boolean} {@code true} если значение отсутствует
                  */
-                $scope.isValueAbsent = function(validatedValue) {
-                    if(typeof(validatedValue) === 'undefined'|| validatedValue == null) {
+                $scope.isValueAbsent = function (validatedValue) {
+                    if (typeof(validatedValue) === 'undefined' || validatedValue == null) {
                         return true
                     }
                 }
-
-            }])
-        .filter('nameFormatter', function () {
-            return function (entity) {
-                return entity ? entity.name : "";
-            };
-        })
-        .filter('periodFormatter', function () {
-            return function (entity) {
-                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
-            };
-        });
-
+            }]
+        );
 }());

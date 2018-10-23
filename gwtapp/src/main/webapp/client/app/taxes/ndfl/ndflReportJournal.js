@@ -62,22 +62,13 @@
                         windowClass: 'modal600',
                         resolve: {
                             $shareData: function () {
-                                return {
-                                    latestSelectedPeriod: $webStorage.get(APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true)
-                                };
+                                return {};
                             }
                         }
                     }).result.then(function (response) {
                         if (response) {
-                            if (response.data && response.data.entityId && response.data.entityId !== null) {
-                                $state.go('ndfl', {
-                                    declarationDataId: response.data.entityId,
-                                    uuid: response.data.uuid
-                                });
-                            } else {
-                                if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                    $logPanel.open('log-panel-container', response.data.uuid);
-                                }
+                            if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
                             }
                         }
                     });

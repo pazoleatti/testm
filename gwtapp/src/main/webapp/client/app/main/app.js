@@ -175,6 +175,7 @@
         "link.ndfl.reporting.downloadPdf": "Выгрузить в PDF",
         "link.ndfl.reporting.formXLSX": "Сформировать в XLSX",
         "link.ndfl.reporting.formTemplateExcel": "Сформировать \"Шаблон ТФ (Excel)\"",
+        "link.ndfl.reporting.createNdflReport": "Сформировать Отчетные формы",
         "link.ndfl.reporting.formForFL": "Сформировать \"РНУ НДФЛ по физическому лицу\"",
         "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
         "link.ndfl.reporting.formForKppOktmo": "Сформировать \"Реестр сформированной отчетности\"",

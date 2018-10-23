@@ -207,26 +207,45 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
-        try {
-            return getJdbcTemplate().query(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
-                            "from declaration_data dd " +
-                            "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
-                            "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                            "where drp.id = ?" +
-                            "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
-                            "and dt.declaration_type_id = ?)",
-                    new Object[]{
-                            departmentReportPeriodId,
-                            declarationTypeId
-                    },
-                    new DeclarationDataRowMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
+        return find(declarationTypeId, null, departmentReportPeriodId, null);
+    }
+
+    @Override
+    public DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId) {
+        List<DeclarationData> declarations = find(DeclarationType.NDFL_CONSOLIDATE, knfType, departmentReportPeriodId, null);
+        if (!declarations.isEmpty()) {
+            Assert.isTrue(declarations.size() == 1, "Найдено более одной консолидированной формы");
+            return declarations.get(0);
+        } else {
+            return null;
         }
+    }
+
+    @Override
+    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
+        return find(declarationTypeId, null, departmentReportPeriodId, kppOktmoPairs);
+    }
+
+    private List<DeclarationData> find(int declarationTypeId, RefBookKnfType knfType, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("departmentReportPeriodId", departmentReportPeriodId);
+        params.addValue("declarationTypeId", declarationTypeId);
+        String sql = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
+                "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
+                "from declaration_data dd " +
+                "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
+                "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
+                "where drp.id = :departmentReportPeriodId\n" +
+                "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id and dt.declaration_type_id = :declarationTypeId)";
+        if (kppOktmoPairs != null && !kppOktmoPairs.isEmpty()) {
+            sql += SqlUtils.pairInStatement(" and (dd.kpp, dd.oktmo)", kppOktmoPairs);
+        }
+        if (knfType != null) {
+            sql += " and dd.knf_type_id = :knfTypeId";
+            params.addValue("knfTypeId", knfType.getId());
+        }
+        return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
     }
 
     @Override
