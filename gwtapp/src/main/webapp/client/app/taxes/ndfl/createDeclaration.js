@@ -54,6 +54,7 @@
                     if (newValue) {
                         $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.declarationData.department.id);
                         $scope.kppSelectFilter.departmentId = newValue.id;
+                        $scope.declarationData.kppList = [];
                     }
                 });
 
