@@ -931,8 +931,11 @@ class Report6Ndfl extends AbstractScriptClass {
             // Список физлиц для каждой пары КПП и ОКТМО
             Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
             // Удаление ранее созданных отчетных форм
-            List<Pair<String, String>> kppOktmoPairs = ndflPersonsGroupedByKppOktmo.keySet().collect {
-                return new Pair<String, String>(it.kpp, it.oktmo)
+            List<Pair<String, String>> kppOktmoPairs = null
+            if (knfId != null) {// если создаём отчетность из КНФ, то формы удаляются по найденным парам КПП/ОКТМО
+                kppOktmoPairs = ndflPersonsGroupedByKppOktmo.keySet().collect {
+                    return new Pair<String, String>(it.kpp, it.oktmo)
+                }
             }
             List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTemplate.type.id, declarationData.departmentReportPeriodId, kppOktmoPairs, logger, userInfo)
             if (!notDeletedDeclarationPair.isEmpty()) {
@@ -1001,11 +1004,11 @@ class Report6Ndfl extends AbstractScriptClass {
                         " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
                 return null
             }
-        }
-        if (consolidatedDeclaration.state != State.ACCEPTED) {
-            logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                    " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № ${consolidatedDeclaration?.id} должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
-            return null
+            if (consolidatedDeclaration.state != State.ACCEPTED) {
+                logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
+                        " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № ${consolidatedDeclaration?.id} должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+                return null
+            }
         }
         return consolidatedDeclaration
     }
