@@ -79,7 +79,7 @@
                 /**
                  * @description Инициализация первичных данных на странице
                  */
-                $scope.updateDeclarationInfo = function () {
+                function updateDeclarationInfo() {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
                             projection: "declarationData",
@@ -87,71 +87,38 @@
                         },
                         function (data) {
                             if (data) {
-                                $scope.declarationData = data;
-                                $scope.declarationDataId = $stateParams.declarationDataId;
-                                switch (data.declarationType) {
-                                    case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id:
-                                        $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name;
-                                        break;
-                                    case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id:
-                                        $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name;
-                                        break;
-                                    case APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id:
-                                        $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name;
-                                        break;
+                                if (!data.declarationDataExists) {
+                                    cancelAllIntervals();
+                                    showDeclarationDataNotExistsError();
+                                } else {
+                                    $scope.declarationData = data;
+                                    $scope.declarationDataId = $stateParams.declarationDataId;
+                                    switch (data.declarationType) {
+                                        case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id:
+                                            $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name;
+                                            break;
+                                        case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id:
+                                            $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name;
+                                            break;
+                                        case APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id:
+                                            $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name;
+                                            break;
+                                    }
                                 }
-
-
                             }
                         }
                     );
-                };
+                }
 
-                var interval;
-                $scope.updateDeclarationInfoPeriodically = function () {
-                    if (angular.isDefined(interval)) {
-                        return;
-                    }
-                    $scope.updateDeclarationInfo();
-                    interval = $interval($scope.updateDeclarationInfo, 3000);
-                };
+                var updateDeclarationInfoInterval;
+                function startUpdateDeclarationInfoInterval() {
+                    updateDeclarationInfoInterval = $interval(updateDeclarationInfo, 3000);
+                    updateDeclarationInfo();
+                }
+                startUpdateDeclarationInfoInterval();
 
-                $scope.$on('$destroy', function () {
-                    if (angular.isDefined(interval)) {
-                        $interval.cancel(interval);
-                        interval = undefined;
-                    }
-                });
-
-                $scope.updateDeclarationInfoPeriodically();
-
-                /**
-                 * Обрабатывает результат формирования отчета
-                 * @param response результат
-                 * @param restartFunc функция повторного запуска формирования, если формирование уже запущено, то вызывается эта функция после подтверждения
-                 * @param reportAvailableModel модель отвечающая за доступность скачивания отчета
-                 */
-                function performReportSuccessResponse(response, restartFunc, reportAvailableModel) {
-                    if (response.uuid && response.uuid !== null) {
-                        // задача запустилась
-                        $logPanel.open('log-panel-container', response.uuid);
-                        $scope[reportAvailableModel] = false;
-                    } else {
-                        if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                            $dialogs.messageDialog({
-                                content: $filter('translate')('title.noCalculationPerformed')
-                            });
-                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                            $dialogs.confirmDialog({
-                                content: response.restartMsg,
-                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick: function () {
-                                    restartFunc(true);
-                                }
-                            });
-                        }
-                    }
+                function cancelUpdateDeclarationInfoInterval() {
+                    $interval.cancel(updateDeclarationInfoInterval);
                 }
 
                 $scope.pdfLoading = false;
@@ -170,43 +137,62 @@
                         function (data) {
                             if (data) {
                                 if (!data.declarationDataExist) {
-                                    $interval.cancel($scope.intervalId);
-                                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                    $dialogs.errorDialog({
-                                        content: message,
-                                        closeBtnClick: function () {
-                                            $state.go("/");
-                                        }
-                                    });
-                                    return;
-                                }
-                                $scope.availablePdf = data.availablePdf;
-                                $scope.availableReports = data.downloadXmlAvailable;
-                                $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                $scope.availableDeptNoticeDoc = data.downloadDeptNoticeAvailable;
-                                if (!$scope.pdfLoaded && data.availablePdf) {
-                                    $http({
-                                        method: "GET",
-                                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
-                                    }).success(function (response) {
-                                        $scope.pagesTotal = response;
-                                    });
-                                    $scope.pdfLoaded = true;
-                                }
-                                if (!$scope.availablePdf && !$scope.pdfLoading) {
-                                    $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Форма предварительного просмотра не сформирована";
-                                }
-                                if (!$scope.intervalId) {
-                                    $scope.intervalId = $interval(function () {
-                                        updateAvailableReports();
-                                    }, 10000);
+                                    cancelAllIntervals();
+                                    showDeclarationDataNotExistsError();
+                                } else {
+                                    $scope.availablePdf = data.availablePdf;
+                                    $scope.availableReports = data.downloadXmlAvailable;
+                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                    $scope.availableDeptNoticeDoc = data.downloadDeptNoticeAvailable;
+                                    if (!$scope.pdfLoaded && data.availablePdf) {
+                                        $http({
+                                            method: "GET",
+                                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
+                                        }).success(function (response) {
+                                            $scope.pagesTotal = response;
+                                        });
+                                        $scope.pdfLoaded = true;
+                                    }
+                                    if (!$scope.availablePdf && !$scope.pdfLoading) {
+                                        $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Форма предварительного просмотра не сформирована";
+                                    }
                                 }
                             }
                         }
                     );
                 }
 
-                updateAvailableReports();
+                var updateAvailableReportsInterval;
+                function startUpdateAvailableReportsInterval() {
+                    updateAvailableReportsInterval = $interval(function () {
+                        updateAvailableReports();
+                    }, 10000);
+                    updateAvailableReports();
+                }
+                startUpdateAvailableReportsInterval();
+
+                function cancelUpdateAvailableReportsInterval() {
+                    $interval.cancel(updateAvailableReportsInterval);
+                }
+
+                function cancelAllIntervals() {
+                    cancelUpdateDeclarationInfoInterval();
+                    cancelUpdateAvailableReportsInterval();
+                }
+
+                function showDeclarationDataNotExistsError() {
+                    var message = $filter('translate')('ndflReport.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                    $dialogs.errorDialog({
+                        content: message,
+                        closeBtnClick: function () {
+                            $state.go("/");
+                        }
+                    });
+                }
+
+                $scope.$on('$destroy', function () {
+                    cancelAllIntervals();
+                });
 
                 $scope.pager = {};
 
@@ -222,10 +208,6 @@
                             $scope.reportImage = response.requestUrl;
                         });
                 };
-
-                $rootScope.$on("$locationChangeStart", function () {
-                    $interval.cancel($scope.intervalId);
-                });
 
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();

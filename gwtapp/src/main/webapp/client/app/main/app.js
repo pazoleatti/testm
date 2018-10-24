@@ -468,6 +468,7 @@
         "filesComment.close.saveChange": "Первоначальные данные изменились, применить изменения?",
 
         "ndfl.removedDeclarationDataBegin": "Налоговая форма с номером = ",
+        "ndflReport.removedDeclarationDataBegin": "Отчетная форма с номером = ",
         "ndfl.removedDeclarationDataEnd": " не существует либо была удалена. Вы будете перенаправлены на главную страницу",
         "ndfl.notPersonalOrConsolidatedDeclarationDataBegin": "Налоговая форма с номером = ",
         "ndfl.notPersonalOrConsolidatedDeclarationDataEnd": " не является ПНФ или КНФ. Вы будете перенаправлены на главную страницу",
