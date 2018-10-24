@@ -358,7 +358,7 @@ CREATE TABLE ref_book_knf_type (
   status NUMBER(1,0) default 0
 );
 COMMENT ON TABLE ref_book_knf_type IS 'Типы КНФ';
-COMMENT ON column ref_book_knf_type.id IS 'Код вычета';
+COMMENT ON column ref_book_knf_type.id IS 'Код';
 COMMENT ON column ref_book_knf_type.name IS 'Наименование типа КНФ';
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_data (
@@ -403,16 +403,16 @@ CREATE TABLE declaration_data_kpp (
 );
 COMMENT ON TABLE declaration_data_kpp IS 'Включаемые в КНФ КПП';
 COMMENT ON column declaration_data_kpp.declaration_data_id IS 'Ид КНФ';
-COMMENT ON column declaration_data_kpp.kpp IS 'Включаемые в КНФ КПП';
+COMMENT ON column declaration_data_kpp.kpp IS 'КПП';
 ------------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE declaration_data_person (
   declaration_data_id NUMBER(18) NOT NULL,
   person_id           NUMBER(18) NOT NULL,
   CONSTRAINT ref_book_knf_type PRIMARY KEY (declaration_data_id, person_id)
 );
-COMMENT ON TABLE declaration_data_person IS 'Включаемые в КНФ КПП';
+COMMENT ON TABLE declaration_data_person IS 'Включаемые в КНФ ФЛ';
 COMMENT ON column declaration_data_person.declaration_data_id IS 'Ид КНФ';
-COMMENT ON column declaration_data_person.person_id IS 'Включаемые в КНФ КПП';
+COMMENT ON column declaration_data_person.person_id IS 'Ид ФЛ';
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
   id                          number(18)          not null,

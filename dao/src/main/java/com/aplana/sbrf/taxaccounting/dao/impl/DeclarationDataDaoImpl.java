@@ -292,7 +292,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder(
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
-                        "   asnu.name asnuName, knf_type.name knf_type_name, state.name state, dd.file_name fileName, log_b.log_date creationDate, su.name creationUserName,\n" +
+                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, log_b.log_date creationDate, su.name creationUserName,\n" +
                         "   case when drp.correction_date is not null then" +
                         "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')'" +
                         "       else tp.year || ': ' || rp.name end as reportPeriod,\n" +
@@ -393,7 +393,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         item.setDeclarationType(rs.getString("declarationType"));
                         item.setDepartment(rs.getString("department"));
                         item.setAsnuName(rs.getString("asnuName"));
-                        item.setKnfTypeName(rs.getString("knf_type_name"));
+                        item.setKnfTypeName(rs.getString("knfTypeName"));
                         item.setState(rs.getString("state"));
                         item.setFileName(rs.getString("fileName"));
                         item.setCreationDate(new Date(rs.getTimestamp("creationDate").getTime()));

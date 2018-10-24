@@ -352,4 +352,14 @@
         </update>
     </changeSet>
 
+    <!--правка на 3.2-dnovikov-13 и 3.2-dnovikov-14 и 3.2-dnovikov-15-->
+    <changeSet id="3.2-dnovikov-30" author="dnovikov">
+        <sql>
+            COMMENT ON column declaration_data_kpp.kpp IS 'КПП';
+            COMMENT ON TABLE declaration_data_person IS 'Включаемые в КНФ ФЛ';
+            COMMENT ON column declaration_data_person.person_id IS 'Ид ФЛ';
+            COMMENT ON column ref_book_knf_type.id IS 'Код';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
