@@ -132,7 +132,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append((filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty() ? "and " + SqlUtils.transformToSqlInStatementById("outer_npi.asnu_id", filter.getIncome().getAsnu()) : ""));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
@@ -259,7 +258,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(filter.getDeduction().getAsnu() != null && !filter.getDeduction().getAsnu().isEmpty() ? "and " + SqlUtils.transformToSqlInStatementById("outer_npd.asnu_id", filter.getDeduction().getAsnu()) : "");
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
@@ -379,7 +377,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(filter.getPrepayment().getAsnu() != null && !filter.getPrepayment().getAsnu().isEmpty() ? "and " + SqlUtils.transformToSqlInStatementById("outer_npp.asnu_id", filter.getPrepayment().getAsnu()) : "");
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
@@ -737,7 +734,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
-        queryBuilder.append(filter.getPerson().getAsnu() != null && !filter.getPerson().getAsnu().isEmpty() ? "and " + SqlUtils.transformToSqlInStatementById("np.asnu_id", filter.getPerson().getAsnu()) : "");
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
@@ -862,6 +858,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 filterBuilder.append(SqlUtils.pairInStatement("and not (npi.kpp, npi.oktmo)", kppOktmoPairs));
             }
         }
+        if (filter.getAsnu() != null && !filter.getAsnu().isEmpty()) {
+            filterBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npi.asnu_id", filter.getAsnu()));
+        }
         appendSqlLikeCondition("npi.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npi.id", filter.getId(), filterBuilder, params);
         appendSqlDateBetweenCondition("npi.modified_date", filter.getModifiedDateFrom(), filter.getModifiedDateTo(), filterBuilder, params);
@@ -879,6 +878,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("npd.notif_num", filter.getNotifNum(), filterBuilder, params);
         appendSqlLikeCondition("npd.notif_source", filter.getNotifSource(), filterBuilder, params);
         appendSqlDateBetweenCondition("npd.notif_date", filter.getNotifDateFrom(), filter.getNotifDateTo(), filterBuilder, params);
+        if (filter.getAsnu() != null && !filter.getAsnu().isEmpty()) {
+            filterBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npd.asnu_id", filter.getAsnu()));
+        }
 
         appendSqlLikeCondition("npd.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npd.id", filter.getId(), filterBuilder, params);
@@ -894,6 +896,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("npp.notif_source", filter.getNotifSource(), filterBuilder, params);
 
         appendSqlDateBetweenCondition("npp.notif_date", filter.getNotifDateFrom(), filter.getNotifDateTo(), filterBuilder, params);
+        if (filter.getAsnu() != null && !filter.getAsnu().isEmpty()) {
+            filterBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npp.asnu_id", filter.getAsnu()));
+        }
 
         appendSqlLikeCondition("npp.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npp.id", filter.getId(), filterBuilder, params);
