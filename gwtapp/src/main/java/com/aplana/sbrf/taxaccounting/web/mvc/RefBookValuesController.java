@@ -138,7 +138,7 @@ public class RefBookValuesController {
      * @return страница подразделений
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=allByFilter")
-    public JqgridPagedList<RefBookDepartment> findAllByFilter(@RequestParam DepartmentFilter filter, @RequestParam String name, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<RefBookDepartment> findAllByFilter(@RequestParam DepartmentFilter filter, @RequestParam(required = false) String name, @RequestParam PagingParams pagingParams) {
         TAUser user = securityService.currentUserInfo().getUser();
         filter.setName(name);
         PagingResult<RefBookDepartment> departments = refBookDepartmentService.findAllByFilter(filter, pagingParams, user);

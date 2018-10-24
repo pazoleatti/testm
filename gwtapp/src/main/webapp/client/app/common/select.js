@@ -317,13 +317,11 @@
 
                 /**
                  * Инициализировать список с видами форм, которые можно создать
-                 * @param modelPath путь к объекту в scope, содержащем значение типа, для установки его значения через _.deep
                  */
-                $scope.initSelectWithDeclarationTypesForCreate = function (modelPath) {
+                $scope.initSelectWithDeclarationTypesForCreate = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
                     $scope.declarationTypeSelect.options.data.results = [];
                     if (PermissionChecker.check($scope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY)) {
-                        _.deep($scope, modelPath, APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY);
                         $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY);
                     }
                     if (PermissionChecker.check($scope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED)) {
@@ -486,8 +484,8 @@
         /**
          * Контроллер для выбора подразделений
          */
-        .controller('SelectDepartmentCtrl', ['$scope', '$rootScope', 'GetSelectOption', 'APP_CONSTANTS', 'RefBookValuesResource', 'DepartmentResource',
-            function ($scope, $rootScope, GetSelectOption, APP_CONSTANTS, RefBookValuesResource, DepartmentResource) {
+        .controller('SelectDepartmentCtrl', ['$scope', '$rootScope', 'GetSelectOption', 'APP_CONSTANTS', 'RefBookValuesResource', '$http',
+            function ($scope, $rootScope, GetSelectOption, APP_CONSTANTS, RefBookValuesResource, $http) {
                 $scope.departmentsSelect = {};
 
                 /**
@@ -543,13 +541,32 @@
                 /**
                  * Инициализировать список с загрузкой подразделений с открытым периодом через ajax
                  * @param departmentFilter дополнительные параметры запроса
+                 * @param modelPath путь до объекта из ng-model, для установки его значения через _.deep, по сути передача параметра по ссылке
                  */
-                $scope.initActiveDepartmentSelectWithOpenPeriod = function (departmentFilter) {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allByFilter",
+                $scope.initActiveDepartmentSelectWithOpenPeriod = function (departmentFilter, modelPath) {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, false, "controller/rest/refBookValues/30?projection=allByFilter",
                         {filter: departmentFilter}, {
                             property: "fullName",
                             direction: "asc"
                         }, "fullNameFormatter");
+
+                    setDefaultValue();
+
+                    // устанавливает первое подразделение из списка
+                    function setDefaultValue() {
+                        $http({
+                            method: "GET",
+                            url: $scope.departmentsSelect.options.ajax.url,
+                            params: $scope.departmentsSelect.options.ajax.data()
+                        }).then(function (response) {
+                            if (response.data && response.data.rows) {
+                                _.deep($scope, modelPath, response.data.rows[0]);
+                            } else {
+                                _.deep($scope, modelPath, null);
+                            }
+                        });
+                    }
+                    return setDefaultValue;
                 };
 
                 /**

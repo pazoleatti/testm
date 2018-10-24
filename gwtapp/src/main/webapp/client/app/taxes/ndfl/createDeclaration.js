@@ -10,15 +10,15 @@
     /**
      * @description Контроллер МО Создания налоговой формы
      */
-        .controller('createDeclarationFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams', "$modalInstance", "$filter",
+        .controller('createDeclarationFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$modalInstance", "$filter",
             "RefBookValuesResource", "APP_CONSTANTS",
             '$shareData', '$dialogs', '$webStorage',
-            function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter,
+            function ($scope, $http, $state, $stateParams, $modalInstance, $filter,
                       RefBookValuesResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage) {
 
                 $scope.selectedReportPeriod = {};
                 $scope.declarationData = {
-                    department: $rootScope.user.department,
+                    declarationType: APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY,
                     knfType: APP_CONSTANTS.KNF_TYPE.ALL
                 };
 
@@ -29,17 +29,15 @@
                 });
 
                 $scope.departmentSelectFilter = {};
-                $scope.kppSelectFilter = {departmentId: $scope.declarationData.department.id};
+                $scope.kppSelectFilter = {};
 
                 $scope.$watch("declarationData.declarationType", function (newValue, oldValue) {
                     if (newValue) {
                         var isKnf = $scope.declarationData.declarationType && $scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id;
                         $scope.departmentSelectFilter.assignedToDeclarationTypeId = $scope.declarationData.declarationType.id;
                         $scope.departmentSelectFilter.onlyTB = isKnf;
-                        if (isKnf) {
-                            if (!$scope.isTerBank($scope.declarationData.department)) {
-                                $scope.declarationData.department = $rootScope.user.terBank;
-                            }
+                        if ($scope.declarationData.setDefaultDepartment) {
+                            $scope.declarationData.setDefaultDepartment();
                         }
                     }
                     if (!newValue || oldValue && newValue.id !== oldValue.id) {

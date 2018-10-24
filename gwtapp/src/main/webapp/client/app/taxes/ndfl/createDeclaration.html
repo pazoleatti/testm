@@ -13,7 +13,7 @@
                             <div style="width: 355px;"
                                  data-ng-controller="SelectDeclarationTypeCtrl"
                                  data-ui-select2="declarationTypeSelect.options"
-                                 data-ng-init="initSelectWithDeclarationTypesForCreate('declarationData.declarationType')"
+                                 data-ng-init="initSelectWithDeclarationTypesForCreate()"
                                  data-ng-model="declarationData.declarationType"
                                  data-required>
                             </div>
@@ -34,7 +34,7 @@
                             <div style="width: 355px;"
                                  data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initActiveDepartmentSelectWithOpenPeriod(departmentSelectFilter)"
+                                 data-ng-init="declarationData.setDefaultDepartment=initActiveDepartmentSelectWithOpenPeriod(departmentSelectFilter, 'declarationData.department')"
                                  data-ng-model="declarationData.department"
                                  data-required>
                             </div>
