@@ -131,6 +131,7 @@
         "menu.taxes": "Налоги",
         "menu.taxes.ndfl": "НДФЛ",
         "menu.taxes.application2": "Сформировать Приложение 2",
+        "menu.taxes.taxNotification": "Сформировать Уведомления о неудержанном налоге",
         "menu.taxes.ndfl.details": "НДФЛ детализация",
         "menu.taxes.ndfl.forms": "Формы",
         "menu.taxes.ndfl.maintenanceOfPeriods": "Ведение периодов",
@@ -1056,7 +1057,14 @@
         "scriptExecution.label.upload": "Выберите архив со скриптом для загрузки",
 
         "application2.title.modal": "Создание файла Приложения 2 к декларации по налогу на прибыль",
-        "application2.label.year": "Год"
+        "application2.label.year": "Год",
+
+        "taxNotification.title.modal": "Параметры для формирования уведомлений",
+        "taxNotification.label.department": "Подразделение",
+        "taxNotification.label.period": "Период",
+        "taxNotification.label.asnu": "Код АСНУ",
+        "taxNotification.confirm.cancel.title": "Отмена формирования",
+        "taxNotification.confirm.cancel.text": "Отменить формирование?"
     };
     /**
      * @description Основной модуль приложения

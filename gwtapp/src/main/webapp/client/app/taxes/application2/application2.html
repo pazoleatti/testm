@@ -15,16 +15,14 @@
                                data-required
                                max="9999"
                                min="1000"/>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                         <div data-aplana-validator data-key='min'>
-                            {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
-                            1000 + ' }'}}
+                            {{:: 'common.validation.min.value' | translate:'{ minValue: ' + 1000 + ' }'}}
                         </div>
                         <div data-aplana-validator data-key='max'>
-                            {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
-                            9999 + ' }'}}
+                            {{:: 'common.validation.max.value' | translate:'{ maxValue: ' + 9999 + ' }'}}
                         </div>
                     </div>
                 </td>

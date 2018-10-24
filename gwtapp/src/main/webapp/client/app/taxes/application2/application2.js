@@ -16,7 +16,7 @@
                 /**
                  * Запуск задачи формирования Приложения 2
                  */
-                $scope.create = function() {
+                $scope.create = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/createApplication2",
@@ -35,6 +35,6 @@
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
-            }])
-
+            }
+        ])
 }());

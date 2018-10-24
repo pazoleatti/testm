@@ -1,0 +1,52 @@
+<form class="form-horizontal">
+    <div class="modal-body">
+        <!-- Подразделение -->
+        <div class="row-fluid form-group">
+            <div class="span4">
+                <label class="control-label">{{::'taxNotification.label.department' | translate}}:</label>
+            </div>
+            <div class="span8"
+                 data-ng-controller="SelectDepartmentCtrl"
+                 data-ui-select2="departmentsSelect.options"
+                 data-ng-init="initAvailableTBSelect()"
+                 data-ng-model="params.department">
+            </div>
+        </div>
+        <!-- Период -->
+        <div class="row-fluid form-group">
+            <div class="span4">
+                <label class="control-label">{{::'taxNotification.label.period' | translate}}:</label>
+            </div>
+            <div class="span8"
+                 data-ng-disabled="!params.department"
+                 data-ng-controller="SelectPeriodCtrl"
+                 data-ui-select2="periodSelect.options"
+                 data-ng-init="initSelectWithOpenDepartmentPeriods(params.department.id, 'params.period')"
+                 data-ng-model="params.period">
+            </div>
+        </div>
+        <!-- АСНУ -->
+        <div class="row-fluid form-group">
+            <div class="span4">
+                <label class="control-label">{{::'taxNotification.label.asnu' | translate}}:</label>
+            </div>
+            <div class="span8"
+                 data-ng-controller="SelectAsnuCtrl"
+                 data-ui-select2="asnuSelect.options"
+                 data-ng-init="initMultipleCodeNameSelectAsnu()"
+                 data-ng-model="params.asnuList">
+            </div>
+        </div>
+    </div>
+    <!-- Управляющие кнопки -->
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton" data-ng-click="create()">
+            <span data-translate-once="button.create"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" data-ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

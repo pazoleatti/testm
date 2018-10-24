@@ -12,7 +12,8 @@
         'app.formatters',
         'app.constants',
         'app.permissionUtils',
-        'app.application2'
+        'app.application2',
+        'app.taxNotification'
     ])
         .directive('appHeader', function () {
             return {
@@ -78,6 +79,12 @@
                         $scope.treeTaxes.push({
                             name: $filter('translate')('menu.taxes.application2'),
                             onClick: openApplication2Modal
+                        });
+                    }
+                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                        $scope.treeTaxes.push({
+                            name: $filter('translate')('menu.taxes.taxNotification'),
+                            onClick: openTaxNotificationModal
                         });
                     }
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_SERVICE)) {
@@ -219,8 +226,7 @@
 
                         if ($scope.notificationsCount > 0) {
                             $scope.notificationsCountClass = "new-message";
-                        }
-                        else {
+                        } else {
                             $scope.notificationsCountClass = "new-message empty-message";
                         }
                     });
@@ -254,6 +260,16 @@
                         controller: 'application2Ctrl',
                         windowClass: 'modal200'
                     });
-                }
-            }]);
+                };
+
+                var openTaxNotificationModal = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('taxNotification.title.modal'),
+                        templateUrl: 'client/app/taxes/taxNotification/taxNotification.html',
+                        controller: 'taxNotificationCtrl',
+                        windowClass: 'modal200'
+                    });
+                };
+            }]
+        );
 }());

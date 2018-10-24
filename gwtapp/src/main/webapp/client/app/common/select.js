@@ -221,6 +221,14 @@
                     });
                 };
 
+                // Множественный выбор в формате "(код) название"
+                $scope.initMultipleCodeNameSelectAsnu = function () {
+                    $scope.asnuSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'codeNameFormatter');
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
+                        $scope.asnuSelect.options.data.results = data;
+                    });
+                };
+
                 $scope.initSingleSelectAsnu = function () {
                     $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptions(true);
                     RefBookValuesResource.query({
@@ -284,7 +292,9 @@
                 };
 
                 var isReportForm = function (declarationType) {
-                    return declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id;
+                    return declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id
+                        || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id
+                        || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id;
                 };
 
                 /**
@@ -427,9 +437,8 @@
                  * @description Инициализировать выпадающий список пустым массивом
                  */
                 $scope.initEmptySelect = function () {
-                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true);
                     $scope.periodSelect.options.data.results = [];
-
                 };
 
                 /**
@@ -465,8 +474,8 @@
                                 // если выбранный период есть в списке, то оставляем, иначе установливаем самый последний
                                 var currentValue = _.deep($scope, modelPath);
                                 if (!currentValue || !_.find(departments, function (department) {
-                                        return department.id === currentValue.id;
-                                    })) {
+                                    return department.id === currentValue.id;
+                                })) {
                                     var defaultValue = departments[0];
                                     _.deep($scope, modelPath, defaultValue);
                                     angular.forEach(departments, function (period) {
