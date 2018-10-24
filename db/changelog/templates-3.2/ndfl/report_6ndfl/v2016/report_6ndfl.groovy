@@ -995,7 +995,7 @@ class Report6Ndfl extends AbstractScriptClass {
         if (knfId != null) {
             consolidatedDeclaration = declarationService.getDeclarationData(knfId)
         } else {
-            consolidatedDeclaration = declarationService.findConesolidated(RefBookKnfType.ALL, departmentReportPeriod.id)
+            consolidatedDeclaration = declarationService.findConsolidated(RefBookKnfType.ALL, departmentReportPeriod.id)
             if (consolidatedDeclaration == null) {
                 logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
                         " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
