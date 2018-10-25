@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
@@ -28,6 +29,7 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -83,6 +85,9 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private RefBookAsnuService refBookAsnuService;
+
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
@@ -222,6 +227,18 @@ public class RefBookServiceImpl implements RefBookService {
             logger.logTopMessage(LogLevel.INFO, "Выполнен импорт скриптов и xsd справочников. Загружаемых файлов в архиве не обнаружено.");
         }
         return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
+    @Transactional (readOnly = true)
+    public List<RefBookAsnu> findAllAsnu() {
+        return refBookAsnuService.fetchAll();
+    }
+
+    @Override
+    @Transactional (readOnly = true)
+    public RefBookAsnu getAsnu(Long asnuId) {
+        return refBookAsnuService.fetchById(asnuId);
     }
 
     private void importRefBookConf(ByteArrayInputStream inputStream, String fileName, Logger logger) throws IOException {

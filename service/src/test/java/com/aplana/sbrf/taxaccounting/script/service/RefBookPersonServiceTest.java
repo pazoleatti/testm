@@ -85,13 +85,15 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Map<Long, Integer> priorityMap = new HashMap<>();
-        priorityMap.put(1L, 100);
-        priorityMap.put(2L, 100);
-        priorityMap.put(3L, 100);
-        priorityMap.put(4L, 100);
-        priorityMap.put(5L, 100);
-        priorityMap.put(6L, 100);
+        Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
+        RefBookAsnu priorityAsnu = new RefBookAsnu();
+        priorityAsnu.setPriority(100);
+        priorityMap.put(1L, priorityAsnu);
+        priorityMap.put(2L, priorityAsnu);
+        priorityMap.put(3L, priorityAsnu);
+        priorityMap.put(4L, priorityAsnu);
+        priorityMap.put(5L, priorityAsnu);
+        priorityMap.put(6L, priorityAsnu);
         IdentificationData identificationDataFixture = new IdentificationData();
         identificationDataFixture.setNaturalPerson(primaryPerson);
         identificationDataFixture.setRefBookPersonList(getList());
@@ -106,13 +108,17 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonAsnuLowPriorityTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Map<Long, Integer> priorityMap = new HashMap<>();
-        priorityMap.put(1L, 100);
-        priorityMap.put(2L, 200);
-        priorityMap.put(3L, 200);
-        priorityMap.put(4L, 200);
-        priorityMap.put(5L, 200);
-        priorityMap.put(6L, 200);
+        Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
+        RefBookAsnu priorityAsnu100 = new RefBookAsnu();
+        priorityAsnu100.setPriority(100);
+        RefBookAsnu priorityAsnu200 = new RefBookAsnu();
+        priorityAsnu200.setPriority(200);
+        priorityMap.put(1L, priorityAsnu100);
+        priorityMap.put(2L, priorityAsnu200);
+        priorityMap.put(3L, priorityAsnu200);
+        priorityMap.put(4L, priorityAsnu200);
+        priorityMap.put(5L, priorityAsnu200);
+        priorityMap.put(6L, priorityAsnu200);
         IdentificationData identificationDataFixture = new IdentificationData();
         identificationDataFixture.setNaturalPerson(primaryPerson);
         identificationDataFixture.setRefBookPersonList(getList());
@@ -129,8 +135,10 @@ public class RefBookPersonServiceTest {
     // TODO добавить ДУЛ для отчётности и включить
     public void identificatePersonEqualWeightTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Map<Long, Integer> priorityMap = new HashMap<>();
-        priorityMap.put(1L, 100);
+        Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
+        RefBookAsnu priorityAsnu = new RefBookAsnu();
+        priorityAsnu.setPriority(100);
+        priorityMap.put(1L, priorityAsnu);
         List<NaturalPerson> personDataList = new ArrayList<NaturalPerson>();
         personDataList.add(createNaturalPerson(1L, "888", "2", "", "12300011156", "", "1112", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
         personDataList.add(createNaturalPerson(2L, "888", "2", "", "12300011156", "", "1113", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
@@ -196,7 +204,9 @@ public class RefBookPersonServiceTest {
         result.setFirstName(firstName);
         result.setMiddleName(middleName);
         result.setBirthDate(toDate(birthDate));
-        result.setSourceId(sourceId);
+        RefBookAsnu source = new RefBookAsnu();
+        source.setId(sourceId);
+        result.setSource(source);
         return result;
     }
 
@@ -204,7 +214,9 @@ public class RefBookPersonServiceTest {
         PersonIdentifier personIdentifier = new PersonIdentifier();
         personIdentifier.setId(id);
         personIdentifier.setInp(inp);
-        personIdentifier.setAsnuId(asnuId);
+        RefBookAsnu asnu = new RefBookAsnu();
+        asnu.setId(asnuId);
+        personIdentifier.setAsnu(asnu);
         return personIdentifier;
     }
 

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -56,6 +57,12 @@ public interface PersonService {
     void updateRegistryPerson(RegistryPersonDTO person);
 
     /**
+     * Обновить несколько записей объектов идентификации - физлиц
+     * @param personList список ФЛ
+     */
+    void updateIdentificatedPersons(List<NaturalPerson> personList);
+
+    /**
      * Проверяет корректность ДУЛ
      * @param docCode   код документа
      * @param docNumber номер документа
@@ -73,6 +80,7 @@ public interface PersonService {
     /**
      * Сохранить группу Физлиц.
      * @param personList коллекция Физлиц
+     * @return список ФЛ с добавленными идентификаторами ФЛ
      */
-    void savePersons(List<RegistryPerson> personList);
+     List<RegistryPerson> savePersons(List<RegistryPerson> personList);
 }

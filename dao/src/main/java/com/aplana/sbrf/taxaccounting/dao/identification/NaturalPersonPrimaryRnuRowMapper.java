@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.refbook.Address;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,16 +12,15 @@ import java.sql.SQLException;
  */
 public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMapper {
 
-    private Long asnuId;
+    private RefBookAsnu asnu;
 
-    public Long getAsnuId() {
-        return asnuId;
+    public RefBookAsnu getAsnu() {
+        return asnu;
     }
 
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
+    public void setAsnu(RefBookAsnu asnu) {
+        this.asnu = asnu;
     }
-
 
     @Override
     public NaturalPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -47,12 +44,13 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         person.setInnForeign(rs.getString("inn_foreign"));
 
         String inp = rs.getString("inp");
-        if (inp != null && asnuId != null) {
+        if (inp != null) {
             PersonIdentifier personIdentifier = new PersonIdentifier();
             personIdentifier.setPerson(person);
             personIdentifier.setInp(inp);
-            personIdentifier.setAsnuId(asnuId);
+            personIdentifier.setAsnu(asnu);
             person.getPersonIdentityList().add(personIdentifier);
+            person.setSource(asnu);
         }
 
         String documentTypeCode = rs.getString("id_doc_type");
@@ -64,20 +62,20 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
             personDocument.setIncRep(1);
+            person.getDocuments().add(personDocument);
         }
 
         person.setTaxPayerState(getTaxpayerStatusByCode(rs.getString("status")));
 
-        //Используются все адреса, а не только те, которые прошли проверку по ФИАС
         person.setAddress(buildAddress(rs));
 
-        //rs.getString("additional_data")
         return person;
     }
 
     public Address buildAddress(ResultSet rs) throws SQLException {
         Address address = new Address();
-        //address.setCountry(getCountryByCode(rs.getString("country_code")));
+        RefBookCountry country = getCountryByCode(rs.getString("country_code"));
+        address.setCountry(country != null ? country : new RefBookCountry());
         address.setRegionCode(rs.getString("region_code"));
         address.setPostalCode(rs.getString("post_index"));
         address.setDistrict(rs.getString("area"));

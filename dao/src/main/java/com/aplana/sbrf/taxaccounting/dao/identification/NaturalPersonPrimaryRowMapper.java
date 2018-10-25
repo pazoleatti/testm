@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;

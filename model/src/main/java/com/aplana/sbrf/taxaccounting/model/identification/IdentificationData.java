@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.Map;
 /**
  * Класс инкапсулирующий данные для идентификации ФЛ
  */
+@Getter @Setter
 public class IdentificationData {
 
     private NaturalPerson naturalPerson;
@@ -19,47 +22,8 @@ public class IdentificationData {
     private long declarationDataAsnuId;
 
     /**
-     * Кэш проритетов АСНУ. Ключ id ref_book-asnu, значение приоритет
+     * Кэш проритетов АСНУ. Ключ id ref_book-asnu, значение асну
      */
-    private Map<Long, Integer> priorityMap;
+    private Map<Long, RefBookAsnu> priorityMap;
 
-    public NaturalPerson getNaturalPerson() {
-        return naturalPerson;
-    }
-
-    public void setNaturalPerson(NaturalPerson naturalPerson) {
-        this.naturalPerson = naturalPerson;
-    }
-
-    public List<NaturalPerson> getRefBookPersonList() {
-        return refBookPersonList;
-    }
-
-    public void setRefBookPersonList(List<NaturalPerson> refBookPersonList) {
-        this.refBookPersonList = refBookPersonList;
-    }
-
-    public int getTresholdValue() {
-        return tresholdValue;
-    }
-
-    public void setTresholdValue(int tresholdValue) {
-        this.tresholdValue = tresholdValue;
-    }
-
-    public long getDeclarationDataAsnuId() {
-        return declarationDataAsnuId;
-    }
-
-    public void setDeclarationDataAsnuId(long declarationDataId) {
-        this.declarationDataAsnuId = declarationDataId;
-    }
-
-    public Map<Long, Integer> getPriorityMap() {
-        return priorityMap;
-    }
-
-    public void setPriorityMap(Map<Long, Integer> priorityMap) {
-        this.priorityMap = priorityMap;
-    }
 }

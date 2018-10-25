@@ -197,7 +197,7 @@ public abstract class BaseWeightCalculator<T> implements WeightCalculator<T> {
 
     public PersonIdentifier findIdentifier(NaturalPerson person, String inp, Long asnuId) {
         for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
-            if (equalsNullSafe(BaseWeightCalculator.prepareString(inp), BaseWeightCalculator.prepareString(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnuId())) {
+            if (equalsNullSafe(BaseWeightCalculator.prepareString(inp), BaseWeightCalculator.prepareString(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnu().getId())) {
                 return personIdentifier;
             }
         }
@@ -206,7 +206,7 @@ public abstract class BaseWeightCalculator<T> implements WeightCalculator<T> {
 
     public PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
         for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
-            if (personIdentifier.getAsnuId() != null && personIdentifier.getAsnuId().equals(asnuId)) {
+            if (personIdentifier.getAsnu() != null && personIdentifier.getAsnu().getId().equals(asnuId)) {
                 return personIdentifier;
             }
         }

@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -69,7 +70,7 @@ public class PersonServiceImpl implements PersonService {
     };
 
     @Override
-    @PreAuthorize("hasPermission(#requestingUser, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional (readOnly = true)
     public PagingResult<RegistryPersonDTO> getPersonsData(PagingParams pagingParams, RefBookPersonFilter filter) {
         PagingResult<RegistryPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
         PagingResult<RegistryPersonDTO> result = convertPersonToDTO(persons);
@@ -123,12 +124,12 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @Transactional (readOnly = true)
     public int getPersonsCount(RefBookPersonFilter filter) {
         return refBookPersonDao.getPersonsCount(filter);
     }
 
     @Override
-    @PreAuthorize("hasPermission(#requestingUser, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
     public RegistryPersonDTO fetchPersonData(Long id) {
         final RegistryPerson person = refBookPersonDao.fetchPersonVersion(id);
         person.setDocuments(idDocDaoImpl.getByPerson(person));
@@ -304,6 +305,43 @@ public class PersonServiceImpl implements PersonService {
         refBookPersonDao.updateRegistryPerson(persistedPerson);
     }
 
+    @Override
+    @Transactional
+    public void updateIdentificatedPersons(List<NaturalPerson> personList) {
+        List<IdDoc> idDocs = new ArrayList<>();
+        List<PersonIdentifier> idTaxPayers = new ArrayList<>();
+        List<PersonTb> personTbs = new ArrayList<>();
+
+        for (NaturalPerson person : personList) {
+            idDocs.addAll(person.getDocuments());
+            idTaxPayers.addAll(person.getPersonIdentityList());
+            personTbs.addAll(person.getPersonTbList());
+        }
+
+        List<RegistryPerson> toSave = new ArrayList<>();
+        for (NaturalPerson person : personList) {
+            toSave.add(person);
+        }
+
+        List<IdDoc> idDocToSave = new ArrayList<>();
+        List<IdDoc> idDocToUpdate = new ArrayList<>();
+        for (IdDoc idDoc : idDocs) {
+            if (idDoc.getId() == null) {
+                idDocToSave.add(idDoc);
+            } else {
+                idDocToUpdate.add(idDoc);
+            }
+        }
+
+        refBookPersonDao.updateBatch(toSave);
+        idDocDaoImpl.saveBatch(idDocToSave);
+        idDocDaoImpl.updateBatch(idDocToUpdate);
+        idTaxPayerDaoImpl.saveBatch(idTaxPayers);
+        personTbDaoImpl.saveBatch(personTbs);
+
+        refBookPersonDao.updateBatch(toSave);
+    }
+
     void checkVersionOverlapping(RegistryPersonDTO person) {
         Date minDate = null, maxDate = new Date(0);
         List<RegistryPerson> overlappingPersonList = new ArrayList<>();
@@ -383,6 +421,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @PreAuthorize("hasPermission(#requestingUser, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional (readOnly = true)
     public PagingResult<RegistryPersonDTO> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser) {
         if (filter == null) {
             return new PagingResult<>();
@@ -395,7 +434,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public void savePersons(List<RegistryPerson> personList) {
+    public List<RegistryPerson> savePersons(List<RegistryPerson> personList) {
         List<IdDoc> idDocs = new ArrayList<>();
         List<PersonIdentifier> idTaxPayers = new ArrayList<>();
         List<PersonTb> personTbs = new ArrayList<>();
@@ -415,6 +454,8 @@ public class PersonServiceImpl implements PersonService {
         personTbDaoImpl.saveBatch(personTbs);
 
         refBookPersonDao.updateBatch(personList);
+
+        return personList;
     }
 
     /**

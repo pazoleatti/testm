@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.script.service.impl;
 
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.script.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +31,16 @@ public class PersonServiceImpl implements PersonService{
     }
 
     @Override
-    public void saveNewPersons(List<RegistryPerson> persons) {
-        personService.savePersons(persons);
+    public List<RegistryPerson> saveNewPersons(List<NaturalPerson> persons) {
+        List<RegistryPerson> toSave = new ArrayList<>();
+        for (NaturalPerson person : persons) {
+            toSave.add(person);
+        }
+        return personService.savePersons(toSave);
+    }
+
+    @Override
+    public void updatePersons(List<NaturalPerson> persons) {
+        personService.updateIdentificatedPersons(persons);
     }
 }

@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.collections4.map.HashedMap;
@@ -50,6 +51,8 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
      * Кэш справочника типы документов
      */
     private Map<Long, RefBookDocType> docTypeMap;
+
+    private Map<Long, RefBookAsnu> asnuMap;
 
     /**
      *
@@ -122,7 +125,9 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             personIdentifier.setId(personIdentifierId);
 
             personIdentifier.setInp(rs.getString("inp"));
-            personIdentifier.setAsnuId(SqlUtils.getLong(rs, "as_nu"));
+            RefBookAsnu asnu = new RefBookAsnu();
+            asnu.setId(SqlUtils.getLong(rs, "as_nu"));
+            personIdentifier.setAsnu(asnu);
             personIdentifier.setPerson(naturalPerson);
             personIdentityMap.put(personIdentifierId, personIdentifier);
             naturalPerson.getPersonIdentityList().add(personIdentifier);
@@ -133,14 +138,13 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         Long refBookPersonId = naturalPerson.getId();
         Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
         Map<Long, IdDoc> pesonDocumentMap = documentsMap.get(refBookPersonId);
-        Integer docStatus = SqlUtils.getInteger(rs, "doc_status");
 
         if (pesonDocumentMap == null) {
             pesonDocumentMap = new HashMap<Long, IdDoc>();
             documentsMap.put(refBookPersonId, pesonDocumentMap);
         }
 
-        if (docId != null && !pesonDocumentMap.containsKey(docId) && docStatus == 0) {
+        if (docId != null && !pesonDocumentMap.containsKey(docId)) {
             Long docTypeId = SqlUtils.getLong(rs, "doc_id");
             RefBookDocType docType = getDocTypeById(docTypeId);
             IdDoc personDocument = new IdDoc();
@@ -165,17 +169,18 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         Long refBookPersonId = naturalPerson.getId();
         Long personTbId = SqlUtils.getLong(rs, "ref_book_person_tb_id");
         Map<Long, PersonTb> tbMap = personTbMap.get(refBookPersonId);
-        Integer tbStatus = SqlUtils.getInteger(rs, "tb_status");
 
         if (tbMap == null) {
             tbMap = new HashMap<>();
             personTbMap.put(refBookPersonId, tbMap);
         }
 
-        if (personTbId != null && !tbMap.containsKey(personTbId) && tbStatus == 0) {
+        if (personTbId != null && !tbMap.containsKey(personTbId)) {
             PersonTb personTb = new PersonTb();
             personTb.setId(personTbId);
-            /*personTb.setTbDepartmentId(rs.getInt("tb_department_id"));*/
+            Department department = new Department();
+            department.setId(rs.getInt("tb_department_id"));
+            personTb.setTbDepartment(department);
             personTb.setImportDate(rs.getDate("import_date"));
             personTb.setPerson(naturalPerson);
             tbMap.put(personTbId, personTb);
@@ -211,8 +216,10 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
             //additional
-            person.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            person.setSource(asnuMap.get(SqlUtils.getLong(rs, "source_id")));
             person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+            person.setOldId(SqlUtils.getLong(rs, "old_id"));
+            person.setVip(rs.getBoolean("vip"));
 
             refbookPersonTempMap.put(refBookPersonId, person);
 
@@ -223,25 +230,20 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     }
 
     private Address buildAddress(ResultSet rs) throws SQLException {
-        Long addrId = SqlUtils.getLong(rs, "REF_BOOK_ADDRESS_ID");
-        if (addrId != null) {
-            Address address = new Address();
-
-            //address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
-            address.setRegionCode(rs.getString("region_code"));
-            address.setPostalCode(rs.getString("postal_code"));
-            address.setDistrict(rs.getString("district"));
-            address.setCity(rs.getString("city"));
-            address.setLocality(rs.getString("locality"));
-            address.setStreet(rs.getString("street"));
-            address.setHouse(rs.getString("house"));
-            address.setBuild(rs.getString("build"));
-            address.setAppartment(rs.getString("appartment"));
-            address.setAddressIno(rs.getString("address"));
-            return address;
-        } else {
-            return null;
-        }
+        Address address = new Address();
+        RefBookCountry country = getCountryById(SqlUtils.getLong(rs, "country_id"));
+        address.setCountry(country != null ? country : new RefBookCountry());
+        address.setRegionCode(rs.getString("region_code"));
+        address.setPostalCode(rs.getString("postal_code"));
+        address.setDistrict(rs.getString("district"));
+        address.setCity(rs.getString("city"));
+        address.setLocality(rs.getString("locality"));
+        address.setStreet(rs.getString("street"));
+        address.setHouse(rs.getString("house"));
+        address.setBuild(rs.getString("build"));
+        address.setAppartment(rs.getString("appartment"));
+        address.setAddressIno(rs.getString("address"));
+        return address;
     }
 
     public Map<Long, RefBookCountry> getCountryMap() {
@@ -266,6 +268,14 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     public void setDocTypeMap(Map<Long, RefBookDocType> docTypeMap) {
         this.docTypeMap = docTypeMap;
+    }
+
+    public Map<Long, RefBookAsnu> getAsnuMap() {
+        return asnuMap;
+    }
+
+    public void setAsnuMap(Map<Long, RefBookAsnu> asnuMap) {
+        this.asnuMap = asnuMap;
     }
 
     private RefBookTaxpayerState getTaxpayerStatusById(Long taxpayerStatusId) {

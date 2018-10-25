@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
@@ -18,7 +19,17 @@ public interface PersonService {
      */
     int getCountOfUniqueEntries(long declarationDataId);
 
+    /**
+     * Сохранить группу Физлиц.
+     * @param persons коллекция Физлиц
+     * @return список ФЛ с добавленными идентификаторами ФЛ
+     */
+   List<RegistryPerson> saveNewPersons(List<NaturalPerson> persons);
 
-    void saveNewPersons(List<RegistryPerson> persons);
+    /**
+     * Обновить несколько записей объектов идентификации - физлиц
+     * @param persons список ФЛ
+     */
+   void updatePersons(List<NaturalPerson> persons);
 
 }

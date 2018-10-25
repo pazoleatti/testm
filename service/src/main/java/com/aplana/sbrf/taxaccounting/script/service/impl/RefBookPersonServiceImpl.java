@@ -50,13 +50,13 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, asnuId, naturalPersonHandler);
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, naturalPersonHandler);
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, asnuId, naturalPersonHandler);
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, naturalPersonHandler);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то устанавливаем ИД АСНУ == null, чтобы указать
             что запись не нужно ни обновлять ни создавать*/
             for (NaturalPerson person : personDataList) {
-                if (person.getSourceId() != null && identificationData.getPriorityMap().get(person.getSourceId()) > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
+                if (person.getSource() != null && person.getSource().getId() != null && identificationData.getPriorityMap().get(person.getSource().getId()).getPriority() > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId()).getPriority()) {
                     person.setNeedUpdate(false);
                 }
             }
@@ -237,7 +237,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
                 if (primaryPersonId != null) {
                     //Ищем совпадение в списке идентификаторов
-                    PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnuId());
+                    PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnu().getId());
                     return (refBookPersonId != null) ? weight : 0D;
                 } else {
                     //Если  значени параметра не задано то оно не должно учитыватся при сравнении со списком

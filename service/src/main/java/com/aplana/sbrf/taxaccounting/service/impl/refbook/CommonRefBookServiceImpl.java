@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
@@ -68,11 +69,13 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     };
 
     @Override
+    @Transactional (readOnly = true)
     public RefBook get(Long refBookId) {
         return refBookDao.get(refBookId);
     }
 
     @Override
+    @Transactional (readOnly = true)
     public RefBook getByAttribute(Long attributeId) {
         return refBookDao.getByAttribute(attributeId);
     }
@@ -83,6 +86,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @Transactional (readOnly = true)
     public List<RefBookShortInfo> findAllShortInfo(String name, PagingParams pagingParams) {
         return refBookDao.findAllVisibleShortInfo(name, pagingParams);
     }
@@ -299,6 +303,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @Transactional (readOnly = true)
     public String getRefBookLockDescription(LockData lockData, long refBookId) {
         if (lockData.getTaskId() != null) {
             //Заблокировано асинхроннной задачей
@@ -317,6 +322,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @Transactional (readOnly = true)
     public RefBookAttribute getAttributeByAlias(long refBookId, String attributeAlias) {
         for (RefBookAttribute attribute : refBookDao.getAttributes(refBookId)) {
             if (attribute.getAlias().equals(attributeAlias)) {
@@ -327,6 +333,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @Transactional (readOnly = true)
     public boolean getEventScriptStatus(long refBookId, FormDataEvent event) {
         String script = refBookScriptingService.getScript(refBookId);
         if (script != null && !script.isEmpty()) {
@@ -337,6 +344,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
+    @Transactional (readOnly = true)
     public Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId) {
         List<FormDataEvent> formDataEventList = Arrays.asList(FormDataEvent.ADD_ROW, FormDataEvent.IMPORT);
         Map<FormDataEvent, Boolean> eventScriptStatus = new HashMap<FormDataEvent, Boolean>();
@@ -355,6 +363,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("isAuthenticated()")
+    @Transactional (readOnly = true)
     public <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String searchPattern, String filter, PagingParams pagingParams) {
         RefBookAttribute sortAttribute = pagingParams != null && StringUtils.isNotEmpty(pagingParams.getProperty()) ?
                 getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
@@ -364,12 +373,14 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("isAuthenticated()")
+    @Transactional (readOnly = true)
     public <T extends RefBookSimple> T fetchRecord(Long refBookId, Long recordId) {
         return refBookSimpleDao.getRecord(get(refBookId), recordId);
     }
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional
     public ActionResult editRecord(TAUserInfo userInfo, long refBookId, long recordId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -392,6 +403,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional
     public ActionResult createRecord(TAUserInfo userInfo, Long refBookId, Map<String, RefBookValue> record) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -432,6 +444,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional
     public ActionResult deleteRecords(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -441,6 +454,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional
     public ActionResult deleteVersions(TAUserInfo userInfo, Long refBookId, List<Long> recordIds) {
         Logger logger = new Logger();
         logger.setTaUserInfo(userInfo);
@@ -450,6 +464,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     public ActionResult createReport(TAUserInfo userInfo, long refBookId, Date version, PagingParams pagingParams,
                                      String searchPattern, boolean exactSearch, Map<String, String> extraParams, AsyncTaskType reportType) {
         Logger logger = new Logger();
@@ -505,6 +520,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("isAuthenticated()")
+    @Transactional (readOnly = true)
     public PagingResult<Map<String, RefBookValue>> fetchAllRecords(Long refBookId, Long recordId, Date version,
                                                                    String searchPattern, boolean exactSearch, Map<String, String> extraParams,
                                                                    PagingParams pagingParams, RefBookAttribute sortAttribute, String direction) {
@@ -524,6 +540,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
 
     @Override
     @PreAuthorize("isAuthenticated()")
+    @Transactional (readOnly = true)
     public int getRecordsCount(Long refBookId, Date version, String searchPattern, boolean exactSearch, Map<String, String> extraParams) {
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         String filter = null;
@@ -598,25 +615,29 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional (readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public List<RefBookTaxpayerState> findAllTaxPayerStateActive(TAUserInfo userInfo) {
         return taxPayerStateDao.findAllActive();
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional (readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public List<RefBookAsnu> findAllAsnuActive(TAUserInfo userInfo) {
         return refBookAsnuDao.fetchAll();
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional (readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public List<RefBookCountry> findAllCountryActive(TAUserInfo userInfo) {
         return refBookCountryDao.findAllActive();
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
+    @Transactional (readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public List<RefBookDocType> findAllDocTypeActive(TAUserInfo userInfo) {
         return refBookDocTypeDao.findAllActive();
     }

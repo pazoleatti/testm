@@ -142,23 +142,21 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForUpd");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
-        params.addValue("p_asnu", asnuId);
         call.execute(params);
         return naturalPersonHandler.getResult();
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForCheck");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC), new SqlParameter("p_asnu", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
-        params.addValue("p_asnu", asnuId);
         call.execute(params);
         return naturalPersonHandler.getResult();
     }
@@ -243,7 +241,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                         "from ref_book_person rbp " +
                         "join ndfl_person np " +
                         "on np.person_id = rbp.id " +
-                        "where np.declaration_data_id = ? and rbp.status = 0",
+                        "where np.declaration_data_id = ?",
                 new Object[]{declarationDataId},
                 new int[]{Types.NUMERIC},
                 Integer.class);

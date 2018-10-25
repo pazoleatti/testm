@@ -1,20 +1,10 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 
@@ -101,5 +91,19 @@ public interface RefBookService {
      * @return uuid ссылку на уведомления с результатом выполнения
      */
     String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo);
+
+    /**
+     * Получение всех значений справочника АСНУ
+     *
+     * @return Список значений справочника отсортированых по названию по возрастанию
+     */
+    List<RefBookAsnu> findAllAsnu();
+
+    /**
+     * Получить АСНУ
+     * @param asnuId    уникальный идентификатор записи
+     * @return  объект АСНУ
+     */
+    RefBookAsnu getAsnu(Long asnuId);
 
 }

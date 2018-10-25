@@ -24,18 +24,15 @@ public interface RefBookPersonDao {
 
     /**
      * Найти всех ФЛ по определяющим параметрам
-     *
      * @param declarationDataId идентификатор НФ
-     * @param asnuId            идентификатор АСНУ загрузившей данные
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
      *
-     * @param asnuId идентификатор АСНУ загрузившей данные
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти данные о ФЛ в ПНФ

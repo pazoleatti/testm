@@ -1,14 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Идентификатор ФЛ
  *
  * @author Andrey Drunk
  */
+@Getter @Setter
+@ToString
 public class PersonIdentifier extends IdentityObject<Long> {
 
     /**
@@ -20,13 +23,6 @@ public class PersonIdentifier extends IdentityObject<Long> {
      * АСНУ
      */
     private RefBookAsnu asnu;
-
-    /**
-     * Идентификатор АСНУ из справочника
-     * @deprecated см {@link #asnu}
-     */
-    @Deprecated
-    private Long asnuId;
 
     /**
      * ИНП
@@ -42,44 +38,4 @@ public class PersonIdentifier extends IdentityObject<Long> {
      */
     public static final String[] FIELDS = {"id", "person.id", "inp", "asnu.id"};
 
-    public RegistryPerson getPerson() {
-        return person;
-    }
-
-    public void setPerson(RegistryPerson person) {
-        this.person = person;
-    }
-
-    public Long getAsnuId() {
-        return asnuId;
-    }
-
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
-    }
-
-    public RefBookAsnu getAsnu() {
-        return asnu;
-    }
-
-    public void setAsnu(RefBookAsnu asnu) {
-        this.asnu = asnu;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", id)
-                .append("asnuId", asnuId)
-                .append("inp", inp)
-                .toString();
-    }
 }

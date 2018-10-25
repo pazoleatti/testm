@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
-import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent;
-import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEventType;
-import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -18,11 +13,11 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.script.service.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
-import com.aplana.sbrf.taxaccounting.script.service.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -399,28 +394,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
 
     }
-
-    @Test
-    public void attrChangeListenerTest(){
-
-        AttributeCountChangeListener attrChangeListener = new AttributeCountChangeListener();
-
-        AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", 1);
-        changeEvent.setType(AttributeChangeEventType.REFRESHED);
-
-        RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 0);
-        changeEvent.setCurrentValue(refBookValue);
-
-        attrChangeListener.processAttr(changeEvent);
-
-        Assert.assertNotNull(attrChangeListener.getMessages().get("INC_REP"));
-        Assert.assertTrue(attrChangeListener.isUpdate());
-        Assert.assertEquals(attrChangeListener.getMessages().get("INC_REP"), "0 -> 1");
-
-        //System.out.println(attrChangeListener.getMessages().get("INC_REP"));
-
-    }
-
 
     public Date parseDate(String xmlDate) {
         try {

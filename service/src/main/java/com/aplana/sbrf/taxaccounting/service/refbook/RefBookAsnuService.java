@@ -43,4 +43,11 @@ public interface RefBookAsnuService {
      * @return запись справочника или null
      */
     RefBookAsnu fetchByName(String name);
+
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника отсортированых по названию по возрастанию
+     */
+    List<RefBookAsnu> fetchAll();
 }

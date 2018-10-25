@@ -27,11 +27,6 @@ public class NaturalPerson extends RegistryPerson implements IdentityPerson {
     private boolean needUpdate = true;
 
     /**
-     * Система источник
-     */
-    private Long sourceId;
-
-    /**
      * Получить идентификатор ФЛ, данный метод используется при работе с ФЛ из первичных форм, так как там может быть не более одного идентификатора
      *
      * @return идентификатор ФЛ
