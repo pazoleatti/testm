@@ -41,7 +41,7 @@ public class CreateApplication2ServiceImpl implements CreateApplication2Service{
     public String createApplication2Task(int reportYear, TAUserInfo userInfo) {
         Logger logger = new Logger();
         String keyTask = "CREATE_APPLICATION_2_FOR_YEAR_" + reportYear;
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("reportYear", reportYear);
         asyncManager.executeTask(keyTask, AsyncTaskType.CREATE_APPLICATION_2, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
             @Override

@@ -25,7 +25,11 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/createTaxNotification",
-                        params: {}
+                        params: {
+                            departmentId: $scope.params.department.id,
+                            periodId: $scope.params.period.id,
+                            asnuIds: $filter('idExtractor')($scope.params.asnuList)
+                        }
                     }).success(function (response) {
                         $logPanel.open('log-panel-container', response);
                         $modalInstance.close(response);

@@ -21,7 +21,7 @@
                  data-ng-disabled="!params.department"
                  data-ng-controller="SelectPeriodCtrl"
                  data-ui-select2="periodSelect.options"
-                 data-ng-init="initSelectWithOpenDepartmentPeriods(params.department.id, 'params.period')"
+                 data-ng-init="initSelectWithOpenDepartmentPeriods(params.department.id, 'params.period', false)"
                  data-ng-model="params.period">
             </div>
         </div>
@@ -40,7 +40,11 @@
     </div>
     <!-- Управляющие кнопки -->
     <div class="modal-footer">
-        <button type="submit" class="btn btn-default iconed-btn" id="saveButton" data-ng-click="create()">
+        <button id="saveButton"
+                type="submit"
+                class="btn btn-default iconed-btn"
+                data-ng-disabled="!params.department || !params.period"
+                data-ng-click="create()">
             <span data-translate-once="button.create"></span>
             <span class="btn-icon-ok"></span>
         </button>
