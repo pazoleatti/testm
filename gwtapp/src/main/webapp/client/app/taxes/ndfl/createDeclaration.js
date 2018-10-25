@@ -28,11 +28,11 @@
                     }
                 });
 
-                $scope.departmentSelectFilter = {};
+                $scope.departmentSelectFilter = {assignedToDeclarationTypeId: $scope.declarationData.declarationType.id};
                 $scope.kppSelectFilter = {};
 
                 $scope.$watch("declarationData.declarationType", function (newValue, oldValue) {
-                    if (newValue) {
+                    if (newValue && (!oldValue || newValue.id !== oldValue.id)) {
                         var isKnf = $scope.declarationData.declarationType && $scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id;
                         $scope.departmentSelectFilter.assignedToDeclarationTypeId = $scope.declarationData.declarationType.id;
                         $scope.departmentSelectFilter.onlyTB = isKnf;
