@@ -275,6 +275,16 @@ public interface DeclarationService {
 
     DeclarationType getTemplateType(int declarationTypeId);
 
+    /**
+     * Создание декларации в заданном отчетном периоде подразделения
+     *
+     * @param newDeclaration         данные формы
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param logger                 объект журнала
+     * @param userInfo               информация о пользователе, выполняющего действие
+     * @param writeAudit             надо ли писать в ЖА
+     * @return идентификатор созданной декларации
+     */
     Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit);
 
     void delete(long declarationDataId, TAUserInfo userInfo);

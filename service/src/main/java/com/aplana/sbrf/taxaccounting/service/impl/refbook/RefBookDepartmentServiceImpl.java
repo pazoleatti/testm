@@ -44,8 +44,8 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
     }
 
     @Override
-    public RefBookDepartment findParentTB(int departmentId) {
-        return refBookDepartmentDao.findParentTB(departmentId);
+    public RefBookDepartment findParentTBById(int id) {
+        return refBookDepartmentDao.findParentTBById(id);
     }
 
     @Override

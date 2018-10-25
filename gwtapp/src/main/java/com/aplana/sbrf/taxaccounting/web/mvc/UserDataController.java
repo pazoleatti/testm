@@ -37,7 +37,7 @@ public class UserDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         TAUser user = userInfo.getUser();
         RefBookDepartment userDepartment = refBookDepartmentService.fetchUserDepartment(user);
-        RefBookDepartment userTB = refBookDepartmentService.findParentTB(userDepartment.getId());
+        RefBookDepartment userTB = refBookDepartmentService.findParentTBById(userDepartment.getId());
         userPermissionSetter.setPermissions(user, UserPermission.VIEW_TAXES, UserPermission.VIEW_TAXES_NDFL, UserPermission.VIEW_TAXES_NDFL_SETTINGS,
                 UserPermission.VIEW_TAXES_NDFL_REPORTS, UserPermission.VIEW_TAXES_GENERAL, UserPermission.VIEW_NSI,
                 UserPermission.VIEW_ADMINISTRATION_BLOCK, UserPermission.VIEW_ADMINISTRATION_CONFIG, UserPermission.VIEW_ADMINISTRATION_SETTINGS,

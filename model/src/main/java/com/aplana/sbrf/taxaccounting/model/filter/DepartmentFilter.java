@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DepartmentFilter {
+    // значения для поиска по имени
     private String name;
     // ид периода. Подразделения будут фильтроваться по наличию открытых в них данного периода
     private Integer reportPeriodId;

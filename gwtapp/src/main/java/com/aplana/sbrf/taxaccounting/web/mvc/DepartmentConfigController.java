@@ -91,7 +91,7 @@ public class DepartmentConfigController {
      * @param departmentId тербанк, из настроек которого будут браться КПП
      * @param kpp          значение поиска по КПП
      * @param pagingParams параметры пагинации
-     * @return возвращает список настроек подразделений
+     * @return возвращает страницу из списка КПП, взятых из настроек подразделений
      */
     @GetMapping(value = "/rest/departmentConfig/kppSelect")
     public JqgridPagedList<KppSelect> findAllKppByDepartmentIdAndKpp(@RequestParam String kpp, @RequestParam int departmentId, @RequestParam PagingParams pagingParams) {

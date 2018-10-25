@@ -27,10 +27,10 @@ public interface RefBookDepartmentService {
     /**
      * Возвращяет родительский ТБ
      *
-     * @param departmentId подразделение
-     * @return ТБ
+     * @param id ид подразделения
+     * @return подразедление типа "ТерБанк"
      */
-    RefBookDepartment findParentTB(int departmentId);
+    RefBookDepartment findParentTBById(int id);
 
     /**
      * Получение подразделения пользователя
@@ -82,13 +82,12 @@ public interface RefBookDepartmentService {
     PagingResult<RefBookDepartment> fetchAvailableDestinationDepartments(TAUser user, String name, PagingParams pagingParams);
 
     /**
-     * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
-     * с фильтрацией по наименованию подразделения и пейджингом
+     * Возвращяет страницу из списка действующих подразделений, доступных пользователю, с заданной фильтрацией и пейджингом
      *
      * @param filter       фильтр
      * @param pagingParams Параметры пейджинга
      * @param user         Пользователь
-     * @return Страница списка значений справочника
+     * @return страница списка подразделений
      */
     PagingResult<RefBookDepartment> findAllByFilter(DepartmentFilter filter, PagingParams pagingParams, TAUser user);
 

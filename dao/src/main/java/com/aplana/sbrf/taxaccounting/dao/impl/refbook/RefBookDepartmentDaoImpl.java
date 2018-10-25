@@ -41,12 +41,12 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     }
 
     @Override
-    public RefBookDepartment findParentTB(int departmentId) {
+    public RefBookDepartment findParentTBById(int id) {
         return getJdbcTemplate().queryForObject("" +
                         REF_BOOK_DEPARTMENT_SELECT +
                         "WHERE dep.parent_id = 0 AND dep.type = 2 " +
                         "START WITH dep.id = ? CONNECT BY dep.id = PRIOR dep.parent_id ",
-                new RefBookDepartmentRowMapper(), departmentId);
+                new RefBookDepartmentRowMapper(), id);
     }
 
     @Override

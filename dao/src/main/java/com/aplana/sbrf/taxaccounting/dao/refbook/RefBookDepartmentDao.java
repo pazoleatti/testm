@@ -24,10 +24,10 @@ public interface RefBookDepartmentDao {
     /**
      * Возвращяет родительский ТБ
      *
-     * @param departmentId подразделение
-     * @return ТБ
+     * @param id ид подразделение
+     * @return подразделение типа "ТерБанк"
      */
-    RefBookDepartment findParentTB(int departmentId);
+    RefBookDepartment findParentTBById(int id);
 
     /**
      * Возвращяет список подразделений по наименованию (через оператор like), включая родительские подразделения у найденных
@@ -77,7 +77,7 @@ public interface RefBookDepartmentDao {
     PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 
     /**
-     * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     * Возвращяет страницу из списка действующих подразделений с заданной фильтрацией и пейджингом
      *
      * @param filter       фильтр
      * @param pagingParams параметры пейджинга
