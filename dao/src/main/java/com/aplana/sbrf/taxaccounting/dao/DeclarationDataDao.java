@@ -153,7 +153,7 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param departmentReportPeriodId отчетный период подразделения
      * @return список форм
      */
-    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
+    List<DeclarationData> findAllByTypeIdAndPeriodId(int declarationTypeId, int departmentReportPeriodId);
 
     /**
      * Возвращяет консолидированную форму в отчетном периоде подразделения и по типу КНФ
@@ -162,7 +162,7 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param departmentReportPeriodId отчетный период подразделения
      * @return консолидированная форм
      */
-    DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId);
+    DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId);
 
     /**
      * Возвращяет список форм по типу и отчетному периоду подразделения и списку пар кпп/октмо
@@ -172,7 +172,7 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param kppOktmoPairs            список пар кпп/октмо
      * @return список форм
      */
-    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs);
+    List<DeclarationData> findAllByTypeIdAndPeriodIdAndKppOktmoPairs(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs);
 
     /**
      * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID

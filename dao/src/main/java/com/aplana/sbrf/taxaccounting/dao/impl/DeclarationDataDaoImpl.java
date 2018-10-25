@@ -206,12 +206,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
+    public List<DeclarationData> findAllByTypeIdAndPeriodId(int declarationTypeId, int departmentReportPeriodId) {
         return find(declarationTypeId, null, departmentReportPeriodId, null);
     }
 
     @Override
-    public DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId) {
+    public DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId) {
         List<DeclarationData> declarations = find(DeclarationType.NDFL_CONSOLIDATE, knfType, departmentReportPeriodId, null);
         if (!declarations.isEmpty()) {
             Assert.isTrue(declarations.size() == 1, "Найдено более одной консолидированной формы");
@@ -222,7 +222,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
+    public List<DeclarationData> findAllByTypeIdAndPeriodIdAndKppOktmoPairs(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
         return find(declarationTypeId, null, departmentReportPeriodId, kppOktmoPairs);
     }
 
@@ -985,9 +985,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "and (npi.kpp, npi.oktmo) " +
                 "not in (" +
                 "   select rnd.kpp, ro.code " +
-                "   from (select t.*, lead(t.version) over(partition by t.record_id order by version) - interval '1' DAY version_end from ref_book_ndfl_detail t) rnd " +
+                "   from (select t.*, lead(t.version) over(partition by t.record_id order by version) - interval '1' DAY version_end from ref_book_ndfl_detail t where status != -1) rnd " +
                 "   join ref_book_oktmo ro on ro.id = rnd.oktmo " +
-                "   where rnd.version <= rp.end_date AND (rnd.version_end IS NULL OR rp.end_date <= rnd.version_end)" +
+                "   where rnd.status = 0 and rnd.version <= rp.end_date and (rnd.version_end is null or rp.end_date <= rnd.version_end)" +
                 ")";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationDataId", declarationDataId);

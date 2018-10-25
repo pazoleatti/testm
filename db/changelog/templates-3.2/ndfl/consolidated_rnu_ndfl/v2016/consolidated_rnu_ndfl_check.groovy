@@ -3037,27 +3037,6 @@ class Check extends AbstractScriptClass {
         return getProvider(RefBook.Id.OKTMO.id).getRecordData(ids)
     }
 
-    /**
-     * Найти адресообразующий объект
-     * @param regionCode код региона (обязательный параметр)
-     * @param area район
-     * @param city город
-     * @param locality населенный пункт
-     * @param street улица
-     */
-    void checkCreate() {
-        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
-        if (departmentReportPeriod.correctionDate != null) {
-            def prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
-            def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
-            declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
-            declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
-            if (declarationList.isEmpty()) {
-                logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
-            }
-        }
-    }
-
     void departmentParamException(int departmentId, int reportPeriodId) {
         ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
         throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",

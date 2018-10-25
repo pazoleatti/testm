@@ -105,18 +105,18 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
+    public List<DeclarationData> findAllByTypeIdAndPeriodId(int declarationTypeId, int departmentReportPeriodId) {
+        return declarationDataDao.findAllByTypeIdAndPeriodId(declarationTypeId, departmentReportPeriodId);
     }
 
     @Override
-    public DeclarationData findConsolidated(RefBookKnfType knfType, int departmentReportPeriodId) {
-        return declarationDataDao.findConsolidated(knfType, departmentReportPeriodId);
+    public DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId) {
+        return declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriodId);
     }
 
     @Override
-    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
+    public List<DeclarationData> findAllByTypeIdAndPeriodIdAndKppOktmoPairs(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
+        return declarationDataDao.findAllByTypeIdAndPeriodIdAndKppOktmoPairs(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
     }
 
     @Override
@@ -482,7 +482,7 @@ public class DeclarationServiceImpl implements DeclarationService {
         List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<>();
 
         // Список ранее созданных отчетных форм
-        List<DeclarationData> deletedDeclarationDataList = find(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
+        List<DeclarationData> deletedDeclarationDataList = findAllByTypeIdAndPeriodIdAndKppOktmoPairs(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
         // Список блокировок на удаление форм
         List<LockData> lockList = new ArrayList<>();
         try {

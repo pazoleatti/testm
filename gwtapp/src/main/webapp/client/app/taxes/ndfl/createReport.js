@@ -13,7 +13,7 @@
             '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage',
             function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
 
-                $scope.knf = $shareData.knf;
+                $scope.knf = angular.copy($shareData.knf);
                 $scope.reportData = {negativeValuesAdjustment: APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT};
 
                 if ($scope.knf) {

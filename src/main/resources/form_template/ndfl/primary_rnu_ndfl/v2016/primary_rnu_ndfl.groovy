@@ -1339,9 +1339,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
         if (departmentReportPeriod.correctionDate != null) {
             def prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
-            def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
-            declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
-            declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
+            def declarationList = declarationService.findAllByTypeIdAndPeriodId(102, prevDepartmentReportPeriod.getId())
+            declarationList.addAll(declarationService.findAllByTypeIdAndPeriodId(103, prevDepartmentReportPeriod.getId()))
+            declarationList.addAll(declarationService.findAllByTypeIdAndPeriodId(104, prevDepartmentReportPeriod.getId()))
             if (declarationList.isEmpty()) {
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде. Отчетные налоговые формы не будут сформированы текущем периоде")
             }

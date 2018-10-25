@@ -717,9 +717,9 @@ class Report2Ndfl extends AbstractScriptClass {
 
         for (DepartmentReportPeriod drp in departmentReportPeriodList) {
             def declarations = []
-            declarations.addAll(declarationService.find(DeclarationType.NDFL_6, drp.id))
-            declarations.addAll(declarationService.find(DeclarationType.NDFL_2_1, drp.id))
-            declarations.addAll(declarationService.find(DeclarationType.NDFL_2_2, drp.id))
+            declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_6, drp.id))
+            declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_2_1, drp.id))
+            declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_2_2, drp.id))
             if (!declarations.isEmpty()) {
                 for (DeclarationData dd in declarations) {
                     if (dd.kpp == declarationData.kpp && dd.oktmo == declarationData.oktmo) {
@@ -1341,8 +1341,9 @@ class Report2Ndfl extends AbstractScriptClass {
             Map<PairKppOktmo, List<NdflPerson>> ndflPersonsIdGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
 
             // Удаление ранее созданных отчетных форм
+            List<Pair<String, String>> kppOktmoPairs = null
             if (knfId != null) {// если создаём отчетность из КНФ, то формы удаляются по найденным парам КПП/ОКТМО
-                List<Pair<String, String>> kppOktmoPairs = ndflPersonsIdGroupedByKppOktmo.keySet().collect {
+                kppOktmoPairs = ndflPersonsIdGroupedByKppOktmo.keySet().collect {
                     return new Pair<String, String>(it.kpp, it.oktmo)
                 }
             }
@@ -1521,9 +1522,9 @@ class Report2Ndfl extends AbstractScriptClass {
             })
 
             for (DepartmentReportPeriod drp in departmentReportPeriodList) {
-                declarations = declarationService.find(declarationTemplate.type.id, drp.id)
+                declarations = declarationService.findAllByTypeIdAndPeriodId(declarationTemplate.type.id, drp.id)
                 if (priznakF == "2") {
-                    declarations.addAll(declarationService.find(DeclarationType.NDFL_2_1, drp.id))
+                    declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_2_1, drp.id))
                 }
                 if (!declarations.isEmpty() || drp.correctionDate == null) {
                     break
@@ -1673,7 +1674,7 @@ class Report2Ndfl extends AbstractScriptClass {
             consolidatedDeclaration = declarationService.getDeclarationData(knfId)
         } else {
             def knfType = declarationData.declarationTemplateId == DeclarationType.NDFL_2_1 ? RefBookKnfType.ALL : RefBookKnfType.BY_NONHOLDING_TAX
-            consolidatedDeclaration = declarationService.findConsolidated(knfType, departmentReportPeriod.id)
+            consolidatedDeclaration = declarationService.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.id)
             if (consolidatedDeclaration == null) {
                 logger.error("Отчетность $reportType для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
                         " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")

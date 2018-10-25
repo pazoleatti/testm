@@ -626,9 +626,9 @@ class Report6Ndfl extends AbstractScriptClass {
 
         for (DepartmentReportPeriod drp in departmentReportPeriodList) {
             def declarations = []
-            declarations.addAll(declarationService.find(DeclarationType.NDFL_6, drp.id))
-            declarations.addAll(declarationService.find(DeclarationType.NDFL_2_1, drp.id))
-            declarations.addAll(declarationService.find(DeclarationType.NDFL_2_2, drp.id))
+            declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_6, drp.id))
+            declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_2_1, drp.id))
+            declarations.addAll(declarationService.findAllByTypeIdAndPeriodId(DeclarationType.NDFL_2_2, drp.id))
             if (!declarations.isEmpty()) {
                 for (DeclarationData dd in declarations) {
                     if (dd.kpp == declarationData.kpp && dd.oktmo == declarationData.oktmo) {
@@ -804,7 +804,7 @@ class Report6Ndfl extends AbstractScriptClass {
             })
 
             for (DepartmentReportPeriod drp in departmentReportPeriodList) {
-                declarations = declarationService.find(declarationTemplate.type.id, drp.id)
+                declarations = declarationService.findAllByTypeIdAndPeriodId(declarationTemplate.type.id, drp.id)
                 if (!declarations.isEmpty() || drp.correctionDate == null) {
                     break
                 }
@@ -998,7 +998,7 @@ class Report6Ndfl extends AbstractScriptClass {
         if (knfId != null) {
             consolidatedDeclaration = declarationService.getDeclarationData(knfId)
         } else {
-            consolidatedDeclaration = declarationService.findConsolidated(RefBookKnfType.ALL, departmentReportPeriod.id)
+            consolidatedDeclaration = declarationService.findKnfByKnfTypeAndPeriodId(RefBookKnfType.ALL, departmentReportPeriod.id)
             if (consolidatedDeclaration == null) {
                 logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
                         " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
