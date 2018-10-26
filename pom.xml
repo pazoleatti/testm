@@ -17,7 +17,6 @@
         <module>gwtapp</module>
         <module>dynacache-spring</module>
         <module>fonts</module>
-        <module>script-test</module>
         <module>schematron</module>
     </modules>
 

@@ -139,7 +139,7 @@ public class RefBookServiceImpl implements RefBookService {
         if (recordId == null) {
             return null;
         }
-        String key = ScriptUtils.getRefBookCacheKey(refBookId, recordId);
+        String key = refBookId + "_" + recordId;
         if (!refBookCache.containsKey(key)) {
             refBookCache.put(key, getRecordData(refBookId, recordId));
         }

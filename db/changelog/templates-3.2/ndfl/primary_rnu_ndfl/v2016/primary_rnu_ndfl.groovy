@@ -227,7 +227,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         pagingResult.getRecords().each() { ndflPerson ->
-            DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = new DataRow<>(FormDataUtils.createCells(rowColumns, null));
+            DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = new DataRow<>(ScriptUtils.createCells(rowColumns, null));
             row.getCell("id").setStringValue(ndflPerson.id.toString())
             row.lastName = ndflPerson.lastName
             row.firstName = ndflPerson.firstName

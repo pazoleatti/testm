@@ -1853,7 +1853,7 @@ class Report2Ndfl extends AbstractScriptClass {
         // Формирование списка данных для вывода в таблицу
         List<DataRow<Cell>> toReturn = []
         docs.each() { doc ->
-            DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null))
+            DataRow<Cell> row = new DataRow<Cell>(ScriptUtils.createCells(rowColumns, null))
             row.pNumSpravka = doc.@НомСпр.text()
             row.lastName = doc?.ПолучДох?.ФИО?.@Фамилия?.text()
             row.firstName = doc?.ПолучДох?.ФИО?.@Имя?.text()

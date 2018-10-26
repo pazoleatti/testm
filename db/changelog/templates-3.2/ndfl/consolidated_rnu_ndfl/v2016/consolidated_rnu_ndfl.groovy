@@ -189,7 +189,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
 
         pagingResult.getRecords().each() { ndflPerson ->
-            DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = new DataRow<com.aplana.sbrf.taxaccounting.model.Cell>(FormDataUtils.createCells(rowColumns, null));
+            DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = new DataRow<com.aplana.sbrf.taxaccounting.model.Cell>(ScriptUtils.createCells(rowColumns, null));
             row.getCell("id").setStringValue(ndflPerson.id.toString())
             row.lastName = ndflPerson.lastName
             row.firstName = ndflPerson.firstName
