@@ -574,7 +574,7 @@ class Calculate extends AbstractScriptClass {
                 person.getPersonTbList().add(personTb)
             }
 
-            List<RegistryPerson> savedPersons = personService.saveNewPersons(insertPersonList)
+            List<RegistryPerson> savedPersons = personService.saveNewIdentificatedPersons(insertPersonList)
 
             //update reference to ref book
             updatePrimaryToRefBookPersonReferences(insertPersonList)

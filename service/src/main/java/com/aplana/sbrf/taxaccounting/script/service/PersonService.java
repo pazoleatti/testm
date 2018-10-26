@@ -20,11 +20,18 @@ public interface PersonService {
     int getCountOfUniqueEntries(long declarationDataId);
 
     /**
+     * Сохранить группу Физлиц созданных при идентификаации
+     * @param persons коллекция Физлиц
+     * @return список ФЛ с добавленными идентификаторами ФЛ
+     */
+   List<RegistryPerson> saveNewIdentificatedPersons(List<NaturalPerson> persons);
+
+    /**
      * Сохранить группу Физлиц.
      * @param persons коллекция Физлиц
      * @return список ФЛ с добавленными идентификаторами ФЛ
      */
-   List<RegistryPerson> saveNewPersons(List<NaturalPerson> persons);
+    List<RegistryPerson> savePersons(List<RegistryPerson> persons);
 
     /**
      * Обновить несколько записей объектов идентификации - физлиц
@@ -32,4 +39,10 @@ public interface PersonService {
      */
    void updatePersons(List<NaturalPerson> persons);
 
+    /**
+     * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
+     * @param declarationDataId идентификатор налоговой формы
+     * @return список найденных записей реестра ФЛ
+     */
+    List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
 }

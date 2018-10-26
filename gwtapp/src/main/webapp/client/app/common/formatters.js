@@ -579,7 +579,6 @@
 
         .filter('docTypeFormatter', ['$filter', function ($filter) {
             return function (data) {
-                console.log(data)
                 if (!data || !data.value) return '';
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');

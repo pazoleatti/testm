@@ -188,4 +188,11 @@ public interface RefBookPersonDao {
      * @param persons коллекция Физлиц
      */
     void updateBatch(Collection<RegistryPerson> persons);
+
+    /**
+     * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
+     * @param declarationDataId идентификатор налоговой формы
+     * @return список найденных записей реестра ФЛ
+     */
+    List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
 }

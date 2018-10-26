@@ -31,7 +31,7 @@ public class PersonServiceImpl implements PersonService{
     }
 
     @Override
-    public List<RegistryPerson> saveNewPersons(List<NaturalPerson> persons) {
+    public List<RegistryPerson> saveNewIdentificatedPersons(List<NaturalPerson> persons) {
         List<RegistryPerson> toSave = new ArrayList<>();
         for (NaturalPerson person : persons) {
             toSave.add(person);
@@ -40,7 +40,17 @@ public class PersonServiceImpl implements PersonService{
     }
 
     @Override
+    public List<RegistryPerson> savePersons(List<RegistryPerson> persons) {
+        return personService.savePersons(persons);
+    }
+
+    @Override
     public void updatePersons(List<NaturalPerson> persons) {
         personService.updateIdentificatedPersons(persons);
+    }
+
+    @Override
+    public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId) {
+        return personService.findActualRefPersonsByDeclarationDataId(declarationDataId);
     }
 }

@@ -477,4 +477,19 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
         getNamedParameterJdbcTemplate().batchUpdate(sql.toString(), batchArgs);
     }
+
+    @Override
+    public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId) {
+        Date actualDate = new Date();
+        String query = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
+                "where\n" +
+                "person.record_id in (select r.record_id from ref_book_person r\n" +
+                "left join ndfl_person np on np.person_id = r.id\n" +
+                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "where declaration_data_id = :declarationDataId)\n" +
+                "and person.start_date <= :actualDate and (person.end_date >= :actualDate or person.end_date is null)";
+        MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId);
+        params.addValue("actualDate" , actualDate);
+        return getNamedParameterJdbcTemplate().query(query, params, new RegistryPersonMapper());
+    }
 }

@@ -6,16 +6,16 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType
-import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.Address
-import com.aplana.sbrf.taxaccounting.model.refbook.Country
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -126,9 +126,9 @@ class Person extends AbstractScriptClass {
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
     // Кэш код страны - страна
-    Map<String, Country> countriesCache = new HashMap<>()
+    Map<String, RefBookCountry> countriesCache = new HashMap<>()
     // Кэш код статуса налогоплательщика - сам статус
-    Map<String, TaxpayerStatus> taxpayerStatusessCache = new HashMap<>()
+    Map<String, RefBookTaxpayerState> taxpayerStatusessCache = new HashMap<>()
     // Кэш код типа документа - сам тип
     Map<String, RefBookDocType> docTypesCache = new HashMap<>()
     // Кэш АСНУ
@@ -263,11 +263,11 @@ class Person extends AbstractScriptClass {
         person.birthDateStr = getAttrValue(reader, "ДатаРожд")
         person.birthDate = toDate(person.birthDateStr)
         person.citizenshipCode = getAttrValue(reader, "Гражд")
-        person.citizenship = getCountryByCode(person.citizenshipCode) ?: new Country()
+        person.citizenship = getCountryByCode(person.citizenshipCode) ?: new RefBookCountry()
         person.inn = getAttrValue(reader, "ИННФЛ")
         person.innForeign = getAttrValue(reader, "ИННИно")
         person.taxPayerStatusCode = getAttrValue(reader, "СтатусФЛ")
-        person.taxPayerState = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new TaxpayerStatus()
+        person.taxPayerState = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new RefBookTaxpayerState()
         person.address = parseAddress(reader)
         person.reportDoc = new IdDoc()
     }
@@ -284,7 +284,7 @@ class Person extends AbstractScriptClass {
         address.build = getAttrValue(reader, "Корпус")
         address.appartment = getAttrValue(reader, "Кварт")
         address.countryCode = getAttrValue(reader, "КодСтрИно")
-        address.country = getCountryByCode(address.countryCode) ?: new Country()
+        address.country = getCountryByCode(address.countryCode) ?: new RefBookCountry()
         address.addressIno = getAttrValue(reader, "АдресИно")
         return address
     }
@@ -373,13 +373,15 @@ class Person extends AbstractScriptClass {
             for (def person : persons) {
                 com.aplana.sbrf.taxaccounting.model.refbook.PersonTb personTb = new com.aplana.sbrf.taxaccounting.model.refbook.PersonTb()
                 personTb.setPerson(person)
-                personTb.setTbDepartmentId(tbPersonDepartmentId)
+                Department department = new Department()
+                department.setId(tbPersonDepartmentId)
+                personTb.setTbDepartment(department)
                 personTb.setImportDate(importDate)
                 person.personTbList.add(personTb)
                 person.startDate = versionFrom
             }
 
-            personService.saveNewPersons(persons)
+            personService.savePersons(persons)
         }
         return persons
     }
@@ -671,15 +673,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет страну по коду
      */
-    Country getCountryByCode(String code) {
-        Country country = null
+    RefBookCountry getCountryByCode(String code) {
+        RefBookCountry country = null
         if (code) {
             country = countriesCache.get(code)
             if (!country) {
                 def recordData = getProvider(RefBook.Id.COUNTRY.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    country = new Country()
+                    country = new RefBookCountry()
                     country.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     country.setCode(record.get("CODE").getStringValue())
                     countriesCache.put(code, country)
@@ -692,15 +694,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет статус налогоплательщика по коду
      */
-    TaxpayerStatus getTaxpayerStatusByCode(String code) {
-        TaxpayerStatus taxpayerStatus = null
+    RefBookTaxpayerState getTaxpayerStatusByCode(String code) {
+        RefBookTaxpayerState taxpayerStatus = null
         if (code) {
             taxpayerStatus = taxpayerStatusessCache.get(code)
             if (!taxpayerStatus) {
                 def recordData = getProvider(RefBook.Id.TAXPAYER_STATUS.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    taxpayerStatus = new TaxpayerStatus()
+                    taxpayerStatus = new RefBookTaxpayerState()
                     taxpayerStatus.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     taxpayerStatus.setCode(record.get("CODE").getStringValue())
                     taxpayerStatusessCache.put(code, taxpayerStatus)

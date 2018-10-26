@@ -348,7 +348,6 @@
                  * @description Сохранить изменения
                  */
                 $scope.save = function () {
-                    console.log($scope.personParam)
                     angular.forEach($scope.personParam.documents.value, function (item) {
                         if (item.tempId) {
                             item.id = null;
@@ -359,8 +358,6 @@
                     }
                     $scope.personParam.vip = $scope.personParam.vipSelect.value;
                     $scope.personParam.duplicates = $scope.personParam.duplicates.concat($scope.deletedDuplicates);
-                    console.log($scope.deletedDuplicates)
-                    console.log($scope.personParam)
                     $http({
                         method: "POST",
                         url: "controller/actions/registryPerson/updatePerson",
@@ -456,7 +453,6 @@
                                 if ($scope.personParam.reportDoc && $scope.personParam.reportDoc.value &&
                                     $scope.personParam.reportDoc.value.id === $scope.idDocsGrid.value[0].id
                                 ) {
-                                    console.log("aaa")
                                     $scope.personParam.reportDoc.value = null;
                                 }
                             }
@@ -584,12 +580,11 @@
                             angular.forEach($scope.personParam.duplicates, function (item) {
                                 if (item.id == $scope.duplicatesGrid.value[0].id) {
                                     indexOfDeleting = i;
-                                    item.recordId = item.oldId
+                                    item.recordId = item.oldId;
                                     $scope.deletedDuplicates.push(item)
                                 }
                                 i++;
                             });
-                            console.log($scope.deletedDuplicates)
                             if (indexOfDeleting > -1) {
                                 $scope.personParam.duplicates.splice(indexOfDeleting, 1);
                             }
@@ -604,7 +599,7 @@
                 });
 
                 $scope.$on("addDuplicate", function (event, duplicate) {
-                    duplicate.recordId = $scope.personParam.recordId
+                    duplicate.recordId = $scope.personParam.recordId;
                     $scope.personParam.duplicates.push(duplicate);
                     $scope.duplicatesGrid.ctrl.refreshGridData($scope.personParam.duplicates)
                 });

@@ -83,4 +83,11 @@ public interface PersonService {
      * @return список ФЛ с добавленными идентификаторами ФЛ
      */
      List<RegistryPerson> savePersons(List<RegistryPerson> personList);
+
+    /**
+     * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
+     * @param declarationDataId идентификатор налоговой формы
+     * @return список найденных записей реестра ФЛ
+     */
+     List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
 }
