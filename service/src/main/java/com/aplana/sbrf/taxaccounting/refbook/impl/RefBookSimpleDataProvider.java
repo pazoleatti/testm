@@ -79,25 +79,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public Date getNextVersion(Date version, @NotNull String filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Date getEndVersion(Long recordId, Date versionFrom) {
-        //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
-        RefBookRecordVersion nextVersion = dao.getNextVersion(refBook, recordId, versionFrom);
-        if (nextVersion != null) {
-            Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
-            if (versionEnd != null && versionFrom.after(versionEnd)) {
-                throw new ServiceException("Дата окончания получена некорректно");
-            }
-            return versionEnd;
-        }
-        return null;
-    }
-
-    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
         return dao.getUniqueRecordIds(getRefBook(), version, filter);
     }
@@ -105,11 +86,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Override
     public int getRecordsCount(Date version, String filter) {
         return dao.getRecordsCount(getRefBook(), version, filter);
-    }
-
-    @Override
-    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
-        return dao.getRecordIdPairs(refBook.getTableName(), refBook.getId(), version, true, filter);
     }
 
     @Override
@@ -163,11 +139,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         return dao.getRecordVersionInfo(getRefBook(), uniqueRecordId);
-    }
-
-    @Override
-    public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -254,11 +225,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         } catch (DataAccessException e) {
             throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);
         }
-    }
-
-    @Override
-    public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -478,29 +444,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
     }
 
-    private boolean checkValuesChanged(Long uniqueRecordId, Map<String, RefBookValue> records) {
-        Map<String, RefBookValue> oldValues = dao.getRecordData(getRefBook(), uniqueRecordId);
-        for (Map.Entry<String, RefBookValue> newValue : records.entrySet()) {
-            RefBookValue oldValue = oldValues.get(newValue.getKey());
-            if (!newValue.getValue().equals(oldValue)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
-        for (Long uniqueRecordId : uniqueRecordIds) {
-            List<Long> relatedVersions = dao.getRelatedVersions(getRefBook(), uniqueRecordIds);
-            if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
-            }
-            Long recordId = dao.getRecordId(getRefBook(), uniqueRecordId);
-            dao.createFakeRecordVersion(getRefBook(), recordId, SimpleDateUtils.addDayToDate(versionEnd, 1));
-        }
-    }
-
     @Override
     public void deleteAllRecords(@NotNull Logger logger, List<Long> uniqueRecordIds) {
         checkIfRefBookIsEditable();
@@ -641,11 +584,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             result.put(record.getKey(), record.getValue().get(refBookAttributeAlias));
         }
         return result;
-    }
-
-    @Override
-    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
-        throw new UnsupportedOperationException();
     }
 
     public RefBook getRefBook() {

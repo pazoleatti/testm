@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookCache;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -21,54 +20,56 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 14.01.2016 18:28
  */
-
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookCacheImpl implements RefBookCache {
 
-	@Autowired
-	CommonRefBookService commonRefBookService;
-	@Autowired
-	RefBookFactory refBookFactory;
+    private Map<Long, RefBook> refBooks = new HashMap<>();
+    private Map<Long, RefBook> refBookByAttrs = new HashMap<>();
+    private Map<Long, RefBookDataProvider> dataProviders = new HashMap<>();
 
-	private Map<Long, RefBook> refBooks = new HashMap<Long, RefBook>();
-	private Map<Long, RefBook> refBookByAttrs = new HashMap<Long, RefBook>();
-	private Map<Long, RefBookDataProvider> dataProviders = new HashMap<Long, RefBookDataProvider>();
+    private CommonRefBookService commonRefBookService;
+    private RefBookFactory refBookFactory;
 
-	@Override
-	public RefBook get(Long refBookId) {
-		RefBook refBook = refBooks.get(refBookId);
-		if (refBook == null) {
-			refBook = commonRefBookService.get(refBookId);
-			refBooks.put(refBookId, refBook);
-			// сразу заполняем по всем атрибутам
-			for (RefBookAttribute attr : refBook.getAttributes()) {
-				refBookByAttrs.put(attr.getId(), refBook);
-			}
-		}
-		return refBook;
-	}
+    public RefBookCacheImpl(CommonRefBookService commonRefBookService, RefBookFactory refBookFactory) {
+        this.commonRefBookService = commonRefBookService;
+        this.refBookFactory = refBookFactory;
+    }
 
-	@Override
-	public RefBook getByAttribute(Long attributeId) {
-		RefBook refBook = refBookByAttrs.get(attributeId);
-		if (refBook == null) {
-			refBook = commonRefBookService.getByAttribute(attributeId);
-			// сразу заполняем по всем атрибутам
-			for (RefBookAttribute attr : refBook.getAttributes()) {
-				refBookByAttrs.put(attr.getId(), refBook);
-			}
-		}
-		return refBook;
-	}
+    @Override
+    public RefBook get(Long refBookId) {
+        RefBook refBook = refBooks.get(refBookId);
+        if (refBook == null) {
+            refBook = commonRefBookService.get(refBookId);
+            refBooks.put(refBookId, refBook);
+            // сразу заполняем по всем атрибутам
+            for (RefBookAttribute attr : refBook.getAttributes()) {
+                refBookByAttrs.put(attr.getId(), refBook);
+            }
+        }
+        return refBook;
+    }
 
-	@Override
-	public RefBookDataProvider getDataProvider(Long refBookId) {
-		RefBookDataProvider provider = dataProviders.get(refBookId);
-		if (provider == null) {
-			provider = refBookFactory.getDataProvider(refBookId);
-			dataProviders.put(refBookId, provider);
-		}
-		return provider;
-	}
+    @Override
+    public RefBook getByAttribute(Long attributeId) {
+        RefBook refBook = refBookByAttrs.get(attributeId);
+        if (refBook == null) {
+            refBook = commonRefBookService.getByAttribute(attributeId);
+            // сразу заполняем по всем атрибутам
+            for (RefBookAttribute attr : refBook.getAttributes()) {
+                refBookByAttrs.put(attr.getId(), refBook);
+            }
+        }
+        return refBook;
+    }
+
+    @Override
+    public RefBookDataProvider getDataProvider(Long refBookId) {
+        RefBookDataProvider provider = dataProviders.get(refBookId);
+        if (provider == null) {
+            provider = refBookFactory.getDataProvider(refBookId);
+            dataProviders.put(refBookId, provider);
+        }
+        return provider;
+    }
 }

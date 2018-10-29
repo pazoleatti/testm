@@ -251,12 +251,7 @@ public class RefBookSimpleDataProviderHelper {
                 }
                 if (isDepartmentConfigTable) i++;
             }
-            if (Arrays.asList(
-                    RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
-                refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
-            } else {
-                refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
-            }
+            refBookHelper.checkReferenceValues(refBook, references, logger);
         }
     }
 

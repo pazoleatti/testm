@@ -71,14 +71,6 @@ public interface TAUserService {
     PagingResult<TAUserView> getUsersViewWithFilter(MembersFilterData filter);
 
 	/**
-	 * Возвращает список-путь от переданного подразделения по иерархии вверх
-	 * @param department
-	 * @return
-	 */
-    // TODO перенести в дао подразделений
-	List<Department> getDepartmentHierarchy(int department);
-
-	/**
 	 * Возвращает информацию о текущем пользователе системы
 	 */
 	TAUser getCurrentUser();

@@ -1,27 +1,15 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @ScriptExposed
@@ -38,22 +26,6 @@ public interface RefBookService {
     String getStringValue(Long refBookId, Long recordId, String alias);
 
     /**
-     * Числовое значение атрибута записи справочника
-     */
-    Number getNumberValue(Long refBookId, Long recordId, String alias);
-
-    /**
-     * Датированное значение атрибута записи справочника
-     */
-    Date getDateValue(Long refBookId, Long recordId, String alias);
-
-    /**
-     * Разыменование строк НФ
-     */
-    @SuppressWarnings("unused")
-    void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns);
-
-    /**
      * Выполняет указанную логику в новой транзакции
      *
      * @param logic код выполняемый в транзакции
@@ -66,14 +38,6 @@ public interface RefBookService {
     @SuppressWarnings("unused")
     Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
                                               Map<String, Map<String, RefBookValue>> refBookCache);
-
-    /**
-     * Получить выборку пользователей для представления "Список пользователей"
-     *
-     * @param filter фильтер
-     * @return возвращает страницу со списком пользователей
-     */
-    PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
 
     /**
      * Возвращяет страницу данных в таблицу справочников из настройщика
@@ -101,5 +65,4 @@ public interface RefBookService {
      * @return uuid ссылку на уведомления с результатом выполнения
      */
     String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo);
-
 }

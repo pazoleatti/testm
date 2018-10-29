@@ -88,24 +88,6 @@ public interface RefBookDataProvider {
     PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
 
     /**
-     * Возвращает дату начала версии следующей за указанной
-     *
-     * @param version дата актуальности
-     * @param filter  фильтр для отбора записей. Обязательное поле, т.к записи не фильтруются по RECORD_ID
-     * @return дата начала следующей версии
-     */
-    Date getNextVersion(Date version, @NotNull String filter);
-
-    /**
-     * Возвращает версию следующей за указанной датой
-     *
-     * @param recordId    идентификатор записи
-     * @param versionFrom дата актуальности
-     * @return дата начала следующей версии
-     */
-    Date getEndVersion(Long recordId, Date versionFrom);
-
-    /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
      *
      * @param version дата актуальности
@@ -122,15 +104,6 @@ public interface RefBookDataProvider {
      * @return
      */
     int getRecordsCount(Date version, String filter);
-
-    /**
-     * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
-     *
-     * @param version дата актуальности. Может быть null - тогда не учитывается
-     * @param filter
-     * @return пары идентификатор версии элемента - идентификатор элемента справочника
-     */
-    List<Pair<Long, Long>> checkRecordExistence(Date version, String filter);
 
     /**
      * Получение row_num записи по заданным параметрам
@@ -216,14 +189,6 @@ public interface RefBookDataProvider {
     RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId);
 
     /**
-     * Возвращает дату начала периода актуальности для указанных версий записей справочника
-     *
-     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
-     * @return идентификатор версии - дата начала периода актуальности
-     */
-    Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
-
-    /**
      * Возвращает количество существующих версий для элемента справочника
      *
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
@@ -245,14 +210,6 @@ public interface RefBookDataProvider {
      * Но без блокировок
      */
     List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
-
-    /**
-     * Возвращает значения уникальных атрибутов для конкретной версии записи справочника
-     *
-     * @param uniqueRecordId идентификатор версии записи
-     * @return not null всегда - ожидается возврат результата
-     */
-    Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId);
 
     /**
      * Обновляет данные версии записи справочника
@@ -280,14 +237,6 @@ public interface RefBookDataProvider {
      * Но без блокировок
      */
     void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records);
-
-    /**
-     * Устанавливает дату окончания периода актуальности для указанных версий записей справочника
-     *
-     * @param versionEnd      задает дату окончания периода актуальности
-     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
-     */
-    void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
 
     /**
      * Удаляет все версии записи из справочника
@@ -350,16 +299,4 @@ public interface RefBookDataProvider {
      * @return ref_book_record.id - ref_book_value.value. Может вернуть null
      */
     Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds);
-
-    /**
-     * Получить записи с одинаковыми значениями уникальных атрибутов
-     *
-     * @param attributes      атрибуты
-     * @param records         записи
-     * @param accountPeriodId идентификатор периода и подразделения БО
-     * @return значения уникальных атрибутов
-     */
-    List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId);
-
-
 }

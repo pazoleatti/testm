@@ -124,11 +124,6 @@ public class TAUserServiceImpl implements TAUserService {
     }
 
     @Override
-    public List<Department> getDepartmentHierarchy(int department) {
-        return getHierarchy(departmentService.getDepartment(department));
-    }
-
-    @Override
     public TAUser getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth == null ? null : getUser(((User) auth.getPrincipal()).getUsername());

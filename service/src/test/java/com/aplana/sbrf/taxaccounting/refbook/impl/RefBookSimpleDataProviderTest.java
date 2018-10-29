@@ -10,17 +10,13 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyLong;
@@ -36,28 +32,25 @@ public class RefBookSimpleDataProviderTest {
     private RefBookSimpleDataProvider provider;
     private RefBookSimpleDaoImpl daoMock;
     private RefBookDao refBookDaoMock;
-    private RefBookSimpleReadOnly SimpleReadOnlyMock;
-    private CommonRefBookService сommonRefBookServiceMock;
     private Logger logger;
-    private RefBookSimpleDataProviderHelper helper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         provider = new RefBookSimpleDataProvider();
 
         daoMock = mock(RefBookSimpleDaoImpl.class);
         refBookDaoMock = mock(RefBookDao.class);
-        SimpleReadOnlyMock = mock(RefBookSimpleReadOnly.class);
-        сommonRefBookServiceMock = mock(CommonRefBookService.class);
+        RefBookSimpleReadOnly simpleReadOnlyMock = mock(RefBookSimpleReadOnly.class);
+        CommonRefBookService commonRefBookServiceMock = mock(CommonRefBookService.class);
         logger = mock(Logger.class);
-        helper = mock(RefBookSimpleDataProviderHelper.class);
+        RefBookSimpleDataProviderHelper helper = mock(RefBookSimpleDataProviderHelper.class);
         when(refBookDaoMock.get(anyLong())).thenReturn(getRefBookStub());
         when(refBookDaoMock.get(RFB_NOT_VERSIONED_ID)).thenReturn(getRefBookNotVersionedStub());
 
         ReflectionTestUtils.setField(provider, "dao", daoMock);
         ReflectionTestUtils.setField(provider, "refBookDao", refBookDaoMock);
-        ReflectionTestUtils.setField(provider, "readOnlyProvider", SimpleReadOnlyMock);
-        ReflectionTestUtils.setField(provider, "commonRefBookService", сommonRefBookServiceMock);
+        ReflectionTestUtils.setField(provider, "readOnlyProvider", simpleReadOnlyMock);
+        ReflectionTestUtils.setField(provider, "commonRefBookService", commonRefBookServiceMock);
         ReflectionTestUtils.setField(provider, "helper", helper);
         provider.setRefBookId(RefBook.Id.ASNU);
     }
@@ -78,10 +71,9 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordsInvokesDao() throws Exception {
+    public void getRecordsInvokesDao() {
         Date version = new GregorianCalendar(1983, Calendar.JULY, 22).getTime();
-		PagingParams pagingParams = null;
-        provider.getRecords(version, pagingParams, null, null);
+        provider.getRecords(version, null, null, null);
 
         verify(daoMock, atLeastOnce()).getRecords(
                 any(RefBook.class), eq(version), any(PagingParams.class),
@@ -89,7 +81,7 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRowNumInvokesDao() throws Exception {
+    public void getRowNumInvokesDao() {
         provider.getRowNum(null, TEST_RECORD_ID, null, null, true);
 
         verify(daoMock, atLeastOnce()).getRowNum(any(RefBook.class), any(Date.class), anyLong(), anyString(),
@@ -97,14 +89,14 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordDataInvokesDao() throws Exception {
+    public void getRecordDataInvokesDao() {
         provider.getRecordData(TEST_RECORD_ID);
 
         verify(daoMock).getRecordData(any(RefBook.class), eq(TEST_RECORD_ID));
     }
 
     @Test
-    public void getUniqueRecordIdsInvokesDao() throws Exception {
+    public void getUniqueRecordIdsInvokesDao() {
         Date version = new GregorianCalendar(1983, Calendar.JULY, 22).getTime();
         String filter = "FILTER";
         provider.getUniqueRecordIds(version, filter);
@@ -113,8 +105,8 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getInactiveRecordsInPeriodInvokesDao() throws Exception {
-        List<Long> recordIds = new ArrayList<Long>();
+    public void getInactiveRecordsInPeriodInvokesDao() {
+        List<Long> recordIds = new ArrayList<>();
         Date startDate = new Date(0);
         Date endDate = new Date();
         provider.getInactiveRecordsInPeriod(recordIds, startDate, endDate);
@@ -124,14 +116,14 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordVersionInfoInvokesDao() throws Exception {
+    public void getRecordVersionInfoInvokesDao() {
         provider.getRecordVersionInfo(3L);
 
         verify(daoMock).getRecordVersionInfo(any(RefBook.class), eq(3L));
     }
 
     @Test
-    public void getVersionsInvokesDao() throws Exception {
+    public void getVersionsInvokesDao() {
         Date versionStart = new Date(0);
         Date versionEnd = new Date();
         provider.getVersions(versionStart, versionEnd);
@@ -140,257 +132,77 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordVersionsCountInvokesDao() throws Exception {
+    public void getRecordVersionsCountInvokesDao() {
         provider.getRecordVersionsCount(4L);
 
         verify(daoMock).getRecordVersionsCount(any(RefBook.class), eq(4L));
     }
 
     @Test
-    public void isRefBookSupportedReturnsTrueIfEditableAndVersioned() throws Exception {
+    public void isRefBookSupportedReturnsTrueIfEditableAndVersioned() {
         RefBook refBook = new RefBook();
         refBook.setReadOnly(false);
         refBook.setVersioned(true);
 
-        assertEquals(true, provider.isRefBookSupported(refBook));
+        assertTrue(provider.isRefBookSupported(refBook));
     }
 
     @Test
-    public void isRefBookSupportedReturnsTrue() throws Exception {
-        assertEquals(true, provider.isRefBookSupported(new RefBook()));
+    public void isRefBookSupportedReturnsTrue() {
+        assertTrue(provider.isRefBookSupported(new RefBook()));
     }
 
     @Test
-    public void isRefBookSupportedByIdReturnsTrue() throws Exception {
-        assertEquals(true, provider.isRefBookSupported(99L));
+    public void isRefBookSupportedByIdReturnsTrue() {
+        assertTrue(provider.isRefBookSupported(99L));
     }
 
     @Test
-    public void getRecordIdInvokesDao() throws Exception {
+    public void getRecordIdInvokesDao() {
         provider.getRecordId(5L);
         verify(daoMock).getRecordId(any(RefBook.class), eq(5L));
     }
 
     @Test
-    public void getRecordVersionsByRecordIdInvokesDao() throws Exception {
+    public void getRecordVersionsByRecordIdInvokesDao() {
         provider.getRecordVersionsByRecordId(4L, null, null, null);
         verify(daoMock).getRecordVersionsByRecordId(any(RefBook.class), eq(4L), any(PagingParams.class), anyString(), any(RefBookAttribute.class));
     }
 
     @Test
-    public void dereferenceValuesExecutes() throws Exception {
+    public void dereferenceValuesExecutes() {
         RefBook refBook = new RefBook();
-        List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+        List<RefBookAttribute> attributes = new ArrayList<>();
         RefBookAttribute refBookAttribute = new RefBookAttribute();
         refBookAttribute.setId(50L);
         refBookAttribute.setAlias("alias");
         attributes.add(refBookAttribute);
         refBook.setAttributes(attributes);
         provider.setRefBook(refBook);
-        provider.dereferenceValues(50L, new ArrayList<Long>(Arrays.asList(4L)));
+        provider.dereferenceValues(50L, new ArrayList<>(Collections.singletonList(4L)));
     }
 
     @Test
-    public void getRecordData2InvokesDao() throws Exception {
-        provider.getRecordData(Arrays.asList(1L,2L));
+    public void getRecordData2InvokesDao() {
+        provider.getRecordData(Arrays.asList(1L, 2L));
         verify(daoMock).getRecordData(any(RefBook.class), anyListOf(Long.class));
     }
 
     @Test
-    public void getRecordDataWhereClause() throws Exception {
+    public void getRecordDataWhereClause() {
         provider.getRecordDataWhere("id in (1, 2)");
         verify(daoMock).getRecordDataWhere(any(RefBook.class), eq("id in (1, 2)"));
     }
 
     @Test
-    public void getRecords() throws Exception {
-
-    }
-
-    @Test
-    public void getRecords1() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordIdPairs() throws Exception {
-
-    }
-
-    @Test
-    public void getNextVersion() throws Exception {
-
-    }
-
-    @Test
-    public void getEndVersion() throws Exception {
-
-    }
-
-    @Test
-    public void getUniqueRecordIds() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordsCount() throws Exception {
-
-    }
-
-    @Test
-    public void checkRecordExistence() throws Exception {
-
-    }
-
-    @Test
-    public void getRowNum() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordData() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordData1() throws Exception {
-
-    }
-
-    @Test
-    public void getValue() throws Exception {
-
-    }
-
-    @Test
-    public void getVersions() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordVersionsById() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordVersionsByRecordId() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordVersionInfo() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordsVersionStart() throws Exception {
-
-    }
-
-    @Test
-    public void getRecordVersionsCount() throws Exception {
-
-    }
-
-    @Test
-    public void createRecordVersion() throws Exception {
-
-    }
-
-    @Test
-    public void createRecordVersionWithoutLock() throws Exception {
-
-    }
-
-    @Test
-    public void getUniqueAttributeValues() throws Exception {
-
-    }
-
-    @Test
-    public void updateRecordVersion() throws Exception {
-
-    }
-
-    @Test
-    public void updateRecordVersionWithoutLock() throws Exception {
-
-    }
-
-    @Test
-    public void updateRecordsVersionEnd() throws Exception {
-
-    }
-
-    @Test
-    public void updateRecordsVersionEndWithoutLock() throws Exception {
-
-    }
-
-    @Test
-    public void deleteAllRecords() throws Exception {
-
-    }
-
-    @Test
-    public void deleteAllRecordsWithoutLock() throws Exception {
-
-    }
-
-    @Test
-    public void deleteRecordVersions() throws Exception {
-
-    }
-
-    @Test
-    public void deleteRecordVersionsWithoutLock() throws Exception {
-
-    }
-
-    @Test
-    public void deleteRecordVersions1() throws Exception {
-
-    }
-
-    @Test
-    public void getFirstRecordIdInvokesDao() throws Exception {
+    public void getFirstRecordIdInvokesDao() {
         provider.getFirstRecordId(5L);
 
         verify(daoMock).getFirstRecordId(any(RefBook.class), eq(5L));
     }
 
     @Test
-    public void getRecordId() throws Exception {
-
-    }
-
-    @Test
-    public void getAttributesValues() throws Exception {
-
-    }
-
-    @Test
-    public void getInactiveRecordsInPeriod() throws Exception {
-
-    }
-
-    @Test
-    public void insertRecords() throws Exception {
-
-    }
-
-    @Test
-    public void insertRecordsWithoutLock() throws Exception {
-
-    }
-
-    @Test
-    public void updateRecords() throws Exception {
-
-    }
-
-    @Test
-    public void test_updateRecordsWithoutLock_notVersionedRefBook() throws Exception {
+    public void test_updateRecordsWithoutLock_notVersionedRefBook() {
         RefBook refBook = getRefBookNotVersionedStub();
         Map<String, RefBookValue> record = new HashMap<>();
         provider.setRefBook(refBook);
@@ -403,7 +215,7 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void test_updateRecordsWithoutLock_versionedRefBookWithNullStartDateAndNullEndDate() throws Exception {
+    public void test_updateRecordsWithoutLock_versionedRefBookWithNullStartDateAndNullEndDate() {
         RefBook refBook = getRefBookStub();
         Map<String, RefBookValue> record = new HashMap<>();
         provider.setRefBook(refBook);
@@ -416,7 +228,7 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void test_updateRecordsWithoutLock_versionedRefBookWithNotNullStartDateAndNullEndDate() throws Exception {
+    public void test_updateRecordsWithoutLock_versionedRefBookWithNotNullStartDateAndNullEndDate() {
         RefBook refBook = getRefBookStub();
         Map<String, RefBookValue> record = new HashMap<>();
         provider.setRefBook(refBook);
@@ -428,31 +240,21 @@ public class RefBookSimpleDataProviderTest {
         verify(daoMock).updateRecordVersion(refBook, 1L, record);
     }
 
-    @Test
-    public void dereferenceValues() throws Exception {
-
-    }
-
-    @Test
-    public void getMatchedRecords() throws Exception {
-
-    }
-
     @Test(expected = IllegalArgumentException.class)
-    public void getRefBookThrowsExceptionOnNullRefBook() throws Exception {
+    public void getRefBookThrowsExceptionOnNullRefBook() {
         provider.setRefBook(null);
         provider.getRefBook();
     }
 
     @Test
-    public void setRefBook() throws Exception {
+    public void setRefBook() {
         provider.setRefBook(getRefBookStub());
 
         assertNotNull(provider.getRefBook());
     }
 
     @Test
-    public void getRefBookId() throws Exception {
+    public void getRefBookId() {
         provider.setRefBook(getRefBookStub());
 
         assertEquals(Long.class, provider.getRefBookId().getClass());
