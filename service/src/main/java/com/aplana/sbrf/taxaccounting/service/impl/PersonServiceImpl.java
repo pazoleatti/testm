@@ -94,9 +94,6 @@ public class PersonServiceImpl implements PersonService {
                 dto.setDocuments(Permissive.of(fromObj.getDocuments()));
                 RegistryPerson stub = new RegistryPerson();
                 stub.setId(fromObj.getId());
-                for (IdDoc personDocument : dto.getDocuments().value()) {
-                    personDocument.setPerson(stub);
-                }
                 for (PersonIdentifier personIdentifier : dto.getPersonIdentityList()) {
                     personIdentifier.setPerson(stub);
                 }
@@ -239,7 +236,7 @@ public class PersonServiceImpl implements PersonService {
 
         if (person.getOriginal() == null) {
             persistedPerson.setRecordId(person.getOldId());
-        } else if (person.getOriginal() != null) {
+        } else {
             persistedPerson.setRecordId(person.getOriginal().getRecordId());
         }
 
@@ -289,7 +286,7 @@ public class PersonServiceImpl implements PersonService {
         persistedPerson.setInnForeign(person.getInnForeign().value());
         persistedPerson.setSnils(person.getSnils().value());
         persistedPerson.setTaxPayerState(person.getTaxPayerState().value() != null ? person.getTaxPayerState().value() : new RefBookTaxpayerState());
-        persistedPerson.setVip(person.getVip());
+        persistedPerson.setVip(person.isVip());
         persistedPerson.getAddress().setRegionCode(person.getAddress().value().getRegionCode());
         persistedPerson.getAddress().setPostalCode(person.getAddress().value().getPostalCode());
         persistedPerson.getAddress().setDistrict(person.getAddress().value().getDistrict());

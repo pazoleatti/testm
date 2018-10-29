@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.lang3.StringUtils;
 
@@ -122,7 +122,8 @@ public class IdentificationUtils {
         IdDoc personDocument = SelectPersonDocumentCalc.selectIncludeReportDocument(naturalPerson, personDocumentList);
 
         if (personDocument != null){
-            return personDocumentList.indexOf(personDocument);
+            int i = personDocumentList.indexOf(personDocument);
+            return i;
         } else {
             return -1;
         }

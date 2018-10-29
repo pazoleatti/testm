@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.collections4.map.HashedMap;
 
@@ -296,7 +295,10 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     private RefBookDocType getDocTypeById(Long docTypeId) {
         if (docTypeId != null) {
-            return docTypeMap != null ? docTypeMap.get(docTypeId) : new RefBookDocType(docTypeId, null);
+            RefBookDocType refBookDocType = new RefBookDocType();
+            refBookDocType.setId(docTypeId);
+            refBookDocType.setCode(null);
+            return docTypeMap != null ? docTypeMap.get(docTypeId) : refBookDocType;
         } else {
             return null;
         }

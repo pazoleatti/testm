@@ -186,7 +186,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, reportPerson.getInnForeign(), "innForeign", CellType.STRING);
         createCellValue(colIndex++, reportPerson.getSnils(), "snils", CellType.STRING);
         createCellValue(colIndex++, reportPerson.getRussianAddress(), "address", CellType.STRING);
-        /*createCellValue(colIndex++, reportPerson.getForeignAddress(), "foreignAddress", CellType.STRING);*/
+        createCellValue(colIndex++, reportPerson.getForeignAddress(), "foreignAddress", CellType.STRING);
         createCellValue(colIndex++, reportPerson.getSource(), "source", CellType.STRING);
         createCellValue(colIndex++, reportPerson.getVersion(), "version", CellType.DATE);
         createCellValue(colIndex++, reportPerson.getVersionEnd(), "versionEnd", CellType.DATE);

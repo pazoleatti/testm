@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.person;
 
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -32,10 +31,17 @@ public class RegistryPersonMapper implements RowMapper<RegistryPerson> {
         docType.setCode(rs.getString("doc_code"));
         docType.setPriority(rs.getInt("doc_type_priority"));
 
+        RegistryPerson docPersonStub = new RegistryPerson();
+        docPersonStub.setId(result.getId());
+        docPersonStub.setOldId(result.getOldId());
+        docPersonStub.setRecordId(result.getRecordId());
+
         IdDoc personDocument = new IdDoc();
         personDocument.setDocType(docType);
         personDocument.setId(rs.getLong("d_id"));
         personDocument.setDocumentNumber(rs.getString("doc_number"));
+        personDocument.setIncRep(rs.getInt("inc_rep"));
+        personDocument.setPerson(docPersonStub);
 
         if (personDocument.getId().equals(0L)) {
             result.setReportDoc(null);

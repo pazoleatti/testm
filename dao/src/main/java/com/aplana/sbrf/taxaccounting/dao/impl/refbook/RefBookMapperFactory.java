@@ -25,8 +25,6 @@ public class RefBookMapperFactory {
             return new DocTypeMapper();
         } else if (RefBook.Id.ASNU.getId() == refBookId) {
             return new AsnuMapper();
-        } else if (RefBook.Id.PERSON.getId() == refBookId) {
-            return new PersonMapper();
         } else if (RefBook.Id.INCOME_CODE.getId() == refBookId) {
             return new IncomeTypeMapper();
         } else if (RefBook.Id.DEDUCTION_MARK.getId() == refBookId) {
@@ -95,21 +93,6 @@ public class RefBookMapperFactory {
             result.setCode(rs.getString("code"));
             result.setType(rs.getString("type"));
             result.setPriority(rs.getInt("priority"));
-            return result;
-        }
-    }
-
-    public static class PersonMapper<T> implements RowMapper<RefBookPerson> {
-
-        @Override
-        public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RefBookPerson result = new RefBookPerson();
-            result.setId(rs.getLong("id"));
-            result.setRecordId(rs.getLong("record_id"));
-            result.setFirstName(rs.getString("first_name"));
-            result.setLastName(rs.getString("last_name"));
-            result.setMiddleName(rs.getString("middle_name"));
-            // TODO: там еще куча полей, но я не знаю какие будут нужны и не тащу лишние
             return result;
         }
     }

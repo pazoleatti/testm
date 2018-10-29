@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.persons.PersonsReportBuilder;
 import org.joda.time.LocalDate;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,7 +15,6 @@ import java.util.List;
 public class PersonsExcelReportBuilderTest {
 
     @Test
-    @Ignore // TODO: починить
     public void test() throws Exception {
         List<RegistryPersonDTO> persons = new ArrayList<>();
         persons.add(person1());
@@ -58,8 +56,8 @@ public class PersonsExcelReportBuilderTest {
         asnu.setCode("asnuCode");
         asnu.setName("asnuName");
         person.setSource(asnu);
-        person.setVersion(new LocalDate(2018, 5, 5).toDate());
-        person.setVersionEnd(new LocalDate(2018, 12, 31).toDate());
+        person.setStartDate(new LocalDate(2018, 5, 5).toDate());
+        person.setEndDate(new LocalDate(2018, 12, 31).toDate());
         return person;
     }
 

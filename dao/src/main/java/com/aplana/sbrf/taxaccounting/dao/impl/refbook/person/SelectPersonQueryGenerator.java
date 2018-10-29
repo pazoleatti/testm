@@ -28,7 +28,7 @@ class SelectPersonQueryGenerator {
             "person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
             "person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, \n" +
             "person.inn_foreign, person.snils, person.start_date, person.end_date,\n" +
-            "doc.id d_id, doc.doc_number, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, doc_type.priority doc_type_priority, \n" +
+            "doc.id d_id, doc.doc_number, doc.inc_rep inc_rep, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, doc_type.priority doc_type_priority, \n" +
             "citizenship_country.id citizenship_country_id, citizenship_country.code citizenship_country_code, \n" +
             "citizenship_country.name citizenship_country_name, \n" +
             "state.id state_id, state.code state_code, state.name state_name, \n" +

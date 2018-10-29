@@ -4,13 +4,13 @@ import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.identification.*;
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,8 +131,6 @@ public class RefBookPersonServiceTest {
     }
 
     @Test
-    @Ignore
-    // TODO добавить ДУЛ для отчётности и включить
     public void identificatePersonEqualWeightTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
         Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
@@ -174,6 +172,13 @@ public class RefBookPersonServiceTest {
         result.setFirstName(firstName);
         result.setMiddleName(middleName);
         result.setBirthDate(toDate(birthDate));
+
+        IdDoc idDoc = new IdDoc();
+        RefBookDocType refBookDocType = new RefBookDocType();
+        refBookDocType.setName(docType);
+        idDoc.setDocType(refBookDocType);
+        result.setReportDoc(idDoc);
+
         return result;
     }
 
@@ -207,6 +212,13 @@ public class RefBookPersonServiceTest {
         RefBookAsnu source = new RefBookAsnu();
         source.setId(sourceId);
         result.setSource(source);
+
+        IdDoc idDoc = new IdDoc();
+        RefBookDocType refBookDocType = new RefBookDocType();
+        refBookDocType.setName(docType);
+        idDoc.setDocType(refBookDocType);
+        result.setReportDoc(idDoc);
+
         return result;
     }
 

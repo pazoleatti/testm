@@ -10,11 +10,9 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.Permissive;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,8 +23,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
@@ -40,94 +36,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookDao refBookDao;
     @Autowired
     RefBookMapperFactory refBookMapperFactory;
-    @Autowired
-    private DBUtils dbUtils;
-
-
-    private static final RowMapper<RegistryPersonDTO> REGISTRY_CARD_PERSON_MAPPER = new RowMapper<RegistryPersonDTO>() {
-        @Override
-        public RegistryPersonDTO mapRow(ResultSet rs, int i) throws SQLException {
-            RegistryPersonDTO result = new RegistryPersonDTO();
-            result.setId(rs.getLong("id"));
-            result.setRecordId(rs.getLong("record_id"));
-            result.setOldId(rs.getLong("old_id"));
-            result.setVersion(rs.getDate("version"));
-            result.setEndDate(rs.getDate("record_version_to"));
-            result.setLastName(rs.getString("last_name"));
-            result.setFirstName(rs.getString("first_name"));
-            result.setMiddleName(rs.getString("middle_name"));
-            result.setBirthDate(rs.getDate("birth_date"));
-            result.setVip(rs.getBoolean("vip"));
-            RefBookAsnu source = new RefBookAsnu();
-            source.setId(rs.getLong("SOURCE_ID"));
-            result.setSource(source);
-
-            /*Country citizenship = new Country();
-            citizenship.setCode();
-            citizenship.put("CITIZENSHIP", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("citizenship")));
-            result.setCitizenship(Permissive.of(citizenship));*/
-
-            /*Map<String, RefBookValue> reportDoc = new HashMap<>();
-            reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-            result.setReportDoc(Permissive.of(reportDoc));*/
-
-            result.setInn(Permissive.of(rs.getString("inn")));
-            result.setInnForeign(Permissive.of(rs.getString("inn_foreign")));
-            result.setSnils(Permissive.of(rs.getString("snils")));
-
-            RefBookTaxpayerState taxPayerState = new RefBookTaxpayerState();
-            taxPayerState.setId(rs.getLong("TAXPAYER_STATE"));
-            result.setTaxPayerState(Permissive.of(taxPayerState));
-
-            /*Map<String, RefBookValue> address = new HashMap<>();
-            address.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("ADDRESS")));
-            result.setAddress(Permissive.of(address));*/
-
-            return result;
-        }
-    };
-
-    private static final RowMapper<RegistryPersonDTO> REGISTRY_CARD_PERSON_ORIGINAL_MAPPER = new RowMapper<RegistryPersonDTO>() {
-        @Override
-        public RegistryPersonDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RegistryPersonDTO result = new RegistryPersonDTO();
-            result.setId(rs.getLong("id"));
-            result.setRecordId(rs.getLong("record_id"));
-            result.setFirstName(rs.getString("first_name"));
-            result.setLastName(rs.getString("last_name"));
-            result.setMiddleName(rs.getString("middle_name"));
-            result.setBirthDate(rs.getDate("BIRTH_DATE"));
-            result.setOldId(SqlUtils.getLong(rs, "OLD_ID"));
-            result.setVersion(rs.getDate("VERSION"));
-            result.setState(rs.getInt("STATUS"));
-            return result;
-        }
-    };
-
-    private static final RowMapper<RegistryPersonDTO> REGISTRY_CARD_PERSON_DUPLICATE_MAPPER = new RowMapper<RegistryPersonDTO>() {
-        @Override
-        public RegistryPersonDTO mapRow(ResultSet rs, int i) throws SQLException {
-            RegistryPersonDTO result = new RegistryPersonDTO();
-            result.setId(rs.getLong("id"));
-            result.setRecordId(rs.getLong("record_id"));
-            result.setOldId(rs.getLong("old_id"));
-            result.setVersion(rs.getDate("version"));
-            result.setState(rs.getInt("status"));
-            result.setLastName(rs.getString("last_name"));
-            result.setFirstName(rs.getString("first_name"));
-            result.setMiddleName(rs.getString("middle_name"));
-            result.setBirthDate(rs.getDate("birth_date"));
-            result.setVip(rs.getBoolean("vip"));
-            Map<String, RefBookValue> reportDoc = new HashMap<>();
-            reportDoc.put("REPORT_DOC", new RefBookValue(RefBookAttributeType.REFERENCE, rs.getLong("report_doc")));
-            /*result.setReportDoc(Permissive.of(reportDoc));*/
-            result.setInn(Permissive.of(rs.getString("inn")));
-            result.setSnils(Permissive.of(rs.getString("snils")));
-
-
-            return result;
-        }
-    };
 
     @Override
     public void clearRnuNdflPerson(Long declarationDataId) {
@@ -405,26 +313,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         if (newReportDocId != null) {
             getNamedParameterJdbcTemplate().update(sqlNewValue, params);
         }
-    }
-
-    @Override
-    public void deleteRegistryPersonFakeVersion(long recordId) {
-        String query = "DELETE FROM ref_book_person WHERE RECORD_ID = :recordId AND RECORD_ID = OLD_ID AND STATUS = 2";
-        MapSqlParameterSource params = new MapSqlParameterSource("recordId", recordId);
-        getNamedParameterJdbcTemplate().update(query, params);
-    }
-
-    @Override
-    public void saveRegistryPersonFakeVersion(RegistryPersonDTO person) {
-        String query = "INSERT INTO ref_book_person(id, version, status, record_id, old_id, vip) VALUES(:id, :version, :status, :recordId, :oldId, :vip)";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("id", dbUtils.getNextRefBookRecordIds(1).get(0))
-                .addValue("version", DateUtils.addDays(person.getEndDate(), 1))
-                .addValue("status", 2)
-                .addValue("recordId", person.getRecordId())
-                .addValue("oldId", person.getRecordId())
-                .addValue("vip", person.getVip());
-        getNamedParameterJdbcTemplate().update(query, params);
     }
 
     public List<RegistryPerson> fetchNonDuplicatesVersions(long recordId) {

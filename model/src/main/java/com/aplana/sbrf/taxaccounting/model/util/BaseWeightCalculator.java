@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

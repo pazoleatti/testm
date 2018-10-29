@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.main.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import org.junit.Ignore;
+import com.aplana.sbrf.taxaccounting.model.refbook.Address;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +133,6 @@ public class RefBookPersonDaoTest {
     }
 
     @Test
-    @Ignore // TODO починить
     public void test_getPersons_filterByTaxpayerStates() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
         filter.setTaxpayerStates(Arrays.asList(2L, 3L));
@@ -139,7 +140,7 @@ public class RefBookPersonDaoTest {
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
         assertThat(persons).hasSize(2)
-                .extracting("taxpayerState.id")
+                .extracting("taxPayerState.id")
                 .containsOnly(2L, 3L);
     }
 

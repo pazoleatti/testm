@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.persons;
 
 import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.Address;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -15,7 +14,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * Обертка над {@link RefBookPerson} для получения данных отображаемых в отчете
+ * Обертка над {@link RegistryPersonDTO} для получения данных отображаемых в отчете
  */
 public class ReportPerson {
     private RegistryPersonDTO person;
@@ -32,7 +31,7 @@ public class ReportPerson {
     }
 
     String getVip() {
-        return person.getVip() ? "VIP" : "Не VIP";
+        return person.isVip() ? "VIP" : "Не VIP";
     }
 
     String getLastName() {
@@ -52,40 +51,64 @@ public class ReportPerson {
     }
 
     String getDocName() {
-        RefBookDocType docType = person.getReportDoc().value().getDocType();
-        try {
-            if (person.getReportDoc().hasPermission()) {
-                return "(" + docType.getCode() + ") " + docType.getName();
-            } else {
-                return "Доступ ограничен";
+        if (person.getReportDoc() != null) {
+            try {
+                if (person.getReportDoc().hasPermission()) {
+                    if (person.getReportDoc().value() != null) {
+                        RefBookDocType docType = person.getReportDoc().value().getDocType();
+                        return "(" + docType.getCode() + ") " + docType.getName();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return "Доступ ограничен";
+                }
+            } catch (NullPointerException npe) {
+                return null;
             }
-        } catch (NullPointerException npe) {
+        } else {
             return null;
         }
     }
 
     String getDocNumber() {
-        return getPermissiveValue(Permissive.<String>forbidden());
+        if (person.getReportDoc() != null) {
+            try {
+                if (person.getReportDoc().hasPermission()) {
+                    if (person.getReportDoc().value() != null) {
+                        return person.getReportDoc().value().getDocumentNumber();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return "Доступ ограничен";
+                }
+            } catch (NullPointerException npe) {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     String getCitizenship() {
-        return person.getCitizenship().value() != null ? "(" + person.getCitizenship().value().getCode() + ") " + person.getCitizenship().value().getName() : null;
+        return person.getCitizenship() != null && person.getCitizenship().value() != null && person.getCitizenship().value().getCode() != null ? "(" + person.getCitizenship().value().getCode() + ") " + person.getCitizenship().value().getName() : null;
     }
 
     String getTaxpayerState() {
-        return person.getTaxPayerState().value() != null ? person.getTaxPayerState().value().getCode() : null;
+        return person.getTaxPayerState() != null && person.getTaxPayerState().value() != null && person.getTaxPayerState().value().getCode() != null ? person.getTaxPayerState().value().getCode() : null;
     }
 
     String getInn() {
-        return getPermissiveValue(person.getInnForJson());
+        return getPermissiveValue(person.getInn());
     }
 
     String getInnForeign() {
-        return getPermissiveValue(person.getInnForeignForJson());
+        return getPermissiveValue(person.getInnForeign());
     }
 
     String getSnils() {
-        return getPermissiveValue(person.getSnilsForJson());
+        return getPermissiveValue(person.getSnils());
     }
 
     private String getPermissiveValue(Permissive<String> permissive) {
@@ -97,7 +120,7 @@ public class ReportPerson {
 
     String getRussianAddress() {
         if (person.getAddress() != null) {
-            if (person.getAddressForJson().hasPermission()) {
+            if (person.getAddress().hasPermission()) {
                 return person.getAddress().value() != null ? getAddressString(person.getAddress().value()) : null;
             } else {
                 return "Доступ ограничен";
@@ -106,16 +129,24 @@ public class ReportPerson {
         return null;
     }
 
+    String getForeignAddress() {
+        if (person.getAddress().hasPermission()) {
+            return person.getAddress().value().getAddressIno();
+        } else {
+            return "Доступ ограничен";
+        }
+    }
+
     String getSource() {
-        return person.getSource() != null ? "(" + person.getSource().getCode() + ") " + person.getSource().getName() : null;
+        return person.getSource() != null && person.getSource().getCode() != null? "(" + person.getSource().getCode() + ") " + person.getSource().getName() : null;
     }
 
     Date getVersion() {
-        return person.getVersion();
+        return person.getStartDate();
     }
 
     Date getVersionEnd() {
-        return person.getVersionEnd();
+        return person.getEndDate();
     }
 
     Long getId() {
