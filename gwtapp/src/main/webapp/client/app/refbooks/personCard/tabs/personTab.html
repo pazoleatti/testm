@@ -16,7 +16,7 @@
                     <div class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.lastName}}</div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT'">
                         <div data-aplana-field>
-                            <input data-ng-model="person.lastName"
+                            <input data-ng-model="personParam.lastName"
                                    type="text" style="min-width: 370px"
                                    required/>
                             <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
@@ -31,7 +31,7 @@
                           data-ng-if="mode == 'VIEW'">{{person.firstName}}</span>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT'">
                         <div data-aplana-field>
-                            <input data-ng-model="person.firstName"
+                            <input data-ng-model="personParam.firstName"
                                    type="text" style="min-width: 370px"
                                    required/>
                             <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
@@ -46,7 +46,7 @@
                           data-ng-if="mode == 'VIEW'">{{person.middleName}}</span>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT'">
                         <div data-aplana-field>
-                            <input data-ng-model="person.middleName"
+                            <input data-ng-model="personParam.middleName"
                                    type="text" style="min-width: 370px"/>
                         </div>
                     </div>
@@ -60,7 +60,7 @@
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT'" style="width: 120px">
                         <div data-aplana-field>
                             <div data-aplana-datepicker
-                                 data-ng-model="person.birthDate">
+                                 data-ng-model="personParam.birthDate">
                             </div>
                         </div>
                     </div>
@@ -78,8 +78,8 @@
                     <div class="span8" data-ng-controller="SelectRegistryPersonController"
                          data-ng-if="mode == 'EDIT' && person.reportDoc.permission"
                          data-ui-select2="selectedDocs.options"
-                         data-ng-init="initIdDocs(idDocs, person)"
-                         data-ng-model="person.reportDoc.value"
+                         data-ng-init="initIdDocs(personParam)"
+                         data-ng-model="personParam.reportDoc.value"
                          style="width: 370px">
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                     </div>
                     <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.taxPayerState.permission">
                         {{person.taxPayerState.value ? (person.taxPayerState.value |
-                        taxPayerStateFormatter) : ""}}
+                        codeNameFormatter) : ""}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.taxPayerState.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
@@ -97,7 +97,7 @@
                     <div class="span8" data-ng-controller="SelectRegistryPersonController"
                          data-ng-if="mode == 'EDIT' && person.taxPayerState.permission"
                          data-ui-select2="taxPayerStateSelected.options"
-                         data-ng-model="person.taxPayerState.value"
+                         data-ng-model="personParam.taxPayerState.value"
                          data-ng-init="initTaxPayerState()"
                          style="width: 370px">
                     </div>
@@ -107,22 +107,23 @@
                     <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.source' | translate}}
                     </div>
                     <div class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.source ? (person.source |
-                        asnuFormatter) : ""}}
+                        codeNameFormatter) : ""}}
                     </div>
                     <div class="span8" data-ng-controller="SelectRegistryPersonController" data-ng-if="mode == 'EDIT'"
                          data-ui-select2="asnuSelect.options"
-                         data-ng-model="person.source"
+                         data-ng-model="personParam.source"
                          data-ng-init="initAsnu()"
                          style="width: 370px">
                     </div>
                 </div>
                 <div class="row-fluid form-group-view">
                     <div class="span4 person-card-left-column-label">{{::'refBook.fl.card.label.vip' | translate}}</div>
-                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.vip | vipTextFormatter}}</div>
+                    <div class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.vip | vipTextFormatter}}
+                    </div>
                     <div class="span8" data-ng-controller="SelectRegistryPersonController" data-ng-if="mode == 'EDIT'"
                          data-ui-select2="vipSelect.options"
-                         data-ng-model="person.vipSelect"
-                         data-ng-init="initVip(person)"
+                         data-ng-model="personParam.vipSelect"
+                         data-ng-init="initVip(personParam)"
                          style="width: 370px">
                     </div>
                 </div>
@@ -136,10 +137,10 @@
                 <div class="row-fluid form-group-view">
                     <span class="span4"
                           style="text-align: right">{{::'refBook.fl.card.label.citizenship' | translate}}</span>
-                    <span class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.citizenship.value ? (person.citizenship.value | countryFormatter) : " "}}</span>
+                    <span class="span8 person-card-data" data-ng-if="mode == 'VIEW'">{{person.citizenship.value ? (person.citizenship.value | codeNameFormatter) : " "}}</span>
                     <div class="span8" data-ng-controller="SelectRegistryPersonController" data-ng-if="mode == 'EDIT'"
                          data-ui-select2="citizenshipSelected.options"
-                         data-ng-model="person.citizenship.value"
+                         data-ng-model="personParam.citizenship.value"
                          data-ng-init="initCitizenship()"
                          style="width: 370px">
                     </div>
@@ -154,7 +155,7 @@
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.inn.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.inn.value"
+                            <input data-ng-model="personParam.inn.value"
                                    type="text"
                                    style="width: 370px"/>
                         </div>
@@ -172,7 +173,7 @@
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.innForeign.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.innForeign.value"
+                            <input data-ng-model="personParam.innForeign.value"
                                    type="text"
                                    style="width: 370px"/>
                         </div>
@@ -189,7 +190,7 @@
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.snils.permission"
                          style="min-width: 370px">
                         <div data-aplana-field>
-                            <input data-ng-model="person.snils.value"
+                            <input data-ng-model="personParam.snils.value"
                                    type="text" style="width: 370px"/>
                         </div>
                     </div>
@@ -208,24 +209,24 @@
                     </div>
                     <div class="span4 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.REGION_CODE.value}}
+                        {{person.address.value.regionCode}}
                     </div>
                     <div class="span4" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span4 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.REGION_CODE.value"
+                            <input data-ng-model="personParam.address.value.regionCode"
                                    type="text"
                                    style="width: 90px"
                                    data-ui-validate="{requiredByAddressItems : 'isAddressRequiredByAddressItems($value)'}"
-                                   data-ui-validate-watch="['person.address.value.APPARTMENT.value',
-                        'person.address.value.POSTAL_CODE.value',
-                        'person.address.value.DISTRICT.value',
-                        'person.address.value.CITY.value',
-                        'person.address.value.LOCALITY.value',
-                        'person.address.value.HOUSE.value',
-                        'person.address.value.BUILD.value']"/>
+                                   data-ui-validate-watch="['personParam.address.value.appartment',
+                        'personParam.address.value.postalCode',
+                        'personParam.address.value.district',
+                        'personParam.address.value.city',
+                        'personParam.address.value.locality',
+                        'personParam.address.value.house',
+                        'personParam.address.value.build']"/>
                             <div data-aplana-validator data-key='requiredByAddressItems'>
                                 {{::'common.validation.required' |
                                 translate}}
@@ -239,14 +240,14 @@
                     </div>
                     <div class="span4 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.POSTAL_CODE.value}}
+                        {{person.address.value.postalCode}}
                     </div>
                     <div class="span4" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span4 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.POSTAL_CODE.value"
+                            <input data-ng-model="personParam.address.value.postalCode"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -259,14 +260,14 @@
                     </div>
                     <div class="span8 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.DISTRICT.value}}
+                        {{person.address.value.district}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.DISTRICT.value"
+                            <input data-ng-model="personParam.address.value.district"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -275,14 +276,14 @@
                 <div class="row-fluid form-group-view">
                     <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.city' | translate}}</div>
                     <div class="span8 person-card-data"
-                         data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.CITY.value}}
+                         data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.city}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.CITY.value"
+                            <input data-ng-model="personParam.address.value.city"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -295,14 +296,14 @@
                     </div>
                     <div class="span8 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.LOCALITY.value}}
+                        {{person.address.value.locality}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.LOCALITY.value"
+                            <input data-ng-model="personParam.address.value.locality"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -311,14 +312,14 @@
                 <div class="row-fluid form-group-view">
                     <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.street' | translate}}</div>
                     <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.STREET.value}}
+                        {{person.address.value.street}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.STREET.value"
+                            <input data-ng-model="personParam.address.value.street"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -329,14 +330,14 @@
                 <div class="row-fluid form-group-view">
                     <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.house' | translate}}</div>
                     <div class="span8 person-card-data"
-                         data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.HOUSE.value}}
+                         data-ng-if="mode == 'VIEW' && person.address.permission">{{person.address.value.house}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.HOUSE.value"
+                            <input data-ng-model="personParam.address.value.house"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -346,14 +347,14 @@
                     <div class="span4" style="text-align: right">{{::'refBook.fl.card.label.apartment' | translate}}
                     </div>
                     <div class="span8 person-card-data" data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.APPARTMENT.value}}
+                        {{person.address.value.appartment}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.APPARTMENT.value"
+                            <input data-ng-model="personParam.address.value.appartment"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -366,14 +367,14 @@
                     </div>
                     <div class="span8 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.BUILD.value}}
+                        {{person.address.value.build}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="person.address.value.BUILD.value"
+                            <input data-ng-model="personParam.address.value.build"
                                    type="text"
                                    style="width: 90px"/>
                         </div>
@@ -393,8 +394,7 @@
                     </div>
                     <div class="span8 person-card-data"
                          data-ng-if="mode == 'VIEW' && person.address.permission">
-                        {{person.address.value.COUNTRY_ID.referenceObject |
-                        countryFormatter}}
+                        {{person.address.value.country | codeNameFormatter}}
                     </div>
                     <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                         {{::'refBook.fl.card.label.permissionDenied' | translate}}
@@ -405,10 +405,10 @@
                          data-ng-if="mode == 'EDIT' && person.address.permission">
                         <div data-aplana-field>
                             <div data-ui-select2="countrySelected.options"
-                                 data-ng-model="person.address.value.COUNTRY_ID.referenceObject"
+                                 data-ng-model="personParam.address.value.country"
                                  data-ng-init="initCountry()"
                                  data-ui-validate="{requiredByAddress : 'isCountryValid($value)'}"
-                                 data-ui-validate-watch="['person.address.value.ADDRESS.value']"
+                                 data-ui-validate-watch="['personParam.address.value.addressIno']"
                                  style="width: 370px">
                             </div>
                             <div data-aplana-validator data-key='requiredByAddress'>{{::'common.validation.required' |
@@ -424,18 +424,19 @@
                         </div>
                         <div class="span8 person-card-data"
                              data-ng-if="mode == 'VIEW' && person.address.permission">
-                            {{person.address.value.ADDRESS.value}}
+                            {{person.address.value.addressIno}}
                         </div>
                         <div class="span8" style="font-style: italic" data-ng-if="!person.address.permission">
                             {{::'refBook.fl.card.label.permissionDenied' | translate}}
                         </div>
-                        <div class="span8 field-wrapper person-card-data" data-ng-if="mode == 'EDIT' && person.address.permission">
+                        <div class="span8 field-wrapper person-card-data"
+                             data-ng-if="mode == 'EDIT' && person.address.permission">
                             <div data-aplana-field>
-                                <input data-ng-model="person.address.value.ADDRESS.value"
+                                <input data-ng-model="personParam.address.value.addressIno"
                                        type="text"
                                        style="width: 800px"
                                        data-ui-validate="{requiredByCountrId : 'isAddressValid($value)'}"
-                                       data-ui-validate-watch="['person.address.value.COUNTRY_ID.referenceObject']"/>
+                                       data-ui-validate-watch="['personParam.address.value.country.code']"/>
                                 <div data-aplana-validator data-key='requiredByCountrId'>
                                     {{::'common.validation.required' |
                                     translate}}

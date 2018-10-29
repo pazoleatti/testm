@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Ignore;
@@ -95,13 +96,13 @@ public class RefBookPersonDaoOracleTest {
 
         int size = 0;
 
-        Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, new NaturalPersonRefbookHandler());
+        Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, new NaturalPersonRefbookHandler());
 
         size += updateRecords.size();
 
         System.out.println("   updateRecords=" + updateRecords);
 
-        Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, 1L, new NaturalPersonRefbookHandler());
+        Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, new NaturalPersonRefbookHandler());
 
         size += checkRecords.size();
 
@@ -134,7 +135,9 @@ public class RefBookPersonDaoOracleTest {
         long time = System.currentTimeMillis();
 
         NaturalPersonPrimaryRnuRowMapper rowMapper = new NaturalPersonPrimaryRnuRowMapper();
-        rowMapper.setAsnuId(1L);
+        RefBookAsnu asnu = new RefBookAsnu();
+        asnu.setId(1L);
+        rowMapper.setAsnu(asnu);
 
         Long declarationDataId = 14873L;
         //Long declarationDataId = 14730L;

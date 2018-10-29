@@ -17,15 +17,15 @@
                         method: "POST",
                         url: "controller/actions/checkDul",
                         params: {
-                            docCode: $scope.idDoc.DOC_ID.referenceObject.CODE.value,
-                            docNumber: $scope.idDoc.DOC_NUMBER.value
+                            docCode: $scope.idDoc.docType.code,
+                            docNumber: $scope.idDoc.documentNumber
                         }
                     }).success(function (response) {
                         if (response.errorMessage && response.errorMessage !== '') {
                             $scope.formatInvalid = true;
                             $scope.formatInvalidMessage = response.errorMessage;
                         } else {
-                            $scope.idDoc.DOC_NUMBER.value = response.formattedNumber;
+                            $scope.idDoc.documentNumber = response.formattedNumber;
                             $scope.formatInvalid = false;
                             $scope.formatInvalidMessage = '';
                             if ($shareData.mode === APP_CONSTANTS.MODE.CREATE) {

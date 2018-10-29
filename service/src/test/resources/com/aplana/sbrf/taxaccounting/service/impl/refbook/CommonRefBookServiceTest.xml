@@ -37,6 +37,19 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PersonService" />
     </bean>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.TaxPayerStateDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookCountryDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDocTypeDao"/>
+    </bean>
+
     <bean id="commonRefBookService" class="com.aplana.sbrf.taxaccounting.service.impl.refbook.CommonRefBookServiceImpl">
 
     </bean>

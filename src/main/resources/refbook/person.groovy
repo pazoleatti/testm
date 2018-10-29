@@ -1,36 +1,49 @@
 package refbook // person_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.IdentityObject
 import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.identification.*
+
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.model.refbook.Address
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.TAUserService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.*
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.DATE
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.NUMBER
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.REFERENCE
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.STRING
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.formatDate
 
 /**
- * Cкрипт справочника "Физические лица" (id = 904).
- * ref_book_id = 904
+ * Cкрипт Реестра ФЛ.
  */
 
 (new Person(this)).run()
@@ -50,6 +63,7 @@ class Person extends AbstractScriptClass {
     String fileName
     CommonRefBookService commonRefBookService
     DepartmentService departmentService
+    PersonService personService
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Person(scriptClass) {
@@ -66,9 +80,6 @@ class Person extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("validDateFrom")) {
             this.validDateFrom = (Date) scriptClass.getBinding().getProperty("validDateFrom")
-        }
-        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
-            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
@@ -91,6 +102,9 @@ class Person extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("taUserServiceScript")) {
             this.taUserServiceScript = (TAUserService) scriptClass.getProperty("taUserServiceScript")
         }
+        if (scriptClass.getBinding().hasVariable("personService")) {
+            this.personService = (PersonService) scriptClass.getProperty("personService")
+        }
     }
 
     @Override
@@ -112,11 +126,11 @@ class Person extends AbstractScriptClass {
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
     // Кэш код страны - страна
-    Map<String, Country> countriesCache = new HashMap<>()
+    Map<String, RefBookCountry> countriesCache = new HashMap<>()
     // Кэш код статуса налогоплательщика - сам статус
-    Map<String, TaxpayerStatus> taxpayerStatusessCache = new HashMap<>()
+    Map<String, RefBookTaxpayerState> taxpayerStatusessCache = new HashMap<>()
     // Кэш код типа документа - сам тип
-    Map<String, DocType> docTypesCache = new HashMap<>()
+    Map<String, RefBookDocType> docTypesCache = new HashMap<>()
     // Кэш АСНУ
     Map<String, RefBookAsnu> asnuCache = new HashMap<>()
 
@@ -128,6 +142,10 @@ class Person extends AbstractScriptClass {
     Integer tbPersonDepartmentId = null
     // Время выгрузки
     Date importDate = null
+    // Маппа неопределенных АСНУ, где ключ ФЛ, значение - неопределнные АСНУ для ФЛ
+    Map<RegistryPerson, List<PersonIdentifier>> undefinedAsnu = [:]
+    // Маппа неопределенных Видов документов, где ключ ФЛ, значение - ДУЛы у которых не определен вид
+    Map<RegistryPerson, List<IdDoc>> undefinedIdDocTypes = [:]
 
     void importData() {
         defineTB()
@@ -136,13 +154,13 @@ class Person extends AbstractScriptClass {
         }
 
         fillAsnuCache()
-        List<NaturalPerson> parsedPersons = parseXml()
-        List<NaturalPerson> savedPersons = save(parsedPersons)
+        List<RegistryPerson> parsedPersons = parseXml()
+        List<RegistryPerson> savedPersons = save(parsedPersons)
         checkPersons(savedPersons)
-        for (NaturalPerson person : savedPersons) {
+        for (RegistryPerson person : savedPersons) {
             logger.info("Создана новая запись в Реестре физических лиц: " +
-                    "$person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, " +
-                    "${person.majorDocument?.documentNumber ?: "(документ не определен)"}")
+                    "$person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, " +
+                    "${person.reportDoc?.documentNumber ?: "(документ не определен)"}")
         }
         logger.info("Обработано записей из файла ${infPartCount}. В Реестре ФЛ создано ${savedPersons.size()} записей")
     }
@@ -162,7 +180,7 @@ class Person extends AbstractScriptClass {
             Map<String, RefBookValue> record = records.get(0)
             Map<String, RefBookValue> tbPersonDepartment = record.get("TB_DEPARTMENT_ID").getValue() as Map<String, RefBookValue>
             tbPersonDepartmentId = tbPersonDepartment.get("id").numberValue.intValue()
-            com.aplana.sbrf.taxaccounting.model.Department department = departmentService.get(tbPersonDepartmentId)
+            Department department = departmentService.get(tbPersonDepartmentId)
             if (department.type != DepartmentType.TERR_BANK) {
                 logger.error("Загрузка файла %s не может быть выполнена. Подразделение \"%s\" определенное для файла, не является территориальным банком.", fileName, department.name)
             }
@@ -171,8 +189,8 @@ class Person extends AbstractScriptClass {
         }
     }
 
-    List<NaturalPerson> parseXml() {
-        List<NaturalPerson> persons = []
+    List<RegistryPerson> parseXml() {
+        List<RegistryPerson> persons = []
         XMLStreamReader reader = null
         try {
             XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
@@ -180,7 +198,7 @@ class Person extends AbstractScriptClass {
             xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
             reader = xmlFactory.createXMLStreamReader(inputStream)
 
-            NaturalPersonExt person = null
+            RegistryPersonExt person = null
 
             boolean inInfoPart = false
             while (reader.hasNext()) {
@@ -192,15 +210,20 @@ class Person extends AbstractScriptClass {
                     if ('ИнфЧасть' == tag) {
                         checkInterrupted()
                         inInfoPart = true
-                        person = new NaturalPersonExt()
+                        person = new RegistryPersonExt()
                     } else if (inInfoPart) {
                         if ('АнкетДаннФЛ' == tag) {
                             parsePersonInfo(reader, person)
                         } else if ('УдЛичнФЛ' == tag) {
-                            PersonDocument document = parseDocumentInfo(reader, person)
-                            person.addDocument(document)
+                            IdDoc document = parseDocumentInfo(reader, person)
+                            if (document) {
+                                person.getDocuments().add(document)
+                            }
                         } else if ('СисИсточ' == tag) {
-                            person.personIdentityList.add(parsePersonIdentifier(reader, person))
+                            PersonIdentifier identifier = parsePersonIdentifier(reader, person)
+                            if (identifier) {
+                                person.personIdentityList.add(identifier)
+                            }
                         }
                     }
                 } else if (reader.endElement) {
@@ -209,6 +232,9 @@ class Person extends AbstractScriptClass {
                         inInfoPart = false
                         infPartCount++
                         person.setSource(getMaxPriorityAsnu(person.personIdentityList))
+                        if (!person.getSource()) {
+                            person.setSource(new RefBookAsnu())
+                        }
                         persons.add(person)
                     }
                 }
@@ -230,23 +256,24 @@ class Person extends AbstractScriptClass {
         importDate = formatter.parse(value)
     }
 
-    void parsePersonInfo(XMLStreamReader reader, NaturalPersonExt person) {
+    void parsePersonInfo(XMLStreamReader reader, RegistryPersonExt person) {
         person.lastName = getAttrValue(reader, "ФамФЛ")
         person.firstName = getAttrValue(reader, "ИмяФЛ")
         person.middleName = getAttrValue(reader, "ОтчФЛ")
         person.birthDateStr = getAttrValue(reader, "ДатаРожд")
         person.birthDate = toDate(person.birthDateStr)
         person.citizenshipCode = getAttrValue(reader, "Гражд")
-        person.citizenship = getCountryByCode(person.citizenshipCode)
+        person.citizenship = getCountryByCode(person.citizenshipCode) ?: new RefBookCountry()
         person.inn = getAttrValue(reader, "ИННФЛ")
         person.innForeign = getAttrValue(reader, "ИННИно")
         person.taxPayerStatusCode = getAttrValue(reader, "СтатусФЛ")
-        person.taxPayerStatus = getTaxpayerStatusByCode(person.taxPayerStatusCode)
+        person.taxPayerState = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new RefBookTaxpayerState()
         person.address = parseAddress(reader)
+        person.reportDoc = new IdDoc()
     }
 
-    Address parseAddress(XMLStreamReader reader) {
-        Address address = new Address()
+    AddressExt parseAddress(XMLStreamReader reader) {
+        AddressExt address = new AddressExt()
         address.regionCode = getAttrValue(reader, "КодРегион")
         address.postalCode = getAttrValue(reader, "Индекс")
         address.district = getAttrValue(reader, "Район")
@@ -257,34 +284,49 @@ class Person extends AbstractScriptClass {
         address.build = getAttrValue(reader, "Корпус")
         address.appartment = getAttrValue(reader, "Кварт")
         address.countryCode = getAttrValue(reader, "КодСтрИно")
-        address.country = getCountryByCode(address.countryCode)
+        address.country = getCountryByCode(address.countryCode) ?: new RefBookCountry()
         address.addressIno = getAttrValue(reader, "АдресИно")
-        // Если присутствует хотя бы один из атрибутов
-        if (address.regionCode || address.postalCode || address.district || address.city || address.locality || address.street || address.house ||
-                address.build || address.appartment || address.countryCode || address.addressIno) {
-            return address
-        } else {
-            return null
-        }
+        return address
     }
 
-    PersonDocument parseDocumentInfo(XMLStreamReader reader, NaturalPerson person) {
-        PersonDocument document = new PersonDocumentExt()
+    IdDoc parseDocumentInfo(XMLStreamReader reader, RegistryPerson person) {
+        IdDoc document = new PersonDocumentExt()
         document.docTypeCode = getAttrValue(reader, "УдЛичнФЛВид")
-        document.docType = getDocTypeByCode(document.docTypeCode)
+        RefBookDocType docType = getDocTypeByCode(document.docTypeCode)
+        document.docType = docType ?: new RefBookDocType()
         document.documentNumber = getAttrValue(reader, "УдЛичнФЛНом")
         document.incRepStr = getAttrValue(reader, "УдЛичнФЛГл")
         document.incRep = toInteger(document.incRepStr)
-        document.naturalPerson = person
+        if (document.incRep == 1) {
+            person.reportDoc = document
+        }
+        document.person = person
+        if (!docType) {
+            if (undefinedIdDocTypes.get(person)) {
+                undefinedIdDocTypes.get(person).add(document)
+            } else {
+                undefinedIdDocTypes.put(person, [document])
+            }
+            return null
+        }
         return document
     }
 
-    PersonIdentifier parsePersonIdentifier(XMLStreamReader reader, NaturalPerson person) {
+    PersonIdentifier parsePersonIdentifier(XMLStreamReader reader, RegistryPerson person) {
         PersonIdentifier personIdentifier = new PersonIdentifierExt()
         personIdentifier.asnuName = getAttrValue(reader, "СисИсточНам")
-        personIdentifier.asnu = getAsnuByName(personIdentifier.asnuName)
+        RefBookAsnu refBookAsnu = getAsnuByName(personIdentifier.asnuName)
+        personIdentifier.asnu = refBookAsnu ?: new RefBookAsnu()
         personIdentifier.inp = getAttrValue(reader, "СисИсточИНП")
-        personIdentifier.naturalPerson = person
+        personIdentifier.person = person
+        if (!refBookAsnu) {
+            if (undefinedAsnu.get(person)) {
+                undefinedAsnu.get(person).add(personIdentifier)
+            } else {
+                undefinedAsnu.put(person, [personIdentifier])
+            }
+            return null
+        }
         return personIdentifier
     }
 
@@ -326,46 +368,20 @@ class Person extends AbstractScriptClass {
         return null
     }
 
-    List<NaturalPerson> save(List<NaturalPerson> persons) {
+    List<RegistryPerson> save(List<RegistryPerson> persons) {
         if (persons) {
-            List<Address> addressesToCreate = []
-            List<PersonDocument> documentsToCreate = []
-            List<PersonIdentifier> identifiersToCreate = []
-            List<com.aplana.sbrf.taxaccounting.model.identification.PersonTb> personTbsToCreate = []
-
             for (def person : persons) {
-                person.address != null && addressesToCreate.add(person.address)
-
-                for (PersonIdentifier identifier : person.personIdentityList) {
-                    if (identifier.asnu != null && identifier.inp) {
-                        identifiersToCreate.add(identifier)
-                    }
-                }
-
-                for (PersonDocument document : person.documents) {
-                    if (document.docType != null && document.documentNumber) {
-                        documentsToCreate.add(document)
-                    }
-                }
-
-                com.aplana.sbrf.taxaccounting.model.identification.PersonTb personTb = new com.aplana.sbrf.taxaccounting.model.identification.PersonTb()
-                personTb.setNaturalPerson(person)
-                personTb.setTbDepartmentId(tbPersonDepartmentId)
+                com.aplana.sbrf.taxaccounting.model.refbook.PersonTb personTb = new com.aplana.sbrf.taxaccounting.model.refbook.PersonTb()
+                personTb.setPerson(person)
+                Department department = new Department()
+                department.setId(tbPersonDepartmentId)
+                personTb.setTbDepartment(department)
                 personTb.setImportDate(importDate)
-                personTbsToCreate.add(personTb)
+                person.personTbList.add(personTb)
+                person.startDate = versionFrom
             }
 
-            insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), addressesToCreate, this.&mapAddressAttr)
-
-            insertBatchRecords(RefBook.Id.PERSON.getId(), persons, this.&mapPersonAttr)
-
-            insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentsToCreate, this.&mapPersonDocumentAttr)
-
-            findReportDocsAndUpdateTheirPersons(documentsToCreate)
-
-            insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), identifiersToCreate, this.&mapPersonIdentifierAttr)
-
-            insertBatchRecords(RefBook.Id.PERSON_TB.getId(), personTbsToCreate, this.&mapPersonTbAttr)
+            personService.savePersons(persons)
         }
         return persons
     }
@@ -373,50 +389,56 @@ class Person extends AbstractScriptClass {
     /**
      * Обработка ошибочных ситуаций алгоритма
      */
-    void checkPersons(List<NaturalPerson> persons) {
+    void checkPersons(List<RegistryPerson> persons) {
         for (def person : persons) {
             // 4.a Ошибки возникшие при создании записей
-            for (def identifier : person.personIdentityList) {
-                def asnuName = (identifier as PersonIdentifierExt).asnuName
-                if (asnuName && identifier.asnu == null) {
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+            List<PersonIdentifier> identityPersonList = undefinedAsnu.get(person)
+            if (identityPersonList != null) {
+                for (def identifier : identityPersonList) {
+                    def asnuName = (identifier as PersonIdentifierExt).asnuName
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " АСНУ=\"$asnuName\" не найдена запись в справочнике \"АСНУ\".")
+
                 }
             }
-            if (person.source == null) {
-                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+            if (person.source?.id == null) {
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                         " невозможно определить систему-источник. Атрибут \"Система-источник\" не был заполнен.")
             }
-            for (def document : person.documents) {
-                def docTypeCode = (document as PersonDocumentExt).docTypeCode
-                if (docTypeCode && document.docType == null) {
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
-                            " указан код ДУЛ ($docTypeCode), отсутствующий в справочнике \"Коды документов\".")
+            List<IdDoc> idDocTypes = this.undefinedIdDocTypes.get(person)
+            if (idDocTypes != null) {
+                for (IdDoc document : idDocTypes) {
+                    def docTypeCode = (document as PersonDocumentExt).docTypeCode
+                    if (docTypeCode && document.docType.id == null) {
+                        logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
+                                " указан код ДУЛ ($docTypeCode), отсутствующий в справочнике \"Коды документов\".")
+                    }
                 }
             }
-            def taxPayerStatusCode = (person as NaturalPersonExt).taxPayerStatusCode
-            if (taxPayerStatusCode && person.taxPayerStatus == null) {
-                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, \"${person.majorDocument?.documentNumber ?: "(документ не определен)"}\"" +
+
+            def taxPayerStatusCode = (person as RegistryPersonExt).taxPayerStatusCode
+            if (taxPayerStatusCode && person.taxPayerState.id == null) {
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"${person.reportDoc?.documentNumber ?: "(документ не определен)"}\"" +
                         " cтатус налогоплательщика ($taxPayerStatusCode) не найден в справочнике \"Статусы налогоплательщика\".")
             }
-            def citizenshipCode = (person as NaturalPersonExt).citizenshipCode
-            if (citizenshipCode && person.citizenship == null) {
-                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
-                        " код страны гражданства ($citizenshipCode) не найден в справочнике \"Общероссийский классификатор стран мира\".")
+            def citizenshipCode = (person as RegistryPersonExt).citizenship.code
+            if (citizenshipCode == null) {
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                        " код страны гражданства (${(person as RegistryPersonExt).citizenshipCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
             }
-            if (person.address != null) {
-                def countryCode = person.address.countryCode
-                if (countryCode && person.address.country == null) {
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
-                            " код страны адреса за пределами РФ ($countryCode) не найден в справочнике \"Общероссийский классификатор стран мира\".")
+            if (person.address.country != null) {
+                def countryCode = (person.address as AddressExt).countryCode
+                if (countryCode && person.address.country.id == null) {
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                            " код страны адреса за пределами РФ (${(person.address as AddressExt).countryCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
                 }
             }
             // Проверки заполненности обязательный полей
             checkFilled(person.lastName, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ФамФЛ")
             checkFilled(person.firstName, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ИмяФЛ")
-            checkFilled((person as NaturalPersonExt).birthDateStr, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ДатаРожд")
-            checkFilled((person as NaturalPersonExt).citizenshipCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.Гражд")
-            checkFilled((person as NaturalPersonExt).taxPayerStatusCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.СтатусФЛ")
+            checkFilled((person as RegistryPersonExt).birthDateStr, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ДатаРожд")
+            checkFilled((person as RegistryPersonExt).citizenshipCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.Гражд")
+            checkFilled((person as RegistryPersonExt).taxPayerStatusCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.СтатусФЛ")
             for (def document : person.documents) {
                 checkFilled((document as PersonDocumentExt).docTypeCode, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛВид")
                 checkFilled(document.documentNumber, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛНом")
@@ -434,10 +456,13 @@ class Person extends AbstractScriptClass {
                     warnings.add(ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер"))
                 }
             }
-            // 2. Проверка разрешеннных символов в фамилии
-            warnings.addAll(ScriptUtils.checkLastName(person.lastName, person.citizenship.code))
-            // 3. Проверка разрешеннных символов в имени
-            warnings.addAll(ScriptUtils.checkFirstName(person.firstName, person.citizenship.code))
+
+            if (person.citizenship.code != null) {
+                // 2. Проверка разрешеннных символов в фамилии
+                warnings.addAll(ScriptUtils.checkLastName(person.lastName, person.citizenship.code))
+                // 3. Проверка разрешеннных символов в имени
+                warnings.addAll(ScriptUtils.checkFirstName(person.firstName, person.citizenship.code))
+            }
             // 4. Проверка корректности ИНН РФ
             def message = ScriptUtils.checkInn(person.inn)
             if (message) {
@@ -450,166 +475,25 @@ class Person extends AbstractScriptClass {
                 }
             }
             // 6. Проверка, что среди ДУЛ имеется ДУЛ с признаком "главный ДУЛ"
-            if (person.majorDocument == null) {
+            if (person.reportDoc?.id == null) {
                 warnings << "Среди записей о ДУЛ отсутствует запись, для которой признак \"Включается в отчетность\"=1"
             }
 
             for (def warning : warnings) {
                 if (warning) {
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " не пройдена проверка: $warning")
                 }
             }
         }
     }
 
-    String checkFilled(String value, NaturalPerson person, String attrName) {
+    String checkFilled(String value, RegistryPerson person, String attrName) {
         if (value != null && value.isEmpty()) {
-            logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.majorDocument?.documentNumber ?: "(документ не определен)"}" +
+            logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                     " было указано пустое значение либо значение, состоящее из одних пробелов, для атрибута ($attrName)")
         }
         return value
-    }
-
-    /**
-     * Метод универсального сохранения записей справочника в БД.
-     * @param refBookId id справочника
-     * @param records записи для сохранения
-     * @param makeRecordMap функция-маппер записи на таблицу в БД
-     */
-    void insertBatchRecords(Long refBookId, List<? extends IdentityObject> records, Closure makeRecordMap) {
-        if (records) {
-            def refBookProvider = getProvider(refBookId)
-
-            String refBookName = refBookProvider.refBook.name
-            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${records.size()}")
-
-            // Работаем по 1000 записей
-            records.collate(1000).each { recordsPortion ->
-                checkInterrupted()
-                if (recordsPortion != null && !recordsPortion.isEmpty()) {
-
-                    // Переводим объекты в подготовленный для сохранения в базу формат
-                    List<RefBookRecord> preparedRecords = []
-                    recordsPortion.each { record ->
-                        checkInterrupted()
-                        // мапа из полей объекта
-                        Map<String, RefBookValue> recordMap = makeRecordMap(record)
-                        // спецобъект для сохранения в базу
-                        def preparedRecord = createRefBookRecord(recordMap)
-                        preparedRecords.add(preparedRecord)
-                    }
-
-                    // Сохраняем записи в базу. Метод называется "create" по историческим причинам.
-                    List<Long> ids = refBookProvider.createRecordVersionWithoutLock(logger, versionFrom, null, preparedRecords)
-
-                    // Устанавливаем id сохраненным объектам, они используются в сохранении связанных объектов
-                    recordsPortion.eachWithIndex { record, int i ->
-                        checkInterrupted()
-                        Long id = ids.get(i)
-                        record.setId(id)
-                    }
-                }
-            }
-        }
-    }
-
-    Map<String, RefBookValue> mapAddressAttr(Address address) {
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "ADDRESS_TYPE", NUMBER, address.getAddressType() ?: 0)
-        putValue(values, "COUNTRY_ID", REFERENCE, address.getCountry()?.getId())
-        putValue(values, "REGION_CODE", STRING, address.getRegionCode())
-        putValue(values, "DISTRICT", STRING, address.getDistrict())
-        putValue(values, "CITY", STRING, address.getCity())
-        putValue(values, "LOCALITY", STRING, address.getLocality())
-        putValue(values, "STREET", STRING, address.getStreet())
-        putValue(values, "HOUSE", STRING, address.getHouse())
-        putValue(values, "BUILD", STRING, address.getBuild())
-        putValue(values, "APPARTMENT", STRING, address.getAppartment())
-        putValue(values, "POSTAL_CODE", STRING, address.getPostalCode())
-        putValue(values, "ADDRESS", STRING, address.getAddressIno())
-        return values
-    }
-
-    Map<String, RefBookValue> mapPersonAttr(NaturalPerson person) {
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "LAST_NAME", STRING, person.getLastName())
-        putValue(values, "FIRST_NAME", STRING, person.getFirstName())
-        putValue(values, "MIDDLE_NAME", STRING, person.getMiddleName())
-        putValue(values, "INN", STRING, person.getInn())
-        putValue(values, "INN_FOREIGN", STRING, person.getInnForeign())
-        putValue(values, "SNILS", STRING, person.getSnils())
-        putValue(values, "BIRTH_DATE", DATE, person.getBirthDate())
-        putValue(values, "BIRTH_PLACE", STRING, null)
-        putValue(values, "ADDRESS", REFERENCE, person.getAddress()?.getId())
-        putValue(values, "CITIZENSHIP", REFERENCE, person.getCitizenship()?.getId())
-        putValue(values, "TAXPAYER_STATE", REFERENCE, person.getTaxPayerStatus()?.getId())
-        putValue(values, "SOURCE_ID", REFERENCE, person.source?.id)
-        return values
-    }
-
-    Map<String, RefBookValue> mapPersonDocumentAttr(PersonDocument personDocument) {
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "PERSON_ID", REFERENCE, personDocument.getNaturalPerson().getId())
-        putValue(values, "DOC_NUMBER", STRING, personDocument.getDocumentNumber())
-        def incRepVal = personDocument.getIncRep() != null ? personDocument.getIncRep() : 1
-        putValue(values, "INC_REP", NUMBER, incRepVal)
-        putValue(values, "DOC_ID", REFERENCE, personDocument.getDocType()?.getId())
-        return values
-    }
-
-    Map<String, RefBookValue> mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "PERSON_ID", REFERENCE, personIdentifier.getNaturalPerson().getId())
-        putValue(values, "INP", STRING, personIdentifier.getInp())
-        putValue(values, "AS_NU", REFERENCE, personIdentifier.asnu.id)
-        return values
-    }
-
-    Map<String, RefBookValue> mapPersonTbAttr(com.aplana.sbrf.taxaccounting.model.identification.PersonTb personTb) {
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "PERSON_ID", REFERENCE, personTb.getNaturalPerson().getId())
-        putValue(values, "TB_DEPARTMENT_ID", REFERENCE, personTb.getTbDepartmentId() as Long)
-        putValue(values, "IMPORT_DATE", DATE, personTb.getImportDate())
-        return values
-    }
-
-    void putValue(Map<String, RefBookValue> values, String attrName, RefBookAttributeType type, Object value) {
-        values.put(attrName, new RefBookValue(type, value))
-    }
-
-    /**
-     * Создание новой записи справочника
-     */
-    RefBookRecord createRefBookRecord(Map<String, RefBookValue> values) {
-        RefBookRecord record = new RefBookRecord()
-        putValue(values, "RECORD_ID", NUMBER, null)
-        record.setValues(values)
-        return record
-    }
-
-    /**
-     * Для документов, включаемых в отчетность, добавляем взаимную ссылку в REF_BOOK_PERSON
-     */
-    void findReportDocsAndUpdateTheirPersons(List<PersonDocument> documents) {
-        documents.each { document ->
-            if (document.isIncludeReport() && document.naturalPerson) {
-                addDocToItsPerson(document)
-            }
-        }
-    }
-
-    void addDocToItsPerson(PersonDocument document) {
-        Long personId = document.naturalPerson.id
-        updatePersonReportDoc(personId, document.id)
-    }
-
-    void updatePersonReportDoc(Long personId, Long documentId) {
-        def personProvider = getProvider(RefBook.Id.PERSON.id)
-
-        Map<String, RefBookValue> personFields = personProvider.getRecordData(personId)
-        personFields.put('REPORT_DOC', new RefBookValue(NUMBER, documentId))
-        personProvider.updateRecordVersionWithoutLock(logger, personId, null, null, personFields)
     }
 
     /**
@@ -725,13 +609,17 @@ class Person extends AbstractScriptClass {
         return date ? ScriptUtils.formatDate(date) : ""
     }
 
-    class NaturalPersonExt extends NaturalPerson {
+    class RegistryPersonExt extends RegistryPerson {
         String birthDateStr
         String citizenshipCode
         String taxPayerStatusCode
     }
 
-    class PersonDocumentExt extends PersonDocument {
+    class AddressExt extends Address {
+        String countryCode
+    }
+
+    class PersonDocumentExt extends IdDoc {
         String docTypeCode
         String incRepStr
     }
@@ -785,15 +673,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет страну по коду
      */
-    Country getCountryByCode(String code) {
-        Country country = null
+    RefBookCountry getCountryByCode(String code) {
+        RefBookCountry country = null
         if (code) {
             country = countriesCache.get(code)
             if (!country) {
                 def recordData = getProvider(RefBook.Id.COUNTRY.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    country = new Country()
+                    country = new RefBookCountry()
                     country.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     country.setCode(record.get("CODE").getStringValue())
                     countriesCache.put(code, country)
@@ -806,15 +694,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет статус налогоплательщика по коду
      */
-    TaxpayerStatus getTaxpayerStatusByCode(String code) {
-        TaxpayerStatus taxpayerStatus = null
+    RefBookTaxpayerState getTaxpayerStatusByCode(String code) {
+        RefBookTaxpayerState taxpayerStatus = null
         if (code) {
             taxpayerStatus = taxpayerStatusessCache.get(code)
             if (!taxpayerStatus) {
                 def recordData = getProvider(RefBook.Id.TAXPAYER_STATUS.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    taxpayerStatus = new TaxpayerStatus()
+                    taxpayerStatus = new RefBookTaxpayerState()
                     taxpayerStatus.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     taxpayerStatus.setCode(record.get("CODE").getStringValue())
                     taxpayerStatusessCache.put(code, taxpayerStatus)
@@ -827,15 +715,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет вид документа по коду
      */
-    DocType getDocTypeByCode(String code) {
-        DocType docType = null
+    RefBookDocType getDocTypeByCode(String code) {
+        RefBookDocType docType = null
         if (code) {
             docType = docTypesCache.get(code)
             if (!docType) {
                 def recordData = getProvider(RefBook.Id.DOCUMENT_CODES.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    docType = new DocType()
+                    docType = new RefBookDocType()
                     docType.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     docType.setCode(record.get("CODE").getStringValue())
                     docTypesCache.put(code, docType)

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration({"RefBookSimpleDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Ignore // Отключил т.к. все тесты построены на справочнике ФЛ. А теперь это реестр ФЛ.
 public class RefBookSimpleDaoTest {
 
     private static final int TABLE_TOTAL_RECORDS = 5;

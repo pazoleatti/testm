@@ -1,10 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * АСНУ
  *
  * @author dloshkarev
  */
+@Getter @Setter @NoArgsConstructor
 public class RefBookAsnu extends RefBookSimple<Long> {
     //Наименование АСНУ
     private String name;
@@ -15,35 +20,4 @@ public class RefBookAsnu extends RefBookSimple<Long> {
     //Приоритет
     private Integer priority;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
-    }
 }

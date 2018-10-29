@@ -17,13 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -248,14 +242,8 @@ public class PrintingServiceImpl implements PrintingService {
                             PagingParams pagingParams = new PagingParams();
                             pagingParams.setPage(page);
                             pagingParams.setCount(BATCH_SIZE);
-                            if (refBookId == RefBook.Id.PERSON.getId()) {
-                                String filter = personService.createSearchFilter(extraParams.get("FIRST_NAME"), extraParams.get("LAST_NAME"), searchPattern, exactSearch);
-                                currentBatch = personService.fetchPersonsAsMap(version, pagingParams, filter, sortAttribute);
-                            } else {
-                                currentBatch = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, direction);
-                            }
-
                             page++;
+                            currentBatch = commonRefBookService.fetchAllRecords(refBookId, null, version, searchPattern, exactSearch, extraParams, pagingParams, sortAttribute, direction);
                             iterator = currentBatch.iterator();
                             return iterator.hasNext();
                         }
@@ -287,7 +275,7 @@ public class PrintingServiceImpl implements PrintingService {
     @Override
     public String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams, TAUser user) {
         pagingParams.setCount(-1);// выбираем все записи выбираем
-        List<RefBookPerson> persons = personService.getPersons(pagingParams, filter, user);
+        List<RegistryPersonDTO> persons = personService.getPersonsData(pagingParams, filter);
         PersonsReportBuilder reportBuilder = new PersonsReportBuilder(persons, filter);
         String reportPath = null;
         try {

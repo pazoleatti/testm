@@ -55,7 +55,7 @@ public abstract class PersonVipDataPermission extends AbstractPermission<Permiss
                 return false;
             } else {
                 Set<Integer> permittedDepartmentsSet = new HashSet<>(departmentsAvailableToUser);
-                if (targetDomainObject.getVip()) {
+                if (targetDomainObject.isVip()) {
                     List<Integer> vipDepartments = refBookPersonDao.getPersonTbIds(targetDomainObject.getId());
                     Set<Integer> vipDepartmentsSet = new HashSet<>(vipDepartments);
                     Set<Integer> intersection = Sets.intersection(permittedDepartmentsSet, vipDepartmentsSet);

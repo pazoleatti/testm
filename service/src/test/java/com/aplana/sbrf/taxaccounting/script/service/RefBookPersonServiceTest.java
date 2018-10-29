@@ -4,14 +4,13 @@ import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,13 +85,15 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Map<Long, Integer> priorityMap = new HashMap<>();
-        priorityMap.put(1L, 100);
-        priorityMap.put(2L, 100);
-        priorityMap.put(3L, 100);
-        priorityMap.put(4L, 100);
-        priorityMap.put(5L, 100);
-        priorityMap.put(6L, 100);
+        Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
+        RefBookAsnu priorityAsnu = new RefBookAsnu();
+        priorityAsnu.setPriority(100);
+        priorityMap.put(1L, priorityAsnu);
+        priorityMap.put(2L, priorityAsnu);
+        priorityMap.put(3L, priorityAsnu);
+        priorityMap.put(4L, priorityAsnu);
+        priorityMap.put(5L, priorityAsnu);
+        priorityMap.put(6L, priorityAsnu);
         IdentificationData identificationDataFixture = new IdentificationData();
         identificationDataFixture.setNaturalPerson(primaryPerson);
         identificationDataFixture.setRefBookPersonList(getList());
@@ -107,13 +108,17 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonAsnuLowPriorityTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Map<Long, Integer> priorityMap = new HashMap<>();
-        priorityMap.put(1L, 100);
-        priorityMap.put(2L, 200);
-        priorityMap.put(3L, 200);
-        priorityMap.put(4L, 200);
-        priorityMap.put(5L, 200);
-        priorityMap.put(6L, 200);
+        Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
+        RefBookAsnu priorityAsnu100 = new RefBookAsnu();
+        priorityAsnu100.setPriority(100);
+        RefBookAsnu priorityAsnu200 = new RefBookAsnu();
+        priorityAsnu200.setPriority(200);
+        priorityMap.put(1L, priorityAsnu100);
+        priorityMap.put(2L, priorityAsnu200);
+        priorityMap.put(3L, priorityAsnu200);
+        priorityMap.put(4L, priorityAsnu200);
+        priorityMap.put(5L, priorityAsnu200);
+        priorityMap.put(6L, priorityAsnu200);
         IdentificationData identificationDataFixture = new IdentificationData();
         identificationDataFixture.setNaturalPerson(primaryPerson);
         identificationDataFixture.setRefBookPersonList(getList());
@@ -126,12 +131,12 @@ public class RefBookPersonServiceTest {
     }
 
     @Test
-    @Ignore
-    // TODO добавить ДУЛ для отчётности и включить
     public void identificatePersonEqualWeightTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Map<Long, Integer> priorityMap = new HashMap<>();
-        priorityMap.put(1L, 100);
+        Map<Long, RefBookAsnu> priorityMap = new HashMap<>();
+        RefBookAsnu priorityAsnu = new RefBookAsnu();
+        priorityAsnu.setPriority(100);
+        priorityMap.put(1L, priorityAsnu);
         List<NaturalPerson> personDataList = new ArrayList<NaturalPerson>();
         personDataList.add(createNaturalPerson(1L, "888", "2", "", "12300011156", "", "1112", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
         personDataList.add(createNaturalPerson(2L, "888", "2", "", "12300011156", "", "1113", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
@@ -161,12 +166,19 @@ public class RefBookPersonServiceTest {
         result.setSnils(snils);
 
         result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
-        result.getPersonDocumentList().add(createPersonDocument(5L, 1, docNumber));
+        result.getDocuments().add(createPersonDocument(5L, 1, docNumber));
 
         result.setLastName(lastName);
         result.setFirstName(firstName);
         result.setMiddleName(middleName);
         result.setBirthDate(toDate(birthDate));
+
+        IdDoc idDoc = new IdDoc();
+        RefBookDocType refBookDocType = new RefBookDocType();
+        refBookDocType.setName(docType);
+        idDoc.setDocType(refBookDocType);
+        result.setReportDoc(idDoc);
+
         return result;
     }
 
@@ -187,7 +199,7 @@ public class RefBookPersonServiceTest {
         result.setRecordId(id);
 
         result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
-        result.getPersonDocumentList().add(createPersonDocument(5L, 1, docNumber));
+        result.getDocuments().add(createPersonDocument(5L, 1, docNumber));
 
         result.setInn(inn);
         result.setInnForeign(innForeign);
@@ -197,7 +209,16 @@ public class RefBookPersonServiceTest {
         result.setFirstName(firstName);
         result.setMiddleName(middleName);
         result.setBirthDate(toDate(birthDate));
-        result.setSourceId(sourceId);
+        RefBookAsnu source = new RefBookAsnu();
+        source.setId(sourceId);
+        result.setSource(source);
+
+        IdDoc idDoc = new IdDoc();
+        RefBookDocType refBookDocType = new RefBookDocType();
+        refBookDocType.setName(docType);
+        idDoc.setDocType(refBookDocType);
+        result.setReportDoc(idDoc);
+
         return result;
     }
 
@@ -205,14 +226,16 @@ public class RefBookPersonServiceTest {
         PersonIdentifier personIdentifier = new PersonIdentifier();
         personIdentifier.setId(id);
         personIdentifier.setInp(inp);
-        personIdentifier.setAsnuId(asnuId);
+        RefBookAsnu asnu = new RefBookAsnu();
+        asnu.setId(asnuId);
+        personIdentifier.setAsnu(asnu);
         return personIdentifier;
     }
 
-    private PersonDocument createPersonDocument(Long docTypeId, Integer incRep, String documentNumber) {
-        DocType docTypeObject = new DocType();
+    private IdDoc createPersonDocument(Long docTypeId, Integer incRep, String documentNumber) {
+        RefBookDocType docTypeObject = new RefBookDocType();
         docTypeObject.setId(5L);
-        PersonDocument personDocument = new PersonDocument();
+        IdDoc personDocument = new IdDoc();
         personDocument.setDocType(docTypeObject);
         personDocument.setIncRep(1);
         personDocument.setDocumentNumber(documentNumber);

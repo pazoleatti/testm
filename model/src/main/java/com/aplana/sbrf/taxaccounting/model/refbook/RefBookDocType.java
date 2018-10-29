@@ -1,10 +1,16 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * Справочник "Коды документов"
  *
  * @author dloshkarev
  */
+@Getter @Setter @NoArgsConstructor @EqualsAndHashCode(of ={"code", "name"}, callSuper = false)
 public class RefBookDocType extends RefBookSimple<Long> {
     //Наименование
     private String name;
@@ -13,27 +19,8 @@ public class RefBookDocType extends RefBookSimple<Long> {
     //Приоритет
     private Integer priority;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
+    public RefBookDocType(Long id, String code) {
+        this.id = id;
         this.code = code;
-    }
-
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
     }
 }

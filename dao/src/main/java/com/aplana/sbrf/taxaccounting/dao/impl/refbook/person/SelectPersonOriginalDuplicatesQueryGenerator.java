@@ -20,6 +20,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
     @Override
     protected void addWhereConditions() {
         if (filter != null) {
+            query = query + "\n" + "where 1 = 1";
             addLike("person.old_id", filter.getId());
             addLikeIgnoreCase("person.last_name", filter.getLastName());
             addLikeIgnoreCase("person.first_name", filter.getFirstName());
@@ -30,7 +31,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
             addDocumentsConditions();
             addVersionsConditions();
             selfExcludeCondition(filter.getRecordId());
-            selfExcludeDuplicates();
+            excludeDuplicates();
         }
     }
 
@@ -46,7 +47,7 @@ public class SelectPersonOriginalDuplicatesQueryGenerator extends SelectPersonQu
         }
     }
 
-    private void selfExcludeDuplicates() {
+    private void excludeDuplicates() {
         query = query + "\n" + "and record_id = old_id";
     }
 }

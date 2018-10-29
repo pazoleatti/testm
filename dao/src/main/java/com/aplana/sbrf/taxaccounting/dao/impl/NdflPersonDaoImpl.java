@@ -54,9 +54,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     private static final Log LOG = LogFactory.getLog(NdflPersonDaoImpl.class);
 
     @Autowired
-    DBUtilsImpl dbUtils;
-
-    @Autowired
     DepartmentDao departmentDao;
     @Autowired
     DepartmentConfigDao departmentConfigDao;
@@ -1225,7 +1222,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             throw new DaoException(DUPLICATE_ERORR_MSG);
         }
 
-        String insert = createInsert(table, seq, columns, fields);
+        String insert = SqlUtils.createInsert(table, seq, columns, fields);
         NamedParameterJdbcTemplate jdbcTemplate = getNamedParameterJdbcTemplate();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -1289,45 +1286,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    /**
-     * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
-     *
-     * @param identityObjects объекты обладающий суррогатным ключом
-     * @param table           наименование таблицы используемой для хранения данных объекта
-     * @param seq             наименование последовательностт используемой для генерации ключей
-     * @param columns         массив содержащий наименование столбцов таблицы для вставки в insert
-     * @param fields          массив содержащий наименования параметров соответствующих столбцам
-     * @param <E>             тип объекта
-     */
-    private <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
-        List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
-        String insert = createInsert(table, columns, fields);
-        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
-        int i = 0;
-        for (E identityObject : identityObjects) {
-            identityObject.setId(ids.get(i));
-            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
-            i++;
-        }
-        getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
-    }
 
-    private static String createInsert(String table, String[] columns, String[] fields) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into ").append(table);
-        sb.append(toSqlString(columns));
-        sb.append(" VALUES ");
-        sb.append(toSqlParameters(fields));
-        return sb.toString();
-    }
-
-    public static String toSqlParameters(String[] fields) {
-        List<String> result = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
-            result.add(":" + fields[i]);
-        }
-        return toSqlString(result.toArray());
-    }
 
     @Override
     public void delete(Long id) {
@@ -1880,55 +1839,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         for (String col : columns) {
             list.add(alias + "." + col);
         }
-        String columnsNames = toSqlString(list.toArray());
+        String columnsNames = SqlUtils.toSqlString(list.toArray());
         return columnsNames.replace("(", "").replace(")", "");
     }
 
-    private static String createInsert(String table, String seq, String[] columns, String[] fields) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into ").append(table);
-        sb.append(toSqlString(columns));
-        sb.append(" VALUES ");
-        sb.append(toSqlParameters(fields, seq));
-        return sb.toString();
-    }
-
-    /**
-     * Метод преобразует массив {"a", "b", "c"} в строку "(a, b, c)"
-     *
-     * @param a исходный массив
-     * @return строка
-     */
-    public static String toSqlString(Object[] a) {
-        if (a == null) {
-            return "";
-        }
-        int iMax = a.length - 1;
-        if (iMax == -1) {
-            return "";
-        }
-        StringBuilder b = new StringBuilder();
-        b.append('(');
-        for (int i = 0; ; i++) {
-            b.append(a[i]);
-            if (i == iMax) {
-                return b.append(')').toString();
-            }
-            b.append(", ");
-        }
-    }
-
-    public static String toSqlParameters(String[] fields, String seq) {
-        List<String> result = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].equals("id")) {
-                result.add(seq + ".nextval");
-            } else {
-                result.add(":" + fields[i]);
-            }
-        }
-        return toSqlString(result.toArray());
-    }
 
     //>-------------------------<The DAO row mappers>-----------------------------<
 
@@ -2239,17 +2153,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
         String sql = "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
-                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc.code AS country_code, rba.address " +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, " +
+                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, " +
+                "rbp.appartment, rbp.address_foreign as address, rbc.code AS country_code " +
                 "FROM ref_book_person rbp " +
                 "LEFT JOIN ndfl_person np ON rbp.id = np.person_id " +
                 "LEFT JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
-                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
-                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id " +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 " +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
                 "WHERE dd.id = ?";
         return getJdbcTemplate().query(sql,
@@ -2401,21 +2314,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 return result;
             }
         }
-        String sql = "WITH temp AS (SELECT max(version) version, record_id FROM ref_book_person r WHERE status = 0 AND version <= :currentDate  AND\n" +
-                "NOT exists (SELECT 1 FROM ref_book_person r2 WHERE r2.record_id=r.record_id AND r2.status = 2 AND r2.version BETWEEN r.version + interval '1' day AND :currentDate)\n" +
-                "GROUP BY record_id) " +
-                "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
-                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc.code AS country_code, rba.address " +
-                "FROM temp, ref_book_person rbp " +
-                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
-                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
-                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
-                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
-                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
-                "WHERE rbp.id IN (:personIdList) AND rbp.version = temp.version AND rbp.record_id = temp.record_id";
+        String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship,\n" +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code,\n" +
+                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build,\n" +
+                "rbp.appartment, rbc.code AS country_code, rbp.address_foreign as address\n" +
+                "FROM ref_book_person rbp\n" +
+                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
+                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
+                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
+                "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) " +
+                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
 
         MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
         params.addValue("currentDate", actualDate);
@@ -2434,18 +2344,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
             return result;
         }
-        String sql = "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rba.region_code, " +
-                "rba.postal_code, rba.district, rba.city, rba.locality, rba.street, rba.house, rba.build, " +
-                "rba.appartment, rbc.code AS country_code, rba.address " +
-                "FROM ref_book_person rbp " +
-                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
-                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
-                "LEFT JOIN ref_book_address rba ON rbp.address = rba.id AND rba.status = 0 " +
-                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id AND ritp.status = 0 " +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 AND rbid.status = 0 " +
-                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
-                "WHERE rbp.id IN (:personIdList)";
+        String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, \n" +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, \n" +
+                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, \n" +
+                "rbp.appartment, rbc.code AS country_code, rbp.address_foreign as address \n" +
+                "FROM ref_book_person rbp \n" +
+                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
+                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
+                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
+                "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) \n" +
+                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
 
         MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
         try {

@@ -399,7 +399,7 @@ class Calculate extends AbstractScriptClass {
                 withoutDulPersonList << refBookPerson
             }
 
-            NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.personId)
+            NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.recordId)
             if (persistingPerson != null) {
                 persistingPerson.incomes.addAll(declarationDataPerson.incomes)
                 persistingPerson.deductions.addAll(declarationDataPerson.deductions)
@@ -477,7 +477,7 @@ class Calculate extends AbstractScriptClass {
                 declarationDataPerson.address = refBookPerson.address
             }
 
-            ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.personId, declarationDataPerson)
+            ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.recordId, declarationDataPerson)
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) return

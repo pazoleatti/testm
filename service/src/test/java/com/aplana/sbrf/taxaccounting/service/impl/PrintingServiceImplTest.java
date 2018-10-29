@@ -113,16 +113,6 @@ public class PrintingServiceImplTest {
         Mockito.verify(blobDataService).create(infoPath.capture(), fileName.capture());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void test_generateRefBookCsv_person() {
-        when(commonRefBookService.get(0L)).thenReturn(refBook);
-        when(refBook.isHierarchic()).thenReturn(false);
-        when(refBook.getId()).thenReturn(RefBook.Id.PERSON.getId());
-
-        printingService.generateRefBookCSV(refBookId, version, searchPattern, exactSearch, extraParams, sortAttribute, direction, lockStateLogger);
-        Mockito.verify(personService).createSearchFilter(null, null, searchPattern, exactSearch);
-    }
-
     @Test
     public void test_generateRefBookExcel_hier() {
         when(commonRefBookService.get(0L)).thenReturn(refBook);
@@ -154,13 +144,4 @@ public class PrintingServiceImplTest {
         Mockito.verify(blobDataService).create(infoPath.capture(), fileName.capture());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void test_generateRefBookExcel_person() {
-        when(commonRefBookService.get(0L)).thenReturn(refBook);
-        when(refBook.isHierarchic()).thenReturn(false);
-        when(refBook.getId()).thenReturn(RefBook.Id.PERSON.getId());
-
-        printingService.generateRefBookExcel(refBookId, version, searchPattern, exactSearch, extraParams, sortAttribute, direction, lockStateLogger);
-        Mockito.verify(personService).createSearchFilter(null, null, searchPattern, exactSearch);
-    }
 }

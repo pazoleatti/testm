@@ -5,6 +5,10 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.Address;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
@@ -46,13 +50,13 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, asnuId, naturalPersonHandler);
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, naturalPersonHandler);
     }
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, asnuId, naturalPersonHandler);
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, naturalPersonHandler);
     }
 
     @Override
@@ -78,7 +82,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то устанавливаем ИД АСНУ == null, чтобы указать
             что запись не нужно ни обновлять ни создавать*/
             for (NaturalPerson person : personDataList) {
-                if (person.getSourceId() != null && identificationData.getPriorityMap().get(person.getSourceId()) > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
+                if (person.getSource() != null && person.getSource().getId() != null && identificationData.getPriorityMap().get(person.getSource().getId()).getPriority() > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId()).getPriority()) {
                     person.setNeedUpdate(false);
                 }
             }
@@ -114,9 +118,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                                     .append("Для физического лица ")
                                     .append(buildFio(declarationDataPerson))
                                     .append(", ")
-                                    .append(declarationDataPerson.getMajorDocument().getDocType().getName())
+                                    .append(declarationDataPerson.getReportDoc().getDocType().getName())
                                     .append(" № ")
-                                    .append(declarationDataPerson.getMajorDocument().getDocumentNumber())
+                                    .append(declarationDataPerson.getReportDoc().getDocumentNumber())
                                     .append(" Найдены записи в реестре ФЛ:\n");
                             for (NaturalPerson refBookPerson : personDataList) {
                                 msg.append("Идентификатор ФЛ: ")
@@ -233,7 +237,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
                 if (primaryPersonId != null) {
                     //Ищем совпадение в списке идентификаторов
-                    PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnuId());
+                    PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnu().getId());
                     return (refBookPersonId != null) ? weight : 0D;
                 } else {
                     //Если  значени параметра не задано то оно не должно учитыватся при сравнении со списком
@@ -271,8 +275,8 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeightCalculator<IdentityPerson>("Статус налогоплательщика", weightsByCode.get(WEIGHT_TAX_PAYER_STATUS.name())) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
-                TaxpayerStatus a = personA.getTaxPayerStatus();
-                TaxpayerStatus b = personB.getTaxPayerStatus();
+                RefBookTaxpayerState a = personA.getTaxPayerState();
+                RefBookTaxpayerState b = personB.getTaxPayerState();
 
                 if (a != null && b != null) {
                     return compareNumber(a.getId(), b.getId());
@@ -293,11 +297,11 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 //Запись справочника физлиц
                 NaturalPerson refBookPerson = (NaturalPerson) b;
 
-                PersonDocument primaryPersonDocument = primaryPerson.getMajorDocument();
+                IdDoc primaryPersonDocument = primaryPerson.getDocuments().get(0);
 
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
-                    PersonDocument personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
+                    IdDoc personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
                     return (personDocument != null) ? weight : 0D;
                 } else {
                     return weight;

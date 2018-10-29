@@ -51,4 +51,10 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
     public RefBookAsnu fetchByName(String name) {
         return refBookAsnuDao.fetchByName(StringUtils.cleanString(name));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RefBookAsnu> fetchAll() {
+        return refBookAsnuDao.fetchAll();
+    }
 }

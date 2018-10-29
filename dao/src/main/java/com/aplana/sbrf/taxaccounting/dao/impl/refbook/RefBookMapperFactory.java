@@ -22,11 +22,9 @@ public class RefBookMapperFactory {
         } else if (RefBook.Id.COUNTRY.getId() == refBookId) {
             return new CountryMapper();
         } else if (RefBook.Id.DOCUMENT_CODES.getId() == refBookId) {
-            return new DepartmentDocTypeMapper();
+            return new DocTypeMapper();
         } else if (RefBook.Id.ASNU.getId() == refBookId) {
             return new AsnuMapper();
-        } else if (RefBook.Id.PERSON.getId() == refBookId) {
-            return new PersonMapper();
         } else if (RefBook.Id.INCOME_CODE.getId() == refBookId) {
             return new IncomeTypeMapper();
         } else if (RefBook.Id.DEDUCTION_MARK.getId() == refBookId) {
@@ -74,7 +72,7 @@ public class RefBookMapperFactory {
         }
     }
 
-    public class DepartmentDocTypeMapper<T> implements RowMapper<RefBookDocType> {
+    public class DocTypeMapper<T> implements RowMapper<RefBookDocType> {
 
         @Override
         public RefBookDocType mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -97,21 +95,6 @@ public class RefBookMapperFactory {
             result.setCode(rs.getString("code"));
             result.setType(rs.getString("type"));
             result.setPriority(rs.getInt("priority"));
-            return result;
-        }
-    }
-
-    public static class PersonMapper<T> implements RowMapper<RefBookPerson> {
-
-        @Override
-        public RefBookPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RefBookPerson result = new RefBookPerson();
-            result.setId(rs.getLong("id"));
-            result.setRecordId(rs.getLong("record_id"));
-            result.setFirstName(rs.getString("first_name"));
-            result.setLastName(rs.getString("last_name"));
-            result.setMiddleName(rs.getString("middle_name"));
-            // TODO: там еще куча полей, но я не знаю какие будут нужны и не тащу лишние
             return result;
         }
     }

@@ -13,19 +13,22 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.CalendarService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-import groovy.transform.Memoized
 import org.apache.commons.lang3.time.DateUtils
 
 import java.util.regex.Matcher
@@ -43,6 +46,7 @@ class Check extends AbstractScriptClass {
     ReportPeriodService reportPeriodService
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
+    PersonService personService
 
     // Сервис для получения рабочих дней
     DateConditionWorkDay dateConditionWorkDay
@@ -67,35 +71,6 @@ class Check extends AbstractScriptClass {
     final String R_INCOME_TYPE = "Виды дохода"
     final String R_TYPE_CODE = "Коды видов вычетов"
     final String R_NOTIF_SOURCE = "Налоговые инспекции"
-    final String R_INP = "Идентификаторы налогоплательщиков"
-    final String R_DUL = "Документы, удостоверяющие личность"
-    final String R_ADDRESS = "Адреса"
-    final String R_DETAIL = "Настройки подразделений"
-
-    final String RF_RECORD_ID = "RECORD_ID"
-    final String RF_ADDRESS = "ADDRESS"
-    final String RF_LAST_NAME = "LAST_NAME"
-    final String RF_FIRST_NAME = "FIRST_NAME"
-    final String RF_MIDDLE_NAME = "MIDDLE_NAME"
-    final String RF_SNILS = "SNILS"
-    final String RF_BIRTH_DATE = "BIRTH_DATE"
-    final String RF_INN = "INN"
-    final String RF_INN_FOREIGN = "INN_FOREIGN"
-    final String RF_TAXPAYER_STATE = "TAXPAYER_STATE"
-    final String RF_CITIZENSHIP = "CITIZENSHIP"
-
-    final String RF_DOC_ID = "DOC_ID"
-    final String RF_DOC_NUMBER = "DOC_NUMBER"
-    final String RF_INC_REP = "INC_REP"
-
-    final String RF_REGION_CODE = "REGION_CODE"
-    final String RF_LOCALITY = "LOCALITY"
-    final String RF_BUILD = "BUILD"
-    final String RF_DISTRICT = "DISTRICT"
-    final String RF_CITY = "CITY"
-    final String RF_STREET = "STREET"
-    final String RF_HOUSE = "HOUSE"
-    final String RF_APPARTMENT = "APPARTMENT"
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String TEMPLATE_PERSON_FL_OPER = "%s, ИНП: %s, ID операции: %s"
@@ -124,12 +99,10 @@ class Check extends AbstractScriptClass {
     final String C_NOT_HOLDING_TAX = "НДФЛ не удержанный" //"НДФЛ.Расчет.Сумма.Не удержанный"
     final String C_OVERHOLDING_TAX = "НДФЛ излишне удержанный" //"НДФЛ.Расчет.Сумма.Излишне удержанный"
     final String C_WITHHOLDING_TAX = "НДФЛ удержанный" //"НДФЛ.Расчет.Сумма.Удержанный"
-    final String C_REFOUND_TAX = "НДФЛ возвращённый НП" //C_REFOUND_TAX
     final String C_TAX_TRANSFER_DATE = "Срок перечисления в бюджет" //"НДФЛ.Перечисление в бюджет.Срок"
     final String C_PERIOD_CURR_SUMM = "Вычет. Текущий период. Сумма" //" Применение вычета.Текущий период.Сумма"
     final String C_INCOME_ACCRUED = "Доход. Дата" //" Начисленный доход.Дата"
     final String C_INCOME_ACCRUED_CODE = "Доход. Код дохода" //" Начисленный доход.Код дохода"
-    final String C_INCOME_ACCRUED_P_SUMM = "Доход. Сумма" //" Начисленный доход.Сумма"
     final String C_PERIOD_CURR_DATE = "Вычет. Текущий период. Дата" //" Применение вычета.Текущий период.Дата"
     final String C_NOTIF_SUMM = "Подтверждающий документ. Сумма" //" Документ о праве на налоговый вычет.Сумма"
 
@@ -141,24 +114,17 @@ class Check extends AbstractScriptClass {
     final String LOG_TYPE_2_14 = "\"Налоговая ставка\" указана некорректно"
     final String LOG_TYPE_2_14_MSG = "Значение гр. \"%s\" (\"%s\") указано некорректно. Для \"Кода дохода\" (\"%s\") и \"Статуса НП\" (\"%s\") предусмотрены ставки: %s"
     final String LOG_TYPE_2_16 = "\"НДФЛ исчисленный\" рассчитан некорректно"
-    final String LOG_TYPE_2_17 = "\"НДФЛ удержанный\" рассчитан некорректно"
     final String LOG_TYPE_2_18 = "\"НДФЛ не удержанный\" рассчитан некорректно"
     final String LOG_TYPE_2_19 = "\"НДФЛ излишне удержанный\" рассчитан некорректно"
-    final String LOG_TYPE_2_20 = "\"НДФЛ возвращеный НП\" рассчитан некорректно"
     final String LOG_TYPE_2_21 = "\"Срок перечисления в бюджет\" указан некорректно"
-    final String LOG_TYPE_NOT_ZERO = "Значение не может быть \"0\""
     final String LOG_TYPE_3_7 = "\"Код источника подтверждающего документа\" указан некорректно"
     final String LOG_TYPE_3_10 = "\"Дата начисленного дохода\" указана некорректно"
     final String LOG_TYPE_3_15 = "\"Дата применения вычета в текущем периоде\" не входит в текущий отчетный период"
     final String LOG_TYPE_3_11 = "\"Код начисленного дохода\" указан некорректно"
-    final String LOG_TYPE_3_12 = "\"Сумма начисленного дохода\" указана некорректно"
     final String LOG_TYPE_3_16 = "\"Сумма применения вычета\" указана некорректно"
     final String LOG_TYPE_SECTION4 = "Раздел 4 заполнен некорректно"
 
     // Сведения о доходах в виде авансовых платежей
-    final String P_SUMM = "Сумма фиксированного авансового платежа" // графа 4 раздела 4
-    final String P_NOTIF_NUM = "Номер уведомления" // графа 5 раздела 4
-    final String P_NOTIF_DATE = "Дата выдачи уведомления" // графа 6 раздела 4
     final String P_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление" // графа 7 раздела 4
 
     // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
@@ -181,13 +147,6 @@ class Check extends AbstractScriptClass {
     // Коды налоговых органов
     List<String> taxInspectionCache = []
 
-    Map<Long, List<Map<String, RefBookValue>>> inpActualCache = [:]
-
-    Map<Long, Map<Long, Map<String, RefBookValue>>> dulActualCache = [:]
-
-    //Адреса физлиц
-    Map<Long, Map<String, RefBookValue>> addressCache = [:]
-
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
 
@@ -200,6 +159,7 @@ class Check extends AbstractScriptClass {
     Date reportPeriodStartDate = null
 
     public Check(scriptClass) {
+        //noinspection GroovyAssignabilityCheck
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("departmentService")) {
             this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
@@ -225,6 +185,12 @@ class Check extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
         }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
+        }
+        if (scriptClass.getBinding().hasVariable("personService")) {
+            this.personService = (PersonService) scriptClass.getProperty("personService")
+        }
     }
 
     @Override
@@ -235,9 +201,6 @@ class Check extends AbstractScriptClass {
                 ScriptUtils.checkInterrupted()
 
                 long time = System.currentTimeMillis()
-                // ФЛ Map<person_id, RefBook>
-                Map<Long, Map<String, RefBookValue>> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
-                logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
                 // Реквизиты
                 List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
                 personsById = ndflPersonList.collectEntries { [it.id, it] }
@@ -259,6 +222,9 @@ class Check extends AbstractScriptClass {
                 logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)")
 
                 time = System.currentTimeMillis()
+                // ФЛ Map<person_id, RefBook>
+                Map<Long, RegistryPerson> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
+                logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
                 ScriptUtils.checkInterrupted()
                 // Проверка и удаление фиктивных строк
@@ -297,36 +263,13 @@ class Check extends AbstractScriptClass {
 
     /**
      * Получить актуальные на отчетную дату записи Реестра физических лиц
-     * @return Map < person_id , Map < имя_поля , значение_поля > >
+     * @return
      */
-    Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(declarationDataId) {
-        String whereClause = """
-                    JOIN ref_book_person p ON (frb.record_id = p.record_id)
-                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
-                """
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(RefBook.Id.PERSON.id, whereClause, getReportPeriodEndDate() - 1)
-        Map<Long, Map<String, RefBookValue>> refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>()
-        refBookMap.each { Long personId, Map<String, RefBookValue> refBookValue ->
-            Long refBookRecordId = (Long) refBookValue.get(RF_RECORD_ID).value
-            refBookMapResult.put(refBookRecordId, refBookValue)
-        }
-        return refBookMapResult
-    }
-
-    void fillNdflPersonFLMap(List<NdflPerson> ndflPersonList, Map<Long, Map<String, RefBookValue>> personMap) {
-        for (def ndflPerson : ndflPersonList) {
-            NdflPersonFL ndflPersonFL
-            if (FORM_DATA_KIND == FormDataKind.PRIMARY) {
-                // РНУ-НДФЛ первичная
-                String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
-                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
-            } else {
-                // РНУ-НДФЛ консолидированная
-                Map<String, RefBookValue> personRecord = personMap.get(ndflPerson.recordId)
-                String fio = (personRecord.get(RF_LAST_NAME).value?.toString() ?: "") + " " + (personRecord.get(RF_FIRST_NAME).value?.toString() ?: "") + " " + (personRecord.get(RF_MIDDLE_NAME).value?.toString() ?: "")
-                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-            }
-            ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+    Map<Long, RegistryPerson> getActualRefPersonsByDeclarationDataId(declarationDataId) {
+        List<RegistryPerson> persons = personService.findActualRefPersonsByDeclarationDataId(declarationDataId)
+        Map<Long, RegistryPerson> result = new HashMap<>()
+        for (RegistryPerson person : persons) {
+            result.put(person.getRecordId(), person)
         }
     }
 
@@ -363,7 +306,7 @@ class Check extends AbstractScriptClass {
      */
     def checkDataReference(
             List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
-            List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+            List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, RegistryPerson> personMap) {
 
         long time = System.currentTimeMillis()
         // Страны
@@ -396,35 +339,6 @@ class Check extends AbstractScriptClass {
 
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)")
 
-        time = System.currentTimeMillis()
-        // ИНП Map<person_id, List<RefBook>>
-        Map<Long, List<Map<String, RefBookValue>>> inpMap = getActualRefInpMapByDeclarationDataId()
-        logForDebug(SUCCESS_GET_TABLE, R_INP, inpMap.size())
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)")
-
-        time = System.currentTimeMillis()
-        // ДУЛ Map<person_id, List<RefBook>>
-        def dulMap = getActualRefDulByDeclarationDataId()
-        logForDebug(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)")
-
-        // Получим Мапу адресов
-        // Адреса
-        def addressIds = []
-        Map<Long, Map<String, RefBookValue>> addressMap = [:]
-        time = System.currentTimeMillis()
-        personMap.each { recordId, person ->
-            // Сохраним идентификаторы адресов в коллекцию
-            if (person.get(RF_ADDRESS).value != null) {
-                addressIds.add(person.get(RF_ADDRESS).value)
-            }
-        }
-        if (addressIds.size() > 0) {
-            addressMap = getRefAddress(addressIds)
-            logForDebug(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
-        }
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)")
-
         long timeIsExistsAddress = 0
         time = System.currentTimeMillis()
         //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
@@ -433,6 +347,19 @@ class Check extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
+            if (ndflPersonFL == null) {
+                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                    // РНУ-НДФЛ первичная
+                    String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
+                } else {
+                    // РНУ-НДФЛ консолидированная
+                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
+                    String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
+                }
+                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+            }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             long tIsExistsAddress = System.currentTimeMillis()
@@ -482,7 +409,7 @@ class Check extends AbstractScriptClass {
                 logger.errorExp("%s. %s.", "Отсутствует связь с Реестром физических лиц", fioAndInp, pathError,
                         "Не удалось установить связь с Реестром физических лиц")
             } else {
-                def personRecord = personMap.get(ndflPerson.recordId)
+                RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
 
                 if (!personRecord) {
                     //TODO turn_to_error
@@ -491,21 +418,21 @@ class Check extends AbstractScriptClass {
                             "Не удалось установить связь с Реестром физических лиц")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
-                    if (ndflPerson.lastName != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.get(RF_LAST_NAME).value.toLowerCase())) {
+                    if (personRecord.lastName != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.lastName.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Фамилия", ndflPerson.lastName ?: ""))
                     }
 
                     // Спр11 Имя (Обязательное поле)
-                    if (ndflPerson.firstName != null && !ndflPerson.firstName.toLowerCase().equals(personRecord.get(RF_FIRST_NAME).value.toLowerCase())) {
+                    if (personRecord.firstName != null && !ndflPerson.firstName.toLowerCase().equals(personRecord.firstName.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Имя", ndflPerson.firstName ?: ""))
                     }
 
                     // Спр11 Отчество (Необязательное поле)
-                    if (ndflPerson.middleName != null && !ndflPerson.middleName.toLowerCase().equals(personRecord.get(RF_MIDDLE_NAME).value.toLowerCase())) {
+                    if (personRecord.middleName != null && ndflPerson.middleName != null && !ndflPerson.middleName.toLowerCase().equals(personRecord.middleName.toLowerCase())) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Отчество", ndflPerson.middleName ?: ""))
@@ -513,14 +440,7 @@ class Check extends AbstractScriptClass {
 
                     if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                         // Спр12 ИНП первичная (Обязательное поле)
-                        List<Map<String, RefBookValue>> record = inpMap.get(personRecord.get("id")?.value)
-                        List<String> inpList = new LinkedList<String>()
-                        for (Map<String, RefBookValue> value : record) {
-                            if (value.get("INP") != null) {
-                                inpList.add(value.get("INP").getStringValue())
-                            }
-                        }
-                        if (!(ndflPerson.inp == personRecord.get(RF_SNILS)?.value || inpList?.contains(ndflPerson.inp))) {
+                        if (!(ndflPerson.inp == personRecord.snils || personRecord.getPersonIdentityList().inp.contains(ndflPerson.inp))) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "ИНП не соответствует Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: ""))
@@ -528,7 +448,7 @@ class Check extends AbstractScriptClass {
                     } else {
                         //Спр12.1 ИНП консолидированная - проверка соответствия RECORD_ID
                         //if (formType == CONSOLIDATE){}
-                        String recordId = String.valueOf(personRecord.get(RF_RECORD_ID).getNumberValue().longValue())
+                        String recordId = String.valueOf(personRecord.recordId)
                         if (!ndflPerson.inp.equals(recordId)) {
                             //TODO turn_to_error
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -538,29 +458,28 @@ class Check extends AbstractScriptClass {
                     }
 
                     // Спр13 Дата рождения (Обязательное поле)
-                    if (ndflPerson.birthDay != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).getDateValue())) {
+                    if (personRecord.birthDate != null && !personRecord.birthDate.equals(ndflPerson?.birthDay)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Дата рождения не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Дата рождения", ndflPerson.birthDay ? ScriptUtils.formatDate(ndflPerson.birthDay) : ""))
                     }
 
                     // Спр14 Гражданство (Обязательное поле)
-                    def citizenship = citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP).value)
-                    if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
+                    if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(personRecord.citizenship.code)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Код гражданства не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_CITIZENSHIP, ndflPerson.citizenship ?: ""))
                     }
 
                     // Спр15 ИНН.В Российской федерации (Необязательное поле)
-                    if (ndflPerson.innNp != null && !ndflPerson.innNp.equals(personRecord.get(RF_INN).value)) {
+                    if (ndflPerson.innNp != null && !ndflPerson.innNp.equals(personRecord.inn)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ИНН в РФ не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "ИНН в РФ", ndflPerson.innNp ?: ""))
                     }
 
                     // Спр16 ИНН.В стране гражданства (Необязательное поле)
-                    if (ndflPerson.innForeign != null && !ndflPerson.innForeign.equals(personRecord.get(RF_INN_FOREIGN).value)) {
+                    if (ndflPerson.innForeign != null && !ndflPerson.innForeign.equals(personRecord.innForeign)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ИНН в ИНО не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "ИНН в ИНО", ndflPerson.innForeign ?: ""))
@@ -568,54 +487,35 @@ class Check extends AbstractScriptClass {
 
                     if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                         // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
-                        Map<Long, Map<String, RefBookValue>> allDocList = dulMap.get(personRecord.get("id")?.value)
-                        // Вид документа
-                        def personDocTypeList = []
-                        // Серия и номер документа
-                        def personDocNumberList = []
-                        allDocList.each { Long key, Map<String, RefBookValue> dul ->
-                            personDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
-                            personDocNumberList.add(BaseWeightCalculator.prepareStringDul(dul.get(RF_DOC_NUMBER).getStringValue()).toUpperCase())
-                        }
-                        if (ndflPerson.idDocType != null && !personDocTypeList.contains(ndflPerson.idDocType)) {
+                        if (ndflPerson.idDocType != null && !ndflPerson.idDocType.equals(personRecord.reportDoc.docType.code)) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код", ndflPerson.idDocType ?: ""))
                         }
-                        if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase())) {
+                        if (ndflPerson.idDocNumber != null && BaseWeightCalculator.prepareStringDul(personRecord.reportDoc.documentNumber).toUpperCase() != BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Номер", ndflPerson.idDocNumber ?: ""))
                         }
                     } else {
-                        Map<Long, Map<String, RefBookValue>> allDocList = dulMap.get(ndflPerson.personId)
-                        //Ищем в справочнике запись по параметрам код документа и номер
-                        Map<String, RefBookValue> dulRecordValues = [:]
-                        allDocList.each { Long key, Map<String, RefBookValue> recordValues ->
-                            String docTypeCode = documentTypeMap.get(recordValues.get(RF_DOC_ID).getReferenceValue())
-                            String docNumber = BaseWeightCalculator.prepareStringDul(recordValues.get(RF_DOC_NUMBER).getStringValue()).toUpperCase()
-                            if (ndflPerson.idDocType.equals(docTypeCode) && BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase().equals(docNumber)) {
-                                dulRecordValues.putAll(recordValues)
-                            }
-                        }
-
-                        if (dulRecordValues.isEmpty()) {
+                        if (ndflPerson.idDocType != null && !personRecord.documents.docType.code.contains(ndflPerson.idDocType)) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код\" (\"${ndflPerson.idDocType ?: ""}\"), \"ДУЛ Номер", ndflPerson.idDocNumber ?: ""))
-                        } else {
-                            int incRep = dulRecordValues.get(RF_INC_REP).getNumberValue().intValue()
-                            if (incRep != 1) {
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                                logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
-                                        "\"ДУЛ Номер\" не включается в отчетность")
+                        }
+                        for (IdDoc idDoc : personRecord.documents) {
+                            if (ndflPerson.idDocNumber != null && BaseWeightCalculator.prepareStringDul(idDoc.documentNumber) != BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase()) {
+                                if (personRecord.reportDoc == null || personRecord.reportDoc.id == null) {
+                                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+                                    logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
+                                            "\"ДУЛ Номер\" не включается в отчетность")
+                                }
                             }
                         }
                     }
 
                     // Спр18 Статус налогоплательщика (Обязательное поле)
-                    def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
-                    if (ndflPerson.status != null && !ndflPerson.status.equals(taxpayerStatus)) {
+                    if (ndflPerson.status != null && !ndflPerson.status.equals(personRecord.taxPayerState.code)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Статус налогоплательщика не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: ""))
@@ -756,7 +656,7 @@ class Check extends AbstractScriptClass {
     /**
      * Общие проверки
      */
-    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
+    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, RegistryPerson> personMap) {
         long time = System.currentTimeMillis()
         long timeTotal = time
         // Параметры подразделения
@@ -771,6 +671,19 @@ class Check extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
+            if (ndflPersonFL == null) {
+                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                    // РНУ-НДФЛ первичная
+                    String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
+                } else {
+                    // РНУ-НДФЛ консолидированная
+                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
+                    String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
+                }
+                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+            }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Общ1 Корректность ИНН (Необязательное поле)
@@ -838,7 +751,6 @@ class Check extends AbstractScriptClass {
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
-
         Department department = departmentService.get(declarationData.departmentId)
 
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
@@ -1075,7 +987,7 @@ class Check extends AbstractScriptClass {
 
         ScriptUtils.checkInterrupted()
 
-        logForDebug("Общие проверки / '$T_PERSON_INCOME_NAME' (" + (System.currentTimeMillis() - time) + " мс)")
+        logForDebug("Общие проверки / " + T_PERSON_INCOME_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
 
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
     }
@@ -1088,13 +1000,28 @@ class Check extends AbstractScriptClass {
      * @param ndflPersonPrepaymentList
      */
     def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
-                        List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+                        List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, RegistryPerson> personMap) {
 
         long time = System.currentTimeMillis()
 
         Map<Long, NdflPerson> personsCache = [:]
         ndflPersonList.each { ndflPerson ->
             personsCache.put(ndflPerson.id, ndflPerson)
+
+            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
+            if (ndflPersonFL == null) {
+                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                    // РНУ-НДФЛ первичная
+                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
+                } else {
+                    // РНУ-НДФЛ консолидированная
+                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
+                    String fio = personRecord.lastName + " " + personRecord.firstName + " " + (personRecord.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
+                }
+                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+            }
         }
 
         Map<Long, List<NdflPersonPrepayment>> ndflPersonPrepaymentCache = [:]
@@ -1859,6 +1786,7 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
+
         logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
@@ -1867,10 +1795,29 @@ class Check extends AbstractScriptClass {
      * @param ndflPersonList
      * @param ndflPersonIncomeList
      * @param ndflPersonDeductionList
+     * @param personMap
      */
     def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList,
-                           List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, Map<String, RefBookValue>> personMap) {
+                           List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, RegistryPerson> personMap) {
+
         long time = System.currentTimeMillis()
+
+        for (NdflPerson ndflPerson : ndflPersonList) {
+            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
+            if (ndflPersonFL == null) {
+                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                    // РНУ-НДФЛ первичная
+                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
+                } else {
+                    // РНУ-НДФЛ консолидированная
+                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
+                    String fio = personRecord.lastName + " " + personRecord.firstName + " " + (personRecord.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
+                }
+                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+            }
+        }
 
         Map<String, Map<String, NdflPersonIncome>> mapNdflPersonIncome = [:]
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
@@ -2033,7 +1980,7 @@ class Check extends AbstractScriptClass {
      * Проверки для Раздел 4. Сведения о доходах в виде авансовых платежей
      */
     def checkDataPrepayment(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
-                            List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+                            List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, RegistryPerson> personMap) {
         long time = System.currentTimeMillis()
 
         Map<Long, NdflPerson> personByIdMap = ndflPersonList.collectEntries { [it.id, it] }
@@ -2616,6 +2563,20 @@ class Check extends AbstractScriptClass {
     }
 
     /**
+     * Получить "Страны"
+     * @return
+     */
+    Map<Long, String> getRefCountryCode() {
+        if (countryCodeCache.size() == 0) {
+            PagingResult<Map<String, RefBookValue>> refBookMap = getRefBook(RefBook.Id.COUNTRY.getId())
+            refBookMap.each { Map<String, RefBookValue> refBook ->
+                countryCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+            }
+        }
+        return countryCodeCache
+    }
+
+    /**
      * Выгрузка из справочников по условию и версии
      * @param refBookId
      * @param whereClause
@@ -2629,20 +2590,6 @@ class Check extends AbstractScriptClass {
             return Collections.emptyMap()
         }
         return refBookMap
-    }
-
-    /**
-     * Получить "Страны"
-     * @return
-     */
-    Map<Long, String> getRefCountryCode() {
-        if (countryCodeCache.size() == 0) {
-            List<Map<String, RefBookValue>> refBookMap = getRefBookAll(RefBook.Id.COUNTRY.getId())
-            refBookMap.each { Map<String, RefBookValue> refBook ->
-                countryCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
-            }
-        }
-        return countryCodeCache
     }
 
     Map<Long, String> getRefDocumentTypeCode() {
@@ -2729,65 +2676,6 @@ class Check extends AbstractScriptClass {
             }
         }
         return taxInspectionCache
-    }
-
-    /**
-     * Получить "ИНП"
-     */
-    Map<Long, List<Map<String, RefBookValue>>> getActualRefInpMapByDeclarationDataId() {
-        if (inpActualCache.isEmpty()) {
-            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_tax_payer.person_id = np.person_id)"
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_TAX_PAYER.id, whereClause)
-
-            refBookMap.each { Long id, Map<String, RefBookValue> refBook ->
-                List<Map<String, RefBookValue>> inpList = inpActualCache.get(refBook?.PERSON_ID?.referenceValue)
-                if (inpList == null) {
-                    inpList = []
-                }
-                inpList.add(refBook)
-                inpActualCache.put(refBook?.PERSON_ID?.referenceValue, inpList)
-            }
-        }
-        return inpActualCache
-    }
-
-    /**
-     * Получить "Документ, удостоверяющий личность (ДУЛ)"
-     */
-    Map<Long, Map<Long, Map<String, RefBookValue>>> getActualRefDulByDeclarationDataId() {
-        if (dulActualCache.isEmpty()) {
-
-            def declarationDataId = declarationData.id
-
-            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} " +
-                    "AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.inc_rep = 1"
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_DOC.id, whereClause)
-
-            refBookMap.each { Long personId, Map<String, RefBookValue> refBookValues ->
-                Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue()
-                Map<Long, Map<String, RefBookValue>> dulMap = dulActualCache.get(refBookPersonId)
-                if (dulMap == null) {
-                    dulMap = new HashMap<Long, Map<String, RefBookValue>>()
-                }
-                dulMap.put(personId, refBookValues)
-                dulActualCache.put(refBookPersonId, dulMap)
-            }
-        }
-        return dulActualCache
-    }
-
-    /**
-     * Получить "Адреса налогоплательщика"
-     * @return
-     */
-    Map<Long, Map<String, RefBookValue>> getRefAddress(List<Long> addressIds) {
-        if (addressCache.size() == 0) {
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordIds(RefBook.Id.PERSON_ADDRESS.getId(), addressIds)
-            refBookMap.each { Long addressId, Map<String, RefBookValue> address ->
-                addressCache.put(addressId, address)
-            }
-        }
-        return addressCache
     }
 
     /**

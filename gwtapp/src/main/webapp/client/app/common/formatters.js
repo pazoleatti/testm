@@ -509,91 +509,30 @@
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
-                if (!data.value) return '';
-                var foreignAddress = data.value;
+                if (!data.value.addressIno) return '';
                 var values = [];
-                if (foreignAddress.country) {
-                    var country = $filter('codeNameFormatter')(foreignAddress.country);
+                if (data.value.country && data.value.country.code) {
+                    var country = $filter('codeNameFormatter')(data.value.country);
                     values.push(country);
                 }
-                if (foreignAddress.address) {
-                    values.push(foreignAddress.address);
+                if (data.value.addressIno) {
+                    values.push(data.value.addressIno);
                 }
                 return values.join(', ');
             }
         }])
 
         /**
-         * Фильтр кода ДУЛ
-         */
-        .filter('idDocCodeFormatter', function () {
-            return function (value) {
-                if (value) {
-                    return "(" + value.CODE.value + ") " + value.NAME.value;
-                }
-                return ''
-            }
-        })
-
-        /**
-         *  Фильтр для простых справочных значений: строк и чисел
-         */
-        .filter('simpleRefBookValueFormatter', function () {
-            return function (value) {
-                if (value) {
-                    return value.value
-                }
-                return ''
-            }
-        })
-
-        /**
          * @description Фильтр ДУЛ
          */
-        .filter('idDocFormatter', function () {
+        .filter('idDocFormatter', ['$filter', function ($filter) {
             return function (value) {
                 if (value) {
-                    return value.DOC_NUMBER.value + " - " + "(" + value.DOC_ID.referenceObject.CODE.value + ") " + value.DOC_ID.referenceObject.NAME.value
+                    return value.documentNumber + " - " + $filter('codeNameFormatter')(value.docType);
                 }
                 return ''
             };
-        })
-
-        /**
-         * Фильтр ОКСМ
-         */
-        .filter('countryFormatter', function () {
-            return function (value) {
-                if (value) {
-                    return "(" + value.CODE.value + ") " + value.NAME.value
-                }
-                return ''
-            };
-        })
-
-        /**
-         * Фильтр АСНУ
-         */
-        .filter('asnuFormatter', function () {
-            return function (value) {
-                if (value) {
-                    return "(" + value.CODE.value + ") " + value.NAME.value
-                }
-                return ''
-            };
-        })
-
-        /**
-         * Фильтр для статуса налогоплательщика
-         */
-        .filter('taxPayerStateFormatter', function () {
-            return function (value) {
-                if (value) {
-                    return "(" + value.CODE.value + ") " + value.NAME.value
-                }
-                return ''
-            };
-        })
+        }])
 
         /**
          * Фильтр для оригинала физлица
@@ -624,34 +563,6 @@
             };
         }])
 
-        /**
-         * Фильтр типа документа
-         */
-        .filter('idDocTypeFormatter', ['$filter', function ($filter) {
-            return function (value) {
-                if (value && value.permission === false) {
-                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
-                } else if (value && value.value)  {
-                    return value.value.DOC_ID.referenceObject.NAME.value;
-                }
-                return '';
-            };
-        }])
-
-        /**
-         * Фильтр серии и номера документа
-         */
-        .filter('idDocNumberFormatter', ['$filter', function ($filter) {
-            return function (value) {
-                if (value && value.permission === false) {
-                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
-                } else if (value && value.value)  {
-                    return value.value.DOC_NUMBER.value;
-                }
-                return '';
-            };
-        }])
-
         .filter('vipOptionsFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
             return function (vipOptionIds) {
                 if (!vipOptionIds) return null;
@@ -676,6 +587,27 @@
         }])
 
         .filter('docTypeFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data || !data.value) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
+                }
+                return $filter('codeNameFormatter')(data.value.docType);
+            };
+        }])
+
+        .filter('docNumberFormatter', ['$filter', function ($filter) {
+            return function (data) {
+                if (!data || !data.value) return '';
+                if (data.permission === false) {
+                    return $filter('translate')('refBook.fl.table.label.permissionDenied');
+                }
+                if (!data.value.documentNumber) return '';
+                return data.value.documentNumber;
+            }
+        }])
+
+        .filter('permissiveCodeFormatter', ['$filter', function ($filter) {
             return function (data) {
                 if (!data) return '';
                 if (data.permission === false) {

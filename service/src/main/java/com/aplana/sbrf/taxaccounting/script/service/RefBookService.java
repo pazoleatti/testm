@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
@@ -65,4 +64,19 @@ public interface RefBookService {
      * @return uuid ссылку на уведомления с результатом выполнения
      */
     String importRefBookConfs(InputStream inputStream, String fileName, TAUserInfo userInfo);
+
+    /**
+     * Получение всех значений справочника АСНУ
+     *
+     * @return Список значений справочника отсортированых по названию по возрастанию
+     */
+    List<RefBookAsnu> findAllAsnu();
+
+    /**
+     * Получить АСНУ
+     * @param asnuId    уникальный идентификатор записи
+     * @return  объект АСНУ
+     */
+    RefBookAsnu getAsnu(Long asnuId);
+
 }

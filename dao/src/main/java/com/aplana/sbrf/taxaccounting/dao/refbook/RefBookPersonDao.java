@@ -9,10 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Интерфейс DAO для работы со справочником физлиц
@@ -27,18 +24,15 @@ public interface RefBookPersonDao {
 
     /**
      * Найти всех ФЛ по определяющим параметрам
-     *
      * @param declarationDataId идентификатор НФ
-     * @param asnuId            идентификатор АСНУ загрузившей данные
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
      *
-     * @param asnuId идентификатор АСНУ загрузившей данные
      */
-    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, NaturalPersonRefbookHandler naturalPersonHandler);
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти данные о ФЛ в ПНФ
@@ -85,10 +79,9 @@ public interface RefBookPersonDao {
      * Получение дубликатов ФЛ
      *
      * @param id           идентификатор версии ФЛ
-     * @param pagingParams параметры пейджинга
      * @return список дубликатов ФЛ
      */
-    List<RegistryPerson> fetchDuplicates(Long id, PagingParams pagingParams);
+    List<RegistryPerson> fetchDuplicates(Long id);
 
     /**
      * Получает список идентификаторов ФЛ, являющихся дуликатами указанных ФЛ
@@ -118,7 +111,7 @@ public interface RefBookPersonDao {
      * @param filter       параметры фильтрации результатов
      * @return страница списка ФЛ, подходящих под фильтр
      */
-    PagingResult<RefBookPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
+    PagingResult<RegistryPerson> getPersons(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
      * Возвращяет кол-во ФЛ по фильтру
@@ -140,21 +133,13 @@ public interface RefBookPersonDao {
      * @param id идентификатор версии
      * @return объект версии ФЛ
      */
-    RegistryPerson fetchPersonWithVersionInfo(Long id);
+    RegistryPerson fetchPersonVersion(Long id);
 
     /**
      * Обновить данные записи реестра ФЛ
      * @param person    данные ФЛ
-     * @param query     запрос
      */
-    void updateRegistryPerson(RegistryPerson person, String query);
-
-    /**
-     * Обновить данные адреса записи реестра ФЛ
-     * @param address   данные адреса
-     * @param query     запрос
-     */
-    void updateRegistryPersonAddress(Map<String, RefBookValue> address, String query);
+    void updateRegistryPerson(RegistryPerson person);
 
     /**
      * Обновить флаг "включается в отчетность"
@@ -162,18 +147,6 @@ public interface RefBookPersonDao {
      * @param newReportDocId    новое значение флага
      */
     void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId);
-
-    /**
-     * Удалить фиктивную версию ФЛ
-     * @param recordId идентификатор ФЛ
-     */
-    void deleteRegistryPersonFakeVersion(long recordId);
-
-    /**
-     * Сохранить фиктивную версию Физлица
-     * @param person объект ФЛ
-     */
-    void saveRegistryPersonFakeVersion(RegistryPerson person);
 
     /**
      * Получить все версии физлица, которые не являются дубликатами
@@ -188,5 +161,26 @@ public interface RefBookPersonDao {
      * @param pagingParams  параметры постраничной выдачи
      * @return  Страница списка записей
      */
-    PagingResult<RefBookPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
+    PagingResult<RegistryPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
+
+    /**
+     * Сохранить группу Физлиц.
+     * @param persons коллекция Физлиц
+     */
+    void saveBatch(Collection<RegistryPerson> persons);
+
+    /**
+     * Обновить группу Физлиц. При групповом обновлении не обновляются поля id, record_id, old_id, start_date, end_date.
+     * В версии 3.2 нет необходимости обновлять вышеуказанные поля массово и поскольку их обновление без проверок
+     * потенциально ведёт к дефектам их массовое обновление недоступно.
+     * @param persons коллекция Физлиц
+     */
+    void updateBatch(Collection<RegistryPerson> persons);
+
+    /**
+     * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
+     * @param declarationDataId идентификатор налоговой формы
+     * @return список найденных записей реестра ФЛ
+     */
+    List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
 }

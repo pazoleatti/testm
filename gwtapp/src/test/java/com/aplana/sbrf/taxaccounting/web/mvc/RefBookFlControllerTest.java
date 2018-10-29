@@ -5,20 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.IdDocService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 
 public class RefBookFlControllerTest {
@@ -45,19 +38,4 @@ public class RefBookFlControllerTest {
         when(securityService.currentUserInfo()).thenReturn(anyUserInfo);
     }
 
-    @Test
-    public void test_deleteIdDoc() throws Exception {
-
-        List<Long> docIds = asList(1L, 2L);
-        doNothing().when(idDocService).deleteByIds(docIds, anyUser);
-
-        mockMvc.perform(
-                post("/actions/refBookFL/deleteIdDocs")
-                        .contentType(APPLICATION_JSON)
-                        .content("[1, 2]"))
-                .andExpect(status().isNoContent());
-
-        verify(idDocService, times(1)).deleteByIds(docIds, anyUser);
-        verifyNoMoreInteractions(idDocService);
-    }
 }

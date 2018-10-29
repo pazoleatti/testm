@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
-import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.lang3.StringUtils;
 
@@ -76,11 +76,11 @@ public class IdentificationUtils {
         sb.append(emptyIfNull(naturalPerson.getFirstName())).append(" ");
         sb.append(emptyIfNull(naturalPerson.getMiddleName())).append(", ");
 
-        PersonDocument personDocument = naturalPerson.getMajorDocument();
+        IdDoc personDocument = naturalPerson.getReportDoc();
 
         if (personDocument != null) {
 
-            DocType docType = personDocument.getDocType();
+            RefBookDocType docType = personDocument.getDocType();
 
             if (docType != null && docType.getName() != null) {
                 sb.append(docType.getName()).append(": ");
@@ -117,12 +117,13 @@ public class IdentificationUtils {
      * @param personDocumentList
      * @return
      */
-    public static int selectIncludeReportDocumentIndex(NaturalPerson naturalPerson, List<PersonDocument> personDocumentList) {
+    public static int selectIncludeReportDocumentIndex(NaturalPerson naturalPerson, List<IdDoc> personDocumentList) {
 
-        PersonDocument personDocument = SelectPersonDocumentCalc.selectIncludeReportDocument(naturalPerson, personDocumentList);
+        IdDoc personDocument = SelectPersonDocumentCalc.selectIncludeReportDocument(naturalPerson, personDocumentList);
 
         if (personDocument != null){
-            return personDocumentList.indexOf(personDocument);
+            int i = personDocumentList.indexOf(personDocument);
+            return i;
         } else {
             return -1;
         }

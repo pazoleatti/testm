@@ -260,4 +260,32 @@ public interface CommonRefBookService {
      * @param records список записей, для которых выполняется разыменование
      */
     PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records);
+
+    /**
+     *  Найти все действующие записи справочника статусы налогоплательщика
+     * @param userInfo текущий пользователь
+     * @return  список записей справочника статусы налогоплательщика
+     */
+    List<RefBookTaxpayerState> findAllTaxPayerStateActive(TAUserInfo userInfo);
+
+    /**
+     *  Найти все действующие записи справочника АСНУ
+     * @param userInfo текущий пользователь
+     * @return  список записей справочника АСНУ
+     */
+    List<RefBookAsnu> findAllAsnuActive(TAUserInfo userInfo);
+
+    /**
+     *  Найти все действующие записи справочника ОКСМ
+     * @param userInfo текущий пользователь
+     * @return  список записей справочника ОКСМ
+     */
+    List<RefBookCountry> findAllCountryActive(TAUserInfo userInfo);
+
+    /**
+     *  Найти все действующие записи справочника Коды документов
+     * @param userInfo текущий пользователь
+     * @return  список записей справочника Коды документов
+     */
+    List<RefBookDocType> findAllDocTypeActive(TAUserInfo userInfo);
 }

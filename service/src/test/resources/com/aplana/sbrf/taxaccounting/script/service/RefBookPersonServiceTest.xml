@@ -20,6 +20,37 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ConfigurationService"/>
     </bean>
 
+    <bean id="personService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.impl.PersonServiceImpl"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LockDataService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.async.AsyncManager"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator"/>
+        <property name="permissionFactoryRegistry">
+            <map />
+        </property>
+    </bean>
+
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/RefBookPersonServiceTest.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>

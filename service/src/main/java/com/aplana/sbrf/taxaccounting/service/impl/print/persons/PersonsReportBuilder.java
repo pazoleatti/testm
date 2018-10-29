@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.persons;
 
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -28,7 +28,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     private final static int DATA_ROW_INDEX = 7;
 
     // Список ФЛ
-    private List<RefBookPerson> persons;
+    private List<RegistryPersonDTO> persons;
     // Фильтр по ФЛ
     private RefBookPersonFilter filter;
     // Отображаемые столбцы
@@ -40,7 +40,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     private final static FastDateFormat dateFormat = FastDateFormat.getInstance("dd.MM.yyyy");
     private StyleBuilder styleBuilder;
 
-    public PersonsReportBuilder(List<RefBookPerson> persons, RefBookPersonFilter filter) {
+    public PersonsReportBuilder(List<RegistryPersonDTO> persons, RefBookPersonFilter filter) {
         super("tmp_физические_лица_", ".xlsx");
         this.persons = persons;
         this.filter = filter;
@@ -90,7 +90,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     @Override
     protected void createDataForTable() {
         curRowIndex = DATA_ROW_INDEX;
-        for (RefBookPerson person : persons) {
+        for (RegistryPersonDTO person : persons) {
             createRowValues(new ReportPerson(person));
             curRowIndex++;
         }

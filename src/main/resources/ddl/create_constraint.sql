@@ -233,7 +233,6 @@ alter table ref_book_tb_person add constraint ref_book_tb_person_pk primary key 
 alter table ref_book_person_tb add constraint ref_book_person_tb_pk primary key (id);
 
 --foreign keys
-alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
 alter table ref_book_person add constraint fk_ref_book_person_report_doc foreign key (report_doc) references ref_book_id_doc(id);
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
@@ -243,8 +242,6 @@ alter table ref_book_person_tb add constraint person_tb_fk_person foreign key (p
 alter table ref_book_person_tb add constraint person_tb_fk_department foreign key (tb_department_id) references department(id) on delete cascade;
 
 --checks
-alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
-alter table ref_book_person add constraint chk_ref_book_person_old_st check (old_status is null or old_status between -1 and 2);
 alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_tax_payer add constraint rb_tax_payer_chk_status check (status in (-1, 0, 1, 2));
