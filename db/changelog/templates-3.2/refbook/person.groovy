@@ -5,17 +5,17 @@ import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.identification.DocType
-import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.Address
-import com.aplana.sbrf.taxaccounting.model.refbook.Country
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonDocument
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -126,11 +126,11 @@ class Person extends AbstractScriptClass {
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
     // Кэш код страны - страна
-    Map<String, Country> countriesCache = new HashMap<>()
+    Map<String, RefBookCountry> countriesCache = new HashMap<>()
     // Кэш код статуса налогоплательщика - сам статус
-    Map<String, TaxpayerStatus> taxpayerStatusessCache = new HashMap<>()
+    Map<String, RefBookTaxpayerState> taxpayerStatusessCache = new HashMap<>()
     // Кэш код типа документа - сам тип
-    Map<String, DocType> docTypesCache = new HashMap<>()
+    Map<String, RefBookDocType> docTypesCache = new HashMap<>()
     // Кэш АСНУ
     Map<String, RefBookAsnu> asnuCache = new HashMap<>()
 
@@ -145,7 +145,7 @@ class Person extends AbstractScriptClass {
     // Маппа неопределенных АСНУ, где ключ ФЛ, значение - неопределнные АСНУ для ФЛ
     Map<RegistryPerson, List<PersonIdentifier>> undefinedAsnu = [:]
     // Маппа неопределенных Видов документов, где ключ ФЛ, значение - ДУЛы у которых не определен вид
-    Map<RegistryPerson, List<PersonDocument>> undefinedIdDocTypes = [:]
+    Map<RegistryPerson, List<IdDoc>> undefinedIdDocTypes = [:]
 
     void importData() {
         defineTB()
@@ -215,7 +215,7 @@ class Person extends AbstractScriptClass {
                         if ('АнкетДаннФЛ' == tag) {
                             parsePersonInfo(reader, person)
                         } else if ('УдЛичнФЛ' == tag) {
-                            PersonDocument document = parseDocumentInfo(reader, person)
+                            IdDoc document = parseDocumentInfo(reader, person)
                             if (document) {
                                 person.getDocuments().add(document)
                             }
@@ -263,13 +263,13 @@ class Person extends AbstractScriptClass {
         person.birthDateStr = getAttrValue(reader, "ДатаРожд")
         person.birthDate = toDate(person.birthDateStr)
         person.citizenshipCode = getAttrValue(reader, "Гражд")
-        person.citizenship = getCountryByCode(person.citizenshipCode) ?: new Country()
+        person.citizenship = getCountryByCode(person.citizenshipCode) ?: new RefBookCountry()
         person.inn = getAttrValue(reader, "ИННФЛ")
         person.innForeign = getAttrValue(reader, "ИННИно")
         person.taxPayerStatusCode = getAttrValue(reader, "СтатусФЛ")
-        person.taxPayerStatus = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new TaxpayerStatus()
+        person.taxPayerState = getTaxpayerStatusByCode(person.taxPayerStatusCode) ?: new RefBookTaxpayerState()
         person.address = parseAddress(reader)
-        person.reportDoc = new PersonDocument()
+        person.reportDoc = new IdDoc()
     }
 
     AddressExt parseAddress(XMLStreamReader reader) {
@@ -284,16 +284,16 @@ class Person extends AbstractScriptClass {
         address.build = getAttrValue(reader, "Корпус")
         address.appartment = getAttrValue(reader, "Кварт")
         address.countryCode = getAttrValue(reader, "КодСтрИно")
-        address.country = getCountryByCode(address.countryCode) ?: new Country()
+        address.country = getCountryByCode(address.countryCode) ?: new RefBookCountry()
         address.addressIno = getAttrValue(reader, "АдресИно")
         return address
     }
 
-    PersonDocument parseDocumentInfo(XMLStreamReader reader, RegistryPerson person) {
-        PersonDocument document = new PersonDocumentExt()
+    IdDoc parseDocumentInfo(XMLStreamReader reader, RegistryPerson person) {
+        IdDoc document = new PersonDocumentExt()
         document.docTypeCode = getAttrValue(reader, "УдЛичнФЛВид")
-        DocType docType = getDocTypeByCode(document.docTypeCode)
-        document.docType = docType ?: new DocType()
+        RefBookDocType docType = getDocTypeByCode(document.docTypeCode)
+        document.docType = docType ?: new RefBookDocType()
         document.documentNumber = getAttrValue(reader, "УдЛичнФЛНом")
         document.incRepStr = getAttrValue(reader, "УдЛичнФЛГл")
         document.incRep = toInteger(document.incRepStr)
@@ -373,13 +373,15 @@ class Person extends AbstractScriptClass {
             for (def person : persons) {
                 com.aplana.sbrf.taxaccounting.model.refbook.PersonTb personTb = new com.aplana.sbrf.taxaccounting.model.refbook.PersonTb()
                 personTb.setPerson(person)
-                personTb.setTbDepartmentId(tbPersonDepartmentId)
+                Department department = new Department()
+                department.setId(tbPersonDepartmentId)
+                personTb.setTbDepartment(department)
                 personTb.setImportDate(importDate)
                 person.personTbList.add(personTb)
                 person.startDate = versionFrom
             }
 
-            personService.saveNewPersons(persons)
+            personService.savePersons(persons)
         }
         return persons
     }
@@ -403,9 +405,9 @@ class Person extends AbstractScriptClass {
                 logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                         " невозможно определить систему-источник. Атрибут \"Система-источник\" не был заполнен.")
             }
-            List<PersonDocument> idDocTypes = this.undefinedIdDocTypes.get(person)
+            List<IdDoc> idDocTypes = this.undefinedIdDocTypes.get(person)
             if (idDocTypes != null) {
-                for (PersonDocument document : idDocTypes) {
+                for (IdDoc document : idDocTypes) {
                     def docTypeCode = (document as PersonDocumentExt).docTypeCode
                     if (docTypeCode && document.docType.id == null) {
                         logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
@@ -415,7 +417,7 @@ class Person extends AbstractScriptClass {
             }
 
             def taxPayerStatusCode = (person as RegistryPersonExt).taxPayerStatusCode
-            if (taxPayerStatusCode && person.taxPayerStatus.id == null) {
+            if (taxPayerStatusCode && person.taxPayerState.id == null) {
                 logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"${person.reportDoc?.documentNumber ?: "(документ не определен)"}\"" +
                         " cтатус налогоплательщика ($taxPayerStatusCode) не найден в справочнике \"Статусы налогоплательщика\".")
             }
@@ -425,8 +427,8 @@ class Person extends AbstractScriptClass {
                         " код страны гражданства (${(person as RegistryPersonExt).citizenshipCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
             }
             if (person.address.country != null) {
-                def countryCode = person.address.country.code
-                if (countryCode == null && (person.address as AddressExt).countryCode != null) {
+                def countryCode = (person.address as AddressExt).countryCode
+                if (countryCode && person.address.country.id == null) {
                     logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " код страны адреса за пределами РФ (${(person.address as AddressExt).countryCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
                 }
@@ -617,7 +619,7 @@ class Person extends AbstractScriptClass {
         String countryCode
     }
 
-    class PersonDocumentExt extends PersonDocument {
+    class PersonDocumentExt extends IdDoc {
         String docTypeCode
         String incRepStr
     }
@@ -671,15 +673,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет страну по коду
      */
-    Country getCountryByCode(String code) {
-        Country country = null
+    RefBookCountry getCountryByCode(String code) {
+        RefBookCountry country = null
         if (code) {
             country = countriesCache.get(code)
             if (!country) {
                 def recordData = getProvider(RefBook.Id.COUNTRY.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    country = new Country()
+                    country = new RefBookCountry()
                     country.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     country.setCode(record.get("CODE").getStringValue())
                     countriesCache.put(code, country)
@@ -692,15 +694,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет статус налогоплательщика по коду
      */
-    TaxpayerStatus getTaxpayerStatusByCode(String code) {
-        TaxpayerStatus taxpayerStatus = null
+    RefBookTaxpayerState getTaxpayerStatusByCode(String code) {
+        RefBookTaxpayerState taxpayerStatus = null
         if (code) {
             taxpayerStatus = taxpayerStatusessCache.get(code)
             if (!taxpayerStatus) {
                 def recordData = getProvider(RefBook.Id.TAXPAYER_STATUS.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    taxpayerStatus = new TaxpayerStatus()
+                    taxpayerStatus = new RefBookTaxpayerState()
                     taxpayerStatus.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     taxpayerStatus.setCode(record.get("CODE").getStringValue())
                     taxpayerStatusessCache.put(code, taxpayerStatus)
@@ -713,15 +715,15 @@ class Person extends AbstractScriptClass {
     /**
      * Возвращяет вид документа по коду
      */
-    DocType getDocTypeByCode(String code) {
-        DocType docType = null
+    RefBookDocType getDocTypeByCode(String code) {
+        RefBookDocType docType = null
         if (code) {
             docType = docTypesCache.get(code)
             if (!docType) {
                 def recordData = getProvider(RefBook.Id.DOCUMENT_CODES.getId()).getRecordDataVersionWhere(" where code = '${code}'", new Date())
                 if (1 == recordData.entrySet().size()) {
                     def record = recordData.entrySet().iterator().next().getValue()
-                    docType = new DocType()
+                    docType = new RefBookDocType()
                     docType.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()?.longValue())
                     docType.setCode(record.get("CODE").getStringValue())
                     docTypesCache.put(code, docType)

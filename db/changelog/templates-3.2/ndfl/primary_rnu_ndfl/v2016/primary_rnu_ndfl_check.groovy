@@ -127,6 +127,8 @@ class Check extends AbstractScriptClass {
 
     // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
     Map<Long, NdflPersonFL> ndflPersonFLMap = [:]
+    // Кэш строк раздела 1 по ид
+    Map<Long, NdflPerson> personsById
 
     //Коды стран из справочника
     Map<Long, String> countryCodeCache = [:]
@@ -190,15 +192,20 @@ class Check extends AbstractScriptClass {
     }
 
     @Override
-    public void run() {
+    void run() {
         initConfiguration()
         switch (formDataEvent) {
             case FormDataEvent.CHECK:
                 ScriptUtils.checkInterrupted()
 
+                Map<Long, RegistryPerson> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
+                logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
+
                 long time = System.currentTimeMillis()
                 // Реквизиты
                 List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+                personsById = ndflPersonList.collectEntries { [it.id, it] }
+                fillNdflPersonFLMap(ndflPersonList, personMap)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_NAME, ndflPersonList.size())
 
                 // Сведения о доходах и НДФЛ
@@ -217,8 +224,6 @@ class Check extends AbstractScriptClass {
 
                 time = System.currentTimeMillis()
                 // ФЛ Map<person_id, RefBook>
-                Map<Long, RegistryPerson> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
-                logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
                 ScriptUtils.checkInterrupted()
                 // Проверка и удаление фиктивных строк
@@ -268,6 +273,50 @@ class Check extends AbstractScriptClass {
         return result
     }
 
+    void fillNdflPersonFLMap(List<NdflPerson> ndflPersonList, Map<Long, RegistryPerson> personMap) {
+        for (def ndflPerson : ndflPersonList) {
+            NdflPersonFL ndflPersonFL
+            if (FORM_DATA_KIND == FormDataKind.PRIMARY) {
+                // РНУ-НДФЛ первичная
+                String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
+                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
+            } else {
+                // РНУ-НДФЛ консолидированная
+                RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
+                String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
+                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
+            }
+            ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+        }
+    }
+
+    def checkAndRemoveDummyIncomes(List<NdflPersonIncome> incomes) {
+        List<NdflPersonIncome> nonDummyIncomes = []
+        Map<Long, List<NdflPersonIncome>> incomesByPersonId = incomes.groupBy { NdflPersonIncome it -> it.ndflPersonId }
+        for (def personId : incomesByPersonId.keySet()) {
+            ScriptUtils.checkInterrupted()
+            def incomesOfPerson = incomesByPersonId.get(personId)
+            for (def income : incomesOfPerson) {
+                NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(income.ndflPersonId)
+                String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, income.operationId])
+                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
+                if (income.isDummy()) {
+                    if (incomesOfPerson.size() > 1) {
+                        String errMsg = String.format("У ФЛ: %s в Разделе 2 имеется более одной строки, несмотря на то, " +
+                                "что текущая строка (для которой ставка налога = 0, ID операции = 0) показывает отсутствие операций по данному ФЛ.",
+                                fioAndInp
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, income.rowNum ?: "")
+                        logger.warnExp("%s. %s.", "Для ФЛ в разделе 2 есть только одна фиктивная строка", fioAndInpAndOperId, pathError, errMsg)
+                    }
+                } else {
+                    nonDummyIncomes.add(income)
+                }
+            }
+        }
+        return nonDummyIncomes
+    }
+
     /**
      * Проверки на соответствие справочникам
      * @return
@@ -315,19 +364,6 @@ class Check extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             long tIsExistsAddress = System.currentTimeMillis()
@@ -484,7 +520,7 @@ class Check extends AbstractScriptClass {
                     // Спр18 Статус налогоплательщика (Обязательное поле)
                     if (ndflPerson.status != null && !ndflPerson.status.equals(personRecord.taxPayerState.code)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует Реестру физических лиц", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Статус налогоплательщика не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: ""))
                     }
                 }
@@ -636,19 +672,6 @@ class Check extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Общ1 Корректность ИНН
@@ -671,18 +694,10 @@ class Check extends AbstractScriptClass {
             boolean checkLastName = checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Фамилия")
             boolean checkFirstName = checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Имя")
             checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Дата рождения")
-            boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
+            checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
             boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "ДУЛ Код")
             boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "ДУЛ Номер")
             checkRequiredAttribute(ndflPerson, fioAndInp, "status", C_STATUS)
-            if (checkCitizenship) {
-                if (ndflPerson.citizenship == "643") {
-                    checkRequiredAttribute(ndflPerson, fioAndInp, "regionCode", "Код субъекта")
-                } else {
-                    checkRequiredAttribute(ndflPerson, fioAndInp, "countryCode", "Код страны проживания вне РФ")
-                    checkRequiredAttribute(ndflPerson, fioAndInp, "address", "Адрес проживания вне РФ ")
-                }
-            }
 
             if (checkLastName) {
                 List<String> errorMessages = ScriptUtils.checkLastName(ndflPerson.lastName, ndflPerson.citizenship)
@@ -964,21 +979,6 @@ class Check extends AbstractScriptClass {
         Map<Long, NdflPerson> personsCache = [:]
         ndflPersonList.each { ndflPerson ->
             personsCache.put(ndflPerson.id, ndflPerson)
-
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.lastName + " " + personRecord.firstName + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
         }
 
         Map<Long, List<NdflPersonPrepayment>> ndflPersonPrepaymentCache = [:]
@@ -1758,23 +1758,6 @@ class Check extends AbstractScriptClass {
                            List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, RegistryPerson> personMap) {
 
         long time = System.currentTimeMillis()
-
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.lastName + " " + personRecord.firstName + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
-        }
 
         Map<String, Map<String, NdflPersonIncome>> mapNdflPersonIncome = [:]
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {

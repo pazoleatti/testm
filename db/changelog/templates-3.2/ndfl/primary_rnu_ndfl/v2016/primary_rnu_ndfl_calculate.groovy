@@ -12,7 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
-import com.aplana.sbrf.taxaccounting.model.identification.RefBookDocType
+
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc

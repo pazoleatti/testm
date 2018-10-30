@@ -672,19 +672,6 @@ class Check extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Общ1 Корректность ИНН
@@ -992,21 +979,6 @@ class Check extends AbstractScriptClass {
         Map<Long, NdflPerson> personsCache = [:]
         ndflPersonList.each { ndflPerson ->
             personsCache.put(ndflPerson.id, ndflPerson)
-
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.lastName + " " + personRecord.firstName + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
         }
 
         Map<Long, List<NdflPersonPrepayment>> ndflPersonPrepaymentCache = [:]
@@ -1786,23 +1758,6 @@ class Check extends AbstractScriptClass {
                            List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, RegistryPerson> personMap) {
 
         long time = System.currentTimeMillis()
-
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.lastName + " " + personRecord.firstName + " " + (personRecord.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
-            }
-        }
 
         Map<String, Map<String, NdflPersonIncome>> mapNdflPersonIncome = [:]
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {

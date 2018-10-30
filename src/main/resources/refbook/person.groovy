@@ -1,8 +1,6 @@
-package refbook
+package refbook // person_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-
-// person_ref комментарий для локального поиска скрипта
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

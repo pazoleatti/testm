@@ -8,11 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
-
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -24,6 +23,8 @@ import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodServic
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import groovy.transform.TypeChecked
+import groovy.transform.TypeCheckingMode
 
 new UpdatePersonsData(this).run()
 
@@ -44,6 +45,7 @@ class UpdatePersonsData extends AbstractScriptClass {
 
     @TypeChecked(TypeCheckingMode.SKIP)
     UpdatePersonsData(scriptClass) {
+        //noinspection GroovyAssignabilityCheck
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("declarationData")) {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")

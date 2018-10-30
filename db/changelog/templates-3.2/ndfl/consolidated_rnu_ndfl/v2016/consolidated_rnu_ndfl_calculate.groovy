@@ -18,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
 import com.aplana.sbrf.taxaccounting.model.util.Pair
-import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
@@ -400,7 +399,7 @@ class Calculate extends AbstractScriptClass {
                 withoutDulPersonList << refBookPerson
             }
 
-            NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.personId)
+            NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.recordId)
             if (persistingPerson != null) {
                 persistingPerson.incomes.addAll(declarationDataPerson.incomes)
                 persistingPerson.deductions.addAll(declarationDataPerson.deductions)
@@ -478,7 +477,7 @@ class Calculate extends AbstractScriptClass {
                 declarationDataPerson.address = refBookPerson.address
             }
 
-            ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.personId, declarationDataPerson)
+            ndflPersonsToPersistGroupedByRefBookPersonId.put(declarationDataPerson.recordId, declarationDataPerson)
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) return
