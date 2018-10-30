@@ -71,6 +71,7 @@ class Check extends AbstractScriptClass {
     final String R_INCOME_TYPE = "Виды дохода"
     final String R_TYPE_CODE = "Коды видов вычетов"
     final String R_NOTIF_SOURCE = "Налоговые инспекции"
+    final String R_DETAIL = "Настройки подразделений"
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String TEMPLATE_PERSON_FL_OPER = "%s, ИНП: %s, ID операции: %s"

@@ -73,12 +73,12 @@ public class PersonServiceImpl implements PersonService {
     @Transactional (readOnly = true)
     public PagingResult<RegistryPersonDTO> getPersonsData(PagingParams pagingParams, RefBookPersonFilter filter) {
         PagingResult<RegistryPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
-        PagingResult<RegistryPersonDTO> result = convertPersonToDTO(persons);
+        PagingResult<RegistryPersonDTO> result = convertPersonToDTO(persons, persons.getTotalCount());
         forbidVipsDataByUserPermissions(result);
         return result;
     }
 
-    private PagingResult<RegistryPersonDTO> convertPersonToDTO(Collection<RegistryPerson> fromList) {
+    private PagingResult<RegistryPersonDTO> convertPersonToDTO(Collection<RegistryPerson> fromList, int count) {
         PagingResult<RegistryPersonDTO> dtoList = new PagingResult<>();
         for (RegistryPerson fromObj : fromList) {
             if (fromObj != null) {
@@ -92,6 +92,7 @@ public class PersonServiceImpl implements PersonService {
                 dto.setAddress(Permissive.of(fromObj.getAddress()));
                 dto.setTaxPayerState(Permissive.of(fromObj.getTaxPayerState()));
                 dto.setDocuments(Permissive.of(fromObj.getDocuments()));
+                dto.setId(fromObj.getId());
                 RegistryPerson stub = new RegistryPerson();
                 stub.setId(fromObj.getId());
                 for (PersonIdentifier personIdentifier : dto.getPersonIdentityList()) {
@@ -103,6 +104,7 @@ public class PersonServiceImpl implements PersonService {
                 dtoList.add(dto);
             }
         }
+        dtoList.setTotalCount(count);
         return dtoList;
     }
 
@@ -132,7 +134,7 @@ public class PersonServiceImpl implements PersonService {
         person.setDocuments(idDocDaoImpl.getByPerson(person));
         person.setPersonIdentityList(idTaxPayerDaoImpl.getByPerson(person));
         person.setPersonTbList(personTbDaoImpl.getByPerson(person));
-        List<RegistryPersonDTO> resultData = convertPersonToDTO(Collections.singletonList(person));
+        List<RegistryPersonDTO> resultData = convertPersonToDTO(Collections.singletonList(person), 1);
         forbidVipsDataByUserPermissions(resultData);
         RegistryPersonDTO result = resultData.get(0);
 
@@ -141,7 +143,7 @@ public class PersonServiceImpl implements PersonService {
 
         RegistryPersonDTO originalData = null;
         if (original != null) {
-            originalData = convertPersonToDTO(Collections.singletonList(original)).get(0);
+            originalData = convertPersonToDTO(Collections.singletonList(original), 1).get(0);
             forbidVipsDataByUserPermissions(Collections.singletonList(originalData));
         }
         result.setOriginal(originalData);
@@ -165,7 +167,7 @@ public class PersonServiceImpl implements PersonService {
                 RegistryPerson duplicate = resolveVersion(groupContent, new Date());
                 pickedDuplicates.add(duplicate);
             }
-            List<RegistryPersonDTO> duplicatesData = convertPersonToDTO(pickedDuplicates);
+            List<RegistryPersonDTO> duplicatesData = convertPersonToDTO(pickedDuplicates, pickedDuplicates.size());
             forbidVipsDataByUserPermissions(duplicatesData);
             result.setDuplicates(duplicatesData);
         }
@@ -424,7 +426,7 @@ public class PersonServiceImpl implements PersonService {
             return new PagingResult<>();
         }
         PagingResult<RegistryPerson> persons = refBookPersonDao.fetchOriginalDuplicatesCandidates(pagingParams, filter);
-        PagingResult<RegistryPersonDTO> result = convertPersonToDTO(persons);
+        PagingResult<RegistryPersonDTO> result = convertPersonToDTO(persons, persons.getTotalCount());
         forbidVipsDataByUserPermissions(result);
         return result;
     }
