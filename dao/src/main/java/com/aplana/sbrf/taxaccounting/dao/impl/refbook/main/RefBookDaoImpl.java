@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookAddressValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -28,8 +27,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 
 @Repository
@@ -306,8 +306,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private RowMapper<Map<String, RefBookValue>> getRowMapper(RefBook refBook) {
         if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
             return new RefBookCalendarValueMapper(refBook);
-        } else if (refBook.getId().equals(RefBook.Id.PERSON_ADDRESS.getId())) {
-            return new RefBookAddressValueMapper(refBook);
         } else {
             return new RefBookValueMapper(refBook);
         }

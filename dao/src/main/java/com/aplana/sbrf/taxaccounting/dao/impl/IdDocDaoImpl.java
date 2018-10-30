@@ -53,6 +53,15 @@ public class IdDocDaoImpl extends AbstractDao implements IdDocDao {
         return result;
     }
 
+    @Override
+    public int findIdDocCount(Long personRecordId) {
+        String query = "select count(doc.id)\n" +
+                "from ref_book_id_doc doc \n" +
+                "left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id \n" +
+                "where doc.person_id in (select id from ref_book_person where record_id = :personRecordId)";
+        return getNamedParameterJdbcTemplate().queryForObject(query, new MapSqlParameterSource("personRecordId", personRecordId), Integer.class);
+    }
+
     private static RowMapper<IdDoc> ID_DOC_MAPPER = new RowMapper<IdDoc>() {
         @Override
         public IdDoc mapRow(ResultSet rs, int rowNum) throws SQLException {

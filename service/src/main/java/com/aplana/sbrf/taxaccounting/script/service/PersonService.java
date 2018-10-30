@@ -45,4 +45,11 @@ public interface PersonService {
      * @return список найденных записей реестра ФЛ
      */
     List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
+
+    /**
+     * Найти общее количество ДУЛ для ФЛ
+     * @param personRecordId идентификатор ФЛ
+     * @return количество ДУЛ ФЛ
+     */
+    int findIdDocCount(Long personRecordId);
 }

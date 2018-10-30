@@ -492,4 +492,17 @@
                  splitStatements="false"/>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-9" author="ytrofimov">
+        <delete tableName="ref_book_attribute">
+            <where>id = 9054</where>
+        </delete>
+        <delete tableName="ref_book_attribute">
+            <where>ref_book_id in (901, 902, 905, 908)</where>
+        </delete>
+        <delete tableName="ref_book">
+            <where>id in (901, 902, 905, 908)</where>
+        </delete>
+    </changeSet>
+
 </databaseChangeLog>

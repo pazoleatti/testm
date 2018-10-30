@@ -58,14 +58,6 @@ public class RefBookPersonDaoOracleTest {
     private static final Long decl_data_id = 15491L; //дубликаты
 
 
-    @Test
-    public void testGetActualRefDulByDeclarationDataId() {
-        //[19261, 18985]
-        long refBookId = RefBook.Id.ID_DOC.getId();
-        String whereClause = "JOIN ref_book_person p ON (frb.person_id = p.id) JOIN ndfl_person np ON (np.declaration_data_id = 18985 AND p.id = np.person_id)";
-        Map<Long, Map<String, RefBookValue>> result = getRefBookByRecordVersionWhere(refBookId, whereClause, new Date());
-    }
-
     private Map<Long, Map<String, RefBookValue>> getRefBookByRecordVersionWhere(long refBookId, String whereClause, Date version) {
         RefBook refBook = refBookDao.get(refBookId);
         Map<Long, Map<String, RefBookValue>> refBookMap = refBookSimpleDao.getRecordDataVersionWhere(refBook, whereClause, version);

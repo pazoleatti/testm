@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookAddressValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -61,8 +60,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     private RowMapper<Map<String, RefBookValue>> getRowMapper(RefBook refBook) {
         if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
             return new RefBookCalendarValueMapper(refBook);
-        } else if (refBook.getId().equals(RefBook.Id.PERSON_ADDRESS.getId())) {
-            return new RefBookAddressValueMapper(refBook);
         } else {
             return new RefBookValueMapper(refBook);
         }
@@ -745,13 +742,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
             recordParameters.addValue("recordId", record.getRecordId());
             recordParameters.addValue("version", new java.sql.Date(version.getTime()));
             recordParameters.addValue("status", status.getId());
-
-            // Костыль. Первичное значение OLD_ID должно быть равно RECORD_ID
-            // TODO: Придумать нормальную реализацию для этой ситуации
-            if (refBook.getId().equals(RefBook.Id.PERSON.getId())) {
-                Long oldId = record.getRecordId();
-                record.getValues().put("OLD_ID", new RefBookValue(RefBookAttributeType.NUMBER, oldId));
-            }
 
             for (RefBookAttribute attribute : refBook.getAttributes()) {
                 Object recordValue = getValueAsObjectFromRecordByAttribute(record, attribute);

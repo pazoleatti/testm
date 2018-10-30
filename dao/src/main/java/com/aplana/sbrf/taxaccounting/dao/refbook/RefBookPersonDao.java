@@ -118,15 +118,6 @@ public interface RefBookPersonDao {
      */
     int getPersonsCount(RefBookPersonFilter filter);
 
-    PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
-
-    /**
-     * Получить объект справочника Физические лица
-     *
-     * @return объект справочника
-     */
-    RefBook getRefBook();
-
     /**
      * Получает версию физлица c информацией о дате начала и конца версии
      *

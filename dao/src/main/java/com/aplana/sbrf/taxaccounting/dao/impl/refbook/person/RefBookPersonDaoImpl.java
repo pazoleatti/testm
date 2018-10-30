@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHand
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookMapperFactory;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
@@ -12,7 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -188,40 +189,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return getJdbcTemplate().queryForObject("select count(*) from (" + query + ")", Integer.class);
     }
 
-
-    public PagingResult<Map<String, RefBookValue>> fetchPersonsAsMap(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-
-        String personSql = "select p.*, (select min(version) - interval '1' day from ref_book_person where status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to from (\n" +
-                "  select frb.*, frb.version as record_version_from, s.id as TAXPAYER_STATE_ID, s.code as TAXPAYER_STATE_CODE, s.name as TAXPAYER_STATE_NAME, \n" +
-                "  c.id as CITIZENSHIP_ID, c.code as CITIZENSHIP_CODE, c.name as CITIZENSHIP_NAME, \n" +
-                "  asnu.id as SOURCE_ID_ID, asnu.name as SOURCE_ID_NAME, asnu.code as SOURCE_ID_CODE, asnu.priority as SOURCE_ID_PRIORITY, asnu.type as SOURCE_ID_TYPE,\n" +
-                "  a.id as A_ID, a.REGION_CODE || ',' || a.POSTAL_CODE || ',' || a.DISTRICT || ',' || a.CITY || ',' || a.LOCALITY || ',' || a.STREET || ',' || a.HOUSE || ',' || a.BUILD || ',' || a.APPARTMENT as ADDRESS_ADDRESS_FULL\n" +
-                "  from REF_BOOK_PERSON frb \n" +
-                "  left join REF_BOOK_TAXPAYER_STATE s on s.id = frb.TAXPAYER_STATE\n" +
-                "  left join REF_BOOK_COUNTRY c on c.id = frb.CITIZENSHIP\n" +
-                "  left join REF_BOOK_ADDRESS a on a.id = frb.ADDRESS \n" +
-                "  left join REF_BOOK_ASNU asnu on asnu.id = frb.SOURCE_ID \n" +
-                "  where frb.status = 0%s) p ";
-
-        String baseSql = String.format(personSql, version != null ? " and frb.version = (select max(version) from REF_BOOK_PERSON where version <= :version and record_id = frb.record_id and status = 0)" : "") +
-                (isNotEmpty(filter) ? "where " + filter : "");
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        if (version != null) {
-            params.addValue("version", version);
-        }
-        if (pagingParams != null) {
-            params.addValue("start", pagingParams.getStartIndex() + 1);
-            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-        }
-
-        String query = prepareStatement(pagingParams, filter, sortAttribute, baseSql);
-
-        RefBook refBook = getRefBook();
-
-        return new PagingResult<>(getNamedParameterJdbcTemplate().query(query, params, new RefBookValueMapper(refBook)));
-    }
-
     private String prepareStatement(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String baseSql) {
 
         String sortColumnName = "id";
@@ -242,11 +209,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return pagingParams != null ?
                 "select " + hint + "* from (select r.*, row_number() over (order by " + sortColumnName + " " + direction + ") as rn from (\n" + baseSql + ") r)\n where rn between :start and :end"
                 : baseSql;
-    }
-
-
-    public RefBook getRefBook() {
-        return refBookDao.get(RefBook.Id.PERSON.getId());
     }
 
     @Override

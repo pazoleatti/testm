@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.script.service.impl;
 
 
+import com.aplana.sbrf.taxaccounting.dao.IdDocDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
@@ -19,6 +20,8 @@ public class PersonServiceImpl implements PersonService{
     private RefBookPersonDao refBookPersonDao;
     @Autowired
     private com.aplana.sbrf.taxaccounting.service.impl.PersonServiceImpl personService;
+    @Autowired
+    private IdDocDao idDocDao;
 
     @Override
     public List<Long> getDuplicate(Set<Long> originalRecordIds) {
@@ -52,5 +55,10 @@ public class PersonServiceImpl implements PersonService{
     @Override
     public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId) {
         return personService.findActualRefPersonsByDeclarationDataId(declarationDataId);
+    }
+
+    @Override
+    public int findIdDocCount(Long personRecordId) {
+        return idDocDao.findIdDocCount(personRecordId);
     }
 }

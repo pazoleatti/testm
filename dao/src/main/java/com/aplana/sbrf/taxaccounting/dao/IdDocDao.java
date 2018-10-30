@@ -35,4 +35,11 @@ public interface IdDocDao {
      */
     List<IdDoc> getByPerson(RegistryPerson person);
 
+    /**
+     * Найти общее количество ДУЛ для ФЛ
+     * @param personRecordId идентификатор ФЛ
+     * @return количество ДУЛ ФЛ
+     */
+    int findIdDocCount(Long personRecordId);
+
 }

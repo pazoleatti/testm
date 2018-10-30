@@ -29,8 +29,6 @@ public class RefBookMapperFactory {
             return new IncomeTypeMapper();
         } else if (RefBook.Id.DEDUCTION_MARK.getId() == refBookId) {
             return new DeductionMarkMapper();
-        } else if (RefBook.Id.PERSON_ADDRESS.getId() == refBookId) {
-            return new PersonAddressMapper();
         } else if (RefBook.Id.TAXPAYER_STATUS.getId() == refBookId) {
             return new TaxPayerStatusMapper();
         } else if (RefBook.Id.DEPARTMENT.getId() == refBookId) {
@@ -120,25 +118,6 @@ public class RefBookMapperFactory {
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
             result.setCode(rs.getString("code"));
-            return result;
-        }
-    }
-
-    public class PersonAddressMapper<T> implements RowMapper<RefBookAddress> {
-
-        @Override
-        public RefBookAddress mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RefBookAddress result = new RefBookAddress();
-            result.setId(rs.getLong("id"));
-            result.setRegionCode(rs.getString("REGION_CODE"));
-            result.setPostalCode(rs.getString("POSTAL_CODE"));
-            result.setDistrict(rs.getString("DISTRICT"));
-            result.setCity(rs.getString("CITY"));
-            result.setLocality(rs.getString("LOCALITY"));
-            result.setStreet(rs.getString("STREET"));
-            result.setHouse(rs.getString("HOUSE"));
-            result.setBuild(rs.getString("BUILD"));
-            result.setApartment(rs.getString("APPARTMENT"));
             return result;
         }
     }

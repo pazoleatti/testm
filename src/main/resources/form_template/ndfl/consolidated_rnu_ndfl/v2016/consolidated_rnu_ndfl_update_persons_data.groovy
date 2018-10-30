@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.Department
@@ -40,8 +41,6 @@ class UpdatePersonsData extends AbstractScriptClass {
 
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
-    // Дата окончания отчетного периода
-    Date reportPeriodEndDate = null
 
     @TypeChecked(TypeCheckingMode.SKIP)
     UpdatePersonsData(scriptClass) {
@@ -105,7 +104,7 @@ class UpdatePersonsData extends AbstractScriptClass {
                 logger.info("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Запись о физическом лице в справочнике отсутствует\"")
                 continue
             }
-            if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null && hasDul(refBookPerson.personId)) {
+            if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null) {
                 logger.info("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1",
                         (declarationDataPerson.lastName ?: "") + " " + (declarationDataPerson.firstName ?: "") + " " + (declarationDataPerson.middleName ?: ""),
                         declarationDataPerson.inp)
@@ -446,25 +445,4 @@ class UpdatePersonsData extends AbstractScriptClass {
         return providerCache.get(providerId)
     }
 
-    /**
-     * Получить дату окончания отчетного периода
-     * @return
-     */
-    Date getReportPeriodEndDate() {
-        if (reportPeriodEndDate == null) {
-            reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-        }
-        return reportPeriodEndDate
-    }
-
-    /**
-     * Выполняет проверку на то что для физлица имеются записи в справочнике ДУЛ, которые не включаются в отчетность
-     * @param personId
-     * @return
-     */
-    boolean hasDul(long personId) {
-        RefBookDataProvider provider = getProvider(RefBook.Id.ID_DOC.id)
-        List<Map<String, RefBookValue>> dulList = provider.getRecords(getReportPeriodEndDate(), null, "INC_REP = 0 AND PERSON_ID = ${personId}".toString(), null)
-        return !dulList.isEmpty()
-    }
 }

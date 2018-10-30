@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.SourceService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
@@ -40,9 +41,9 @@ class Calculate extends AbstractScriptClass {
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
     SourceService sourceService
+    PersonService personService
 
-    // Кэш провайдеров cправочников
-    Map<Long, RefBookDataProvider> providerCache = [:]
+
     //Коды Асну
     List<Long> asnuCache = []
     // Даты создания налоговой формы
@@ -72,6 +73,9 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("sourceService")) {
             this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
+        }
+        if (scriptClass.getBinding().hasVariable("personService")) {
+            this.personService = (PersonService) scriptClass.getProperty("personService")
         }
     }
 
@@ -490,8 +494,7 @@ class Calculate extends AbstractScriptClass {
 
         if (!withoutDulPersonList.isEmpty()) {
             for (NdflPerson person : withoutDulPersonList) {
-                RefBookDataProvider provider = getProvider(RefBook.Id.ID_DOC.id)
-                int count = provider.getRecordsCount(new Date(), "PERSON_ID = ${person.personId}")
+                int count = personService.findIdDocCount(person.getRecordId())
                 if (count == 0) {
                     logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность",
                             "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
@@ -626,18 +629,6 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
-    }
-
-    /**
-     * Получение провайдера с использованием кеширования.
-     * @param providerId
-     * @return
-     */
-    RefBookDataProvider getProvider(long providerId) {
-        if (!providerCache.containsKey(providerId)) {
-            providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
-        }
-        return providerCache.get(providerId)
     }
 
     /**

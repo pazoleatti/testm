@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.Address;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -306,22 +307,6 @@ public class RefBookPersonDaoTest {
 
 
     // --- Методы работы с  RegistryPerson ---
-
-
-    @Test
-    public void test_updateRegistryPersonIncRepDocId() {
-        //setup
-        //execution
-        personDao.updateRegistryPersonIncRepDocId(1L, 4L);
-
-
-        RefBook refBook = refBookDao.get(RefBook.Id.ID_DOC.getId());
-        Map<String, RefBookValue> oldValue = refBookSimpleDao.getRecordData(refBook, 1L);
-        Map<String, RefBookValue> newValue = refBookSimpleDao.getRecordData(refBook, 4L);
-
-        assertThat(oldValue.get("INC_REP").getNumberValue().intValue()).isEqualTo(0);
-        assertThat(newValue.get("INC_REP").getNumberValue().intValue()).isEqualTo(1);
-    }
 
     @Test
     public void test_setOriginal() {
