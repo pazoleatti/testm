@@ -1,11 +1,12 @@
-package refbook // person_ref комментарий для локального поиска скрипта
+package refbook
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+
+// person_ref комментарий для локального поиска скрипта
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.PagingResult
-
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.Address
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
@@ -14,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
