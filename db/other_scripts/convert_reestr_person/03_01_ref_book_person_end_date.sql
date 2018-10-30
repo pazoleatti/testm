@@ -3,6 +3,7 @@ declare
     v_rows number;
 begin
   
+  v_rows := 0;
   FOR c1 IN (
               select 
               id,

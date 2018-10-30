@@ -44,7 +44,6 @@ begin
 	update NDFL_PERSON c
 	set c.person_id = null
 	where 
-	c.status=0 and 
 	exists (select 1 from REF_BOOK_PERSON p where p.status in (-1,1) and p.id=c.person_id);
 	
 	CASE SQL%ROWCOUNT 
@@ -62,10 +61,9 @@ COMMIT;
 declare 
 	v_task_name varchar2(128):='ref_book_update block #4 - update NDFL_REFERENCES person_id = null';  
 begin
-	update NDFL_REFERENCES d  -- NDFL_REFERENCES.person_id not null !!!
+	update NDFL_REFERENCES d  
 	set d.person_id = null
 	where 
-	d.status=0 and 
 	exists (select 1 from REF_BOOK_PERSON p where p.status in (-1,1) and p.id=d.person_id);
 	
 	CASE SQL%ROWCOUNT 
@@ -86,7 +84,6 @@ begin
 	update REF_BOOK_ID_TAX_PAYER e 
 	set e.person_id = null
 	where 
-	e.status=0 and 
 	exists (select 1 from REF_BOOK_PERSON p where p.status in (-1,1) and p.id=e.person_id);
 	
 	CASE SQL%ROWCOUNT 
@@ -107,7 +104,6 @@ begin
 	update REF_BOOK_PERSON_TB f 
 	set f.person_id = null
 	where 
-	f.status=0 and 
 	exists (select 1 from REF_BOOK_PERSON p where p.status in (-1,1) and p.id=f.person_id);
 	
 	CASE SQL%ROWCOUNT 

@@ -214,6 +214,16 @@ BEGIN
     select decode(count(*),0,1,0) into v_run_condition from ref_book_person where start_date is null;
     select decode(count(*),0,1,0) into v_run_condition2 from ref_book_person where status<>0;
 	IF v_run_condition=1 AND v_run_condition2=1 THEN
+		v_task_name :='drop_columns block #11 - alter table ref_book_person drop index IDX_REF_PERSON_ST_VER_REC (SBRFNDFL-5837)';  
+		select count(*) into v_run_condition from user_indexes where lower(table_name)='ref_book_person' and lower(index_name)=lower('IDX_REF_PERSON_ST_VER_REC');
+		IF v_run_condition=1 THEN
+			EXECUTE IMMEDIATE 'drop index IDX_REF_PERSON_ST_VER_REC';
+			dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+		ELSE
+			dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+		END IF; 
+
+		v_task_name:='drop_columns block #11 - alter table ref_book_person drop column version (SBRFNDFL-5837)';  
 	    v_run_condition := 0;
 		select count(*) into v_run_condition from user_tab_columns where lower(table_name)='ref_book_person' and lower(column_name)='version';
 		IF v_run_condition=1 THEN
@@ -253,15 +263,6 @@ BEGIN
 		select count(*) into v_run_condition from user_indexes where lower(table_name)='ref_book_person' and lower(index_name)=lower('IDX_REF_PERSON_STATUS');
 		IF v_run_condition=1 THEN
 			EXECUTE IMMEDIATE 'drop index IDX_REF_PERSON_STATUS';
-			dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
-		ELSE
-			dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
-		END IF; 
-
-		v_task_name :='drop_columns block #12 - alter table ref_book_person drop index IDX_REF_PERSON_STATUS (SBRFNDFL-5837)';  
-		select count(*) into v_run_condition from user_indexes where lower(table_name)='ref_book_person' and lower(index_name)=lower('IDX_REF_PERSON_ST_VER_REC');
-		IF v_run_condition=1 THEN
-			EXECUTE IMMEDIATE 'drop index IDX_REF_PERSON_ST_VER_REC';
 			dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
 		ELSE
 			dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
