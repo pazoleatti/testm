@@ -482,4 +482,14 @@
                  splitStatements="false"/>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ytrofimov-8" author="ytrofimov">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body13.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
