@@ -231,16 +231,23 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonDeduction> fetchNdflPersonDeductionByDeclarationData(long declarationDataId) {
-        try {
-            return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
-                    "from ndfl_person_deduction npd "
-                    + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
-                    + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
-                    + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonDeduction>();
-        }
+    public List<NdflPersonDeduction> findAllDeductionsByDeclarationId(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
+                "from ndfl_person_deduction npd "
+                + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
+                + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
+                + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataIds", declarationDataIds);
+        return getNamedParameterJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
+                "from ndfl_person_deduction npd "
+                + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
+                + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
+                + " where np.declaration_data_id in (:declarationDataIds)", params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
     }
 
     @Override
@@ -1285,7 +1292,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             saveNewObjects(allPrepayments, NdflPersonPrepayment.TABLE_NAME, NdflPersonPrepayment.SEQ, NdflPersonPrepayment.COLUMNS, NdflPersonPrepayment.FIELDS);
         }
     }
-
 
 
     @Override
@@ -2354,8 +2360,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
                 "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
-                "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) \n" +
-                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
+                "WHERE rbp.id in (:personIdList)";
 
         MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
         try {
@@ -2366,34 +2371,24 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds) {
+    public List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds) {
         String sql = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", rbp.id as person_id, rba.name as asnu_name " +
                 "from ndfl_person_income npi\n" +
                 "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
                 "left join declaration_data dd on np.declaration_data_id = dd.id\n" +
                 "left join ref_book_person rbp on np.person_id = rbp.id\n" +
-                " left join ref_book_asnu rba on npi.asnu_id = rba.id " +
-                "where dd.id in (:declarationDataIds)\n" +
-                "and rbp.status = 0\n" +
-                "and npi.operation_id in (select distinct npi.operation_id from ndfl_person_income npi \n" +
-                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
-                "left join declaration_data dd on np.declaration_data_id = dd.id\n" +
-                "where dd.id in (:declarationDataIds)\n" +
-                "and npi.income_code in (:incomeCodes))";
-        MapSqlParameterSource params = new MapSqlParameterSource("incomeCodes", incomeCodes);
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id\n" +
+                "where dd.id in (:declarationDataIds)\n";
+        MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationDataIds", declarationDataIds);
-        try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Application2Income>() {
-                @Override
-                public Application2Income mapRow(ResultSet resultSet, int i) throws SQLException {
-                    Application2Income income = new Application2Income(new NdflPersonIncomeRowMapper().mapRow(resultSet, i));
-                    income.setRefBookPersonId(SqlUtils.getLong(resultSet, "person_id"));
-                    return income;
-                }
-            });
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
+        return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Application2Income>() {
+            @Override
+            public Application2Income mapRow(ResultSet resultSet, int i) throws SQLException {
+                Application2Income income = new Application2Income(new NdflPersonIncomeRowMapper().mapRow(resultSet, i));
+                income.setRefBookPersonId(SqlUtils.getLong(resultSet, "person_id"));
+                return income;
+            }
+        });
     }
 
     private static final class NdflPersonRefBookRowMapper implements RowMapper<NdflPerson> {

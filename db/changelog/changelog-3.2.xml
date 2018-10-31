@@ -508,9 +508,9 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
     <changeSet id="3.2-amandzyak-4" author="amandzyak">
         <sql>
-			update ref_book_income_type 
+			update ref_book_income_type
 			set name='Доходы по операциям с производными финансовыми инструментами, которые обращаются на организованном рынке и базисным активом которых являются ценные бумаги, фондовые индексы или иные производные финансовые инструменты, базисным активом которых являются ценные бумаги или фондовые индексы'
-			where 
+			where
 			code='1532'
         </sql>
     </changeSet>
@@ -518,9 +518,9 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
     <changeSet id="3.2-amandzyak-5" author="amandzyak">
         <sql>
-			update ref_book_income_type 
+			update ref_book_income_type
 			set name='Доходы по операциям с производными финансовыми инструментами, не обращающимися на организованном рынке'
-			where 
+			where
 			code='1533'
         </sql>
     </changeSet>
@@ -528,9 +528,9 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
     <changeSet id="3.2-amandzyak-6" author="amandzyak">
         <sql>
-			update ref_book_income_type 
+			update ref_book_income_type
 			set name='Доходы по операциям с производными финансовыми инструментами, которые обращаются на организованном рынке и базисным активом которых не являются ценные бумаги, фондовые индексы или иные производные финансовые инструменты, базисным активом которых являются ценные бумаги или фондовые индексы'
-			where 
+			where
 			code='1535'
         </sql>
     </changeSet>
@@ -538,9 +538,9 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
     <changeSet id="3.2-amandzyak-7" author="amandzyak">
         <sql>
-			update ref_book_income_type 
+			update ref_book_income_type
 			set name='Вознаграждение, получаемое налогоплательщиком за выполнение трудовых или иных обязанностей; денежное содержание, денежное довольствие, не подпадающее под действие пункта 29 статьи 217 Налогового кодекса Российской Федерации и иные налогооблагаемые выплаты военнослужащим и приравненным к ним категориям физических лиц (кроме выплат по договорам гражданско-правового характера)'
-			where 
+			where
 			code='2000'
         </sql>
     </changeSet>
@@ -548,9 +548,9 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
     <changeSet id="3.2-amandzyak-8" author="amandzyak">
         <sql>
-			update ref_book_income_type 
+			update ref_book_income_type
 			set name='Материальная выгода, полученная от приобретения производных финансовых инструментов'
-			where 
+			where
 			code='2641'
         </sql>
     </changeSet>
@@ -561,6 +561,14 @@
             <column name="data"
                     valueBlobFile="templates-3.2/refbook/person.groovy"/>
             <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.2-dnovikov-32" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
         </update>
     </changeSet>
 

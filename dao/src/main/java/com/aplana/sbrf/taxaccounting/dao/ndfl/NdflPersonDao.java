@@ -95,12 +95,20 @@ public interface NdflPersonDao {
     public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(NdflFilter ndflFilter, PagingParams pagingParams);
 
     /**
-     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
+     * Возвращяет список строк из раздела 3 по списку ид форм
      *
-     * @param declarationDataId идентификатор декларации
+     * @param declarationDataId ид формы
      * @return список объектов вычетов физического лица
      */
-    List<NdflPersonDeduction> fetchNdflPersonDeductionByDeclarationData(long declarationDataId);
+    List<NdflPersonDeduction> findAllDeductionsByDeclarationId(long declarationDataId);
+
+    /**
+     * Возвращяет список строк из раздела 3 по списку ид форм
+     *
+     * @param declarationDataIds списсок ид форм
+     * @return список строк раздела 3
+     */
+    List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds);
 
     /**
      * Найти все NdflPersonDeduction по заданным параметрам
@@ -684,10 +692,9 @@ public interface NdflPersonDao {
 
     /**
      * Получает доходы данные которых будут включены в формирование Приложения 2 к налогу на прибыль
-     * @param incomeCodes           список кодов доходов, операции которых будут отобраны
      * @param declarationDataIds    список налоговых форм, операции которых будут отобраны
      * @return  список объектов доходов
      */
-    List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds);
+    List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds);
 
 }

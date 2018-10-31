@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.application2.Application2Income
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.Pair
@@ -25,8 +26,6 @@ import org.xml.sax.helpers.DefaultHandler
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
-import java.math.MathContext
-import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
@@ -53,11 +52,8 @@ class DeclarationType extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     ReportPeriodService reportPeriodService
     ScriptSpecificRefBookReportHolder scriptSpecificRefBookReportHolder
+    OutputStream outputStream
     int reportYear
-    List<String> application2IncomeCodes = ["1010", "1011", "1110", "1120", "1530", "1531", "1532", "1533", "1535",
-                                            "1536", "1537", "1538", "1539", "1540", "1541", "1542", "1544", "1545",
-                                            "1546", "1547", "1548", "1549", "1550", "1551", "1552", "1553", "1554",
-                                            "2640", "2641", "3023"]
     NdflPersonService ndflPersonService
     String version
 
@@ -117,6 +113,7 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("dataHolder")) {
             this.scriptSpecificRefBookReportHolder = (ScriptSpecificRefBookReportHolder) scriptClass.getProperty("dataHolder")
+            this.outputStream = scriptSpecificRefBookReportHolder.getFileOutputStream()
         }
         if (scriptClass.getBinding().hasVariable("version")) {
             this.version = (String) scriptClass.getProperty("version")
@@ -1199,6 +1196,11 @@ class DeclarationType extends AbstractScriptClass {
         return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : "";
     }
 
+    // кол-во созданныеъ строк в Приложении2
+    int rowCount = 0
+    // Итоговая строка
+    TotalRow totalRow = new TotalRow()
+
     void createApplication2() {
         List<Long> declarationDataIdList = declarationService.findApplication2DeclarationDataId(reportYear)
         if (declarationDataIdList.isEmpty()) {
@@ -1206,163 +1208,70 @@ class DeclarationType extends AbstractScriptClass {
             return
         }
         logger.info("Для формирования Приложения 2 используются КНФ в состоянии \"Принята\": %s", declarationDataIdList.join(", "))
-        List<Application2Income> incomes = ndflPersonService.fetchApplication2Incomes(application2IncomeCodes, declarationDataIdList)
-        if (incomes.isEmpty()) {
-            logger.error("Файл Приложения 2 не может быть сформирован: не обнаружено строк Раздела 2 \"Сведения о доходах и НДФЛ\" с кодами дохода 1010, 1011, 1110, 1120, 1530, 1531, 1532, 1533, 1535, 1536, 1537, 1538, 1539, 1540, 1541, 1542, 1544, 1545, 1546, 1547, 1548, 1549, 1550, 1551, 1552, 1553, 1554, 2640, 2641, 3023")
+        List<Application2Income> allIncomes = ndflPersonService.findAllApplication2Incomes(declarationDataIdList)
+        List<NdflPersonDeduction> allDeductions = ndflPersonService.findAllDeductionsByDeclarationIds(declarationDataIdList)
+        if (allIncomes.isEmpty()) {
+            logger.error("Файл Приложения 2 не может быть сформирован: не обнаружено строк Раздела 2 \"Сведения о доходах и НДФЛ\"")
             return
         }
-        List<NdflPerson> refBookPersons = ndflPersonService.fetchRefBookPersonsAsNdflPerson(new ArrayList<Long>(incomes.refBookPersonId.toSet()))
-        Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
-        for (NdflPerson refBookPerson : refBookPersons) {
-            refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
+        Map<Long, Long> ndflPersonIdByRefBookPersonId = [:]
+        for (def income : allIncomes) {
+            ndflPersonIdByRefBookPersonId.put(income.refBookPersonId, income.ndflPersonId)
         }
-        Map<Pair<Long, Integer>, List<Application2Income>> incomesGroupedByPersonAndTaxRate = [:]
-        for (Application2Income income : incomes) {
-            Pair<Long, Integer> key = new Pair<>(income.refBookPersonId, income.taxRate);
-            List<Application2Income> group = incomesGroupedByPersonAndTaxRate.get(key)
-            if (group == null) {
-                incomesGroupedByPersonAndTaxRate.put(key, [income])
-            } else {
-                group.add(income)
-            }
+        List<NdflPerson> refBookPersons = ndflPersonService.fetchRefBookPersonsAsNdflPerson(new ArrayList<Long>(allIncomes.refBookPersonId.toSet()))
+        Map<Long, NdflPerson> refBookPersonById = refBookPersons.collectEntries { [it.personId, it] }
+        Map<Pair<Long, Integer>, List<Application2Income>> incomesGroupedByPersonIdAndTaxRate = allIncomes.groupBy {
+            new Pair<Long, Integer>(it.refBookPersonId, it.taxRate)
         }
 
+        Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
+        StringBuilder headerBuilder = new StringBuilder()
+        headerBuilder << new Date().format(SharedConstants.FULL_DATE_FORMAT) << "|"
+        headerBuilder << userDepartment.getName().replaceAll("\\|", " ") << "|"
+        headerBuilder << "Приложение 2" << "|"
+        headerBuilder << String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version) << "|"
+        headerBuilder << "\r\n" << "\r\n"
+        IOUtils.write(headerBuilder.toString(), outputStream, "IBM866")
 
-        OutputStream writer = scriptSpecificRefBookReportHolder.getFileOutputStream()
-        com.aplana.sbrf.taxaccounting.model.Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
-        StringBuilder headerBuilder = new StringBuilder(new Date().format(SharedConstants.FULL_DATE_FORMAT))
-                .append("|")
-                .append(userDepartment.getName().replaceAll("\\|", " "))
-                .append("|")
-                .append("Приложение 2")
-                .append("|")
-                .append(String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version))
-                .append("|")
-                .append("\r\n")
-                .append("\r\n")
-        IOUtils.write(headerBuilder.toString(), writer, "IBM866")
+        for (def personIdAndTaxRateKey : incomesGroupedByPersonIdAndTaxRate.keySet()) {
+            NdflPerson refBookPerson = refBookPersonById.get(personIdAndTaxRateKey.getFirst())
+            Long ndflPersonId = ndflPersonIdByRefBookPersonId.get(refBookPerson.personId)
+            def personRateRowGroup = new App2PersonRateRowGroup(refBookPerson, personIdAndTaxRateKey.second, incomesGroupedByPersonIdAndTaxRate.get(personIdAndTaxRateKey))
 
-        int refNum = 1
-        for (Pair<Long, Integer> personTaxRate : incomesGroupedByPersonAndTaxRate.keySet()) {
-            NdflPerson refBookPerson = refBookPersonsGroupedById.get(personTaxRate.getFirst())
+            def row = new App2Row(personRateRowGroup)
+            def operationIds = personRateRowGroup.incomes.operationId.toSet()
+            def incomesByIncomeCode = personRateRowGroup.incomes.groupBy { it.incomeCode }
+            for (def incomeCode : incomesByIncomeCode.keySet()) {
+                if (!row.hasNextApp2IncomeColGroup()) {
+                    write(row)
+                    totalRow.add(row)
+                    row = new App2Row(personRateRowGroup)
+                }
+                App2IncomeColGroup incomeColGroup = row.nextApp2IncomeColGroup()
+                incomeColGroup.setData(incomeCode, incomesByIncomeCode.get(incomeCode))
 
-            BigDecimal incomeAccruedSumm = null
-            BigDecimal incomeDeductionSumm = null
-            BigDecimal taxBaseSumm = null
-            BigDecimal withholdingTaxSumm = null
-            Long taxTransferSumm = null
-            BigDecimal overholdingTaxSumm = null
-            BigDecimal notholdingTaxSumm = null
-
-            for (Application2Income income : incomesGroupedByPersonAndTaxRate.get(personTaxRate)) {
-                if (income.incomeAccruedSumm != null) {
-                    if (incomeAccruedSumm == null) {
-                        incomeAccruedSumm = new BigDecimal("0", new MathContext(2, RoundingMode.HALF_UP))
+                def deductionsOfIncomeCodeByDeductionCode = allDeductions.findAll {
+                    it.ndflPersonId == ndflPersonId && it.incomeCode == incomeCode && it.operationId in operationIds
+                }.groupBy { it.typeCode }
+                for (def deductionCode : deductionsOfIncomeCodeByDeductionCode.keySet()) {
+                    if (!incomeColGroup.hasNextApp2DeductionColGroup()) {
+                        if (!row.hasNextApp2IncomeColGroup()) {
+                            write(row)
+                            totalRow.add(row)
+                            row = new App2Row(personRateRowGroup)
+                        }
+                        incomeColGroup = row.nextApp2IncomeColGroup()
+                        incomeColGroup.setData(incomeCode, incomesByIncomeCode.get(incomeCode))
                     }
-                    incomeAccruedSumm = incomeAccruedSumm.add(income.incomeAccruedSumm)
-                }
-                if (income.totalDeductionsSumm != null) {
-                    if (incomeDeductionSumm == null) {
-                        incomeDeductionSumm = new BigDecimal("0", new MathContext(2, RoundingMode.HALF_UP))
-                    }
-                    incomeDeductionSumm = incomeDeductionSumm.add(income.totalDeductionsSumm)
-                }
-                if (income.taxBase != null) {
-                    if (taxBaseSumm == null) {
-                        taxBaseSumm = new BigDecimal("0", new MathContext(2, RoundingMode.HALF_UP))
-                    }
-                    taxBaseSumm = taxBaseSumm.add(income.taxBase)
-                }
-                if (income.withholdingTax != null) {
-                    if (withholdingTaxSumm == null) {
-                        withholdingTaxSumm = new BigDecimal("0")
-                    }
-                    withholdingTaxSumm = withholdingTaxSumm.add(income.withholdingTax)
-                }
-                if (income.taxSumm != null) {
-                    if (taxTransferSumm == null) {
-                        taxTransferSumm = 0L
-                    }
-                    taxTransferSumm += income.taxSumm
-                }
-                if (income.overholdingTax != null) {
-                    if (overholdingTaxSumm == null) {
-                        overholdingTaxSumm = new BigDecimal("0")
-                    }
-                    overholdingTaxSumm = overholdingTaxSumm.add(income.overholdingTax)
-                }
-                if (income.notHoldingTax != null) {
-                    if (notholdingTaxSumm == null) {
-                        notholdingTaxSumm = new BigDecimal("0")
-                    }
-                    notholdingTaxSumm = notholdingTaxSumm.add(income.notHoldingTax)
+                    App2DeductionColGroup deductionColGroup = incomeColGroup.nextApp2DeductionColGroup()
+                    deductionColGroup.setData(deductionCode, deductionsOfIncomeCodeByDeductionCode.get(deductionCode))
                 }
             }
-
-            StringBuilder dataBuilder = new StringBuilder(refNum++)
-            dataBuilder.append("|")
-                    .append((refBookPerson.innNp ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.innForeign ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.lastName ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.firstName ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.middleName ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.status ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : ""))
-                    .append("|")
-                    .append((refBookPerson.citizenship ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.idDocType ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.idDocNumber ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.postIndex ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.regionCode ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.area ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.city ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.locality ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.street ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.house ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.building ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.flat ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.countryCode ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append((refBookPerson.address ?: "").replaceAll("\\|", ""))
-                    .append("|")
-                    .append(personTaxRate.getSecond() ?: "")
-                    .append("|")
-                    .append(incomeAccruedSumm ?: "")
-                    .append("|")
-                    .append(incomeDeductionSumm ?: "")
-                    .append("|")
-                    .append(taxBaseSumm ?: "")
-                    .append("|")
-                    .append(withholdingTaxSumm ?: "")
-                    .append("|")
-                    .append(incomeAccruedSumm ?: "")
-                    .append("|")
-                    .append(overholdingTaxSumm ?: "")
-                    .append("|")
-                    .append(notholdingTaxSumm ?: "")
-                    .append("|")
-                    .append("\r\n")
-            IOUtils.write(dataBuilder.toString(), writer, "IBM866")
+            write(row)
+            totalRow.add(row)
         }
-        IOUtils.closeQuietly(writer)
+        write(totalRow)
+        IOUtils.closeQuietly(outputStream)
         scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName(userDepartment.getName()))
     }
 
@@ -1374,4 +1283,229 @@ class DeclarationType extends AbstractScriptClass {
                 .append(".rnu")
     }
 
+    void write(Object row) {
+        IOUtils.write(row.toString(), outputStream, "IBM866")
+    }
+
+    // Группа строк Приложения2 по ФЛ и ставке
+    static class App2PersonRateRowGroup {
+        NdflPerson person
+        int rate
+        List<Application2Income> incomes
+
+        BigDecimal incomeAccruedSum = null
+        BigDecimal incomeDeductionSum = null
+        BigDecimal taxBaseSum = null
+        BigDecimal calculatedTaxSum = null
+        BigDecimal withholdingTaxSum = null
+        Long taxSum = null
+        BigDecimal overholdingTaxSum = null
+        BigDecimal notholdingTaxSum = null
+
+        App2PersonRateRowGroup(NdflPerson person, int rate, List<Application2Income> incomes) {
+            this.person = person
+            this.incomes = incomes
+            this.rate = rate
+            for (Application2Income income : incomes) {
+                if (income.incomeAccruedSumm != null) {
+                    incomeAccruedSum = (incomeAccruedSum ?: 0) + income.incomeAccruedSumm
+                }
+                if (income.totalDeductionsSumm != null) {
+                    incomeDeductionSum = (incomeDeductionSum ?: 0) + income.totalDeductionsSumm
+                }
+                if (income.taxBase != null) {
+                    taxBaseSum = (taxBaseSum ?: 0) + income.taxBase
+                }
+                if (income.calculatedTax != null) {
+                    calculatedTaxSum = (calculatedTaxSum ?: 0) + income.calculatedTax
+                }
+                if (income.withholdingTax != null) {
+                    withholdingTaxSum = (withholdingTaxSum ?: 0) + income.withholdingTax
+                }
+                if (income.taxSumm != null) {
+                    taxSum = (taxSum ?: 0) + income.taxSumm
+                }
+                if (income.overholdingTax != null) {
+                    overholdingTaxSum = (overholdingTaxSum ?: 0) + income.overholdingTax
+                }
+                if (income.notHoldingTax != null) {
+                    notholdingTaxSum = (notholdingTaxSum ?: 0) + income.notHoldingTax
+                }
+            }
+        }
+    }
+    // строка Приложения2
+    class App2Row {
+        int rowNum = ++rowCount
+        App2PersonRateRowGroup personRateRowGroup
+        List<App2IncomeColGroup> incomeColGroups = []
+        Iterator<App2IncomeColGroup> incomeColGroupsIterator
+
+        App2Row(App2PersonRateRowGroup personRateRowGroup) {
+            this.personRateRowGroup = personRateRowGroup
+            3.times { incomeColGroups.add(new App2IncomeColGroup(it == 2)) }
+            incomeColGroupsIterator = incomeColGroups.iterator()
+        }
+
+        NdflPerson getPerson() {
+            return personRateRowGroup.person
+        }
+
+        boolean hasNextApp2IncomeColGroup() {
+            return incomeColGroupsIterator.hasNext()
+        }
+
+        App2IncomeColGroup nextApp2IncomeColGroup() {
+            return incomeColGroupsIterator.next()
+        }
+
+        @Override
+        String toString() {
+            StringBuilder dataBuilder = new StringBuilder()
+            dataBuilder << rowNum++ << "|"
+            dataBuilder << (person.innNp?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.innForeign?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << person.lastName.replaceAll("\\|", "") << "|"
+            dataBuilder << person.firstName.replaceAll("\\|", "") << "|"
+            dataBuilder << (person.middleName?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << person.status.replaceAll("\\|", "") << "|"
+            dataBuilder << person.birthDay.format(SharedConstants.DATE_FORMAT) << "|"
+            dataBuilder << person.citizenship.replaceAll("\\|", "") << "|"
+            dataBuilder << person.idDocType.replaceAll("\\|", "") << "|"
+            dataBuilder << person.idDocNumber.replaceAll("\\|", "") << "|"
+            dataBuilder << (person.postIndex?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.regionCode?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.area?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.city?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.locality?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.street?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.house?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.building?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.flat?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.countryCode?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << (person.address?.replaceAll("\\|", "") ?: "") << "|"
+            dataBuilder << personRateRowGroup.rate << "|"
+            dataBuilder << personRateRowGroup.incomeAccruedSum << "|"
+            dataBuilder << (personRateRowGroup.incomeDeductionSum != null ? personRateRowGroup.incomeDeductionSum : "") << "|"
+            dataBuilder << personRateRowGroup.taxBaseSum << "|"
+            dataBuilder << personRateRowGroup.calculatedTaxSum << "|"
+            dataBuilder << (personRateRowGroup.withholdingTaxSum != null ? personRateRowGroup.withholdingTaxSum : "") << "|"
+            dataBuilder << (personRateRowGroup.taxSum != null ? personRateRowGroup.taxSum : "") << "|"
+            dataBuilder << (personRateRowGroup.overholdingTaxSum != null ? personRateRowGroup.overholdingTaxSum : "") << "|"
+            dataBuilder << (personRateRowGroup.notholdingTaxSum != null ? personRateRowGroup.notholdingTaxSum : "") << "|"
+            for (def incomeColGroup : incomeColGroups) {
+                dataBuilder << incomeColGroup.toString()
+            }
+            dataBuilder << "\r\n"
+
+            return dataBuilder.toString()
+        }
+    }
+    // группа столбцов строки Приложения2 с данными по отдельному коду дохода
+    static class App2IncomeColGroup {
+        String incomeCode
+        List<Application2Income> incomes
+        BigDecimal incomeAccruedSum = null
+        List<App2DeductionColGroup> deductionColGroups = []
+        Iterator<App2DeductionColGroup> deductionColGroupsIterator
+
+        App2IncomeColGroup(boolean last = false) {
+            (last ? 7 : 5).times { deductionColGroups.add(new App2DeductionColGroup()) }
+            deductionColGroupsIterator = deductionColGroups.iterator()
+        }
+
+        void setData(String incomeCode, List<Application2Income> incomes) {
+            this.incomeCode = incomeCode
+            this.incomes = incomes
+            for (Application2Income income : incomes) {
+                if (income.incomeAccruedSumm) {
+                    incomeAccruedSum = (incomeAccruedSum ?: 0) + income.incomeAccruedSumm
+                }
+            }
+        }
+
+        boolean hasNextApp2DeductionColGroup() {
+            return deductionColGroupsIterator.hasNext()
+        }
+
+        App2DeductionColGroup nextApp2DeductionColGroup() {
+            return deductionColGroupsIterator.next()
+        }
+
+        @Override
+        String toString() {
+            StringBuilder stringBuilder = new StringBuilder()
+            stringBuilder << (incomeCode ?: "") << "|"
+            stringBuilder << (incomeAccruedSum ?: "") << "|"
+            for (def deductionColGroup : deductionColGroups) {
+                stringBuilder << deductionColGroup.toString()
+            }
+            return stringBuilder.toString()
+        }
+    }
+    // группа столбцов строки Приложения2 с данными по отдельному коду вычета
+    static class App2DeductionColGroup {
+        String deductionCode
+        List<NdflPersonDeduction> deductions
+        BigDecimal periodCurrSum = null
+
+        void setData(String deductionCode, List<NdflPersonDeduction> deductions) {
+            this.deductionCode = deductionCode
+            this.deductions = deductions
+            for (def deduction : deductions) {
+                if (deduction.periodCurrSumm) {
+                    periodCurrSum = (periodCurrSum ?: 0) + deduction.periodCurrSumm
+                }
+            }
+        }
+
+        @Override
+        String toString() {
+            StringBuilder stringBuilder = new StringBuilder()
+            stringBuilder << (deductionCode ?: "") << "|"
+            stringBuilder << (periodCurrSum ?: "") << "|"
+            return stringBuilder.toString()
+        }
+    }
+    // Итоговая строка
+    class TotalRow {
+        // значения строки по позиции поля (начиная с 1)
+        Map<Integer, BigDecimal> values = [:]
+        App2PersonRateRowGroup lastRowGroup = null
+
+        void add(App2Row row) {
+            if (!row.personRateRowGroup.is(lastRowGroup)) {
+                lastRowGroup = row.personRateRowGroup
+                add(27, row.personRateRowGroup.calculatedTaxSum)
+                add(28, row.personRateRowGroup.withholdingTaxSum)
+                add(29, row.personRateRowGroup.taxSum ? new BigDecimal(row.personRateRowGroup.taxSum) : null)
+                add(30, row.personRateRowGroup.overholdingTaxSum)
+                add(31, row.personRateRowGroup.notholdingTaxSum)
+            }
+            int index = 33
+            for (def incomeColGroup : row.incomeColGroups) {
+                add(index++, incomeColGroup.incomeAccruedSum)
+                index++
+                for (def deductionColGroup : incomeColGroup.deductionColGroups) {
+                    add(index++, deductionColGroup.periodCurrSum)
+                    index++
+                }
+            }
+        }
+
+        void add(int index, BigDecimal valueToAdd) {
+            BigDecimal value = values.get(index) ?: 0
+            value += (valueToAdd ?: 0)
+            values.put(index, value)
+        }
+
+        @Override
+        String toString() {
+            StringBuilder stringBuilder = new StringBuilder()
+            for (int i = 1; i <= 71; i++) {
+                stringBuilder << (values.get(i) != null ? values.get(i) : "") << "|"
+            }
+            return stringBuilder.toString()
+        }
+    }
 }

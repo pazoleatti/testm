@@ -109,7 +109,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public List<NdflPerson> findNdflPersonWithOperations(long declarationDataId) {
         List<NdflPerson> persons = ndflPersonDao.fetchByDeclarationData(declarationDataId);
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId));
-        Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonDeductionByDeclarationData(declarationDataId));
+        Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId));
         for (NdflPerson person : persons) {
             person.setIncomes(incomesByPersonId.get(person.getId()));
@@ -149,7 +149,12 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId) {
-        return ndflPersonDao.fetchNdflPersonDeductionByDeclarationData(declarationDataId);
+        return ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
+        return ndflPersonDao.findAllDeductionsByDeclarationIds(declarationDataIds);
     }
 
     @Override
@@ -437,8 +442,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds) {
-        return ndflPersonDao.fetchApplication2Incomes(incomeCodes, declarationDataIds);
+    public List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds) {
+        return ndflPersonDao.findAllApplication2Incomes(declarationDataIds);
     }
 
     @Override
