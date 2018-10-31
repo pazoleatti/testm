@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.TaxPayerStateDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxpayerStateDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-public class TaxPayerStateDaoImpl extends AbstractDao implements TaxPayerStateDao {
+public class RefBookTaxpayerStateDaoImpl extends AbstractDao implements RefBookTaxpayerStateDao {
 
     @Autowired
     private RefBookMapperFactory refBookMapperFactory;
@@ -30,7 +30,7 @@ public class TaxPayerStateDaoImpl extends AbstractDao implements TaxPayerStateDa
                 "from ref_book_taxpayer_state ts where status = 0) r\n" +
                 "where r.start_date <= :actualDate and (r.end_date >= :actualDate or r.end_date is null)";
         try {
-            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), refBookMapperFactory.new TaxPayerStatusMapper<RefBookTaxpayerState>() );
+            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), refBookMapperFactory.new TaxPayerStatusMapper<RefBookTaxpayerState>());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }

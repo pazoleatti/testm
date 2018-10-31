@@ -191,7 +191,7 @@ public class RefBookServiceImpl implements RefBookService {
     @Override
     @Transactional (readOnly = true)
     public List<RefBookAsnu> findAllAsnu() {
-        return refBookAsnuService.fetchAll();
+        return refBookAsnuService.findAll();
     }
 
     @Override

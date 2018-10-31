@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * DAO для работы со справочником "Статусы налогоплательщика"
  */
-public interface TaxPayerStateDao {
+public interface RefBookTaxpayerStateDao {
     /**
      * Найти все действующие записи
      */

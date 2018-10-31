@@ -10,6 +10,8 @@ import java.util.List;
 public interface RefBookCountryDao {
     /**
      * Найти все действующие записи
+     *
+     * @return список действующих записей
      */
     List<RefBookCountry> findAllActive();
 }

@@ -1,13 +1,15 @@
-package com.aplana.sbrf.taxaccounting.dao.refbook;
+package com.aplana.sbrf.taxaccounting.service.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
 
 /**
- * DAO для работы со справочником "Коды документов"
+ * Сервис для работы со справочником "Коды документов"
  */
-public interface RefBookDocTypeDao {
+@ScriptExposed
+public interface RefBookDocTypeService {
     /**
      * Найти все действующие записи
      *

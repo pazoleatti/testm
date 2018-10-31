@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.service.refbook.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
@@ -30,10 +30,20 @@ import java.util.Map;
 public class RefBookController {
     private final CommonRefBookService commonRefBookService;
     private final SecurityService securityService;
+    private final RefBookAsnuService refBookAsnuService;
+    private final RefBookDocTypeService refBookDocTypeService;
+    private final RefBookCountryService refBookCountryService;
+    private final RefBookTaxpayerStateService refBookTaxpayerStateService;
 
-    public RefBookController(CommonRefBookService commonRefBookService, SecurityService securityService) {
+    public RefBookController(CommonRefBookService commonRefBookService, SecurityService securityService,
+                             RefBookAsnuService refBookAsnuService, RefBookDocTypeService refBookDocTypeService,
+                             RefBookCountryService refBookCountryService, RefBookTaxpayerStateService refBookTaxpayerStateService) {
         this.commonRefBookService = commonRefBookService;
         this.securityService = securityService;
+        this.refBookAsnuService = refBookAsnuService;
+        this.refBookDocTypeService = refBookDocTypeService;
+        this.refBookCountryService = refBookCountryService;
+        this.refBookTaxpayerStateService = refBookTaxpayerStateService;
     }
 
     /**
@@ -225,41 +235,41 @@ public class RefBookController {
 
     /**
      * Найти все действующие записи справочника Статусы налогоплательщика
+     *
      * @return список записей справочника Статусы налогоплательщика
      */
     @GetMapping(value = "/rest/refBook/903", params = "projection=findAllActive")
     public List<RefBookTaxpayerState> findAllActiveTaxPayerState() {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return commonRefBookService.findAllTaxPayerStateActive(userInfo);
+        return refBookTaxpayerStateService.findAllActive();
     }
 
     /**
-     * Найти все действующие записи справочника АСНУ
+     * Найти все записи справочника АСНУ
+     *
      * @return список записей справочника АСНУ
      */
     @GetMapping(value = "/rest/refBook/900", params = "projection=findAllActive")
-    public List<RefBookAsnu> findAllActiveAsnu() {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return commonRefBookService.findAllAsnuActive(userInfo);
+    public List<RefBookAsnu> findAllRefBookAsnu() {
+        return refBookAsnuService.findAll();
     }
 
     /**
      * Найти все действующие записи справочника ОКСМ
+     *
      * @return список записей справочника ОКСМ
      */
     @GetMapping(value = "/rest/refBook/10", params = "projection=findAllActive")
     public List<RefBookCountry> findAllActiveCountry() {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return commonRefBookService.findAllCountryActive(userInfo);
+        return refBookCountryService.findAllActive();
     }
 
     /**
      * Найти все действующие записи справочника Коды документов
+     *
      * @return список записей справочника Коды документов
      */
     @GetMapping(value = "/rest/refBook/360", params = "projection=findAllActive")
     public List<RefBookDocType> findAllActiveDocType() {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return commonRefBookService.findAllDocTypeActive(userInfo);
+        return refBookDocTypeService.findAllActive();
     }
 }

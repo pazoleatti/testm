@@ -32,25 +32,6 @@ public interface CommonRefBookService {
     String getRefBookActionDescription(DescriptionTemplate descriptionTemplate, Long refBookId);
 
     /**
-     * Проверяет целесообразность запуска скрипта для указанного справочника. Если скрипт пустой или не содержит
-     * обработчика указанного события, то он выполняться не будет.
-     *
-     * @param refBookId идентификатор справочника
-     * @param event     событие, которе обрабатывается в скрипте
-     * @return можно выполнить скрипт?
-     */
-    boolean getEventScriptStatus(long refBookId, FormDataEvent event);
-
-    /**
-     * Проверяет целесообразность запуска скрипта для всех событий указанного справочника. Если скрипт пустой или не содержит
-     * обработчика указанного события, то он выполняться не будет.
-     *
-     * @param refBookId идентификатор справочника
-     * @return список пар событие - можно выполнить скрипт по событию?
-     */
-    Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId);
-
-    /**
      * Формирует ключ блокировки для справочника
      *
      * @param refBookId идентификатор справочника
@@ -119,15 +100,6 @@ public interface CommonRefBookService {
      * @return строку фильтрации для поиска по справочнику
      */
     String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch);
-
-    /**
-     * Метод возвращает строку для фильтрации справочника с неточным соответствием по определенному строковому ключу
-     *
-     * @param query     ключ для поиска
-     * @param refBookId справочник
-     * @return строку фильтрации для поиска по справочнику
-     */
-    String getSearchQueryStatement(String query, Long refBookId);
 
     /**
      * Метод возвращает строку для фильтрации справочника по
@@ -260,32 +232,4 @@ public interface CommonRefBookService {
      * @param records список записей, для которых выполняется разыменование
      */
     PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records);
-
-    /**
-     *  Найти все действующие записи справочника статусы налогоплательщика
-     * @param userInfo текущий пользователь
-     * @return  список записей справочника статусы налогоплательщика
-     */
-    List<RefBookTaxpayerState> findAllTaxPayerStateActive(TAUserInfo userInfo);
-
-    /**
-     *  Найти все действующие записи справочника АСНУ
-     * @param userInfo текущий пользователь
-     * @return  список записей справочника АСНУ
-     */
-    List<RefBookAsnu> findAllAsnuActive(TAUserInfo userInfo);
-
-    /**
-     *  Найти все действующие записи справочника ОКСМ
-     * @param userInfo текущий пользователь
-     * @return  список записей справочника ОКСМ
-     */
-    List<RefBookCountry> findAllCountryActive(TAUserInfo userInfo);
-
-    /**
-     *  Найти все действующие записи справочника Коды документов
-     * @param userInfo текущий пользователь
-     * @return  список записей справочника Коды документов
-     */
-    List<RefBookDocType> findAllDocTypeActive(TAUserInfo userInfo);
 }
