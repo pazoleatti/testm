@@ -555,4 +555,13 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ishevchuk-2" author="ishevchuk">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
