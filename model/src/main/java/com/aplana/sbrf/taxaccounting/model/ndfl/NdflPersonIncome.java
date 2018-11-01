@@ -10,8 +10,6 @@ import java.util.*;
 
 /**
  * Сведения о доходах физического лица
- *
- * @author Andrey Drunk
  */
 public class NdflPersonIncome extends NdflPersonOperation {
 
@@ -316,8 +314,8 @@ public class NdflPersonIncome extends NdflPersonOperation {
 
     @Override
     public String toString() {
-        return "NdflPersonIncomeFilter{" +
-                ", incomeCode='" + incomeCode + '\'' +
+        return "NdflPersonIncome{" +
+                "incomeCode='" + incomeCode + '\'' +
                 ", incomeType='" + incomeType + '\'' +
                 ", oktmo='" + oktmo + '\'' +
                 ", kpp='" + kpp + '\'' +
@@ -338,6 +336,8 @@ public class NdflPersonIncome extends NdflPersonOperation {
                 ", paymentDate=" + paymentDate +
                 ", paymentNumber='" + paymentNumber + '\'' +
                 ", taxSumm=" + taxSumm +
+                ", asnuId=" + asnuId +
+                ", asnu=" + asnu +
                 '}';
     }
 

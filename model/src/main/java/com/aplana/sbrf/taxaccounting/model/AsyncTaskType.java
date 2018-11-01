@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Типы асинхронных задач с привязкой их к обработчикам в таблице ASYNC_TASK_TYPE
- *
- * @author lhaziev
  */
 public enum AsyncTaskType {
     //Асинхронные задачи
@@ -32,7 +30,8 @@ public enum AsyncTaskType {
     IDENTIFY_PERSON(1, "IDENTIFY_PERSON", "Идентификация ФЛ %s", 8L),
     CONSOLIDATE(1, "CONSOLIDATE", "Расчет НФ. %s", 9L),
     UPDATE_PERSONS_DATA(34, "UPDATE_PERSONS_DATA", "Обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\"", 34L),
-    CREATE_APPLICATION_2(36, "CREATE_APPLICATION_2","Формирование файла Приложения 2 для декларации по налогу на прибыль за %s год", 36L),
+    CREATE_APPLICATION_2(36, "CREATE_APPLICATION_2", "Формирование файла Приложения 2 для декларации по налогу на прибыль за %s год", 36L),
+    CREATE_NOT_HOLDING_TAX_NOTIFICATIONS(40, "CREATE_NOT_HOLDING_TAX_NOTIFICATIONS", "Формирование Уведомлений о неудержанном налоге", 40L),
 
     //Типы отчетов
     JASPER_DEC(3, "JASPER", ""),
