@@ -28,20 +28,12 @@ begin
               order by r.record_id, r.old_id, r.version asc, status desc
             ))
   LOOP          
-    IF c1.status = 0 THEN
-      IF trunc(c1.version) < c1.end_date THEN
+    IF c1.status = 0 and c1.end_date is not null THEN
         update ref_book_person r
         set r.end_date = c1.end_date
         where
         r.id = c1.id and r.record_id = c1.record_id and r.old_id = c1.old_id;
         v_rows := v_rows + 1;
-      ELSE
-        update ref_book_person r
-        set r.end_date = c1.version
-        where
-        r.id = c1.id and r.record_id = c1.record_id and r.old_id = c1.old_id;
-        v_rows := v_rows + 1;
-      END IF;
     END IF;
   END LOOP;
 	

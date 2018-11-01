@@ -15,8 +15,9 @@ select
 from REF_BOOK_PERSON p 
 where 
 p.status=0 and 
+p.start_date is not null and
 p.end_date is not null and
-p.end_date in (p.start_date, start_date + interval '1' day);
+p.start_date > p.end_date;
 
 spool off;
 

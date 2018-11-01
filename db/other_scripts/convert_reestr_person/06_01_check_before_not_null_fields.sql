@@ -54,4 +54,15 @@ where start_date is null;
 
 spool off;
 
+spool &6
+
+select '"ID";"PERSON_ID";"DOC_ID";"DOC_NUMBER";"INC_REP"' from dual;
+
+select
+'"'||to_char(ID)||'";"'||to_char(PERSON_ID)||'";"'||to_char(DOC_ID)||'";"'||DOC_NUMBER||'";"'||to_char(INC_REP)||'"'
+from REF_BOOK_ID_DOC 
+where person_id is null;
+
+spool off;
+
 exit;	
