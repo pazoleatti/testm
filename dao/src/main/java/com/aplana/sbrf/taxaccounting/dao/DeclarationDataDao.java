@@ -17,8 +17,6 @@ import java.util.Set;
 
 /**
  * Dao-объект для работы с {@link DeclarationData декларациями}
- *
- * @author dsultanbekov
  */
 public interface DeclarationDataDao extends PermissionDao {
     String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с номером = %d не существует либо была удалена";
@@ -119,8 +117,6 @@ public interface DeclarationDataDao extends PermissionDao {
      */
     void delete(long declarationDataId);
 
-    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId);
-
     /**
      * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
      * по декларациям, соответствующие критериям поиска
@@ -131,8 +127,10 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param paginatedSearchParams - диапазон индексов, задающий страницу
      * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
      */
-    PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering,
-                                                           boolean ascSorting, PagingParams paginatedSearchParams);
+    PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter,
+                                                           DeclarationDataSearchOrdering ordering,
+                                                           boolean ascSorting,
+                                                           PagingParams paginatedSearchParams);
 
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
@@ -177,13 +175,18 @@ public interface DeclarationDataDao extends PermissionDao {
     /**
      * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
+    DeclarationData find(int declarationTypeId,
+                         int departmentReportPeriodId,
+                         String kpp,
+                         String oktmo,
+                         String taxOrganCode,
+                         Long asnuId,
+                         String fileName);
 
     /**
      * Поиск деклараций по имени файла
      *
      * @param fileName - имя файла
-     * @return
      */
     List<DeclarationData> find(String fileName);
 
@@ -223,17 +226,11 @@ public interface DeclarationDataDao extends PermissionDao {
 
     /**
      * Обновления комментария НФ
-     *
-     * @param declarationDataId
-     * @param note
      */
     void updateNote(long declarationDataId, String note);
 
     /**
      * Получение комментария НФ
-     *
-     * @param declarationDataId
-     * @return
      */
     String getNote(long declarationDataId);
 
@@ -261,17 +258,13 @@ public interface DeclarationDataDao extends PermissionDao {
 
     /**
      * Найти НФ НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
-     *
-     * @param declarationTypeId
-     * @param departmentReportPeriodId
-     * @param departmentId
-     * @param reportPeriod
-     * @param oktmo
-     * @param kpp
-     * @return
      */
-
-    DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
+    DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId,
+                                                                     int departmentReportPeriodId,
+                                                                     int departmentId,
+                                                                     int reportPeriod,
+                                                                     String oktmo,
+                                                                     String kpp);
 
     /**
      * Поиск ОНФ по имени файла и типу файла
@@ -280,46 +273,26 @@ public interface DeclarationDataDao extends PermissionDao {
 
     /**
      * Проверка существования формы
-     *
-     * @param declarationDataId
-     * @return
      */
     boolean existDeclarationData(long declarationDataId);
 
     /**
      * Найти все формы всех подразделений в активном периоде по виду и периоду
-     *
-     * @param declarationTypeId
-     * @param reportPeriodId
-     * @return
      */
     List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId);
 
     /**
      * Найти НФ по типу, периоду, и значениям Налоговый орган, КПП, ОКТМО
-     *
-     * @param declarationTemplate
-     * @param departmentReportPeriodId
-     * @param taxOrganCode
-     * @param kpp
-     * @param oktmo
-     * @return
      */
     List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
 
     /**
      * Находит все пары КПП/ОКТМО которых нет в справочнике Подразделений, но которые представлены у операций относящихся к НФ
-     *
-     * @param declarationDataId
-     * @return
      */
     List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId);
 
     /**
      * Проверяет существование НФ по критериям в зависимости от ее вида
-     *
-     * @param declarationData
-     * @return
      */
     boolean existDeclarationData(DeclarationData declarationData);
 

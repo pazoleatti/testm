@@ -445,9 +445,12 @@
                  * Инициализировать выпадающий список периодами, коорые активны и открыты для определенного подразделения
                  * @param departmentId идентификатор подразделения
                  * @param modelPath путь до объекта в scope, содержащем значение периода, для установки его значения через _.deep
+                 * @param allowClear добавлять ли крестик очистки
                  */
-                $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, modelPath) {
-                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatterWithCorrectionDate');
+                $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, modelPath, allowClear) {
+                    if (allowClear !== false) allowClear = true;
+
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(allowClear, true, 'periodFormatterWithCorrectionDate');
                     $scope.periodSelect.options.data = function () {
                         // select2 копирует results и его потом изменить уже нельзя, поэтому используем функцию, возвращяющую последние запрошенные данные
                         return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
@@ -575,6 +578,7 @@
                             }
                         });
                     }
+
                     return setDefaultValue;
                 };
 

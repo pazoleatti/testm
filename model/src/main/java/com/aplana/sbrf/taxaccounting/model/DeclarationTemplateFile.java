@@ -4,10 +4,11 @@ import java.io.Serializable;
 
 /**
  * Модельный класс для файлов версии макета
+ *
  * @author lhaziev
  */
-public class DeclarationTemplateFile implements Serializable{
-	private static final long serialVersionUID = 1L;
+public class DeclarationTemplateFile implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Шаблон РНУ
@@ -17,6 +18,26 @@ public class DeclarationTemplateFile implements Serializable{
      * Уведомление о задолженности для 2-НДФЛ
      */
     public static final String DEPT_NOTICE_DOC_TEMPLATE = "dept_notice.doc";
+    /**
+     * Приложение 11 задолженности по налогу
+     */
+    public static final String APPLICATION11_NDFL_DEBT_TEMPLATE = "app11_ndfl_debt.docx";
+    /**
+     * Приложение 12 задолженности по налогу
+     */
+    public static final String APPLICATION12_NDFL_DEBT_TEMPLATE = "app12_ndfl_debt.docx";
+    /**
+     * Приложение 13 задолженности по налогу для АСНУ != 6000
+     */
+    public static final String APPLICATION13_1_NDFL_DEBT_TEMPLATE = "app13_1_ndfl_debt.docx";
+    /**
+     * Приложение 13 задолженности по налогу для АСНУ == 6000
+     */
+    public static final String APPLICATION13_2_NDFL_DEBT_TEMPLATE = "app13_2_ndfl_debt.docx";
+    /**
+     * Приложение 14 задолженности по налогу
+     */
+    public static final String APPLICATION14_NDFL_DEBT_TEMPLATE = "app14_ndfl_debt.docx";
 
     private String fileName;
     private String blobDataId;

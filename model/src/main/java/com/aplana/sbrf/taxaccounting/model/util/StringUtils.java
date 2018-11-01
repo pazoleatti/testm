@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
 
+import com.google.common.base.Joiner;
+
 public final class StringUtils {
 
     private StringUtils() {
@@ -65,6 +67,16 @@ public final class StringUtils {
             }
         }
         return buf.toString();
+    }
+
+
+    public static String joinNotEmpty(Object[] array, String separator) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null && array[i].equals("")) {
+                array[i] = null;
+            }
+        }
+        return Joiner.on(separator).skipNulls().join(array);
     }
 
     /**

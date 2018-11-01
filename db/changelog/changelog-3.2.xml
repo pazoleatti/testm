@@ -572,4 +572,90 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5779 Реализовать формирование уведомлений о неудержанном налоге -->
+    <changeSet id="3.2-snazin-4" author="snazin">
+        <insert tableName="async_task_type">
+            <column name="id" value="40"/>
+            <column name="name" value="Формирование Уведомлений о неудержанном налоге"/>
+            <column name="handler_bean" value="CreateTaxNotificationAsyncTask"/>
+        </insert>
+    </changeSet>
+    <changeSet id="3.2-snazin-5" author="snazin">
+        <insert tableName="blob_data">
+            <column name="id" value="c1e2aa59-98f8-4234-b3ea-09defcc9e52b"/>
+            <column name="name" value="app11_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app11_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="7eb666b4-0ad7-44a1-9288-f27d0200388d"/>
+            <column name="name" value="app12_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app12_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="f103841c-b850-428b-a6af-3b4c38f90c81"/>
+            <column name="name" value="app13_1_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app13_1_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="576112c6-5d87-42c4-8073-9e6c414af82f"/>
+            <column name="name" value="app13_2_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app13_2_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="20f4a5ca-0312-4f95-971f-9909f4ec6236"/>
+            <column name="name" value="app14_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app14_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="c1e2aa59-98f8-4234-b3ea-09defcc9e52b"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="7eb666b4-0ad7-44a1-9288-f27d0200388d"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="f103841c-b850-428b-a6af-3b4c38f90c81"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="576112c6-5d87-42c4-8073-9e6c414af82f"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="20f4a5ca-0312-4f95-971f-9909f4ec6236"/>
+        </insert>
+        <rollback>
+            <delete tableName="declaration_template_file">
+                <where>
+                    blob_data_id in (
+                        'c1e2aa59-98f8-4234-b3ea-09defcc9e52b',
+                        '7eb666b4-0ad7-44a1-9288-f27d0200388d',
+                        'f103841c-b850-428b-a6af-3b4c38f90c81',
+                        '576112c6-5d87-42c4-8073-9e6c414af82f',
+                        '20f4a5ca-0312-4f95-971f-9909f4ec6236'
+                    )
+                </where>
+            </delete>
+            <delete tableName="blob_data">
+                <where>
+                    id in (
+                        'c1e2aa59-98f8-4234-b3ea-09defcc9e52b',
+                        '7eb666b4-0ad7-44a1-9288-f27d0200388d',
+                        'f103841c-b850-428b-a6af-3b4c38f90c81',
+                        '576112c6-5d87-42c4-8073-9e6c414af82f',
+                        '20f4a5ca-0312-4f95-971f-9909f4ec6236'
+                    )
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

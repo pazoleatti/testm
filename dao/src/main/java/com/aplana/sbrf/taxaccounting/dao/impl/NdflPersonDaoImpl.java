@@ -113,7 +113,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     + " left join ref_book_asnu rba on npi.asnu_id = rba.id"
                     + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonIncome>();
+            return new ArrayList<>();
         }
     }
 
@@ -1942,6 +1942,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             personIncome.setModifiedDate(rs.getTimestamp("modified_date"));
             personIncome.setModifiedBy(rs.getString("modified_by"));
+            personIncome.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
             personIncome.setAsnu(rs.getString("asnu_name"));
             return personIncome;
         }
