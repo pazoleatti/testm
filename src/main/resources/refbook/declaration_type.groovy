@@ -26,6 +26,8 @@ import org.xml.sax.helpers.DefaultHandler
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
@@ -1287,8 +1289,23 @@ class DeclarationType extends AbstractScriptClass {
         IOUtils.write(row.toString(), outputStream, "IBM866")
     }
 
+    DecimalFormat format17_2
+    {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault())
+        symbols.setDecimalSeparator('.' as char)
+        format17_2 = new DecimalFormat("0.00", symbols)
+    }
+
+    String format17_2(BigDecimal value) {
+        return value != null ? format17_2.format(value) : ""
+    }
+
+    String format(Object value) {
+        return value != null ? value : ""
+    }
+
     // Группа строк Приложения2 по ФЛ и ставке
-    static class App2PersonRateRowGroup {
+    class App2PersonRateRowGroup {
         NdflPerson person
         int rate
         List<Application2Income> incomes
@@ -1385,14 +1402,14 @@ class DeclarationType extends AbstractScriptClass {
             dataBuilder << (person.countryCode?.replaceAll("\\|", "") ?: "") << "|"
             dataBuilder << (person.address?.replaceAll("\\|", "") ?: "") << "|"
             dataBuilder << personRateRowGroup.rate << "|"
-            dataBuilder << personRateRowGroup.incomeAccruedSum << "|"
-            dataBuilder << (personRateRowGroup.incomeDeductionSum != null ? personRateRowGroup.incomeDeductionSum : "") << "|"
-            dataBuilder << personRateRowGroup.taxBaseSum << "|"
-            dataBuilder << personRateRowGroup.calculatedTaxSum << "|"
-            dataBuilder << (personRateRowGroup.withholdingTaxSum != null ? personRateRowGroup.withholdingTaxSum : "") << "|"
-            dataBuilder << (personRateRowGroup.taxSum != null ? personRateRowGroup.taxSum : "") << "|"
-            dataBuilder << (personRateRowGroup.overholdingTaxSum != null ? personRateRowGroup.overholdingTaxSum : "") << "|"
-            dataBuilder << (personRateRowGroup.notholdingTaxSum != null ? personRateRowGroup.notholdingTaxSum : "") << "|"
+            dataBuilder << format17_2(personRateRowGroup.incomeAccruedSum) << "|"
+            dataBuilder << format17_2(personRateRowGroup.incomeDeductionSum) << "|"
+            dataBuilder << format17_2(personRateRowGroup.taxBaseSum) << "|"
+            dataBuilder << format(personRateRowGroup.calculatedTaxSum) << "|"
+            dataBuilder << format(personRateRowGroup.withholdingTaxSum) << "|"
+            dataBuilder << format(personRateRowGroup.taxSum) << "|"
+            dataBuilder << format(personRateRowGroup.overholdingTaxSum) << "|"
+            dataBuilder << format(personRateRowGroup.notholdingTaxSum) << "|"
             for (def incomeColGroup : incomeColGroups) {
                 dataBuilder << incomeColGroup.toString()
             }
@@ -1402,7 +1419,7 @@ class DeclarationType extends AbstractScriptClass {
         }
     }
     // группа столбцов строки Приложения2 с данными по отдельному коду дохода
-    static class App2IncomeColGroup {
+    class App2IncomeColGroup {
         String incomeCode
         List<Application2Income> incomes
         BigDecimal incomeAccruedSum = null
@@ -1418,7 +1435,7 @@ class DeclarationType extends AbstractScriptClass {
             this.incomeCode = incomeCode
             this.incomes = incomes
             for (Application2Income income : incomes) {
-                if (income.incomeAccruedSumm) {
+                if (income.incomeAccruedSumm != null) {
                     incomeAccruedSum = (incomeAccruedSum ?: 0) + income.incomeAccruedSumm
                 }
             }
@@ -1436,7 +1453,7 @@ class DeclarationType extends AbstractScriptClass {
         String toString() {
             StringBuilder stringBuilder = new StringBuilder()
             stringBuilder << (incomeCode ?: "") << "|"
-            stringBuilder << (incomeAccruedSum ?: "") << "|"
+            stringBuilder << format17_2(incomeAccruedSum) << "|"
             for (def deductionColGroup : deductionColGroups) {
                 stringBuilder << deductionColGroup.toString()
             }
@@ -1444,7 +1461,7 @@ class DeclarationType extends AbstractScriptClass {
         }
     }
     // группа столбцов строки Приложения2 с данными по отдельному коду вычета
-    static class App2DeductionColGroup {
+    class App2DeductionColGroup {
         String deductionCode
         List<NdflPersonDeduction> deductions
         BigDecimal periodCurrSum = null
@@ -1453,7 +1470,7 @@ class DeclarationType extends AbstractScriptClass {
             this.deductionCode = deductionCode
             this.deductions = deductions
             for (def deduction : deductions) {
-                if (deduction.periodCurrSumm) {
+                if (deduction.periodCurrSumm != null) {
                     periodCurrSum = (periodCurrSum ?: 0) + deduction.periodCurrSumm
                 }
             }
@@ -1463,7 +1480,7 @@ class DeclarationType extends AbstractScriptClass {
         String toString() {
             StringBuilder stringBuilder = new StringBuilder()
             stringBuilder << (deductionCode ?: "") << "|"
-            stringBuilder << (periodCurrSum ?: "") << "|"
+            stringBuilder << format17_2(periodCurrSum) << "|"
             return stringBuilder.toString()
         }
     }
@@ -1503,7 +1520,7 @@ class DeclarationType extends AbstractScriptClass {
         String toString() {
             StringBuilder stringBuilder = new StringBuilder()
             for (int i = 1; i <= 71; i++) {
-                stringBuilder << (values.get(i) != null ? values.get(i) : "") << "|"
+                stringBuilder << format17_2(values.get(i)) << "|"
             }
             return stringBuilder.toString()
         }
