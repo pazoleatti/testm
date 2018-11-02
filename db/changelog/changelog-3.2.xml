@@ -680,4 +680,11 @@
 					 splitStatements="false"/>
 	</changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5104 Внести изменения в календарную дату начала периода 90 в справочнике кодов периодов-->
+	<changeSet id="3.2-amandzyak-10" author="amandzyak">
+        <sql>
+            update report_period_type set calendar_start_date=to_date('01.10.1970','DD.MM.YYYY') where code='90'
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
