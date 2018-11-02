@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +40,7 @@ public class CreateDeclarationTypeAssignmentAction {
 
     public List<Integer> getPerformerIds() {
         if (performerIds == null) {
-            performerIds = Collections.emptyList();
+            performerIds = new ArrayList<>();
         }
         return performerIds;
     }

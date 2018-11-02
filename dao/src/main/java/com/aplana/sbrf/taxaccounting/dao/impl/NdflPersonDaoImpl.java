@@ -971,7 +971,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
             }
         }
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     @Override

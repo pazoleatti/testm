@@ -174,7 +174,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             values.put("dateTo", dateTo);
 
             //TODO: (dloshkarev) надо переделывать тут получение через department_form_type и declaration_source пока что закомментирую, чтоб не ругалось на несуществующие таблицы
-            return Collections.emptyList();
+            return new ArrayList<>();
             /*return getNamedParameterJdbcTemplate().query(
                     FIND_DT_DESTINATIONS_FOR_FORM_TYPE,
                     values,
@@ -213,7 +213,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             values.put("dateTo", dateTo);
 
             //TODO: (dloshkarev) надо переделывать тут получение через department_form_type и declaration_source пока что закомментирую, чтоб не ругалось на несуществующие таблицы
-            return Collections.emptyList();
+            return new ArrayList<>();
             /*return getNamedParameterJdbcTemplate().query(FIND_FT_SOURCES_FOR_DECLARATION,
                     values,
                     DFT_SOURCES_MAPPER);*/
@@ -708,7 +708,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         //TODO: (dloshkarev) надо переделывать тут получение через department_form_type и declaration_source пока что закомментирую, чтоб не ругалось на несуществующие таблицы
-        return Collections.emptyList();
+        return new ArrayList<>();
         //return getNamedParameterJdbcTemplate().query(GET_DECLARATION_DESTINATIONS_SQL, params, DDT_SOURCES_MAPPER);
     }
 }

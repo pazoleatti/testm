@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.filter;
 import com.aplana.sbrf.taxaccounting.model.URM;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -88,7 +88,7 @@ public class NdflPersonIncomeFilter {
     /**
      * Данные УРМ
      */
-    private List<URM> urmList = Collections.emptyList();
+    private List<URM> urmList = new ArrayList<>();;
 
     /**
      * Номер строки
