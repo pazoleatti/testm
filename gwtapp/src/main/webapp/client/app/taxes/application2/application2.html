@@ -8,14 +8,15 @@
                     <label class="control-label">{{::'application2.label.year' | translate}}:</label>
                 </td>
                 <td>
-                    <div data-aplana-field>
+                    <!--TODO доделать, не изменяется значение поля ввода если с data-aplana-field-->
+                    <!--<div data-aplana-field>-->
                         <input type="number"
                                style="width: 300px;"
                                data-ng-model="reportYear"
                                data-required
                                max="9999"
                                min="1000"/>
-                        <div data-aplana-validator data-key='required'>
+                        <!--<div data-aplana-validator data-key='required'>
                             {{::'common.validation.required' | translate}}
                         </div>
                         <div data-aplana-validator data-key='min'>
@@ -24,7 +25,7 @@
                         <div data-aplana-validator data-key='max'>
                             {{:: 'common.validation.max.value' | translate:'{ maxValue: ' + 9999 + ' }'}}
                         </div>
-                    </div>
+                    </div>-->
                 </td>
             </tr>
             </tbody>

@@ -517,4 +517,157 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
+    <changeSet id="3.2-amandzyak-4" author="amandzyak">
+        <sql>
+			update ref_book_income_type
+			set name='Доходы по операциям с производными финансовыми инструментами, которые обращаются на организованном рынке и базисным активом которых являются ценные бумаги, фондовые индексы или иные производные финансовые инструменты, базисным активом которых являются ценные бумаги или фондовые индексы'
+			where
+			code='1532'
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
+    <changeSet id="3.2-amandzyak-5" author="amandzyak">
+        <sql>
+			update ref_book_income_type
+			set name='Доходы по операциям с производными финансовыми инструментами, не обращающимися на организованном рынке'
+			where
+			code='1533'
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
+    <changeSet id="3.2-amandzyak-6" author="amandzyak">
+        <sql>
+			update ref_book_income_type
+			set name='Доходы по операциям с производными финансовыми инструментами, которые обращаются на организованном рынке и базисным активом которых не являются ценные бумаги, фондовые индексы или иные производные финансовые инструменты, базисным активом которых являются ценные бумаги или фондовые индексы'
+			where
+			code='1535'
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
+    <changeSet id="3.2-amandzyak-7" author="amandzyak">
+        <sql>
+			update ref_book_income_type
+			set name='Вознаграждение, получаемое налогоплательщиком за выполнение трудовых или иных обязанностей; денежное содержание, денежное довольствие, не подпадающее под действие пункта 29 статьи 217 Налогового кодекса Российской Федерации и иные налогооблагаемые выплаты военнослужащим и приравненным к ним категориям физических лиц (кроме выплат по договорам гражданско-правового характера)'
+			where
+			code='2000'
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
+    <changeSet id="3.2-amandzyak-8" author="amandzyak">
+        <sql>
+			update ref_book_income_type
+			set name='Материальная выгода, полученная от приобретения производных финансовых инструментов'
+			where
+			code='2641'
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5692 -->
+    <changeSet id="3.2-ishevchuk-2" author="ishevchuk">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.2-dnovikov-32" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5779 Реализовать формирование уведомлений о неудержанном налоге -->
+    <changeSet id="3.2-snazin-4" author="snazin">
+        <insert tableName="async_task_type">
+            <column name="id" value="40"/>
+            <column name="name" value="Формирование Уведомлений о неудержанном налоге"/>
+            <column name="handler_bean" value="CreateTaxNotificationAsyncTask"/>
+        </insert>
+    </changeSet>
+    <changeSet id="3.2-snazin-5" author="snazin">
+        <insert tableName="blob_data">
+            <column name="id" value="c1e2aa59-98f8-4234-b3ea-09defcc9e52b"/>
+            <column name="name" value="app11_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app11_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="7eb666b4-0ad7-44a1-9288-f27d0200388d"/>
+            <column name="name" value="app12_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app12_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="f103841c-b850-428b-a6af-3b4c38f90c81"/>
+            <column name="name" value="app13_1_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app13_1_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="576112c6-5d87-42c4-8073-9e6c414af82f"/>
+            <column name="name" value="app13_2_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app13_2_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+        <insert tableName="blob_data">
+            <column name="id" value="20f4a5ca-0312-4f95-971f-9909f4ec6236"/>
+            <column name="name" value="app14_ndfl_debt.docx"/>
+            <column name="data" valueBlobFile="templates-3.2/app14_ndfl_debt.docx"/>
+            <column name="creation_date" valueDate="2018-10-25"/>
+        </insert>
+
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="c1e2aa59-98f8-4234-b3ea-09defcc9e52b"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="7eb666b4-0ad7-44a1-9288-f27d0200388d"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="f103841c-b850-428b-a6af-3b4c38f90c81"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="576112c6-5d87-42c4-8073-9e6c414af82f"/>
+        </insert>
+        <insert tableName="declaration_template_file">
+            <column name="declaration_template_id" value="101"/>
+            <column name="blob_data_id" value="20f4a5ca-0312-4f95-971f-9909f4ec6236"/>
+        </insert>
+        <rollback>
+            <delete tableName="declaration_template_file">
+                <where>
+                    blob_data_id in (
+                        'c1e2aa59-98f8-4234-b3ea-09defcc9e52b',
+                        '7eb666b4-0ad7-44a1-9288-f27d0200388d',
+                        'f103841c-b850-428b-a6af-3b4c38f90c81',
+                        '576112c6-5d87-42c4-8073-9e6c414af82f',
+                        '20f4a5ca-0312-4f95-971f-9909f4ec6236'
+                    )
+                </where>
+            </delete>
+            <delete tableName="blob_data">
+                <where>
+                    id in (
+                        'c1e2aa59-98f8-4234-b3ea-09defcc9e52b',
+                        '7eb666b4-0ad7-44a1-9288-f27d0200388d',
+                        'f103841c-b850-428b-a6af-3b4c38f90c81',
+                        '576112c6-5d87-42c4-8073-9e6c414af82f',
+                        '20f4a5ca-0312-4f95-971f-9909f4ec6236'
+                    )
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

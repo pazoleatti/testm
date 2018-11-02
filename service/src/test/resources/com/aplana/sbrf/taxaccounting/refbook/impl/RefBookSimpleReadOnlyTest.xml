@@ -46,7 +46,7 @@
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.TaxPayerStateDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxpayerStateDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao"/>

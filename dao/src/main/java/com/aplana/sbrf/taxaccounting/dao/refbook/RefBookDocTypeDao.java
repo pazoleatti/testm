@@ -10,6 +10,8 @@ import java.util.List;
 public interface RefBookDocTypeDao {
     /**
      * Найти все действующие записи
+     *
+     * @return список действующих записей
      */
     List<RefBookDocType> findAllActive();
 }

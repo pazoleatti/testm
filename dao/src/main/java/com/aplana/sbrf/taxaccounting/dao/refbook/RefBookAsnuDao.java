@@ -14,7 +14,7 @@ public interface RefBookAsnuDao {
      *
      * @return Список значений справочника отсортированых по названию по возрастанию
      */
-    List<RefBookAsnu> fetchAll();
+    List<RefBookAsnu> findAll();
 
     /**
      * Возвращяет записи справочника по идентификаторам

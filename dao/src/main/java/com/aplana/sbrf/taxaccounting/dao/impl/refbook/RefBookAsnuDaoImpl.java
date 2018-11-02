@@ -20,7 +20,7 @@ import java.util.List;
 public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
 
     @Override
-    public List<RefBookAsnu> fetchAll() {
+    public List<RefBookAsnu> findAll() {
         //Выбирются записи с положительным значением id, т.к. есть фиктивные записи с id=-1
         return getJdbcTemplate().query("select id, code, name, type, priority " +
                         "from ref_book_asnu " +

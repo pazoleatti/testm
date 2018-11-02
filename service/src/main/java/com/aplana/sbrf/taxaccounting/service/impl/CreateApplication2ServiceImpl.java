@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -16,32 +15,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class CreateApplication2ServiceImpl implements CreateApplication2Service{
+public class CreateApplication2ServiceImpl implements CreateApplication2Service {
 
-    @Autowired
     private AsyncManager asyncManager;
-
-    @Autowired
     private LockDataService lockDataService;
-
-    @Autowired
     private LogEntryService logEntryService;
-
-    @Autowired
     private RefBookScriptingService refBookScriptingService;
-
-    @Autowired
     private BlobDataService blobDataService;
-
-    @Autowired
     private ApplicationInfo applicationInfo;
+
+    public CreateApplication2ServiceImpl(AsyncManager asyncManager,
+                                         LockDataService lockDataService,
+                                         LogEntryService logEntryService,
+                                         RefBookScriptingService refBookScriptingService,
+                                         BlobDataService blobDataService,
+                                         ApplicationInfo applicationInfo) {
+        this.asyncManager = asyncManager;
+        this.lockDataService = lockDataService;
+        this.logEntryService = logEntryService;
+        this.refBookScriptingService = refBookScriptingService;
+        this.blobDataService = blobDataService;
+        this.applicationInfo = applicationInfo;
+    }
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.getUser(), T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_CREATE_APPLICATION_2)")
     public String createApplication2Task(int reportYear, TAUserInfo userInfo) {
         Logger logger = new Logger();
         String keyTask = "CREATE_APPLICATION_2_FOR_YEAR_" + reportYear;
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("reportYear", reportYear);
         asyncManager.executeTask(keyTask, AsyncTaskType.CREATE_APPLICATION_2, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
             @Override
@@ -71,5 +73,4 @@ public class CreateApplication2ServiceImpl implements CreateApplication2Service{
             reportFile.delete();
         }
     }
-
 }

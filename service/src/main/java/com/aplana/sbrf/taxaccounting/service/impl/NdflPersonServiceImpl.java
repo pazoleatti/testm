@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
@@ -19,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +48,16 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @PreAuthorize("hasPermission(#ndflFilter.declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchNdflPersonByParameters(ndflFilter, pagingParams);
+    }
+
+    @Override
+    public List<NdflPerson> findAllByDeclarationId(long declarationDataId) {
+        return ndflPersonDao.fetchByDeclarationData(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId) {
+        return ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId);
     }
 
     @Override

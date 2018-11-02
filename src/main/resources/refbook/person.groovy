@@ -11,10 +11,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
@@ -35,10 +33,6 @@ import javax.xml.stream.XMLStreamReader
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.DATE
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.NUMBER
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.REFERENCE
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.STRING
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.formatDate
 
@@ -110,18 +104,11 @@ class Person extends AbstractScriptClass {
     @Override
     void run() {
         switch (formDataEvent) {
-            case FormDataEvent.SAVE:
-                save()
-                break
             case FormDataEvent.IMPORT:
                 importData()
                 break
         }
     }
-    // Документ, удостоверяющий личность (ДУЛ)
-    final long REF_BOOK_ID_DOC_ID = RefBook.Id.ID_DOC.id
-    // ИНП
-    final long REF_BOOK_ID_TAX_PAYER_ID = RefBook.Id.ID_TAX_PAYER.id
 
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -496,115 +483,6 @@ class Person extends AbstractScriptClass {
         return value
     }
 
-    /**
-     * Создадим дубли ДУЛ и ИНП с привязкой к новой записи
-     */
-    void save() {
-
-        /*
-        sourceUniqueRecordId - идентификатор старой записи
-        uniqueRecordId - идентификатор новой записи
-        isNewRecords - признак новой записи
-         */
-        if (sourceUniqueRecordId && uniqueRecordId && isNewRecords) {
-
-            // Перенесем ДУЛ из старой версии в новую
-            PagingResult<Map<String, RefBookValue>> oldRefDulList = getRefDul(sourceUniqueRecordId)
-            List<RefBookRecord> newRefDulList = new ArrayList<RefBookRecord>()
-            if (oldRefDulList && !oldRefDulList.isEmpty()) {
-                oldRefDulList.each { Map<String, RefBookValue> oldRefDul ->
-                    newRefDulList.add(createIdentityDocRecord(oldRefDul))
-                }
-            }
-            if (!newRefDulList.isEmpty()) {
-                List<Long> docIds = getProvider(REF_BOOK_ID_DOC_ID).createRecordVersionWithoutLock(logger, validDateFrom, null, newRefDulList)
-                logger.info("В справочнике 'Документ, удостоверяющий личность' создано записей: " + docIds.size())
-            }
-
-            // Перенесем ИНП из старой версии в новую
-            PagingResult<Map<String, RefBookValue>> oldRefInpList = getRefInp(sourceUniqueRecordId)
-            List<RefBookRecord> newRefInpList = new ArrayList<RefBookRecord>()
-            if (oldRefInpList && !oldRefInpList.isEmpty()) {
-                oldRefInpList.each { Map<String, RefBookValue> oldRefInp ->
-                    newRefInpList.add(createIdentityTaxpayerRecord(oldRefInp))
-                }
-            }
-            if (!newRefInpList.isEmpty()) {
-                List<Long> docIds = getProvider(REF_BOOK_ID_TAX_PAYER_ID).createRecordVersionWithoutLock(logger, validDateFrom, null, newRefInpList)
-                logger.info("В справочнике 'Идентификаторы налогоплательщика' создано записей: " + docIds.size())
-            }
-        }
-    }
-
-    /**
-     * Документы, удостоверяющие личность
-     */
-    RefBookRecord createIdentityDocRecord(Map<String, RefBookValue> oldRefDul) {
-        RefBookRecord record = new RefBookRecord()
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        fillIdentityDocAttr(values, oldRefDul)
-        record.setValues(values)
-        return record
-    }
-
-    /**
-     * Идентификаторы физлиц
-     */
-    RefBookRecord createIdentityTaxpayerRecord(Map<String, RefBookValue> oldRefInp) {
-        RefBookRecord record = new RefBookRecord()
-        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        fillIdentityTaxpayerRecord(values, oldRefInp)
-        record.setValues(values)
-        return record
-    }
-
-    /**
-     * Заполнение аттрибутов справочника документов
-     * @param values карта для хранения значений атрибутов
-     * @param person класс предоставляющий данные для заполнения справочника
-     * @return
-     */
-    def fillIdentityDocAttr(Map<String, RefBookValue> values, Map<String, RefBookValue> oldRefDul) {
-        putOrUpdate(values, "PERSON_ID", REFERENCE, uniqueRecordId)
-        putOrUpdate(values, "DOC_NUMBER", STRING, oldRefDul?.DOC_NUMBER?.stringValue)
-        putOrUpdate(values, "ISSUED_BY", STRING, oldRefDul?.ISSUED_BY?.stringValue)
-        putOrUpdate(values, "ISSUED_DATE", DATE, oldRefDul?.ISSUED_DATE?.dateValue)
-        //Признак включения в отчет, при создании ставиться 1, при обновлении надо выбрать с минимальным приоритетом
-        putOrUpdate(values, "INC_REP", NUMBER, 1)
-        putOrUpdate(values, "DOC_ID", REFERENCE, oldRefDul?.DOC_ID?.referenceValue)
-    }
-
-    /**
-     * Заполнение аттрибутов справочника Идентификаторы физлиц
-     * @param person
-     * @param asnuId
-     * @return
-     */
-    def fillIdentityTaxpayerRecord(Map<String, RefBookValue> values, Map<String, RefBookValue> oldRefInp) {
-        putOrUpdate(values, "PERSON_ID", REFERENCE, uniqueRecordId)
-        putOrUpdate(values, "INP", STRING, oldRefInp?.INP?.stringValue)
-        putOrUpdate(values, "AS_NU", REFERENCE, oldRefInp?.AS_NU?.referenceValue)
-    }
-
-    /**
-     * Если не заполнен входной параметр, то никаких изменений в соответствующий атрибут записи справочника не вносится
-     * @return 0 - изменений нет, 1-создание записи, 2 - обновление
-     */
-    void putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value) {
-        RefBookValue refBookValue = valuesMap.get(attrName)
-        if (refBookValue != null) {
-            //обновление записи, если новое значение задано и отличается от существующего
-            Object currentValue = refBookValue.getValue()
-            if (value != null && !ScriptUtils.equalsNullSafe(currentValue, value)) {
-                //значения не равны, обновление
-                refBookValue.setValue(value)
-            }
-        } else {
-            //создание новой записи
-            valuesMap.put(attrName, new RefBookValue(type, value))
-        }
-    }
-
     String formatDate(Date date) {
         return date ? ScriptUtils.formatDate(date) : ""
     }
@@ -629,34 +507,6 @@ class Person extends AbstractScriptClass {
     }
 
     /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
-
-    /**
-     * Получить все записи справочника по его идентификатору и фильтру (отсутствие значений не является ошибкой)
-     * @param refBookId - идентификатор справочника
-     * @param filter - фильтр
-     * @return - возвращает лист
-     */
-    PagingResult<Map<String, RefBookValue>> getRefBookByFilter(long refBookId, String filter) {
-        // Передаем как аргумент только срок действия версии справочника
-        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(null, null, filter, null)
-        return refBookList
-    }
-
-    /**
-     * Получить "Документ, удостоверяющий личность (ДУЛ)"
-     * @return
-     */
-    PagingResult<Map<String, RefBookValue>> getRefDul(long personId) {
-        return getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId)
-    }
-
-    /**
-     * Получить "ИНП"
-     * @return
-     */
-    PagingResult<Map<String, RefBookValue>> getRefInp(long personId) {
-        return getRefBookByFilter(REF_BOOK_ID_TAX_PAYER_ID, "PERSON_ID = " + personId)
-    }
 
     /**
      * Получение провайдера с использованием кеширования.

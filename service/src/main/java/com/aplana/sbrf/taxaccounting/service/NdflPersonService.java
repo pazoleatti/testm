@@ -4,10 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +38,20 @@ public interface NdflPersonService {
      * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
      */
     PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams);
+
+    /**
+     * Возвращает данные только 1ого раздела формы РНУ
+     *
+     * @param declarationDataId идентификатор формы РНУ
+     */
+    List<NdflPerson> findAllByDeclarationId(long declarationDataId);
+
+    /**
+     * Найти все "Сведения о доходах физического лица" привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
 
     /**
      * Найти все данные о доходах и НДФЛ привязанные к декларации

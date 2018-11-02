@@ -945,6 +945,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
+        return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
+    }
+
+    @Override
     public CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, final long declarationDataId,
                                                    final boolean force) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;

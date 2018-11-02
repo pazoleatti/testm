@@ -49,5 +49,5 @@ public interface RefBookAsnuService {
      *
      * @return Список значений справочника отсортированых по названию по возрастанию
      */
-    List<RefBookAsnu> fetchAll();
+    List<RefBookAsnu> findAll();
 }

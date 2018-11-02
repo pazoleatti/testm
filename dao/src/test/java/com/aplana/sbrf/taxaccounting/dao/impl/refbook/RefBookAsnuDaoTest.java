@@ -15,7 +15,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RefBookAsnuDaoTest.xml"})
@@ -30,16 +29,16 @@ public class RefBookAsnuDaoTest {
 
     //Проверка получения всех значений справочника
     @Test
-    public void testFetchAll() {
-        List<RefBookAsnu> asnuList = refBookAsnuDao.fetchAll();
-        assertTrue(asnuList.size() == ASNU_COUNT);
+    public void testFindAll() {
+        List<RefBookAsnu> asnuList = refBookAsnuDao.findAll();
+        assertEquals(asnuList.size(), ASNU_COUNT);
     }
 
     //Проверка получения значений справочника по id
     @Test
     public void testFetchByIds() {
         List<RefBookAsnu> asnuList = refBookAsnuDao.fetchByIds(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L));
-        assertTrue(asnuList.size() == ASNU_BY_IDS_COUNT);
+        assertEquals(asnuList.size(), ASNU_BY_IDS_COUNT);
     }
 
     public void testFetchById() {

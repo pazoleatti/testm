@@ -232,6 +232,10 @@ public interface DeclarationDataService {
      */
     DeclarationResult fetchDeclarationData(TAUserInfo userInfo, long declarationDataId);
 
+    /**
+     * Найти все формы созданные в отчетном периоде
+     */
+    List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
      * Проверить декларацию
@@ -672,7 +676,7 @@ public interface DeclarationDataService {
      * @param departmentReportPeriod отчетный период
      * @param declarationTypeId      идентификатор типа декларации
      */
-    public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
+    String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
 
     /**
      * Изменение Состояния ЭД

@@ -97,6 +97,14 @@ public interface NdflPersonService {
     List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
 
     /**
+     * Возвращяет список строк из раздела 3 по списку ид форм
+     *
+     * @param declarationDataIds списсок ид форм
+     * @return список строк раздела 3
+     */
+    List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds);
+
+    /**
      * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
      *
      * @param declarationDataId идентификатор декларации
@@ -626,11 +634,10 @@ public interface NdflPersonService {
     /**
      * Получает доходы данные которых будут включены в формирование Приложения 2 к налогу на прибыль
      *
-     * @param incomeCodes        список кодов доходов, операции которых будут отобраны
      * @param declarationDataIds список налоговых форм, операции которых будут отобраны
      * @return список объектов доходов
      */
-    List<Application2Income> fetchApplication2Incomes(List<String> incomeCodes, List<Long> declarationDataIds);
+    List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds);
 
     /**
      * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.

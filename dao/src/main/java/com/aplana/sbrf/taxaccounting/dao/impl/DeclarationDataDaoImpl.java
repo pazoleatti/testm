@@ -249,25 +249,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId) {
-        StringBuilder sql = new StringBuilder("select rn from (select dat.*, rownum as rn from (");
-        HashMap<String, Object> values = new HashMap<>();
-        appendSelectClause(sql);
-        appendFromAndWhereClause(sql, values, filter);
-        appendOrderByClause(sql, ordering, ascSorting);
-        sql.append(") dat) ordDat where declaration_data_id = :declarationDataId");
-        values.put("declarationDataId", declarationDataId);
-        try {
-            return getNamedParameterJdbcTemplate().queryForObject(
-                    sql.toString(),
-                    values,
-                    Long.class);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
     public PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
                                                                   boolean ascSorting, PagingParams pageParams) {
         StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
@@ -1083,17 +1064,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "left join report_period rp on drp.report_period_id = rp.id\n" +
                 "left join report_period_type rpt on rp.dict_tax_period_id = rpt.id\n" +
                 "left join tax_period tp on rp.tax_period_id = tp.id\n" +
-                "where dd.declaration_template_id = 101\n" +
+                "where dd.declaration_template_id = 101 and dd.knf_type_id = 5\n" +
                 "and dep.id in (select id from department where dep.type = 2)\n" +
                 "and dd.state = 3\n" +
                 "and rpt.code = '34'\n" +
                 "and tp.year = :reportYear\n" +
                 "group by dep.id";
         MapSqlParameterSource params = new MapSqlParameterSource("reportYear", reportYear);
-        try {
-            return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
+        return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
     }
 }

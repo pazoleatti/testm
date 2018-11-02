@@ -27,7 +27,7 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
     @Transactional(readOnly = true)
     public List<RefBookAsnu> fetchAvailableAsnu(TAUserInfo userInfo) {
         if (userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
-            return refBookAsnuDao.fetchAll();
+            return refBookAsnuDao.findAll();
         } else {
             return userInfo.getUser().getAsnuIds().isEmpty() ? new ArrayList<RefBookAsnu>() : refBookAsnuDao.fetchByIds(userInfo.getUser().getAsnuIds());
         }
@@ -54,7 +54,7 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RefBookAsnu> fetchAll() {
-        return refBookAsnuDao.fetchAll();
+    public List<RefBookAsnu> findAll() {
+        return refBookAsnuDao.findAll();
     }
 }
