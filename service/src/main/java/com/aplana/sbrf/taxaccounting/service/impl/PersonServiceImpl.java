@@ -460,7 +460,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional (readOnly = true)
     public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId) {
-        List<RegistryPerson> result = refBookPersonDao.findActualRefPersonsByDeclarationDataId(declarationDataId);
+        List<RegistryPerson> result = refBookPersonDao.findActualRefPersonsByDeclarationDataId(declarationDataId, new Date());
         for (RegistryPerson person : result) {
             person.getPersonIdentityList().addAll(idTaxPayerDaoImpl.getByPerson(person));
             person.getDocuments().addAll(idDocDaoImpl.getByPerson(person));

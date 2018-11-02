@@ -74,6 +74,7 @@ class UpdatePersonsData extends AbstractScriptClass {
                 try {
                     doUpdate()
                 } catch (Throwable e) {
+                    e.printStackTrace()
                     DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
                     String strCorrPeriod = ""
                     if (departmentReportPeriod.getCorrectionDate() != null) {
@@ -101,13 +102,7 @@ class UpdatePersonsData extends AbstractScriptClass {
         for (NdflPerson declarationDataPerson : declarationDataPersonList) {
             NdflPerson refBookPerson = personIdAssociatedRefBookPersons.get(declarationDataPerson.personId)
             if (refBookPerson == null) {
-                logger.info("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Запись о физическом лице в справочнике отсутствует\"")
-                continue
-            }
-            if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null) {
-                logger.info("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1",
-                        (declarationDataPerson.lastName ?: "") + " " + (declarationDataPerson.firstName ?: "") + " " + (declarationDataPerson.middleName ?: ""),
-                        declarationDataPerson.inp)
+                logger.warn("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Запись о физическом лице в Реестре физических лиц отсутствует\"")
                 continue
             }
             String personInfo
@@ -115,7 +110,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             boolean updated = false
             if (refBookPerson.inp != declarationDataPerson.inp) {
                 if (refBookPerson.inp == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.INP_FULL, SharedConstants.REF_PERSON_REC_ID))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.INP_FULL, SharedConstants.REF_PERSON_REC_ID))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.INP_FULL, declarationDataPerson.inp ?: "", refBookPerson.inp ?: "")
                     declarationDataPerson.inp = refBookPerson.inp
@@ -124,7 +119,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.lastName != declarationDataPerson.lastName) {
                 if (refBookPerson.lastName == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.LAST_NAME_FULL, SharedConstants.REF_PERSON_LAST_NAME))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.LAST_NAME_FULL, SharedConstants.REF_PERSON_LAST_NAME))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.LAST_NAME_FULL, declarationDataPerson.lastName ?: "", refBookPerson.lastName ?: "")
                     declarationDataPerson.lastName = refBookPerson.lastName
@@ -133,7 +128,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.firstName != declarationDataPerson.firstName) {
                 if (refBookPerson.firstName == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.FIRST_NAME_FULL, SharedConstants.REF_PERSON_FIRST_NAME))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.FIRST_NAME_FULL, SharedConstants.REF_PERSON_FIRST_NAME))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.FIRST_NAME_FULL, declarationDataPerson.firstName ?: "", refBookPerson.firstName ?: "")
                     declarationDataPerson.firstName = refBookPerson.firstName
@@ -142,7 +137,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.middleName != declarationDataPerson.middleName) {
                 if (refBookPerson.middleName == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.MIDDLE_NAME_FULL, SharedConstants.REF_PERSON_MIDDLE_NAME))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.MIDDLE_NAME_FULL, SharedConstants.REF_PERSON_MIDDLE_NAME))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.MIDDLE_NAME_FULL, declarationDataPerson.middleName ?: "", refBookPerson.middleName ?: "")
                     declarationDataPerson.middleName = refBookPerson.middleName
@@ -151,7 +146,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.birthDay != declarationDataPerson.birthDay) {
                 if (refBookPerson.birthDay == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.BIRTH_DAY_FULL, SharedConstants.REF_PERSON_BIRTH_DAY))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.BIRTH_DAY_FULL, SharedConstants.REF_PERSON_BIRTH_DAY))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.BIRTH_DAY_FULL, declarationDataPerson.birthDay ? declarationDataPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "", refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "")
                     declarationDataPerson.birthDay = refBookPerson.birthDay
@@ -160,7 +155,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.citizenship != declarationDataPerson.citizenship) {
                 if (refBookPerson.citizenship == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.CITIZENSHIP_FULL, SharedConstants.REF_PERSON_CITIZENSHIP))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.CITIZENSHIP_FULL, SharedConstants.REF_PERSON_CITIZENSHIP))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.CITIZENSHIP_FULL, declarationDataPerson.citizenship ?: "", refBookPerson.citizenship ?: "")
                     declarationDataPerson.citizenship = refBookPerson.citizenship
@@ -169,7 +164,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.innNp != declarationDataPerson.innNp) {
                 if (refBookPerson.innNp == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.INN_FULL, SharedConstants.REF_PERSON_INN))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.INN_FULL, SharedConstants.REF_PERSON_INN))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.INN_FULL, declarationDataPerson.innNp ?: "", refBookPerson.innNp ?: "")
                     declarationDataPerson.innNp = refBookPerson.innNp
@@ -179,7 +174,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.innForeign != declarationDataPerson.innForeign) {
                 if (refBookPerson.innForeign == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.INN_FOREIGN_FULL, SharedConstants.REF_PERSON_INN_FOREIGN))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.INN_FOREIGN_FULL, SharedConstants.REF_PERSON_INN_FOREIGN))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.INN_FOREIGN_FULL, declarationDataPerson.innForeign ?: "", refBookPerson.innForeign ?: "")
                     declarationDataPerson.innForeign = refBookPerson.innForeign
@@ -189,7 +184,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.idDocType != declarationDataPerson.idDocType) {
                 if (refBookPerson.idDocType == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.ID_DOC_TYPE_FULL, SharedConstants.REF_ID_DOC_TYPE))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.ID_DOC_TYPE_FULL, SharedConstants.REF_ID_DOC_TYPE))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.ID_DOC_TYPE_FULL, declarationDataPerson.idDocType ?: "", refBookPerson.idDocType ?: "")
                     declarationDataPerson.idDocType = refBookPerson.idDocType
@@ -198,7 +193,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.idDocNumber != declarationDataPerson.idDocNumber) {
                 if (refBookPerson.idDocNumber == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.ID_DOC_NUMBER_FULL, SharedConstants.REF_ID_DOC_NUMBER))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.ID_DOC_NUMBER_FULL, SharedConstants.REF_ID_DOC_NUMBER))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.ID_DOC_NUMBER_FULL, declarationDataPerson.idDocNumber ?: "", refBookPerson.idDocNumber ?: "")
                     declarationDataPerson.idDocNumber = refBookPerson.idDocNumber
@@ -207,7 +202,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.status != declarationDataPerson.status) {
                 if (refBookPerson.status == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.STATUS_FULL, SharedConstants.REF_PERSON_STATUS))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.STATUS_FULL, SharedConstants.REF_PERSON_STATUS))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.STATUS_FULL, declarationDataPerson.status ?: "", refBookPerson.status ?: "")
                     declarationDataPerson.status = refBookPerson.status
@@ -216,7 +211,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.regionCode != declarationDataPerson.regionCode) {
                 if (refBookPerson.regionCode == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.REGION_CODE_FULL, SharedConstants.ADDRESS_REGION_CODE))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.REGION_CODE_FULL, SharedConstants.ADDRESS_REGION_CODE))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.REGION_CODE_FULL, declarationDataPerson.regionCode ?: "", refBookPerson.regionCode ?: "")
                     declarationDataPerson.regionCode = refBookPerson.regionCode
@@ -225,7 +220,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.postIndex != declarationDataPerson.postIndex) {
                 if (refBookPerson.postIndex == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.POST_INDEX_FULL, SharedConstants.ADDRESS_POST_INDEX))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.POST_INDEX_FULL, SharedConstants.ADDRESS_POST_INDEX))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.POST_INDEX_FULL, declarationDataPerson.postIndex ?: "", refBookPerson.postIndex ?: "")
                     declarationDataPerson.postIndex = refBookPerson.postIndex
@@ -234,7 +229,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.area != declarationDataPerson.area) {
                 if (refBookPerson.area == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.AREA_FULL, SharedConstants.ADDRESS_AREA))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.AREA_FULL, SharedConstants.ADDRESS_AREA))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.AREA_FULL, declarationDataPerson.area ?: "", refBookPerson.area ?: "")
                     declarationDataPerson.area = refBookPerson.area
@@ -243,7 +238,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.city != declarationDataPerson.city) {
                 if (refBookPerson.city == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.CITY_FULL, SharedConstants.ADDRESS_CITY))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.CITY_FULL, SharedConstants.ADDRESS_CITY))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.CITY_FULL, declarationDataPerson.city ?: "", refBookPerson.city ?: "")
                     declarationDataPerson.city = refBookPerson.city
@@ -252,7 +247,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.locality != declarationDataPerson.locality) {
                 if (refBookPerson.locality == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.LOCALITY_FULL, SharedConstants.ADDRESS_LOCALITY))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.LOCALITY_FULL, SharedConstants.ADDRESS_LOCALITY))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.LOCALITY_FULL, declarationDataPerson.locality ?: "", refBookPerson.locality ?: "")
                     declarationDataPerson.locality = refBookPerson.locality
@@ -261,7 +256,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.street != declarationDataPerson.street) {
                 if (refBookPerson.street == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.STREET_FULL, SharedConstants.ADDRESS_STREET))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.STREET_FULL, SharedConstants.ADDRESS_STREET))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.STREET_FULL, declarationDataPerson.street ?: "", refBookPerson.street ?: "")
                     declarationDataPerson.street = refBookPerson.street
@@ -270,7 +265,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.house != declarationDataPerson.house) {
                 if (refBookPerson.house == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.HOUSE_FULL, SharedConstants.ADDRESS_HOUSE))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.HOUSE_FULL, SharedConstants.ADDRESS_HOUSE))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.HOUSE_FULL, declarationDataPerson.house ?: "", refBookPerson.house ?: "")
                     declarationDataPerson.house = refBookPerson.house
@@ -279,7 +274,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.building != declarationDataPerson.building) {
                 if (refBookPerson.building == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.BUILDING_FULL, SharedConstants.ADDRESS_BUILDING))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.BUILDING_FULL, SharedConstants.ADDRESS_BUILDING))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.BUILDING_FULL, declarationDataPerson.building ?: "", refBookPerson.building ?: "")
                     declarationDataPerson.building = refBookPerson.building
@@ -288,7 +283,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.flat != declarationDataPerson.flat) {
                 if (refBookPerson.flat == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.FLAT_FULL, SharedConstants.ADDRESS_FLAT))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.FLAT_FULL, SharedConstants.ADDRESS_FLAT))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.FLAT_FULL, declarationDataPerson.flat ?: "", refBookPerson.flat ?: "")
                     declarationDataPerson.flat = refBookPerson.flat
@@ -297,7 +292,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.snils != declarationDataPerson.snils) {
                 if (refBookPerson.snils == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.SNILS_FULL, SharedConstants.REF_PERSON_SNILS))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.SNILS_FULL, SharedConstants.REF_PERSON_SNILS))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.SNILS_FULL, declarationDataPerson.snils ?: "", refBookPerson.snils ?: "")
                     declarationDataPerson.snils = refBookPerson.snils
@@ -306,7 +301,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.countryCode != declarationDataPerson.countryCode) {
                 if (refBookPerson.countryCode == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.COUNTRY_CODE_FULL, SharedConstants.ADDRESS_COUNTRY_CODE))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.COUNTRY_CODE_FULL, SharedConstants.ADDRESS_COUNTRY_CODE))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.COUNTRY_CODE_FULL, declarationDataPerson.countryCode ?: "", refBookPerson.countryCode ?: "")
                     declarationDataPerson.countryCode = refBookPerson.countryCode
@@ -315,7 +310,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             }
             if (refBookPerson.address != declarationDataPerson.address) {
                 if (refBookPerson.address == null) {
-                    logger.info(createAbsentValueMessage(declarationDataPerson, SharedConstants.ADDRESS_FULL, SharedConstants.ADDRESS_ADDRESS))
+                    logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.ADDRESS_FULL, SharedConstants.ADDRESS_ADDRESS))
                 } else {
                     updateInfo << createUpdateInfo(SharedConstants.ADDRESS_FULL, declarationDataPerson.address ?: "", refBookPerson.address ?: "")
                     declarationDataPerson.address = refBookPerson.address
@@ -429,8 +424,8 @@ class UpdatePersonsData extends AbstractScriptClass {
      * @param refBookFieldName  название поля в справочнике
      * @return  сообщение об осутствии значения поля в справочнике ФЛ
      */
-    String createAbsentValueMessage(NdflPerson person, String fieldName, String refBookFieldName) {
-        return "Физическое лицо: ${(person.lastName ?: "") + " " + (person.firstName ?: "") + " " + (person.middleName ?: "")}, идентификатор ФЛ: ${person.inp}, включено в форму без указания $fieldName, отсутствуют данные в справочнике $refBookFieldName."
+    static String createAbsentValueMessage(NdflPerson person, String fieldName, String refBookFieldName) {
+        return "Физическое лицо: ${(person.lastName ?: "") + " " + (person.firstName ?: "") + " " + (person.middleName ?: "")}, идентификатор ФЛ: ${person.inp}, включено в форму без указания $fieldName, отсутствуют данные в Реестре физических лиц $refBookFieldName."
     }
     /**
      * Получение провайдера с использованием кеширования.

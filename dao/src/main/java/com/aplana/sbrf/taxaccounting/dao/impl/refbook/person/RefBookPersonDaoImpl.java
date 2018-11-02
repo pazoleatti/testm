@@ -329,8 +329,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId) {
-        Date actualDate = new Date();
+    public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId, Date actualDate) {
         String query = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
                 "where\n" +
                 "person.record_id in (select r.record_id from ref_book_person r\n" +

@@ -2162,7 +2162,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id " +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 " +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc " +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
                 "WHERE dd.id = ?";
         return getJdbcTemplate().query(sql,
@@ -2322,7 +2322,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc \n" +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
                 "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) " +
                 "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
@@ -2334,35 +2334,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList) {
-        if (personIdList.size() > IN_CLAUSE_LIMIT) {
-            List<NdflPerson> result = new ArrayList<>();
-            int n = (personIdList.size() - 1) / IN_CLAUSE_LIMIT + 1;
-            for (int i = 0; i < n; i++) {
-                List<Long> subList = getSubList(personIdList, i);
-                List<NdflPerson> subResult = fetchNdflPersonByIdList(subList);
-                result.addAll(subResult);
-            }
-            return result;
-        }
-        String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, \n" +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, \n" +
-                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, \n" +
-                "rbp.appartment, rbc.code AS country_code, rbp.address_foreign as address \n" +
-                "FROM ref_book_person rbp \n" +
-                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
-                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
-                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
-                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
-                "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) \n" +
-                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
-
-        MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
-        try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRefBookRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
+        return fetchRefBookPersonsAsNdflPerson(personIdList, new Date());
     }
 
     @Override
@@ -2374,7 +2346,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join ref_book_person rbp on np.person_id = rbp.id\n" +
                 " left join ref_book_asnu rba on npi.asnu_id = rba.id " +
                 "where dd.id in (:declarationDataIds)\n" +
-                "and rbp.status = 0\n" +
                 "and npi.operation_id in (select distinct npi.operation_id from ndfl_person_income npi \n" +
                 "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
                 "left join declaration_data dd on np.declaration_data_id = dd.id\n" +
