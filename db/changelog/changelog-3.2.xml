@@ -670,4 +670,14 @@
         </rollback>
     </changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-5803 Загрузить информацию календаря на 2019 год-->
+	<changeSet id="3.2-amandzyak-9" author="amandzyak">
+			<sqlFile dbms="oracle"
+					 encoding="utf8"
+					 endDelimiter=""
+					 path="/scripts/ref_book_calendar_2019.sql"
+					 relativeToChangelogFile="true"
+					 splitStatements="false"/>
+	</changeSet>
+
 </databaseChangeLog>
