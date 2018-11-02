@@ -971,7 +971,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
             }
         }
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     @Override
@@ -2169,7 +2169,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id " +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1 " +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc " +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
                 "WHERE dd.id = ?";
         return getJdbcTemplate().query(sql,
@@ -2329,7 +2329,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc \n" +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
                 "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) " +
                 "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
@@ -2359,7 +2359,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.person_id = rbp.id AND rbid.inc_rep = 1\n" +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc\n" +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
                 "WHERE rbp.id in (:personIdList)";
 

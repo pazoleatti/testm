@@ -171,7 +171,8 @@ public interface RefBookPersonDao {
     /**
      * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
      * @param declarationDataId идентификатор налоговой формы
+     * @param actualDate        дата актуальности
      * @return список найденных записей реестра ФЛ
      */
-    List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
+    List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId, Date actualDate);
 }

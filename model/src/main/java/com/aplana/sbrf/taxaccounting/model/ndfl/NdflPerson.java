@@ -363,7 +363,7 @@ public class NdflPerson extends NdflData<Long> {
     }
 
     public List<NdflPersonIncome> getIncomes() {
-        return incomes != null ? incomes : Collections.<NdflPersonIncome>emptyList();
+        return incomes != null ? incomes : new ArrayList<NdflPersonIncome>();
     }
 
     public void setIncomes(List<NdflPersonIncome> incomes) {
@@ -373,7 +373,7 @@ public class NdflPerson extends NdflData<Long> {
     }
 
     public List<NdflPersonDeduction> getDeductions() {
-        return deductions != null ? deductions : Collections.<NdflPersonDeduction>emptyList();
+        return deductions != null ? deductions : new ArrayList<NdflPersonDeduction>();
     }
 
     public void setDeductions(List<NdflPersonDeduction> deductions) {
@@ -383,7 +383,7 @@ public class NdflPerson extends NdflData<Long> {
     }
 
     public List<NdflPersonPrepayment> getPrepayments() {
-        return prepayments != null ? prepayments : Collections.<NdflPersonPrepayment>emptyList();
+        return prepayments != null ? prepayments : new ArrayList<NdflPersonPrepayment>();
     }
 
     public void setPrepayments(List<NdflPersonPrepayment> prepayments) {

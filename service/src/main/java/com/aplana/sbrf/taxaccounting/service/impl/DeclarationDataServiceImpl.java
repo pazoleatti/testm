@@ -1135,7 +1135,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             relationList.addAll(sourceService.getDeclarationDestinationsInfo(declarationDataId));
             return relationList;
         } else {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
     }
 

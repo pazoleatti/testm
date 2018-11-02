@@ -27,6 +27,9 @@ ECHO ## 03_fill_end_date
 ECHO ## 03_2_check_end_date
 "%ORA_BIN%\sqlplus" %AUTH% @"03_2_check_end_date.sql" %LOG_DIR%/03_REF_BOOK_PERSON_end_date.csv
 
+ECHO ## 03_3_update_end_date
+"%ORA_BIN%\sqlplus" %AUTH% @"03_3_update_end_date.sql" > "%LOG_DIR%/03_3_update_end_date.txt"
+
 ECHO ## 04_check_before_delete
 "%ORA_BIN%\sqlplus" %AUTH% @"04_check_before_delete.sql" %LOG_DIR%/04_REF_BOOK_ID_DOC_person_links.csv %LOG_DIR%/04_DECLARATION_DATA_PERSON_person_links.csv %LOG_DIR%/04_NDFL_PERSON_person_links.csv %LOG_DIR%/04_NDFL_REFERENCES_person_links.csv %LOG_DIR%/04_REF_BOOK_ID_TAX_PAYER_person_links.csv %LOG_DIR%/04_REF_BOOK_PERSON_TB_person_links.csv %LOG_DIR%/04_REF_BOOK_PERSON_id_doc_links.csv
 
@@ -37,7 +40,7 @@ ECHO ## 05_2_delete
 "%ORA_BIN%\sqlplus" %AUTH% @"05_2_delete.sql" > "%LOG_DIR%/05_2_delete.txt"
 
 ECHO ## 06_1_check_null_field
-"%ORA_BIN%\sqlplus" %AUTH% @"06_1_check_null_field.sql" %LOG_DIR%/06_1_check_null_field.txt %LOG_DIR%/06_NDFL_REFERENCES_person_id_null.csv %LOG_DIR%/06_REF_BOOK_ID_TAX_PAYER_person_id_null.csv %LOG_DIR%/06_REF_BOOK_PERSON_TB_person_id_null.csv %LOG_DIR%/06_REF_BOOK_PERSON_start_date_null.csv
+"%ORA_BIN%\sqlplus" %AUTH% @"06_1_check_null_field.sql" %LOG_DIR%/06_1_check_null_field.txt %LOG_DIR%/06_NDFL_REFERENCES_person_id_null.csv %LOG_DIR%/06_REF_BOOK_ID_TAX_PAYER_person_id_null.csv %LOG_DIR%/06_REF_BOOK_PERSON_TB_person_id_null.csv %LOG_DIR%/06_REF_BOOK_PERSON_start_date_null.csv %LOG_DIR%/06_REF_BOOK_ID_DOC_person_id_null.csv
 
 ECHO ## 06_2_alter_table_not_null
 "%ORA_BIN%\sqlplus" %AUTH% @"06_2_alter_table_not_null.sql" > "%LOG_DIR%/06_2_alter_table_not_null.txt"

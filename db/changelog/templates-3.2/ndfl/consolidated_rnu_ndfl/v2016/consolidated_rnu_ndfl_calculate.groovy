@@ -377,9 +377,6 @@ class Calculate extends AbstractScriptClass {
         // Физлица для сохранения сгуппированные по идентификатору физлица в справочнике
         Map<Long, NdflPerson> ndflPersonsToPersistGroupedByRefBookPersonId = [:]
 
-        List<NdflPerson> withoutDulPersonList = []
-
-
         // Данные для заполнения раздела 1
 
         for (NdflPerson declarationDataPerson : ndflPersonList) {
@@ -399,8 +396,10 @@ class Calculate extends AbstractScriptClass {
             declarationDataPerson.modifiedBy = null
             declarationDataPerson.declarationDataId = declarationData.id
 
-            if (refBookPerson.idDocType == null) {
-                withoutDulPersonList << refBookPerson
+            if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null) {
+                logger.warn("Раздел 1. ФЛ: %s, идентификатор ФЛ %s, включено в форму без заполнения Графы 10 (\"ДУЛ Код\") и Графы 11 (\"ДУЛ Номер\"), т.к. информация о ДУЛ, включаемом в отчетность, отсутствует  в Реестре ФЛ.",
+                        "${refBookPerson.lastName + " " + refBookPerson.firstName + " " + (refBookPerson.middleName ?: "")}",
+                        refBookPerson.recordId)
             }
 
             NdflPerson persistingPerson = ndflPersonsToPersistGroupedByRefBookPersonId.get(declarationDataPerson.recordId)
@@ -485,27 +484,6 @@ class Calculate extends AbstractScriptClass {
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) return
-
-        /**
-         * Получение данных из справочника физлиц сделан одним запросом. Мы не загружаем связанные со справочником ФЛ справочники ИНП, ДУЛ, и Адресов отдельными запросами.
-         * Побочный эффект этого то что ДУЛ будет = null, в случае когда нет в справочнике ДУЛ с признаком включения в отчетность =1 и когда вообще нет ДУЛ у физлица.
-         * Поэтому здесь проверяется причина почему ДУЛ = null и выводится предупреждение
-         */
-
-        if (!withoutDulPersonList.isEmpty()) {
-            for (NdflPerson person : withoutDulPersonList) {
-                int count = personService.findIdDocCount(person.getRecordId())
-                if (count == 0) {
-                    logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность",
-                            "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
-                            person.inp)
-                } else {
-                    logger.warn("Физическое лицо: %s, идентификатор ФЛ: %s, включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'  с признаком включения в отчетность: 1",
-                            "${person.lastName + " " + person.firstName + " " + (person.middleName ?: "")}",
-                            person.inp)
-                }
-            }
-        }
 
         //noinspection GroovyAssignabilityCheck
         logForDebug("Консолидация данных, (" + ScriptUtils.calcTimeMillis(time))

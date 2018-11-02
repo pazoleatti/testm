@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿﻿<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
@@ -505,6 +505,18 @@
         </delete>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5610 -->
+    <changeSet id="3.2-ytrofimov-10" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.2/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.2/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
+        </update>
+    </changeSet>
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-5929 Данные справочника "Коды видов доходов" разнятся с постановкой-->
     <changeSet id="3.2-amandzyak-4" author="amandzyak">
         <sql>
@@ -656,6 +668,23 @@
                 </where>
             </delete>
         </rollback>
+    </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-5803 Загрузить информацию календаря на 2019 год-->
+	<changeSet id="3.2-amandzyak-9" author="amandzyak">
+			<sqlFile dbms="oracle"
+					 encoding="utf8"
+					 endDelimiter=""
+					 path="/scripts/ref_book_calendar_2019.sql"
+					 relativeToChangelogFile="true"
+					 splitStatements="false"/>
+	</changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5104 Внести изменения в календарную дату начала периода 90 в справочнике кодов периодов-->
+	<changeSet id="3.2-amandzyak-10" author="amandzyak">
+        <sql>
+            update report_period_type set calendar_start_date=to_date('01.10.1970','DD.MM.YYYY') where code='90'
+        </sql>
     </changeSet>
 
     <changeSet id="3.2-dnovikov-33" author="dnovikov">

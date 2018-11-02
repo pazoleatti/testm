@@ -219,7 +219,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     new ReportPeriodMapper()
             );
         } catch (EmptyResultDataAccessException e) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
     }
 

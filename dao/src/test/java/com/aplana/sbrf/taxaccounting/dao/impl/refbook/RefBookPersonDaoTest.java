@@ -14,10 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,8 +53,8 @@ public class RefBookPersonDaoTest {
     public void test_getPersons() {
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, null);
 
-        assertThat(persons).hasSize(6);
-        assertThat(persons.getTotalCount()).isEqualTo(6);
+        assertThat(persons).hasSize(7);
+        assertThat(persons.getTotalCount()).isEqualTo(7);
     }
 
     @Test
@@ -67,7 +64,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(3)
+        assertThat(persons).hasSize(4)
                 .extracting("vip")
                 .containsOnly(false);
     }
@@ -79,7 +76,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(2)
+        assertThat(persons).hasSize(3)
                 .extracting("middleName")
                 .containsOnly("Сергеевич");
     }
@@ -93,7 +90,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(5);
+        assertThat(persons).hasSize(6);
     }
 
     @Test
@@ -127,7 +124,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(5)
+        assertThat(persons).hasSize(6)
                 .extracting("citizenship.code")
                 .containsOnly("643", "678")
                 .containsOnlyOnce("678");
@@ -164,9 +161,9 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(2)
+        assertThat(persons).hasSize(3)
                 .extracting("oldId")
-                .containsExactlyInAnyOrder(1L, 10L);
+                .containsExactlyInAnyOrder(1L, 10L, 10L);
     }
 
     @Test
@@ -200,7 +197,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(2)
+        assertThat(persons).hasSize(3)
                 .extracting("address.regionCode")
                 .containsOnly("77");
     }
@@ -213,7 +210,7 @@ public class RefBookPersonDaoTest {
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
         assertThat(persons)
-                .hasSize(3)
+                .hasSize(4)
                 .extracting("address.postalCode")
                 .containsOnly("143080", "109431");
     }
@@ -286,7 +283,7 @@ public class RefBookPersonDaoTest {
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
-        assertThat(persons).hasSize(2);
+        assertThat(persons).hasSize(3);
 
         RegistryPerson person = persons.get(0);
         assertThat(person.getRecordId()).isNotEqualTo(person.getOldId());
@@ -346,6 +343,26 @@ public class RefBookPersonDaoTest {
         //verification
         RegistryPerson changedPerson = personDao.fetchPersonVersion(4L);
         assertThat(changedPerson.getRecordId()).isEqualTo(10L);
+    }
+
+    @Test
+    public void test_findActualRefPersonsByDeclarationDataId() {
+        //setup
+        Calendar calendar = new GregorianCalendar();
+        calendar.set(2017, Calendar.JUNE, 1);
+        //execution
+        List<RegistryPerson> persons = personDao.findActualRefPersonsByDeclarationDataId(100L, calendar.getTime());
+        Collections.sort(persons, new Comparator<RegistryPerson>() {
+            @Override
+            public int compare(RegistryPerson o1, RegistryPerson o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
+        //verification
+        assertThat(persons)
+                .hasSize(3)
+                .extracting("id")
+                .containsExactlyInAnyOrder(3L, 4L, 12122L);
     }
 
 }
