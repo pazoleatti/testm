@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
 import org.apache.commons.io.IOUtils
@@ -1198,10 +1199,19 @@ class DeclarationType extends AbstractScriptClass {
         return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : "";
     }
 
-    // кол-во созданныеъ строк в Приложении2
+    // кол-во созданных строк в Приложении2
     int rowCount = 0
     // Итоговая строка
     TotalRow totalRow = new TotalRow()
+    // Поля Приложения2
+    List<String> fieldNames = [1 : "Номер строки", 2: "ИНН в РФ", 3: "ИНН в стране гражданства", 4: "Фамилия", 5: "Имя",
+                               6 : "Отчество", 7: "Статус налогоплательщика", 8: "Дата рождения", 9: "Гражданство (код страны)", 10: "Код вида документа, удостоверяющего личность",
+                               11: "Серия и номер документа", 12: "Почтовый индекс", 13: "Регион (код)", 14: "Район", 15: "Город",
+                               16: "Населенный пункт (село, поселок)", 17: "Улица (проспект, переулок)", 18: "Номер дома (владения)", 19: "Номер корпуса (строения)",
+                               20: "Номер квартиры", 21: "Код страны", 22: "Адрес места жительства за пределами Российской Федерации", 23: "Налоговая ставка",
+                               24: "Общая сумма дохода", 25: "Общая сумма вычетов", 26: "Налоговая база", 27: "Сумма налога исчисленная", 28: "Сумма налога удержанная",
+                               29: "Сумма налога, излишне удержанная налоговым агентом", 30: "Сумма налога, не удержанная налоговым агентом",
+                               31: "Сумма налога, не удержанная налоговым агентом"].values() as List
 
     void createApplication2() {
         List<Long> declarationDataIdList = declarationService.findApplication2DeclarationDataId(reportYear)
@@ -1222,71 +1232,311 @@ class DeclarationType extends AbstractScriptClass {
         }
         List<NdflPerson> refBookPersons = ndflPersonService.fetchRefBookPersonsAsNdflPerson(new ArrayList<Long>(allIncomes.refBookPersonId.toSet()))
         Map<Long, NdflPerson> refBookPersonById = refBookPersons.collectEntries { [it.personId, it] }
-        Map<Pair<Long, Integer>, List<Application2Income>> incomesGroupedByPersonIdAndTaxRate = allIncomes.groupBy {
+
+        // Пока формируем строки по ФЛ и ставке, после этого они будут при необходимости дробится на несколько строк
+        List<App2PersonRateRowGroup> personRateRowGroups = allIncomes.groupBy {
             new Pair<Long, Integer>(it.refBookPersonId, it.taxRate)
+        }.collect { personRatePair, incomes ->
+            NdflPerson refBookPerson = refBookPersonById.get(personRatePair.getFirst())
+            def personRateRowGroup = new App2PersonRateRowGroup(refBookPerson, personRatePair.second, incomes)
+            checkRequired(personRateRowGroup)
+            return personRateRowGroup
         }
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            // Первая строка
+            Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
+            StringBuilder headerBuilder = new StringBuilder()
+            headerBuilder << new Date().format(SharedConstants.FULL_DATE_FORMAT) << "|"
+            headerBuilder << userDepartment.getName().replaceAll("\\|", " ") << "|"
+            headerBuilder << "Приложение 2" << "|"
+            headerBuilder << String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version) << "|" << "\r\n"
+            // Пустая строка
+            headerBuilder << "\r\n"
+            write(headerBuilder)
+            // Строки с данными по ФЛ и ставке. Могут дробится на несколько, в зависимости от того будут ли данные по кодам доходов и вычетов влезать в одну строку
+            for (def personRateRowGroup : personRateRowGroups) {
+                Long ndflPersonId = ndflPersonIdByRefBookPersonId.get(personRateRowGroup.person.personId)
 
-        Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
-        StringBuilder headerBuilder = new StringBuilder()
-        headerBuilder << new Date().format(SharedConstants.FULL_DATE_FORMAT) << "|"
-        headerBuilder << userDepartment.getName().replaceAll("\\|", " ") << "|"
-        headerBuilder << "Приложение 2" << "|"
-        headerBuilder << String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version) << "|"
-        headerBuilder << "\r\n" << "\r\n"
-        IOUtils.write(headerBuilder.toString(), outputStream, "IBM866")
-
-        for (def personIdAndTaxRateKey : incomesGroupedByPersonIdAndTaxRate.keySet()) {
-            NdflPerson refBookPerson = refBookPersonById.get(personIdAndTaxRateKey.getFirst())
-            Long ndflPersonId = ndflPersonIdByRefBookPersonId.get(refBookPerson.personId)
-            def personRateRowGroup = new App2PersonRateRowGroup(refBookPerson, personIdAndTaxRateKey.second, incomesGroupedByPersonIdAndTaxRate.get(personIdAndTaxRateKey))
-
-            def row = new App2Row(personRateRowGroup)
-            def operationIds = personRateRowGroup.incomes.operationId.toSet()
-            def incomesByIncomeCode = personRateRowGroup.incomes.groupBy { it.incomeCode }
-            for (def incomeCode : incomesByIncomeCode.keySet()) {
-                if (!row.hasNextApp2IncomeColGroup()) {
-                    write(row)
-                    totalRow.add(row)
-                    row = new App2Row(personRateRowGroup)
+                def row = personRateRowGroup.addRow()
+                def operationIds = personRateRowGroup.incomes.operationId.toSet()
+                def deductionsOfOperations = allDeductions.findAll {
+                    it.ndflPersonId == ndflPersonId && it.operationId in operationIds
                 }
-                App2IncomeColGroup incomeColGroup = row.nextApp2IncomeColGroup()
-                incomeColGroup.setData(incomeCode, incomesByIncomeCode.get(incomeCode))
+                def incomesByIncomeCode = personRateRowGroup.incomes.groupBy { it.incomeCode }
+                for (def incomeCode : incomesByIncomeCode.keySet()) {
+                    def incomesOfIncomeCode = incomesByIncomeCode.get(incomeCode)
+                    List<NdflPersonDeduction> deductionsOfIncomeCode = []
+                    deductionsOfOperations.removeAll { it.incomeCode == incomeCode && deductionsOfIncomeCode.add(it) }
 
-                def deductionsOfIncomeCodeByDeductionCode = allDeductions.findAll {
-                    it.ndflPersonId == ndflPersonId && it.incomeCode == incomeCode && it.operationId in operationIds
-                }.groupBy { it.typeCode }
-                for (def deductionCode : deductionsOfIncomeCodeByDeductionCode.keySet()) {
-                    if (!incomeColGroup.hasNextApp2DeductionColGroup()) {
-                        if (!row.hasNextApp2IncomeColGroup()) {
-                            write(row)
-                            totalRow.add(row)
-                            row = new App2Row(personRateRowGroup)
-                        }
-                        incomeColGroup = row.nextApp2IncomeColGroup()
-                        incomeColGroup.setData(incomeCode, incomesByIncomeCode.get(incomeCode))
+                    // Добавляем новый набор полей для кода дохода. Если он не влазит в текущую строку, то дублируем эту строку внутри группы строк
+                    if (!row.hasNextApp2IncomeColGroup()) {
+                        row = personRateRowGroup.addRow()
                     }
-                    App2DeductionColGroup deductionColGroup = incomeColGroup.nextApp2DeductionColGroup()
-                    deductionColGroup.setData(deductionCode, deductionsOfIncomeCodeByDeductionCode.get(deductionCode))
+                    App2IncomeColGroup incomeColGroup = row.nextApp2IncomeColGroup()
+                    incomeColGroup.setData(incomeCode, incomesOfIncomeCode, deductionsOfIncomeCode)
+
+                    def deductionsByDeductionCode = deductionsOfIncomeCode.groupBy { it.typeCode }
+                    for (def deductionCode : deductionsByDeductionCode.keySet()) {
+                        def deductionsOfDeductionCode = deductionsByDeductionCode.get(deductionCode)
+
+                        // Добавляем новый набор полей для кода вычета внутри набора полей для кода дохода.
+                        // Если не влазит в текущий набор полей для кода дохода, то дублируем его и добавляем туда
+                        if (!incomeColGroup.hasNextApp2DeductionColGroup()) {
+                            break
+                            // Если сдублированный набор полей для кода дохода не влез в текущуй строку, то дублируем эту строку
+                            if (!row.hasNextApp2IncomeColGroup()) {
+                                row = personRateRowGroup.addRow()
+                            }
+                            incomeColGroup = row.nextApp2IncomeColGroup()
+                            incomeColGroup.setData(incomeCode, incomesOfIncomeCode, deductionsOfIncomeCode)
+                        }
+                        App2DeductionColGroup deductionColGroup = incomeColGroup.nextApp2DeductionColGroup()
+                        deductionColGroup.setData(deductionCode, deductionsOfDeductionCode)
+                    }
                 }
+                // TODO deductionsOfOperations - оставшиеся необработанные строки 3 раздела
+                for (def deduction : deductionsOfOperations) {
+
+                }
+                check(personRateRowGroup)
+                write(personRateRowGroup)
+                totalRow.add(personRateRowGroup)
             }
-            write(row)
-            totalRow.add(row)
+            write(totalRow)
+            IOUtils.closeQuietly(outputStream)
+            scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName(userDepartment))
         }
-        write(totalRow)
-        IOUtils.closeQuietly(outputStream)
-        scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName(userDepartment.getName()))
     }
 
-    String createApplication2FileName(String departmentName) {
-        StringBuilder nameBuilder = new StringBuilder("_____app2_______")
-        nameBuilder.append(departmentName)
-                .append("34")
-                .append(reportYear)
-                .append(".rnu")
+    boolean checkRequiredFailed = false
+
+    void checkRequired(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        List<String> errFields = []
+        !person.lastName && errFields.add("\"Фамилия\"")
+        !person.firstName && errFields.add("\"Имя\"")
+        !person.status && errFields.add("\"Статус налогоплательщика\"")
+        !person.birthDay && errFields.add("\"Дата рождения\"")
+        !person.citizenship && errFields.add("\"Гражданство (код страны)\"")
+        !person.idDocType && errFields.add("\"Код вида документа, удостоверяющего личность\"")
+        !person.idDocNumber && errFields.add("\"Серия и номер документа\"")
+        personRateRowGroup.rate == null && errFields.add("\"Налоговая ставка\"")
+        personRateRowGroup.incomeAccruedSum == null && errFields.add("\"Общая сумма дохода\"")
+        personRateRowGroup.taxBaseSum == null && errFields.add("\"Налоговая база\"")
+        personRateRowGroup.calculatedTaxSum == null && errFields.add("\"Сумма налога исчисленная\"")
+        if (errFields) {
+            if (!checkRequiredFailed) {
+                checkRequiredFailed = true
+                logger.error("В транспортном файле не заполнены обязательные поля для ФЛ")
+            }
+            logger.error("У ФЛ: ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " не заполнены обязательные поля: ${errFields.join(", ")}")
+        }
+    }
+
+    // Проверки данных в полученных строках. Группы строк, т.к. данные в них могут быть задублированны
+    void check(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        checkNotContainVerticalLine(personRateRowGroup)
+        if (person.citizenship == "643" && person.innForeign) {
+            logger.error("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " в поле 9 указан код страны = \"643\". При этом значении кода страны поле 3 (\"ИНН в стране гражданства\") не должно быть заполнено.")
+        }
+        if (!person.postIndex.matches("[0-9]{6}")) {
+            logger.error("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " в поле 12 (Почтовый индекс) указано значение не соответствующее формату почтового индекса.")
+        }
+        checkAddress(personRateRowGroup)
+        checkRegionCode(personRateRowGroup)
+        checkInoAddress(personRateRowGroup)
+        checkIncomeAccruedSum(personRateRowGroup)
+        checkIncomeDeductionSum(personRateRowGroup)
+        checkTaxBaseSum(personRateRowGroup)
+        checkCalculatedTaxSum(personRateRowGroup)
+        checkIncomeAndDeductionSums(personRateRowGroup)
+        checkIncomeColGroup(personRateRowGroup)
+        checkDeductionColGroup(personRateRowGroup)
+    }
+
+    void checkNotContainVerticalLine(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        List<String> errFields = []
+        personRateRowGroup.person.innNp?.contains('|') && errFields.add("\"ИНН в РФ\"")
+        personRateRowGroup.person.innForeign?.contains('|') && errFields.add("\"ИНН в стране гражданства\"")
+        personRateRowGroup.person.lastName?.contains('|') && errFields.add("\"Фамилия\"")
+        personRateRowGroup.person.firstName?.contains('|') && errFields.add("\"Имя\"")
+        personRateRowGroup.person.middleName?.contains('|') && errFields.add("\"Отчество\"")
+        personRateRowGroup.person.status?.contains('|') && errFields.add("\"Статус налогоплательщика\"")
+        personRateRowGroup.person.citizenship?.contains('|') && errFields.add("\"Гражданство (код страны)\"")
+        personRateRowGroup.person.idDocType?.contains('|') && errFields.add("\"Код вида документа, удостоверяющего личность\"")
+        personRateRowGroup.person.idDocNumber?.contains('|') && errFields.add("\"Серия и номер документа\"")
+        personRateRowGroup.person.postIndex?.contains('|') && errFields.add("\"Почтовый индекс\"")
+        personRateRowGroup.person.regionCode?.contains('|') && errFields.add("\"Регион (код)\"")
+        personRateRowGroup.person.area?.contains('|') && errFields.add("\"Район\"")
+        personRateRowGroup.person.city?.contains('|') && errFields.add("\"Город\"")
+        personRateRowGroup.person.locality?.contains('|') && errFields.add("\"Населенный пункт (село, поселок)\"")
+        personRateRowGroup.person.street?.contains('|') && errFields.add("\"Улица (проспект, переулок)\"")
+        personRateRowGroup.person.house?.contains('|') && errFields.add("\"Номер дома (владения)\"")
+        personRateRowGroup.person.building?.contains('|') && errFields.add("\"Номер корпуса (строения)\"")
+        personRateRowGroup.person.flat?.contains('|') && errFields.add("\"Номер квартиры\"")
+        personRateRowGroup.person.countryCode?.contains('|') && errFields.add("\"Код страны\"")
+        personRateRowGroup.person.address?.contains('|') && errFields.add("\"Адрес места жительства за пределами Российской Федерации\"")
+        for (def field : errFields) {
+            logger.error("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    "\"${person.idDocNumber ?: ""}\" в поле ${field} содержится недопустимый символ разделителя \"|\"")
+        }
+    }
+
+    void checkAddress(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        if (person.regionCode) {
+            if (!(person.postIndex && person.area && person.city && person.locality && person.street && person.house && person.building && person.flat)) {
+                for (def row : personRateRowGroup.rows) {
+                    logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                            " в строке ${row.rowNum} заполнено поле 13 \"Регион (код)\", но не заполнены поля Почтовый индекс, Район, Город, Населенный пункт (село, поселок), Улица (проспект, переулок), Номер дома (владения), Номер корпуса (строения), Номер квартиры ")
+                }
+            }
+        }
+    }
+
+    void checkRegionCode(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        if (!person.regionCode) {
+            if ((person.postIndex || person.area || person.city || person.locality || person.street || person.house || person.building || person.flat) ||
+                    (!person.countryCode && !person.address) ||
+                    (person.status == "1") ||
+                    (person.citizenship == "643")) {
+                logger.error("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                        " не заполнено поле 13 \"Регион (код)\"")
+            }
+        }
+    }
+
+    void checkInoAddress(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        if (person.citizenship != "643" &&
+                !person.postIndex && !person.regionCode && !person.area && !person.city && !person.locality && !person.street && !person.house && !person.building && !person.flat) {
+            if (!(person.countryCode && person.address)) {
+                logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                        " не заполнены поля 21 \"Код страны\" и 22 \"Адрес места жительства за пределами Российской Федерации\"")
+            }
+        }
+    }
+
+    void checkIncomeAccruedSum(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        BigDecimal sum = 0
+        Set<String> incomeCodes = []
+        for (def row : personRateRowGroup.rows) {
+            for (def incomeColGroup : row.incomeColGroups) {
+                if (!incomeCodes.contains(incomeColGroup.incomeCode)) {
+                    sum += (incomeColGroup.incomeAccruedSum ?: 0)
+                    incomeCodes.add(incomeColGroup.incomeCode)
+                }
+            }
+        }
+        if (personRateRowGroup.incomeAccruedSum != sum) {
+            logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " общая сумма дохода не равна сумме всех сумм доходов")
+        }
+    }
+
+    void checkIncomeDeductionSum(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        BigDecimal sum = 0
+        for (def row : personRateRowGroup.rows) {
+            for (def incomeColGroup : row.incomeColGroups) {
+                for (def deductionColGroup : incomeColGroup.deductionColGroups) {
+                    sum += (deductionColGroup.periodCurrSum ?: 0)
+                }
+            }
+        }
+        if (personRateRowGroup.incomeDeductionSum != sum) {
+            logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " общая сумма вычетов не равна сумме всех сумм вычетов")
+        }
+    }
+
+    void checkTaxBaseSum(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        if ((personRateRowGroup.taxBaseSum ?: 0) != ((personRateRowGroup.incomeAccruedSum ?: 0) - (personRateRowGroup.incomeDeductionSum ?: 0))) {
+            logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " налоговая база не равна разности между \"Общая сумма дохода\" и \"Общая сумма вычета\"")
+        }
+    }
+
+    void checkCalculatedTaxSum(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        BigDecimal v = (personRateRowGroup.taxBaseSum ?: 0) * personRateRowGroup.rate / 100
+        if ((personRateRowGroup.calculatedTaxSum ?: 0) == ScriptUtils.round(v)) {
+            logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                    " в поле 27 («Сумма налога исчисленная» указано некорректное значение.")
+        }
+    }
+
+    void checkIncomeAndDeductionSums(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        App2IncomeColGroup lastIncomeColGroup = null
+        for (def row : personRateRowGroup.rows) {
+            for (def incomeColGroup : row.incomeColGroups) {
+                if (!lastIncomeColGroup || incomeColGroup.incomeCode != lastIncomeColGroup.incomeCode) {
+                    BigDecimal deductionSum = 0
+                    for (def deduction : incomeColGroup.deductions) {
+                        deductionSum = (deductionSum ?: 0) + deduction.periodCurrSumm
+                    }
+                    if (deductionSum > incomeColGroup.incomeAccruedSum) {
+                        logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                                " в строке ${row.rowNum} сумма вычета превышает сумму дохода")
+                    }
+                }
+                lastIncomeColGroup = incomeColGroup
+            }
+        }
+    }
+
+    void checkIncomeColGroup(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        for (def row : personRateRowGroup.rows) {
+            for (def incomeColGroup : row.incomeColGroups) {
+                if (incomeColGroup.incomeCode && incomeColGroup.incomeAccruedSum == null) {
+                    logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                            " заполнено значение \"Код дохода\", но не заполнено значение \"Сумма дохода\"")
+                    return
+                }
+            }
+        }
+    }
+
+    void checkDeductionColGroup(App2PersonRateRowGroup personRateRowGroup) {
+        def person = personRateRowGroup.person
+        for (def row : personRateRowGroup.rows) {
+            for (def incomeColGroup : row.incomeColGroups) {
+                for (def deductionColGroup : incomeColGroup.deductionColGroups) {
+                    if (deductionColGroup.deductionCode && deductionColGroup.periodCurrSum == null) {
+                        logger.warn("Для ${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""} ${person.birthDay?.format("dd.MM.yyyy") ?: ""} \"${person.idDocNumber ?: ""}\"" +
+                                " заполнено значение \"Код вычета\", но не заполнено значение \"Сумма вычета\"")
+                        return
+                    }
+                }
+            }
+        }
+    }
+
+    String createApplication2FileName(Department department) {
+        StringBuilder nameBuilder = new StringBuilder("_____app2")
+        for (int i = 0; i < 17 - department.sbrfCode.length(); i++) {
+            nameBuilder.append("_")
+        }
+        nameBuilder.append(department.sbrfCode)
+        nameBuilder.append("34")
+        nameBuilder.append(reportYear)
+        nameBuilder.append(".rnu")
     }
 
     void write(Object row) {
-        IOUtils.write(row.toString(), outputStream, "IBM866")
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            IOUtils.write(row.toString(), outputStream, "IBM866")
+        }
     }
 
     DecimalFormat format17_2
@@ -1307,8 +1557,9 @@ class DeclarationType extends AbstractScriptClass {
     // Группа строк Приложения2 по ФЛ и ставке
     class App2PersonRateRowGroup {
         NdflPerson person
-        int rate
+        Integer rate
         List<Application2Income> incomes
+        List<App2Row> rows = []
 
         BigDecimal incomeAccruedSum = null
         BigDecimal incomeDeductionSum = null
@@ -1319,7 +1570,7 @@ class DeclarationType extends AbstractScriptClass {
         BigDecimal overholdingTaxSum = null
         BigDecimal notholdingTaxSum = null
 
-        App2PersonRateRowGroup(NdflPerson person, int rate, List<Application2Income> incomes) {
+        App2PersonRateRowGroup(NdflPerson person, Integer rate, List<Application2Income> incomes) {
             this.person = person
             this.incomes = incomes
             this.rate = rate
@@ -1350,17 +1601,38 @@ class DeclarationType extends AbstractScriptClass {
                 }
             }
         }
+
+        App2Row addRow() {
+            def row = new App2Row(this)
+            rows.add(row)
+            return row
+        }
+
+        @Override
+        String toString() {
+            StringBuilder stringBuilder = new StringBuilder()
+            for (def row : rows) {
+                stringBuilder << row.toString()
+            }
+            return stringBuilder.toString()
+        }
     }
     // строка Приложения2
     class App2Row {
         int rowNum = ++rowCount
+        // Группа строк с одинаковыми данными в столбцах 1-31, в которую входит текущая строка
         App2PersonRateRowGroup personRateRowGroup
+        // 3 группы столбцов по коду дохода. Если кодов дохода больше, то они переносятся в след-ую строку
         List<App2IncomeColGroup> incomeColGroups = []
-        Iterator<App2IncomeColGroup> incomeColGroupsIterator
+        // 2 последних столбца кодов вычетов, несвязанные с кодом дохода
+        List<App2DeductionColGroup> deductionColGroups = []
+
+        private Iterator<App2IncomeColGroup> incomeColGroupsIterator
 
         App2Row(App2PersonRateRowGroup personRateRowGroup) {
             this.personRateRowGroup = personRateRowGroup
-            3.times { incomeColGroups.add(new App2IncomeColGroup(it == 2)) }
+            3.times { incomeColGroups.add(new App2IncomeColGroup()) }
+            2.times { deductionColGroups.add(new App2DeductionColGroup()) }
             incomeColGroupsIterator = incomeColGroups.iterator()
         }
 
@@ -1422,18 +1694,20 @@ class DeclarationType extends AbstractScriptClass {
     class App2IncomeColGroup {
         String incomeCode
         List<Application2Income> incomes
+        List<NdflPersonDeduction> deductions
         BigDecimal incomeAccruedSum = null
         List<App2DeductionColGroup> deductionColGroups = []
         Iterator<App2DeductionColGroup> deductionColGroupsIterator
 
-        App2IncomeColGroup(boolean last = false) {
-            (last ? 7 : 5).times { deductionColGroups.add(new App2DeductionColGroup()) }
+        App2IncomeColGroup() {
+            5.times { deductionColGroups.add(new App2DeductionColGroup()) }
             deductionColGroupsIterator = deductionColGroups.iterator()
         }
 
-        void setData(String incomeCode, List<Application2Income> incomes) {
+        void setData(String incomeCode, List<Application2Income> incomes, List<NdflPersonDeduction> deductions) {
             this.incomeCode = incomeCode
             this.incomes = incomes
+            this.deductions = deductions
             for (Application2Income income : incomes) {
                 if (income.incomeAccruedSumm != null) {
                     incomeAccruedSum = (incomeAccruedSum ?: 0) + income.incomeAccruedSumm
@@ -1490,6 +1764,12 @@ class DeclarationType extends AbstractScriptClass {
         Map<Integer, BigDecimal> values = [:]
         App2PersonRateRowGroup lastRowGroup = null
 
+        void add(App2PersonRateRowGroup rowGroup) {
+            for (def row : rowGroup.rows) {
+                add(row)
+            }
+        }
+
         void add(App2Row row) {
             if (!row.personRateRowGroup.is(lastRowGroup)) {
                 lastRowGroup = row.personRateRowGroup
@@ -1518,7 +1798,7 @@ class DeclarationType extends AbstractScriptClass {
 
         @Override
         String toString() {
-            StringBuilder stringBuilder = new StringBuilder()
+            StringBuilder stringBuilder = new StringBuilder("|\r\n")
             for (int i = 1; i <= 71; i++) {
                 stringBuilder << format17_2(values.get(i)) << "|"
             }
