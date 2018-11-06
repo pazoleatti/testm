@@ -703,4 +703,10 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.2-dnovikov-35" author="dnovikov">
+        <sql>
+            update ref_book_attribute set visible = 0 where id in (167, 168);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
