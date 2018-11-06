@@ -3,19 +3,10 @@ package com.aplana.sbrf.taxaccounting.refbook;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Интерфейс провайдеров данных для справочников.
@@ -106,19 +97,6 @@ public interface RefBookDataProvider {
     int getRecordsCount(Date version, String filter);
 
     /**
-     * Получение row_num записи по заданным параметрам
-     *
-     * @param version         дата актуальности
-     * @param recordId        id записи справочника
-     * @param filter          условие фильтрации строк
-     * @param sortAttribute   условие фильтрации строк
-     * @param isSortAscending сортируемый столбец. Может быть не задан
-     * @return
-     */
-    Long getRowNum(Date version, Long recordId,
-                   String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
-
-    /**
      * По коду возвращает строку справочника
      *
      * @param uniqueRecordId код строки справочника
@@ -160,15 +138,6 @@ public interface RefBookDataProvider {
     RefBookValue getValue(Long recordId, Long attributeId);
 
     /**
-     * Возвращает список версий элементов справочника за указанный период времени
-     *
-     * @param startDate начальная дата
-     * @param endDate   конечная дата
-     * @return
-     */
-    List<Date> getVersions(Date startDate, Date endDate);
-
-    /**
      * Возвращает все версии из указанной группы версий записи справочника
      *
      * @param recordId      идентификатор группы версий записи справочника
@@ -187,14 +156,6 @@ public interface RefBookDataProvider {
      * @return
      */
     RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId);
-
-    /**
-     * Возвращает количество существующих версий для элемента справочника
-     *
-     * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @return
-     */
-    int getRecordVersionsCount(Long uniqueRecordId);
 
     /**
      * Создает новую версию записи справочника
@@ -263,14 +224,6 @@ public interface RefBookDataProvider {
      * Но без блокировок
      */
     void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds);
-
-    /**
-     * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
-     *
-     * @param uniqueRecordId идентификатор версии записи справочника
-     * @return
-     */
-    Long getFirstRecordId(Long uniqueRecordId);
 
     /**
      * Получает идентификатор записи без учета версии (record_id) по ее уникальному идентификатору

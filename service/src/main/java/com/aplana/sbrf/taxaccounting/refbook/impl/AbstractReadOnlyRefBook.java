@@ -39,13 +39,6 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public List<Date> getVersions(Date startDate, Date endDate) {
-        List<Date> list = new ArrayList<>();
-        list.add(new Date(0));
-        return list;
-    }
-
-    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = refBookDao.get(getRefBookId());
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
@@ -65,11 +58,6 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
         version.setVersionStart(d);
         version.setVersionEnd(d);
         return version;
-    }
-
-    @Override
-    public int getRecordVersionsCount(Long refBookRecordId) {
-        return 1;
     }
 
     @Override
@@ -108,11 +96,6 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public Long getFirstRecordId(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Long getRecordId(Long uniqueRecordId) {
         return uniqueRecordId;
     }
@@ -130,12 +113,6 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 
     public void setRefBook(RefBook refBook) {
         this.refBook = refBook;
-    }
-
-    @Override
-    public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
-                          boolean isSortAscending) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

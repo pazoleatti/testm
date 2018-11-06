@@ -89,11 +89,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return dao.getRowNum(getRefBook(), version, recordId, filter, sortAttribute, isSortAscending);
-    }
-
-    @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long id) {
         return dao.getRecordData(getRefBook(), id);
     }
@@ -122,15 +117,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Date> getVersions(Date startDate, Date endDate) {
-        if (getRefBook().isVersioned()) {
-            return dao.getVersions(getRefBook(), startDate, endDate);
-        } else {
-            return readOnlyProvider.getVersions(startDate, endDate);
-        }
-    }
-
-    @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PagingResult<Map<String, RefBookValue>> records = dao.getRecordVersionsByRecordId(getRefBook(), recordId, pagingParams, filter, sortAttribute);
         return commonRefBookService.dereference(getRefBook(), records);
@@ -139,11 +125,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         return dao.getRecordVersionInfo(getRefBook(), uniqueRecordId);
-    }
-
-    @Override
-    public int getRecordVersionsCount(Long uniqueRecordId) {
-        return dao.getRecordVersionsCount(getRefBook(), uniqueRecordId);
     }
 
     @Override
@@ -265,7 +246,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException(CURRENT_USER_NOT_SET);
         }
-        List<String> lockedObjects = new ArrayList<String>();
+        List<String> lockedObjects = new ArrayList<>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = commonRefBookService.generateTaskKey(getRefBook().getId());
         if (lockRefBook(getRefBook(), userId, lockKey)) {
@@ -451,7 +432,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
         //Устанавливаем блокировку на текущий справочник
-        List<String> lockedObjects = new ArrayList<String>();
+        List<String> lockedObjects = new ArrayList<>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = commonRefBookService.generateTaskKey(getRefBookId());
         if (lockRefBook(getRefBook(), userId, lockKey)) {
@@ -482,10 +463,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         checkIfRefBookIsEditable();
         try {
-            //Проверка использования
-            if (refBook.isHierarchic()) {
-//                checkChildren(uniqueRecordIds);
-            }
             //Ищем все ссылки на запись справочника без учета периода
             //Deprecated: helper.checkUsages(getRefBook(), uniqueRecordIds, null, null, null, logger, "Удаление невозможно, обнаружено использование элемента справочника!");
             dao.deleteAllRecordVersions(getRefBook(), uniqueRecordIds);
@@ -537,10 +514,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         checkIfRefBookIsEditable();
         try {
             RefBook refBook = refBookDao.get(getRefBookId());
-            //Проверка использования
-            if (refBook.isHierarchic()) {
-//                checkChildren(uniqueRecordIds);
-            }
             //Ищем все ссылки на запись справочника без учета периода
             //Deprecated: helper.checkUsages(refBook, uniqueRecordIds, null, null, null, logger, "Удаление невозможно, обнаружено использование элемента справочника!");
             if (refBook.isVersioned()) {
@@ -561,11 +534,6 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public Long getFirstRecordId(Long uniqueRecordId) {
-        return dao.getFirstRecordId(getRefBook(), uniqueRecordId);
-    }
-
-    @Override
     public Long getRecordId(@NotNull Long uniqueRecordId) {
         return dao.getRecordId(getRefBook(), uniqueRecordId);
     }
@@ -577,9 +545,9 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
     @Override
     public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
-        Map<Long, Map<String, RefBookValue>> recordData = getRecordData(new ArrayList<Long>(recordIds));
+        Map<Long, Map<String, RefBookValue>> recordData = getRecordData(new ArrayList<>(recordIds));
         String refBookAttributeAlias = refBook.getAttribute(attributeId).getAlias();
-        Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
+        Map<Long, RefBookValue> result = new HashMap<>();
         for (Map.Entry<Long, Map<String, RefBookValue>> record : recordData.entrySet()) {
             result.put(record.getKey(), record.getValue().get(refBookAttributeAlias));
         }

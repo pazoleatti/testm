@@ -19,7 +19,6 @@ public class RefBook implements Serializable {
     public static final String RECORD_ID_ALIAS = "id";
     public static final String BUSINESS_ID_ALIAS = "record_id";
     public static final String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
-    public static final String RECORD_CHILDREN_ALIAS = "children";
 
     public static final String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
@@ -29,7 +28,6 @@ public class RefBook implements Serializable {
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
 
-    public static final String RECORD_HAS_CHILD_ALIAS = "HAS_CHILD";
     public static final String RECORD_SORT_ALIAS = "row_number_over";
 
     public static final List<String> SYSTEM_ALIASES = Arrays.asList("record_id", "version", "status");
@@ -383,11 +381,8 @@ public class RefBook implements Serializable {
      * @return
      */
     public Map<String, RefBookValue> createRecord() {
-        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+        Map<String, RefBookValue> result = new HashMap<>();
         result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
-        if (isHierarchic()) {
-            result.put(RefBook.RECORD_PARENT_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
-        }
         for (RefBookAttribute attribute : getAttributes()) {
             result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), null));
         }
