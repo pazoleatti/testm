@@ -109,22 +109,6 @@ public interface RefBookDao {
     List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook);
 
     /**
-     * Возвращает row_num для элемента справочника
-     */
-    Long getRowNum(Long refBookId,
-                   String tableName,
-                   Long recordId,
-                   String filter,
-                   RefBookAttribute sortAttribute,
-                   boolean isSortAscending,
-                   String whereClause);
-
-    /**
-     * Возвращает row_num для элемента справочника
-     */
-    Long getRowNum(PreparedStatementData ps, Long recordId);
-
-    /**
      * Получение данных справочника
      *
      * @param refBookId       идентификатор справочника

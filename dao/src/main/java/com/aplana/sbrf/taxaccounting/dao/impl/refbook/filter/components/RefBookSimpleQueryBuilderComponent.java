@@ -342,11 +342,10 @@ public class RefBookSimpleQueryBuilderComponent {
      * @param refBook     справочник, для которого формируется запрос
      * @param versionFrom начала периода
      * @param versionTo   конец периода
-     * @param filter      условия фильтрации (<strong>пока не реализовано</strong>)
      * @return
      */
     @Deprecated
-    public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
+    public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT * FROM (SELECT r.id ")
                 .appendQuery(RefBook.RECORD_ID_ALIAS).appendQuery(", r.record_id ")
@@ -371,15 +370,9 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.addNamedParam("versionFrom", versionFrom);
         ps.addNamedParam("versionTo", versionTo);
         Calendar maxDate = Calendar.getInstance();
-        maxDate.set(2099, 11, 31);
+        maxDate.set(2099, Calendar.DECEMBER, 31);
         ps.addNamedParam("maxDate", maxDate.getTime());
 
-		/*PreparedStatementData filterPS = new PreparedStatementData();
-        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
-		simpleFilterTreeListener.setRefBook(refBook);
-		simpleFilterTreeListener.setPs(filterPS);
-
-		Filter.getFilterQuery(filter, simpleFilterTreeListener);*/
         return ps;
     }
 
@@ -636,25 +629,6 @@ public class RefBookSimpleQueryBuilderComponent {
         return sql;
     }
 
-    private static final String CHECK_PARENT_CONFLICT = "with currentRecord as (select id, record_id, version from %1$s where id = :parentId),\n" +
-            "nextVersion as (select min(r.version) as version from %1$s r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.status != -1),\n" +
-            "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
-            "select distinct id,\n" +
-            "case\n" +
-            "\twhen (versionEnd is not null and (:versionTo is null or :versionTo > versionEnd)) then 1\n" +
-            "\twhen (:versionFrom < versionStart) then -1\n" +
-            "\telse 0\n" +
-            "end as result\n" +
-            "from allRecords";
-
-    public PreparedStatementData psCheckParentConflict(RefBook refBook, Long parentId, Date versionFrom, Date versionTo) {
-        PreparedStatementData sql = new PreparedStatementData(String.format(CHECK_PARENT_CONFLICT, refBook.getTableName()));
-        sql.addNamedParam("parentId", parentId);
-        sql.addNamedParam("versionFrom", versionFrom);
-        sql.addNamedParam("versionTo", versionTo);
-        return sql;
-    }
-
     private static final String CHECK_CROSS_VERSIONS =
             "with allVersions as (select r.id, r.record_id, r.version from %1$s r where status != -1 and record_id=:recordId and (:excludedRecordId is null or id != :excludedRecordId)),\n" +
                     "recordsByVersion as (select r.id, r.record_id, r.status, r.version, row_number() over(%2$s) rn from %1$s r, allVersions av where r.id=av.id and r.status != -1),\n" +
@@ -686,16 +660,6 @@ public class RefBookSimpleQueryBuilderComponent {
     public PreparedStatementData psCheckCrossVersions(RefBook refBook) {
         String partition = isSupportOver() ? CHECK_CROSS_VERSIONS_PARTITION : "";
         return new PreparedStatementData(String.format(CHECK_CROSS_VERSIONS, refBook.getTableName(), partition));
-    }
-
-    private static final String IS_VERSION_USED_LIKE_PARENT =
-            "select r.version as version, \n" +
-                    "  (SELECT min(version) - interval '1' DAY FROM %1$s rn WHERE rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
-                    "from %1$s r where r.%2$s = :parentId and r.version >= :versionFrom and r.status != -1";
-
-    public PreparedStatementData psVersionUsedLikeParent(RefBook refBook) {
-        String query = String.format(IS_VERSION_USED_LIKE_PARENT, refBook.getTableName(), RefBook.RECORD_PARENT_ID_ALIAS);
-        return new PreparedStatementData(query);
     }
 
     public PreparedStatementData psGetNextVersion(RefBook refBook, Date version, String filter) {
@@ -758,7 +722,7 @@ public class RefBookSimpleQueryBuilderComponent {
     }
 
     private List<RefBookAttribute> getNotSystemAttributes(List<RefBookAttribute> attributes) {
-        List<RefBookAttribute> result = new ArrayList<RefBookAttribute>();
+        List<RefBookAttribute> result = new ArrayList<>();
         for (RefBookAttribute attribute : attributes) {
             if (!RefBook.SYSTEM_ALIASES.contains(attribute.getAlias().toLowerCase())) {
                 result.add(attribute);
@@ -788,7 +752,7 @@ public class RefBookSimpleQueryBuilderComponent {
     }
 
     private List<RefBookAttribute> getRequiredAttributesListFromBook(RefBook refBook) {
-        List<RefBookAttribute> requiredAttributes = new ArrayList<RefBookAttribute>();
+        List<RefBookAttribute> requiredAttributes = new ArrayList<>();
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.isRequired()) {
                 requiredAttributes.add(attribute);
@@ -945,9 +909,9 @@ public class RefBookSimpleQueryBuilderComponent {
     }
 
     private <K, V> List<Pair<K, V>> convertMapToPairsList(Map<K, V> map) {
-        List<Pair<K, V>> pairsList = new ArrayList<Pair<K, V>>();
+        List<Pair<K, V>> pairsList = new ArrayList<>();
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            Pair<K, V> pair = new Pair<K, V>(entry.getKey(), entry.getValue());
+            Pair<K, V> pair = new Pair<>(entry.getKey(), entry.getValue());
             pairsList.add(pair);
         }
         return pairsList;

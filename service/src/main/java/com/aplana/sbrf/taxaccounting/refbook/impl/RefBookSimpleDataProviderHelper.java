@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -77,9 +75,6 @@ public class RefBookSimpleDataProviderHelper {
         boolean isConfig = refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId());
 
         if (!isConfig) {
-            if (refBook.isHierarchic() && refBook.isVersioned()) {
-                checkParentConflict(refBook, logger, versionFrom, records);
-            }
             // Проверяем каждую запись по-отдельности на уникальность значений
             for (RefBookRecord record : records) {
                 // Найденные совпадения [uniqRecordId-атрибут(ы), ...]
@@ -101,37 +96,6 @@ public class RefBookSimpleDataProviderHelper {
     }
 
     /**
-     * Проверка отсутствия конфликта с датой актуальности родительского элемента
-     */
-    private void checkParentConflict(RefBook refBook, Logger logger, Date versionFrom, List<RefBookRecord> records) {
-        List<Pair<Long, Integer>> checkResult = dao.checkParentConflict(refBook, versionFrom, records);
-        if (!checkResult.isEmpty()) {
-            for (Pair<Long, Integer> conflict : checkResult) {
-                if (conflict.getSecond() == 1) {
-                    logger.error("Запись " + findNameByParent(records, conflict.getFirst()) +
-                            ": Дата окончания периода актуальности версии должна быть не больше даты окончания периода актуальности записи, которая является родительской в иерархии!");
-                }
-                if (conflict.getSecond() == -1) {
-                    logger.error("Запись " + findNameByParent(records, conflict.getFirst()) +
-                            ": Дата начала периода актуальности версии должна быть не меньше даты начала периода актуальности записи, которая является родительской в иерархии!");
-                }
-            }
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Запись не сохранена. Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-            }
-        }
-    }
-
-    private String findNameByParent(List<RefBookRecord> records, Long parentId) {
-        for (RefBookRecord record : records) {
-            if (record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue().equals(parentId)) {
-                return record.getValues().get("NAME").getStringValue();
-            }
-        }
-        throw new ServiceException("Не найдена запись с заданным родительским элементом");
-    }
-
-    /**
      * Формирует строку с информацией о конфликтующих значениях
      *
      * @param refBook
@@ -142,7 +106,7 @@ public class RefBookSimpleDataProviderHelper {
      */
     private String makeAttrNames(RefBook refBook, RefBookRecord record, List<Pair<Long, String>> matchedRecords, List<Long> conflictedIds) {
         // [алиас атрибута : количество дублей] дублей может быть > 1, так как текущая запись может пересекать несколько интервалов времени
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
         if (conflictedIds != null) {
             //Если было ограничение по периоду, то отбираем нужные
             for (Long id : conflictedIds) {
@@ -187,9 +151,9 @@ public class RefBookSimpleDataProviderHelper {
 
     private void checkReferences(RefBook refBook, List<RefBookAttribute> attributes, List<RefBookRecord> records, Date versionFrom, Logger logger) {
         if (!attributes.isEmpty()) {
-            Map<String, RefBookDataProvider> providers = new HashMap<String, RefBookDataProvider>();
-            Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
-            List<String> uniqueAliases = new ArrayList<String>();
+            Map<String, RefBookDataProvider> providers = new HashMap<>();
+            Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<>();
+            List<String> uniqueAliases = new ArrayList<>();
 
             for (RefBookAttribute attribute : attributes) {
                 if (attribute.getUnique() != 0) {
@@ -269,10 +233,6 @@ public class RefBookSimpleDataProviderHelper {
 
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
-                if (refBook.isHierarchic()) {
-                    checkIfChildrenRecordsExists(refBook, versionFrom, logger, CROSS_ERROR_MSG, result.getRecordId());
-                }
-
                 //Ищем все ссылки на запись справочника в новом периоде
                 //Deprecated: checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
                 if (logger != null) {
@@ -288,23 +248,6 @@ public class RefBookSimpleDataProviderHelper {
             }
         }
         return true;
-    }
-
-    private void checkIfChildrenRecordsExists(RefBook refBook, Date versionFrom, Logger logger, String errorMsg, Long uniqueRecordId) {
-        List<Pair<Date, Date>> childrenVersions = dao.isVersionUsedLikeParent(refBook, uniqueRecordId, versionFrom);
-        if (childrenVersions != null && !childrenVersions.isEmpty()) {
-            for (Pair<Date, Date> versions : childrenVersions) {
-                if (logger != null) {
-                    String msg = "Существует дочерняя запись";
-                    if (refBook.isVersioned()) {
-                        msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
-                                (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
-                    }
-                    logger.error(msg);
-                }
-            }
-            throw new ServiceException(errorMsg);
-        }
     }
 
     /**

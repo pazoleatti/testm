@@ -160,7 +160,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         // получаем страницу с данными
         PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending, whereClause);
         List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
         ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
         result.setTotalCount(getRecordsCount(ps));
@@ -311,26 +311,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-
-    @Override
-    public Long getRowNum(Long refBookId, String tableName, Long recordId, String filter,
-                          RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause) {
-        RefBook refBook = get(refBookId);
-        PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
-        return getRowNum(ps, recordId);
-    }
-
-    @Override
-    public Long getRowNum(PreparedStatementData ps, Long recordId) {
-        try {
-            ps.addParam(recordId);
-            return getJdbcTemplate().queryForObject("select " + RefBook.RECORD_SORT_ALIAS + " from (" + ps.getQuery().toString() + ") where " + RefBook.RECORD_ID_ALIAS + " = ?",
-                    ps.getParams().toArray(), Long.class);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
     @Override
     public Integer getRecordsCount(PreparedStatementData ps) {
         if (!ps.getParams().isEmpty()) {
@@ -357,7 +337,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         sql.append(" FROM ");
         sql.append(tableName);
         sql.append(" WHERE id = :id");
-        Map<String, Long> params = new HashMap<String, Long>();
+        Map<String, Long> params = new HashMap<>();
         params.put("id", id);
         try {
             return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, getRowMapper(refBook));
@@ -383,26 +363,24 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             return new HashMap<>();
         }
 
-        List<Long> recordList = new ArrayList<Long>(recordIds);
-        Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
+        List<Long> recordList = new ArrayList<>(recordIds);
+        Map<Long, RefBookValue> result = new HashMap<>();
         RefBook refBook = getByAttribute(attributeId);
         final RefBookAttribute attribute = refBook.getAttribute(attributeId);
         int n = ((int) Math.floor(recordList.size() / (double) IN_CLAUSE_LIMIT) + 1);
         for (int i = 0; i < n; i++) {
-            List<Long> ids = new ArrayList<>();
-            ids.addAll(recordList.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, recordList.size())));
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT id ")
-                    .append(RefBook.RECORD_ID_ALIAS)
-                    .append(", ")
-                    .append(attribute.getAlias())
-                    .append(" value FROM ")
-                    .append(tableName)
-                    .append(" WHERE ")
-                    .append(transformToSqlInStatement("id", ids));
+            List<Long> ids = new ArrayList<>(recordList.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, recordList.size())));
 
             DereferenceMapper mapper = new DereferenceMapper(attribute);
-            getJdbcTemplate().query(sql.toString(), mapper);
+            String sql = "SELECT id " +
+                    RefBook.RECORD_ID_ALIAS +
+                    ", " +
+                    attribute.getAlias() +
+                    " value FROM " +
+                    tableName +
+                    " WHERE " +
+                    transformToSqlInStatement("id", ids);
+            getJdbcTemplate().query(sql, mapper);
             result.putAll(mapper.getResult());
         }
         return result;
@@ -435,8 +413,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<ReferenceCheckResult> getInactiveRecords(String tableName, @NotNull List<Long> uniqueRecordIds) {
         final List<ReferenceCheckResult> result = new ArrayList<>();
-        Set<Long> recordIds = new HashSet<Long>(uniqueRecordIds);
-        List<Long> existRecords = new ArrayList<Long>();
+        Set<Long> recordIds = new HashSet<>(uniqueRecordIds);
+        List<Long> existRecords = new ArrayList<>();
 
         //Исключаем несуществующие записи
         String sql = String.format("select id from %s where %s", tableName, SqlUtils.transformToSqlInStatement("id", recordIds));

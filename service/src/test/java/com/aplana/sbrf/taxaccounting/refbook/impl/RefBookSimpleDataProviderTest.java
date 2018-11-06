@@ -17,7 +17,6 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
@@ -81,14 +80,6 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRowNumInvokesDao() {
-        provider.getRowNum(null, TEST_RECORD_ID, null, null, true);
-
-        verify(daoMock, atLeastOnce()).getRowNum(any(RefBook.class), any(Date.class), anyLong(), anyString(),
-                any(RefBookAttribute.class), anyBoolean());
-    }
-
-    @Test
     public void getRecordDataInvokesDao() {
         provider.getRecordData(TEST_RECORD_ID);
 
@@ -120,22 +111,6 @@ public class RefBookSimpleDataProviderTest {
         provider.getRecordVersionInfo(3L);
 
         verify(daoMock).getRecordVersionInfo(any(RefBook.class), eq(3L));
-    }
-
-    @Test
-    public void getVersionsInvokesDao() {
-        Date versionStart = new Date(0);
-        Date versionEnd = new Date();
-        provider.getVersions(versionStart, versionEnd);
-
-        verify(daoMock).getVersions(any(RefBook.class), eq(versionStart), eq(versionEnd));
-    }
-
-    @Test
-    public void getRecordVersionsCountInvokesDao() {
-        provider.getRecordVersionsCount(4L);
-
-        verify(daoMock).getRecordVersionsCount(any(RefBook.class), eq(4L));
     }
 
     @Test
@@ -192,13 +167,6 @@ public class RefBookSimpleDataProviderTest {
     public void getRecordDataWhereClause() {
         provider.getRecordDataWhere("id in (1, 2)");
         verify(daoMock).getRecordDataWhere(any(RefBook.class), eq("id in (1, 2)"));
-    }
-
-    @Test
-    public void getFirstRecordIdInvokesDao() {
-        provider.getFirstRecordId(5L);
-
-        verify(daoMock).getFirstRecordId(any(RefBook.class), eq(5L));
     }
 
     @Test

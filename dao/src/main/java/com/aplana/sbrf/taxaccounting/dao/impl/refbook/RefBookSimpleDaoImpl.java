@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
@@ -18,17 +16,13 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
-import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -51,8 +45,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Autowired
     private DBUtils dbUtils;
     @Autowired
-    private ApplicationContext applicationContext;
-    @Autowired
     private RefBookMapperFactory refBookMapperFactory;
 
     private static int IN_CLAUSE_LIMIT = 10000;
@@ -63,11 +55,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         } else {
             return new RefBookValueMapper(refBook);
         }
-    }
-
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsWithVersionInfo(RefBook refBook, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, String direction) {
-        return refBookDao.getRecordsWithVersionInfo(refBook, version, pagingParams, filter, sortAttribute, direction);
     }
 
     /**
@@ -87,7 +74,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false, false);
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
 
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>(records);
         if (pagingParams != null) {
             ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false, false);
             result.setTotalCount(refBookDao.getRecordsCount(ps));
@@ -132,12 +119,12 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo);
         LOG.debug(ps.getQuery().toString());
         List<Map<String, RefBookValue>> records =
                 getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(), getRowMapper(refBook));
 
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>(records);
         result.setTotalCount(records.size());
         return result;
     }
@@ -181,7 +168,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(RefBook refBook, List<Long> recordIds) {
         if (recordIds.size() > IN_CLAUSE_LIMIT) {
-            Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>();
+            Map<Long, Map<String, RefBookValue>> result = new HashMap<>();
             int n = (recordIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
             for (int i = 0; i < n; i++) {
                 List<Long> subList = getSubList(recordIds, i);
@@ -245,27 +232,11 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     }
 
     private Map<Long, Map<String, RefBookValue>> mapListToData(List<Map<String, RefBookValue>> recordsList) {
-        Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
+        Map<Long, Map<String, RefBookValue>> recordData = new HashMap<>();
         for (Map<String, RefBookValue> record : recordsList) {
             recordData.put(record.get("id").getNumberValue().longValue(), record);
         }
         return recordData;
-    }
-
-    /**
-     * Получение row_num записи по заданным параметрам
-     *
-     * @param refBook       справочник
-     * @param version       дата актуальности
-     * @param recordId      идентификатор искомой записи
-     * @param filter        условие фильтрации строк. Может быть не задано
-     * @param sortAttribute сортируемый столбец. Может быть не задан
-     * @return номер записи
-     */
-    @Override
-    public Long getRowNum(@NotNull RefBook refBook, Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, recordId, null, version, sortAttribute, filter, null, isSortAscending, false, false);
-        return refBookDao.getRowNum(ps, recordId);
     }
 
     /**
@@ -330,31 +301,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
-    /**
-     * Перечень версий записей за период
-     *
-     * @param refBook справочник
-     * @return список дат - версий
-     */
-    @Override
-    public List<Date> getVersions(RefBook refBook, Date startDate, Date endDate) {
-        String sql = String.format("SELECT version FROM %s where version >= ? and version <= ? GROUP BY version", refBook.getTableName());
-        return getJdbcTemplate().queryForList(sql, new Object[]{startDate, endDate}, new int[]{Types.DATE, Types.DATE}, Date.class);
-    }
-
-    /**
-     * Возвращает количество существующих версий для элемента справочника
-     *
-     * @param refBook        справочник
-     * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @return количество версий
-     */
-    @Override
-    public int getRecordVersionsCount(RefBook refBook, Long uniqueRecordId) {
-        String sql = "select count(*) as cnt from %1$s where STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from %1$s where ID=?)";
-        return getJdbcTemplate().queryForObject(String.format(sql, refBook.getTableName()), Integer.class, uniqueRecordId);
-    }
-
     static final String SQL_GET_RECORD_ID = "select record_id from %s where id = %d";
 
     /**
@@ -397,7 +343,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         refBookClone.addAttribute(RefBook.getVersionToAttribute());
 
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBookClone);
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<>(records);
         result.setTotalCount(recordsCount);
         return result;
     }
@@ -445,16 +391,16 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      * @return список записей с группами уникальности списков пар уникальных атрибутов и значений
      */
     private Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> aggregateUniqueAttributesAndValues(List<RefBookAttribute> attributes, RefBookRecord record) {
-        Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> attributeValues = new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>();
+        Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> attributeValues = new HashMap<>();
         for (RefBookAttribute attribute : attributes) {
             if (attribute.getUnique() != 0) {
                 List<Pair<RefBookAttribute, RefBookValue>> values;
                 if (attributeValues.get(attribute.getUnique()) != null) {
                     values = attributeValues.get(attribute.getUnique());
                 } else {
-                    values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
+                    values = new ArrayList<>();
                 }
-                values.add(new Pair<RefBookAttribute, RefBookValue>(attribute, record.getValues().get(attribute.getAlias())));
+                values.add(new Pair<>(attribute, record.getValues().get(attribute.getAlias())));
                 attributeValues.put(attribute.getUnique(), values);
             }
         }
@@ -468,13 +414,13 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      * @return список пар идентификатор записи - названия уникальных атрибутов через запятую
      */
     private List<Pair<Long, String>> aggregateUniqueAttributeNamesByRecords(List<Pair<Long, String>> result) {
-        List<Pair<Long, String>> matchedRecords = new ArrayList<Pair<Long, String>>();
+        List<Pair<Long, String>> matchedRecords = new ArrayList<>();
         Long prevRecordId = 0L;
         String prevName = "";
         for (Pair<Long, String> pair : result) {
 
             if (!prevRecordId.equals(pair.getFirst()) && prevRecordId != 0) {
-                Pair<Long, String> newPair = new Pair<Long, String>(prevRecordId, prevName);
+                Pair<Long, String> newPair = new Pair<>(prevRecordId, prevName);
                 matchedRecords.add(newPair);
             }
 
@@ -487,7 +433,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
             prevRecordId = pair.getFirst();
         }
 
-        Pair<Long, String> newPair = new Pair<Long, String>(prevRecordId, prevName);
+        Pair<Long, String> newPair = new Pair<>(prevRecordId, prevName);
         matchedRecords.add(newPair);
         return matchedRecords;
     }
@@ -502,36 +448,12 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      */
     @Override
     public List<Long> checkConflictValuesVersions(RefBook refBook, List<Pair<Long, String>> recordPairs, Date versionFrom, Date versionTo) {
-        List<Long> recordIds = new ArrayList<Long>();
+        List<Long> recordIds = new ArrayList<>();
         for (Pair<Long, String> pair : recordPairs) {
             recordIds.add(pair.getFirst());
         }
         PreparedStatementData ps = queryBuilder.psCheckConflictValuesVersions(refBook, recordIds, versionFrom, versionTo);
         return getNamedParameterJdbcTemplate().queryForList(ps.getQueryString(), ps.getNamedParams(), Long.class);
-    }
-
-    /**
-     * Проверяет существуют ли конфликты в датах актуальности у проверяемых записей и их родительских записей (в иерархических справочниках)
-     *
-     * @param versionFrom дата начала актуальности
-     * @param records     проверяемые записи
-     */
-    @Override
-    public List<Pair<Long, Integer>> checkParentConflict(RefBook refBook, Date versionFrom, List<RefBookRecord> records) {
-        final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
-        for (RefBookRecord record : records) {
-            Long parentId = record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-            if (parentId != null) {
-                PreparedStatementData ps = queryBuilder.psCheckParentConflict(refBook, parentId, versionFrom, record.getVersionTo());
-                getNamedParameterJdbcTemplate().query(ps.getQueryString(), ps.getNamedParams(), new RowCallbackHandler() {
-
-                    public void processRow(ResultSet rs) throws SQLException {
-                        result.add(new Pair<Long, Integer>(SqlUtils.getLong(rs, "id"), SqlUtils.getInteger(rs, "result")));
-                    }
-                });
-            }
-        }
-        return new ArrayList<Pair<Long, Integer>>(result);
     }
 
     /**
@@ -575,30 +497,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
                 return result;
             }
         });
-    }
-
-    /**
-     * Проверяет использование записи как родителя для дочерних
-     *
-     * @param refBook     справочник
-     * @param parentId    уникальный идентификатор записи
-     * @param versionFrom дата начала актуальности новой версии
-     * @return список пар <дата начала - дата окончания> периода актуальности обнаруженных дочерних записей
-     */
-    @Override
-    public List<Pair<Date, Date>> isVersionUsedLikeParent(RefBook refBook, Long parentId, Date versionFrom) {
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("versionFrom", versionFrom);
-        parameters.put("parentId", parentId);
-
-        PreparedStatementData ps = queryBuilder.psVersionUsedLikeParent(refBook);
-        return getNamedParameterJdbcTemplate().query(ps.getQueryString(), parameters,
-                new RowMapper<Pair<Date, Date>>() {
-
-                    public Pair<Date, Date> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Date, Date>(rs.getDate("version"), rs.getDate("versionEnd"));
-                    }
-                });
     }
 
     /**
@@ -771,44 +669,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         return null;
     }
 
-    /**
-     * Возвращает все версии указанной записи справочника
-     *
-     * @param refBook        идентификатор справочник
-     * @param uniqueRecordId уникальный идентификатор записи, все версии которой будут получены
-     * @param pagingParams   определяет параметры запрашиваемой страницы данных. Могут быть не заданы
-     * @param filter         условие фильтрации строк. Может быть не задано
-     * @param sortAttribute  сортируемый столбец. Может быть не задан
-     * @return
-     */
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(RefBook refBook, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        RefBook newRefBook = SerializationUtils.clone(refBook);
-        // получаем страницу с данными
-        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(newRefBook, null, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, false, false);
-
-        //Добавляем атрибуты версии, т.к они не хранятся в бд
-        newRefBook.getAttributes().add(RefBook.getVersionFromAttribute());
-        newRefBook.getAttributes().add(RefBook.getVersionToAttribute());
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), getRowMapper(newRefBook));
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        // получаем информацию о количестве версий
-        result.setTotalCount(getRecordVersionsCount(newRefBook, uniqueRecordId));
-        return result;
-    }
-
-    /**
-     * Проверяет существует ли циклическая зависимость для указанных записей справочника
-     * Если среди дочерних элементов указанной записи существует указанный родительский элемент, то существует цикл
-     *
-     * @param uniqueRecordId идентификатор записи
-     * @param parentRecordId идентификатор родительской записи
-     * @return циклическая зависимость существует?
-     */
-    public boolean hasLoops(Long uniqueRecordId, Long parentRecordId) {
-        throw new UnsupportedOperationException();
-    }
-
     private final static String SQL_FIND_RECORD =
             "select id from %s where record_id = :recordId and version = :version and status != -1";
 
@@ -853,7 +713,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Override
     public List<Long> getRelatedVersions(RefBook refBook, List<Long> uniqueRecordIds) {
         if (uniqueRecordIds.size() > IN_CLAUSE_LIMIT) {
-            List<Long> result = new ArrayList<Long>();
+            List<Long> result = new ArrayList<>();
             int n = (uniqueRecordIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
             for (int i = 0; i < n; i++) {
                 List<Long> subList = getSubList(uniqueRecordIds, i);
@@ -868,7 +728,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         try {
             return getJdbcTemplate().queryForList(sql, Long.class);
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Long>();
+            return new ArrayList<>();
         }
     }
 
@@ -908,29 +768,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
-    private final static String SQL_GET_FIRST_RECORD_ID = "" +
-            "with allRecords as (select id, version from %1$s where record_id = (select record_id from %1$s where id = :id) and id != :id and status not in (-1, 2))\n" +
-            "select id from allRecords where version = (select min(version) from allRecords)";
-
-    /**
-     * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
-     *
-     * @param refBook        справочник
-     * @param uniqueRecordId идентификатор версии записи справочника
-     * @return
-     */
-    @Override
-    public Long getFirstRecordId(RefBook refBook, Long uniqueRecordId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource("id", uniqueRecordId);
-        String query = String.format(SQL_GET_FIRST_RECORD_ID, refBook.getTableName());
-        try {
-            return getNamedParameterJdbcTemplate().queryForObject(query,
-                    parameters, Long.class);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
     private static final String SQL_DELETE_ALL_VERSIONS = "update %1$s set status = -1 where record_id in (select record_id from %1$s where %2$s)";
 
     /**
@@ -943,51 +780,5 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     public void deleteAllRecordVersions(RefBook refBook, List<Long> uniqueRecordIds) {
         String sql = String.format(SQL_DELETE_ALL_VERSIONS, refBook.getTableName(), transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
-    }
-
-    @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
-        // TODO сейчас параметры version и needAccurateVersion игнорируются
-        RefBook refBook = refBookDao.get(refBookId);
-
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("SELECT ");
-        ps.appendQuery("id, RECORD_ID");
-        ps.appendQuery(" FROM ");
-        ps.appendQuery(tableName);
-        ps.appendQuery(" frb");
-
-        PreparedStatementData filterPS = new PreparedStatementData();
-        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
-        simpleFilterTreeListener.setRefBook(refBook);
-        simpleFilterTreeListener.setPs(filterPS);
-
-        Filter.getFilterQuery(filter, simpleFilterTreeListener);
-        ps.appendQuery(" WHERE status = 0 ");
-        if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" AND ");
-            ps.appendQuery(filterPS.getQuery().toString());
-            if (!filterPS.getParams().isEmpty()) {
-                ps.addParam(filterPS.getParams());
-            }
-        }
-
-        if (version != null && needAccurateVersion) {
-            ps.appendQuery(" AND ");
-            ps.appendQuery(" version = ?");
-            ps.addParam(version);
-        }
-
-        try {
-            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
-                    new RowMapper<Pair<Long, Long>>() {
-                        @Override
-                        public Pair<Long, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return new Pair<Long, Long>(SqlUtils.getLong(rs, "ID"), SqlUtils.getLong(rs, "RECORD_ID"));
-                        }
-                    });
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
     }
 }
