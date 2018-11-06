@@ -692,7 +692,7 @@ class Check extends AbstractScriptClass {
                     String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                     if (checkInn != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.errorExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
                                 checkInn)
                     }
                 }

@@ -680,13 +680,6 @@ class Check extends AbstractScriptClass {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение")
-                } else {
-                    String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
-                    if (checkInn != null) {
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.errorExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
-                                checkInn)
-                    }
                 }
             }
 
@@ -1476,7 +1469,9 @@ class Check extends AbstractScriptClass {
                                 }
                             }
                             def groupIncomes = incomesByPersonIdForCol16Sec2Check.get(groupKey(ndflPersonIncome))
-                            def groupPrepayments = ndflPersonPrepaymentList.findAll { it.operationId in groupIncomes.operationId }
+                            def groupPrepayments = ndflPersonPrepaymentList.findAll {
+                                it.operationId in groupIncomes.operationId
+                            }
                             BigDecimal АвансовыеПлатежиПоГруппе = (BigDecimal) groupPrepayments.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
                             BigDecimal taxBaseSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income ->
                                 income.calculatedTax != null && income.taxBase ? income.taxBase : 0
@@ -1873,9 +1868,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                        ?.get(ndflPersonDeduction.notifSumm) ?: []
+                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1896,7 +1891,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId) ?: []
+                ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -2299,7 +2294,7 @@ class Check extends AbstractScriptClass {
          * Выполняет проверку в строке раздела 2
          *
          * @param checkedIncome проверяемая строка раздела 2
-         * @param allIncomesOf  группа строк, относящиеся к проверяемой каким-то условием (например, по ид операции)
+         * @param allIncomesOf группа строк, относящиеся к проверяемой каким-то условием (например, по ид операции)
          * @return пройдена ли проверка
          */
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOf)
@@ -2553,7 +2548,7 @@ class Check extends AbstractScriptClass {
 
     /**
      * Получить "Виды доходов"
-     * @return мапа, где ключ значение признака дохода, значение - список записей из справочника "Виды доходов" соответствующие данному признаку
+     * @return мапа , где ключ значение признака дохода, значение - список записей из справочника "Виды доходов" соответствующие данному признаку
      */
     Map<String, List<Map<String, RefBookValue>>> getRefIncomeType() {
         // Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
