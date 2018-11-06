@@ -727,6 +727,25 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.2-dnovikov-37" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.2-dnovikov-38" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
 
     <changeSet id="3.2-ytrofimov-12" author="ytrofimov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">

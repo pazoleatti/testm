@@ -146,7 +146,7 @@ class Person extends AbstractScriptClass {
         checkPersons(savedPersons)
         for (RegistryPerson person : savedPersons) {
             logger.info("Создана новая запись в Реестре физических лиц: " +
-                    "$person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, " +
+                    "$person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, " +
                     "${person.reportDoc?.documentNumber ?: "(документ не определен)"}")
         }
         logger.info("Обработано записей из файла ${infPartCount}. В Реестре ФЛ создано ${savedPersons.size()} записей")
@@ -383,13 +383,13 @@ class Person extends AbstractScriptClass {
             if (identityPersonList != null) {
                 for (def identifier : identityPersonList) {
                     def asnuName = (identifier as PersonIdentifierExt).asnuName
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " АСНУ=\"$asnuName\" не найдена запись в справочнике \"АСНУ\".")
 
                 }
             }
             if (person.source?.id == null) {
-                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                         " невозможно определить систему-источник. Атрибут \"Система-источник\" не был заполнен.")
             }
             List<IdDoc> idDocTypes = this.undefinedIdDocTypes.get(person)
@@ -397,7 +397,7 @@ class Person extends AbstractScriptClass {
                 for (IdDoc document : idDocTypes) {
                     def docTypeCode = (document as PersonDocumentExt).docTypeCode
                     if (docTypeCode && document.docType.id == null) {
-                        logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
+                        logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, \"$document.documentNumber\"" +
                                 " указан код ДУЛ ($docTypeCode), отсутствующий в справочнике \"Коды документов\".")
                     }
                 }
@@ -405,18 +405,18 @@ class Person extends AbstractScriptClass {
 
             def taxPayerStatusCode = (person as RegistryPersonExt).taxPayerStatusCode
             if (taxPayerStatusCode && person.taxPayerState.id == null) {
-                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, \"${person.reportDoc?.documentNumber ?: "(документ не определен)"}\"" +
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, \"${person.reportDoc?.documentNumber ?: "(документ не определен)"}\"" +
                         " cтатус налогоплательщика ($taxPayerStatusCode) не найден в справочнике \"Статусы налогоплательщика\".")
             }
             def citizenshipCode = (person as RegistryPersonExt).citizenship.code
             if (citizenshipCode == null) {
-                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                         " код страны гражданства (${(person as RegistryPersonExt).citizenshipCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
             }
             if (person.address.country != null) {
                 def countryCode = (person.address as AddressExt).countryCode
                 if (countryCode && person.address.country.id == null) {
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName?:""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " код страны адреса за пределами РФ (${(person.address as AddressExt).countryCode}) не найден в справочнике \"Общероссийский классификатор стран мира\".")
                 }
             }
@@ -468,7 +468,7 @@ class Person extends AbstractScriptClass {
 
             for (def warning : warnings) {
                 if (warning) {
-                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+                    logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                             " не пройдена проверка: $warning")
                 }
             }
@@ -477,7 +477,7 @@ class Person extends AbstractScriptClass {
 
     String checkFilled(String value, RegistryPerson person, String attrName) {
         if (value != null && value.isEmpty()) {
-            logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName $person.middleName, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
+            logger.warn("Для ФЛ $person.id, $person.lastName $person.firstName ${person.middleName ?: ""}, ${formatDate(person.birthDate)}, ${person.reportDoc?.documentNumber ?: "(документ не определен)"}" +
                     " было указано пустое значение либо значение, состоящее из одних пробелов, для атрибута ($attrName)")
         }
         return value
