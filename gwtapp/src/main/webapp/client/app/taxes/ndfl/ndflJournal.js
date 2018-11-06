@@ -95,6 +95,7 @@
                 $scope.ndflJournalGrid = {
                     ctrl: {},
                     options: {
+                        gridName: 'ndflJournal',
                         datatype: "angularResource",
                         angularResource: DeclarationDataResource,
                         requestParameters: function () {
