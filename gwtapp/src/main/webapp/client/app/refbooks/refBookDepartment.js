@@ -94,7 +94,7 @@
                                 return {
                                     mode: "VIEW",
                                     refBook: $scope.refBook,
-                                    record: $scope.refBookTree.ctrl.selection
+                                    record: $scope.refBookTree.ctrl.selection.mapValues
                                 };
                             }
                         }

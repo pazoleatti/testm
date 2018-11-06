@@ -71,6 +71,7 @@ class Check extends AbstractScriptClass {
     final String R_INCOME_TYPE = "Виды дохода"
     final String R_TYPE_CODE = "Коды видов вычетов"
     final String R_NOTIF_SOURCE = "Налоговые инспекции"
+    final String R_DETAIL = "Настройки подразделений"
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String TEMPLATE_PERSON_FL_OPER = "%s, ИНП: %s, ID операции: %s"
@@ -307,7 +308,7 @@ class Check extends AbstractScriptClass {
                 if (income.isDummy()) {
                     if (incomesOfPerson.size() > 1) {
                         String errMsg = String.format("У ФЛ: %s в Разделе 2 имеется более одной строки, несмотря на то, " +
-                                "что текущая строка (для которой ставка налога = 0, ID операции = 0) показывает отсутствие операций по данному ФЛ.",
+                                "что текущая строка (для которой ставка налога = 0, ID операции = 0) показывает отсутствие операций по данному ФЛ",
                                 fioAndInp
                         )
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, income.rowNum ?: "")
