@@ -720,4 +720,15 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.2-dnovikov-37" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

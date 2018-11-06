@@ -585,35 +585,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-        Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
-            @Override
-            int compare(NdflPerson o1, NdflPerson o2) {
-                return o1.id.compareTo(o2.id)
-            }
-        })
-
+        ndflPersonList.sort { it.rowNum }
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
-        Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
-            @Override
-            int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
-                return o1.id.compareTo(o2.id)
-            }
-        })
-
+        ndflPersonIncomeList.sort { it.rowNum }
         List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
-        Collections.sort(ndflPersonDeductionList, new Comparator<NdflPersonDeduction>() {
-            @Override
-            int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
-                return o1.id.compareTo(o2.id)
-            }
-        })
+        ndflPersonDeductionList.sort { it.rowNum }
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
-        Collections.sort(ndflPersonPrepaymentList, new Comparator<NdflPersonPrepayment>() {
-            @Override
-            int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
-                return o1.id.compareTo(o2.id)
-            }
-        })
+        ndflPersonPrepaymentList.sort { it.rowNum }
         String departmentName = departmentService.get(declarationData.departmentId)?.name
         String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
         String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
