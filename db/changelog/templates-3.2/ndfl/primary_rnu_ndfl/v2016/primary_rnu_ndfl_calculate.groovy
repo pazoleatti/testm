@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
-
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
@@ -21,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
@@ -572,6 +572,31 @@ class Calculate extends AbstractScriptClass {
                 personTb.tbDepartment = parentTb
                 personTb.importDate = getDeclarationDataCreationDate()
                 person.getPersonTbList().add(personTb)
+
+                String fio = (person.lastName ?: "") + " " + (person.firstName ?: "") + " " + (person.middleName ?: "")
+                String inp = person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : ""
+                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+                if (person.inn == null) {
+                    if (person.citizenship?.code == "643") {
+                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 не указано значение ИНН в РФ. Физическое лицо будет создано в Реестре физических лиц без указания ИНН в РФ",
+                                "\"ИНН\" не указан",
+                                fioAndInp,
+                                fio,
+                                person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : "")
+                    }
+                } else {
+                    String checkInn = ScriptUtils.checkInn(person.inn)
+                    if (checkInn != null) {
+                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 указано некорректное значение ИНН в РФ  (%s). Причина: %s. Физическое лицо будет создано в Реестре физических лиц без указания ИНН в РФ",
+                                "\"ИНН\" не соответствует формату",
+                                fioAndInp,
+                                fio,
+                                person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : "",
+                                person.inn,
+                                checkInn)
+                        person.setInn(null)
+                    }
+                }
             }
 
             List<RegistryPerson> savedPersons = personService.saveNewIdentificatedPersons(insertPersonList)
@@ -829,7 +854,7 @@ class Calculate extends AbstractScriptClass {
         return toReturn
     }
 
-    static boolean updatePerson(NaturalPerson refBookPerson, NaturalPerson primaryPerson, StringBuilder infoBuilder) {
+    boolean updatePerson(NaturalPerson refBookPerson, NaturalPerson primaryPerson, StringBuilder infoBuilder) {
         boolean updated = false
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getLastName(), primaryPerson.getLastName())) {
             infoBuilder.append(makeUpdateMessage("Фамилия", refBookPerson.getLastName(), primaryPerson.getLastName()))
@@ -857,9 +882,33 @@ class Calculate extends AbstractScriptClass {
             updated = true
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getInn(), primaryPerson.getInn())) {
-            infoBuilder.append(makeUpdateMessage("ИНН в РФ", refBookPerson.getInn(), primaryPerson.getInn()))
-            refBookPerson.setInn(primaryPerson.getInn())
-            updated = true
+            String fio = (primaryPerson.lastName ?: "") + " " + (primaryPerson.firstName ?: "") + " " + (primaryPerson.middleName ?: "")
+            String inp = primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : ""
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+                if (primaryPerson.inn == null) {
+                    if (primaryPerson.citizenship?.code == "643") {
+                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 не указано значение ИНН в РФ. ИНН в РФ не будет сохраняться в Реестр физических лиц",
+                                "\"ИНН\" не указан",
+                                fioAndInp,
+                                fio,
+                                primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : "")
+                    }
+                } else {
+                    String checkInn = ScriptUtils.checkInn(primaryPerson.inn)
+                    if (checkInn != null) {
+                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 указано некорректное значение ИНН в РФ  (%s). Причина: %s. Это значение ИНН в РФ не будет сохраняться в Реестр физических лиц",
+                                "\"ИНН\" не соответствует формату",
+                                fioAndInp,
+                                fio,
+                                primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : "",
+                                primaryPerson.inn,
+                                checkInn)
+                    } else {
+                        infoBuilder.append(makeUpdateMessage("ИНН в РФ", refBookPerson.getInn(), primaryPerson.getInn()))
+                        refBookPerson.setInn(primaryPerson.getInn())
+                        updated = true
+                    }
+                }
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getInnForeign(), primaryPerson.getInnForeign())) {
             infoBuilder.append(makeUpdateMessage("ИНН в стране гражданства", refBookPerson.getInnForeign(), primaryPerson.getInnForeign()))
