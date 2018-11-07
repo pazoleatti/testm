@@ -1164,13 +1164,13 @@ class Check extends AbstractScriptClass {
                 }
 
                 // СведДох3 НДФЛ.Процентная ставка (Графа 14)
-                if ((ndflPersonIncome.taxRate ?: 0) > 0) {
+                if (ndflPersonIncome.taxRate != null) {
                     boolean checkNdflPersonIncomingTaxRateTotal = false
 
-                    boolean presentCitizenship = ndflPerson.citizenship != null && ndflPerson.citizenship != "0"
-                    boolean presentIncomeCode = ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeCode != "0"
-                    boolean presentStatus = ndflPerson.status != null && ndflPerson.status != "0"
-                    boolean presentTaxRate = ndflPersonIncome.taxRate != null && ndflPersonIncome.taxRate != 0
+                    boolean presentCitizenship = ndflPerson.citizenship != null
+                    boolean presentIncomeCode = ndflPersonIncome.incomeCode != null
+                    boolean presentStatus = ndflPerson.status != null
+                    boolean presentTaxRate = ndflPersonIncome.taxRate != null
                     def ndflPersonIncomingTaxRates = []
                     CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13:
                     {
@@ -1868,9 +1868,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                ?.get(ndflPersonDeduction.notifSumm) ?: []
+                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                        ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1891,7 +1891,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId) ?: []
+                        ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
