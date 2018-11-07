@@ -179,11 +179,6 @@ public class DepartmentDaoTest {
     }
 
     @Test
-    public void fetchAllTBIdsByPerformer() {
-        assertEquals(Arrays.asList(3), departmentDao.findAllTBIdsByPerformerId(6));
-    }
-
-    @Test
     public void testSearchDepartmentNames() {
 
         PagingParams pagingParams = new PagingParams();

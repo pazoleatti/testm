@@ -105,7 +105,7 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
             // Все ТБ, для которых подразделение пользователя назначено исполнителем.
             Set<Integer> TBIds = new HashSet<>(departmentDao.findAllTBIdsByPerformerId(user.getDepartmentId()));
             TBIds.add(userTBId);
-            return refBookDepartmentDao.fetchDepartments(TBIds);
+            return refBookDepartmentDao.findAllActiveByIds(TBIds);
         }
         throw new AccessDeniedException("Недостаточно прав");
     }
