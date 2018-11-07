@@ -122,7 +122,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
             TAUser user = taUserService.getUser(currentUser.getUsername());
             Integer userTBId = departmentDao.getParentTBId(user.getDepartmentId());
             // ТерБанк пользователя и ТерБанки, куда назначено подразделение пользователя исполнителем
-            Set<Integer> TBIds = new HashSet<>(departmentDao.fetchAllTBIdsByPerformer(user.getDepartmentId()));
+            Set<Integer> TBIds = new HashSet<>(departmentDao.findAllTBIdsByPerformerId(user.getDepartmentId()));
             TBIds.add(userTBId);
             return TBIds.contains(reportPeriodTBId);
         }

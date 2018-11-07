@@ -161,26 +161,26 @@ public class DepartmentDaoTest {
 
     @Test
     public void getDepartmentsByDeclarationsPerformersTest() {
-        List<Integer> result = departmentDao.fetchAllIdsByDeclarationsPerformers(asList(5));
+        List<Integer> result = departmentDao.findAllIdsByPerformerIds(asList(5));
         assertEquals(1, result.size());
         assertTrue(result.containsAll(asList(2)));
 
-        result = departmentDao.fetchAllIdsByDeclarationsPerformers(asList(3));
+        result = departmentDao.findAllIdsByPerformerIds(asList(3));
         assertEquals(1, result.size());
         assertTrue(result.containsAll(asList(2)));
 
-        result = departmentDao.fetchAllIdsByDeclarationsPerformers(asList(3, 4, 5));
+        result = departmentDao.findAllIdsByPerformerIds(asList(3, 4, 5));
         assertEquals(1, result.size());
         assertTrue(result.containsAll(asList(2)));
 
-        result = departmentDao.fetchAllIdsByDeclarationsPerformers(asList(7));
+        result = departmentDao.findAllIdsByPerformerIds(asList(7));
         assertEquals(2, result.size());
         assertTrue(result.containsAll(asList(2, 3)));
     }
 
     @Test
     public void fetchAllTBIdsByPerformer() {
-        assertEquals(Arrays.asList(3), departmentDao.fetchAllTBIdsByPerformer(6));
+        assertEquals(Arrays.asList(3), departmentDao.findAllTBIdsByPerformerId(6));
     }
 
     @Test

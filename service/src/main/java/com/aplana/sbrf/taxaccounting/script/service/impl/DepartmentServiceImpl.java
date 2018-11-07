@@ -86,7 +86,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId) {
-        return departmentDao.fetchAllTBIdsByPerformer(performerDepartmentId);
+        return departmentDao.findAllTBIdsByPerformerId(performerDepartmentId);
     }
 }
 

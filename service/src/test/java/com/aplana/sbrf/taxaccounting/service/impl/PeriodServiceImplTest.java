@@ -119,7 +119,7 @@ public class PeriodServiceImplTest {
     }
 
     private void mockDepartments() {
-        when(departmentDao.fetchAllChildrenIds(1)).thenReturn(asList(1, 2, 3));
+        when(departmentDao.findAllChildrenIdsById(1)).thenReturn(asList(1, 2, 3));
         Department department = new Department();
         department.setId(1);
         department.setName("dep1Name");
