@@ -106,27 +106,8 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void setOriginal(Long changingPersonRecordId, Long changingPersonOldId, Long addedOriginalRecordId) {
-        String sql;
-        if (changingPersonRecordId == changingPersonOldId) {
-            sql = "UPDATE ref_book_person set record_id = :addedOriginalRecordId where record_id = :changingPersonRecordId";
-        } else {
-            sql = "UPDATE ref_book_person set record_id = :addedOriginalRecordId where record_id = :changingPersonRecordId AND old_id = :changingPersonOldId";
-        }
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("addedOriginalRecordId", addedOriginalRecordId)
-                .addValue("changingPersonRecordId", changingPersonRecordId)
-                .addValue("changingPersonOldId", changingPersonOldId);
-        getNamedParameterJdbcTemplate().update(sql, params);
-    }
-
-    @Override
-    public void deleteOriginal(Long changingPersonRecordId, Long changingPersonOldId) {
-        String sql = "UPDATE ref_book_person set record_id = old_id where record_id = :changingPersonRecordId AND old_id = :changingPersonOldId";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("changingPersonOldId", changingPersonOldId)
-                .addValue("changingPersonRecordId", changingPersonRecordId);
-        getNamedParameterJdbcTemplate().update(sql, params);
+    public void setOriginal(Long originalRecordId, Long duplicateRecordId) {
+        setDuplicates(Collections.singletonList(duplicateRecordId), originalRecordId);
     }
 
     @Override

@@ -309,20 +309,10 @@ public class RefBookPersonDaoTest {
     public void test_setOriginal() {
         //setup
         //execution
-        personDao.setOriginal(5L, 5L, 2L);
+        personDao.setOriginal(2L, 5L);
         //verification
         RegistryPerson changedPerson = personDao.fetchPersonVersion(5L);
         assertThat(changedPerson.getRecordId()).isEqualTo(2L);
-    }
-
-    @Test
-    public void test_deleteOriginal() {
-        //setup
-        //execution
-        personDao.deleteOriginal(1L, 10L);
-        //verification
-        RegistryPerson changedPerson = personDao.fetchPersonVersion(4L);
-        assertThat(changedPerson.getRecordId()).isEqualTo(10L);
     }
 
     @Test

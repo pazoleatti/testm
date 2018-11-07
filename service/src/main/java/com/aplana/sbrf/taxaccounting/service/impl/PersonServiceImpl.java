@@ -240,11 +240,12 @@ public class PersonServiceImpl implements PersonService {
             persistedPerson.setRecordId(person.getOldId());
         } else {
             persistedPerson.setRecordId(person.getOriginal().getRecordId());
+            refBookPersonDao.setOriginal(person.getOriginal().getRecordId(), person.getRecordId());
         }
 
         List<Long> deletedDuplicates = new ArrayList<>();
         List<Long> duplicates = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(person.getDuplicates())) {
+        if (person.getOriginal() == null && CollectionUtils.isNotEmpty(person.getDuplicates())) {
             for (RegistryPersonDTO duplicate : person.getDuplicates()) {
 
                 if (duplicate.getRecordId().equals(duplicate.getOldId())) {
