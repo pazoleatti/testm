@@ -363,7 +363,11 @@
                         url: "controller/actions/registryPerson/updatePerson",
                         data: $scope.personParam
                     }).success(function (response) {
-                        $scope.person = $scope.dataExtract()
+                        $scope.person = $scope.dataExtract();
+                        angular.forEach($scope.personRegTabs, function(tab) {
+                            tab.active = false;
+                        });
+                        $scope.personTab.active = true;
                     });
                     $scope.mode = APP_CONSTANTS.MODE.VIEW;
                 };

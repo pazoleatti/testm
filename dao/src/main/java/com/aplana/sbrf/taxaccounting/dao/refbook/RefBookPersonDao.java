@@ -5,10 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -54,18 +53,11 @@ public interface RefBookPersonDao {
 
     /**
      * Установить оригинал
-     * @param changingPersonRecordId    идентификатор изменяемого ФЛ
-     * @param changingPersonOldId       исходный идентификатор изменяемого ФЛ
-     * @param addedOriginalRecordId     идентификатор добавляемого оригинала
+     * @param originalRecordId    идентификатор оригинала
+     * @param duplicateRecordId   идентификатор дубликата
      */
-    void setOriginal(Long changingPersonRecordId, Long changingPersonOldId, @NotNull Long addedOriginalRecordId);
+    void setOriginal(Long originalRecordId, Long duplicateRecordId);
 
-    /**
-     * Удалить оригинал
-     * @param changingPersonRecordId    идентификатор изменяемого ФЛ
-     * @param changingPersonOldId       исходный идентификатор изменяемого ФЛ
-     */
-    void deleteOriginal(Long changingPersonRecordId, Long changingPersonOldId);
 
     /**
      * Получение оригинала ФЛ

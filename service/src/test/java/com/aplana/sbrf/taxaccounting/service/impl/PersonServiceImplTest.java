@@ -10,7 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
@@ -22,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -165,6 +170,26 @@ public class PersonServiceImplTest {
         verify(personDao).updateBatch(personList);
 
     }
+
+    @Test
+    public void test_checkDul_codeEquals91() {
+        String docCode = "91";
+        String docNumber = "123";
+        CheckDulResult result = personService.checkDul(docCode, docNumber);
+        assertThat(result.getErrorMessage()).isNullOrEmpty();
+        assertThat(result.getFormattedNumber()).isEqualTo(docNumber);
+    }
+
+    @Test
+    public void test_checkDul_codeNotEquals91() {
+        String docCode = "03";
+        String docNumber = "123";
+
+        CheckDulResult result = personService.checkDul(docCode, docNumber);
+        assertThat(result.getErrorMessage()).isNullOrEmpty();
+        assertThat(result.getFormattedNumber()).isEqualTo(docNumber);
+    }
+
 
     private static class VersionComparator implements Comparator<RegistryPerson> {
         @Override

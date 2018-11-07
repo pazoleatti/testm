@@ -240,11 +240,12 @@ public class PersonServiceImpl implements PersonService {
             persistedPerson.setRecordId(person.getOldId());
         } else {
             persistedPerson.setRecordId(person.getOriginal().getRecordId());
+            refBookPersonDao.setOriginal(person.getOriginal().getRecordId(), person.getRecordId());
         }
 
         List<Long> deletedDuplicates = new ArrayList<>();
         List<Long> duplicates = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(person.getDuplicates())) {
+        if (person.getOriginal() == null && CollectionUtils.isNotEmpty(person.getDuplicates())) {
             for (RegistryPersonDTO duplicate : person.getDuplicates()) {
 
                 if (duplicate.getRecordId().equals(duplicate.getOldId())) {
@@ -408,6 +409,8 @@ public class PersonServiceImpl implements PersonService {
         if (docCode.equals("91")) {
             if (ScriptUtils.isUSSRIdDoc(docNumber)) {
                 result.setErrorMessage("Значение для типа ДУЛ с кодом 91 в поле \"Серия и номер\" указаны реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является разрешенным документом, удостоверяющим личность.");
+            } else {
+                result.setFormattedNumber(docNumber);
             }
         } else {
             result.setErrorMessage(ScriptUtils.checkDul(docCode, erasedNumber, "Серия и номер"));
