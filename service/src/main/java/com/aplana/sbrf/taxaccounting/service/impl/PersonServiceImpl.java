@@ -409,6 +409,8 @@ public class PersonServiceImpl implements PersonService {
         if (docCode.equals("91")) {
             if (ScriptUtils.isUSSRIdDoc(docNumber)) {
                 result.setErrorMessage("Значение для типа ДУЛ с кодом 91 в поле \"Серия и номер\" указаны реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является разрешенным документом, удостоверяющим личность.");
+            } else {
+                result.setFormattedNumber(docNumber);
             }
         } else {
             result.setErrorMessage(ScriptUtils.checkDul(docCode, erasedNumber, "Серия и номер"));
