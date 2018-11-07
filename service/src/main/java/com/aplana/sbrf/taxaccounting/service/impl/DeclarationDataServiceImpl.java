@@ -1749,7 +1749,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataId,
                     departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriodType.getName(),
-                    departmentReportPeriod.getCorrectionDate() != null ? sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "",
+                    formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
                     department.getName(),
                     declarationTemplate.getType().getName(),
                     asnuClause);
@@ -1773,6 +1773,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             lockDataService.unlock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
         }
     }
+
+    private String formatCorrectionDate(Date correctionDate) {
+        if (correctionDate == null) {
+            return "";
+        } else {
+            return " корр. " + sdf.get().format(correctionDate);
+        }
+    }
+
 
     @Override
     @Transactional
