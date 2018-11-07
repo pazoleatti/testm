@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Модель для передачи данных о ПНФ/КНФ
@@ -52,6 +53,10 @@ public class DeclarationResult {
      * Тип КНФ
      */
     private RefBookKnfType knfType;
+    /**
+     * КПП для КНФ по обособленному подразделению
+     */
+    private List<String> kppList;
     /**
      * Тип налоговой форы
      */

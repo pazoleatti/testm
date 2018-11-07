@@ -182,8 +182,17 @@
                                             <label class="control-label">{{::'title.manuallyCreated' | translate}}:</label>
                                         </div>
                                         <div class="span6">
-                                            <label class="font-normal info-text" style="width: 138px;">{{declarationData.manuallyCreated
-                                                | yesNoFormatter}}</label>
+                                            <label class="font-normal info-text" style="width: 138px;">{{declarationData.manuallyCreated | yesNoFormatter}}</label>
+                                        </div>
+                                    </div>
+                                    <div data-ng-if="declarationData.kppList" class="row-fluid">
+                                        <div class="span6">
+                                            <label class="control-label">{{::'title.kpp' | translate}}:</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="font-normal info-text" style="width: 138px;" title="{{::declarationData.kppList.join(',')}}">
+                                                {{::declarationData.kppList | joinAndTruncateFormatter : ',': 2}}
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
