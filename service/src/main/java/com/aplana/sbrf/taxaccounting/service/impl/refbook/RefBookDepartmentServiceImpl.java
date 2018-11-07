@@ -103,9 +103,9 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
         } else if (user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             Integer userTBId = departmentDao.getParentTBId(user.getDepartmentId());
             // Все ТБ, для которых подразделение пользователя назначено исполнителем.
-            Set<Integer> TBIds = new HashSet<>(departmentDao.fetchAllTBIdsByPerformer(user.getDepartmentId()));
+            Set<Integer> TBIds = new HashSet<>(departmentDao.findAllTBIdsByPerformerId(user.getDepartmentId()));
             TBIds.add(userTBId);
-            return refBookDepartmentDao.fetchDepartments(TBIds);
+            return refBookDepartmentDao.findAllActiveByIds(TBIds);
         }
         throw new AccessDeniedException("Недостаточно прав");
     }

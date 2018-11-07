@@ -139,10 +139,6 @@ public class DepartmentServiceImplTest {
             }
         }).when(departmentReportPeriodDao).fetchAllByFilter(any(DepartmentReportPeriodFilter.class));
 
-        // Доступность по связям
-        when(departmentDao.getDepartmentIdsByExecutors(Collections.singletonList(311))).thenReturn(Collections.singletonList(3));
-        when(departmentDao.getDepartmentIdsByExecutors(Collections.singletonList(31))).thenReturn(Collections.singletonList(3));
-
         when(departmentDao.getParentTBId(311)).thenReturn(3);
         when(departmentDao.getParentTBId(31)).thenReturn(3);
         when(departmentDao.getParentTBId(3)).thenReturn(3);
@@ -311,37 +307,6 @@ public class DepartmentServiceImplTest {
         for (int aDepartmentID : departmentID) {
             taUser.setDepartmentId(aDepartmentID);
             Assert.assertEquals(0, departmentService.getBADepartmentIds(taUser).size());
-        }
-    }
-
-    @Test
-    public void getTBDepartmentsTest() {
-        TAUser taUser = new TAUser();
-        taUser.setRoles(taRoles);
-
-        List<Department> result = departmentService.getTBDepartments(taUser, TaxType.NDFL);
-        Assert.assertEquals(3, result.size());
-        Assert.assertTrue(result.contains(root) && result.contains(departmentTB2)
-                && result.contains(departmentTB3));
-
-        // REMOVE TARole.ROLE_CONTROL_UNP, TARole.ROLE_ADMIN
-        taUser.getRoles().remove(0);
-        taUser.getRoles().remove(0);
-
-        for (int aDepartmentID : departmentID) {
-            taUser.setDepartmentId(aDepartmentID);
-            result = departmentService.getTBDepartments(taUser, TaxType.NDFL);
-
-            switch (aDepartmentID) {
-                case 0:
-                    Assert.assertEquals(0, result.size());
-                    break;
-                case 2:
-                case 3:
-                    Assert.assertEquals(1, result.size());
-                    Assert.assertTrue(result.contains(departmentTB2) || result.contains(departmentTB3));
-                    break;
-            }
         }
     }
 

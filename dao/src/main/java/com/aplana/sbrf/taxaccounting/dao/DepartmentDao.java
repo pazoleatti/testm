@@ -52,7 +52,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param parentDepartmentId Идентификатор родительского подразделения
      * @return Список идентификаторов всех дочерних подразделений
      */
-    List<Integer> fetchAllChildrenIds(int parentDepartmentId);
+    List<Integer> findAllChildrenIdsById(int parentDepartmentId);
 
     /**
      * Получить список идентификаторов всех подразделений, являющихся дочерниими для заданных
@@ -60,7 +60,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param parentDepartmentIds Идентификаторы родительских подразделений
      * @return Список идентификаторов всех дочерних подразделений
      */
-    List<Integer> fetchAllChildrenIds(List<Integer> parentDepartmentIds);
+    List<Integer> findAllChildrenIdsByIds(Collection<Integer> parentDepartmentIds);
 
     /**
      * Получить список идентификаторов подразделений, для которых заланное является дочерним. К списку добавляется само подразделение
@@ -187,60 +187,20 @@ public interface DepartmentDao extends PermissionDao {
     List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments);
 
     /**
-     * Все подразделения, для форм которых, подразделения departments назначены исполнителями
-     */
-    List<Integer> getDepartmentIdsByExecutors(List<Integer> departments);
-
-    /**
-     * Установка значения поля GARANT_USE
-     * Используется для установки флага что данное поразделение используется в модуле Гарантий
-     *
-     * @param depId ид подразделения
-     * @param used  true - используется, false - не используется
-     */
-    void setUsedByGarant(int depId, boolean used);
-
-    /**
-     * Получить списиок подразделений, для которых подразделение пользователя(или его дочернее подразделение) является исполнителем макетов
-     *
-     * @param userDepId         подразделения-исполнителя
-     * @param declarationTypeId id макета
-     * @return
-     */
-    List<Integer> getAllPerformers(int userDepId, int declarationTypeId);
-
-    /**
-     * Получить списиок ТБ подразделений, для которых подразделение из ТБ пользователя является исполнителем макетов
-     *
-     * @param userTBDepId       подразделения-исполнителя
-     * @param declarationTypeId id макета
-     * @return
-     */
-    List<Integer> getAllTBPerformers(int userTBDepId, int declarationTypeId);
-
-    /**
-     * Получить список подразделений, исполнителями форм которых являются заданные подразделения
+     * Возвращяет список ид подразделений, на которые назначено исполнителем заданные подразделения
      *
      * @param performersIds Список подразделений-исполнителей
      * @return список подразделений, исполнителями форм которых являются заданные подразделения
      */
-    List<Integer> fetchAllIdsByDeclarationsPerformers(List<Integer> performersIds);
+    List<Integer> findAllIdsByPerformerIds(List<Integer> performersIds);
 
     /**
-     * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     * Возвращяет список ид ТерБанков подразделений, на которые назначено исполнителем заданные подразделения
      *
      * @param performerDepartmentId ID подразделения, которое является исполнителем
      * @return список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
      */
-    List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
-
-    /**
-     * Получить список ID Территориальных банков подразделений, исполнителем (без дочерних) макетов форм которых является заданное подразделение
-     *
-     * @param performerDepartmentId ID подразделения, которое является исполнителем
-     * @return список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
-     */
-    List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId);
+    List<Integer> findAllTBIdsByPerformerId(int performerDepartmentId);
 
     /**
      * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения

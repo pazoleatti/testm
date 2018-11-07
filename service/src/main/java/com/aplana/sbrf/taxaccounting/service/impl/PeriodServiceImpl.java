@@ -188,7 +188,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            List<Integer> departmentIds = departmentDao.fetchAllChildrenIds(departmentReportPeriod.getDepartmentId());
+            List<Integer> departmentIds = departmentDao.findAllChildrenIdsById(departmentReportPeriod.getDepartmentId());
             departmentReportPeriodService.create(departmentReportPeriod, departmentIds);
 
             logger.info("%s открыт для \"%s\" и всех дочерних подразделений",
@@ -553,13 +553,13 @@ public class PeriodServiceImpl implements PeriodService {
 
     private DepartmentReportPeriodFilter filterForAllPeriods(DepartmentReportPeriod departmentReportPeriod) {
         DepartmentReportPeriodFilter filter = filterFor(departmentReportPeriod);
-        filter.setDepartmentIdList(departmentDao.fetchAllChildrenIds(departmentReportPeriod.getDepartmentId()));
+        filter.setDepartmentIdList(departmentDao.findAllChildrenIdsById(departmentReportPeriod.getDepartmentId()));
         return filter;
     }
 
     private DeclarationDataFilter declarationFilterForAllPeriods(DepartmentReportPeriod departmentReportPeriod) {
         DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDepartmentIds(departmentDao.fetchAllChildrenIds(departmentReportPeriod.getDepartmentId()));
+        filter.setDepartmentIds(departmentDao.findAllChildrenIdsById(departmentReportPeriod.getDepartmentId()));
         filter.setReportPeriodIds(singletonList(departmentReportPeriod.getReportPeriod().getId()));
         filter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
         filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());

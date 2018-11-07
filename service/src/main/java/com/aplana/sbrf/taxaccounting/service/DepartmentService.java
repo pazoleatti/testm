@@ -108,17 +108,6 @@ public interface DepartmentService {
     List<Integer> getBADepartmentIds(TAUser tAUser);
 
     /**
-     * 20 - Получение ТБ универсальное
-     * Для роли "Контролер УНП" может быть несколько подразделений
-     * Для роли "Контролер НС" только одно подразделение
-     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380723">Аналитика</a>
-     *
-     * @param tAUser пользователь
-     * @return список подразделений
-     */
-    List<Department> getTBDepartments(TAUser tAUser, TaxType taxType);
-
-    /**
      * 20 - Получение идентификаторов ТБ
      * Для роли "Контролер УНП" может быть несколько подразделений
      * Для роли "Контролер НС" только одно подразделение

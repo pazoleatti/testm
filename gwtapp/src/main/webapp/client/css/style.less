@@ -1748,10 +1748,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   margin-right: 10px;
 }
 
-.field-content {
-  height: 100%;
-}
-
 .person-card-data {
   font-weight: bold;
   margin-left: 2% !important;
@@ -1765,6 +1761,10 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 Без этого класса размеры будут вычислятся через js (в grid.js fillHeight).
 Добавил, т.к. так работает заметно лучше и быстрее, тем более при движении сплиттера панели уведомлений*/
 .flex-grid {
+  &:extend(.flex-column);
+  .field-content {
+    flex: 1;
+  }
   .ui-jqgrid {
     &:extend(.flex-column);
   }

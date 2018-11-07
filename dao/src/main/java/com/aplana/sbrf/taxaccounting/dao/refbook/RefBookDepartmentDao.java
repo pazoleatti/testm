@@ -53,7 +53,7 @@ public interface RefBookDepartmentDao {
      * @param ids список идентификаторов
      * @return список значений справочника
      */
-    List<RefBookDepartment> fetchDepartments(Collection<Integer> ids);
+    List<RefBookDepartment> findAllActiveByIds(Collection<Integer> ids);
 
     /**
      * Получение значений справочника с фильтрацией по наименованию подразделения и пейджингом

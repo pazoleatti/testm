@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +92,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Integer> getAllChildrenIds(Integer depId) {
         if (depId == null)
             return new ArrayList<>(0);
-        return departmentDao.fetchAllChildrenIds(depId);
+        return departmentDao.findAllChildrenIdsById(depId);
     }
 
     @Override
@@ -123,42 +121,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRole(TARole.N_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
         } else if (tAUser.hasRole(TARole.N_ROLE_OPER)) {
-            retList.addAll(departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId()));
-        }
-
-        return retList;
-    }
-
-    @Override
-    public List<Department> getTBDepartments(TAUser tAUser, TaxType taxType) {
-        List<Department> retList = new ArrayList<>();
-
-        if (tAUser.hasRole(TARole.ROLE_ADMIN)
-                || tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
-            // подразделение с типом 1
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
-            // подразделение с типом 2
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
-        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || tAUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
-            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.CSKO_PCP) {
-                List<Integer> departmentIds = departmentDao.getDepartmentIdsByExecutors(Collections.singletonList(tAUser.getDepartmentId()));
-                for (Integer depId : departmentIds) {
-                    Department department = getParentTB(depId);
-                    if (department != null) {
-                        retList.add(department);
-                    }
-                }
-            } else if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
-                // поразделение пользователя
-                retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
-
-            } else {
-                // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
-                Department departmenTB = departmentDao.getDepartmentTB(tAUser.getDepartmentId());
-                if (departmenTB != null) {
-                    retList.add(departmenTB);
-                }
-            }
+            retList.addAll(departmentDao.findAllChildrenIdsById(tAUser.getDepartmentId()));
         }
 
         return retList;
@@ -200,36 +163,27 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Cacheable(value = CacheConstants.DEPARTMENT, key = "'user_departments_'+#tAUser.id")
     public List<Integer> getTaxFormDepartments(TAUser tAUser) {
-        TaxType taxType = TaxType.NDFL;
-        List<Integer> retList = new ArrayList<>();
-        if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
-            retList.addAll(departmentDao.fetchAllIds());
-        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS)) {
-            // ТБ подразделения пользователя + все дочерние
-            Set<Integer> departments = new LinkedHashSet<>(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
-            // ТБ + дочерние подразделения, для которых подразделение пользователя назначено исполнителем. Т.е сначала вверх до ТБ, а потом все дочерние
-            List<Integer> forPerform = departmentDao.getTBDepartmentIdsByDeclarationPerformer(tAUser.getDepartmentId());
-            for (Integer tbId : forPerform) {
-                departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
-            }
-            retList.addAll(departments);
-        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
-            // Дочерние подразделения для подразделения пользователя
-            List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId());
-            // Подразделения, исполнителями налоговых форм которых являются подразделение пользователя
-            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(Lists.newArrayList((Integer) tAUser.getDepartmentId()));
-            // В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
-            // назначены исполнителями
-            retList.addAll(userDepartmentChildrenIds);
-            retList.addAll(declarationDepartmentsIds);
+            return departmentDao.fetchAllIds();
+        } else if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS)) {
+            Set<Integer> tbDepartmentIds = new HashSet<>();
+            // ТБ подразделения пользователя
+            tbDepartmentIds.add(departmentDao.getParentTBId(tAUser.getDepartmentId()));
+            // ТБ, на которые (или на их дочерние) подразделение пользователя (или его дочерние) назначено исполнителем
+            tbDepartmentIds.addAll(departmentDao.findAllTBIdsByPerformerId(tAUser.getDepartmentId()));
+            // В итоге возвращяем все ТБ выше и все их дочерние
+            return departmentDao.findAllChildrenIdsByIds(tbDepartmentIds);
+        } else if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
+            Set<Integer> departmentIds = new HashSet<>();
+            // подразделение пользователя
+            departmentIds.add(tAUser.getDepartmentId());
+            // подразделения, на которые подразделение пользователя назначено исполнителем
+            departmentIds.addAll(departmentDao.findAllIdsByPerformerIds(Lists.newArrayList((Integer) tAUser.getDepartmentId())));
+            // В итоге возвращяем все подразделение выше и все их дочерние
+            return departmentDao.findAllChildrenIdsByIds(departmentIds);
         }
-
-        // Результат выборки должен содержать только уникальные подразделения
-        Set<Integer> setItems = new HashSet<>(retList);
-        retList.clear();
-        retList.addAll(setItems);
-        return retList;
+        return new ArrayList<>();
     }
 
     @Override

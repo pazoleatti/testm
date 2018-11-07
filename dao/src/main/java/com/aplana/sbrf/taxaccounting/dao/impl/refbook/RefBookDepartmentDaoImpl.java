@@ -98,11 +98,11 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     }
 
     @Override
-    public List<RefBookDepartment> fetchDepartments(Collection<Integer> ids) {
-        return fetchDepartments(ids, false);
+    public List<RefBookDepartment> findAllActiveByIds(Collection<Integer> ids) {
+        return findAllByIds(ids);
     }
 
-    private List<RefBookDepartment> fetchDepartments(Collection<Integer> ids, boolean activeOnly) {
+    private List<RefBookDepartment> findAllByIds(Collection<Integer> ids) {
         String sql = REF_BOOK_DEPARTMENT_SELECT + "where dep.is_active = 1 AND dep.id IN (:ids)";
         return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("ids", ids), new RefBookDepartmentRowMapper());
     }

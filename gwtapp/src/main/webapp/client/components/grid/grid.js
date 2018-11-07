@@ -962,7 +962,7 @@
                             },
 
                             resetSettings: function () {
-                                if (scope.gridStoreColSettings) {
+                                if (scope.gridStorePageSettings || scope.gridStoreColSettings) {
                                     GridSettingsStorage.resetSettings(scope.grid, scope.gridParams.gridItself, initialConfig);
                                     fillLastColumn();
                                 }
@@ -1003,15 +1003,6 @@
                             gridComplete: undefined,
                             loadComplete: undefined
                         };
-
-                        angular.forEach(element[0].attributes, function (attribute) {
-                            // не нужно переносить директиву
-                            if (attribute.name.indexOf('aplana-grid') === -1) {
-                                var value = attribute.value;
-                                var key = attribute.name;
-                                scope.grid.attr(key, value);
-                            }
-                        });
 
                         // Чтобы id и name div и table не дублировались,
                         // явно задаем id и name у table
@@ -1583,7 +1574,7 @@
                                         }
                                     }
                                 } else if (element.hasClass('full-height-grid')) {
-                                    var elementHeight = element.height();
+                                    var elementHeight = element.height() - element.find('.ui-jqgrid-restore').height();
                                     var tableHeight = scope.gridParams.bdiv.find("table").height();
                                     var hdivHeight = scope.gridParams.hdiv.height();
                                     var pagerHeight = 30;

@@ -36,7 +36,7 @@ public class RefBookDepartmentDaoTest {
 
     @Test
     public void testFetchDepartments() {
-        List<RefBookDepartment> result = refBookDepartmentDao.fetchDepartments(Lists.newArrayList(1));
+        List<RefBookDepartment> result = refBookDepartmentDao.findAllActiveByIds(Lists.newArrayList(1));
         assertEquals(1, result.size());
         assertEquals(DepartmentType.ROOT_BANK, result.get(0).getType());
     }

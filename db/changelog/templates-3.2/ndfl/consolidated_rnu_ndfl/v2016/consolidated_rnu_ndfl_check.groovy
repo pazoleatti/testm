@@ -1195,13 +1195,13 @@ class Check extends AbstractScriptClass {
                 }
 
                 // СведДох3 НДФЛ.Процентная ставка (Графа 14)
-                if ((ndflPersonIncome.taxRate ?: 0) > 0) {
+                if (ndflPersonIncome.taxRate != null) {
                     boolean checkNdflPersonIncomingTaxRateTotal = false
 
-                    boolean presentCitizenship = ndflPerson.citizenship != null && ndflPerson.citizenship != "0"
-                    boolean presentIncomeCode = ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeCode != "0"
-                    boolean presentStatus = ndflPerson.status != null && ndflPerson.status != "0"
-                    boolean presentTaxRate = ndflPersonIncome.taxRate != null && ndflPersonIncome.taxRate != 0
+                    boolean presentCitizenship = ndflPerson.citizenship != null
+                    boolean presentIncomeCode = ndflPersonIncome.incomeCode != null
+                    boolean presentStatus = ndflPerson.status != null
+                    boolean presentTaxRate = ndflPersonIncome.taxRate != null
                     def ndflPersonIncomingTaxRates = []
                     CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13:
                     {
