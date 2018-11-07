@@ -361,6 +361,24 @@
         })
 
         /**
+         * @description Формирует строку значений массива через разделитель. В строку войдут ограниченное число значений, остальные обрежутся
+         * @param list массив значений
+         * @param delimiter разделитель
+         * @param limit кол-во значений, которые будут показаны через разделитель, остальные обрежутся
+         */
+        .filter('joinAndTruncateFormatter', [function () {
+            return function (list, delimiter, limit) {
+                if (angular.isUndefined(list)) return null;
+                if (!list) return '';
+                if (list.length > limit) {
+                    return list.slice(0, limit).join(delimiter) + '...';
+                } else {
+                    return list.join(delimiter);
+                }
+            };
+        }])
+
+        /**
          * @description Форматирует конфигурационный параметр для отображения описания сущности
          */
         .filter('configParamFormatter', function () {

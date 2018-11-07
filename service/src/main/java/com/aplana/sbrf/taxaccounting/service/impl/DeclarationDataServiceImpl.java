@@ -31,6 +31,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -930,6 +931,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
             }
             result.setKnfType(declaration.getKnfType());
+            if (RefBookKnfType.BY_KPP.equals(result.getKnfType())) {
+                result.setKppList(declarationDataDao.getDeclarationDataKppList(declaration.getId()));
+            }
 
             result.setCreationDate(logBusinessService.getFormCreationDate(declaration.getId()));
             result.setKpp(declaration.getKpp());
