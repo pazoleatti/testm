@@ -209,37 +209,39 @@ class Calculate extends AbstractScriptClass {
                         [naturalPerson.getPrimaryPersonId(), naturalPerson]
                     }
 
-                    //Заполнени временной таблицы версий
-                    time = System.currentTimeMillis()
-                    refBookPersonService.fillRecordVersions()
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time))
+                    if (!getPrimaryPersonDataList().isEmpty()) {
+                        //Заполнени временной таблицы версий
+                        time = System.currentTimeMillis()
+                        refBookPersonService.fillRecordVersions()
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time))
 
-                    // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
-                    time = System.currentTimeMillis()
-                    Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
+                        time = System.currentTimeMillis()
+                        Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
 
-                    time = System.currentTimeMillis()
-                    updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
+                        time = System.currentTimeMillis()
+                        updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
 
-                    time = System.currentTimeMillis()
-                    Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        time = System.currentTimeMillis()
+                        Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
 
-                    time = System.currentTimeMillis()
-                    updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
+                        time = System.currentTimeMillis()
+                        updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
 
-                    time = System.currentTimeMillis()
-                    createNaturalPersonRefBookRecords()
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        time = System.currentTimeMillis()
+                        createNaturalPersonRefBookRecords()
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                    }
 
                     countTotalAndUniquePerson()
                     //noinspection GroovyAssignabilityCheck
