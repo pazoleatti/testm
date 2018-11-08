@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Date;
 import java.util.List;
@@ -8,7 +12,15 @@ import java.util.List;
 /**
  * Модель для параметров Фильтра вкладки "Сведения о доходах в виде авансовых платежей" страницу РНУ НДФЛ
  */
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class NdflPersonPrepaymentFilter {
+    /**
+     * Общий фильтр
+     */
+    private NdflFilter ndflFilter;
     /**
      * id операции
      */
@@ -51,96 +63,11 @@ public class NdflPersonPrepaymentFilter {
      */
     private String modifiedBy;
 
-    /**
-     * АСНУ
-     */
-    private List<RefBookAsnu> asnu;
-
-    public String getOperationId() {
-        return operationId;
-    }
-
-    public void setOperationId(String operationId) {
-        this.operationId = operationId;
-    }
-
-    public String getNotifNum() {
-        return notifNum;
-    }
-
-    public void setNotifNum(String notifNum) {
-        this.notifNum = notifNum;
-    }
-
-    public String getNotifSource() {
-        return notifSource;
-    }
-
-    public void setNotifSource(String notifSource) {
-        this.notifSource = notifSource;
-    }
-
-    public Date getNotifDateFrom() {
-        return notifDateFrom;
-    }
-
-    public void setNotifDateFrom(Date notifDateFrom) {
-        this.notifDateFrom = notifDateFrom;
-    }
-
-    public Date getNotifDateTo() {
-        return notifDateTo;
-    }
-
-    public void setNotifDateTo(Date notifDateTo) {
-        this.notifDateTo = notifDateTo;
-    }
-
-    public String getRowNum() {
-        return rowNum;
-    }
-
-    public void setRowNum(String rowNum) {
-        this.rowNum = rowNum;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Date getModifiedDateFrom() {
-        return modifiedDateFrom;
-    }
-
-    public void setModifiedDateFrom(Date modifiedDateFrom) {
-        this.modifiedDateFrom = modifiedDateFrom;
-    }
-
-    public Date getModifiedDateTo() {
-        return modifiedDateTo;
-    }
-
-    public void setModifiedDateTo(Date modifiedDateTo) {
-        this.modifiedDateTo = modifiedDateTo;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
+    public NdflPersonPrepaymentFilter(NdflFilter ndflFilter) {
+        this.ndflFilter = ndflFilter;
     }
 
     public List<RefBookAsnu> getAsnu() {
-        return asnu;
-    }
-
-    public void setAsnu(List<RefBookAsnu> asnu) {
-        this.asnu = asnu;
+        return ndflFilter.getIncome().getAsnu();
     }
 }

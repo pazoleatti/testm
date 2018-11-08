@@ -1,8 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * Общий фильтр по форме НДФЛ
  */
+@Getter
+@Setter
+@ToString
 public class NdflFilter {
     /**
      * id формы
@@ -12,48 +19,26 @@ public class NdflFilter {
     /**
      * Значения фильтра из раздела "Реквизиты страницу РНУ НДФЛ"
      */
-    private NdflPersonFilter person;
+    private NdflPersonFilter person = new NdflPersonFilter(this);
 
     /**
      * Значения фильтра из раздела "Сведения о доходах и НДФЛ"
      */
-    private NdflPersonIncomeFilter income;
+    private NdflPersonIncomeFilter income = new NdflPersonIncomeFilter(this);
 
     /**
      * Значения фильтра из раздела "Сведения о вычетах"
      */
-    private NdflPersonDeductionFilter deduction;
+    private NdflPersonDeductionFilter deduction = new NdflPersonDeductionFilter(this);
 
     /**
      * Значения фильтра из раздела "Сведения о доходах в виде авансовых платежей"
      */
-    private NdflPersonPrepaymentFilter prepayment;
-
-    public long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public NdflPersonFilter getPerson() {
-        if (person == null) {
-            person = new NdflPersonFilter();
-        }
-        return person;
-    }
+    private NdflPersonPrepaymentFilter prepayment = new NdflPersonPrepaymentFilter(this);
 
     public void setPerson(NdflPersonFilter person) {
+        person.setNdflFilter(this);
         this.person = person;
-    }
-
-    public NdflPersonIncomeFilter getIncome() {
-        if (income == null) {
-            income = new NdflPersonIncomeFilter();
-            income.setNdflFilter(this);
-        }
-        return income;
     }
 
     public void setIncome(NdflPersonIncomeFilter income) {
@@ -61,25 +46,13 @@ public class NdflFilter {
         this.income = income;
     }
 
-    public NdflPersonDeductionFilter getDeduction() {
-        if (deduction == null) {
-            deduction = new NdflPersonDeductionFilter();
-        }
-        return deduction;
-    }
-
     public void setDeduction(NdflPersonDeductionFilter deduction) {
+        deduction.setNdflFilter(this);
         this.deduction = deduction;
     }
 
-    public NdflPersonPrepaymentFilter getPrepayment() {
-        if (prepayment == null) {
-            prepayment = new NdflPersonPrepaymentFilter();
-        }
-        return prepayment;
-    }
-
     public void setPrepayment(NdflPersonPrepaymentFilter prepayment) {
+        prepayment.setNdflFilter(this);
         this.prepayment = prepayment;
     }
 }

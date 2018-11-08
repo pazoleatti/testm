@@ -7,18 +7,35 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.URM;
 import com.aplana.sbrf.taxaccounting.model.application2.Application2Income;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.filter.*;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +45,11 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -44,6 +65,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Andrey Drunk
@@ -130,6 +152,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+        if (filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty()) {
+            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("outer_npi.asnu_id", filter.getIncome().getAsnu()));
+        }
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
@@ -263,6 +288,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+        if (filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty()) {
+            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("outer_npd.asnu_id", filter.getIncome().getAsnu()));
+        }
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
@@ -382,6 +410,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+        if (filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty()) {
+            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("outer_npp.asnu_id", filter.getIncome().getAsnu()));
+        }
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
@@ -741,20 +772,36 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        // через UNION, т.к. operation_id общий
-        if (filter.getIncome().getOperationId() != null && !filter.getIncome().getOperationId().isEmpty()) {
+
+        // общие параметры фильтра делаем через UNION
+        if (!isEmpty(filter.getIncome().getOperationId()) || !CollectionUtils.isEmpty(filter.getIncome().getAsnu())) {
             queryBuilder.append(" and exists (");
             queryBuilder.append(" select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ");
-            appendSqlLikeCondition("npi.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            if (!isEmpty(filter.getIncome().getOperationId())) {
+                appendSqlLikeCondition("npi.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            }
+            if (!CollectionUtils.isEmpty(filter.getIncome().getAsnu())) {
+                queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npi.asnu_id", filter.getIncome().getAsnu()));
+            }
             queryBuilder.append(" UNION ALL ");
             queryBuilder.append(" select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ");
-            appendSqlLikeCondition("npd.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            if (!isEmpty(filter.getIncome().getOperationId())) {
+                appendSqlLikeCondition("npd.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            }
+            if (!CollectionUtils.isEmpty(filter.getIncome().getAsnu())) {
+                queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npd.asnu_id", filter.getIncome().getAsnu()));
+            }
             queryBuilder.append(" UNION ALL ");
             queryBuilder.append(" select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ");
-            appendSqlLikeCondition("npp.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            if (!isEmpty(filter.getIncome().getOperationId())) {
+                appendSqlLikeCondition("npp.operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
+            }
+            if (!CollectionUtils.isEmpty(filter.getIncome().getAsnu())) {
+                queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npp.asnu_id", filter.getIncome().getAsnu()));
+            }
             queryBuilder.append(")");
         }
-        // через INTERSECT, чтобы найденные операции из р2-4 пересекались
+        // остальное через INTERSECT, чтобы найденные операции из р2-4 пересекались
         if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
             queryBuilder.append(" and exists (");
             if (!incomeFilter.isEmpty()) {
@@ -862,9 +909,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 filterBuilder.append(SqlUtils.pairInStatement("and not (npi.kpp, npi.oktmo)", kppOktmoPairs));
             }
         }
-        if (filter.getAsnu() != null && !filter.getAsnu().isEmpty()) {
-            filterBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npi.asnu_id", filter.getAsnu()));
-        }
         appendSqlLikeCondition("npi.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npi.id", filter.getId(), filterBuilder, params);
         appendSqlDateBetweenCondition("npi.modified_date", filter.getModifiedDateFrom(), filter.getModifiedDateTo(), filterBuilder, params);
@@ -882,9 +926,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("npd.notif_num", filter.getNotifNum(), filterBuilder, params);
         appendSqlLikeCondition("npd.notif_source", filter.getNotifSource(), filterBuilder, params);
         appendSqlDateBetweenCondition("npd.notif_date", filter.getNotifDateFrom(), filter.getNotifDateTo(), filterBuilder, params);
-        if (filter.getAsnu() != null && !filter.getAsnu().isEmpty()) {
-            filterBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npd.asnu_id", filter.getAsnu()));
-        }
 
         appendSqlLikeCondition("npd.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npd.id", filter.getId(), filterBuilder, params);
@@ -900,9 +941,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlLikeCondition("npp.notif_source", filter.getNotifSource(), filterBuilder, params);
 
         appendSqlDateBetweenCondition("npp.notif_date", filter.getNotifDateFrom(), filter.getNotifDateTo(), filterBuilder, params);
-        if (filter.getAsnu() != null && !filter.getAsnu().isEmpty()) {
-            filterBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npp.asnu_id", filter.getAsnu()));
-        }
 
         appendSqlLikeCondition("npp.row_num", filter.getRowNum(), filterBuilder, params);
         appendSqlLikeCondition("npp.id", filter.getId(), filterBuilder, params);
@@ -2398,7 +2436,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPerson person = new NdflPerson();
 
             person.setPersonId(SqlUtils.getLong(rs, "id"));
-            person.setRecordId(SqlUtils.getLong(rs, "inp"));;
+            person.setRecordId(SqlUtils.getLong(rs, "inp"));
+            ;
             person.setInp(String.valueOf(SqlUtils.getLong(rs, "inp")));
             person.setLastName(rs.getString("last_name"));
             person.setFirstName(rs.getString("first_name"));
