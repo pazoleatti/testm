@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.Address
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
@@ -283,8 +284,7 @@ class Person extends AbstractScriptClass {
         document.docType = docType ?: new RefBookDocType()
         document.documentNumber = getAttrValue(reader, "УдЛичнФЛНом")
         document.incRepStr = getAttrValue(reader, "УдЛичнФЛГл")
-        document.incRep = toInteger(document.incRepStr)
-        if (document.incRep == 1) {
+        if (document.incRepStr == "1") {
             person.reportDoc = document
         }
         document.person = person
@@ -358,7 +358,7 @@ class Person extends AbstractScriptClass {
     List<RegistryPerson> save(List<RegistryPerson> persons) {
         if (persons) {
             for (def person : persons) {
-                com.aplana.sbrf.taxaccounting.model.refbook.PersonTb personTb = new com.aplana.sbrf.taxaccounting.model.refbook.PersonTb()
+                PersonTb personTb = new PersonTb()
                 personTb.setPerson(person)
                 Department department = new Department()
                 department.setId(tbPersonDepartmentId)

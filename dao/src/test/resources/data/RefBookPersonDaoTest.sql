@@ -70,7 +70,6 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9021, 902, 'Код ДУЛ', 'DOC_ID', 4, 1, 360, 3601, 1, null, 15, 1, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9022, 902, 'Серия и номер ДУЛ', 'DOC_NUMBER', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 25);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9025, 902, 'Включается в отчетность', 'INC_REP', 2, 5, null, null, 1, 0, 6, 0, 0, null, null, 0, 1);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9031, 903, 'Код', 'CODE', 1, 1, null, null, 1, null, 1, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9032, 903, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 1000);
@@ -148,4 +147,4 @@ insert into department (id, name, parent_id, type, is_active, code, garant_use, 
 insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(1, 1, date '2018-01-01', 0, 1, 1);
 insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(2, 2, date '2018-01-01', 0, 1, 2);
 
-Insert into REF_BOOK_ID_DOC (ID,RECORD_ID,VERSION,STATUS,PERSON_ID,DOC_ID,DOC_NUMBER,INC_REP,DUPLICATE_RECORD_ID) values (4,4,to_date('01.01.17','DD.MM.RR'),'0',1,null,'96 71 570980','0',null);
+Insert into REF_BOOK_ID_DOC (ID,RECORD_ID,VERSION,STATUS,PERSON_ID,DOC_ID,DOC_NUMBER,DUPLICATE_RECORD_ID) values (4,4,to_date('01.01.17','DD.MM.RR'),'0',1,null,'96 71 570980',null);

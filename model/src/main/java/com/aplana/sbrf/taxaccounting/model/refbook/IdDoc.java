@@ -30,19 +30,14 @@ public class IdDoc extends IdentityObject<Long> {
      */
     private String documentNumber;
 
-    /**
-     * Включается в отчетность
-     */
-    private Integer incRep;
-
     public static final String TABLE_NAME = "ref_book_id_doc";
 
-    public static final String[] COLUMNS = {"id", "person_id", "doc_id", "doc_number", "inc_rep"};
+    public static final String[] COLUMNS = {"id", "person_id", "doc_id", "doc_number"};
 
     /**
      * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
      */
-    public static final String[] FIELDS = {"id", "person.id", "docType.id", "documentNumber", "incRep"};
+    public static final String[] FIELDS = {"id", "person.id", "docType.id", "documentNumber"};
 
     @Override
     public boolean equals(Object o) {

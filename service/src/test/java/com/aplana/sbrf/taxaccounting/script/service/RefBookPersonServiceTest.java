@@ -166,7 +166,7 @@ public class RefBookPersonServiceTest {
         result.setSnils(snils);
 
         result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
-        result.getDocuments().add(createPersonDocument(5L, 1, docNumber));
+        result.getDocuments().add(createPersonDocument(5L, docNumber));
 
         result.setLastName(lastName);
         result.setFirstName(firstName);
@@ -199,7 +199,7 @@ public class RefBookPersonServiceTest {
         result.setRecordId(id);
 
         result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
-        result.getDocuments().add(createPersonDocument(5L, 1, docNumber));
+        result.getDocuments().add(createPersonDocument(5L, docNumber));
 
         result.setInn(inn);
         result.setInnForeign(innForeign);
@@ -232,12 +232,11 @@ public class RefBookPersonServiceTest {
         return personIdentifier;
     }
 
-    private IdDoc createPersonDocument(Long docTypeId, Integer incRep, String documentNumber) {
+    private IdDoc createPersonDocument(Long docTypeId, String documentNumber) {
         RefBookDocType docTypeObject = new RefBookDocType();
         docTypeObject.setId(5L);
         IdDoc personDocument = new IdDoc();
         personDocument.setDocType(docTypeObject);
-        personDocument.setIncRep(1);
         personDocument.setDocumentNumber(documentNumber);
         return personDocument;
     }

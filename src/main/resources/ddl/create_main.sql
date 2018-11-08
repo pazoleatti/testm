@@ -1375,7 +1375,6 @@ create table ref_book_id_doc
   person_id           number(18),
   doc_id              number(18),
   doc_number          varchar2(25 char),
-  inc_rep             number(1),
   duplicate_record_id number(18)
 );
 
@@ -1387,7 +1386,6 @@ comment on column ref_book_id_doc.status is 'Статус записи (0 - об
 comment on column ref_book_id_doc.person_id is 'Физическое лицо';
 comment on column ref_book_id_doc.doc_id is 'Вид документа';
 comment on column ref_book_id_doc.doc_number is 'Серия и номер документа';
-comment on column ref_book_id_doc.inc_rep is 'Включается в отчетность';
 comment on column ref_book_id_doc.duplicate_record_id is 'Идентификатор ФЛ - дубля, у которого был скопирован ДУЛ при назначении дубля';
 
 create table ref_book_address

@@ -45,7 +45,7 @@ public class IdDocDaoImpl extends AbstractDao implements IdDocDao {
     public List<IdDoc> getByPerson(RegistryPerson person) {
         Long recordId = person.getRecordId();
         String query = "select distinct \n" +
-                "doc.id d_id, doc.doc_number, doc.inc_rep, doc.person_id doc_person_id, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, doc_type.priority doc_type_priority \n" +
+                "doc.id d_id, doc.doc_number, doc.person_id doc_person_id, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, doc_type.priority doc_type_priority \n" +
                 "from ref_book_id_doc doc \n" +
                 "left join ref_book_doc_type doc_type on doc_type.id = doc.doc_id \n" +
                 "where doc.person_id in (select id from ref_book_person where record_id = :recordId)";
@@ -75,7 +75,6 @@ public class IdDocDaoImpl extends AbstractDao implements IdDocDao {
             result.setDocType(docType);
             result.setId(rs.getLong("d_id"));
             result.setDocumentNumber(rs.getString("doc_number"));
-            result.setIncRep(rs.getInt("inc_rep"));
 
             RegistryPerson person = new RegistryPerson();
             person.setId(rs.getLong("doc_person_id"));

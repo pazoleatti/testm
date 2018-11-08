@@ -40,7 +40,6 @@ public class RegistryPersonMapper implements RowMapper<RegistryPerson> {
         personDocument.setDocType(docType);
         personDocument.setId(rs.getLong("d_id"));
         personDocument.setDocumentNumber(rs.getString("doc_number"));
-        personDocument.setIncRep(rs.getInt("inc_rep"));
         personDocument.setPerson(docPersonStub);
 
         if (personDocument.getId().equals(0L)) {

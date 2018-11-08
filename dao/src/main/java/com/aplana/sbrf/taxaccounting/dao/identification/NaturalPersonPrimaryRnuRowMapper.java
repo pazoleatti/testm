@@ -61,7 +61,6 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             personDocument.setPerson(person);
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
-            personDocument.setIncRep(1);
             person.getDocuments().add(personDocument);
         }
 

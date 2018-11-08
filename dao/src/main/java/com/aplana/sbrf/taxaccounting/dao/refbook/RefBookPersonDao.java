@@ -125,13 +125,6 @@ public interface RefBookPersonDao {
     void updateRegistryPerson(RegistryPerson person);
 
     /**
-     * Обновить флаг "включается в отчетность"
-     * @param oldReportDocId    старое значение флага
-     * @param newReportDocId    новое значение флага
-     */
-    void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId);
-
-    /**
      * Получить все версии физлица, которые не являются дубликатами
      * @param recordId идентификатор ФЛ
      * @return список объектов найденных версий

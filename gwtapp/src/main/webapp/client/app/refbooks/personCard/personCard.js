@@ -394,7 +394,6 @@
                                 id: new Date().getTime(),
                                 docType: {},
                                 person: {id: $scope.personParam.id},
-                                incRep: 0,
                                 tempId: true
                             };
 

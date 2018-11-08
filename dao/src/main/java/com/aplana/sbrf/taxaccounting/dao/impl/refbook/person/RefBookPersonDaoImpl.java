@@ -241,23 +241,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         updateObjects(Collections.singletonList(person), RegistryPerson.TABLE_NAME, RegistryPerson.COLUMNS, RegistryPerson.FIELDS);
     }
 
-    @Override
-    public void updateRegistryPersonIncRepDocId(Long oldReportDocId, Long newReportDocId) {
-        String sqlOldValue = "UPDATE ref_book_id_doc set inc_rep = 0 WHERE id = :oldReportDocId";
-        String sqlNewValue = "UPDATE ref_book_id_doc set inc_rep = 1 WHERE id = :newReportDocId";
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("oldReportDocId", oldReportDocId)
-                .addValue("newReportDocId", newReportDocId);
-
-        if (oldReportDocId != null) {
-            getNamedParameterJdbcTemplate().update(sqlOldValue, params);
-        }
-        if (newReportDocId != null) {
-            getNamedParameterJdbcTemplate().update(sqlNewValue, params);
-        }
-    }
-
     public List<RegistryPerson> fetchNonDuplicatesVersions(long recordId) {
         Date actualDate = new Date();
         String query = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +

@@ -822,12 +822,12 @@ class Calculate extends AbstractScriptClass {
     /**
      * Метод устанавливает признак включения в отчетность на основе приоритета
      */
-    boolean checkIncReportFlag(NaturalPerson naturalPerson, StringBuilder messageBuilder) {
+    static boolean checkIncReportFlag(NaturalPerson naturalPerson, StringBuilder messageBuilder) {
         boolean toReturn = false
         List personDocumentList = naturalPerson.getDocuments()
 
         if (personDocumentList != null && !personDocumentList.isEmpty()) {
-            //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
+            //индекс документа в списке personDocumentList который включается в отчетность
             int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList)
 
             for (int i = 0; i < personDocumentList.size(); i++) {
@@ -840,15 +840,10 @@ class Calculate extends AbstractScriptClass {
                         String oldValue = String.format("%s - (%s) %s", naturalPerson?.reportDoc?.getDocumentNumber(), naturalPerson?.reportDoc?.getDocType()?.getCode(), naturalPerson?.reportDoc?.getDocType()?.getName())
                         String newValue = String.format("%s - (%s) %s", personDocument?.getDocumentNumber(), personDocument?.getDocType()?.getCode(), personDocument?.getDocType()?.getName())
                         toReturn = true
-                        personDocument.setIncRep(INCLUDE_TO_REPORT)
                         naturalPerson.setReportDoc(personDocument)
 
                         messageBuilder.append(String.format("[ДУЛ, включаемый в отчетность: %s  ->  %s]", oldValue, newValue))
-                    } else {
-                        personDocument.setIncRep(NOT_INCLUDE_TO_REPORT)
                     }
-                } else {
-                    personDocument.setIncRep(NOT_INCLUDE_TO_REPORT)
                 }
             }
 
@@ -887,30 +882,30 @@ class Calculate extends AbstractScriptClass {
             String fio = (primaryPerson.lastName ?: "") + " " + (primaryPerson.firstName ?: "") + " " + (primaryPerson.middleName ?: "")
             String inp = primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : ""
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                if (primaryPerson.inn == null) {
-                    if (primaryPerson.citizenship?.code == "643") {
-                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 не указано значение ИНН в РФ. ИНН в РФ не будет сохраняться в Реестр физических лиц",
-                                "\"ИНН\" не указан",
-                                fioAndInp,
-                                fio,
-                                primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : "")
-                    }
-                } else {
-                    String checkInn = ScriptUtils.checkInn(primaryPerson.inn)
-                    if (checkInn != null) {
-                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 указано некорректное значение ИНН в РФ  (%s). Причина: %s. Это значение ИНН в РФ не будет сохраняться в Реестр физических лиц",
-                                "\"ИНН\" не соответствует формату",
-                                fioAndInp,
-                                fio,
-                                primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : "",
-                                primaryPerson.inn,
-                                checkInn)
-                    } else {
-                        infoBuilder.append(makeUpdateMessage("ИНН в РФ", refBookPerson.getInn(), primaryPerson.getInn()))
-                        refBookPerson.setInn(primaryPerson.getInn())
-                        updated = true
-                    }
+            if (primaryPerson.inn == null) {
+                if (primaryPerson.citizenship?.code == "643") {
+                    logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 не указано значение ИНН в РФ. ИНН в РФ не будет сохраняться в Реестр физических лиц",
+                            "\"ИНН\" не указан",
+                            fioAndInp,
+                            fio,
+                            primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : "")
                 }
+            } else {
+                String checkInn = ScriptUtils.checkInn(primaryPerson.inn)
+                if (checkInn != null) {
+                    logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 указано некорректное значение ИНН в РФ  (%s). Причина: %s. Это значение ИНН в РФ не будет сохраняться в Реестр физических лиц",
+                            "\"ИНН\" не соответствует формату",
+                            fioAndInp,
+                            fio,
+                            primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : "",
+                            primaryPerson.inn,
+                            checkInn)
+                } else {
+                    infoBuilder.append(makeUpdateMessage("ИНН в РФ", refBookPerson.getInn(), primaryPerson.getInn()))
+                    refBookPerson.setInn(primaryPerson.getInn())
+                    updated = true
+                }
+            }
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getInnForeign(), primaryPerson.getInnForeign())) {
             infoBuilder.append(makeUpdateMessage("ИНН в стране гражданства", refBookPerson.getInnForeign(), primaryPerson.getInnForeign()))

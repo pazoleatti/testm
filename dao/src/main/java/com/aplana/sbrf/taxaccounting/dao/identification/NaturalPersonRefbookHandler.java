@@ -151,7 +151,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
             personDocument.setDocType(docType);
             personDocument.setDocumentNumber(rs.getString("doc_number"));
-            personDocument.setIncRep(SqlUtils.getInteger(rs, "inc_rep"));
             personDocument.setPerson(naturalPerson);
             pesonDocumentMap.put(docId, personDocument);
             naturalPerson.getDocuments().add(personDocument);
