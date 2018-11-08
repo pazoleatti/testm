@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -44,6 +45,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 public class TaxNotificationServiceImpl implements TaxNotificationService {
 
     private final DeclarationTemplateDao declarationTemplateDao;
+    private final DeclarationDataFileDao declarationDataFileDao;
 
     // сервисы, по алфавиту классов
     private final BlobDataService blobDataService;
@@ -54,19 +56,24 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     private final NdflPersonService ndflPersonService;
     private final PeriodService periodService;
     private final RefBookAsnuService asnuService;
+    private final TAUserService userService;
 
     private final AsyncManager asyncManager;
 
     public TaxNotificationServiceImpl(DeclarationTemplateDao declarationTemplateDao,
-                                      BlobDataService blobDataService, DeclarationDataService declarationDataService,
+                                      DeclarationDataFileDao declarationDataFileDao,
+                                      BlobDataService blobDataService,
+                                      DeclarationDataService declarationDataService,
                                       NdflPersonService ndflPersonService,
                                       DepartmentService departmentService,
                                       PeriodService periodService,
                                       RefBookAsnuService asnuService,
                                       LogEntryService logEntryService,
                                       LockDataService lockDataService,
+                                      TAUserService userService,
                                       AsyncManager asyncManager) {
         this.declarationTemplateDao = declarationTemplateDao;
+        this.declarationDataFileDao = declarationDataFileDao;
         this.blobDataService = blobDataService;
         this.declarationDataService = declarationDataService;
         this.ndflPersonService = ndflPersonService;
@@ -75,6 +82,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
         this.asnuService = asnuService;
         this.logEntryService = logEntryService;
         this.lockDataService = lockDataService;
+        this.userService = userService;
         this.asyncManager = asyncManager;
     }
 
@@ -149,6 +157,8 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
 
             String zipFileName = generateZipFileName(knf) + ".zip";
             String fileUuid = archiveAndSaveNotifications(notifications, zipFileName);
+            attachFileToKnf(knf, fileUuid);
+
             return fileUuid;
         } catch (NoDebtException | GenerationException e) {
             logger.error(e.getMessage());
@@ -545,5 +555,21 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
 
         zipOut.close();
         fileOut.close();
+    }
+
+    /**
+     * Добавляет файл Уведомлений к файлам КНФ.
+     */
+    private void attachFileToKnf(DeclarationData knf, String fileUuid) {
+        TAUser currentUser = userService.getCurrentUser();
+        String userDepartmentName = departmentService.getParentsHierarchyShortNames(currentUser.getDepartmentId());
+
+        DeclarationDataFile declarationDataFile = new DeclarationDataFile();
+        declarationDataFile.setDeclarationDataId(knf.getId());
+        declarationDataFile.setUuid(fileUuid);
+        declarationDataFile.setUserName(currentUser.getName());
+        declarationDataFile.setUserDepartmentName(userDepartmentName);
+        declarationDataFile.setFileTypeId(AttachFileType.NOTICE.getId());
+        declarationDataFileDao.create(declarationDataFile);
     }
 }

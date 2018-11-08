@@ -1,4 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
@@ -818,6 +818,15 @@
         <sql>
             alter table ref_book_id_doc drop column inc_rep;
         </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5966 КНФ "Файлы и комментарии". Не добавляется файл "Уведомление о неудержанном налоге" -->
+    <changeSet id="3.2-snazin-7" author="snazin">
+        <insert tableName="ref_book_attach_file_type">
+            <column name="id" value="21657800"/>
+            <column name="code" value="7"/>
+            <column name="name" value="Уведомление о неудержанном налоге"/>
+        </insert>
     </changeSet>
 
     <!-- Переименование констант из AttachFileType в скриптах -->

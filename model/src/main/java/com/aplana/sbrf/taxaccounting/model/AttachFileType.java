@@ -9,7 +9,8 @@ public enum AttachFileType {
     INCOMING_FROM_FNS   (21657400, 3, "Входящий из ФНС"),
     REPORT              (21657500, 4, "Отчет"),
     ERROR_LOG           (21657600, 5, "Протокол ошибок"),
-    OTHER               (21657700, 6, "Прочее");
+    OTHER               (21657700, 6, "Прочее"),
+    NOTICE              (21657800, 7, "Уведомление о неудержанном налоге");
 
     private final long id;
     private final int code;
