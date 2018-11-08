@@ -2875,7 +2875,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
             String fileUuid;
-            if (AttachFileType.TYPE_1.equals(fileType)) {
+            if (AttachFileType.TRANSPORT_FILE.equals(fileType)) {
                 //Архивирование перед сохраннеием в базу
                 File zipOutFile = null;
                 try {
@@ -3664,7 +3664,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataFile.setUuid(blobData.getUuid());
                 declarationDataFile.setUserName(userInfo.getUser().getName());
                 declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
-                declarationDataFile.setFileTypeId(AttachFileType.TYPE_1.getId());
+                declarationDataFile.setFileTypeId(AttachFileType.TRANSPORT_FILE.getId());
                 declarationDataFileDao.create(declarationDataFile);
 
                 if (logger.containsLevel(LogLevel.ERROR)) {

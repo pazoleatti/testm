@@ -672,7 +672,7 @@ class Report2Ndfl extends AbstractScriptClass {
         TAUser createUser = declarationService.getSystemUserInfo().getUser()
 
         RefBookDataProvider fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-        Long fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.code}").get(0)
+        Long fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.OUTGOING_TO_FNS.code}").get(0)
 
         DeclarationDataFile declarationDataFile = new DeclarationDataFile()
         declarationDataFile.setDeclarationDataId(declarationData.id)

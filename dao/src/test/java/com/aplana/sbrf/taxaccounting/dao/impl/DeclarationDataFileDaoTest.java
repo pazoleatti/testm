@@ -191,14 +191,14 @@ public class DeclarationDataFileDaoTest {
 
     @Test
     public void testDeleteByDeclarationDataIdAndTypeSuccess() {
-        long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TYPE_1);
+        long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TRANSPORT_FILE);
         assertEquals(2L, result);
         assertEquals(1, declarationDataFileDao.fetchByDeclarationDataId(1).size());
     }
 
     @Test
     public void testDeleteByDeclarationDataIdAndTypeFail() {
-        long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TYPE_6);
+        long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.OTHER);
         assertEquals(0L, result);
         assertEquals(3, declarationDataFileDao.fetchByDeclarationDataId(1).size());
     }

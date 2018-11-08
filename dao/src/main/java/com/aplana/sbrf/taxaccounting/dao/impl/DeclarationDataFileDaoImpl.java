@@ -247,7 +247,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
                 "and ddf.blob_data_id = (select id from blob_data bd where bd.id = ddf.blob_data_id and bd.name like '%.xlsx')";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationDataId", declarationDataId);
-        params.addValue("type", AttachFileType.TYPE_1.getId());
+        params.addValue("type", AttachFileType.TRANSPORT_FILE.getId());
         getNamedParameterJdbcTemplate().update(query, params);
     }
 

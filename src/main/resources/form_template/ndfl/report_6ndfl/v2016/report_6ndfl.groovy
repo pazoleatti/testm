@@ -646,7 +646,7 @@ class Report6Ndfl extends AbstractScriptClass {
         def createUser = declarationService.getSystemUserInfo().getUser()
 
         def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.code}").get(0)
+        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.OUTGOING_TO_FNS.code}").get(0)
 
         DeclarationDataFile declarationDataFile = new DeclarationDataFile()
         declarationDataFile.setDeclarationDataId(declarationData.id)
