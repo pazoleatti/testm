@@ -41,7 +41,9 @@
                 CREATE_DEPARTMENT_CONFIG: 1 << 27,
                 EXPORT_PERSONS: 1 << 28,
                 EXPORT_DEPARTMENT_CONFIG: 1 << 29,
-                IMPORT_DEPARTMENT_CONFIG: 1 << 30
+                IMPORT_DEPARTMENT_CONFIG: 1 << 30,
+                VIEW_ADMINISTRATION: Math.pow(2, 31),
+                TAX_NOTIFICATION: Math.pow(2, 32)
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

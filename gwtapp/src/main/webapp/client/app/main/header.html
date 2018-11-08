@@ -19,7 +19,7 @@
             <tree tree='treeNsi'></tree>
         </li>
     </ul>
-    <ul class="nav navbar-nav">
+    <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION)">
         <li class="dropdown">
             <a data-toggle="dropdown">{{::'main.menu.administration' | translate}}</a>
             <tree tree='treeAdministration'></tree>

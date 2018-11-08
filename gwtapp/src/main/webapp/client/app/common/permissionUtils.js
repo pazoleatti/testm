@@ -7,7 +7,7 @@
         .factory('PermissionChecker', [function () {
 
             var service = {
-                maxInt32: Math.pow(2, 32),
+                maxInt32: Math.pow(2, 31),
 
                 /**
                  * Сравнивает битовые маски длиннее, чем 32 бита

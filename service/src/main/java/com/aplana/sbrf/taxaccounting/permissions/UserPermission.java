@@ -19,148 +19,158 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
     /**
      * Право доступа к пункту меню "Налоги->НДФЛ->Формы"
      */
-    public static final Permission<TAUser> VIEW_TAXES_NDFL = new ViewTaxesNdflPermission(1 << 0);
+    public static final Permission<TAUser> VIEW_TAXES_NDFL = new ViewTaxesNdflPermission(1L << 0);
     /**
      * Право доступа к пунктам меню:
      * "Налоги->НДФЛ->Ведение периодов"
      * "Налоги->НДФЛ->Настройки подразделений"
      * "Налоги->НДФЛ->Назначение форм"
      */
-    public static final Permission<TAUser> VIEW_TAXES_NDFL_SETTINGS = new ViewTaxesNdflSettingsPermission(1 << 1);
+    public static final Permission<TAUser> VIEW_TAXES_NDFL_SETTINGS = new ViewTaxesNdflSettingsPermission(1L << 1);
     /**
      * Право доступа к пункту меню "Налоги->НДФЛ->Отчетность"
      */
-    public static final Permission<TAUser> VIEW_TAXES_NDFL_REPORTS = new ViewTaxesNdflReportsPermission(1 << 2);
+    public static final Permission<TAUser> VIEW_TAXES_NDFL_REPORTS = new ViewTaxesNdflReportsPermission(1L << 2);
     /**
      * Право доступа к пункту меню "Налоги->Общие параметры"
      */
-    public static final Permission<TAUser> VIEW_TAXES_GENERAL = new ViewTaxesGeneralPermission(1 << 3);
+    public static final Permission<TAUser> VIEW_TAXES_GENERAL = new ViewTaxesGeneralPermission(1L << 3);
     /**
      * Право доступа к пунктам меню:
      * "Администрирование->Список блокировок"
      * "Администрирование->Журнал аудита"
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_BLOCK = new ViewAdministrationBlockAndAuditPermission(1 << 4);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_BLOCK = new ViewAdministrationBlockAndAuditPermission(1L << 4);
     /**
      * Право доступа к пунктам меню:
      * "Администрирование->Конфигурационные параметр"
      * "Администрирование->Планировщик задач"
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_CONFIG = new ViewAdministrationConfigPermission(1 << 5);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_CONFIG = new ViewAdministrationConfigPermission(1L << 5);
     /**
      * Право доступа к пункту меню "Администрирование->Настройки" и всем подменю
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_SETTINGS = new ViewAdministrationSettingsPermission(1 << 6);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_SETTINGS = new ViewAdministrationSettingsPermission(1L << 6);
     /**
      * Право доступа к пункту меню "Руководство пользователя"
      */
-    public static final Permission<TAUser> VIEW_MANUAL_USER = new ViewManualUserPermission(1 << 7);
+    public static final Permission<TAUser> VIEW_MANUAL_USER = new ViewManualUserPermission(1L << 7);
     /**
      * Право доступа к пункту меню "Руководство настройщика макетов"
      */
-    public static final Permission<TAUser> VIEW_MANUAL_DESIGNER = new ViewManualDesignerPermission(1 << 8);
+    public static final Permission<TAUser> VIEW_MANUAL_DESIGNER = new ViewManualDesignerPermission(1L << 8);
     /**
      * Право на просмотр журнала
      */
-    public static final Permission<TAUser> VIEW_JOURNAL = new ViewJournalPermission(1 << 9);
+    public static final Permission<TAUser> VIEW_JOURNAL = new ViewJournalPermission(1L << 9);
     /**
      * Право на создание декларации вручную (журнал = отчетность)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_REPORT = new CreateDeclarationReportPermission(1 << 10);
+    public static final Permission<TAUser> CREATE_DECLARATION_REPORT = new CreateDeclarationReportPermission(1L << 10);
     /**
      * Право на создание первичной формы вручную (журнал = налоговые формы)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_PRIMARY = new CreatePrimaryDeclarationPermission(1 << 11);
+    public static final Permission<TAUser> CREATE_DECLARATION_PRIMARY = new CreatePrimaryDeclarationPermission(1L << 11);
 
     /**
      * Право на создание консолидированный формы вручную (журнал = налоговые формы)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_CONSOLIDATED = new CreateConsolidatedDeclarationPermission(1 << 12);
+    public static final Permission<TAUser> CREATE_DECLARATION_CONSOLIDATED = new CreateConsolidatedDeclarationPermission(1L << 12);
     /**
      * Право на создание и выгрузку отчетности
      */
-    public static final Permission<TAUser> CREATE_UPLOAD_REPORT = new CreateAndUploadReportPermission(1 << 13);
+    public static final Permission<TAUser> CREATE_UPLOAD_REPORT = new CreateAndUploadReportPermission(1L << 13);
 
     /**
      * Право на обработку ТФ из каталога загрузки
      */
-    public static final Permission<TAUser> HANDLING_FILE = new HandlingFilePermission(1 << 14);
+    public static final Permission<TAUser> HANDLING_FILE = new HandlingFilePermission(1L << 14);
     /**
      * Право на загрузку ТФ
      */
-    public static final Permission<TAUser> UPLOAD_FILE = new UploadFilePermission(1 << 15);
+    public static final Permission<TAUser> UPLOAD_FILE = new UploadFilePermission(1L << 15);
     /**
      * Право на редактирование общих параметров
      */
-    public static final Permission<TAUser> EDIT_GENERAL_PARAMS = new EditGeneralParamsPermission(1 << 16);
+    public static final Permission<TAUser> EDIT_GENERAL_PARAMS = new EditGeneralParamsPermission(1L << 16);
     /**
      * Право на просмотр справочников
      */
-    public static final Permission<TAUser> VIEW_REF_BOOK = new ViewRefBookPermission(1 << 17);
+    public static final Permission<TAUser> VIEW_REF_BOOK = new ViewRefBookPermission(1L << 17);
     /**
      * Право на редактирование справочников
      */
-    public static final Permission<TAUser> EDIT_REF_BOOK = new EditRefBookPermission(1 << 18);
+    public static final Permission<TAUser> EDIT_REF_BOOK = new EditRefBookPermission(1L << 18);
     /**
      * Право доступа к пункту меню "НСИ"
      */
-    public static final Permission<TAUser> VIEW_NSI = new ViewNsiPermission(1 << 19);
+    public static final Permission<TAUser> VIEW_NSI = new ViewNsiPermission(1L << 19);
     /**
      * Право доступа к пункту меню "Налоги"
      */
-    public static final Permission<TAUser> VIEW_TAXES = new ViewTaxesPermission(1 << 20);
+    public static final Permission<TAUser> VIEW_TAXES = new ViewTaxesPermission(1L << 20);
     /**
      * Право доступа к пунктам меню:
      * "Администрирование->Список пользователей"
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_USERS = new ViewAdministrationUsersPermission(1 << 21);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_USERS = new ViewAdministrationUsersPermission(1L << 21);
 
     /**
      * Право "Назначение форм > Редактирование"
      */
-    public static final Permission<TAUser> EDIT_DECLARATION_TYPES_ASSIGNMENT = new EditDeclarationTypesAssignmentPermission(1 << 22);
+    public static final Permission<TAUser> EDIT_DECLARATION_TYPES_ASSIGNMENT = new EditDeclarationTypesAssignmentPermission(1L << 22);
 
     /**
      * Право "Ведение периодов > Открыть период"
      */
-    public static final Permission<TAUser> OPEN_DEPARTMENT_REPORT_PERIOD = new OpenDepartmentReportPeriodPermission(1 << 23);
+    public static final Permission<TAUser> OPEN_DEPARTMENT_REPORT_PERIOD = new OpenDepartmentReportPeriodPermission(1L << 23);
 
     /**
      * Право доступа к редактированию пунктов меню:
      * "Администрирование->Конфигурационные параметр"
      * "Администрирование->Планировщик задач"
      */
-    public static final Permission<TAUser> EDIT_ADMINISTRATION_CONFIG = new EditAdministrationConfigPermission(1 << 24);
+    public static final Permission<TAUser> EDIT_ADMINISTRATION_CONFIG = new EditAdministrationConfigPermission(1L << 24);
 
     /**
      * Право "Налоги > Сервис"
      */
-    public static final Permission<TAUser> VIEW_TAXES_SERVICE = new ViewTaxesServicePermission(1 << 25);
+    public static final Permission<TAUser> VIEW_TAXES_SERVICE = new ViewTaxesServicePermission(1L << 25);
 
     /**
      * Право доступа к пункту меню "Налоги - Создание файла приложения 2"
      */
-    public static final Permission<TAUser> VIEW_TAXES_CREATE_APPLICATION_2 = new ViewTaxesCreateApplication2Permission(1 << 26);
+    public static final Permission<TAUser> VIEW_TAXES_CREATE_APPLICATION_2 = new ViewTaxesCreateApplication2Permission(1L << 26);
 
     /**
      * Право на создание записи настроек подразделений
      */
-    public static final Permission<TAUser> CREATE_DEPARTMENT_CONFIG = new CreateDepartmentConfigPermission(1 << 27);
+    public static final Permission<TAUser> CREATE_DEPARTMENT_CONFIG = new CreateDepartmentConfigPermission(1L << 27);
 
     /**
      * Право на выгрузку реестра ФЛ
      */
-    public static final Permission<TAUser> EXPORT_PERSONS = new ExportPersonsPermission(1 << 28);
+    public static final Permission<TAUser> EXPORT_PERSONS = new ExportPersonsPermission(1L << 28);
 
     /**
      * Право на создание записи настроек подразделений
      */
-    public static final Permission<TAUser> EXPORT_DEPARTMENT_CONFIG = new ExportDepartmentConfigPermission(1 << 29);
+    public static final Permission<TAUser> EXPORT_DEPARTMENT_CONFIG = new ExportDepartmentConfigPermission(1L << 29);
 
     /**
      * Право на создание записи настроек подразделений
      */
-    public static final Permission<TAUser> IMPORT_DEPARTMENT_CONFIG = new ImportDepartmentConfigPermission(1 << 30);
+    public static final Permission<TAUser> IMPORT_DEPARTMENT_CONFIG = new ImportDepartmentConfigPermission(1L << 30);
+
+    /**
+     * Право доступа к пункту меню "Администрирование"
+     */
+    public static final Permission<TAUser> VIEW_ADMINISTRATION = new ViewAdministrationPermission(1L << 31);
+
+    /**
+     * Право доступа к формированию Уведомления о неудержанном налоге
+     */
+    public static final Permission<TAUser> TAX_NOTIFICATION = new TaxNotificationPermission(1L << 32);
 
     public UserPermission(long mask) {
         super(mask);
@@ -515,7 +525,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN);
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN, TARole.N_ROLE_OPER_NOTICE);
         }
     }
 
@@ -622,6 +632,30 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+        }
+    }
+
+    public static final class ViewAdministrationPermission extends UserPermission {
+
+        public ViewAdministrationPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_CONF);
+        }
+    }
+
+    public static final class TaxNotificationPermission extends UserPermission {
+
+        public TaxNotificationPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER_NOTICE);
         }
     }
 }

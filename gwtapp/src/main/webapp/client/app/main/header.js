@@ -81,7 +81,7 @@
                             onClick: openApplication2Modal
                         });
                     }
-                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.TAX_NOTIFICATION)) {
                         $scope.treeTaxes.push({
                             name: $filter('translate')('menu.taxes.taxNotification'),
                             onClick: openTaxNotificationModal
