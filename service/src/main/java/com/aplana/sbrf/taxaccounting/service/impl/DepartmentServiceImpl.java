@@ -170,7 +170,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             Set<Integer> tbDepartmentIds = new HashSet<>();
             // ТБ подразделения пользователя
             tbDepartmentIds.add(departmentDao.getParentTBId(tAUser.getDepartmentId()));
-            // ТБ, на которые (или на их дочерние) подразделение пользователя (или его дочерние) назначено исполнителем
+            // ТБ, на которые (или на их дочерние) подразделение пользователя назначено исполнителем
             tbDepartmentIds.addAll(departmentDao.findAllTBIdsByPerformerId(tAUser.getDepartmentId()));
             // В итоге возвращяем все ТБ выше и все их дочерние
             return departmentDao.findAllChildrenIdsByIds(tbDepartmentIds);
