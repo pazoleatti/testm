@@ -813,4 +813,10 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5610 -->
+    <changeSet id="3.2-ytrofimov-15" author="ytrofimov">
+        <sql>
+            alter table ref_book_id_doc drop column inc_rep;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
