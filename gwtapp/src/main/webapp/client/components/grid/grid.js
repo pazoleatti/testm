@@ -1146,7 +1146,7 @@
                                 var tableWidth = table.width();
 
                                 var hasScroll = scope.gridParams.bdiv[0].scrollHeight > scope.gridParams.bdiv.height();
-                                if (gridWidth + (hasScroll ? 20 : 0) !== tableWidth) {
+                                if (gridWidth + (hasScroll ? 20 : 0) > tableWidth) {
                                     var colmodel = scope.grid.jqGrid('getGridParam', 'colModel');
 
                                     //На это изменение колонки не нужно реагироват при сохранении настроек грида
