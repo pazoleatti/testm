@@ -92,7 +92,7 @@ class UpdatePersonsData extends AbstractScriptClass {
 
     void doUpdate() {
         List<NdflPerson> declarationDataPersonList = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
-        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(declarationData.id)
+        List<NdflPerson> refBookPersonList = ndflPersonService.fetchRefBookPersonsAsNdflPerson(declarationData.id, new Date())
         List<NdflPerson> toUpdatePersons = []
         List<LogEntry> logs = []
         Map<Long, NdflPerson> personIdAssociatedRefBookPersons = [:]
@@ -102,7 +102,7 @@ class UpdatePersonsData extends AbstractScriptClass {
         for (NdflPerson declarationDataPerson : declarationDataPersonList) {
             NdflPerson refBookPerson = personIdAssociatedRefBookPersons.get(declarationDataPerson.personId)
             if (refBookPerson == null) {
-                logger.warn("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Запись о физическом лице в Реестре физических лиц отсутствует\"")
+                logger.warn("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Для связанного физического лица в Реестре физических лиц отсутствует актуальная запись о физическом лице\"")
                 continue
             }
             String personInfo

@@ -417,8 +417,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
-        return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(declarationDataId);
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId, Date actualDate) {
+        return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(declarationDataId, actualDate);
     }
 
     @Override

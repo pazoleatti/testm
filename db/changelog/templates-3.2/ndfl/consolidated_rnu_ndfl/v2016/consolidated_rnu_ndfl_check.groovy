@@ -203,7 +203,6 @@ class Check extends AbstractScriptClass {
 
                 long time = System.currentTimeMillis()
 
-
                 // ФЛ Map<person_id, RefBook>
                 Map<Long, RegistryPerson> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
@@ -281,16 +280,8 @@ class Check extends AbstractScriptClass {
     void fillNdflPersonFLMap(List<NdflPerson> ndflPersonList, Map<Long, RegistryPerson> personMap) {
         for (def ndflPerson : ndflPersonList) {
             NdflPersonFL ndflPersonFL
-            if (FORM_DATA_KIND == FormDataKind.PRIMARY) {
-                // РНУ-НДФЛ первичная
-                String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
-                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
-            } else {
-                // РНУ-НДФЛ консолидированная
-                RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
-                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-            }
+            String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
+            ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
             ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
         }
     }
@@ -421,10 +412,10 @@ class Check extends AbstractScriptClass {
                 RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
 
                 if (!personRecord) {
-                    //TODO turn_to_error
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.errorExp("%s. %s.", "Не установлена ссылка на запись Реестра физических лиц", fioAndInp, pathError,
-                            "Не установлена ссылка на запись Реестра физических лиц. Выполните операцию идентификации")
+                            "Для физического лица из (Реестра физических лиц) определенного по установленной ссылке " +
+                                    "отсутствует актуальная на настоящий момент времени версия")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
                     if (personRecord.lastName != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.lastName.toLowerCase())) {
@@ -1500,7 +1491,9 @@ class Check extends AbstractScriptClass {
                                 }
                             }
                             def groupIncomes = incomesByPersonIdForCol16Sec2Check.get(groupKey(ndflPersonIncome))
-                            def groupPrepayments = ndflPersonPrepaymentList.findAll { it.operationId in groupIncomes.operationId }
+                            def groupPrepayments = ndflPersonPrepaymentList.findAll {
+                                it.operationId in groupIncomes.operationId
+                            }
                             BigDecimal АвансовыеПлатежиПоГруппе = (BigDecimal) groupPrepayments.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
                             BigDecimal taxBaseSum = (BigDecimal) groupIncomes.sum { NdflPersonIncome income ->
                                 income.calculatedTax != null && income.taxBase ? income.taxBase : 0
@@ -1897,9 +1890,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                        ?.get(ndflPersonDeduction.notifSumm) ?: []
+                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1920,7 +1913,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId) ?: []
+                ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -2342,7 +2335,7 @@ class Check extends AbstractScriptClass {
          * Выполняет проверку в строке раздела 2
          *
          * @param checkedIncome проверяемая строка раздела 2
-         * @param allIncomesOf  группа строк, относящиеся к проверяемой каким-то условием (например, по ид операции)
+         * @param allIncomesOf группа строк, относящиеся к проверяемой каким-то условием (например, по ид операции)
          * @return пройдена ли проверка
          */
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOf)

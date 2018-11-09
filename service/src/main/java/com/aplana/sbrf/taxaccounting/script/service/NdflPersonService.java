@@ -597,7 +597,7 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор налоговой формы
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
-    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId);
+    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId, Date actualDate);
 
     /**
      * Определяет список операций которые нужно включить в КНФ

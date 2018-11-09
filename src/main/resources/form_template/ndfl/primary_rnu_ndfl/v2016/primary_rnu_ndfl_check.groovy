@@ -408,7 +408,7 @@ class Check extends AbstractScriptClass {
             }
 
             // Спр10 Наличие связи с "Физическое лицо"
-            if (ndflPerson.personId == null || ndflPerson.personId == 0) {
+            if (ndflPerson.personId == null || ndflPerson.personId == 0L) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.errorExp("%s. %s.", "Не установлена ссылка на запись Реестра физических лиц", fioAndInp, pathError,
                         "Не установлена ссылка на запись Реестра физических лиц. Выполните операцию идентификации")
@@ -416,10 +416,10 @@ class Check extends AbstractScriptClass {
                 RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
 
                 if (!personRecord) {
-                    //TODO turn_to_error
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.errorExp("%s. %s.", "Не установлена ссылка на запись Реестра физических лиц", fioAndInp, pathError,
-                            "Не установлена ссылка на запись Реестра физических лиц. Выполните операцию идентификации")
+                    logger.errorExp("%s. %s.", " Отсутствует актуальная версия связанного ФЛ", fioAndInp, pathError,
+                            "Для физического лица из (Реестра физических лиц) определенного по установленной ссылке " +
+                                    "отсутствует актуальная на настоящий момент времени версия")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
                     if (personRecord.lastName != null && !ndflPerson.lastName.toLowerCase().equals(personRecord.lastName.toLowerCase())) {

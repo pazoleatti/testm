@@ -382,12 +382,17 @@ class Calculate extends AbstractScriptClass {
         for (NdflPerson declarationDataPerson : ndflPersonList) {
             NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
 
-            if (refBookPerson == null) {
-                logger.error("В Разделе 1 первичной формы ${declarationDataPerson.declarationDataId} для ФЛ:" +
+            if (declarationDataPerson.personId == null) {
+                logger.error("ПНФ: ${declarationDataPerson.declarationDataId} " +
+                        "Раздел 1. Строка: ${declarationDataPerson.rowNum}. Для ФЛ:" +
                         "${declarationDataPerson.lastName + " " + declarationDataPerson.firstName + " " + (declarationDataPerson.middleName ?: "")}" +
-                        ", ИНП: ${declarationDataPerson.inp}, строка: ${declarationDataPerson.rowNum} не установлена " +
-                        "ссылка на запись Реестра физических лиц. Выполните операцию идентификации формы " +
-                        "${declarationDataPerson.declarationDataId}")
+                        ", ИНП: ${declarationDataPerson.inp}, отсутствует ссылка на запись Реестра физических лиц. Выполните идентификацию ПНФ")
+                continue
+            }
+            if (refBookPerson == null) {
+                logger.error("ПНФ: ${declarationDataPerson.declarationDataId} Раздел 1. Для ФЛ:" +
+                        "${declarationDataPerson.lastName + " " + declarationDataPerson.firstName + " " + (declarationDataPerson.middleName ?: "")}" +
+                        ", ИНП: ${declarationDataPerson.inp} установлена ссылка на физическое лицо из Реестр физических лиц, для которой отсутствует актуальная версия.")
                 continue
             }
 

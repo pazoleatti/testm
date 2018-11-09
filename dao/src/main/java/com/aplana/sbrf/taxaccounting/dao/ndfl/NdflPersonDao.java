@@ -675,9 +675,10 @@ public interface NdflPersonDao {
      * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.
      *
      * @param declarationDataId идентификатор налоговой формы
+     * @param actualDate        актуальная дата версии
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
-    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId);
+    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId, Date actualDate);
 
     /**
      * Определяет список операций которые нужно включить в КНФ

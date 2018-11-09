@@ -2196,23 +2196,28 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId) {
-        String sql = "SELECT DISTINCT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, " +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, " +
-                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, " +
-                "rbp.appartment, rbp.address_foreign as address, rbc.code AS country_code " +
-                "FROM ref_book_person rbp " +
-                "LEFT JOIN ndfl_person np ON rbp.id = np.person_id " +
-                "LEFT JOIN declaration_data dd ON np.declaration_data_id = dd.id " +
-                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 " +
-                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 " +
-                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id " +
-                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc " +
-                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 " +
-                "WHERE dd.id = ?";
-        return getJdbcTemplate().query(sql,
-                new Object[]{declarationDataId},
-                new NdflPersonRefBookRowMapper());
+    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId, Date actualDate) {
+        String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, \n" +
+                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, \n" +
+                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, \n" +
+                "rbp.appartment, rbp.address_foreign as address, rbc2.code AS country_code \n" +
+                "FROM ref_book_person rbp \n" +
+                "LEFT JOIN ndfl_person np ON rbp.id = np.person_id \n" +
+                "LEFT JOIN declaration_data dd ON np.declaration_data_id = dd.id \n" +
+                "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
+                "LEFT JOIN ref_book_country rbc2 ON rbp.country_id = rbc2.id AND rbc2.status = 0 \n" +
+                "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
+                "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id \n" +
+                "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc \n" +
+                "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
+                "WHERE dd.id = :dd\n" +
+                "and rbp.record_id in (select record_id from ref_book_person where id in (SELECT rbp2.id FROM ref_book_person rbp2 LEFT JOIN ndfl_person np2 ON rbp2.id = np2.person_id \n" +
+                "LEFT JOIN declaration_data dd2 ON np2.declaration_data_id = dd2.id)) \n" +
+                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))\n" +
+                "AND rbp.record_id = rbp.old_id";
+        MapSqlParameterSource params = new MapSqlParameterSource("currentDate", actualDate);
+        params.addValue("dd", declarationDataId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRefBookRowMapper());
     }
 
     @Override
@@ -2362,15 +2367,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship,\n" +
                 "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code,\n" +
                 "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build,\n" +
-                "rbp.appartment, rbc.code AS country_code, rbp.address_foreign as address\n" +
+                "rbp.appartment, rbc2.code AS country_code, rbp.address_foreign as address\n" +
                 "FROM ref_book_person rbp\n" +
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
+                "LEFT JOIN ref_book_country rbc2 ON rbp.country_id = rbc2.id AND rbc2.status = 0 \n" +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
                 "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc \n" +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
                 "WHERE rbp.record_id in (select record_id from ref_book_person where id in (:personIdList)) " +
-                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))";
+                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))" +
+                "AND rbp.record_id = rbp.old_id";
 
         MapSqlParameterSource params = new MapSqlParameterSource("personIdList", personIdList);
         params.addValue("currentDate", actualDate);
@@ -2392,9 +2399,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, \n" +
                 "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, \n" +
                 "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, \n" +
-                "rbp.appartment, rbc.code AS country_code, rbp.address_foreign as address \n" +
+                "rbp.appartment, rbc2.code AS country_code, rbp.address_foreign as address \n" +
                 "FROM ref_book_person rbp \n" +
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
+                "LEFT JOIN ref_book_country rbc2 ON rbp.country_id = rbc2.id AND rbc2.status = 0 \n" +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id\n" +
                 "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc\n" +

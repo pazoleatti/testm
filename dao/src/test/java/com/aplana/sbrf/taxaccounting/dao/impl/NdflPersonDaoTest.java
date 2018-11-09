@@ -1146,7 +1146,9 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFetchRefBookPersons() {
-        List<NdflPerson> resultByDeclarationData = ndflPersonDao.fetchRefBookPersonsAsNdflPerson(1L);
+        Calendar calendar = new GregorianCalendar();
+        calendar.set(2018, Calendar.JANUARY, 1);
+        List<NdflPerson> resultByDeclarationData = ndflPersonDao.fetchRefBookPersonsAsNdflPerson(1L, calendar.getTime());
         Assert.assertEquals(1, resultByDeclarationData.size());
         Assert.assertEquals("Федор", resultByDeclarationData.get(0).getFirstName());
     }
