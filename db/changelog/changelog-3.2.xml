@@ -850,6 +850,59 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5973 Убрать ref_book_id_doc.inc_rep из хранимок-->
+    <changeSet id="3.2-amandzyak-11" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body14.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!-- Переименование констант из AttachFileType в скриптах -->
+    <changeSet id="3.2-ishevchuk-3" author="ishevchuk">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 102</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 104</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.2/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
+        </update>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5967 Исправить коментарии у таблиц и колонок реестра ФЛ-->
+    <changeSet id="3.2-amandzyak-12" author="amandzyak">
+        <sql>
+          comment on table REF_BOOK_PERSON is 'Реестр физических лиц';
+          comment on column REF_BOOK_PERSON.record_id is 'Идентификатор ФЛ';
+          comment on table REF_BOOK_PERSON_TB is 'Тербанк назначенный ФЛ';
+          comment on column REF_BOOK_PERSON_TB.person_id is 'Ссылка на запись реестра ФЛ';
+          comment on table REF_BOOK_ID_DOC is 'Документ, удостоверяющий личность ФЛ';
+          comment on column REF_BOOK_ID_DOC.person_id is 'Ссылка на запись реестра ФЛ';
+          comment on table REF_BOOK_ID_TAX_PAYER is 'Идентификатор налогоплательщика назначенный ФЛ в АСНУ';
+          comment on column REF_BOOK_ID_TAX_PAYER.person_id is 'Ссылка на запись реестра ФЛ';
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5969 В справочнике АСНУ изменить значение в поле "Тип дохода"-->
+    <changeSet id="3.2-amandzyak-13" author="amandzyak">
+        <sql>
+               update REF_BOOK_ASNU set type='Возврат платы за подключение к программе страхования' where code='9000'
+        </sql>
+    </changeSet>
+
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-5620 -->
     <changeSet id="3.2-ytrofimov-17" author="ytrofimov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
