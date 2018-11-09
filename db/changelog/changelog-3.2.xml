@@ -850,6 +850,16 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5973 Убрать ref_book_id_doc.inc_rep из хранимок-->
+    <changeSet id="3.2-amandzyak-11" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body14.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
     <!-- Переименование констант из AttachFileType в скриптах -->
     <changeSet id="3.2-ishevchuk-3" author="ishevchuk">
         <update tableName="DECLARATION_TEMPLATE">
