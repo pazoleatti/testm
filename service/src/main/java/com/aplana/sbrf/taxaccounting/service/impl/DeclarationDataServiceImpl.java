@@ -593,6 +593,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @Transactional
     public RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask) {
         return recalculateDeclaration(userInfo, declarationDataId, force, cancelTask, DeclarationDataReportType.IDENTIFY_PERSON);
     }
@@ -659,7 +660,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return result;
     }
 
-    @Transactional
+
     private RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, final long declarationDataId,
                                                                 final boolean force, final boolean cancelTask,
                                                                 final DeclarationDataReportType ddReportType) {
@@ -1789,7 +1790,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
 
-        for (Long declarationId : declarationDataIds) {
+        List<Long> sortedDeclarationIds = sortDeclarationIdsByKnfThenPnf(declarationDataIds);
+
+        for (Long declarationId : sortedDeclarationIds) {
             final Logger logger = new Logger();
             if (existDeclarationData(declarationId)) {
                 String declarationFullName = getDeclarationFullName(declarationId, DeclarationDataReportType.TO_CREATE_DEC);
@@ -1807,6 +1810,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
     }
+
+    // Сортировка форм: КНФ > ПНФ > другие
+    private List<Long> sortDeclarationIdsByKnfThenPnf(List<Long> unsortedIds) {
+        // ORDER BY KNF, THEN PNF
+        List<DeclarationData> declarations = get(unsortedIds);
+
+        List<Long> sortedIds = new ArrayList<>();
+        List<Long> knfIds = new ArrayList<>();
+        List<Long> pnfIds = new ArrayList<>();
+        List<Long> otherIds = new ArrayList<>();
+
+        for (DeclarationData declaration : declarations) {
+            if (declaration.getDeclarationTemplateId() == DeclarationType.NDFL_CONSOLIDATE) {
+                knfIds.add(declaration.getId());
+            } else if (declaration.getDeclarationTemplateId() == DeclarationType.NDFL_PRIMARY) {
+                pnfIds.add(declaration.getId());
+            } else {
+                otherIds.add(declaration.getId());
+            }
+        }
+
+        sortedIds.addAll(knfIds);
+        sortedIds.addAll(pnfIds);
+        sortedIds.addAll(otherIds);
+
+        return sortedIds;
+    }
+
 
     @Override
     public List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo) {
