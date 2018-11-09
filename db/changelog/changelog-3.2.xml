@@ -849,4 +849,15 @@
             <where>id in (select script_id from ref_book r where r.id = 207)</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5973 Убрать ref_book_id_doc.inc_rep из хранимок-->
+    <changeSet id="3.2-amandzyak-11" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body14.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
