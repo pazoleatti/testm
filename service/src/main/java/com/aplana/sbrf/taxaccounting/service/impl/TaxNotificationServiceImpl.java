@@ -12,11 +12,11 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.impl.print.taxnotification.GenerationException;
-import com.aplana.sbrf.taxaccounting.service.impl.print.taxnotification.NoDebtException;
+import com.aplana.sbrf.taxaccounting.service.impl.print.taxnotification.TaxNotificationException;
 import com.aplana.sbrf.taxaccounting.service.impl.print.taxnotification.NotificationDocument;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -96,18 +96,6 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
         List<DeclarationData> declarations = declarationDataService.findAllDeclarationData(DeclarationType.NDFL_CONSOLIDATE, departmentId, periodId);
         DeclarationData declaration = findAcceptedDeclarationForNotHoldingTax(declarations);
 
-        List<RefBookAsnu> asnuList = null;
-        // Если есть АСНУ
-        if (declaration != null && isNotEmpty(asnuIds)) {
-            // проверяем, есть ли АСНУ декларации в списке
-            Long declarationAsnuId = declaration.getAsnuId();
-            if (!asnuIds.contains(declarationAsnuId)) {
-                declaration = null;
-            } else {
-                asnuList = asnuService.fetchByIds(asnuIds);
-            }
-        }
-
         Logger logger = new Logger();
         if (declaration == null) {
             String errorMessage = "За указанный период %d: %s по территориальному банку %s отсутствует КНФ, " +
@@ -120,9 +108,13 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
             params.put("declaration", declaration);
             params.put("department", department);
             params.put("period", period);
-            if (asnuList != null) {
+
+            // Если есть АСНУ
+            if (isNotEmpty(asnuIds)) {
+                List<RefBookAsnu> asnuList = asnuService.fetchByIds(asnuIds);
                 params.put("asnuList", asnuList);
             }
+
             asyncManager.executeTask(keyTask, AsyncTaskType.CREATE_NOT_HOLDING_TAX_NOTIFICATIONS, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                 @Override
                 public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
@@ -160,7 +152,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
             attachFileToKnf(knf, fileUuid);
 
             return fileUuid;
-        } catch (NoDebtException | GenerationException e) {
+        } catch (TaxNotificationException e) {
             logger.error(e.getMessage());
         } catch (Exception e) {
             logger.error(e);
@@ -175,8 +167,23 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
         int reportYear = getKnfReportYear(knf);
 
         // Группируем доходы по физлицам
-        List<NdflPersonIncome> knfIncomes = ndflPersonService.findNdflPersonIncome(knf.getId());
-        ImmutableListMultimap<Long, NdflPersonIncome> incomesGroupedByPerson = Multimaps.index(knfIncomes, personIncomeToPersonId());
+        Collection<NdflPersonIncome> incomes = ndflPersonService.findNdflPersonIncome(knf.getId());
+
+        // Если требуется, фильтруем доходы по АСНУ
+        if (isNotEmpty(selectedAsnuList)) {
+            Collection<Long> selectedAsnuIds = Collections2.transform(selectedAsnuList, getId());
+            incomes = Collections2.filter(incomes, isIncomeByAsnuIds(selectedAsnuIds));
+
+            // Если incomes получилась пустой, то выкидываем исключение
+            if (isEmpty(incomes)) {
+                Collection<String> selectedAsnuCodes = Collections2.transform(selectedAsnuList, getCode());
+                String asnuCodesList = join(selectedAsnuCodes, ", ");
+                throw new TaxNotificationException("При формировании Уведомлений по неудержанному налогу не найдено ни одной строки, " +
+                        "удовлетворяющей условию: \"Код АСНУ в [" + asnuCodesList + "]\"");
+            }
+        }
+
+        ImmutableListMultimap<Long, NdflPersonIncome> incomesGroupedByPerson = Multimaps.index(incomes, getPersonId());
 
         List<NotificationDocument> notifications = new ArrayList<>();
 
@@ -200,9 +207,33 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     }
 
     /**
+     * Проверка, содержится ли АСНУ дохода в списке АСНУ.
+     */
+    private Predicate<NdflPersonIncome> isIncomeByAsnuIds(final Collection<Long> asnuIds) {
+        return new Predicate<NdflPersonIncome>() {
+            @Override
+            public boolean apply(NdflPersonIncome income) {
+                return asnuIds.contains(income.getAsnuId());
+            }
+        };
+    }
+
+    /**
+     * Функция asnu -> asnu.code
+     */
+    private Function<RefBookAsnu, String> getCode() {
+        return new Function<RefBookAsnu, String>() {
+            @Override
+            public String apply(RefBookAsnu asnu) {
+                return asnu.getCode();
+            }
+        };
+    }
+
+    /**
      * Функция income -> income.personId
      */
-    private Function<NdflPersonIncome, Long> personIncomeToPersonId() {
+    private Function<NdflPersonIncome, Long> getPersonId() {
         return new Function<NdflPersonIncome, Long>() {
             @Override
             public Long apply(NdflPersonIncome income) {
@@ -222,7 +253,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
         }
 
         // Группируем доходы по АСНУ
-        ImmutableListMultimap<Long, NdflPersonIncome> incomesGroupedByAsnu = Multimaps.index(personIncomes, personIncomeToAsnuId());
+        ImmutableListMultimap<Long, NdflPersonIncome> incomesGroupedByAsnu = Multimaps.index(personIncomes, getAsnuId());
 
         List<NotificationDocument> notifications = new ArrayList<>();
 
@@ -245,7 +276,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     /**
      * Функция income -> income.asnuId
      */
-    private Function<NdflPersonIncome, Long> personIncomeToAsnuId() {
+    private Function<NdflPersonIncome, Long> getAsnuId() {
         return new Function<NdflPersonIncome, Long>() {
             @Override
             public Long apply(NdflPersonIncome income) {
@@ -311,13 +342,13 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
             } catch (IOException | XmlException e) {
                 String errorMessage = "При формировании Уведомлений по неудержанному налогу (Приложение %d) " +
                         "по ФЛ %s (ИНП = %s) возникла ошибка при формировании файла - файл не сформирован";
-                throw new GenerationException(String.format(errorMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp()));
+                throw new TaxNotificationException(String.format(errorMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp()));
             }
         } else {
             String errorMessage = "Для формирования Уведомлений по неудержанному налогу (Приложение %d) " +
                     "по ФЛ %s (ИНП = %s) не найдено ни одной строки, удовлетворяющей условию: " +
                     "\"Разница сумм неудержанного и излишне удержанного налога > 0\"";
-            throw new NoDebtException(String.format(errorMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp()));
+            throw new TaxNotificationException(String.format(errorMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp()));
         }
     }
 
