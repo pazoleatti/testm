@@ -880,4 +880,19 @@
             <where>id in (select script_id from ref_book r where r.id = 207)</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5967 Исправить коментарии у таблиц и колонок реестра ФЛ-->
+    <changeSet id="3.2-amandzyak-12" author="amandzyak">
+        <sql>
+          comment on table REF_BOOK_PERSON is 'Реестр физических лиц';
+          comment on column REF_BOOK_PERSON.record_id is 'Идентификатор ФЛ';
+          comment on table REF_BOOK_PERSON_TB is 'Тербанк назначенный ФЛ';
+          comment on column REF_BOOK_PERSON_TB.person_id is 'Ссылка на запись реестра ФЛ';
+          comment on table REF_BOOK_ID_DOC is 'Документ, удостоверяющий личность ФЛ';
+          comment on column REF_BOOK_ID_DOC.person_id is 'Ссылка на запись реестра ФЛ';
+          comment on table REF_BOOK_ID_TAX_PAYER is 'Идентификатор налогоплательщика назначенный ФЛ в АСНУ';
+          comment on column REF_BOOK_ID_TAX_PAYER.person_id is 'Ссылка на запись реестра ФЛ';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
