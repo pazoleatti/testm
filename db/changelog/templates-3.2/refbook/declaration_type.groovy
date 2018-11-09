@@ -680,7 +680,7 @@ class DeclarationType extends AbstractScriptClass {
 
         // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
         def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.code}").get(0)
+        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.OUTGOING_TO_FNS.code}").get(0)
         List<DeclarationData> declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
 
         if (declarationDataList.isEmpty()) {
@@ -690,7 +690,7 @@ class DeclarationType extends AbstractScriptClass {
         if (declarationDataList.size() > 1) {
             def result = ""
             declarationDataList.each { DeclarationData declData ->
-                result += "\"${AttachFileType.TYPE_2.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
+                result += "\"${AttachFileType.OUTGOING_TO_FNS.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
             }
             logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName);
             return
@@ -846,7 +846,7 @@ class DeclarationType extends AbstractScriptClass {
         // Сохранение файла ответа в форме
         def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
-        def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.code}").get(0)
+        def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.INCOMING_FROM_FNS.code}").get(0)
 
         def declarationDataFile = new DeclarationDataFile()
         declarationDataFile.setDeclarationDataId(declarationData.id)
@@ -955,7 +955,7 @@ class DeclarationType extends AbstractScriptClass {
                 & UploadFileName.length() == NAME_LENGTH_QUARTER_DEC) {
             // РНУ_НДФЛ (первичная)
             declarationTypeId = DECLARATION_TYPE_RNU_NDFL_ID;
-            attachFileType = AttachFileType.TYPE_1
+            attachFileType = AttachFileType.TRANSPORT_FILE
             departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
 
             List<Department> formDepartments = departmentService.getDepartmentsBySbrfCode(departmentCode, true);
