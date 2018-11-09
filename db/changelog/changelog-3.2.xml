@@ -895,4 +895,11 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5969 В справочнике АСНУ изменить значение в поле "Тип дохода"-->
+    <changeSet id="3.2-amandzyak-13" author="amandzyak">
+        <sql>
+               update REF_BOOK_ASNU set type='Возврат платы за подключение к программе страхования' where code='9000'
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
