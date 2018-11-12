@@ -937,4 +937,10 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.2-amandzyak-16" author="amandzyak">
+        <sql>
+            ALTER TABLE DECLARATION_DATA_PERSON RENAME CONSTRAINT REF_BOOK_KNF_TYPE to DECLARATION_DATA_PERSON_PK;
+        </sql>
+    </changeSet>
+	
 </databaseChangeLog>
