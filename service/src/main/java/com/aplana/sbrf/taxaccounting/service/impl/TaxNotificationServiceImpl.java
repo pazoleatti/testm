@@ -145,7 +145,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     @Override
     public String create(DeclarationData knf, List<RefBookAsnu> selectedAsnuList, Logger logger) {
         try {
-            List<NotificationDocument> notifications = generateNotificationsForKnf(knf, selectedAsnuList);
+            List<NotificationDocument> notifications = generateNotificationsForKnf(knf, selectedAsnuList, logger);
 
             String zipFileName = generateZipFileName(knf) + ".zip";
             String fileUuid = archiveAndSaveNotifications(notifications, zipFileName);
@@ -163,7 +163,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     /**
      * Генерирует документы Уведомлений для КНФ по неудержанному НДФЛ.
      */
-    private List<NotificationDocument> generateNotificationsForKnf(DeclarationData knf, List<RefBookAsnu> selectedAsnuList) {
+    private List<NotificationDocument> generateNotificationsForKnf(DeclarationData knf, List<RefBookAsnu> selectedAsnuList, Logger logger) {
         int reportYear = getKnfReportYear(knf);
 
         // Группируем доходы по физлицам
@@ -172,14 +172,14 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
         // Если требуется, фильтруем доходы по АСНУ
         if (isNotEmpty(selectedAsnuList)) {
             Collection<Long> selectedAsnuIds = Collections2.transform(selectedAsnuList, getId());
-            incomes = Collections2.filter(incomes, isIncomeByAsnuIds(selectedAsnuIds));
+            incomes = Collections2.filter(incomes, isIncomeByOneOf(selectedAsnuIds));
 
             // Если incomes получилась пустой, то выкидываем исключение
             if (isEmpty(incomes)) {
                 Collection<String> selectedAsnuCodes = Collections2.transform(selectedAsnuList, getCode());
                 String asnuCodesList = join(selectedAsnuCodes, ", ");
-                throw new TaxNotificationException("При формировании Уведомлений по неудержанному налогу не найдено ни одной строки, " +
-                        "удовлетворяющей условию: \"Код АСНУ в [" + asnuCodesList + "]\"");
+                throw new TaxNotificationException("При формировании Уведомлений по неудержанному налогу " +
+                        "не найдено ни одной строки Раздела 2 с кодом АСНУ из выбранного списка: " + asnuCodesList);
             }
         }
 
@@ -193,7 +193,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
             NdflPerson person = ndflPersonService.findOne(personId);
             ImmutableList<NdflPersonIncome> personIncomes = incomesGroupedByPerson.get(personId);
 
-            List<NotificationDocument> personNotifications = generatePersonNotifications(person, personIncomes, reportYear, selectedAsnuList);
+            List<NotificationDocument> personNotifications = generatePersonNotifications(person, personIncomes, reportYear, selectedAsnuList, logger);
 
             notifications.addAll(personNotifications);
         }
@@ -209,7 +209,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     /**
      * Проверка, содержится ли АСНУ дохода в списке АСНУ.
      */
-    private Predicate<NdflPersonIncome> isIncomeByAsnuIds(final Collection<Long> asnuIds) {
+    private Predicate<NdflPersonIncome> isIncomeByOneOf(final Collection<Long> asnuIds) {
         return new Predicate<NdflPersonIncome>() {
             @Override
             public boolean apply(NdflPersonIncome income) {
@@ -245,28 +245,38 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     /**
      * Генерирует Уведомления по физлицу и списку его доходов.
      */
-    private List<NotificationDocument> generatePersonNotifications(NdflPerson person, List<NdflPersonIncome> personIncomes, int reportYear, List<RefBookAsnu> selectedAsnuList) {
-
-        Collection<Long> selectedAsnuIds = null;
-        if (isNotEmpty(selectedAsnuList)) {
-            selectedAsnuIds = Collections2.transform(selectedAsnuList, getId());
-        }
+    private List<NotificationDocument> generatePersonNotifications(NdflPerson person, List<NdflPersonIncome> personIncomes, int reportYear, List<RefBookAsnu> selectedAsnuList, Logger logger) {
 
         // Группируем доходы по АСНУ
-        ImmutableListMultimap<Long, NdflPersonIncome> incomesGroupedByAsnu = Multimaps.index(personIncomes, getAsnuId());
+        ImmutableListMultimap<Long, NdflPersonIncome> incomesGroupedByAsnuId = Multimaps.index(personIncomes, getAsnuId());
 
-        List<NotificationDocument> notifications = new ArrayList<>();
+        // Проверяем, по всем ли выбранным АСНУ имеются данные у физлица
+        ImmutableSet<Long> personAsnuIdSet = incomesGroupedByAsnuId.keySet();
+        if (isNotEmpty(selectedAsnuList)) {
+
+            Collection<Long> selectedAsnuIds = Collections2.transform(selectedAsnuList, getId());
+            ImmutableSet<Long> selectedAsnuIdSet = ImmutableSet.copyOf(selectedAsnuIds);
+
+            Set<Long> asnuIdsPersonDoesntHave = Sets.difference(selectedAsnuIdSet, personAsnuIdSet);
+
+            for (Long asnuId : asnuIdsPersonDoesntHave) {
+                RefBookAsnu asnu = asnuService.fetchById(asnuId);
+
+                String warningMessage = "При формировании Уведомлений по неудержанному налогу (Приложение %d) " +
+                        "по ФЛ %s (ИНП = %s) не найдено ни одной строки, удовлетворяющей условию: \"Код АСНУ = %s\"";
+                logger.warn(warningMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp(), asnu.getCode());
+            }
+        }
 
         // Для каждого АСНУ формируем отдельное Уведомление
-        for (Long asnuId : incomesGroupedByAsnu.keySet()) {
+        List<NotificationDocument> notifications = new ArrayList<>();
+        for (Long asnuId : personAsnuIdSet) {
 
-            // Если АСНУ содержится в избранных, либо избранные пусты
-            if (isEmpty(selectedAsnuIds) || (selectedAsnuIds.contains(asnuId))) {
+            RefBookAsnu asnu = asnuService.fetchById(asnuId);
+            ImmutableList<NdflPersonIncome> personAsnuIncomes = incomesGroupedByAsnuId.get(asnuId);
 
-                RefBookAsnu asnu = asnuService.fetchById(asnuId);
-                ImmutableList<NdflPersonIncome> personAsnuIncomes = incomesGroupedByAsnu.get(asnuId);
-
-                NotificationDocument personNotificationByAsnu = generateNotificationByPersonAndAsnu(person, asnu, personAsnuIncomes, reportYear);
+            NotificationDocument personNotificationByAsnu = generateNotificationByPersonAndAsnu(person, asnu, personAsnuIncomes, reportYear, logger);
+            if (personNotificationByAsnu != null) {
                 notifications.add(personNotificationByAsnu);
             }
         }
@@ -300,7 +310,7 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
     /**
      * Генерирует одно Уведомление по физлицу и списку его доходов, относящихся к одной АСНУ.
      */
-    private NotificationDocument generateNotificationByPersonAndAsnu(NdflPerson person, RefBookAsnu asnu, List<NdflPersonIncome> incomes, int reportYear) {
+    private NotificationDocument generateNotificationByPersonAndAsnu(NdflPerson person, RefBookAsnu asnu, List<NdflPersonIncome> incomes, int reportYear, Logger logger) {
 
         BigDecimal notHoldingTaxSum = BigDecimal.ZERO;
         BigDecimal overHoldingTaxSum = BigDecimal.ZERO;
@@ -345,10 +355,11 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
                 throw new TaxNotificationException(String.format(errorMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp()));
             }
         } else {
-            String errorMessage = "Для формирования Уведомлений по неудержанному налогу (Приложение %d) " +
+            String infoMessage = "Для формирования Уведомлений по неудержанному налогу (Приложение %d) " +
                     "по ФЛ %s (ИНП = %s) не найдено ни одной строки, удовлетворяющей условию: " +
                     "\"Разница сумм неудержанного и излишне удержанного налога > 0\"";
-            throw new TaxNotificationException(String.format(errorMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp()));
+            logger.info(infoMessage, getTemplateCodeByAsnuCode(asnu.getCode()), getPersonFullNameString(person), person.getInp());
+            return null;
         }
     }
 
@@ -553,6 +564,10 @@ public class TaxNotificationServiceImpl implements TaxNotificationService {
      * @return uuid файла в базе
      */
     private String archiveAndSaveNotifications(List<NotificationDocument> notifications, String fileName) {
+        if (isEmpty(notifications)) {
+            throw new TaxNotificationException("При формировании Уведомлений по неудержанному налогу нет сформированных файлов для упаковки в архив");
+        }
+
         File tempZipFile = null;
         try {
             tempZipFile = File.createTempFile("archive", ".zip");
