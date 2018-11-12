@@ -922,4 +922,19 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
         </update>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5969 В справочнике АСНУ изменить значение в поле "Тип дохода"-->
+    <changeSet id="3.2-amandzyak-14" author="amandzyak">
+        <sql>
+               update REF_BOOK_ASNU set type='Прощение задолженности по договорам отступного' where code='6002'
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5969 В справочнике АСНУ изменить значение в поле "Тип дохода"-->
+    <changeSet id="3.2-amandzyak-15" author="amandzyak">
+        <sql>
+               update REF_BOOK_ASNU set type='Доходы вследствие возврата/прощения долга после наступления страхового случая' where code='6003'
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
