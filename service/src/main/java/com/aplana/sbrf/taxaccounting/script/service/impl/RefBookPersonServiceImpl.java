@@ -118,9 +118,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                                     .append("Для физического лица ")
                                     .append(buildFio(declarationDataPerson))
                                     .append(", ")
-                                    .append(declarationDataPerson.getReportDoc().getDocType().getName())
+                                    .append(!declarationDataPerson.getDocuments().isEmpty() ? declarationDataPerson.getDocuments().get(0).getDocType().getName() : "")
                                     .append(" № ")
-                                    .append(declarationDataPerson.getReportDoc().getDocumentNumber())
+                                    .append(!declarationDataPerson.getDocuments().isEmpty() ? declarationDataPerson.getDocuments().get(0).getDocumentNumber() : "")
                                     .append(" Найдены записи в реестре ФЛ:\n");
                             for (NaturalPerson refBookPerson : personDataList) {
                                 msg.append("Идентификатор ФЛ: ")
