@@ -97,6 +97,13 @@
                                     showDeclarationDataNotExistsError();
                                 } else {
                                     var isRefreshGridNeeded = false;
+                                    // Обновляем информацию об актуальности если обновляем грид.
+                                    // Обновляем грид если были изменения в течение просмотра формы.
+                                    // Логика в этом блоке выстроена для этой цели.
+                                    var oldActualDate = null;
+                                    if ($scope.declarationData && $scope.declarationData.actualDataDate) {
+                                        oldActualDate = $scope.declarationData.actualDataDate
+                                    }
                                     if ($scope.declarationData && $scope.declarationData.actualDataDate &&
                                         $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
                                         isRefreshGridNeeded = true;
@@ -105,6 +112,8 @@
                                     $scope.declarationDataId = $stateParams.declarationDataId;
                                     if (isRefreshGridNeeded) {
                                         $scope.refreshGrid(1);
+                                    } else if (oldActualDate) {
+                                        $scope.declarationData.actualDataDate = oldActualDate
                                     }
                                 }
                             }
