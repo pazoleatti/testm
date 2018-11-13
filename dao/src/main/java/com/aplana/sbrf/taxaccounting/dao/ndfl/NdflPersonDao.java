@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.ndfl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.application2.Application2Income;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
@@ -76,12 +75,28 @@ public interface NdflPersonDao {
     List<NdflPerson> fetchByDeclarationData(long declarationDataId);
 
     /**
+     * Возвращяет список строк из раздела 1 по списку ид форм
+     *
+     * @param declarationDataIds список ид форм
+     * @return список строк раздела 1
+     */
+    List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds);
+
+    /**
      * Найти все "Сведения о доходах физического лица" привязанные к налоговой форме
      *
      * @param declarationDataId идентификатор налоговой формы
      * @return список объектов доходов физического лица
      */
     List<NdflPersonIncome> fetchNdflPersonIncomeByDeclarationData(long declarationDataId);
+
+    /**
+     * Возвращяет список строк из раздела 2 по списку ид форм
+     *
+     * @param declarationDataIds список ид форм
+     * @return список строк раздела 2
+     */
+    List<NdflPersonIncome> findAllIncomesByDeclarationIds(List<Long> declarationDataIds);
 
     /**
      * Найти все NdflPersonIncome по заданным параметрам
@@ -711,21 +726,4 @@ public interface NdflPersonDao {
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
     List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList, Date actualDate);
-
-    /**
-     * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.
-     * Без учета версий.
-     *
-     * @param personIdList список идентификаторов физических лиц из справочника
-     * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
-     */
-    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList);
-
-    /**
-     * Получает доходы данные которых будут включены в формирование Приложения 2 к налогу на прибыль
-     * @param declarationDataIds    список налоговых форм, операции которых будут отобраны
-     * @return  список объектов доходов
-     */
-    List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds);
-
 }
