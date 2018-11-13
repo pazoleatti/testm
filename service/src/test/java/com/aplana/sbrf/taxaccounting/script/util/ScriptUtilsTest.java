@@ -273,7 +273,8 @@ public class ScriptUtilsTest {
 
         Assert.assertEquals("Значение гр. 11 ДУЛ Номер (\"IVXLCivxlc1УХЛСухлс-АВ 123456\") содержит реквизиты паспорта гражданина СССР. Паспорт гражданина СССР не является актуальным документом, удостоверяющим личность",
                 ScriptUtils.checkDul("91", "IVXLCivxlc1УХЛСухлс-АВ 123456", "dulNumber"));
-        Assert.assertNull(ScriptUtils.checkDul("91", "IVXLCivxlc1УХЛСухлс-XE 123456", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("91", "IVXLCivxlc1УХЛС-XE 123456", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"12345678901234567890123456\") не соответствует формату ", ScriptUtils.checkDul("03", "12345678901234567890123456", "dulNumber"));
     }
 
     @Test

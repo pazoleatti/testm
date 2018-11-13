@@ -439,7 +439,7 @@
 
                 var values = [];
                 // Формируем список полей в нужном порядке
-                var fields = ['postalCode', 'regionCode', 'district', 'city', 'locality', 'street', 'house', 'build', 'apartment'];
+                var fields = ['postalCode', 'regionCode', 'district', 'city', 'locality', 'street', 'house', 'build', 'appartment'];
                 // Добавляем значения непустых полей
                 fields.forEach(function (field) {
                     if (address[field]) {
