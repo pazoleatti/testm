@@ -97,6 +97,7 @@
                     ctrl: {},
                     value: [],
                     options: {
+                        gridName: 'registryFLGrid',
                         datatype: "angularResource",
                         angularResource: RefBookFLResource,
                         ondblClickRow: function (rowId) {
