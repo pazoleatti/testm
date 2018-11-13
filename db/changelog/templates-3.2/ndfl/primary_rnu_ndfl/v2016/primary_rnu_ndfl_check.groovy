@@ -1107,6 +1107,9 @@ class Check extends AbstractScriptClass {
 
             ScriptUtils.checkInterrupted()
 
+            // ид операции, по которым уже выполнялась проверка заполненности графы 12, чтобы проверка проходила по операции, а не по строке
+            List<String> col12CheckedOperationIds = []
+
             for (NdflPersonIncome ndflPersonIncome : item.value) {
                 NdflPerson ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
                 def operationId = ndflPersonIncome.operationId
@@ -1140,26 +1143,35 @@ class Check extends AbstractScriptClass {
 
                 // СведДох2 Сумма вычета (Графа 12)
                 if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.incomeAccruedSumm != null) {
-                    BigDecimal incomesAccruedSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.incomeAccruedSumm ?: 0 } ?: 0
-                    BigDecimal incomesDeductionsSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.totalDeductionsSumm ?: 0 } ?: 0
-                    BigDecimal deductionsSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
-                    if (!comparNumbEquals(incomesDeductionsSum, deductionsSum)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") Раздела 2 должно быть равно сумме гр. \"%s\" " +
-                                "(\"%s\") Раздела 3 для всех строк одной операции",
-                                C_TOTAL_DEDUCTIONS_SUMM, incomesDeductionsSum,
-                                C_PERIOD_CURR_SUMM, deductionsSum)
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
-                    }
-                    if (comparNumbGreater(deductionsSum, incomesAccruedSum)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") Раздела 3 должно быть меньше или равно сумме значений гр. \"%s\" " +
-                                "(\"%s\") Раздела 2 для всех строк одной операции",
-                                C_PERIOD_CURR_SUMM, incomesDeductionsSum,
-                                C_INCOME_ACCRUED_SUMM, incomesAccruedSum)
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
+                    if (!col12CheckedOperationIds.contains(operationId)) {
+                        BigDecimal incomesAccruedSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.incomeAccruedSumm ?: 0 } ?: 0
+                        BigDecimal incomesDeductionsSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.totalDeductionsSumm ?: 0 } ?: 0
+                        BigDecimal deductionsSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
+                        if (signOf(incomesAccruedSum) != signOf(incomesDeductionsSum)) {
+                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                            String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" сумма значений гр. \"Сумма вычета\" (\"%s\") и сумма значений гр. " +
+                                    "\"Сумма начисленного налога\" (\"%s\") должны иметь одинаковый знак.",
+                                    operationId, incomesDeductionsSum, incomesAccruedSum)
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                        if (incomesAccruedSum.abs() < incomesDeductionsSum.abs()) {
+                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                            String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" Модуль суммы значений гр\"Сумма вычета\" (\"%s\") должен быть меньше " +
+                                    "или равен модулю суммы значений гр. \"Сумма начисленного дохода\" (\"%s\").",
+                                    operationId, incomesDeductionsSum, incomesAccruedSum)
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                        if (incomesDeductionsSum != deductionsSum) {
+                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                            String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" сумма значений гр. \"Сумма вычета\" " +
+                                    "Раздела 2 (\"%s\") должна быть равна сумме значений гр. \"Вычет. Текущий период. Сумма\" Раздела 3 (\"%s\")",
+                                    operationId, incomesDeductionsSum, deductionsSum)
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                        col12CheckedOperationIds.add(operationId)
                     }
                 }
 
@@ -2632,17 +2644,8 @@ class Check extends AbstractScriptClass {
         return true
     }
 
-    /**
-     * Сравнение чисел с плавающей точкой через эпсилон-окрестности
-     */
-    boolean comparNumbEquals(BigDecimal d1, BigDecimal d2) {
-        if (d1 == null || d2 == null) return false
-        return ((d1 - d2).abs() < 0.001)
-    }
-
-    boolean comparNumbGreater(BigDecimal d1, BigDecimal d2) {
-        if (d1 == null || d2 == null) return false
-        return (d1 - d2 > 0.001)
+    int signOf(def number) {
+        return number > 0 ? 1 : number < 0 ? -1 : 0
     }
 
     /**
