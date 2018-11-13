@@ -1038,6 +1038,8 @@
         "refBook.fl.card.button.save": "Сохранить",
         "refBook.fl.card.button.cancel": "Отмена",
         "refBook.fl.card.tabs.lable.idDoc": "Документы, удостоверяющие личность (ДУЛ)",
+        "refBook.fl.card.validation.snils.mask": "Значение не соответствует формату.",
+        "refBook.fl.card.validation.snils.parse": "СНИЛС должен содержать 14 символов: цифры и разделители (-)",
 
         "refBook.version": "Дата актуальности",
         "refBook.versionFrom": "Дата начала актуальности",
@@ -1102,6 +1104,7 @@
         'aplana.dateFromToFilter',
         'aplana.formLeaveConfirmer',
         'aplana.link',
+        'ui.mask',
         'aplana.modal',
         'aplana.modal.dialogs',
         // Модули приложения
