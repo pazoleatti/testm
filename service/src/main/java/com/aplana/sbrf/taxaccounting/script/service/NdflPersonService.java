@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.application2.Application2Income;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -53,6 +52,14 @@ public interface NdflPersonService {
     List<NdflPerson> findNdflPerson(long declarationDataId);
 
     /**
+     * Возвращяет список строк из раздела 1 по списку ид форм
+     *
+     * @param declarationDataIds список ид форм
+     * @return список строк раздела 1
+     */
+    List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds);
+
+    /**
      * Возвращяет данные все разделов формы РНУ
      *
      * @param declarationDataId идентификатор формы РНУ
@@ -66,6 +73,14 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
+
+    /**
+     * Возвращяет список строк из раздела 2 по списку ид форм
+     *
+     * @param declarationDataIds список ид форм
+     * @return список строк раздела 2
+     */
+    List<NdflPersonIncome> findAllIncomesByDeclarationIds(List<Long> declarationDataIds);
 
     /**
      * Найти данные о доходах по КПП и ОКТМО для Физлица
@@ -99,7 +114,7 @@ public interface NdflPersonService {
     /**
      * Возвращяет список строк из раздела 3 по списку ид форм
      *
-     * @param declarationDataIds списсок ид форм
+     * @param declarationDataIds список ид форм
      * @return список строк раздела 3
      */
     List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds);
@@ -630,22 +645,5 @@ public interface NdflPersonService {
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
     List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> ndflPersonIdList, Date actualDate);
-
-    /**
-     * Получает доходы данные которых будут включены в формирование Приложения 2 к налогу на прибыль
-     *
-     * @param declarationDataIds список налоговых форм, операции которых будут отобраны
-     * @return список объектов доходов
-     */
-    List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds);
-
-    /**
-     * Получает данные из справочника по физическим лицам и заполняет ими класс модели соответствующий Разделу 1 РНУ НДФЛ - {@code com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}.
-     * Без учета версий.
-     *
-     * @param personIdList список идентификаторов физических лиц из справочника
-     * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
-     */
-    List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList);
 }
 

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.script.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.application2.Application2Income;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -106,6 +105,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds) {
+        return ndflPersonDao.findAllNdflPersonsByDeclarationIds(declarationDataIds);
+    }
+
+    @Override
     public List<NdflPerson> findNdflPersonWithOperations(long declarationDataId) {
         List<NdflPerson> persons = ndflPersonDao.fetchByDeclarationData(declarationDataId);
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId));
@@ -135,6 +139,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId) {
         return ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findAllIncomesByDeclarationIds(List<Long> declarationDataIds) {
+        return ndflPersonDao.findAllIncomesByDeclarationIds(declarationDataIds);
     }
 
     @Override
@@ -439,15 +448,5 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> ndflPersonIdList, Date actualDate) {
         return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(ndflPersonIdList, actualDate);
-    }
-
-    @Override
-    public List<Application2Income> findAllApplication2Incomes(List<Long> declarationDataIds) {
-        return ndflPersonDao.findAllApplication2Incomes(declarationDataIds);
-    }
-
-    @Override
-    public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList) {
-        return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(personIdList);
     }
 }
