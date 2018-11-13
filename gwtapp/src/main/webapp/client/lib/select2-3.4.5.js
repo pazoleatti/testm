@@ -1577,6 +1577,16 @@
             below = more.offset().top - results.offset().top - results.height();
 
             if (below <= this.opts.loadMorePadding) {
+                //Метод loadMoreIfNeeded вызывается после выполнения каждого запроса и при касании полосы прокрутки нижней границы.
+                //Может сложиться так, что оба события сработают с разницей во времени меньшей, чем требуется
+                //на обработку ответа с сервера и одна страница с данными добавится два раза.
+                //Чтобы это не происходило - будем следить, не активен ли уже этот процесс.
+                if (this._loadingMore) {
+                    return;
+                }
+
+                this._loadingMore = true;
+
                 more.addClass("select2-active");
                 this.opts.query({
                     element: this.opts.element,
@@ -1605,6 +1615,8 @@
                         self.resultsPage = page;
                         self.context = data.context;
                         this.opts.element.trigger({ type: "select2-loaded", items: data });
+
+                        this._loadingMore = false;
                     })});
             }
         },
