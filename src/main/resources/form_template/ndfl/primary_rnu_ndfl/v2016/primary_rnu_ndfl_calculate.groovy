@@ -527,22 +527,34 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
+        // Это список ид физлиц-дубликатов для конкретного оригинала
+        List<Long> duplicatePersons = []
+
         if (originalPerson != null) {
             for (int i = 0; i < processingPersonList.size(); i++) {
-                // Это список физлиц-дубликатов для конкретного оригинала
-                List<NaturalPerson> duplicatePersons = primaryPersonOriginalDuplicates.get(originalPerson)
-                if (duplicatePersons == null || !duplicatePersonList.contains(processingPersonList.get(i))) {
+                if (primaryPersonOriginalDuplicates.get(originalPerson) != null) {
+                    duplicatePersons.addAll(primaryPersonOriginalDuplicates.get(originalPerson).primaryPersonId)
+                }
+                if (duplicatePersons.isEmpty() || !duplicatePersonList?.primaryPersonId?.contains(processingPersonList.get(i).primaryPersonId)) {
                     refBookPersonService.calculateWeight(originalPerson, [processingPersonList.get(i)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
                     if (processingPersonList.get(i).weight > similarityLine) {
                         duplicatePersonList.add(processingPersonList.get(i))
-                        insertPersonList.remove(processingPersonList.get(i))
-                        if (duplicatePersons != null) {
-                            duplicatePersons.add(processingPersonList.get(i))
+                        if (!duplicatePersons.isEmpty()) {
+                            duplicatePersons.add(processingPersonList.get(i).primaryPersonId)
                         } else {
                             primaryPersonOriginalDuplicates.put(originalPerson, [processingPersonList.get(i)])
                         }
                     }
                 }
+            }
+        }
+
+        Iterator<NaturalPerson> iterator = insertPersonList.iterator()
+
+        while(iterator.hasNext()) {
+            NaturalPerson person = iterator.next()
+            if (duplicatePersons.contains(person.primaryPersonId)) {
+                iterator.remove()
             }
         }
     }
