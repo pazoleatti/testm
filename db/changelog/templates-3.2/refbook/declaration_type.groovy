@@ -1359,7 +1359,6 @@ class DeclarationType extends AbstractScriptClass {
         check2(personRateRowGroup)
         check5(personRateRowGroup)
         check8(personRateRowGroup)
-        check9(personRateRowGroup)
         check10(personRateRowGroup)
         check12(personRateRowGroup)
         check12_1(personRateRowGroup)
@@ -1424,20 +1423,6 @@ class DeclarationType extends AbstractScriptClass {
         if (person.postIndex && !person.postIndex.matches("[0-9]{6}")) {
             logger.error("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
                     " в поле 12 (Почтовый индекс) указано значение не соответствующее формату почтового индекса.")
-        }
-    }
-
-    /**
-     * Если поле 13 "Регион (код)" заполнено, то графы 12, 14-20 заполнены (допустимо заполнение прочерком)
-     */
-    void check9(App2PersonRateRowGroup personRateRowGroup) {
-        def person = personRateRowGroup.person
-        if (person.regionCode) {
-            if (!(person.postIndex && person.area && person.city && person.locality && person.street && person.house && person.building && person.flat)) {
-                def row = personRateRowGroup.rows.first()
-                logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                        " в строке ${row.rowNum} заполнено поле 13 \"Регион (код)\", но не заполнены поля Почтовый индекс, Район, Город, Населенный пункт (село, поселок), Улица (проспект, переулок), Номер дома (владения), Номер корпуса (строения), Номер квартиры ")
-            }
         }
     }
 
@@ -1509,7 +1494,7 @@ class DeclarationType extends AbstractScriptClass {
         }
         if ((personRateRowGroup.incomeAccruedSum ?: 0) != sum) {
             logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                    " общая сумма дохода не равна сумме всех сумм доходов")
+                    " общая сумма дохода ($personRateRowGroup.incomeAccruedSum) не равна сумме всех сумм доходов ($sum)")
         }
     }
 
@@ -1531,7 +1516,7 @@ class DeclarationType extends AbstractScriptClass {
         }
         if ((personRateRowGroup.incomeDeductionSum ?: 0) != sum) {
             logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                    " общая сумма вычетов не равна сумме всех сумм вычетов")
+                    " общая сумма вычетов ($personRateRowGroup.incomeDeductionSum) не равна сумме всех сумм вычетов ($sum)")
         }
     }
 
@@ -1542,7 +1527,8 @@ class DeclarationType extends AbstractScriptClass {
         def person = personRateRowGroup.person
         if ((personRateRowGroup.taxBaseSum ?: 0) != ((personRateRowGroup.incomeAccruedSum ?: 0) - (personRateRowGroup.incomeDeductionSum ?: 0))) {
             logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                    " налоговая база не равна разности между \"Общая сумма дохода\" и \"Общая сумма вычета\"")
+                    " налоговая база ($personRateRowGroup.taxBaseSum) не равна разности между \"Общая сумма дохода\" (${personRateRowGroup.incomeAccruedSum ?: 0})" +
+                    " и \"Общая сумма вычета\" (${personRateRowGroup.incomeDeductionSum ?: 0})")
         }
     }
 
@@ -1555,7 +1541,7 @@ class DeclarationType extends AbstractScriptClass {
         BigDecimal v = (personRateRowGroup.taxBaseSum ?: 0) * personRateRowGroup.rate / 100
         if ((personRateRowGroup.calculatedTaxSum ?: 0) != ScriptUtils.round(v)) {
             logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                    " в поле 27 «Сумма налога исчисленная» указано некорректное значение.")
+                    " в поле 27 «Сумма налога исчисленная» (${personRateRowGroup.calculatedTaxSum ?: 0}) указано некорректное значение.")
         }
     }
 
@@ -1565,10 +1551,7 @@ class DeclarationType extends AbstractScriptClass {
     @SuppressWarnings("GroovyVariableNotAssigned")
     void check15(App2PersonRateRowGroup personRateRowGroup) {
         def person = personRateRowGroup.person
-        int rowNum = 1
-        Integer incomeColGroupСolNum = 32
         BigDecimal deductionSum = 0
-        List<Integer> deductionColNums = []
         for (int rowIndex = 0; rowIndex < personRateRowGroup.rows.size(); rowIndex++) {
             def row = personRateRowGroup.rows[rowIndex]
             App2Row nextRow = rowIndex < personRateRowGroup.rows.size() - 1 ? personRateRowGroup.rows[rowIndex + 1] : null
@@ -1579,19 +1562,15 @@ class DeclarationType extends AbstractScriptClass {
                 for (def deductionColGroup : incomeColGroup.deductionColGroups) {
                     if (deductionColGroup.deductionCode) {
                         deductionSum += (deductionColGroup.periodCurrSum ?: 0)
-                        deductionColNums.add(deductionColGroup.colNum + 1)
                     }
                 }
                 // проверяем только если достигли последней группы по коду дохода
                 if (nextIncomeColGroup == null || incomeColGroup.incomeCode != nextIncomeColGroup.incomeCode) {
                     if (deductionSum > (incomeColGroup.incomeAccruedSum ?: 0)) {
                         logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                                " в строке ${rowNum} сумма вычета для полей ${deductionColNums.join(", ")} превышает сумму дохода, указанную в поле ${incomeColGroupСolNum + 1}")
+                                " для кода дохода $incomeColGroup.incomeCode сумма вычета ($deductionSum) превышает сумму дохода (${incomeColGroup.incomeAccruedSum ?: 0}).")
                     }
-                    rowNum = row.rowNum
                     deductionSum = 0
-                    deductionColNums.clear()
-                    incomeColGroupСolNum = nextIncomeColGroup?.colNum
                 }
             }
         }
@@ -1641,7 +1620,8 @@ class DeclarationType extends AbstractScriptClass {
             for (def standartDeductionColGroup : row.standartDeductionColGroups) {
                 if ((standartDeductionColGroup.periodCurrSum ?: 0) > (personRateRowGroup.incomeAccruedSum ?: 0)) {
                     logger.warn("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
-                            " значение суммы стандартного вычета в поле ${standartDeductionColGroup.colNum + 1} превышает общую сумму дохода")
+                            " значение суммы стандартного вычета (${standartDeductionColGroup.periodCurrSum ?: 0}) в поле ${standartDeductionColGroup.colNum + 1}" +
+                            " превышает общую сумму дохода (${personRateRowGroup.incomeAccruedSum ?: 0})")
                     return
                 }
             }

@@ -11,7 +11,7 @@
         .controller('application2Ctrl', ['$scope', '$modalInstance', '$http', '$logPanel',
             function ($scope, $modalInstance, $http, $logPanel) {
 
-                $scope.reportYear = new Date().getFullYear() - 1;
+                $scope.form = {reportYear: new Date().getFullYear() - 1};
 
                 /**
                  * Запуск задачи формирования Приложения 2
@@ -21,7 +21,7 @@
                         method: "POST",
                         url: "controller/actions/createApplication2",
                         params: {
-                            reportYear: $scope.reportYear
+                            reportYear: $scope.form.reportYear
                         }
                     }).success(function (response) {
                         $logPanel.open('log-panel-container', response);
