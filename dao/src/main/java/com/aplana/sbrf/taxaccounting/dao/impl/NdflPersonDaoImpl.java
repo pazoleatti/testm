@@ -2249,7 +2249,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "(select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
                 "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo\n" +
                 "where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId )\n" +
-                "select npi.operation_id, dd.asnu_id, np.inp, tp.year, rpt.code as period_code, drp.correction_date\n" +
+                "select distinct npi.operation_id, dd.asnu_id, np.inp, tp.year, rpt.code as period_code, drp.correction_date\n" +
                 "from ndfl_person_income npi \n" +
                 "join kpp_oktmo on kpp_oktmo.kpp = npi.kpp and kpp_oktmo.oktmo = npi.oktmo\n" +
                 "join ndfl_person np on npi.ndfl_person_id = np.id \n" +
@@ -2264,11 +2264,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "or npi.tax_date between :periodStartDate and :periodEndDate \n" +
                 "or npi.tax_transfer_date between :periodStartDate and :periodEndDate ) \n" +
                 "and dt.declaration_type_id = :declarationType and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear";
-        String selectSql = "select distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, cd.inp, cd.year, cd.period_code, cd.correction_date, rba.NAME as asnu_name " +
+        String selectSql = "select distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date, rba.NAME as asnu_name " +
                 "from ndfl_person_income npi\n" +
                 "left join tmp_cons_data cd on cd.operation_id = npi.operation_id\n" +
                 "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
                 "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "join department_report_period drp on drp.id = dd.department_report_period_id \n" +
+                "join report_period rp on rp.id = drp.report_period_id \n" +
+                "join tax_period tp on rp.tax_period_id = tp.id \n" +
+                "left join report_period_type rpt on rp.dict_tax_period_id = rpt.id\n" +
                 " left join ref_book_asnu rba on npi.asnu_id = rba.id " +
                 "where dd.asnu_id = cd.asnu_id";
         MapSqlParameterSource params = new MapSqlParameterSource();
