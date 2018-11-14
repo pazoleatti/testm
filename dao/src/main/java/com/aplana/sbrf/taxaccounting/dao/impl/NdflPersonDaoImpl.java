@@ -2236,7 +2236,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
-        String insertSql = "insert into tmp_cons_data(operation_id, asnu_id, inp, year, period_code, correction_date)\n" +
+        String insertSql = "insert into tmp_cons_data(operation_id, asnu_id)\n" +
                 "with temp as\n" +
                 "(select max(version) version, record_id\n" +
                 "from ref_book_ndfl_detail r\n" +
