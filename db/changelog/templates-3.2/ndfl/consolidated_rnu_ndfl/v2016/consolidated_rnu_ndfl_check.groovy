@@ -76,6 +76,7 @@ class Check extends AbstractScriptClass {
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String TEMPLATE_PERSON_FL_OPER = "%s, ИНП: %s, ID операции: %s"
     final String SECTION_LINE_MSG = "Раздел %s. Строка %s"
+    final String SECTION_LINES_MSG = "Раздел %s. Строки %s"
 
     final String C_CITIZENSHIP = "Гражданство (код страны)"
     final String C_STATUS = "Статус (код)"
@@ -1169,12 +1170,13 @@ class Check extends AbstractScriptClass {
                         BigDecimal incomesAccruedSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.incomeAccruedSumm ?: 0 } ?: 0
                         BigDecimal incomesDeductionsSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.totalDeductionsSumm ?: 0 } ?: 0
                         BigDecimal deductionsSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
+                        String rowNums = allIncomesOfOperation?.rowNum?.join(", ") ?: ""
                         if (signOf(incomesAccruedSum) != signOf(incomesDeductionsSum)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" сумма значений гр. \"Сумма вычета\" (\"%s\") и сумма значений гр. " +
                                     "\"Сумма начисленного налога\" (\"%s\") должны иметь одинаковый знак.",
                                     operationId, incomesDeductionsSum, incomesAccruedSum)
-                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                             logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                         }
                         if (incomesAccruedSum.abs() < incomesDeductionsSum.abs()) {
@@ -1182,7 +1184,7 @@ class Check extends AbstractScriptClass {
                             String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" Модуль суммы значений гр\"Сумма вычета\" (\"%s\") должен быть меньше " +
                                     "или равен модулю суммы значений гр. \"Сумма начисленного дохода\" (\"%s\").",
                                     operationId, incomesDeductionsSum, incomesAccruedSum)
-                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                             logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                         }
                         if (incomesDeductionsSum != deductionsSum) {
@@ -1190,7 +1192,7 @@ class Check extends AbstractScriptClass {
                             String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" сумма значений гр. \"Сумма вычета\" " +
                                     "Раздела 2 (\"%s\") должна быть равна сумме значений гр. \"Вычет. Текущий период. Сумма\" Раздела 3 (\"%s\")",
                                     operationId, incomesDeductionsSum, deductionsSum)
-                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                             logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                         }
                         col12CheckedOperationIds.add(operationId)
