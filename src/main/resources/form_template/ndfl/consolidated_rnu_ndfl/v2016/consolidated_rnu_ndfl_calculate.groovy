@@ -18,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
 import com.aplana.sbrf.taxaccounting.model.util.Pair
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
@@ -42,6 +41,7 @@ class Calculate extends AbstractScriptClass {
     DepartmentService departmentService
     SourceService sourceService
     PersonService personService
+    Set<Long> unacceptedSources
 
 
     //Коды Асну
@@ -76,6 +76,9 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("personService")) {
             this.personService = (PersonService) scriptClass.getProperty("personService")
+        }
+        if (scriptClass.getBinding().hasVariable("unacceptedSources")) {
+            this.unacceptedSources = (Set<Long>) scriptClass.getProperty("unacceptedSources")
         }
     }
 
@@ -270,8 +273,16 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
+        // Если в итоге число строк пустое, выкидываем ошибку, учитывая, были ли найдены подходящие данные в непринятых ПНФ
         if (pickedRows.isEmpty()) {
-            logger.error("Не найдено ни одной ПНФ в состоянии \"Принята\", содержащей данные для включения в КНФ")
+            Set<Long> acceptedPnfIds = acceptedSources.get(Boolean.TRUE)
+            Set<Long> unacceptedPnfIds = acceptedSources.get(Boolean.FALSE)
+            if (acceptedPnfIds.isEmpty() && !unacceptedPnfIds.isEmpty()) {
+                unacceptedSources?.addAll(unacceptedPnfIds)
+                logger.error("Формы содержащие данные для включения в КНФ существуют, но все они находятся в состоянии \"Не принята\". Номера найденных ПНФ: %s", unacceptedPnfIds.join(", "))
+            } else {
+                logger.error("Не найдено ни одной ПНФ, содержащей данные для включения  в КНФ")
+            }
             return
         }
 
@@ -617,7 +628,7 @@ class Calculate extends AbstractScriptClass {
     /**
      * Получить дату создания налоговой формы
      * @param declarationDataId идентификатор налоговой формы
-     * @return  дата создания налоговой формы
+     * @return дата создания налоговой формы
      */
     Date getDeclarationDataCreationDate(Long declarationDataId) {
         Date toReturn = creationDateCache.get(declarationDataId)

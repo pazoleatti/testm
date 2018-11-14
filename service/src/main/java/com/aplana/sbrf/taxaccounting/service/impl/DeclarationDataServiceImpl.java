@@ -79,12 +79,10 @@ import java.util.zip.ZipOutputStream;
 
 import static com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType.UPDATE_PERSONS_DATA;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * Сервис для работы с декларациями
- *
- * @author Eugene Stetsenko
- * @author dsultanbekov
  */
 @Service
 @Transactional(readOnly = true)
@@ -105,13 +103,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         }
     };
-    private static final ThreadLocal<SimpleDateFormat> SDF_YYYY_MM_DD_HH_MM_SS = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        }
-    };
-    private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
     private static final String CALCULATION_NOT_TOPICAL = "Налоговая форма содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация).";
@@ -160,8 +151,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private AsyncTaskDao asyncTaskDao;
     @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
-    @Autowired
     private RefBookFactory rbFactory;
     @Autowired
     private DeclarationDataFileDao declarationDataFileDao;
@@ -183,22 +172,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
+    @Autowired
+    private TransactionHelper transactionHelper;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
-    public static final String TAG_FILE = "Файл";
-    public static final String TAG_DOCUMENT = "Документ";
-    public static final String ATTR_FILE_ID = "ИдФайл";
-    public static final String ATTR_DOC_DATE = "ДатаДок";
+    private static final String TAG_FILE = "Файл";
+    private static final String TAG_DOCUMENT = "Документ";
+    private static final String ATTR_FILE_ID = "ИдФайл";
+    private static final String ATTR_DOC_DATE = "ДатаДок";
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
-    public static final String MSG_IS_EXIST_DECLARATION =
+    private static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
     private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
             "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
-    private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
-            "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" - экземпляр формы не создан";
-    private static final String EXIST_DESTINATION_DECLARATION_ERROR =
-            "Переход невозможен, т.к. уже подготовлена/принята вышестоящая налоговая форма.";
     private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
 
     private static final Date MAX_DATE;
@@ -215,7 +202,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         private Map<String, String> values;
         private Map<String, String> tagAttrNames;
 
-        public SAXHandler(Map<String, String> tagAttrNames) {
+        SAXHandler(Map<String, String> tagAttrNames) {
             this.tagAttrNames = tagAttrNames;
         }
 
@@ -225,12 +212,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         @Override
-        public void startDocument() throws SAXException {
-            values = new HashMap<String, String>();
+        public void startDocument() {
+            values = new HashMap<>();
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
             if (tagAttrNames.containsKey(qName)) {
                 values.put(qName, attributes.getValue(tagAttrNames.get(qName)));
             }
@@ -374,12 +361,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     /**
      * Проверка возможности создания пользователем формы из макета
      * TODO: вынести в пермишены
-     *
-     * @param userInfo
-     * @param declarationTemplateId
-     * @param departmentReportPeriod
-     * @param asnuId
-     * @param logger
      */
     private void canCreate(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuId, Logger logger) {
         // Для начала проверяем, что в данном подразделении вообще можно
@@ -520,18 +501,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void consolidate(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         LOG.info(String.format("DeclarationDataServiceImpl.consolidate by %s. docDate: %s; exchangeParams: %s",
                 userInfo, docDate, exchangeParams));
-        DeclarationData declarationData = declarationDataDao.get(targetIdAndLogger.getId());
+        final DeclarationData declarationData = declarationDataDao.get(targetIdAndLogger.getId());
 
         if (exchangeParams == null) {
             exchangeParams = new HashMap<>();
         }
-        Map<String, Object> params = new HashMap<>();
-        params.put("declarationData", declarationData);
-        exchangeParams.put("calculateParams", params);
+        final Set<Long> unacceptedSources = new HashSet<>();
+        exchangeParams.put("unacceptedSources", unacceptedSources);
 
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, targetIdAndLogger.getLogger(), exchangeParams);
 
         if (targetIdAndLogger.getLogger().containsLevel(LogLevel.ERROR)) {
+            // Если из скрипта пришёл список источников, требуется их сохранить
+            if (isNotEmpty(unacceptedSources)) {
+                transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                    @Override
+                    public Object execute() {
+                        sourceService.addDeclarationConsolidationInfo(declarationData.getId(), unacceptedSources);
+                        return null;
+                    }
+                });
+            }
             throw new ServiceException();
         }
 
@@ -3298,21 +3288,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger logger = new Logger();
         ActionResult result = new ActionResult();
         List<DeclarationData> declarationDataList = declarationDataDao.get(declarationDataIdList);
-        List<DeclarationData> succesfullPreCreateDeclarationDataList = new LinkedList<DeclarationData>();
-        List<DeclarationData> unsuccesfullPreCreateDeclarationDataList = new LinkedList<DeclarationData>();
+        List<DeclarationData> successfulPreCreateDeclarationDataList = new LinkedList<>();
+        List<DeclarationData> unsuccessfulPreCreateDeclarationDataList = new LinkedList<>();
         for (DeclarationData declarationData : declarationDataList) {
             if (preCreateReports(logger, userInfo, declarationData)) {
-                succesfullPreCreateDeclarationDataList.add(declarationData);
+                successfulPreCreateDeclarationDataList.add(declarationData);
             } else {
-                unsuccesfullPreCreateDeclarationDataList.add(declarationData);
+                unsuccessfulPreCreateDeclarationDataList.add(declarationData);
             }
         }
-        if (succesfullPreCreateDeclarationDataList.isEmpty()) {
+        if (successfulPreCreateDeclarationDataList.isEmpty()) {
             logger.error("Отчетность не выгружена. В выбранных отчетных формах некорректное количество файлов " +
                     "формата xml, категория которых равна \"Исходящий в ФНС\", должно быть файлов: один");
             result.setUuid(logEntryService.save(logger.getEntries()));
         } else {
-            for (DeclarationData declarationData : unsuccesfullPreCreateDeclarationDataList) {
+            for (DeclarationData declarationData : unsuccessfulPreCreateDeclarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
                 DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
                 Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -3332,7 +3322,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
 
-            String reportId = createReports(succesfullPreCreateDeclarationDataList, userInfo);
+            String reportId = createReports(successfulPreCreateDeclarationDataList, userInfo);
             String uuid = logEntryService.save(logger.getEntries());
             sendNotification("Подготовлена к выгрузке отчетность", uuid, userInfo.getUser().getId(), NotificationType.REF_BOOK_REPORT, reportId);
         }
