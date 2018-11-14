@@ -83,8 +83,15 @@
                                 messageType = 'warning';
                             }
 
+                            if (typeof addMessage === "string") {
+                                $injector.invoke(['$dialogs', function ($dialogs) {
+                                    $dialogs.errorDialog({
+                                        content: addMessage
+                                    });
+                                }]);
+                            }
                             //jQuery возвращает число, а ангуляр - строку, !== не использовать
-                            if (status === '413') {
+                            else if (status === '413') {
                                 message = $filter('translate')("common.error.message.constraint.violation.exception");
                                 // ignored?
                             } else if (status !== '500' && status !== '403') {
