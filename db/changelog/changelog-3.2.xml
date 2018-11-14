@@ -1009,4 +1009,11 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5979 -->
+    <changeSet id="3.2-ytrofimov-19" author="ytrofimov">
+        <sql>
+            alter table tmp_cons_data drop (inp, year, period_code, correction_date);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
