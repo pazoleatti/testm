@@ -70,6 +70,8 @@ public class DeclarationDataServiceImplTest {
     ReportPeriodService reportPeriodService;
     @Autowired
     RefBookFactory refBookFactory;
+    @Autowired
+    TransactionHelper transactionHelper;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
