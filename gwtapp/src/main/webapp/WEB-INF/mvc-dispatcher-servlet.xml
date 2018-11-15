@@ -15,6 +15,9 @@
             <beans:bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <beans:property name="objectMapper" ref="objectMapper"/>
             </beans:bean>
+            <beans:bean class="com.aplana.sbrf.taxaccounting.web.spring.ExceptionMessageConverter">
+                <beans:property name="objectMapper" ref="objectMapper"/>
+            </beans:bean>
         </message-converters>
     </annotation-driven>
 

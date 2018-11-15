@@ -1,0 +1,23 @@
+LOAD DATA
+INFILE *
+APPEND
+CONTINUEIF NEXT(1:1) = '#'
+INTO TABLE "BLOB_DATA_TMP"
+FIELDS TERMINATED BY'|'
+OPTIONALLY ENCLOSED BY '[' AND ']'
+TRAILING NULLCOLS ( 
+ID char(36),
+NAME char(530),
+L_0 FILLER char,
+DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
+CREATION_DATE DATE "DD.MM.RR",
+DECLARATION_TEMPLATE_ID)
+begindata
+ 38454eea-0595-47d5-8aff-5811a136888c|department_configs.groovy|templates/data/refbook/department_configs.groovy|19-07-2018|| 
+ 352adf59-372b-4020-98fe-8960dd5bc972|refbook_declaration_type.groovy|templates/data/refbook/declaration_type.groovy|01.01.2016||
+ 884b9f2e-1678-4d69-9652-b036bba2f728|refbook_person.groovy|templates/data/refbook/person.groovy|01.01.2016||
+ c1e2aa59-98f8-4234-b3ea-09defcc9e52b|app11_ndfl_debt.docx|templates/data/app11_ndfl_debt.docx|25.10.2018||
+ 7eb666b4-0ad7-44a1-9288-f27d0200388d|app12_ndfl_debt.docx|templates/data/app12_ndfl_debt.docx|25.10.2018||
+ f103841c-b850-428b-a6af-3b4c38f90c81|app13_1_ndfl_debt.docx|templates/data/app13_1_ndfl_debt.docx|25.10.2018||
+ 576112c6-5d87-42c4-8073-9e6c414af82f|app13_2_ndfl_debt.docx|templates/data/app13_2_ndfl_debt.docx|25.10.2018||
+ 20f4a5ca-0312-4f95-971f-9909f4ec6236|app14_ndfl_debt.docx|templates/data/app14_ndfl_debt.docx|25.10.2018||

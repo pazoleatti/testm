@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +38,7 @@ public class GlobalControllerExceptionHandler {
     @ResponseBody
     ExceptionMessage exceptionHandler(Exception e, final HttpServletResponse response) {
         LOG.error(e.getLocalizedMessage(), e);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(UTF_8);
         return errorService.getExceptionMessage(e);
     }
@@ -52,6 +54,7 @@ public class GlobalControllerExceptionHandler {
     @ResponseBody
     ExceptionMessage accessDeniedexceptionHandler(Exception e, final HttpServletResponse response) {
         LOG.error(e.getLocalizedMessage(), e);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(UTF_8);
         return errorService.getExceptionMessage(e);
     }
