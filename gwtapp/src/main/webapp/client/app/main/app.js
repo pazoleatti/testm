@@ -1038,6 +1038,7 @@
         "refBook.fl.card.button.save": "Сохранить",
         "refBook.fl.card.button.cancel": "Отмена",
         "refBook.fl.card.tabs.lable.idDoc": "Документы, удостоверяющие личность (ДУЛ)",
+        "refBook.fl.card.validation.inn": "Значение не соответствует формату. ИНН в РФ должен содержать 12 цифр",
         "refBook.fl.card.validation.snils.mask": "Значение не соответствует формату.",
         "refBook.fl.card.validation.snils.parse": "СНИЛС должен содержать 14 символов: цифры и разделители (-)",
 

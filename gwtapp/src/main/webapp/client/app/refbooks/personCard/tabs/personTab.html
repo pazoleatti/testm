@@ -155,9 +155,13 @@
                     </div>
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.inn.permission">
                         <div data-aplana-field>
-                            <input data-ng-model="personParam.inn.value"
-                                   type="text"
-                                   style="width: 370px"/>
+                            <input type="text" style="width: 370px"
+                                   data-ng-model="personParam.inn.value"
+                                   data-ng-pattern="/^\d{12}$/"
+                                   maxlength="12"/>
+                            <div data-aplana-validator data-key="pattern">{{::'refBook.fl.card.validation.inn' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </div>
