@@ -18,17 +18,14 @@ DEL /s /q /f %LOG_DIR%\*.txt
 DEL /s /q /f %LOG_DIR%\*.csv
 DEL /s /q /f %BAD_DIR%\*.*
 
-ECHO ## Check Conversion
- "%ORA_BIN%\sqlplus" %AUTH% @"00_check_conversion.sql" %LOG_DIR%
+ECHO ## Create Tables
+ "%ORA_BIN%\sqlplus" %AUTH% @"00_create_tables.sql"  > "%LOG_DIR%/00_create_tables.txt"
 
-IF EXIST %LOG_DIR%/00_ref_book_person-start_date.txt GOTO PATCH
- 
 ECHO ## Beginning Conversion
 CD conversion
 CALL run-conversion.bat %AUTH% %ORA_BIN%
 CD..
 
-:PATCH
 ECHO ## Beginning Installing Patch
 
 ECHO ## drop_create_tables

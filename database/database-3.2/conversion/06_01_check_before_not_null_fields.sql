@@ -5,6 +5,16 @@ set termout off;
 set linesize 2000;
 set trimspool on;
 set NEWP NONE;
+WHENEVER SQLERROR EXIT;
+
+variable v_count number;
+
+exec :v_count:=0;
+
+select count(*) into :v_count 
+from NDFL_REFERENCES nr 
+where person_id is null and status=status;
+
 spool &2
 
 select '"id";"record_id";"version";"status";"declaration_data_id";"person_id";"num";"surname";"name";"lastname";"birthday";"errtext";"ndfl_person_id"' from dual;
@@ -13,9 +23,13 @@ select
 '"'||to_char(id)||'";"'||to_char(record_id)||'";"'||to_char(version,'DD.MM.YYYY')||'";"'||to_char(status)||'";"'||to_char(declaration_data_id)||'";"'||to_char(person_id)
 ||'";"'||to_char(num)||'";"'||surname||'";"'||name||'";"'||lastname||'";"'||to_char(birthday,'DD.MM.YYYY')||'";"'||errtext||'";"'||to_char(ndfl_person_id)||'"'
 from NDFL_REFERENCES nr 
-where person_id is null;
+where person_id is null and status=status;
 
 spool off;
+
+select count(*) into :v_count 
+from REF_BOOK_ID_TAX_PAYER
+where person_id is null and status=status;
 
 spool &3
 
@@ -28,6 +42,10 @@ where person_id is null;
 
 spool off;
 
+select count(*) into :v_count 
+from REF_BOOK_PERSON_TB 
+where person_id is null and status=status;
+
 spool &4
 
 select '"ID";"RECORD_ID";"VERSION";"STATUS";"PERSON_ID";"TB_DEPARTMENT_ID";"IMPORT_DATE"' from dual;
@@ -38,6 +56,10 @@ from REF_BOOK_PERSON_TB
 where person_id is null;
 
 spool off;
+
+select count(*) into :v_count 
+from REF_BOOK_PERSON 
+where start_date is null and status=status;
 
 spool &5
 
@@ -53,6 +75,10 @@ from REF_BOOK_PERSON
 where start_date is null;
 
 spool off;
+
+select count(*) into :v_count 
+from REF_BOOK_ID_DOC 
+where person_id is null;
 
 spool &6
 
