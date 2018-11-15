@@ -281,7 +281,7 @@ class Calculate extends AbstractScriptClass {
                 unacceptedSources?.addAll(unacceptedPnfIds)
                 logger.error("Формы содержащие данные для включения в КНФ существуют, но все они находятся в состоянии \"Не принята\". Номера найденных ПНФ: %s", unacceptedPnfIds.join(", "))
             } else {
-                logger.error("Не найдено ни одной ПНФ, содержащей данные для включения  в КНФ")
+                logger.error("Не найдено ни одной ПНФ, содержащей данные для включения в КНФ")
             }
             return
         }
