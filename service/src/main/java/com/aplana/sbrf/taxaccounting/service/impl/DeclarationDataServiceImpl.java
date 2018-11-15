@@ -3164,15 +3164,75 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. action: %s", userInfo, action));
-        // логика взята из CreateFormsDeclarationHandler
         Logger logger = new Logger();
-        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
-        final AsyncTaskType reportType = AsyncTaskType.CREATE_FORMS_DEC;
+        CreateDeclarationReportResult taskResult = new CreateDeclarationReportResult();
 
-        String keyTask;
-        final Map<String, Object> params = new HashMap<>();
+        // Пропускаем случай запуска по непринятой КНФ
+        if (!isTaskByUnacceptedKnf(action, logger)) {
+
+            String taskKey = generateTaskKey(action);
+            Pair<Boolean, String> restartStatus = asyncManager.restartTask(taskKey, userInfo, false, logger);
+
+            if (restartStatus != null) {
+                taskResult.setStatus(CreateAsyncTaskStatus.EXIST);
+
+                String restartMessage = getRestartMessage(restartStatus);
+                taskResult.setRestartMsg(restartMessage);
+            } else {
+                taskResult.setStatus(CreateAsyncTaskStatus.CREATE);
+
+                final Map<String, Object> params = generateTaskParams(action);
+                asyncManager.executeTask(taskKey, AsyncTaskType.CREATE_FORMS_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+                    }
+                });
+            }
+        }
+
+        taskResult.setUuid(logEntryService.save(logger.getEntries()));
+        return taskResult;
+    }
+
+    /**
+     * Отчёт может быть вызван из КНФ или из меню отчетов. Проверяем это.
+     */
+    private boolean isReportByKnf(CreateDeclarationReportAction action) {
+        return action.getKnfId() != null;
+    }
+
+    // Если задача запущена по непринятой КНФ, возвращаем true
+    private boolean isTaskByUnacceptedKnf(CreateDeclarationReportAction action, Logger logger) {
+        if (isReportByKnf(action)) {
+            DeclarationData knf = declarationDataDao.get(action.getKnfId());
+            if (knf.getState() != State.ACCEPTED) {
+                logger.error("Создание отчетных форм невозможно. Отчетные формы могут быть сформированы только для РНУ НДФЛ (консолидированной), находящейся в состоянии \"Принята\"");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String generateTaskKey(CreateDeclarationReportAction action) {
+        return isReportByKnf(action) ?
+                LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getKnfId() :
+                LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getDeclarationTypeId() + "_" + action.getPeriodId() + "_" + action.getDepartmentId();
+    }
+
+    private String getRestartMessage(Pair<Boolean, String> restartStatus) {
+        Boolean lockExists = restartStatus.getFirst();
+        String restartMessage = restartStatus.getSecond();
+
+        return lockExists ? restartMessage : null;
+    }
+
+    private Map<String, Object> generateTaskParams(CreateDeclarationReportAction action) {
+        Map<String, Object> params = new HashMap<>();
+
         params.put("declarationTypeId", action.getDeclarationTypeId());
         params.put("adjustNegativeValues", action.isAdjustNegativeValues());
+
         int departmentReportPeriodId;
         if (action.getKnfId() == null) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
@@ -3180,32 +3240,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 throw new ServiceException("Не удалось определить налоговый период.");
             }
             departmentReportPeriodId = departmentReportPeriod.getId();
-            keyTask = LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getDeclarationTypeId() + "_" + action.getPeriodId() + "_" + action.getDepartmentId();
         } else {
             departmentReportPeriodId = declarationDataDao.get(action.getKnfId()).getDepartmentReportPeriodId();
             params.put("knfId", action.getKnfId());
-            keyTask = LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getKnfId();
         }
         params.put("departmentReportPeriodId", departmentReportPeriodId);
-        Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
-        if (restartStatus != null && restartStatus.getFirst()) {
-            // TODO: Реализовать логику случая, когда задача уже запущена.
-            result.setStatus(CreateAsyncTaskStatus.EXIST);
-            result.setRestartMsg(restartStatus.getSecond());
-        } else if (restartStatus != null && !restartStatus.getFirst()) {
-            result.setStatus(CreateAsyncTaskStatus.EXIST);
-        } else {
-            result.setStatus(CreateAsyncTaskStatus.CREATE);
-            asyncManager.executeTask(keyTask, reportType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
-                }
-            });
-        }
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        return result;
+
+        return params;
     }
+
 
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_NS', 'N_ROLE_CONTROL_UNP')")
@@ -3269,7 +3312,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private void sendNotification(String msg, String uuid, Integer userId, NotificationType notificationType, String reportId) {
         if (msg != null && !msg.isEmpty()) {
-            List<Notification> notifications = new ArrayList<Notification>();
+            List<Notification> notifications = new ArrayList<>();
             Notification notification = new Notification();
             notification.setUserId(userId);
             notification.setCreateDate(new Date());
