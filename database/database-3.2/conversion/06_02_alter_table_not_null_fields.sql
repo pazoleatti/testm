@@ -1,6 +1,6 @@
 --https://jira.aplana.com/browse/SBRFNDFL-5837 Конвертировать данные реестра ФЛ
 declare 
-	v_run_condition number(1);
+	v_run_condition number(1):=0;
 	v_task_name varchar2(128):='alter_tables block #1 - alter table NDFL_REFERENCES PERSON_ID nullable=''N'' (SBRFNDFL-5837)';  
 begin
 	select decode(count(*),0,1,0) into v_run_condition from NDFL_REFERENCES where PERSON_ID is null;
@@ -23,7 +23,7 @@ end;
 	
 --https://jira.aplana.com/browse/SBRFNDFL-5837 Конвертировать данные реестра ФЛ
 declare 
-	v_run_condition number(1);
+	v_run_condition number(1):=0;
 	v_task_name varchar2(128):='alter_tables block #2 - alter table REF_BOOK_ID_TAX_PAYER PERSON_ID nullable=''N'' (SBRFNDFL-5837)';  
 begin
 	select decode(count(*),0,1,0) into v_run_condition from REF_BOOK_ID_TAX_PAYER where PERSON_ID is null;
@@ -46,7 +46,7 @@ end;
 
 --https://jira.aplana.com/browse/SBRFNDFL-5837 Конвертировать данные реестра ФЛ
 declare 
-	v_run_condition number(1);
+	v_run_condition number(1):=0;
 	v_task_name varchar2(128):='alter_tables block #3 - alter table REF_BOOK_PERSON_TB PERSON_ID nullable=''N'' (SBRFNDFL-5837)';  
 begin
 	select decode(count(*),0,1,0) into v_run_condition from REF_BOOK_PERSON_TB where PERSON_ID is null;
@@ -69,21 +69,26 @@ end;
 
 --https://jira.aplana.com/browse/SBRFNDFL-5837 Конвертировать данные реестра ФЛ
 declare 
-	v_run_condition number(1);
+	v_run_condition number(1):=0;
 	v_task_name varchar2(128):='alter_tables block #4 - alter table REF_BOOK_PERSON START_DATE nullable=''N'' (SBRFNDFL-5837)';  
 begin
-	select decode(count(*),0,1,0) into v_run_condition from REF_BOOK_PERSON where START_DATE is null;
+	select count(*) into v_run_condition from user_tab_columns where lower(table_name)='ref_book_person' and lower(column_name)='start_date';
 	IF v_run_condition=1 THEN
-		select count(*) into v_run_condition from user_tab_columns where table_name='REF_BOOK_PERSON' and column_name='START_DATE' and nullable='Y';
+		select decode(count(*),0,1,0) into v_run_condition from REF_BOOK_PERSON where START_DATE is null;
 		IF v_run_condition=1 THEN
-			EXECUTE IMMEDIATE 'alter table REF_BOOK_PERSON modify START_DATE not null';
-			dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+			select count(*) into v_run_condition from user_tab_columns where table_name='REF_BOOK_PERSON' and column_name='START_DATE' and nullable='Y';
+			IF v_run_condition=1 THEN
+				EXECUTE IMMEDIATE 'alter table REF_BOOK_PERSON modify START_DATE not null';
+				dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+			ELSE
+				dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+			END IF; 
 		ELSE
-			dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+			dbms_output.put_line(v_task_name||'[WARNING]:'||' START_DATE contains empty values');
 		END IF; 
 	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING]:'||' START_DATE contains empty values');
-	END IF; 
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' column ref_book_person.start_date not found');
+	END IF;
 EXCEPTION
 	when OTHERS then
 		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);

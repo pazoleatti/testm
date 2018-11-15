@@ -491,12 +491,12 @@ class Check extends AbstractScriptClass {
 
                     if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                         // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
-                        if (ndflPerson.idDocType != null && !ndflPerson.idDocType.equals(personRecord.reportDoc.docType.code)) {
+                        if (ndflPerson.idDocType != null && !ndflPerson.idDocType.equals(personRecord.reportDoc?.docType?.code)) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код", ndflPerson.idDocType ?: ""))
                         }
-                        if (ndflPerson.idDocNumber != null && BaseWeightCalculator.prepareStringDul(personRecord.reportDoc.documentNumber).toUpperCase() != BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase()) {
+                        if (ndflPerson.idDocNumber != null && BaseWeightCalculator.prepareStringDul(personRecord.reportDoc?.documentNumber)?.toUpperCase() != BaseWeightCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют Реестру физических лиц", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Номер", ndflPerson.idDocNumber ?: ""))
@@ -1042,31 +1042,31 @@ class Check extends AbstractScriptClass {
         dateConditionDataListForBudget << new DateConditionData(["1010", "1011", "3020", "3023",
                                                                  "1110", "1400", "2001", "2010", "2301", "2710", "2760",
                                                                  "2762", "2770", "2900", "4800"], ["00"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 3 "Графа 21" <= "Графа 7" + "30 дней"
         dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
                                                                  "1541", "1542", "1551", "1552", "1553", "1554"], ["01", "03", "04"],
-                new Column21LEColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть меньше или равно значению гр. \"%s\" (\"%s\") + 30 дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21LEColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть меньше или равно значению гр. \"%s\" (\"%s\") + 30 дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 4 "Графа 21" ≤ "Графа 7" + "30 дней"
         dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
                                                                  "1541", "1542", "1543", "1551", "1552", "1553", "1554"], ["02"],
-                new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 30 дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 30 дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 5 ?
 
         // 6 "Графа 21" = "Графа 7" + "1 день"
         dateConditionDataListForBudget << new DateConditionData(["2000"], ["05", "06", "11", "12"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 7 "Графа 21" = "Графа 7" + "1 день"
         dateConditionDataListForBudget << new DateConditionData(["2002"], ["07", "08", "09", "10"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 8 "Графа 21" = "Графа 7" + "1 рабочий день"
         dateConditionDataListForBudget << new DateConditionData(["2003"], ["05", "06", "07", "08", "09", "10"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 9 "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
         dateConditionDataListForBudget << new DateConditionData(["2012", "2300"], ["00"],
@@ -1074,11 +1074,11 @@ class Check extends AbstractScriptClass {
 
         // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
         dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800", "2013", "2014"], ["13"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 11.1 "Графа 21" = "Графа 7" + "1 день"
         dateConditionDataListForBudget << new DateConditionData(["2720", "2740", "2750", "2790", "4800"], ["14"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // 11.2 "Графа 21" ≤ ("31.12.20**" + "1 день"), где 31.12.20** - последний день налогового периода
         dateConditionDataListForBudget << new DateConditionData(["2720", "2740", "2750", "2790", "4800"], ["14"],
@@ -1086,7 +1086,7 @@ class Check extends AbstractScriptClass {
 
         // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
         dateConditionDataListForBudget << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день.")
+                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
 
         // Сгруппируем Сведения о доходах на основании принадлежности к плательщику
         Map<Long, List<NdflPersonIncome>> ndflPersonIncomeCache = [:]
@@ -1441,7 +1441,7 @@ class Check extends AbstractScriptClass {
                         BigDecimal var3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
                         BigDecimal ВычисленноеЗначениеНалога = var2 - var3
                         if (!((var1 - ВычисленноеЗначениеНалога).abs() < 1)) {
-                            String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                            String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                     var1, ВычисленноеЗначениеНалога
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
@@ -1455,7 +1455,7 @@ class Check extends AbstractScriptClass {
                             // ОКРУГЛ (Р.2.Гр.13 x Р.2.Гр.14/100)
                             BigDecimal ВычисленноеЗначениеНалога = ScriptUtils.round(((ndflPersonIncome.taxBase ?: 0) * (ndflPersonIncome.taxRate ?: 0)) / 100, 0)
                             if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
-                                String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                                String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                         ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
@@ -1522,7 +1522,7 @@ class Check extends AbstractScriptClass {
 
                                 // Для ПНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | <= 1
                                 if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() <= 1)) {
-                                    String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                                    String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                             ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога)
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                     logger.logCheck("%s. %s.",
@@ -1819,7 +1819,7 @@ class Check extends AbstractScriptClass {
                     it.incomeAccruedDate == ndflPersonDeduction.incomeAccrued
                 } != null
                 if (!incomeExists) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в гр. \"%s\"  в строках операции Раздела 2.",
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в гр. \"%s\"  в строках операции Раздела 2",
                             C_INCOME_ACCRUED, formatDate(ndflPersonDeduction.incomeAccrued), C_INCOME_ACCRUED_DATE
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
@@ -1857,7 +1857,7 @@ class Check extends AbstractScriptClass {
                 } != null
                 if (!incomeExists) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в гр. \"%s\" в строках операции Раздела 2.",
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в гр. \"%s\" в строках операции Раздела 2",
                             C_INCOME_ACCRUED_CODE, ndflPersonDeduction.incomeCode ?: "", C_INCOME_CODE
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")

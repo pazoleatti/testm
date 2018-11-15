@@ -160,7 +160,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     private void initReportDoc(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
         Long reportDocId = rs.getLong("report_doc");
         IdDoc personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
-        naturalPerson.setReportDoc(personDocument);
+        naturalPerson.setReportDoc(personDocument != null ? personDocument: new IdDoc());
     }
 
     private void addPersonTb(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {

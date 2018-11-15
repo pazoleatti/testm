@@ -848,13 +848,17 @@ class Calculate extends AbstractScriptClass {
                 IdDoc personDocument = personDocumentList.get(i)
 
                 if (i == incRepIndex) {
-                    if (naturalPerson?.reportDoc != null && naturalPerson.reportDoc?.getId() != personDocument?.getId()) {
+                    if (naturalPerson.reportDoc?.getId() != personDocument?.getId() ) {
                         String oldValue = String.format("%s - (%s) %s", naturalPerson?.reportDoc?.getDocumentNumber(), naturalPerson?.reportDoc?.getDocType()?.getCode(), naturalPerson?.reportDoc?.getDocType()?.getName())
                         String newValue = String.format("%s - (%s) %s", personDocument?.getDocumentNumber(), personDocument?.getDocType()?.getCode(), personDocument?.getDocType()?.getName())
                         toReturn = true
                         naturalPerson.setReportDoc(personDocument)
 
                         messageBuilder.append(String.format("[ДУЛ, включаемый в отчетность: %s  ->  %s]", oldValue, newValue))
+                    }
+                    if (naturalPerson.reportDoc?.getId() == null) {
+                        toReturn = true
+                        naturalPerson.setReportDoc(personDocument)
                     }
                 }
             }

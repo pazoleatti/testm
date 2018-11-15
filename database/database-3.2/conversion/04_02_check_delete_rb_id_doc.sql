@@ -5,6 +5,7 @@ set termout off;
 set linesize 2000;
 set trimspool on;
 set NEWP NONE;
+WHENEVER SQLERROR EXIT;
 spool &7
 
 select '"id";"last_name";"first_name";"middle_name";"inn";"inn_foreign";"snils";"taxpayer_state";"birth_date";"birth_place";"citizenship";"address";"record_id";"version";"status";"source_id";"old_id";"report_doc";"vip";"start_date";"end_date"' from dual;

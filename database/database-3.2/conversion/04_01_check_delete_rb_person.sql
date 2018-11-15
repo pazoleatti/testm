@@ -5,6 +5,17 @@ set termout off;
 set linesize 2000;
 set trimspool on;
 set NEWP NONE;
+WHENEVER SQLERROR EXIT;
+
+variable v_count number;
+
+exec :v_count:=0;
+
+select count(*) into :v_count 
+from REF_BOOK_ID_DOC a 
+where 
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=a.person_id);
+
 spool &1
 
 select '"id";"record_id";"version";"status";"person_id";"doc_id";"doc_number";"inc_rep";"duplicate_record_id"' from dual;
@@ -16,6 +27,11 @@ exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=a.person_id);
 
 spool off;
 
+select count(*) into :v_count 
+from DECLARATION_DATA_PERSON b 
+where 
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=b.person_id);
+
 spool &2
 
 select '"declaration_data_id";"person_id"' from dual;
@@ -26,6 +42,11 @@ where
 exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=b.person_id);
 	
 spool off;
+
+select count(*) into :v_count 
+from NDFL_PERSON c
+where 
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=c.person_id);
 
 spool &3
 
@@ -42,6 +63,11 @@ exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=c.person_id);
 
 spool off;
 
+select count(*) into :v_count 
+from NDFL_REFERENCES d 
+where 
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=d.person_id);
+
 spool &4
 
 select '"id";"record_id";"version";"status";"declaration_data_id";"person_id";"num";"surname";"name";"lastname";"birthday";"errtext";"ndfl_person_id"' from dual;
@@ -55,6 +81,11 @@ exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=d.person_id);
 
 spool off;
 
+select count(*) into :v_count 
+from REF_BOOK_ID_TAX_PAYER e 
+where 
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=e.person_id);
+
 spool &5
 
 select '"id";"record_id";"version";"status";"person_id";"inp";"as_nu"' from dual;
@@ -66,6 +97,11 @@ where
 exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=e.person_id);
 
 spool off;
+
+select count(*) into :v_count 
+from REF_BOOK_PERSON_TB f 
+where 
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=f.person_id);
 
 spool &6
 

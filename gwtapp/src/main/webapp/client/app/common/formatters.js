@@ -606,20 +606,22 @@
 
         .filter('docTypeFormatter', ['$filter', function ($filter) {
             return function (data) {
-                if (!data || !data.value) return '';
+                if (!data) return '';
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
+                if (!data.value) return '';
                 return $filter('codeNameFormatter')(data.value.docType);
             };
         }])
 
         .filter('docNumberFormatter', ['$filter', function ($filter) {
             return function (data) {
-                if (!data || !data.value) return '';
+                if (!data) return '';
                 if (data.permission === false) {
                     return $filter('translate')('refBook.fl.table.label.permissionDenied');
                 }
+                if (!data.value) return '';
                 if (!data.value.documentNumber) return '';
                 return data.value.documentNumber;
             }
