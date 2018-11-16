@@ -1,7 +1,20 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@ToString
 public class TARole implements Serializable {
     /**
      * Алиас роли "Оператор (НДФЛ)"
@@ -38,25 +51,6 @@ public class TARole implements Serializable {
 	private String alias;
 	private String name;
 
-    public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getAlias() {
-		return alias;
-	}
-	public void setAlias(String alias) {
-		this.alias = alias;
-	}
-
     @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -75,12 +69,4 @@ public class TARole implements Serializable {
 	public int hashCode() {
 		return alias.hashCode();
 	}
-
-    @Override
-    public String toString() {
-        return "TARole{" +
-                "id: " + id +
-                ", alias: " + alias +
-                ", name: " + name + '}';
-    }
 }

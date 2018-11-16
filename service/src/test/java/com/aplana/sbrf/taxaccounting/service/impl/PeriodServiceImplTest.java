@@ -300,7 +300,7 @@ public class PeriodServiceImplTest {
         declarationData.setDepartmentId(1);
         when(declarationDataSearchService.getDeclarationData(any(DeclarationDataFilter.class), any(DeclarationDataSearchOrdering.class), anyBoolean()))
                 .thenReturn(new ArrayList<DeclarationData>(), singletonList(declarationData), new ArrayList<DeclarationData>());
-        LockDataItem lockDataItem = new LockDataItem();
+        LockDataDTO lockDataItem = new LockDataDTO();
         lockDataItem.setKey("DECLARATION_DATA_1");
         when(lockDataService.fetchAllByKeySet(anySetOf(String.class))).thenReturn(singletonList(lockDataItem));
 

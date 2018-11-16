@@ -40,8 +40,8 @@ public class LockDataController {
      * @return список {@link JqgridPagedList} блокировок {@link LockData}
      */
     @GetMapping(value = "/rest/locks")
-    public JqgridPagedList<LockDataItem> fetchLocks(@RequestParam(required = false) String filter, @RequestParam PagingParams pagingParams) {
-        PagingResult<LockDataItem> locks = lockDataService.getLocks(filter, pagingParams);
+    public JqgridPagedList<LockDataDTO> fetchLocks(@RequestParam(required = false) String filter, @RequestParam PagingParams pagingParams) {
+        PagingResult<LockDataDTO> locks = lockDataService.getLocks(filter, pagingParams, securityService.currentUserInfo().getUser());
         return JqgridPagedResourceAssembler.buildPagedList(
                 locks,
                 locks.getTotalCount(),

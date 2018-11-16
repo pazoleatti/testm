@@ -3,9 +3,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -18,7 +21,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -137,36 +139,41 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
-        try {
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("start", pagingParams.getStartIndex() + 1);
-            params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
-            if (!StringUtils.isEmpty(filter)) {
-                params.put("filter", "%" + filter.toLowerCase() + "%");
-            }
-            String sql = " (SELECT ld.id, ld.key, ld.user_id, ld.task_id, ld.date_lock, ld.description, u.login, \n" +
-                    (isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY date_lock)" : "ROWNUM") +
-                    " AS rn \n" +
-                    "FROM lock_data ld \n"
-                    + "join sec_user u on u.id = ld.user_id \n" +
-                    (!StringUtils.isEmpty(filter) ?
-                            " WHERE (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
-                            : "")
-                    + ") \n";
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(params);
-                LOG.trace(sql);
-            }
-            String fullSql = "SELECT * FROM" + sql + "WHERE rn BETWEEN :start AND :count";
-            String countSql = "SELECT COUNT(*) FROM" + sql;
-            List<LockData> records = getNamedParameterJdbcTemplate().query(fullSql, params, new LockDataMapper());
-            int count = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
-            return new PagingResult<LockData>(records, count);
-        } catch (EmptyResultDataAccessException e) {
-            // недостижимое место из-за особенности запроса
-            return new PagingResult<LockData>(new ArrayList<LockData>(), 0);
+    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("start", pagingParams.getStartIndex() + 1);
+        params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
+        String whereClause = " where 1=1 ";
+        if (!StringUtils.isEmpty(filter)) {
+            params.put("filter", "%" + filter.toLowerCase() + "%");
+            whereClause += " and (lower(ld.key) like :filter or lower(ld.description) like :filter or lower(u.login) like :filter or lower(u.name) like :filter) ";
         }
+        if (!user.hasRoles(TARole.ROLE_ADMIN)) {
+            params.put("userId", user.getId());
+            whereClause += " and ld.user_id = :userId ";
+        }
+        String sql = "select ld.id, ld.key, u.name || ' (' || u.login || ')' as user_name, ld.date_lock, ld.description, " +
+                (isSupportOver() ? "row_number() over (order by date_lock)" : "rownum") + " as rn\n" +
+                "from lock_data ld\n" +
+                "join sec_user u on u.id = ld.user_id\n" +
+                whereClause;
+
+        List<LockDataDTO> records = getNamedParameterJdbcTemplate().query(
+                "SELECT * FROM (" + sql + ") WHERE rn BETWEEN :start AND :count",
+                params, new RowMapper<LockDataDTO>() {
+                    @Override
+                    public LockDataDTO mapRow(ResultSet rs, int index) throws SQLException {
+                        LockDataDTO result = new LockDataDTO();
+                        result.setId(rs.getLong("id"));
+                        result.setKey(rs.getString("key"));
+                        result.setUser(rs.getString("user_name"));
+                        result.setDateLock(rs.getTimestamp("date_lock"));
+                        result.setDescription(rs.getString("description"));
+                        return result;
+                    }
+                });
+        int count = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(*) FROM (" + sql + ")", params, Integer.class);
+        return new PagingResult<>(records, count);
     }
 
     @Override

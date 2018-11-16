@@ -1,11 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.apache.commons.logging.Log;
@@ -142,20 +150,8 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public PagingResult<LockDataItem> getLocks(String filter, PagingParams pagingParams) {
-        PagingResult<LockData> lockDataList = dao.getLocks(filter, pagingParams);
-        PagingResult<LockDataItem> result = new PagingResult<LockDataItem>();
-        for (LockData lockData : lockDataList) {
-            LockDataItem item = new LockDataItem();
-            item.setDateLock(lockData.getDateLock());
-            item.setDescription(lockData.getDescription());
-            item.setKey(lockData.getKey());
-            item.setId(lockData.getId());
-            TAUser user = userDao.getUser(lockData.getUserId());
-            item.setUser(TAUser.SYSTEM_USER_ID != user.getId() ? user.getName() + " (" + user.getLogin() + ")" : user.getName());
-            result.add(item);
-        }
-        return result;
+    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user) {
+        return dao.getLocks(filter, pagingParams, user);
     }
 
     @Override
@@ -214,11 +210,11 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public List<LockDataItem> fetchAllByKeySet(Set<String> keysBlocker) {
+    public List<LockDataDTO> fetchAllByKeySet(Set<String> keysBlocker) {
         List<LockData> lockDataList = dao.fetchAllByKeySet(keysBlocker);
-        List<LockDataItem> lockDataItems = new ArrayList<>(lockDataList.size());
-        for(LockData lockData: lockDataList){
-            LockDataItem lockDataItem = new LockDataItem();
+        List<LockDataDTO> lockDataItems = new ArrayList<>(lockDataList.size());
+        for (LockData lockData : lockDataList) {
+            LockDataDTO lockDataItem = new LockDataDTO();
             lockDataItem.setId(lockData.getId());
             lockDataItem.setKey(lockData.getKey());
             lockDataItem.setDateLock(lockData.getDateLock());

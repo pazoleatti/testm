@@ -386,13 +386,13 @@ public class PeriodServiceImpl implements PeriodService {
         for (DeclarationData declarationData : declarations) {
             keysBlocker.put("DECLARATION_DATA_" + declarationData.getId(), declarationData);
         }
-        List<LockDataItem> lockDataItems = new ArrayList<>();
+        List<LockDataDTO> lockDataItems = new ArrayList<>();
 
         if (keysBlocker.size() > 0) {
             lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
         }
 
-        for (LockDataItem lockDataItem : lockDataItems) {
+        for (LockDataDTO lockDataItem : lockDataItems) {
             DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
             DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.error("Форма \"%s\" № %s, Подразделении: \"%s\", Период: \"%s\" заблокирована.",
