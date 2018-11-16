@@ -19,14 +19,17 @@
             });
         }])
 
-        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs', '$logPanel',
-            function ($scope, $rootScope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs, $logPanel) {
+        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs',
+            function ($scope, $rootScope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs) {
 
                 $scope.mode = APP_CONSTANTS.MODE.VIEW;
 
                 $scope.deletedDuplicates = [];
 
                 $scope.personParam = {};
+
+                // Права на редактирование карточки. Временно только для Контролёра УНП, на расширение заведён баг SBRFNDFL-6008.
+                $scope.userHasEditPermission = $rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP);
 
                 /**
                  * @description Получить данные физлица открытой карточки
@@ -364,7 +367,7 @@
                         data: $scope.personParam
                     }).success(function (response) {
                         $scope.person = $scope.dataExtract();
-                        angular.forEach($scope.personRegTabs, function(tab) {
+                        angular.forEach($scope.personRegTabs, function (tab) {
                             tab.active = false;
                         });
                         $scope.personTab.active = true;
