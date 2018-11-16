@@ -232,26 +232,32 @@
                     });
                 };
 
-                $scope.updateNotificationCountPeriodically = function () {
+                function startUpdateNotificationCountInterval() {
                     if (angular.isDefined($scope.stop)) {
                         return;
                     }
                     $scope.updateNotificationCount();
                     $scope.stop = $interval($scope.updateNotificationCount, 30000);
-                };
+                }
+                function cancelUpdateNotificationCountInterval() {
+                    if (angular.isDefined($scope.stop)) {
+                        $interval.cancel($scope.stop);
+                        $scope.stop = undefined;
+                    }
+                }
+                $scope.$on("AUTHORIZATION_EXPIRED", function () {
+                    cancelUpdateNotificationCountInterval();
+                });
 
                 $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {
                     $scope.updateNotificationCount();
                 });
 
                 $scope.$on('$destroy', function () {
-                    if (angular.isDefined($scope.stop)) {
-                        $interval.cancel($scope.stop);
-                        $scope.stop = undefined;
-                    }
+                    cancelUpdateNotificationCountInterval();
                 });
 
-                $scope.updateNotificationCountPeriodically();
+                startUpdateNotificationCountInterval();
 
                 var openApplication2Modal = function () {
                     $aplanaModal.open({

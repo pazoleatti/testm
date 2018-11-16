@@ -334,6 +334,9 @@
                                     });
                                 }]);
                             }
+                            $injector.invoke(['$rootScope', function ($rootScope) {
+                                $rootScope && $rootScope.$broadcast('AUTHORIZATION_EXPIRED');;
+                            }]);
                             Overlay.processResponse();
                             return $q.reject();
                         }
