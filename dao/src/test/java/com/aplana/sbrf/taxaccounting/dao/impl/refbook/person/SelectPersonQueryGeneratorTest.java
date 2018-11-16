@@ -225,6 +225,7 @@ public class SelectPersonQueryGeneratorTest {
     @Test
     public void test_generatePagedAndFilteredQuery_defaultOrdersById() {
         String query = generator.generatePagedAndFilteredQuery();
+        assertThat(query).contains("select /*+ index_asc(person PK_REF_BOOK_PERSON) parallel(person,8) first_rows(1)*/");
         assertThat(query).contains("order by id asc");
     }
 
