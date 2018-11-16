@@ -190,6 +190,10 @@
                     });
                 }
 
+                $scope.$on("AUTHORIZATION_EXPIRED", function () {
+                    cancelAllIntervals();
+                });
+
                 $scope.$on('$destroy', function () {
                     cancelAllIntervals();
                 });
