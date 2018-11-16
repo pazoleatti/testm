@@ -276,7 +276,7 @@
         }])
         .factory('_OverlayHttpInterceptor', ['$q', 'Overlay', '$window', '$injector', '$filter',
             function ($q, Overlay, $window, $injector, $filter) {
-                var expireDialogOpened = false, expireDialogCanceled = false;
+                var expireDialogOpened = false;
 
                 //notice:
                 //Если использовать $http в этом interceptor, то для того, чтобы
@@ -314,10 +314,10 @@
 
                         if (response.headers()['content-type'] && response.headers()['content-type'].indexOf("text/html") !== -1
                             && invalidHeader && nonCached) {
-                            if (!expireDialogOpened && !expireDialogCanceled) {
-                                expireDialogOpened = true;
-
+                            if (!expireDialogOpened) {
                                 $injector.invoke(['$dialogs', function ($dialogs) {
+                                    expireDialogOpened = true;
+
                                     $dialogs.confirmDialog({
                                         title: $filter('translate')('authorization.expire.dialog.title'),
                                         content: $filter('translate')('authorization.expire.dialog.message'),
@@ -328,7 +328,6 @@
                                         },
                                         cancelBtnClick: function () {
                                             expireDialogOpened = false;
-                                            expireDialogCanceled = true;
                                             return false;
                                         }
                                     });
