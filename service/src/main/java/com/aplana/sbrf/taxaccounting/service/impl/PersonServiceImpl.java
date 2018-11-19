@@ -199,7 +199,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#person, T(com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission).VIEW_VIP_DATA)")
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
     @Transactional
     public void updateRegistryPerson(RegistryPersonDTO person) {
         checkVersionOverlapping(person);

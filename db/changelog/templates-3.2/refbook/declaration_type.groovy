@@ -1248,10 +1248,9 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             // Первая строка
-            Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
             StringBuilder headerBuilder = new StringBuilder()
             headerBuilder << new Date().format(SharedConstants.FULL_DATE_FORMAT) << "|"
-            headerBuilder << userDepartment.getName().replaceAll("\\|", " ") << "|"
+            headerBuilder << "Управление налогового планирования" << "|"
             headerBuilder << "Приложение 2" << "|"
             headerBuilder << String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version) << "|" << "\r\n"
             // Пустая строка
@@ -1324,7 +1323,7 @@ class DeclarationType extends AbstractScriptClass {
             }
             write(totalRow.toString())
             IOUtils.closeQuietly(outputStream)
-            scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName(userDepartment))
+            scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName())
         }
     }
 
@@ -1627,12 +1626,13 @@ class DeclarationType extends AbstractScriptClass {
         }
     }
 
-    String createApplication2FileName(Department department) {
+    String createApplication2FileName() {
         StringBuilder nameBuilder = new StringBuilder("_____app2")
-        for (int i = 0; i < 17 - department.sbrfCode.length(); i++) {
+        String unpDepartmentCode = "99_6200_00"
+        for (int i = 0; i < 17 - unpDepartmentCode.length(); i++) {
             nameBuilder.append("_")
         }
-        nameBuilder.append(department.sbrfCode)
+        nameBuilder.append(unpDepartmentCode)
         nameBuilder.append("34")
         nameBuilder.append(reportYear)
         nameBuilder.append(".rnu")
@@ -1926,7 +1926,7 @@ class DeclarationType extends AbstractScriptClass {
 
         @Override
         String toString() {
-            StringBuilder stringBuilder = new StringBuilder("|\r\n")
+            StringBuilder stringBuilder = new StringBuilder("\r\n")
             for (int i = 1; i <= 71; i++) {
                 stringBuilder << format17_2(values.get(i)) << "|"
             }
