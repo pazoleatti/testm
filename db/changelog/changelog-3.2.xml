@@ -1046,8 +1046,15 @@
         </update>
     </changeSet>
 
-
     <changeSet id="3.2-dnovikov-45" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.2/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.2-dnovikov-46" author="dnovikov">
         <update tableName="BLOB_DATA">
             <column name="data"
                     valueBlobFile="templates-3.2/refbook/declaration_type.groovy"/>

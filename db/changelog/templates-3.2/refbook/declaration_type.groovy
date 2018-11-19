@@ -1926,7 +1926,7 @@ class DeclarationType extends AbstractScriptClass {
 
         @Override
         String toString() {
-            StringBuilder stringBuilder = new StringBuilder("|\r\n")
+            StringBuilder stringBuilder = new StringBuilder("\r\n")
             for (int i = 1; i <= 71; i++) {
                 stringBuilder << format17_2(values.get(i)) << "|"
             }
