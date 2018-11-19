@@ -1233,20 +1233,24 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         // Пока формируем строки по ФЛ и ставке, после этого они будут при необходимости дробится на несколько строк
-        List<App2PersonRateRowGroup> personRateRowGroups = allIncomes.groupBy {
-            new Pair<Long, Integer>(it.ndflPersonId, it.taxRate)
-        }.collect { personRatePair, incomes ->
-            NdflPerson ndflPerson = ndflPersonsById.get(personRatePair.getFirst())
-            def personRateRowGroup = new App2PersonRateRowGroup(ndflPerson, personRatePair.second, incomes)
-            checkRequired(personRateRowGroup)
-            return personRateRowGroup
+        List<App2PersonRateRowGroup> personRateRowGroups = []
+        (allIncomes.groupBy(
+                { NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.taxRate }
+        ) as Map<Long, Map<Integer, List<NdflPersonIncome>>>).each { personId, incomesOfPersonByTaxRate ->
+            for (def taxRate : incomesOfPersonByTaxRate.keySet()) {
+                if (taxRate != null) {
+                    NdflPerson ndflPerson = ndflPersonsById.get(personId)
+                    def personRateRowGroup = new App2PersonRateRowGroup(ndflPerson, taxRate, incomesOfPersonByTaxRate)
+                    checkRequired(personRateRowGroup)
+                    personRateRowGroups.add(personRateRowGroup)
+                }
+            }
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             // Первая строка
-            Department userDepartment = departmentService.get(userInfo.getUser().getDepartmentId())
             StringBuilder headerBuilder = new StringBuilder()
             headerBuilder << new Date().format(SharedConstants.FULL_DATE_FORMAT) << "|"
-            headerBuilder << userDepartment.getName().replaceAll("\\|", " ") << "|"
+            headerBuilder << "Управление налогового планирования" << "|"
             headerBuilder << "Приложение 2" << "|"
             headerBuilder << String.format("АС УН, ФП \"%s\" %s", "НДФЛ", version) << "|" << "\r\n"
             // Пустая строка
@@ -1319,11 +1323,9 @@ class DeclarationType extends AbstractScriptClass {
             }
             write(totalRow.toString())
             IOUtils.closeQuietly(outputStream)
-            scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName(userDepartment))
+            scriptSpecificRefBookReportHolder.setFileName(createApplication2FileName())
         }
     }
-
-    boolean checkRequiredFailed = false
 
     /**
      * Заполнены все Поля, отмеченные как обязательные для заполнения в таблице "Заполнение полей строк файла"
@@ -1343,10 +1345,6 @@ class DeclarationType extends AbstractScriptClass {
         personRateRowGroup.taxBaseSum == null && errFields.add("\"Налоговая база\"")
         personRateRowGroup.calculatedTaxSum == null && errFields.add("\"Сумма налога исчисленная\"")
         if (errFields) {
-            if (!checkRequiredFailed) {
-                checkRequiredFailed = true
-                logger.error("В транспортном файле не заполнены обязательные поля")
-            }
             logger.error("Для ${person.lastName} ${person.firstName} ${person.middleName ?: ""} ${person.birthDay.format("dd.MM.yyyy") ?: ""} ${person.idDocNumber}" +
                     " не заполнены обязательные поля: ${errFields.join(", ")}")
         }
@@ -1628,12 +1626,13 @@ class DeclarationType extends AbstractScriptClass {
         }
     }
 
-    String createApplication2FileName(Department department) {
+    String createApplication2FileName() {
         StringBuilder nameBuilder = new StringBuilder("_____app2")
-        for (int i = 0; i < 17 - department.sbrfCode.length(); i++) {
+        String unpDepartmentCode = "99_6200_00"
+        for (int i = 0; i < 17 - unpDepartmentCode.length(); i++) {
             nameBuilder.append("_")
         }
-        nameBuilder.append(department.sbrfCode)
+        nameBuilder.append(unpDepartmentCode)
         nameBuilder.append("34")
         nameBuilder.append(reportYear)
         nameBuilder.append(".rnu")
@@ -1676,11 +1675,12 @@ class DeclarationType extends AbstractScriptClass {
         BigDecimal overholdingTaxSum = null
         BigDecimal notholdingTaxSum = null
 
-        App2PersonRateRowGroup(NdflPerson person, Integer rate, List<NdflPersonIncome> incomes) {
+        App2PersonRateRowGroup(NdflPerson person, Integer rate, Map<Integer, List<NdflPersonIncome>> incomesOfPersonByTaxRate) {
             this.person = person
-            this.incomes = incomes
+            this.incomes = incomesOfPersonByTaxRate.get(rate)
             this.rate = rate
-            for (NdflPersonIncome income : incomes) {
+            def incomesOfPerson = incomesOfPersonByTaxRate.values().flatten() as List<NdflPersonIncome>
+            for (def income : incomes) {
                 if (income.incomeAccruedSumm != null) {
                     incomeAccruedSum = (incomeAccruedSum ?: 0) + income.incomeAccruedSumm
                 }
@@ -1696,14 +1696,16 @@ class DeclarationType extends AbstractScriptClass {
                 if (income.withholdingTax != null) {
                     withholdingTaxSum = (withholdingTaxSum ?: 0) + income.withholdingTax
                 }
-                if (income.taxSumm != null) {
-                    taxSum = (taxSum ?: 0) + income.taxSumm
-                }
                 if (income.overholdingTax != null) {
                     overholdingTaxSum = (overholdingTaxSum ?: 0) + income.overholdingTax
                 }
                 if (income.notHoldingTax != null) {
                     notholdingTaxSum = (notholdingTaxSum ?: 0) + income.notHoldingTax
+                }
+            }
+            for (NdflPersonIncome income : incomesOfPerson) {
+                if (income.taxSumm != null) {
+                    taxSum = (taxSum ?: 0) + income.taxSumm
                 }
             }
         }
@@ -1783,7 +1785,7 @@ class DeclarationType extends AbstractScriptClass {
             dataBuilder << personRateRowGroup.person.birthDay.format(SharedConstants.DATE_FORMAT) << "|"
             dataBuilder << personRateRowGroup.person.citizenship << "|"
             dataBuilder << personRateRowGroup.person.idDocType << "|"
-            dataBuilder << personRateRowGroup.person.idDocNumber.replaceAll(" ", "") << "|"
+            dataBuilder << getIdDocType() << "|"
             dataBuilder << (personRateRowGroup.person.postIndex ?: "") << "|"
             dataBuilder << (personRateRowGroup.person.regionCode ?: "") << "|"
             dataBuilder << (personRateRowGroup.person.area ?: "") << "|"
@@ -1813,6 +1815,14 @@ class DeclarationType extends AbstractScriptClass {
             dataBuilder << "\r\n"
 
             return dataBuilder.toString()
+        }
+
+        String getIdDocType() {
+            if (personRateRowGroup.person.idDocType == "21") {
+                return personRateRowGroup.person.idDocNumber.replaceAll(" ", "")
+            } else {
+                return personRateRowGroup.person.idDocNumber
+            }
         }
     }
     // группа столбцов строки Приложения2 с данными по отдельному коду дохода
@@ -1916,7 +1926,7 @@ class DeclarationType extends AbstractScriptClass {
 
         @Override
         String toString() {
-            StringBuilder stringBuilder = new StringBuilder("|\r\n")
+            StringBuilder stringBuilder = new StringBuilder("\r\n")
             for (int i = 1; i <= 71; i++) {
                 stringBuilder << format17_2(values.get(i)) << "|"
             }
