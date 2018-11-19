@@ -120,7 +120,7 @@
                         //Добавить в запрос поля для фильтрации данных
                         if (select.options.dataFilter) {
                             angular.forEach(select.options.dataFilter, function (value, key) {
-                                if (angular.isObject(value)) {
+                                if (angular.isObject(value) && !angular.isArray(value)) {
                                     dataObject[key] = JSON.stringify(value);
                                 } else {
                                     dataObject[key] = value;
