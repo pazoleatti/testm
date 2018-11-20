@@ -73,6 +73,7 @@ public class ConsolidationIncome extends NdflPersonIncome {
         this.paymentNumber = income.getPaymentNumber();
         this.paymentDate = income.getPaymentDate();
         this.taxSumm = income.getTaxSumm();
+        this.modifiedDate = income.getModifiedDate();
     }
 
     public String getInp() {
