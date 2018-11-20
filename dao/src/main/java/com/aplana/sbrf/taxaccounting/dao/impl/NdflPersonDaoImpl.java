@@ -2249,7 +2249,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "(select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
                 "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo\n" +
                 "where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId )\n" +
-                "select distinct npi.operation_id, dd.asnu_id\n" +
+                "select distinct /*+ NO_INDEX(npi NDFL_PERS_INC_KPP_OKTMO) */ npi.operation_id, dd.asnu_id\n" +
                 "from ndfl_person_income npi \n" +
                 "join kpp_oktmo on kpp_oktmo.kpp = npi.kpp and kpp_oktmo.oktmo = npi.oktmo\n" +
                 "join ndfl_person np on npi.ndfl_person_id = np.id \n" +
