@@ -53,11 +53,23 @@
                     </span>
                     <!--Выгрузить отчетность-->
                     <span>
-                        <button type="button" class="btn btn-default"
-                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DOWNLOAD_REPORTS)"
-                                data-ng-click="downloadReports()">
+                        <button id="download-reports-button" type="button" class="btn btn-default"
+                                data-bs-dropdown
+                                data-placement="bottom-left"
+                                data-ng-disabled="!user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP, APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS)">
                             <span data-translate-once="ndflReportJournal.button.downloadReport"></span>
                         </button>
+                        <ul class="dropdown-menu dropdown-menu-block" role="menu" aria-labelledby="download-reports-button">
+                            <li role="menuitem">
+                                <a ng-click="downloadReportsByAccepted()">{{::'ndflReportJournal.button.downloadReport.allAccepted' | translate}}</a>
+                            </li>
+                            <li role="menuitem">
+                                <a ng-class="ndflReportJournalGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'" ng-click="downloadReportsByFilter()">{{::'ndflReportJournal.button.downloadReport.byFilter' | translate}}</a>
+                            </li>
+                            <li role="menuitem">
+                                <a ng-class="ndflReportJournalGrid.value.length > 0 ? '' : 'disabled'" ng-click="downloadReportsBySelected()">{{::'ndflReportJournal.button.downloadReport.selected' | translate}}</a>
+                            </li>
+                        </ul>
                     </span>
                 </div>
             </div>

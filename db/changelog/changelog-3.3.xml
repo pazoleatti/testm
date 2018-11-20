@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5625 Реализовать изменения в массовой выгрузке файлов в статусах, отличных от Принята-->
+    <changeSet id="3.3-dnovikov-1" author="dnovikov">
+        <insert tableName="async_task_type">
+            <column name="id" value="41"/>
+            <column name="name" value="Выгрузка отчетности"/>
+            <column name="handler_bean" value="ExportReportsAsyncTask"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

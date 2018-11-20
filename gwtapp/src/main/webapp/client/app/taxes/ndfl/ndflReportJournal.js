@@ -109,6 +109,24 @@
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
                 };
 
+                function getFilter() {
+                    return {
+                        docStateIds: $filter('idExtractor')($scope.searchFilter.params.docState),
+                        departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
+                        formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
+                        declarationDataId: $scope.searchFilter.params.declarationNumber,
+                        declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
+                        formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
+                        fileName: $scope.searchFilter.params.file,
+                        note: $scope.searchFilter.params.note,
+                        oktmo: $scope.searchFilter.params.oktmo,
+                        taxOrganKpp: $scope.searchFilter.params.kpp,
+                        taxOrganCode: $scope.searchFilter.params.codeNo,
+                        correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
+                        reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
+                    };
+                }
+
                 $scope.ndflReportJournalGrid = {
                     ctrl: {},
                     options: {
@@ -118,21 +136,7 @@
                         requestParameters: function () {
                             return {
                                 projection: 'declarations',
-                                filter: JSON.stringify({
-                                    docStateIds: $filter('idExtractor')($scope.searchFilter.params.docState),
-                                    departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
-                                    formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
-                                    declarationDataId: $scope.searchFilter.params.declarationNumber,
-                                    declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
-                                    formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
-                                    fileName: $scope.searchFilter.params.file,
-                                    note: $scope.searchFilter.params.note,
-                                    oktmo: $scope.searchFilter.params.oktmo,
-                                    taxOrganKpp: $scope.searchFilter.params.kpp,
-                                    taxOrganCode: $scope.searchFilter.params.codeNo,
-                                    correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
-                                    reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
-                                })
+                                filter: JSON.stringify(getFilter())
                             };
                         },
                         height: 250,
@@ -267,9 +271,43 @@
                 };
 
                 /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Выгрузить отчетность"
+                 * @description Выгрузить отчетность по фильтру
                  */
-                $scope.downloadReports = function () {
+                $scope.downloadReportsByAccepted = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/downloadReportsByFilter",
+                        params: {
+                            filter: JSON.stringify({formState: APP_CONSTANTS.STATE.ACCEPTED.id})
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Выгрузить отчетность по фильтру
+                 */
+                $scope.downloadReportsByFilter = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/downloadReportsByFilter",
+                        params: {
+                            filter: JSON.stringify(getFilter())
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Выгрузить отчетность по фильтру по выбранным формам
+                 */
+                $scope.downloadReportsBySelected = function () {
                     var selectedItems = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",

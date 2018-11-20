@@ -270,6 +270,58 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams pagingParams) {
+        QueryData queryData = buildQueryByFilter(filter);
+        String query = queryData.getQuery();
+        MapSqlParameterSource params = queryData.getParameterSource();
+
+        String orderedSql = query + " order by " + pagingParams.getProperty() + " " + pagingParams.getDirection();
+
+        String numberedSql = "select rownum rn, ordered.* from (" + orderedSql + ") ordered";
+
+        String pagedSql = "select * from (" + numberedSql + ") where rn between :start and :end";
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+
+        List<DeclarationDataJournalItem> items = getNamedParameterJdbcTemplate().query(
+                pagedSql, params,
+                new RowMapper<DeclarationDataJournalItem>() {
+                    @Override
+                    public DeclarationDataJournalItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        DeclarationDataJournalItem item = new DeclarationDataJournalItem();
+                        item.setDeclarationDataId(rs.getLong("declarationDataId"));
+                        item.setDeclarationKind(rs.getString("declarationKind"));
+                        item.setDeclarationType(rs.getString("declarationType"));
+                        item.setDepartment(rs.getString("department"));
+                        item.setAsnuName(rs.getString("asnuName"));
+                        item.setKnfTypeName(rs.getString("knfTypeName"));
+                        item.setState(rs.getString("state"));
+                        item.setFileName(rs.getString("fileName"));
+                        item.setCreationDate(new Date(rs.getTimestamp("creationDate").getTime()));
+                        item.setCreationUserName(rs.getString("creationUserName"));
+                        item.setReportPeriod(rs.getString("reportPeriod"));
+                        item.setKpp(rs.getString("kpp"));
+                        item.setOktmo(rs.getString("oktmo"));
+                        item.setTaxOrganCode(rs.getString("taxOrganCode"));
+                        item.setDocState(rs.getString("docState"));
+                        item.setNote(rs.getString("note"));
+                        return item;
+                    }
+                }
+        );
+        long count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + query + ")", params, Long.class);
+
+        return new PagingResult<>(items, (int) count);
+    }
+
+    public List<Long> findAllIdsByFilter(DeclarationDataFilter filter) {
+        QueryData queryData = buildQueryByFilter(filter);
+        String query = queryData.getQuery();
+        MapSqlParameterSource params = queryData.getParameterSource();
+
+        return getNamedParameterJdbcTemplate().queryForList("select declarationDataId from (" + query + ")", params, Long.class);
+    }
+
+    private QueryData buildQueryByFilter(DeclarationDataFilter filter) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder(
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
@@ -355,43 +407,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             sql.append(" and ").append(SqlUtils.transformToSqlInStatement("dd.doc_state_id", filter.getDocStateIds()));
         }
 
-        String orderedSql = sql.toString() + " order by " + pagingParams.getProperty() + " " + pagingParams.getDirection();
-
-        String numberedSql = "select rownum rn, ordered.* from (" + orderedSql + ") ordered";
-
-        String pagedSql = "select * from (" + numberedSql + ") where rn between :start and :end";
-        params.addValue("start", pagingParams.getStartIndex() + 1);
-        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-
-        List<DeclarationDataJournalItem> items = getNamedParameterJdbcTemplate().query(
-                pagedSql, params,
-                new RowMapper<DeclarationDataJournalItem>() {
-                    @Override
-                    public DeclarationDataJournalItem mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        DeclarationDataJournalItem item = new DeclarationDataJournalItem();
-                        item.setDeclarationDataId(rs.getLong("declarationDataId"));
-                        item.setDeclarationKind(rs.getString("declarationKind"));
-                        item.setDeclarationType(rs.getString("declarationType"));
-                        item.setDepartment(rs.getString("department"));
-                        item.setAsnuName(rs.getString("asnuName"));
-                        item.setKnfTypeName(rs.getString("knfTypeName"));
-                        item.setState(rs.getString("state"));
-                        item.setFileName(rs.getString("fileName"));
-                        item.setCreationDate(new Date(rs.getTimestamp("creationDate").getTime()));
-                        item.setCreationUserName(rs.getString("creationUserName"));
-                        item.setReportPeriod(rs.getString("reportPeriod"));
-                        item.setKpp(rs.getString("kpp"));
-                        item.setOktmo(rs.getString("oktmo"));
-                        item.setTaxOrganCode(rs.getString("taxOrganCode"));
-                        item.setDocState(rs.getString("docState"));
-                        item.setNote(rs.getString("note"));
-                        return item;
-                    }
-                }
-        );
-        long count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + sql.toString() + ")", params, Long.class);
-
-        return new PagingResult<>(items, (int) count);
+        QueryData queryData = new QueryData();
+        queryData.setQuery(sql.toString());
+        queryData.setParameterSource(params);
+        return queryData;
     }
 
     @Override

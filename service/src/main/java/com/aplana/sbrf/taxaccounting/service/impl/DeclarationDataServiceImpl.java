@@ -1120,76 +1120,76 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter
-            filter, PagingParams pagingParams) {
-        TAUser currentUser = userInfo.getUser();
-
+    public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams) {
         PagingResult<DeclarationDataJournalItem> page = new PagingResult<>();
 
         if (filter != null) {
-            if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
-                //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
-                //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
-                //список будет состоять из 1 элемента (-1), который не может быть id существующего АСНУ, чтобы не нашлась ни одна форма
-                List<Long> asnuIds = new ArrayList<Long>();
-                if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
-                    List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
-                    if (!avaliableAsnuList.isEmpty()) {
-                        for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
-                            asnuIds.add(asnu.getId());
-                        }
-                    } else {
-                        asnuIds.add(-1L);
-                    }
-                }
-                filter.setAsnuIds(asnuIds);
-            }
-
-            // Отбираем подразделения (и соответственно их формы), доступные пользователю в соотстветствии с его ролями
-            List<Integer> availableDepartments = departmentService.getTaxFormDepartments(currentUser);
-            List<Integer> departmentIds = new ArrayList<>();
-            if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
-                departmentIds = availableDepartments;
-            } else {
-                for (Integer departmentId : filter.getDepartmentIds()) {
-                    if (availableDepartments.contains(departmentId)) {
-                        departmentIds.add(departmentId);
-                    }
-                }
-            }
-            // Если доступных подразделений нет, то список будет состоять из 1 элемента (-1),
-            // который не может быть id существующего подразделения, чтобы не нашлась ни одна форма
-            if (departmentIds.isEmpty()) {
-                departmentIds.add(-1);
-            }
-            filter.setDepartmentIds(departmentIds);
-
-            if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
-                List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
-                if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
-                    availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
-                } else if (currentUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
-                    availableDeclarationFormKindIds.add(DeclarationFormKind.PRIMARY.getId());
-                }
-                filter.setFormKindIds(availableDeclarationFormKindIds);
-            }
-
-            filter.setTaxType(TaxType.NDFL);
-
-            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
-                filter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
-                filter.setControlNs(true);
-            } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
-                filter.setUserDepartmentId(currentUser.getDepartmentId());
-                filter.setControlNs(false);
-            }
-
+            setUpDeclarationFilter(filter, userInfo);
             page = declarationDataDao.findPage(filter, pagingParams);
         }
 
         return page;
     }
 
+    void setUpDeclarationFilter(DeclarationDataFilter filter, TAUserInfo userInfo) {
+        TAUser currentUser = userInfo.getUser();
+        if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
+            //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
+            //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
+            //список будет состоять из 1 элемента (-1), который не может быть id существующего АСНУ, чтобы не нашлась ни одна форма
+            List<Long> asnuIds = new ArrayList<Long>();
+            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
+                List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
+                if (!avaliableAsnuList.isEmpty()) {
+                    for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
+                        asnuIds.add(asnu.getId());
+                    }
+                } else {
+                    asnuIds.add(-1L);
+                }
+            }
+            filter.setAsnuIds(asnuIds);
+        }
+
+        // Отбираем подразделения (и соответственно их формы), доступные пользователю в соотстветствии с его ролями
+        List<Integer> availableDepartments = departmentService.getTaxFormDepartments(currentUser);
+        List<Integer> departmentIds = new ArrayList<>();
+        if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
+            departmentIds = availableDepartments;
+        } else {
+            for (Integer departmentId : filter.getDepartmentIds()) {
+                if (availableDepartments.contains(departmentId)) {
+                    departmentIds.add(departmentId);
+                }
+            }
+        }
+        // Если доступных подразделений нет, то список будет состоять из 1 элемента (-1),
+        // который не может быть id существующего подразделения, чтобы не нашлась ни одна форма
+        if (departmentIds.isEmpty()) {
+            departmentIds.add(-1);
+        }
+        filter.setDepartmentIds(departmentIds);
+
+        if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
+            List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
+            if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
+            } else if (currentUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
+                availableDeclarationFormKindIds.add(DeclarationFormKind.PRIMARY.getId());
+            }
+            filter.setFormKindIds(availableDeclarationFormKindIds);
+        }
+
+        filter.setTaxType(TaxType.NDFL);
+
+        if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
+            filter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
+            filter.setControlNs(true);
+        } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
+            filter.setUserDepartmentId(currentUser.getDepartmentId());
+            filter.setControlNs(false);
+        }
+    }
 
     //Формирование рну ндфл для физ лица
     @Override
@@ -3325,12 +3325,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    public ActionResult asyncExportReports(DeclarationDataFilter filter, TAUserInfo userInfo) {
+        List<Long> declarationDataIdList = declarationDataDao.findAllIdsByFilter(filter);
+        return asyncExportReports(declarationDataIdList, userInfo);
+    }
 
     @Override
-    public ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList) {
+    public ActionResult asyncExportReports(List<Long> declarationDataIds, TAUserInfo userInfo) {
         Logger logger = new Logger();
-        ActionResult result = new ActionResult();
-        List<DeclarationData> declarationDataList = declarationDataDao.get(declarationDataIdList);
+        if (declarationDataIds.isEmpty()) {
+            logger.error("По заданым параметрам не найдено ни одной формы");
+        } else {
+            String taskKey = AsyncTaskType.EXPORT_REPORTS.name() + System.currentTimeMillis();
+            Map<String, Object> params = new HashMap<>();
+            params.put("declarationDataIds", declarationDataIds);
+            asyncManager.executeTask(taskKey, AsyncTaskType.EXPORT_REPORTS, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                @Override
+                protected LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
+                    return lockDataService.lockAsync(lockKey, user.getUser().getId());
+                }
+            });
+        }
+        return new ActionResult(logEntryService.save(logger.getEntries()));
+    }
+
+    @Override
+    public String exportReports(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger) {
+        List<DeclarationData> declarationDataList = declarationDataDao.get(declarationDataIds);
         List<DeclarationData> successfulPreCreateDeclarationDataList = new LinkedList<>();
         List<DeclarationData> unsuccessfulPreCreateDeclarationDataList = new LinkedList<>();
         for (DeclarationData declarationData : declarationDataList) {
@@ -3340,10 +3362,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 unsuccessfulPreCreateDeclarationDataList.add(declarationData);
             }
         }
+        String reportId = null;
         if (successfulPreCreateDeclarationDataList.isEmpty()) {
             logger.error("Отчетность не выгружена. В выбранных отчетных формах некорректное количество файлов " +
                     "формата xml, категория которых равна \"Исходящий в ФНС\", должно быть файлов: один");
-            result.setUuid(logEntryService.save(logger.getEntries()));
         } else {
             for (DeclarationData declarationData : unsuccessfulPreCreateDeclarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -3363,14 +3385,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         declarationData.getId());
                 logger.warn(msg);
             }
-
-
-            String reportId = createReports(successfulPreCreateDeclarationDataList, userInfo);
-            String uuid = logEntryService.save(logger.getEntries());
-            sendNotification("Подготовлена к выгрузке отчетность", uuid, userInfo.getUser().getId(), NotificationType.REF_BOOK_REPORT, reportId);
+            reportId = createReports(successfulPreCreateDeclarationDataList, userInfo);
         }
-
-        return result;
+        return reportId;
     }
 
     private String createReports(List<DeclarationData> declarationDataList, TAUserInfo userInfo) {

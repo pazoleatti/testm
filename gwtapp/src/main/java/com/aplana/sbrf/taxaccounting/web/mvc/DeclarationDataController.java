@@ -729,14 +729,22 @@ public class DeclarationDataController {
         return declarationService.checkAvailabilityReportDD(userInfo, declarationDataId);
     }
 
-
     /**
-     * Выгрузка отчетности
+     * Выгрузка отчетности по списку ид форм
      */
     @PostMapping(value = "/actions/declarationData/downloadReports")
     public ActionResult downloadReports(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.downloadReports(userInfo, declarationDataIds);
+        return declarationService.asyncExportReports(declarationDataIds, userInfo);
+    }
+
+    /**
+     * Выгрузка отчетности по фильтру
+     */
+    @PostMapping(value = "/actions/declarationData/downloadReportsByFilter")
+    public ActionResult downloadReportsByFilter(@RequestParam DeclarationDataFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.asyncExportReports(filter, userInfo);
     }
 
     /**

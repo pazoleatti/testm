@@ -196,6 +196,9 @@
 
         "ndflReportJournal.button.createReport": "Создать отчетность",
         "ndflReportJournal.button.downloadReport": "Выгрузить",
+        "ndflReportJournal.button.downloadReport.allAccepted": "В состоянии «Принята»",
+        "ndflReportJournal.button.downloadReport.byFilter": "Отобранные по фильтру",
+        "ndflReportJournal.button.downloadReport.selected": "Выбранные на странице",
         "ndflReportJournal.message.emptyFilterFields": "Заполнены не все поля отчетности",
         "ndflReportJournal.filter.documentState": "Состояние ЭД",
         "ndflReportJournal.filter.note": "Примечание",
@@ -1253,7 +1256,15 @@
                             var roleAliasList = data.taUserInfo.user.roles.map(function (userRole) {
                                 return userRole.alias;
                             });
-                            return roleAliasList.indexOf(role) >= 0;
+                            if (arguments.length > 1) {
+                                for (var i = 0; i < arguments.length; i++) {
+                                    if (roleAliasList.indexOf(arguments[i]) >= 0) {
+                                        return true;
+                                    }
+                                }
+                            } else {
+                                return roleAliasList.indexOf(role) >= 0;
+                            }
                         }
                     };
                     $rootScope.permissionChecker = PermissionChecker;

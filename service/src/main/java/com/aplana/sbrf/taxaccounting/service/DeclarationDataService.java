@@ -732,13 +732,32 @@ public interface DeclarationDataService {
     AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, AcceptDeclarationDataAction action);
 
     /**
-     * Выгрузка отчетности
+     * Запускает ассинхронную задачу на выгрузку отчетности для форм
      *
-     * @param userInfo              информация о пользователе
-     * @param declarationDataIdList список идентификаторов налоговых форм
-     * @return объект результат выполнения операции по выгрузке с отчетности с даннными для представления
+     * @param filter   фильтр, по которому выбираются формы
+     * @param userInfo пользователь запустивший операцию
+     * @return результат запуска задачи
      */
-    ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList);
+    ActionResult asyncExportReports(DeclarationDataFilter filter, TAUserInfo userInfo);
+
+    /**
+     * Запускает ассинхронную задачу на массовую выгрузку отчетности для форм
+     *
+     * @param declarationDataIds список ид форм
+     * @param userInfo           пользователь запустивший операцию
+     * @return результат запуска задачи
+     */
+    ActionResult asyncExportReports(List<Long> declarationDataIds, TAUserInfo userInfo);
+
+    /**
+     * Выполняет массовую выгрузку отчетности для форм
+     *
+     * @param declarationDataIds список идентификаторов налоговых форм
+     * @param userInfo           информация о пользователе
+     * @param logger             логгер
+     * @return uuid сформированного файла отчетности
+     */
+    String exportReports(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
 
     /**
      * Создание отчета для отчетной НФ

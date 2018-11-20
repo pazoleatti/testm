@@ -135,14 +135,21 @@ public interface DeclarationDataDao extends PermissionDao {
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
     /**
-     * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает страницу списка идентификаторов данных
-     * по декларациям, соответствующие критериям поиска
+     * Возвращяет страницу списка форм по фильтру
      *
-     * @param declarationDataFilter Фильтр, по которому происходит поиск
-     * @param pagingParams          Диапазон индексов, поле сортировки, прямой/обратный порядок
+     * @param declarationDataFilter фильтр, по которому происходит поиск
+     * @param pagingParams          диапазон индексов, поле сортировки, прямой/обратный порядок
      * @return Страница списка идентификаторов данных по декларациям, соответствующие критериям поиска
      */
     PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter declarationDataFilter, PagingParams pagingParams);
+
+    /**
+     * Возвращяет список ид форм по фильтру
+     *
+     * @param filter фильтр
+     * @return список ид форм
+     */
+    List<Long> findAllIdsByFilter(DeclarationDataFilter filter);
 
     /**
      * Возвращяет список форм по типу и отчетному периоду подразделения

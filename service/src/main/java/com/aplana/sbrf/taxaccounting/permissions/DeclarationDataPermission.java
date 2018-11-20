@@ -401,8 +401,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
-            return targetDomainObject.getState() == State.ACCEPTED && PermissionUtils.hasRole(user,
-                    TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
