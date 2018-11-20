@@ -25,6 +25,8 @@
             //кастомные обработчики ответа сервера
             //должны иметь метод handle, который вернет true, если они обработали ответ сервера и больше ничего делать не нужно
             var responseHandlers = [];
+            //была ли уже открыто окно с ошибкой. Предотвращяет показ нескольких окон с ошибками
+            var errorDialogOpened = false;
 
             //для прелоада изображений
             jQuery.preloadImages = function () {
@@ -71,7 +73,6 @@
                             //Вариант решения проблемы с circular dependency
 
                             var messageType;
-                            var message;
                             //500 это значит во время обработки запроса на стороне сервера проихошла ошибка
                             //Сообщения в таком случае формируются в классе GlobalControllerExceptionHandler
 
@@ -83,61 +84,60 @@
                                 messageType = 'warning';
                             }
 
-                            if (typeof addMessage === "string") {
-                                $injector.invoke(['$dialogs', function ($dialogs) {
-                                    $dialogs.errorDialog({
-                                        content: addMessage
-                                    });
-                                }]);
-                            }
-                            //jQuery возвращает число, а ангуляр - строку, !== не использовать
-                            else if (status === '413') {
-                                message = $filter('translate')("common.error.message.constraint.violation.exception");
-                                // ignored?
-                            } else if (status !== '500' && status !== '403') {
-                                message = $filter('translate')(status);
-                                if (addMessage) {
-                                    message += addMessage;
+                            function errorDialog(message) {
+                                if (!errorDialogOpened) {
+                                    $injector.invoke(['$dialogs', function ($dialogs) {
+                                        errorDialogOpened = true;
+                                        $dialogs.errorDialog({
+                                            content: message,
+                                            closeBtnClick: function () {
+                                                errorDialogOpened = false;
+                                            }
+                                        });
+                                    }]);
                                 }
-                                // ignored?
-                            } else {
-                                //noinspection JSUnresolvedVariable
+                            }
+
+                            function errorWithStack(message, addMessage) {
+                                if (!errorDialogOpened) {
+                                    $injector.invoke(['$dialogs', function ($dialogs) {
+                                        errorDialogOpened = true;
+                                        $dialogs.errorWithStack({
+                                            message: message,
+                                            addMessage: addMessage,
+                                            windowClass: 'modal1000',
+                                            closeBtnClick: function () {
+                                                errorDialogOpened = false;
+                                            }
+                                        });
+                                    }]);
+                                }
+                            }
+
+                            if (typeof addMessage === "string") {
+                                errorDialog(addMessage);
+                            } else if (status === '500' || status === '403') {
                                 messageType = addMessage.messageType;
-                                if (messageType === 'MULTI_ERROR' && addMessage.additionInfo.uuid){
-                                    //Отображаем список ошибок
+                                var message;
+                                if (status === '403') {
+                                    message = $filter('translate')(status);
+                                } else if (addMessage.exceptionCause && addMessage.exceptionCause.length > 0) {
+                                    //Достаем корневое сообщение из стека исключений
+                                    message = addMessage.exceptionCause[0].message;
+                                } else {
+                                    message = $filter('translate')(addMessage.messageCode);
+                                }
+                                if (messageType === 'MULTI_ERROR' && addMessage.additionInfo.uuid) {
+                                    //Отображаем уведомления по uuid и ошибку в окне
                                     $injector.invoke(['$logPanel', function ($logPanel) {
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
                                     }]);
-                                    $injector.invoke(['$dialogs', function ($dialogs) {
-                                        $dialogs.errorDialog({
-                                            content: addMessage.exceptionCause[0].message
-                                        });
-                                    }]);
+                                    errorDialog(message);
+                                } else if (messageType === "BUSINESS_ERROR") {
+                                    // Бизнес-ошибка, стектрейс не нужен
+                                    errorDialog(message);
                                 } else {
-                                    if (status === '403') {
-                                        message = $filter('translate')(status);
-                                    } else if (addMessage.exceptionCause && addMessage.exceptionCause.length > 0) {
-                                        //Достаем корневое сообщение из стека исключений
-                                        message = addMessage.exceptionCause[0].message;
-                                    } else {
-                                        message = $filter('translate')(addMessage.messageCode);
-                                    }
-                                    if (messageType === "BUSINESS_ERROR") {
-                                        // Бизнес-ошибка, стектрейс не нужен
-                                        $injector.invoke(['$dialogs', function ($dialogs) {
-                                            $dialogs.errorDialog({
-                                                content: message
-                                            });
-                                        }]);
-                                    } else {
-                                        $injector.invoke(['$dialogs', function ($dialogs) {
-                                            $dialogs.errorWithStack({
-                                                message: message,
-                                                addMessage: addMessage,
-                                                windowClass: 'modal1000'
-                                            });
-                                        }]);
-                                    }
+                                    errorWithStack(message, addMessage);
                                 }
                             }
                         },

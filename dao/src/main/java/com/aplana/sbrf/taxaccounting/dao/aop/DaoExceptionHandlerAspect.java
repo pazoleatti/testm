@@ -7,6 +7,8 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * Обработчик исключений в dao. Обарачивает необработанные исключенияв в DaoException
  */
@@ -27,10 +29,10 @@ public class DaoExceptionHandlerAspect {
         }
         if (e instanceof DaoException) {
             throw (DaoException) e;
-        } if (e instanceof  IllegalArgumentException) {
+        } else if (e instanceof  IllegalArgumentException) {
             throw (IllegalArgumentException) e;
         } else {
-            throw new DaoException(e.getLocalizedMessage(), e);
+            throw new DaoException(isEmpty(e.getLocalizedMessage()) ? e.getClass().getName() : e.getLocalizedMessage(), e);
         }
     }
 }
