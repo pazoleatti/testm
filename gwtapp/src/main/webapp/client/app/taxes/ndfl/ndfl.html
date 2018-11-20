@@ -24,31 +24,50 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
-                            <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download'
+                            <a ng-click="createReportXlsx()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formXLSX'
+                                | translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.formXLSX' | translate}}
+                            </div>
+                            <a ng-click="downloadXlsx()"
+                               ng-show="availableXlsxReport && declarationData.ndflPersonCount > 0">{{::'link.ndfl.reporting.download'
                                 | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' | translate}}</a>
+                            <a ng-click="createReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formForFL'
+                                | translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.formForFL' | translate}}
+                            </div>
                         </div>
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' |
+                            <a ng-click="createReportAllRnu()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formForFLs'
+                                |
                                 translate}}</a>
-                            <a ng-click="downloadSpecific()" ng-show="availableRnuNdflPersonAllDb">{{::'link.ndfl.reporting.download'
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.formForFLs' | translate}}
+                            </div>
+                            <a ng-click="downloadSpecific()"
+                               ng-show="availableRnuNdflPersonAllDb && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.download'
                                 | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem"
                         ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <div class="row menuitem">
-                            <a ng-click="createPairKppOktmo(false)">{{::'link.ndfl.reporting.formForKppOktmo'
+                            <a ng-click="createPairKppOktmo(false)"
+                               ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formForKppOktmo'
                                 |
                                 translate}}</a>
-                            <a ng-click="downloadPairKppOktmo()" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.formForKppOktmo' | translate}}
+                            </div>
+                            <a ng-click="downloadPairKppOktmo()"
+                               ng-show="availableReportKppOktmo && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.download'
                                 | translate}}</a>
                         </div>
                     </li>
@@ -61,12 +80,16 @@
                                 | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem"
-                        ng-show="canCreateNdflReport()">
+                    <li role="menuitem">
                         <hr style="margin: 0;">
                         <div class="row menuitem">
-                            <a ng-click="createNdflReport()">{{::'link.ndfl.reporting.createNdflReport' |
+                            <a ng-click="createNdflReport()" ng-show="canCreateNdflReport()">{{::'link.ndfl.reporting.createNdflReport'
+                                |
                                 translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.createNdflReport' |
+                                translate}}
+                            </div>
                         </div>
                     </li>
                 </ul>
@@ -78,7 +101,8 @@
         <div id="ndflScrollPanel"
              style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; overflow-y: auto; background-color: white;">
             <div style="display: flex; flex: 1; flex-flow: column;">
-                <div class="grid-filter" style="flex-shrink: 0; min-width: 100%; background: #ffffff; padding-bottom: 1px;">
+                <div class="grid-filter"
+                     style="flex-shrink: 0; min-width: 100%; background: #ffffff; padding-bottom: 1px;">
                     <div class="header-col " style="float: right;  margin-top: 6px;">
                         <!-- ссылка на модальное окно измениий по налоговой форме -->
                         <button type="button" class="btn btn-default-nonBg" style="float: right;"
@@ -140,7 +164,8 @@
                                             <label class="control-label">{{::'title.period' | translate}}:</label>
                                         </div>
                                         <div class="span7">
-                                            <label class="font-normal info-text" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
+                                            <label class="font-normal info-text"
+                                                   data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                         </div>
                                     </div>
                                     <div class="row-fluid">
@@ -153,7 +178,8 @@
                                     </div>
                                 </div>
                                 <div class="span4" style="margin: 0;">
-                                    <div class="row-fluid" ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
+                                    <div class="row-fluid"
+                                         ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
                                         <div class="span6">
                                             <label class="control-label">{{::'title.nameAsnu' | translate}}:</label>
                                         </div>
@@ -161,7 +187,8 @@
                                             <label class="font-normal info-text">{{declarationData.asnuName}}</label>
                                         </div>
                                     </div>
-                                    <div class="row-fluid" ng-show="declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
+                                    <div class="row-fluid"
+                                         ng-show="declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
                                         <div class="span6">
                                             <label class="control-label">{{::'title.knfType' | translate}}:</label>
                                         </div>
@@ -171,18 +198,22 @@
                                     </div>
                                     <div class="row-fluid">
                                         <div class="span6">
-                                            <label class="control-label">{{::'title.dateAndTimeCreate' | translate}}:</label>
+                                            <label class="control-label">{{::'title.dateAndTimeCreate' |
+                                                translate}}:</label>
                                         </div>
                                         <div class="span6">
-                                            <label class="font-normal info-text" style="width: 138px;">{{declarationData.creationDate | dateTimeFormatter}}</label>
+                                            <label class="font-normal info-text" style="width: 138px;">{{declarationData.creationDate
+                                                | dateTimeFormatter}}</label>
                                         </div>
                                     </div>
                                     <div class="row-fluid">
                                         <div class="span6">
-                                            <label class="control-label">{{::'title.manuallyCreated' | translate}}:</label>
+                                            <label class="control-label">{{::'title.manuallyCreated' |
+                                                translate}}:</label>
                                         </div>
                                         <div class="span6">
-                                            <label class="font-normal info-text" style="width: 138px;">{{declarationData.manuallyCreated | yesNoFormatter}}</label>
+                                            <label class="font-normal info-text" style="width: 138px;">{{declarationData.manuallyCreated
+                                                | yesNoFormatter}}</label>
                                         </div>
                                     </div>
                                     <div data-ng-if="declarationData.kppList" class="row-fluid">
@@ -190,7 +221,8 @@
                                             <label class="control-label">{{::'title.kpp' | translate}}:</label>
                                         </div>
                                         <div class="span6">
-                                            <label class="font-normal info-text" style="width: 138px;" title="{{::declarationData.kppList.join(',')}}">
+                                            <label class="font-normal info-text" style="width: 138px;"
+                                                   title="{{::declarationData.kppList.join(',')}}">
                                                 {{::declarationData.kppList | joinAndTruncateFormatter : ',': 2}}
                                             </label>
                                         </div>

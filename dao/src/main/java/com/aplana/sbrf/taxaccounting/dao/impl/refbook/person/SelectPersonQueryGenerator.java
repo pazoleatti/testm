@@ -21,11 +21,11 @@ class SelectPersonQueryGenerator {
 
     private static final String DEFAULT_SORT_PROPERTY = "id";
 
+    // Используем параллельный запрос для ускорения работы, с разрешения БД-разработчиков.
     @Language("SQL")
-    public static final String SELECT_FULL_PERSON = "" +
-            // Используем параллельный запрос для ускорения работы, с разрешения БД-разработчиков.
-            "select /*+ parallel(person,8) first_rows(1)*/\n" +
-            "person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
+    public static final String SELECT_HINT_CLAUSE = "select /*+ parallel(person,8) first_rows(1)*/\n";
+    @Language("SQL")
+    public static final String FULL_PERSON_SELECT_BASE = "person.id, person.record_id, person.old_id, person.last_name, person.first_name, \n" +
             "person.middle_name, person.birth_date, person.birth_place, person.vip, person.inn, \n" +
             "person.inn_foreign, person.snils, person.start_date, person.end_date,\n" +
             "doc.id d_id, doc.doc_number, doc_type.id doc_type_id, doc_type.code doc_code, doc_type.name doc_name, doc_type.priority doc_type_priority, \n" +
@@ -45,6 +45,9 @@ class SelectPersonQueryGenerator {
             "left join ref_book_taxpayer_state state on state.id = person.taxpayer_state  \n" +
             "left join ref_book_country address_country on address_country.id = person.country_id \n" +
             "left join ref_book_asnu asnu on asnu.id = person.source_id";
+
+    @Language("SQL")
+    public static final String SELECT_FULL_PERSON = SELECT_HINT_CLAUSE + FULL_PERSON_SELECT_BASE;
 
     /**
      * Список полей, по которым сортировать, в зависимости от того, чему равно pagingParams.getProperty()
@@ -98,7 +101,7 @@ class SelectPersonQueryGenerator {
      * Генерирует SQL-запрос с фильтром.
      */
     String generateFilteredQuery() {
-        initSelectPerson();
+        initSelectPerson(false);
         addWhereConditions();
         return query;
     }
@@ -107,7 +110,7 @@ class SelectPersonQueryGenerator {
      * Генерирует SQL-запрос с фильтром, сортировкой и пагинацией.
      */
     String generatePagedAndFilteredQuery() {
-        initSelectPerson();
+        initSelectPerson(true);
         addWhereConditions();
         addOrder();
         addPagination();
@@ -118,8 +121,15 @@ class SelectPersonQueryGenerator {
         this.pagingParams = pagingParams;
     }
 
-    private void initSelectPerson() {
-        query = SELECT_FULL_PERSON;
+    private void initSelectPerson(boolean orderOptimization) {
+        if (orderOptimization && pagingParams != null) {
+            String sortProperty = getSortProperty(pagingParams);
+            SortDirection sortDirection = SortDirection.of(pagingParams.getDirection());
+            generateOrderOptimizationClause(sortProperty, sortDirection);
+            query = generateOrderOptimizationClause(sortProperty, sortDirection) + FULL_PERSON_SELECT_BASE;
+        } else {
+            query = SELECT_FULL_PERSON;
+        }
     }
 
     protected void addWhereConditions() {
@@ -323,6 +333,34 @@ class SelectPersonQueryGenerator {
             String fieldsString = generateSortFieldsString(sortFields, sortDirection);
             query = query + fieldsString;
         }
+
+    }
+
+    /**
+     * Генерирует часть селекта касающуюся динамической оптимизации в зависимости от сортировки
+     * @param sortProperty  свойство для сортировки
+     * @param sortDirection направление сортировки.
+     * @return  сгенерированное выражение
+     */
+    private String generateOrderOptimizationClause(String sortProperty, SortDirection sortDirection) {
+        StringBuilder builder = new StringBuilder("select /*+ ");
+        if (sortDirection.equals(SortDirection.ASC)) {
+            builder.append("index_asc(");
+        } else {
+            builder.append("index_desc(");
+        }
+        switch (sortProperty) {
+            case DEFAULT_SORT_PROPERTY: {
+                builder.append("person PK_REF_BOOK_PERSON) ");
+                break;
+            }
+            default: {
+                return SELECT_HINT_CLAUSE;
+            }
+        }
+
+        builder.append("parallel(person,8) first_rows(1)*/ ");
+        return builder.toString();
     }
 
     private boolean isPropertyPermissive(String field) {
