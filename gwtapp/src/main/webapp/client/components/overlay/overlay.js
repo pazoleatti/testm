@@ -307,13 +307,17 @@
 
                     // On response success
                     response: function (response) {
-                        var invalidHeader = ('true' === response.headers('isLoginPage')) ||
-                            ('true' !== response.headers('isCustomPage'));
-                        var nonCached = !(angular.isDefined(response.config.cache) &&
-                            angular.isObject(response.config.cache) && angular.isDefined(response.config.cache.info()));
-
-                        if (response.headers()['content-type'] && response.headers()['content-type'].indexOf("text/html") !== -1
-                            && invalidHeader && nonCached) {
+                        // признак того что запрос обработан самим приложением, а не СУДИР или чем-то другим
+                        var isCustomPage = ('true' !== response.headers('isCustomPage'));
+                        // ответ пришел с сервера, а не взят из кэша
+                        var cached = angular.isDefined(response.config.cache) &&
+                            angular.isObject(response.config.cache) && angular.isDefined(response.config.cache.info());
+                        // contentType = 'text/html'
+                        var isHtmlContent = response.headers()['content-type'] && response.headers()['content-type'].indexOf("text/html") !== -1;
+                        // Определяем что сессия не истекла, и если истекла, то выдаём окно с информацией об этом.
+                        // тут правильней словить статус код 401 (не авторизован), но СУДИР этого делать не умеет, возвращяет 400,
+                        // поэтому ловим ответ с типом 'text/html', который сформировала не само приложение, а СУДИР или др., и чтобы он был взят не из кэша
+                        if (isHtmlContent && isCustomPage && !cached) {
                             if (!expireDialogOpened) {
                                 $injector.invoke(['$dialogs', function ($dialogs) {
                                     expireDialogOpened = true;

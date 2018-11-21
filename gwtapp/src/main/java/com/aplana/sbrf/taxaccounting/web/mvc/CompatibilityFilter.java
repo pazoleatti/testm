@@ -21,6 +21,7 @@ public class CompatibilityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         response.addHeader("X-UA-Compatible", "IE=edge,chrome=1");
+        // отмечаем что ответ обработан приложением, а не СУДИР или чем то другим. См. использование в overlay.js
         response.setHeader("isCustomPage", "true");
         HttpSession session = httpServletRequest.getSession();
         try {
