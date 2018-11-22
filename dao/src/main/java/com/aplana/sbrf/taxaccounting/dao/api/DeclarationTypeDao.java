@@ -46,8 +46,6 @@ public interface DeclarationTypeDao {
      */
     void updateDT(DeclarationType type);
 
-    void delete(int typeId);
-
     List<Integer> getByFilter(TemplateFilter filter);
 
 	/**

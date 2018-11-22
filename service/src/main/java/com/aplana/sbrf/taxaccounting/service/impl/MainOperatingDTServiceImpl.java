@@ -25,9 +25,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
-    private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
-    private static final String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
     private static final String CHECK_ROLE_MESSAGE = "Нет прав доступа к данному виду налогу \"%s\"!";
 
     @Autowired
@@ -84,7 +81,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 Calendar c = Calendar.getInstance();
                 c.setTime(declarationTemplate.getVersion());
                 c.add(Calendar.DATE, -1);
-                beginRange = new Pair<Date, Date>(dbVersionBeginDate, c.getTime());
+                beginRange = new Pair<>(dbVersionBeginDate, c.getTime());
             }
             if (
                     (dbVersionEndDate == null && templateActualEndDate != null)
@@ -93,7 +90,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 Calendar c = Calendar.getInstance();
                 c.setTime(templateActualEndDate);
                 c.add(Calendar.DATE, 1);
-                endRange = new Pair<Date, Date>(c.getTime(), dbVersionEndDate);
+                endRange = new Pair<>(c.getTime(), dbVersionEndDate);
             }
             versionOperatingService.checkDestinationsSources(declarationTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);
@@ -134,112 +131,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
 
         return true;
-    }
-
-    @Override
-    public <T> int createNewType(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user) {
-        DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        checkRole(TaxType.NDFL, user.getUser());
-        declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
-        checkError(logger, SAVE_MESSAGE);
-        DeclarationType type = declarationTemplate.getType();
-        type.setStatus(VersionedObjectStatus.NORMAL);
-        type.setName(declarationTemplate.getName() != null && !declarationTemplate.getName().isEmpty()?declarationTemplate.getName():"");
-        int formTypeId = declarationTypeService.save(type);
-        declarationTemplate.getType().setId(formTypeId);
-        versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger, user);
-        checkError(logger, SAVE_MESSAGE);
-        declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        int id = declarationTemplateService.save(declarationTemplate, user);
-        declarationTemplateService.createChecks(checks, id);
-
-        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
-                declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
-        logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
-        return id;
-    }
-
-    @Override
-    public <T> int createNewTemplateVersion(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user) {
-        DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        checkRole(TaxType.NDFL, user.getUser());
-        declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
-        checkError(logger, SAVE_MESSAGE);
-        declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),
-                declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger, user);
-        checkError(logger, SAVE_MESSAGE);
-        int id = declarationTemplateService.save(declarationTemplate, user);
-        declarationTemplateService.createChecks(checks, id);
-
-        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
-                declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
-        logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
-        return id;
-    }
-
-    @Override
-    public void deleteTemplate(int typeId, Logger logger, TAUserInfo user) {
-        checkRole(TaxType.NDFL, user.getUser());
-        List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
-                VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
-        if (templates != null && !templates.isEmpty()){
-
-            for (DeclarationTemplate declarationTemplate : templates){
-                versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
-                        declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
-            }
-            checkError(logger, DELETE_TEMPLATE_MESSAGE);
-        }
-        versionOperatingService.checkDestinationsSources(typeId, (Date) null, null, logger);
-        checkError(logger, DELETE_TEMPLATE_MESSAGE);
-        //Проверка назначений деклараций
-        for (DepartmentDeclarationType departmentFormType : sourceService.getDDTByDeclarationType(typeId))
-            logger.error(
-                    String.format(HAVE_DDT_MESSAGE,
-                            departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
-        checkError(logger, DELETE_TEMPLATE_MESSAGE);
-        declarationTypeService.delete(typeId);
-    }
-
-    @Override
-    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUserInfo user) {
-        boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
-        DeclarationTemplate template = declarationTemplateService.get(templateId);
-        checkRole(TaxType.NDFL, user.getUser());
-        Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
-        versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
-                template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
-        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), dateEndActualize, logger);
-        checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
-
-        versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
-                template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        Date endDate = declarationTemplateService.getDTEndDate(templateId);
-        int deletedFTid = declarationTemplateService.delete(template.getId());
-        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
-                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
-        //TODO: (dloshkarev) надо реализовать эту проверку в привязке к DECLARATION_TYPE при реализации источников-приемников
-        /*if (declarationTemplates.isEmpty()){
-            for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
-                logger.error(
-                        String.format(HAVE_DDT_MESSAGE,
-                                departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
-                checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
-            }
-        }*/
-
-        //Если нет версий макетов, то можно удалить весь макет
-        if (declarationTemplates.isEmpty()){
-            templateChangesService.deleteByTemplateIds(null, Arrays.asList(deletedFTid));
-            declarationTypeService.delete(template.getType().getId());
-            logger.info("Макет удален в связи с удалением его последней версии");
-            isDeleteAll = true;
-        }
-        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, template.getVersion(),
-                endDate, template.getName(), null, null, null);
-        return isDeleteAll;
     }
 
     @Override

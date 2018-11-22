@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
-import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.dao.TaxEventDao;
 import com.aplana.sbrf.taxaccounting.model.TaxChangesEvent;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -25,8 +24,6 @@ public class TaxEventProcessor {
     @Autowired
     private TaxEventDao taxEventDao;
     @Autowired
-    private CacheManagerDecorator cacheManagerDecorator;
-    @Autowired
     private PeriodService periodService;
 
     /**
@@ -36,22 +33,12 @@ public class TaxEventProcessor {
         List<TaxChangesEvent> newEvents = taxEventDao.getNewTaxEvents();
         if (!newEvents.isEmpty()) {
             LOG.info("processTaxEvents started");
-            boolean needToClearCache = false;
             for (TaxChangesEvent event : newEvents) {
-                if (event.getTableName().equals(TaxTableNames.DEPARTMENT.name()) ||
-                        event.getTableName().equals(TaxTableNames.SEC_USER.name())) {
-                    //Изменилась таблица пользователей или подразделений - нужно сбросить серверный кэш в НДФЛ
-                    needToClearCache = true;
-                }
                 if (event.getTableName().equals(TaxTableNames.DEPARTMENT.name()) &&
                         event.getOperationName().equalsIgnoreCase(Operations.insert.name())) {
                     periodService.openForNewDepartment(event.getTableRowId().intValue());
                 }
                 taxEventDao.processTaxEvent(event);
-            }
-
-            if (needToClearCache) {
-                cacheManagerDecorator.clearAll();
             }
             LOG.info("processTaxEvents finished, " + newEvents.size() + " events processed");
         }

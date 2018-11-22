@@ -116,7 +116,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
 	@Override
-	@Cacheable(CacheConstants.DECLARATION_TEMPLATE)
+	@Cacheable(cacheNames = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId")
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -288,8 +288,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    @Transactional(readOnly = false)
-    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId", beforeInvocation = true)
+    @Transactional
+    @CacheEvict(cacheNames = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId")
     public void setJrxml(int declarationTemplateId, String jrxmlBlobId) {
         int count = getJdbcTemplate().update(
                 "update declaration_template set jrxml = ? where id = ?",

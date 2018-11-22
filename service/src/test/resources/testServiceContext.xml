@@ -47,9 +47,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao"/>
     </bean>
     <bean id="signDataPath" class="java.net.URL">

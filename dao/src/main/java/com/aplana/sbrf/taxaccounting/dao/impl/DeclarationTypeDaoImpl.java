@@ -129,19 +129,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
-    @CacheEvict(CacheConstants.DECLARATION_TYPE)
-    @Override
-    public void delete(int typeId) {
-        try {
-            getJdbcTemplate().update("delete from declaration_type where id = ?",
-                    new Object[]{typeId},
-                    new int[]{Types.INTEGER});
-        } catch (DataAccessException e){
-			LOG.error("Ошибка при удалении макета", e);
-            throw new DaoException("Ошибка при удалении макета", e);
-        }
-    }
-
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
         PreparedStatementData ps = new PreparedStatementData();
