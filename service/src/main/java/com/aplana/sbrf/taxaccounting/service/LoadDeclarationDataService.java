@@ -1,31 +1,24 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.File;
-import java.io.InputStream;
-import java.util.Date;
 
 /**
  * Сервис загрузки ТФ деклараций
- *
- * @author lhaziev
  */
 public interface LoadDeclarationDataService {
 
     /**
-     * @param logger
-     * @param userInfo
-     * @param declarationData
-     * @param inputStream
-     * @param fileName
-     * @param dataFile
-     * @param attachFileType
-     * @param createDateFile
+     * Импортировать в систему данные из ТФ в формате xml.
+     *
+     * @param xmlTransportFile импортируемый файл
+     * @param xmlFileName      название файла
+     * @param declarationData  целевая ПНФ
+     * @param userInfo         данные пользователя, загрузившего файл
+     * @param logger           логгер панели уведомлений
      */
-    void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                               String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile);
+    void importXmlTransportFile(File xmlTransportFile, String xmlFileName, DeclarationData declarationData, TAUserInfo userInfo, Logger logger);
 }

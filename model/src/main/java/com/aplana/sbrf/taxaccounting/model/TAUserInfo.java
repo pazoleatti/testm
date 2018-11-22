@@ -28,6 +28,4 @@ public class TAUserInfo implements Serializable{
 	public String toString() {
 		return "TAUserInfo [user=" + user + ", ip=" + ip + "]";
 	}
-
-
 }

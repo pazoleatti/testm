@@ -1,45 +1,45 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.commons.io.IOUtils;
+import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
+import java.io.*;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * @author lhaziev
- */
+
 @Service
-@Transactional
 public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataService implements LoadDeclarationDataService {
 
     private static final Log LOG = LogFactory.getLog(LoadDeclarationDataServiceImpl.class);
-    private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
-            "т.к. в данный момент выполняется изменение данных налоговой формы \"%s\" " +
-            "для подразделения \"%s\" " +
-            "в периоде \"%s\", " +
-            "инициированное пользователем \"%s\" " +
-            "в %s";
-    private static final ThreadLocal<SimpleDateFormat> SDF_HH_MM_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("HH:mm dd.MM.yyyy");
-        }
-    };
 
     @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    private DeclarationDataFileDao declarationDataFileDao;
+
+    @Autowired
+    private BlobDataService blobDataService;
+    @Autowired
     private DeclarationDataService declarationDataService;
+    @Autowired
+    private DeclarationDataScriptingService declarationDataScriptingService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
@@ -47,46 +47,143 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     @Autowired
     private LockDataService lockDataService;
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
+    private LogBusinessService logBusinessService;
+    @Autowired
+    private ReportService reportService;
     @Autowired
     private TAUserService userService;
 
+    @Autowired
+    private RefBookFactory refBookFactory;
+
+
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                                      String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
-        LOG.info(String.format("LoadDeclarationDataServiceImpl.importDeclarationData. userInfo: %s; declarationData: %s; fileName: %s; attachFileType: %s",
-                userInfo, declarationData, fileName, attachFileType));
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declarationData.getDepartmentReportPeriodId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        DeclarationType declarationType = declarationTemplate.getType();
-        String reportPeriodName = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " - "
-                + departmentReportPeriod.getReportPeriod().getName();
+    @Transactional
+    @PreAuthorize("hasPermission(#declaration.id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
+    public void importXmlTransportFile(File xmlTransportFile, String xmlFileName, DeclarationData declaration, TAUserInfo userInfo, Logger logger) {
 
-        // Блокировка
-        LockData lockData = lockDataService.lock(declarationDataService.generateAsyncTaskKey(declarationData.getId(), DeclarationDataReportType.IMPORT_TF_DEC),
-                userInfo.getUser().getId(),
-                declarationDataService.getDeclarationFullName(declarationData.getId(), DeclarationDataReportType.IMPORT_TF_DEC));
-        if (lockData != null)
-            throw new ServiceException(String.format(
-                    LOCK_MSG,
-                    declarationType.getName(),
-                    departmentService.getDepartment(declarationData.getDepartmentId()).getName(),
-                    reportPeriodName,
-                    userService.getUser(lockData.getUserId()).getName(),
-                    SDF_HH_MM_DD_MM_YYYY.get().format(lockData.getDateLock())
-            ));
+        TAUser user = userInfo.getUser();
+        long declarationId = declaration.getId();
 
+        LOG.info(String.format("LoadDeclarationDataServiceImpl: Import transport file. user: %s; declaration: %s; fileName: %s",
+                user, declaration, xmlFileName));
+
+        setLock(declaration, user);
         try {
-            // Скрипт загрузки ТФ + прикладываем файл к НФ
-            try {
-                declarationDataService.importDeclarationData(logger, userInfo, declarationData.getId(), inputStream,
-                        fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, dataFile, attachFileType, createDateFile);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
+            LOG.info(String.format("Сохранение XML-файла в базе данных для налоговой формы %s", declarationId));
+            String fileUuid = archiveAndSaveFile(xmlTransportFile, xmlFileName);
+
+            // Добавляем ТФ к отчётам декларации, таблица declaration_report
+            reportService.attachReportToDeclaration(declarationId, fileUuid, DeclarationDataReportType.XML_DEC);
+            // Добавляем ТФ к файлам декларации, таблица declaration_data_file
+            attachFileToDeclaration(fileUuid, declaration, user);
+
+            // Парсим xml и импортируем данные в базу с помощью primary_rnu_ndfl.groovy
+            Map<String, Object> additionalParameters = new HashMap<>();
+            additionalParameters.put("dataFile", xmlTransportFile);
+            if (!declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters)) {
+                throw new ServiceException("Импорт данных не предусмотрен");
             }
+
+            logBusinessService.add(null, declarationId, userInfo, FormDataEvent.IMPORT_TRANSPORT_FILE, null);
+            String note = "Загрузка данных из файла \"" + xmlFileName + "\" в налоговую форму";
+            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, declaration, note, null);
         } finally {
-            // Снимаем блокировку
-            lockDataService.unlock(declarationDataService.generateAsyncTaskKey(declarationData.getId(), DeclarationDataReportType.IMPORT_TF_DEC), userInfo.getUser().getId());
+            unlock(declaration, user);
         }
+    }
+
+    // добавление файла к декларации (раздел "Файлы и комментарии" декларации, таблица declaration_data_file)
+    private void attachFileToDeclaration(String fileUuid, DeclarationData declaration, TAUser user) {
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
+        Long fileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + AttachFileType.TRANSPORT_FILE.getCode() + "").get(0);
+
+        DeclarationDataFile declarationDataFile = new DeclarationDataFile();
+        declarationDataFile.setDeclarationDataId(declaration.getId());
+        declarationDataFile.setUuid(fileUuid);
+        declarationDataFile.setUserName(user.getName());
+        declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
+        declarationDataFile.setFileTypeId(fileTypeId);
+        declarationDataFileDao.create(declarationDataFile);
+    }
+
+    /**
+     * Архивация и сохранение файла
+     *
+     * @return uuid файла в blob_data
+     */
+    private String archiveAndSaveFile(File file, String fileName) {
+        File zipFile = null;
+        String zipFileUuid;
+        try {
+            zipFile = ZipUtils.archive(file, fileName);
+
+            Date creationDateToday = new Date();
+            zipFileUuid = blobDataService.create(zipFile, trimFileExtension(fileName) + ".zip", creationDateToday);
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            deleteTempFile(zipFile);
+        }
+        return zipFileUuid;
+    }
+
+    private String trimFileExtension(String filename) {
+        int dotPos = filename.lastIndexOf('.');
+        if (dotPos < 0) {
+            return filename;
+        }
+        return filename.substring(0, dotPos);
+    }
+
+    private void deleteTempFile(File tempFile) {
+        if (tempFile != null && !tempFile.delete()) {
+            LOG.warn(String.format("Временный файл %s не удален", tempFile.getAbsolutePath()));
+        }
+    }
+
+    private void setLock(DeclarationData declaration, TAUser user) {
+        String asyncTaskKey = declarationDataService.generateAsyncTaskKey(declaration.getId(), DeclarationDataReportType.IMPORT_TF_DEC);
+        String declarationFullName = declarationDataService.getDeclarationFullName(declaration.getId(), DeclarationDataReportType.IMPORT_TF_DEC);
+
+        LockData lockData = lockDataService.lock(asyncTaskKey, user.getId(), declarationFullName);
+        if (lockData != null) {
+            throw new ServiceException(createDataLockedErrorMessage(declaration, lockData));
+        }
+    }
+
+    // генерация сообщения при заблокированных данных
+    private String createDataLockedErrorMessage(DeclarationData declaration, LockData lockData) {
+
+        String lockedByUser = userService.getUser(lockData.getUserId()).getName();
+        String lockedOnDate = FastDateFormat.getInstance("HH:mm dd.MM.yyyy").format(lockData.getDateLock());
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declaration.getDepartmentReportPeriodId());
+        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
+        String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        String declarationTypeName = declarationTemplate.getType().getName();
+
+        String departmentName = departmentService.getDepartment(declaration.getDepartmentId()).getName();
+
+        return String.format(
+                "Обработка данных транспортного файла не выполнена, " +
+                        "т.к. в данный момент выполняется изменение данных налоговой формы \"%s\" " +
+                        "для подразделения \"%s\" " +
+                        "в периоде \"%s\", " +
+                        "инициированное пользователем \"%s\" " +
+                        "в %s",
+                declarationTypeName,
+                departmentName,
+                reportPeriodName,
+                lockedByUser,
+                lockedOnDate
+        );
+    }
+
+    private void unlock(DeclarationData declaration, TAUser user) {
+        String asyncTaskKey = declarationDataService.generateAsyncTaskKey(declaration.getId(), DeclarationDataReportType.IMPORT_TF_DEC);
+        lockDataService.unlock(asyncTaskKey, user.getId());
     }
 }

@@ -348,13 +348,6 @@ public class DeclarationDataDaoTest {
         Assert.assertEquals(1, declarationDataList.size());
     }
 
-    @Test
-    public void fetchAllDeclarationData() {
-        List<DeclarationData> declarationDataList = declarationDataDao.fetchAllDeclarationData(1, asList(4, 5), 1);
-        Assert.assertNotNull(declarationDataList);
-        Assert.assertEquals(2, declarationDataList.size());
-    }
-
     private void assertIdsEquals(long[] expected, List<DeclarationDataSearchResultItem> items) {
         if (expected.length != items.size()) {
             fail("List size mismatch: " + expected.length + " expected but " + items.size() + " received");
@@ -375,13 +368,6 @@ public class DeclarationDataDaoTest {
         if (failed) {
             fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
         }
-    }
-
-    @Test
-    public void getLastTest() {
-        DeclarationData declarationData = declarationDataDao.getLast(1, 1, 20);
-        Assert.assertNotNull(declarationData);
-        Assert.assertEquals(3, declarationData.getId().intValue());
     }
 
     @Test
@@ -414,12 +400,5 @@ public class DeclarationDataDaoTest {
         assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataKppList(1L));
         declarationDataDao.createDeclarationDataKppList(1L, Sets.newHashSet("1", "2", "3"));
         assertEquals(asList("1", "2", "3"), declarationDataDao.getDeclarationDataKppList(1L));
-    }
-
-    @Test
-    public void getSaveDeclarationDataPersonIds() {
-        assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataPersonIds(1L));
-        declarationDataDao.createDeclarationDataPersonIds(1L, Sets.newHashSet(1L, 2L, 3L));
-        assertEquals(asList(1L, 2L, 3L), declarationDataDao.getDeclarationDataPersonIds(1L));
     }
 }

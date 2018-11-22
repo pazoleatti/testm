@@ -64,14 +64,6 @@ public interface DeclarationDataDao extends PermissionDao {
     List<Long> getDeclarationDataPersonIds(long declarationDataId);
 
     /**
-     * Сохраняет список ид ФЛ, включаемые в КНВ
-     *
-     * @param declarationDataId ид КНФ
-     * @param personIds         ид ФЛ из реестра
-     */
-    void createDeclarationDataPersonIds(final long declarationDataId, final Set<Long> personIds);
-
-    /**
      * Сохраняет новую декларацию в БД.
      * Этот метод позволяет сохранять только новые декларации (т.е. те, у которых id == null).
      * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
@@ -217,11 +209,6 @@ public interface DeclarationDataDao extends PermissionDao {
     List<Long> getDeclarationIds(int declarationTypeId, int departmentId);
 
     /**
-     * Декларация созданная в последнем отчетном периоде подразделения
-     */
-    DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
-
-    /**
      * Находим декларации, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
      *
      * @param decTemplateId идентификатор версии макета НФ
@@ -254,26 +241,6 @@ public interface DeclarationDataDao extends PermissionDao {
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
-     * Найти все формы созданные в отчетном периоде
-     *
-     * @param declarationTypeId идентификатор вида налоговой формы
-     * @param departmentIds     список идентификаторов подразделений
-     * @param reportPeriodId    идентификатор отчетного периода
-     * @return список налоговых форм заданного вида, созданных в заданном периоде и принадлежащих заданным подразделениям
-     */
-    List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId);
-
-    /**
-     * Найти НФ НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
-     */
-    DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId,
-                                                                     int departmentReportPeriodId,
-                                                                     int departmentId,
-                                                                     int reportPeriod,
-                                                                     String oktmo,
-                                                                     String kpp);
-
-    /**
      * Поиск ОНФ по имени файла и типу файла
      */
     List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
@@ -282,11 +249,6 @@ public interface DeclarationDataDao extends PermissionDao {
      * Проверка существования формы
      */
     boolean existDeclarationData(long declarationDataId);
-
-    /**
-     * Найти все формы всех подразделений в активном периоде по виду и периоду
-     */
-    List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId);
 
     /**
      * Найти НФ по типу, периоду, и значениям Налоговый орган, КПП, ОКТМО

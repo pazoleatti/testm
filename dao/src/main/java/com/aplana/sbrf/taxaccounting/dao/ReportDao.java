@@ -32,7 +32,7 @@ public interface ReportDao {
      *
      * @param declarationDataId идентификатор декларации
      */
-    void deleteDec(long declarationDataId);
+    void deleteAllByDeclarationId(long declarationDataId);
 
     /**
      * Удаляет отчет декларации по типу

@@ -193,9 +193,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * @param loadedFileNameList    Список файлов, если необходимо загружать определенные файлы
      */
     @Transactional(propagation = Propagation.SUPPORTS)
-    private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
-                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
-                                        List<String> loadedFileNameList, long taskId, long maxFileSize) {
+    ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
+                                Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
+                                List<String> loadedFileNameList, long taskId, long maxFileSize) {
         // Получение пути к каталогу загрузки ТФ
         ConfigurationParamModel model = configurationDao.fetchAllByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
@@ -261,45 +261,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     fail++;
                     continue;
                 }
-                //File dataFile = null;
+
                 try {
-
-                    /*
-                    dataFile = File.createTempFile("dataFile", ".original");
-                    OutputStream dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
-                    InputStream currentFileInputStream = currentFile.getInputStream();
-                    try {
-                        IOUtils.copy(currentFileInputStream, dataFileOutputStream);
-                    } finally {
-                        IOUtils.closeQuietly(currentFileInputStream);
-                        IOUtils.closeQuietly(dataFileOutputStream);
-                    }
-
-                    // ЭП
-                    List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
-                    if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
-                        Pair<Boolean, Set<String>> check = new Pair<Boolean, Set<String>>(false, new HashSet<String>());
-                        try {
-                            check = signService.checkSign(fileName, dataFile.getPath(), 1, logger);
-                        } catch (Exception e) {
-                            log(userInfo, LogData.L36, logger, taskId, fileName, e.getMessage());
-                        }
-                        if (!check.getFirst()) {
-                            for(String msg: check.getSecond())
-                                log(userInfo, LogData.L0_ERROR, logger, taskId, msg);
-                            fail++;
-                            if (move) {
-                                moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, taskId), currentFile, null, logger, taskId);
-                            }
-                            log(userInfo, LogData.L20, logger, taskId, currentFile.getName());
-                            continue;
-                        }
-                        for(String msg: check.getSecond())
-                            log(userInfo, LogData.L0_INFO, logger, taskId, msg);
-                    } else {
-                        log(userInfo, LogData.L15_1, logger, taskId, fileName);
-                    }*/
-
                     // Один файл может соответствоваь нескольким справочникам
                     List<Pair<Boolean, Long>> matchList = mappingMap.get(mappingMatch(currentFile.getName(), mappingMap.keySet()));
 
@@ -466,10 +429,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 } finally {
                     //Снимаем блокировки
                     lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                    /*
-                    if (dataFile != null) {
-                        dataFile.delete();
-                    }*/
                 }
             }
         }
@@ -604,7 +563,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         String fileName = blobData.getName();
         try {
             RefBook refBook = commonRefBookService.get(refBookId);
-            validate(xmlFile, refBook, logger, userInfo);
+            validate(xmlFile, refBook, logger);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
                         "Загрузка файла \"%s\" не может быть выполнена. Файл не соответствует xsd-схеме.",
@@ -619,10 +578,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         fileName);
             }
         } finally {
-            if (xmlFile != null) {
-                if (!xmlFile.delete()) {
-                    LOG.warn("Не удален временный файл: " + xmlFile.getAbsoluteFile());
-                }
+            if (xmlFile != null && !xmlFile.delete()) {
+                LOG.warn("Не удален временный файл: " + xmlFile.getAbsoluteFile());
             }
         }
     }
@@ -630,12 +587,15 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     /**
      * Валидирует указанный xml-файл по xsd схеме справочника с использованием схематрона
      */
-    private boolean validate(File xmlFile, RefBook refBook, Logger logger, TAUserInfo userInfo) {
+    private boolean validate(File xmlFile, RefBook refBook, Logger logger) {
         if (refBook.getXsdId() != null) {
             BlobData blobData = blobDataService.get(refBook.getXsdId());
-            return validateXMLService.validate(userInfo, logger, true,
-                    xmlFile.getName(), xmlFile,
-                    "personData.xsd", blobData.getInputStream()
+            return validateXMLService.validate(
+                    logger,
+                    xmlFile.getName(),
+                    xmlFile,
+                    "personData.xsd",
+                    blobData.getInputStream()
             );
         }
         return true;

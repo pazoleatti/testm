@@ -56,8 +56,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     FormSources sources
     ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
     DepartmentReportPeriodService departmentReportPeriodService
-    String UploadFileName
-    InputStream ImportInputStream
     File dataFile
     BlobDataService blobDataService
     LogBusinessService logBusinessService
@@ -107,12 +105,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("dataFile")) {
             this.dataFile = (File) scriptClass.getProperty("dataFile");
-        }
-        if (scriptClass.getBinding().hasVariable("UploadFileName")) {
-            this.UploadFileName = (String) scriptClass.getProperty("UploadFileName");
-        }
-        if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
-            this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
         }
         if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
             this.blobDataService = (BlobDataService) scriptClass.getProperty("blobDataServiceDaoImpl");
@@ -707,12 +699,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         logForDebug("Начало загрузки данных первичной налоговой формы " + declarationData.id + ". Дата начала отчетного периода: " + sdf.format(getReportPeriodStartDate()) + ", дата окончания: " + sdf.format(getReportPeriodEndDate()));
 
         formCreationDate = logBusinessService.getFormCreationDate(declarationData.id)
-
-        InputStream xmlInputStream = ImportInputStream;
-
-        if (xmlInputStream == null) {
-            throw new ServiceException("Отсутствует значение параметра ImportInputStream!");
-        }
 
         // "Загрузка ТФ РНУ НДФЛ" п.9
         // Проверка соответствия атрибута ДатаОтч периоду в наименовании файла

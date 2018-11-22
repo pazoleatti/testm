@@ -72,7 +72,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
             if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
                 return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
             } else {
-                reportService.createDec(declarationData.getId(), uuid, ddReportType);
+                reportService.attachReportToDeclaration(declarationData.getId(), uuid, ddReportType);
                 return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
             }
         }

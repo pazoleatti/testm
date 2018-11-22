@@ -128,16 +128,4 @@ public class TAUserServiceImpl implements TAUserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth == null ? null : getUser(((User) auth.getPrincipal()).getUsername());
     }
-
-    List<Department> getHierarchy(Department department) {
-
-        List<Department> departments = new LinkedList<>();
-        if (department.getType() != DepartmentType.ROOT_BANK) {
-            departments.add(0, department);
-        }
-        if (department.getParentId() != null) {
-            departments.addAll(0, getHierarchy(departmentService.getDepartment(department.getParentId())));
-        }
-        return departments;
-    }
 }

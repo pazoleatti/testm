@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -42,8 +40,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60L; //таймаут работы утилиты для валидации XML по XSD
 
     private static final String SUCCESS_FLAG = "SUCCESS";
-    public static final String NOT_DELETE_WARN = "Файл %s не был удален";
-    private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
+    private static final String NOT_DELETE_WARN = "Файл %s не был удален";
+    private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -51,19 +49,15 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private BlobDataService blobDataService;
     @Autowired
     private ReportService reportService;
-    @Autowired
-    private LockDataService lockDataService;
 
-    private final class ProcessRunner implements Runnable{
+    private final class ProcessRunner implements Runnable {
         private String[] params;
         private Logger logger;
-        private boolean isErrorFatal;
         private Process process;
 
-        private ProcessRunner(String[] params, Logger logger, boolean isErrorFatal) {
+        private ProcessRunner(String[] params, Logger logger) {
             this.params = params;
             this.logger = logger;
-            this.isErrorFatal = isErrorFatal;
         }
 
         private void processDestroy() {
@@ -86,31 +80,23 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     String s = reader.readLine();
                     if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
                         logger.info("Проверка xml по xsd завершена успешно.");
-                    } else if(s!=null) {
+                    } else if (s != null) {
                         while ((s = reader.readLine()) != null) {
                             if (Thread.interrupted()) {
                                 LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
                                 throw new TAInterruptedException();
                             }
                             if (!s.startsWith("Execution time:")) {
-                                if (isErrorFatal) {
-                                    logger.error(s);
-                                } else {
-                                    logger.warn(s);
-                                }
+                                logger.error(s);
                             }
                         }
                     } else {
                         logger.warn("Не удалось заустить проверку xml по xsd.");
-                        //throw new ServiceException("");
                     }
                 } finally {
                     processDestroy();
                     reader.close();
                 }
-            } catch (UnsupportedEncodingException e) {
-                LOG.error("", e);
-                throw new ServiceException("", e);
             } catch (IOException e) {
                 LOG.error("", e);
                 throw new ServiceException("", e);
@@ -119,36 +105,37 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     @Override
-    public boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId) {
+    public boolean validate(DeclarationData data, Logger logger, File xmlFile, String fileName, String xsdBlobDataId) {
 
         // Создаём локальный логгер на случай,
         // если в пришедшем логгере есть нефатальные ошибки или предупреждения с предыдущего этапа
         Logger localLogger = new Logger();
-        boolean result = validate(data, userInfo, localLogger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
+        boolean result = validate(data, localLogger, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
 
         // Переносим записи из локального логгера
         logger.getEntries().addAll(localLogger.getEntries());
         return result;
     }
 
-    @Override
-    public boolean validate(TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream) {
-        return isValid(logger, isErrorFatal, xmlFileName, xmlFile, xsdFileName, xsdStream, VALIDATION_TIMEOUT);
-    }
-
-    boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
+    boolean validate(DeclarationData data, Logger logger, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
         if (xsdBlobDataId == null) {
             xsdBlobDataId = declarationTemplateService.get(data.getDeclarationTemplateId()).getXsdId();
         }
-        if (xmlFile != null){
-            return isValid(logger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, timeout);
+        if (xmlFile != null) {
+            return isValid(logger, xmlFile, fileName, xsdBlobDataId, timeout);
         } else {
-            return isValid(data, userInfo, logger, isErrorFatal, fileName, xsdBlobDataId, timeout);
+            return isValid(data, logger, fileName, xsdBlobDataId, timeout);
         }
     }
 
-    private boolean isValid(Logger logger, boolean isErrorFatal, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream, long timeout) {
-        String[] params = new String[StringUtils.isNotBlank(xmlFileName)?4:3];
+
+    @Override
+    public boolean validate(Logger logger, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream) {
+        return isValid(logger, xmlFileName, xmlFile, xsdFileName, xsdStream, VALIDATION_TIMEOUT);
+    }
+
+    private boolean isValid(Logger logger, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream, long timeout) {
+        String[] params = new String[StringUtils.isNotBlank(xmlFileName) ? 4 : 3];
 
         File xsdFile = null, vsax3TempDir = null, vsax3ExeFile, vsax3DllFile;
         try {
@@ -162,14 +149,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             //Получаем xml
             params[1] = xmlFile.getAbsolutePath();
             //Получаем xsd файл
-            xsdFile = createTempFile(xsdStream, "validation_file",".xsd");
+            xsdFile = createTempFile(xsdStream, "validation_file", ".xsd");
             params[2] = xsdFile.getAbsolutePath();
 
             if (StringUtils.isNotBlank(xmlFileName)) {
                 params[3] = xmlFileName;
             }
 
-            ProcessRunner runner = new ProcessRunner(params, logger, isErrorFatal);
+            ProcessRunner runner = new ProcessRunner(params, logger);
             Thread threadRunner = new Thread(runner);
             threadRunner.start();
             try {
@@ -185,7 +172,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                         logger.warn(String.format("Истекло время выполнения проверки. Проверка длилась более %d мс.", timeout));
                         return false;
                     }
-                    if (!threadRunner.isAlive()){
+                    if (!threadRunner.isAlive()) {
                         return !logger.containsLevel(LogLevel.ERROR);
                     }
                 }
@@ -207,14 +194,9 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             LOG.error("", e);
             logger.warn("Произошла ошибка ввода-вывода. Проверка не выполнена.");
             return false;
-            //throw new ServiceException("", e);
         } finally {
-            if (xsdFile != null && !xsdFile.delete()){
-                LOG.warn(String.format(NOT_DELETE_WARN, xsdFile.getName()));
-            }
-            if (vsax3TempDir != null && !vsax3TempDir.delete()){
-                LOG.warn(String.format(NOT_DELETE_WARN, vsax3TempDir.getName()));
-            }
+            deleteTempFile(xsdFile);
+            deleteTempFile(vsax3TempDir);
         }
     }
 
@@ -236,13 +218,20 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    boolean isValid(Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
-        BlobData xsd = blobDataService.get(xsdBlobDataId);
-        return isValid(logger, isErrorFatal, fileName, xmlFile, xsd.getName(), xsd.getInputStream(), timeout);
+    private void deleteTempFile(File tempFile) {
+        if (tempFile != null && !tempFile.delete()) {
+            LOG.warn(String.format(NOT_DELETE_WARN, tempFile.getName()));
+        }
     }
 
-    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String fileName, String xsdBlobDataId, long timeout) {
-        BlobData xmlBlob = blobDataService.get(reportService.getSafeDec(data.getId(), DeclarationDataReportType.XML_DEC));
+    private boolean isValid(Logger logger, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
+        BlobData xsd = blobDataService.get(xsdBlobDataId);
+        return isValid(logger, fileName, xmlFile, xsd.getName(), xsd.getInputStream(), timeout);
+    }
+
+    private boolean isValid(DeclarationData data, Logger logger, String fileName, String xsdBlobDataId, long timeout) {
+
+        BlobData xmlBlob = blobDataService.get(reportService.getReportFileUuidSafe(data.getId(), DeclarationDataReportType.XML_DEC));
         File xmlFileBD = null;
         try {
             String xmlFileName = xmlBlob.getName().substring(0, xmlBlob.getName().lastIndexOf('.'));
@@ -250,14 +239,12 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             FileOutputStream outputStream = new FileOutputStream(xmlFileBD);
             InputStream inputStream = xmlBlob.getInputStream();
             unzip(outputStream, inputStream);
-            return isValid(logger, isErrorFatal, xmlFileBD, fileName, xsdBlobDataId, timeout);
+            return isValid(logger, xmlFileBD, fileName, xsdBlobDataId, timeout);
         } catch (IOException e) {
             LOG.error("", e);
             throw new ServiceException("", e);
         } finally {
-            if (xmlFileBD!=null && !xmlFileBD.delete()){
-                LOG.warn(String.format(NOT_DELETE_WARN, xmlFileBD.getName()));
-            }
+            deleteTempFile(xmlFileBD);
         }
     }
 
@@ -268,19 +255,21 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         /**
          * Determines whether the operating system can retrieve version information for a specified file.
          * If version information is available, GetFileVersionInfoSize returns the size, in bytes, of that information
+         *
          * @param lptstrFilename The name of the file of interest.
-         * @param dwDummy A pointer to a variable that the function sets to zero.
+         * @param dwDummy        A pointer to a variable that the function sets to zero.
          * @return info size
          */
         int GetFileVersionInfoSizeW(String lptstrFilename, int dwDummy);
 
         /**
          * Retrieves version information for the specified file.
+         *
          * @param lptstrFilename The name of the file. If a full path is not specified, the function uses the search
          *                       sequence specified by the LoadLibrary function.
-         * @param dwHandle This parameter is ignored.
-         * @param dwLen The size, in bytes, of the buffer pointed to by the lpData parameter.
-         * @param lpData Pointer to a buffer that receives the file-version information.
+         * @param dwHandle       This parameter is ignored.
+         * @param dwLen          The size, in bytes, of the buffer pointed to by the lpData parameter.
+         * @param lpData         Pointer to a buffer that receives the file-version information.
          * @return true If the function succeeds
          */
         boolean GetFileVersionInfoW(String lptstrFilename, int dwHandle,
@@ -291,15 +280,16 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          * To retrieve the appropriate resource, before you call VerQueryValue, you must first call the
          * {@link #GetFileVersionInfoSizeW(String, int)} function, and then the
          * {@link #GetFileVersionInfoW(String, int, int, com.sun.jna.Pointer)} function.
-         * @param pBlock The version-information resource returned by the GetFileVersionInfo function.
+         *
+         * @param pBlock     The version-information resource returned by the GetFileVersionInfo function.
          * @param lpSubBlock The version-information value to be retrieved.
          *                   The string must consist of names separated by backslashes (\) and it must have one of the following forms.
          * @param lplpBuffer When this method returns, contains the address of a pointer to the requested
          *                   version information in the buffer pointed to by pBlock.
-         * @param puLen When this method returns, contains a pointer to the size of the requested data pointed to by lplpBuffer;
-         *              for version information values, the length in characters of the string stored at lplpBuffer;
-         *              for translation array values, the size in bytes of the array stored at lplpBuffer;
-         *              and for root block, the size in bytes of the structure
+         * @param puLen      When this method returns, contains a pointer to the size of the requested data pointed to by lplpBuffer;
+         *                   for version information values, the length in characters of the string stored at lplpBuffer;
+         *                   for translation array values, the size in bytes of the array stored at lplpBuffer;
+         *                   and for root block, the size in bytes of the structure
          * @return the return value is nonzero - If the specified version-information structure exists, and version information is available
          */
         int VerQueryValueW(Pointer pBlock, String lpSubBlock,
@@ -330,7 +320,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          */
         public int dwProductVersionLS;
 
-        public VS_FIXEDFILEINFO(com.sun.jna.Pointer p){
+        public VS_FIXEDFILEINFO(com.sun.jna.Pointer p) {
             super(p);
         }
 
@@ -340,7 +330,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    private void fileInfo(Logger logger, File fileVSAX){
+    private void fileInfo(Logger logger, File fileVSAX) {
 
         int dwDummy = 0;
         int versionlength = Version.INSTANCE.GetFileVersionInfoSizeW(
@@ -354,14 +344,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         boolean fileInfoResult = Version.INSTANCE.GetFileVersionInfoW(
                 fileVSAX.getAbsolutePath(),
                 0, versionlength, lpData);
-        if (!fileInfoResult){
+        if (!fileInfoResult) {
             logger.error("Нет связанной с файлом информации.");
             return;
         }
         int verQueryVal = Version.INSTANCE.VerQueryValueW(lpData,
                 "\\", lplpBuffer,
                 puLen);
-        if (verQueryVal == 0){
+        if (verQueryVal == 0) {
             logger.error("Связанная с файлом мета-информация недоступна.");
             return;
         }
@@ -382,7 +372,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private void unzip(FileOutputStream outFile, InputStream zipXml) throws IOException {
         ZipInputStream zis = new ZipInputStream(zipXml);
         try {
-            while (zis.getNextEntry() != null){
+            while (zis.getNextEntry() != null) {
                 LOG.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
             }
         } finally {

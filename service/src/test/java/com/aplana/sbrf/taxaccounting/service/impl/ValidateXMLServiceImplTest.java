@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -60,7 +59,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
     private String uuidXsd1;
 
     @Before
-    public void init() throws IOException {
+    public void init() {
         uuidXsd1 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
         declarationTemplate1.setXsdId(uuidXsd1);
@@ -78,7 +77,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         blobDataXml.setInputStream(inputStreamXml);
         blobDataXml.setName(ZIP_XML_1);
         String uuidXml = UUID.randomUUID().toString();
-        when(reportService.getDec(eq(3l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml);
+        when(reportService.getReportFileUuid(eq(3L), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml);
 
         when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
@@ -106,17 +105,16 @@ public class ValidateXMLServiceImplTest implements Runnable {
         blobDataXml.setInputStream(inputStreamXml);
         blobDataXml.setName(ZIP_XML_1);
         String uuidXml = UUID.randomUUID().toString();
-        when(reportService.getDec(eq(3l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml);
+        when(reportService.getReportFileUuid(eq(3L), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml);
 
         when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
 
         Logger logger = new Logger();
-        TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
-        data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, null));
+        data.setId(3L);
+        Assert.assertTrue(validateService.validate(data, logger, null, null, null));
     }
 
     @Test
@@ -138,7 +136,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
                         File.separator + "validate" + File.separator + ZIP_XML_1);
         blobDataXml2.setInputStream(inputStreamXml2);
         blobDataXml2.setName(ZIP_XML_1);
-        when(reportService.getDec(eq(5l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml2);
+        when(reportService.getReportFileUuid(eq(5L), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml2);
 
         when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
         when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
@@ -147,11 +145,10 @@ public class ValidateXMLServiceImplTest implements Runnable {
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             return;
         }
-        TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
-        data.setId(5l);
-        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, null));
+        data.setId(5L);
+        Assert.assertFalse(validateService.validate(data, logger, null, null, null));
     }
 
     @Test
@@ -166,7 +163,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
     }
 
     @Test
-    public void validateLargeXml() throws IOException {
+    public void validateLargeXml() {
         if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         String uuidXsd2 = UUID.randomUUID().toString();
@@ -187,35 +184,30 @@ public class ValidateXMLServiceImplTest implements Runnable {
                         File.separator + "validate" + File.separator + ZIP_XML_2);
         blobDataXml2.setInputStream(inputStreamXml2);
         blobDataXml2.setName(ZIP_XML_2);
-        when(reportService.getDec(eq(5l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml2);
+        when(reportService.getReportFileUuid(eq(5L), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml2);
 
         when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
         when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
 
         Logger logger = new Logger();
-        TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
-        data.setId(5l);
+        data.setId(5L);
         // Приводим интерфейс к текущей реализации
         // при маленьком таймауте проверка не должна пройти
-        Assert.assertFalse(((ValidateXMLServiceImpl) validateService).validate(data, userInfo, logger, true, null, null, null, 1000L));
+        Assert.assertFalse(((ValidateXMLServiceImpl) validateService).validate(data, logger, null, null, null, 1000L));
         Assert.assertEquals(4, logger.getEntries().size());
     }
 
     @Override
     public void run() {
         Logger logger = new Logger();
-        try {
-            init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        TAUserInfo userInfo = new TAUserInfo();
+        init();
+
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
-        data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, uuidXsd1));
+        data.setId(3L);
+        Assert.assertTrue(validateService.validate(data, logger, null, null, uuidXsd1));
         Iterables.find(logger.getEntries(), new Predicate<LogEntry>() {
             @Override
             public boolean apply(@Nullable LogEntry input) {
@@ -251,6 +243,5 @@ public class ValidateXMLServiceImplTest implements Runnable {
         } finally {
             fileVSAX.delete();
         }
-
     }
 }

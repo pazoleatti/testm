@@ -82,7 +82,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void deleteDec(long declarationDataId) {
+    public void deleteAllByDeclarationId(long declarationDataId) {
         try {
             getJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = ?",
                     new Object[]{declarationDataId},

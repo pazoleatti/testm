@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -15,8 +14,6 @@ import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.util.JRSwapFile;
-import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.util.IOUtils;
@@ -26,9 +23,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,19 +30,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.zip.ZipInputStream;
 
-/*
- * author auldanov
- */
+
 @Service("declarationService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeclarationServiceImpl implements DeclarationService {
@@ -70,8 +57,6 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
-    @Autowired
     private LoadDeclarationDataService loadDeclarationDataService;
     @Autowired
     private ReportService reportService;
@@ -87,11 +72,6 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
         return declarationDataDao.get(declarationDataId);
-    }
-
-    @Override
-    public List<DeclarationData> getDeclarationData(List<Long> declarationDataIds) {
-        return declarationDataDao.get(declarationDataIds);
     }
 
     @Override
@@ -115,11 +95,6 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public List<DeclarationData> findAllByTypeIdAndPeriodIdAndKppOktmoPairs(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
-        return declarationDataDao.findAllByTypeIdAndPeriodIdAndKppOktmoPairs(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
-    }
-
-    @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
@@ -130,18 +105,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
-        return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
-    }
-
-    @Override
     public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
-    }
-
-    @Override
-    public List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId) {
-        return declarationDataDao.fetchAllDeclarationData(declarationTypeId, departmentIds, reportPeriodId);
     }
 
     @Override
@@ -175,82 +140,12 @@ public class DeclarationServiceImpl implements DeclarationService {
         return null;
     }
 
-    @Override
-    public XMLStreamReader getXmlStreamReader(long declarationDataId, TAUserInfo userInfo) {
-        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId, userInfo);
-        if (zipXmlIn != null) {
-            try {
-                zipXmlIn.getNextEntry();
-                return XMLInputFactory.newInstance().createXMLStreamReader(zipXmlIn);
-            } catch (IOException e) {
-                throw new ServiceException("Не удалось получить поток xml для скрипта.", e);
-            } catch (XMLStreamException e) {
-                throw new ServiceException("Не удалось получить поток xml для скрипта.", e);
-            }
-        }
-        return null;
-    }
-
     private ZipInputStream getZipInputStream(long declarationDataId, TAUserInfo userInfo) {
         InputStream zipXml = declarationDataService.getXmlDataAsStream(declarationDataId, userInfo);
         if (zipXml != null) {
             return new ZipInputStream(zipXml);
         }
         return null;
-    }
-
-    @Override
-    public boolean checkExistDeclarationsInPeriod(int declarationTypeId, int departmentReportPeriodId) {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
-        DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
-        // фильтр
-        declarationFilter.setDeclarationTypeIds(Arrays.asList((long) declarationTypeId));
-        declarationFilter.setReportPeriodIds(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
-        declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-        declarationFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
-        declarationFilter.setTaxType(TaxType.INCOME);
-
-        // пейджинг
-        declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
-        declarationFilter.setStartIndex(0);
-        declarationFilter.setCountOfRecords(1);
-
-        PagingResult<DeclarationDataSearchResultItem> result = declarationDataSearchService.search(declarationFilter);
-        return (result != null && !result.isEmpty());
-    }
-
-    @Override
-    public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
-        String fileName = declarationDataService.getXmlDataFileName(declarationDataId, userInfo);
-        if (fileName != null) {
-            return fileName.replace(".zip", ".xml");
-        }
-        return null;
-    }
-
-    @Override
-    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
-        return sourceService.getDeclarationSourcesInfo(declaration.getId());
-    }
-
-    @Override
-    public List<Integer> getDeclarationTypeIds(TaxType taxType) {
-        if (taxType == null) {
-            return new ArrayList<Integer>();
-        }
-        TemplateFilter filter = new TemplateFilter();
-        filter.setTaxType(taxType);
-        return declarationTypeDao.getByFilter(filter);
-    }
-
-    @Override
-    public DeclarationType getType(int declarationTypeId) {
-        return declarationTypeDao.get(declarationTypeId);
-    }
-
-    @Override
-    public DeclarationType getTypeByTemplateId(int declarationTemplateId) {
-        return declarationTypeDao.getTypeByTemplateId(declarationTemplateId);
     }
 
     @Override
@@ -264,39 +159,30 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params) {
-        return declarationDataService.createJasperReport(xmlIn, jrxml, jrSwapFile, params);
-    }
-
-    @Override
     public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters, Closure xmlBuilder) {
         ByteArrayInputStream xmlData = xmlBuilder == null ? null : generateXmlData(xmlBuilder);
         return declarationDataService.createJasperReport(xmlData, jrxmlTemplate, parameters);
     }
 
-    @Override
-    public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters, InputStream inputStream) {
-        return declarationDataService.createJasperReport(inputStream, jrxmlTemplate, parameters);
+    /**
+     * Метод записывает xml данные в буфер формирует поток на чтение
+     *
+     * @param xmlBuilder замыкание в котором описано формирование xml
+     * @return поток xml данных отчета
+     */
+    private ByteArrayInputStream generateXmlData(Closure xmlBuilder) {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(byteStream, StandardCharsets.UTF_8);
+        //вызываем замыкание, в котором описано формирование xml
+        xmlBuilder.call(writer);
+        byte[] buffer = byteStream.toByteArray();
+        return new ByteArrayInputStream(buffer);
     }
+
 
     @Override
     public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters) {
         return declarationDataService.createJasperReport(null, jrxmlTemplate, parameters);
-    }
-
-    @Override
-    public ByteArrayInputStream generateXmlData(Closure xmlBuilder) {
-        try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            OutputStreamWriter writer = new OutputStreamWriter(byteStream, CharEncoding.UTF_8);
-            //вызываем замыкание, в котором описано формирование xml
-            xmlBuilder.call(writer);
-            byte[] buffer = byteStream.toByteArray();
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
-            return inputStream;
-        } catch (UnsupportedEncodingException e) {
-            throw new ServiceException(e.getMessage(), e);
-        }
     }
 
     @Override
@@ -305,58 +191,19 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public void exportPDF(JasperPrint jasperPrint, OutputStream data) {
-        declarationDataService.exportPDF(jasperPrint, data);
-    }
-
-    @Override
     public Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
         return declarationDataService.create(newDeclaration, departmentReportPeriod, logger, userInfo, writeAudit);
     }
 
     @Override
-    @Transactional
-    public void delete(long declarationDataId, TAUserInfo userInfo) {
-        if (declarationDataDao.existDeclarationData(declarationDataId)) {
-            declarationDataDao.setStatus(declarationDataId, State.CREATED);
-            declarationDataService.deleteSync(declarationDataId, userInfo, false);
-        }
-    }
-
-
-    @Override
     public void deleteReport(long declarationDataId) {
-        reportService.deleteDec(declarationDataId);
+        reportService.deleteAllByDeclarationId(declarationDataId);
     }
 
     @Override
-    public void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList) {
-        reportService.deleteDec(Arrays.asList(declarationDataId), declarationDataReportTypeList);
-    }
-
-    @Override
-    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile) {
-        validateDeclaration(declarationData, userInfo, logger, dataFile, null, null);
-    }
-
-    @Override
-    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName) {
-        validateDeclaration(declarationData, userInfo, logger, dataFile, fileName, null);
-    }
-
-    @Override
-    public void validateDeclaration(TAUserInfo userInfo, Logger logger, File xmlFile, String fileName, String xsdBlobDataId) {
-        validateDeclaration(null, userInfo, logger, xmlFile, fileName, xsdBlobDataId);
-    }
-
-    @Override
-    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName, String xsdBlobDataId) {
-        declarationDataService.validateDeclaration(userInfo, declarationData, logger, true, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, fileName, xsdBlobDataId, new LockStateLogger() {
-            @Override
-            public void updateState(AsyncTaskState state) {
-                // ничего не делаем
-            }
-        });
+    public void validateDeclaration(Logger logger, File xmlFile, String fileName, String xsdBlobDataId) {
+        // TODO: Отправка null выглядит неправильно. Нам чисто везёт, что там алгоритм не заходит в ветки, способные вызвать NPE.
+        declarationDataService.validateDeclaration(null, logger, xmlFile, fileName, xsdBlobDataId);
     }
 
     @Override
@@ -380,13 +227,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
-        loadDeclarationDataService.importDeclarationData(logger, userInfo, declarationData, inputStream, fileName, dataFile, attachFileType, createDateFile);
-    }
-
-    @Override
-    public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
-        return declarationDataDao.findDeclarationDataByKppOktmoOfNdflPersonIncomes(declarationTypeId, departmentReportPeriodId, departmentId, reportPeriodId, kpp, oktmo);
+    public void importXmlTransportFile(File xmlTransportFile, String xmlFileName, DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
+        loadDeclarationDataService.importXmlTransportFile(xmlTransportFile, xmlFileName, declarationData, userInfo, logger);
     }
 
     @Override
@@ -430,15 +272,15 @@ public class DeclarationServiceImpl implements DeclarationService {
         });
     }
 
-    @Override
-    public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
-        return declarationDataFileDao.fetchByAttachFileTypeName(declarationDataId, fileTypeName);
+    // Удаляет отчеты заданных типов
+    private void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList) {
+        reportService.deleteDec(Collections.singletonList(declarationDataId), declarationDataReportTypeList);
     }
 
 
     @Override
-    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
-        return declarationDataDao.findAllActive(declarationTypeId, reportPeriodId);
+    public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
+        return declarationDataFileDao.fetchByAttachFileTypeName(declarationDataId, fileTypeName);
     }
 
     @Override
@@ -482,7 +324,7 @@ public class DeclarationServiceImpl implements DeclarationService {
         List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<>();
 
         // Список ранее созданных отчетных форм
-        List<DeclarationData> deletedDeclarationDataList = findAllByTypeIdAndPeriodIdAndKppOktmoPairs(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
+        List<DeclarationData> deletedDeclarationDataList = declarationDataDao.findAllByTypeIdAndPeriodIdAndKppOktmoPairs(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
         // Список блокировок на удаление форм
         List<LockData> lockList = new ArrayList<>();
         try {
@@ -521,6 +363,14 @@ public class DeclarationServiceImpl implements DeclarationService {
         }
         return result;
     }
+
+    private void delete(long declarationDataId, TAUserInfo userInfo) {
+        if (declarationDataDao.existDeclarationData(declarationDataId)) {
+            declarationDataDao.setStatus(declarationDataId, State.CREATED);
+            declarationDataService.deleteSync(declarationDataId, userInfo, false);
+        }
+    }
+
 
     @Override
     public void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger) {

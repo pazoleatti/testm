@@ -127,25 +127,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public void createDeclarationDataPersonIds(final long declarationDataId, final Set<Long> personsIds) {
-        if (personsIds != null && !personsIds.isEmpty()) {
-            final Iterator<Long> iterator = personsIds.iterator();
-            getJdbcTemplate().batchUpdate("insert into declaration_data_person(declaration_data_id, person_id) values(?, ?)", new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setLong(1, declarationDataId);
-                    ps.setLong(2, iterator.next());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return personsIds.size();
-                }
-            });
-        }
-    }
-
-    @Override
     public void delete(long id) {
         int count = getJdbcTemplate().update("delete from declaration_data where id = ?", id);
         if (count == 0) {
@@ -765,31 +746,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "select * from " +
-                            "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id, rownum, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
-                            "from declaration_data dd " +
-                            "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
-                            "inner join declaration_template dt on dt.id = dd.declaration_template_id\n" +
-                            "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                            "where dt.declaration_type_id = ? " +
-                            "and drp.department_id = ? " +
-                            "and drp.report_period_id = ? " +
-                            "order by drp.correction_date desc nulls last) " +
-                            "where rownum = 1",
-                    new Object[]{declarationTypeId, departmentId, reportPeriodId},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
-                    new DeclarationDataRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
     public List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate) {
         try {
             Map<String, Object> params = new HashMap<>();
@@ -848,55 +804,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationTypeId", declarationTypeId);
-        params.addValue("departmentIds", departmentIds);
-        params.addValue("reportPeriodId", reportPeriodId);
-        return getNamedParameterJdbcTemplate().query(
-                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state,\n" +
-                        " dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id,\n" +
-                        " dd.manually_created, dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name\n" +
-                        "from DECLARATION_DATA dd\n" +
-                        "inner join DECLARATION_TEMPLATE dt on dd.declaration_template_id = dt.id\n" +
-                        "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
-                        "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                        "where declaration_type_id = :declarationTypeId\n" +
-                        " and department_id in (:departmentIds)\n" +
-                        " and report_period_id = :reportPeriodId",
-                params,
-                new DeclarationDataRowMapper());
-    }
-
-    @Override
-    public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
-        String sql = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.adjust_negative_values, drp.report_period_id, " +
-                "drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
-                "from DECLARATION_DATA dd " +
-                "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
-                "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
-                "and dd.DECLARATION_TEMPLATE_ID in " +
-                "(select dt.id from DECLARATION_TEMPLATE dt" +
-                " where dt.DECLARATION_TYPE_ID = :declarationTypeId) " +
-                "and dd.id in (select np.declaration_data_id from NDFL_PERSON np " +
-                "inner join declaration_data dd on dd.ID = np.DECLARATION_DATA_ID and np.id in " +
-                "(select npi.ndfl_person_id from NDFL_PERSON_INCOME npi " +
-                "inner join NDFL_PERSON np on np.id = npi.NDFL_PERSON_ID where lower(npi.kpp) = :kpp and npi.oktmo is null or lower(npi.oktmo) = :oktmo))";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationTypeId", declarationTypeId)
-                .addValue("departmentReportPeriodId", departmentReportPeriodId)
-                .addValue("kpp", kpp != null ? kpp.toLowerCase() : null)
-                .addValue("oktmo", oktmo != null ? oktmo.toLowerCase() : null);
-        try {
-            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
     public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         String sql =
                 "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
@@ -923,28 +830,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM declaration_data WHERE id = :declarationDataId", values, Long.class) > 0;
         } catch (EmptyResultDataAccessException e) {
             return false;
-        }
-    }
-
-    @Override
-    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
-        String sql = "select " +
-                "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
-                "from declaration_data dd " +
-                "join department_report_period drp on drp.ID = dd.department_report_period_id " +
-                "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                "where dd.declaration_template_id = :declarationTypeId " +
-                "and drp.report_period_id = :reportPeriodId " +
-                "and drp.is_active = 1 ";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationTypeId", declarationTypeId)
-                .addValue("reportPeriodId", reportPeriodId);
-        try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
         }
     }
 

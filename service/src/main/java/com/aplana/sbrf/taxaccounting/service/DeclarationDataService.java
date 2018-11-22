@@ -27,8 +27,6 @@ import java.util.Map;
 
 /**
  * Сервис для работы с {@link DeclarationData налоговыми декларациями }
- *
- * @author dsultanbekov
  */
 public interface DeclarationDataService {
     /**
@@ -74,39 +72,19 @@ public interface DeclarationDataService {
 
     /**
      * Формирование Pdf отчета
-     *
-     * @param logger
-     * @param declarationData
-     * @param userInfo
      */
     void setPdfDataBlobs(Logger logger,
                          DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
 
     /**
      * Формирование Xlsx отчета
-     *
-     * @param logger
-     * @param declarationData
-     * @param userInfo
      */
     String setXlsxDataBlobs(Logger logger,
                             DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
-    /**
-     * Получить декларацию
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @return объект декларации
-     * @throws AccessDeniedException если у пользователя нет прав на просмотр данной декларации
-     */
 
     /**
      * Формирование специфичного отчета декларации
      *
-     * @param logger
-     * @param declarationData
-     * @param ddReportType
-     * @param userInfo
-     * @param stateLogger
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
     String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
@@ -114,10 +92,6 @@ public interface DeclarationDataService {
     /**
      * Подготовить данные для спец. отчета
      *
-     * @param logger
-     * @param declarationData
-     * @param ddReportType
-     * @param userInfo
      * @return предварительные результаты для формирования спец. отчета
      */
     PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
@@ -381,18 +355,13 @@ public interface DeclarationDataService {
     ActionResult acceptDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
-     * Метод передающий управление на проверку декларации сторонней утилите
-     *
-     * @param userInfo
-     * @param declarationData
-     * @param logger
-     * @param operation       не используется
-     * @param isErrorFatal
-     * @param xmlFile
-     * @param stateLogger
+     * Метод, передающий управление на проверку декларации сторонней утилите
      */
-    void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                             FormDataEvent operation, File xmlFile, String fileName, String xsdBlobDataId, LockStateLogger stateLogger);
+    void validateDeclaration(DeclarationData declarationData,
+                             final Logger logger,
+                             File xmlFile,
+                             String fileName,
+                             String xsdBlobDataId);
 
     /**
      * Отмена принятия декларации
@@ -412,16 +381,6 @@ public interface DeclarationDataService {
      * @param userInfo           информация о пользователе, выполняющем действие
      */
     void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo);
-
-    /**
-     * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param logger            объект журнала
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @return список ИД приемников  в состоянии Принята или Подготовлена
-     */
-    List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
@@ -468,7 +427,6 @@ public interface DeclarationDataService {
      *
      * @param declarationTypeId      тип декларации
      * @param departmentReportPeriod отчетный период подразделения
-     * @return
      */
     DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
@@ -487,8 +445,6 @@ public interface DeclarationDataService {
     /**
      * Генерация ключа блокировки для асинхронных задач по декларациям
      *
-     * @param declarationDataId
-     * @param type
      * @return код блокировки
      */
     String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
@@ -517,14 +473,6 @@ public interface DeclarationDataService {
      */
     void unlock(long declarationDataId, TAUserInfo userInfo);
 
-    /**
-     * Проверяет, не заблокирована ли декларация другим пользователем
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация о пользователе
-     */
-    void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
-
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
     Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType);
@@ -550,21 +498,13 @@ public interface DeclarationDataService {
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку
-     *
-     * @param declarationDataId
-     * @param reportType
-     * @param logger
-     * @return
      */
     boolean checkExistAsyncTask(long declarationDataId, AsyncTaskType reportType, Logger logger);
 
     /**
      * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
      *
-     * @param declarationDataId
-     * @param userInfo
-     * @param reportType
-     * @param cause             причина остановки задачи
+     * @param cause причина остановки задачи
      */
     void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, AsyncTaskType reportType, TaskInterruptCause cause);
 
@@ -580,11 +520,8 @@ public interface DeclarationDataService {
     /**
      * Формирование jasper-отчета
      *
-     * @param xmlIn      поток данных xml
-     * @param jrxml      текст jrxml
-     * @param jrSwapFile
-     * @param params
-     * @return
+     * @param xmlIn поток данных xml
+     * @param jrxml текст jrxml
      */
     JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
 
@@ -608,42 +545,23 @@ public interface DeclarationDataService {
 
     /**
      * Получить соединение для передачи в отчет
-     *
-     * @return
      */
     Connection getReportConnection();
 
     /**
      * Формирование PDF отчета
-     *
-     * @param jasperPrint
-     * @param data
      */
     void exportPDF(JasperPrint jasperPrint, OutputStream data);
 
     /**
      * Формирование XLSX отчета
-     *
-     * @param jasperPrint
-     * @param data
      */
     void exportXLSX(JasperPrint jasperPrint, OutputStream data);
 
     /**
      * Получение возможности отображения формы предварительного просмотра
-     *
-     * @param declarationData
-     * @param userInfo
-     * @return
      */
     boolean isVisiblePDF(DeclarationData declarationData, TAUserInfo userInfo);
-
-    /**
-     * Импорт ТФ Декларации
-     */
-    void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
-                               String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
-                               AttachFileType fileType, Date createDateFile);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"
@@ -679,20 +597,7 @@ public interface DeclarationDataService {
     String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
 
     /**
-     * Изменение Состояния ЭД
-     *
-     * @param logger
-     * @param userInfo
-     * @param declarationDataId
-     * @param docStateId
-     */
-    void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId);
-
-    /**
      * Проверка существования формы
-     *
-     * @param declarationDataId
-     * @return
      */
     boolean existDeclarationData(long declarationDataId);
 
@@ -701,15 +606,11 @@ public interface DeclarationDataService {
      *
      * @param userInfo          пользователь
      * @param declarationDataId id формы
-     * @return
      */
     DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Получает мапу созданных блокировок по основным операциям формы
-     *
-     * @param declarationDataId
-     * @return
      */
     Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
 
@@ -895,7 +796,7 @@ public interface DeclarationDataService {
     /**
      * Скачать файл налоговой формы
      *
-     * @param declarationDataFile объект файла налоговой формы. Нам нужен не понлоценный объект, а огрызок объекта, где заполнены поля {@link DeclarationDataFile#declarationDataId} и {@link DeclarationDataFile#uuid}
+     * @param declarationDataFile объект файла налоговой формы. Нам нужен не понлоценный объект, а огрызок объекта, где заполнены поля DeclarationDataFile.declarationDataId и DeclarationDataFile.uuid
      * @return данные файла
      */
     BlobData downloadFile(DeclarationDataFile declarationDataFile);

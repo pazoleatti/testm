@@ -123,6 +123,6 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
                 }
             }
         }
-        reportService.deleteDec(declarationDataId);
+        reportService.deleteAllByDeclarationId(declarationDataId);
     }
 }

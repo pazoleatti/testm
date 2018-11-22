@@ -120,7 +120,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        String blobId = reportService.getSafeDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
+        String blobId = reportService.getReportFileUuidSafe(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
         createBlobResponse(blobId, req, response);
     }
 
@@ -134,7 +134,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/pdf", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationPdf(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        String blobId = reportService.getSafeDec(declarationDataId, DeclarationDataReportType.PDF_DEC);
+        String blobId = reportService.getReportFileUuidSafe(declarationDataId, DeclarationDataReportType.PDF_DEC);
         BlobData blobData = null;
         if (blobId != null) {
             blobData = blobDataService.get(blobId);
@@ -156,7 +156,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/excelTemplate", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationExcelTemplate(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        String blobId = reportService.getSafeDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        String blobId = reportService.getReportFileUuidSafe(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
         createBlobResponse(blobId, req, response);
     }
 
@@ -192,7 +192,7 @@ public class DeclarationDataController {
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
-        String uuid = reportService.getSafeDec(declarationDataId, ddReportType);
+        String uuid = reportService.getReportFileUuidSafe(declarationDataId, ddReportType);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
 

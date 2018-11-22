@@ -50,7 +50,7 @@ public class XlsxGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
                     asyncManager.updateState(taskData.getId(), state);
                 }
             });
-            reportService.createDec(declarationData.getId(), uuid, DeclarationDataReportType.EXCEL_DEC);
+            reportService.attachReportToDeclaration(declarationData.getId(), uuid, DeclarationDataReportType.EXCEL_DEC);
             return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
         }
         return new BusinessLogicResult(true, null);

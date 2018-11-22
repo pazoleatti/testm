@@ -7,8 +7,6 @@ import java.util.List;
 
 /**
  * Интерфейс для работы с таблицей отчетов
- *
- * @author lhaziev
  */
 public interface ReportService {
     /**
@@ -18,7 +16,7 @@ public interface ReportService {
      * @param blobDataId        идентификатор блоба
      * @param type              тип отчета
      */
-    void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type);
+    void attachReportToDeclaration(long declarationDataId, String blobDataId, DeclarationDataReportType type);
 
     /**
      * Получение записи об отчете декларации
@@ -27,30 +25,23 @@ public interface ReportService {
      * @param type              тип отчета
      * @return uuid идентификатор блоба
      */
-    String getDec(long declarationDataId, DeclarationDataReportType type);
+    String getReportFileUuid(long declarationDataId, DeclarationDataReportType type);
 
     /**
-     * То же что {@link #getDec(long, DeclarationDataReportType)}, но с проверкой прав
+     * То же что {@link #getReportFileUuid(long, DeclarationDataReportType)}, но с проверкой прав
      *
      * @param declarationDataId идентификатор декларации
      * @param type              тип отчета
      * @return uuid идентификатор блоба
      */
-    String getSafeDec(long declarationDataId, DeclarationDataReportType type);
+    String getReportFileUuidSafe(long declarationDataId, DeclarationDataReportType type);
 
     /**
      * Удаление всех отчетов по id декларации
      *
      * @param declarationDataId идентификатор декларации
      */
-    void deleteDec(long declarationDataId);
-
-    /**
-     * Удаляет отчет декларации по типу
-     *
-     * @param declarationDataIds идентификаторы деклараций
-     */
-    void deleteDec(Collection<Long> declarationDataIds);
+    void deleteAllByDeclarationId(long declarationDataId);
 
     /**
      * Удаляет отчет декларации по типу
@@ -58,7 +49,7 @@ public interface ReportService {
      * @param declarationDataId идентификатор декларации
      * @param type              тип отчета
      */
-    void deleteDec(long declarationDataId, DeclarationDataReportType type);
+    void deleteByDeclarationAndType(long declarationDataId, DeclarationDataReportType type);
 
     /**
      * Удаляет отчет декларации по типу

@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
@@ -17,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
+import groovy.transform.TypeCheckingMode
 import org.apache.commons.io.IOUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -33,11 +33,8 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
-/**
- * Created by lhaziev on 09.02.2017.
- */
 
-(new DeclarationType(this)).run();
+(new DeclarationType(this)).run()
 
 @TypeChecked
 @SuppressWarnings("GrMethodMayBeStatic")
@@ -65,50 +62,47 @@ class DeclarationType extends AbstractScriptClass {
     private DeclarationType() {
     }
 
-    @TypeChecked(groovy.transform.TypeCheckingMode.SKIP)
+    @TypeChecked(TypeCheckingMode.SKIP)
     DeclarationType(scriptClass) {
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
-            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("departmentService")) {
-            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("userInfo")) {
-            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo")
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
-            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
         }
         if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
-            this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl");
+            this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl")
         }
         if (scriptClass.getBinding().hasVariable("msgBuilder")) {
             msgBuilder = (StringBuilder) scriptClass.getBinding().getProperty("msgBuilder")
         }
-        if (scriptClass.getBinding().hasVariable("userInfo")) {
-            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
-        }
         if (scriptClass.getBinding().hasVariable("dataFile")) {
-            this.dataFile = (File) scriptClass.getProperty("dataFile");
+            this.dataFile = (File) scriptClass.getProperty("dataFile")
         }
         if (scriptClass.getBinding().hasVariable("fileType")) {
-            this.fileType = (TransportFileType) scriptClass.getProperty("fileType");
+            this.fileType = (TransportFileType) scriptClass.getProperty("fileType")
         }
         if (scriptClass.getBinding().hasVariable("UploadFileName")) {
-            this.UploadFileName = (String) scriptClass.getProperty("UploadFileName");
+            this.UploadFileName = (String) scriptClass.getProperty("UploadFileName")
         }
         if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
-            this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
+            this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream")
         }
         if (scriptClass.getBinding().hasVariable("reportYear")) {
             this.reportYear = (int) scriptClass.getProperty("reportYear")
@@ -126,7 +120,7 @@ class DeclarationType extends AbstractScriptClass {
     }
 
     @Override
-    public void run() {
+    void run() {
         switch (formDataEvent) {
             case FormDataEvent.IMPORT_TRANSPORT_FILE:
                 importTF()
@@ -137,73 +131,75 @@ class DeclarationType extends AbstractScriptClass {
         }
     }
 
-    public class SAXHandler extends DefaultHandler {
+    class SAXHandler extends DefaultHandler {
         // Хранит содержимое атрибута
-        private Map<String, Map<String, String>> attrValues;
-        private Map<String, List<String>> findAttrNames;
+        private Map<String, Map<String, String>> attrValues
+        private Map<String, List<String>> findAttrNames
 
         // Хранит содержимое узла
-        private List<String> nodeValueList;
-        private boolean isNodeNameFind;
-        private boolean isParentNodeNameFind;
-        private boolean isGetValueAttributesTag = false;
-        private String nodeNameFind;
-        private String parentNodeNameFind;
+        private List<String> nodeValueList
+        private boolean isNodeNameFind
+        private boolean isParentNodeNameFind
+        private boolean isGetValueAttributesTag = false
+        private String nodeNameFind
+        private String parentNodeNameFind
 
         //Хранит содержимое атрибутов(название атрибута, значение)
-        public Map<String, String> ListValueAttributesTag = null;
+        private Map<String, String> ListValueAttributesTag = null
 
-        public SAXHandler(Map<String, List<String>> findAttrNames) {
-            this.findAttrNames = findAttrNames;
+
+        SAXHandler(Map<String, List<String>> findAttrNames) {
+            this.findAttrNames = findAttrNames
         }
 
-        public Map<String, String> getListValueAttributesTag() {
-            return ListValueAttributesTag;
+        SAXHandler(String nodeNameFind, String parentNodeNameFind) {
+            this.findAttrNames = new HashMap<String, List<String>>()
+            this.nodeValueList = new ArrayList<>()
+            this.nodeNameFind = nodeNameFind
+            this.parentNodeNameFind = parentNodeNameFind
         }
 
-        public SAXHandler(String nodeNameFind, String parentNodeNameFind) {
-            this.findAttrNames = new HashMap<String, List<String>>();
-            this.nodeValueList = new ArrayList<>();
-            this.nodeNameFind = nodeNameFind;
-            this.parentNodeNameFind = parentNodeNameFind;
+        SAXHandler(String nodeNameFind, String parentNodeNameFind, boolean isGetValueAttributes) {
+            this(nodeNameFind, parentNodeNameFind)
+            this.ListValueAttributesTag = new HashMap<String, String>()
+            this.isGetValueAttributesTag = isGetValueAttributes
         }
 
-        public SAXHandler(String nodeNameFind, String parentNodeNameFind, boolean isGetValueAttributes) {
-            this(nodeNameFind, parentNodeNameFind);
-            this.ListValueAttributesTag = new HashMap<String, String>();
-            this.isGetValueAttributesTag = isGetValueAttributes;
+
+        Map<String, String> getListValueAttributesTag() {
+            return ListValueAttributesTag
         }
 
-        public Map<String, Map<String, String>> getAttrValues() {
-            return attrValues;
+        Map<String, Map<String, String>> getAttrValues() {
+            return attrValues
         }
 
-        public List<String> getNodeValueList() {
-            return nodeValueList;
+        List<String> getNodeValueList() {
+            return nodeValueList
         }
 
         @Override
-        public void startDocument() throws SAXException {
-            attrValues = new HashMap<String, Map<String, String>>();
+        void startDocument() throws SAXException {
+            attrValues = new HashMap<String, Map<String, String>>()
             for (Map.Entry<String, List<String>> entry : findAttrNames.entrySet()) {
-                attrValues.put(entry.getKey(), new HashMap<String, String>());
+                attrValues.put(entry.getKey(), new HashMap<String, String>())
             }
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             for (Map.Entry<String, List<String>> entry : findAttrNames.entrySet()) {
-                if (entry.getKey().equals(qName)) {
+                if (entry.getKey() == qName) {
                     for (String attrName : entry.getValue()) {
-                        attrValues.get(qName).put(attrName, attributes.getValue(attrName));
+                        attrValues.get(qName).put(attrName, attributes.getValue(attrName))
                     }
                 }
             }
-            if (qName.equals(nodeNameFind)) {
-                isNodeNameFind = true;
+            if (qName == nodeNameFind) {
+                isNodeNameFind = true
             }
-            if (qName.equals(parentNodeNameFind)) {
-                isParentNodeNameFind = true;
+            if (qName == parentNodeNameFind) {
+                isParentNodeNameFind = true
             }
             //Заполняем атрибуты тега
             if (isGetValueAttributesTag && isParentNodeNameFind && isNodeNameFind) {
@@ -214,33 +210,26 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName)
+        void endElement(String uri, String localName, String qName)
                 throws SAXException {
-            if (qName.equals(nodeNameFind)) {
-                isNodeNameFind = false;
+            if (qName == nodeNameFind) {
+                isNodeNameFind = false
             }
-            if (qName.equals(parentNodeNameFind)) {
-                isParentNodeNameFind = false;
+            if (qName == parentNodeNameFind) {
+                isParentNodeNameFind = false
             }
         }
 
         @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
+        void characters(char[] ch, int start, int length) throws SAXException {
             if (isNodeNameFind && isParentNodeNameFind) {
-                nodeValueList.add(new String(ch, start, length));
+                nodeValueList.add(new String(ch, start, length))
             }
         }
     }
 
-    String TAG_DOCUMENT = "Документ";
-
-    String ATTR_PERIOD = "Период";
-
-    String ATTR_YEAR = "ОтчетГод";
-
-    String ERROR_NAME_FORMAT = "Имя транспортного файла «%s» не соответствует формату!";
-    String ERROR_NOT_FOUND_FILE_NAME = "Не найдено имя отчетного файла в файле ответа «%s»!";
-    String ERROR_NOT_FOUND_FORM = "Не найдена форма, содержащая «%s», для файла ответа «%s»";
+    String ERROR_NAME_FORMAT = "Имя транспортного файла «%s» не соответствует формату!"
+    String ERROR_NOT_FOUND_FORM = "Не найдена форма, содержащая «%s», для файла ответа «%s»"
 
     final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
     final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
@@ -271,24 +260,22 @@ class DeclarationType extends AbstractScriptClass {
     final KND_SUCCESS = 1166007 // Успешно отработан
     final KND_REQUIRED = 1166009 // Требует уточнения
 
-// Идентификаторы видов деклараций
+    // Идентификаторы видов деклараций
     final Integer DECLARATION_TYPE_RNU_NDFL_ID = 100
 
-    String NAME_EXTENSION_DEC = ".xml";
-    int NAME_LENGTH_QUARTER_DEC = 63;
+    String NAME_EXTENSION_DEC = ".xml"
+    int NAME_LENGTH_QUARTER_DEC = 63
 
-// Кэш провайдеров
+    // Кэш провайдеров
     def providerCache = [:]
 
-    final long REF_BOOK_DEPARTMENT_ID = RefBook.Id.DEPARTMENT.id
-
     Map<String, String> getPeriodNdflMap() {
-        Map<String, String> periodNdflMap = new HashMap<String, String>();
-        periodNdflMap.put("21", "21");
-        periodNdflMap.put("32", "31");
-        periodNdflMap.put("33", "33");
-        periodNdflMap.put("34", "34");
-        return periodNdflMap;
+        Map<String, String> periodNdflMap = new HashMap<String, String>()
+        periodNdflMap.put("21", "21")
+        periodNdflMap.put("32", "31")
+        periodNdflMap.put("33", "33")
+        periodNdflMap.put("34", "34")
+        return periodNdflMap
     }
 
     def importTF() {
@@ -397,7 +384,6 @@ class DeclarationType extends AbstractScriptClass {
     final String NDFL2_NOT_CORRECT_PATH = "Путь к реквизиту:"
     final String NDFL2_NOT_CORRECT_VALUE = "Значение элемента:"
     final String NDFL2_NOT_CORRECT_TEXT = "Текст ошибки:"
-    final String NDFL2_NOT_CORRECT_SKIP = "---"
     final String NDFL2_CORRECT_NUMB_REF = "Номер справки:"
     final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_BEFORE = Pattern.compile("\\s*Адрес ДО исправления:.+")
     final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_AFTER = Pattern.compile("\\s*Адрес ПОСЛЕ исправления:.+")
@@ -406,7 +392,6 @@ class DeclarationType extends AbstractScriptClass {
     final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
     final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
     final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
-    final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(NONDFL.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
     final int sizeLastEntry = 4
 
 /**
@@ -583,7 +568,7 @@ class DeclarationType extends AbstractScriptClass {
     Map<String, Map<String, String>> readNdfl6ResponseContent() {
         def sett = [:]
 
-        SAXHandler handler
+        SAXHandler handler = null
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
             handler = new SAXHandler('ИмяОбрабФайла', 'СвКвит')
@@ -602,7 +587,7 @@ class DeclarationType extends AbstractScriptClass {
             handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлОшФайл')
         }
 
-        InputStream inputStream
+        InputStream inputStream = null
         try {
             inputStream = new FileInputStream(dataFile)
             SAXParserFactory factory = SAXParserFactory.newInstance()
@@ -686,15 +671,15 @@ class DeclarationType extends AbstractScriptClass {
         List<DeclarationData> declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
 
         if (declarationDataList.isEmpty()) {
-            logger.error(ERROR_NOT_FOUND_FORM, reportFileName, UploadFileName);
+            logger.error(ERROR_NOT_FOUND_FORM, reportFileName, UploadFileName)
             return
         }
         if (declarationDataList.size() > 1) {
             def result = ""
             declarationDataList.each { DeclarationData declData ->
-                result += "\"${AttachFileType.OUTGOING_TO_FNS.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
+                result += "\"${AttachFileType.OUTGOING_TO_FNS.title}\", \"${declData.kpp}\", \"${declData.oktmo}\" "
             }
-            logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName);
+            logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName)
             return
         }
         DeclarationData declarationData = declarationDataList.get(0)
@@ -712,7 +697,7 @@ class DeclarationType extends AbstractScriptClass {
         String formTypeCode = formType.CODE.stringValue
 
         // Выполнить проверку структуры файла ответа на соответствие XSD
-        InputStream inputStream
+        InputStream inputStream = null
         if (NDFL6 == formTypeCode) {
             SAXHandler handl = new SAXHandler('Файл', 'Файл', true)
             try {
@@ -727,13 +712,12 @@ class DeclarationType extends AbstractScriptClass {
             } finally {
                 IOUtils.closeQuietly(inputStream)
             }
-            // handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation');
             handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation')
 
             DeclarationTemplateFile templateFile = null
             for (DeclarationTemplateFile tf : declarationTemplate.declarationTemplateFiles) {
                 if (tf.fileName.equals(handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation'))) {
-                    templateFile = tf;
+                    templateFile = tf
                     break
                 }
             }
@@ -743,7 +727,7 @@ class DeclarationType extends AbstractScriptClass {
                 return
             }
 
-            declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
+            declarationService.validateDeclaration(logger, dataFile, UploadFileName, templateFile.blobDataId)
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 logger.error("Файл ответа \"%s\" не соответствует формату", UploadFileName)
@@ -778,7 +762,7 @@ class DeclarationType extends AbstractScriptClass {
                             } else {
                                 def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
-                                ndflRef.ERRTEXT.value = "Путь к реквизиту: \"${entry.path}\"; Значение элемента: \"${entry.val}\"; Текст ошибки: \"${entry.text}\"".toString()
+                                ndflRef.ERRTEXT.value = "Путь к реквизиту: \"${entry.path}\" Значение элемента: \"${entry.val}\" Текст ошибки: \"${entry.text}\"".toString()
                                 ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                             }
                         }
@@ -803,16 +787,16 @@ class DeclarationType extends AbstractScriptClass {
                             } else {
                                 def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
-                                String errtext;
+                                String errtext
                                 if (ndflRef.ERRTEXT.value == null || ndflRef.ERRTEXT.value.toString().isEmpty()) {
                                     errtext = ""
                                 } else {
                                     errtext = ndflRef.ERRTEXT.value.toString() + ".\n"
                                 }
                                 if (entry.valid) {
-                                    ndflRef.ERRTEXT.setValueForce(errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString())
+                                    ndflRef.ERRTEXT.setValueForce(errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString())
                                 } else {
-                                    ndflRef.ERRTEXT.setValueForce(errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString())
+                                    ndflRef.ERRTEXT.setValueForce(errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString())
                                 }
                                 ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                             }
@@ -830,7 +814,7 @@ class DeclarationType extends AbstractScriptClass {
                         .append("№: \"").append(declarationData.id).append("\"")
                         .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
                         .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
-                        .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"");
+                        .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"")
                 logger.info(msgBuilder.toString())
             }
         }
@@ -840,7 +824,7 @@ class DeclarationType extends AbstractScriptClass {
         if (isNdfl6Response(UploadFileName)) {
             fileDate = Date.parse("yyyyMMdd", UploadFileName.substring(56, 64))
         } else if (isNdfl2ResponseReestr(UploadFileName)) {
-            fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
+            fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE) as String)
         } else if (isNdfl2ResponseProt(UploadFileName)) {
             fileDate = Date.parse("dd.MM.yyyy", (String) ndfl2ContentMap.get(NDFL2_PROTOCOL_DATE))
         }
@@ -914,8 +898,8 @@ class DeclarationType extends AbstractScriptClass {
      * Валидирует xml-файл по xsd схеме макета
      * @param declarationTemplate макет формы
      */
-    def boolean validate(DeclarationTemplate declarationTemplate) {
-        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, declarationTemplate.xsdId)
+    boolean validate(DeclarationTemplate declarationTemplate) {
+        declarationService.validateDeclaration(logger, dataFile, UploadFileName, declarationTemplate.xsdId)
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             return false
@@ -933,120 +917,110 @@ class DeclarationType extends AbstractScriptClass {
 
     @Deprecated
     def _importTF() {
-        Integer declarationTypeId;
-        int departmentId;
-        String departmentCode;
-        String reportPeriodCode;
-        String asnuCode = null;
-        String guid = null;
-        Integer year = null;
-        boolean isFNS = false;
 
-        // Дата создания файла
-        Date createDateFile = null
+        Integer declarationTypeId
+        int departmentId
+        String departmentCode
+        String reportPeriodCode
+        String asnuCode
+        String guid
+        Integer year
+        Long declarationDataId
 
-        // Категория прикрепленного файла
-        AttachFileType attachFileType = null
-
-        Long declarationDataId = null
-
-        // Имя файла, для которого сформирован ответ
-        def String declarationDataFileNameReport = null
-
-        if (UploadFileName != null && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
+        if (UploadFileName != null
+                && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
                 & UploadFileName.length() == NAME_LENGTH_QUARTER_DEC) {
             // РНУ_НДФЛ (первичная)
-            declarationTypeId = DECLARATION_TYPE_RNU_NDFL_ID;
-            attachFileType = AttachFileType.TRANSPORT_FILE
-            departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
+            declarationTypeId = DECLARATION_TYPE_RNU_NDFL_ID
+            departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim()
 
-            List<Department> formDepartments = departmentService.getDepartmentsBySbrfCode(departmentCode, true);
+            List<Department> formDepartments = departmentService.getDepartmentsBySbrfCode(departmentCode, true)
             if (formDepartments.size() == 0) {
                 logger.error("Не удалось определить подразделение \"%s\"", departmentCode)
                 return
             }
             if (formDepartments.size() > 1) {
-                String departments = "";
+                String departments = ""
                 for (Department department : formDepartments) {
-                    departments = departments + "\"" + department.getName().replaceAll("\"", "") + "\", ";
+                    departments = departments + "\"" + department.getName().replaceAll("\"", "") + "\", "
                 }
-                departments = departments.substring(0, departments.length() - 2);
+                departments = departments.substring(0, departments.length() - 2)
 
                 logger.error("ТФ с именем \"%s\" не может быть загружен в Систему, в справочнике «Подразделения» АС «Учет налогов» с кодом \"%s\" найдено " +
-                        "несколько подразделений: %s. Обратитесь к пользователю с ролью \"Контролёр УНП\"", UploadFileName, departmentCode, departments);
+                        "несколько подразделений: %s. Обратитесь к пользователю с ролью \"Контролёр УНП\"", UploadFileName, departmentCode, departments)
 
                 return
             }
 
-            Department formDepartment = formDepartments.get(0);
-            departmentId = formDepartment != null ? formDepartment.getId() : null;
+            Department formDepartment = formDepartments.get(0)
+            departmentId = formDepartment != null ? formDepartment.getId() : null
 
-            reportPeriodCode = UploadFileName.substring(21, 23).replaceAll("_", "").trim();
+            reportPeriodCode = UploadFileName.substring(21, 23).replaceAll("_", "").trim()
             if (reportPeriodCode != null && !reportPeriodCode.isEmpty() && periodNdflMap.containsKey(reportPeriodCode)) {
-                reportPeriodCode = periodNdflMap.get(reportPeriodCode);
+                reportPeriodCode = periodNdflMap.get(reportPeriodCode)
             }
-            asnuCode = UploadFileName.substring(17, 21).replaceFirst("_", "").trim();
-            guid = UploadFileName.substring(27, 59).replaceAll("_", "").trim();
+            asnuCode = UploadFileName.substring(17, 21).replaceFirst("_", "").trim()
+            guid = UploadFileName.substring(27, 59).replaceAll("_", "").trim()
             try {
-                year = Integer.parseInt(UploadFileName.substring(23, 27));
+                year = Integer.parseInt(UploadFileName.substring(23, 27))
             } catch (NumberFormatException nfe) {
                 logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
                 return
             }
         } else {
             // Неизвестный формат имени загружаемого файла
-            throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName));
+            throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName))
         }
 
-        com.aplana.sbrf.taxaccounting.model.DeclarationType declarationType = declarationService.getTemplateType(declarationTypeId);
+        com.aplana.sbrf.taxaccounting.model.DeclarationType declarationType = declarationService.getTemplateType(declarationTypeId)
 
         // Указан недопустимый код периода
-        ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodCode, year);
+        ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodCode, year)
         if (reportPeriod == null) {
-            logger.error("Для вида налога «%s» в Системе не создан период с кодом «%s», календарный год «%s»! Загрузка файла «%s» не выполнена.", TaxType.NDFL.getName(), reportPeriodCode, year, UploadFileName);
-            return;
+            logger.error("Для вида налога «%s» в Системе не создан период с кодом «%s», календарный год «%s»! Загрузка файла «%s» не выполнена.", TaxType.NDFL.getName(), reportPeriodCode, year, UploadFileName)
+            return
         }
 
-        Department formDepartment = departmentService.get(departmentId);
+        Department formDepartment = departmentService.get(departmentId)
         if (formDepartment == null) {
             logger.error("Не удалось определить подразделение для транспортного файла \"%s\"", UploadFileName)
             return
         }
 
         // Актуальный шаблон НФ, введенный в действие
-        Integer declarationTemplateId;
+        Integer declarationTemplateId
         try {
-            declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.getId());
+            declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.getId())
         } catch (Exception e) {
             // Если шаблона нет, то не загружаем ТФ
-            logger.error("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s", e.getMessage());
-            return;
+            logger.error("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s", e.getMessage())
+            return
         }
 
-        DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationTemplateId);
+        DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationTemplateId)
         if (!TAAbstractScriptingServiceImpl.canExecuteScript(declarationService.getDeclarationTemplateScript(declarationTemplateId), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
-            logger.error("Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", UploadFileName);
-            return;
+            logger.error("Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", UploadFileName)
+            return
         }
 
         // АСНУ
-        Long asnuId = null;
-        def asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+        Long asnuId = null
+        def asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId())
         if (asnuCode != null) {
-            List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
+            List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'")
             if (asnuIds.size() == 1) {
-                asnuId = asnuIds.get(0);
+                asnuId = asnuIds.get(0)
             }
         }
 
         // Назначение подразделению Декларации
         List<DepartmentDeclarationType> ddts = declarationService.getDDTByDepartment(departmentId,
-                TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        boolean found = false;
+                TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate())
+        boolean found = false
         for (DepartmentDeclarationType ddt : ddts) {
             if (ddt.getDeclarationTypeId() == declarationType.getId()) {
-                found = true;
-                break;
+                found = true
+                break
             }
         }
         if (!found) {
@@ -1054,10 +1028,10 @@ class DeclarationType extends AbstractScriptClass {
             return
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.getId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.getId())
         // Открытость периода
         if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-            String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+            String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()
             logger.error("Нет открытых отчетных периодов для \"%s\" за \"%s\".", formDepartment.getName(), reportPeriodName)
             return
         }
@@ -1065,7 +1039,7 @@ class DeclarationType extends AbstractScriptClass {
         if (validate(declarationTemplate)) {
             //достать из XML файла атрибуты тега СлЧасть
             SAXHandler handler = new SAXHandler('СлЧасть', 'Файл', true)
-            InputStream inputStream
+            InputStream inputStream = null
             try {
                 inputStream = new FileInputStream(dataFile)
                 SAXParserFactory factory = SAXParserFactory.newInstance()
@@ -1082,23 +1056,23 @@ class DeclarationType extends AbstractScriptClass {
             } finally {
                 IOUtils.closeQuietly(inputStream)
             }
-            handler.getListValueAttributesTag();
+            handler.getListValueAttributesTag()
 
             //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
             def xmlDepartmentCode = handler.getListValueAttributesTag()?.get(KOD_DEPARTMENT)?.replaceFirst("_*", "")?.trim()
-            if (!departmentCode.equals(xmlDepartmentCode)) {
+            if (departmentCode != xmlDepartmentCode) {
                 logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»",
                         departmentCode, xmlDepartmentCode)
             }
 
             def xmlAsnuCode = handler.getListValueAttributesTag()?.get(KOD_ASNU)
-            if (!asnuCode.equals(xmlAsnuCode)) {
+            if (asnuCode != xmlAsnuCode) {
                 logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»",
                         asnuCode, xmlAsnuCode)
             }
 
             def xmlFileName = handler.getListValueAttributesTag()?.get(NAME_TF_NOT_EXTENSION)
-            if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(xmlFileName)) {
+            if (UploadFileName.trim().substring(0, UploadFileName.length() - 4) != xmlFileName) {
                 logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»",
                         UploadFileName.trim()[0..-5], xmlFileName)
             }
@@ -1122,7 +1096,7 @@ class DeclarationType extends AbstractScriptClass {
 
             //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
             def xmlReportPeriodCode = handler.getListValueAttributesTag()?.get(KOD_REPORT_PERIOD)
-            if (!reportPeriodCode.equals(xmlReportPeriodCode)) {
+            if (reportPeriodCode != xmlReportPeriodCode) {
                 logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»",
                         reportPeriodCode, xmlReportPeriodCode)
             }
@@ -1130,75 +1104,74 @@ class DeclarationType extends AbstractScriptClass {
             def xmlReportYear = handler.getListValueAttributesTag()?.get(REPORT_YEAR)
             Integer reportYear = null
             try {
-                reportYear = Integer.parseInt(xmlReportYear);
+                reportYear = Integer.parseInt(xmlReportYear)
             } catch (NumberFormatException nfe) {
                 nfe.printStackTrace()
             }
 
-            if (!year.equals(reportYear)) {
+            if (year != reportYear) {
                 logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»",
                         year, xmlReportYear)
             }
 
             // Проверка не загружен ли уже такой файл в систему
             if (UploadFileName != null && !UploadFileName.isEmpty()) {
-                DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
+                DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
 
-                declarationFilter.setFileName(UploadFileName);
-                declarationFilter.setTaxType(TaxType.NDFL);
-                declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+                declarationFilter.setFileName(UploadFileName)
+                declarationFilter.setTaxType(TaxType.NDFL)
+                declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID)
 
-                List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
+                List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false)
                 if (!declarationDataSearchResultItems.isEmpty()) {
                     logger.error("ТФ с именем «%s» уже загружен в систему.", UploadFileName)
                 }
             }
 
             // Поиск экземпляра декларации
-            DeclarationData declarationData = declarationService.find(declarationTemplateId, departmentReportPeriod.getId(), null, null, null, asnuId, UploadFileName);
+            DeclarationData declarationData = declarationService.find(declarationTemplateId, departmentReportPeriod.getId(), null, null, null, asnuId, UploadFileName)
             // Экземпляр уже есть
             if (declarationData != null) {
-                logger.error("Экземпляр формы \"%s\" в \"%s\" уже существует! Загрузка файла «%s» не выполнена.", declarationType.getName(), formDepartment.getName(), UploadFileName);
-                return;
+                logger.error("Экземпляр формы \"%s\" в \"%s\" уже существует! Загрузка файла «%s» не выполнена.", declarationType.getName(), formDepartment.getName(), UploadFileName)
+                return
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 return
             }
             // Создание экземпляра декларации
-            DeclarationData newDeclaratinoData = new DeclarationData()
-            newDeclaratinoData.declarationTemplateId = declarationTemplateId
-            newDeclaratinoData.asnuId = asnuId
-            newDeclaratinoData.fileName = UploadFileName
-            declarationDataId = declarationService.create(newDeclaratinoData, departmentReportPeriod, logger, userInfo, true)
+            DeclarationData newDeclarationData = new DeclarationData()
+            newDeclarationData.declarationTemplateId = declarationTemplateId
+            newDeclarationData.asnuId = asnuId
+            newDeclarationData.fileName = UploadFileName
+            declarationDataId = declarationService.create(newDeclarationData, departmentReportPeriod, logger, userInfo, true)
 
-            inputStream = new FileInputStream(dataFile)
-            try {
-                // Запуск события скрипта для разбора полученного файла
-                declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, createDateFile)
-            } finally {
-                IOUtils.closeQuietly(inputStream);
+            // Запуск события скрипта для разбора полученного файла
+            DeclarationData createdDeclarationData = declarationService.getDeclarationData(declarationDataId)
+            declarationService.importXmlTransportFile(dataFile, UploadFileName, createdDeclarationData, userInfo, logger)
+
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                msgBuilder.append("Выполнено создание налоговой формы: ")
+                        .append("№: \"").append(declarationDataId).append("\"")
+                        .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+                        .append(getCorrectionDateString(departmentReportPeriod))
+                        .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
+                        .append(", Вид: \"").append(declarationType.getName()).append("\"")
+                        .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"")
+                logger.info(msgBuilder.toString())
             }
-            msgBuilder.append("Выполнено создание налоговой формы: ")
-                    .append("№: \"").append(declarationDataId).append("\"")
-                    .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
-                    .append(getCorrectionDateString(departmentReportPeriod))
-                    .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
-                    .append(", Вид: \"").append(declarationType.getName()).append("\"")
-                    .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
-            logger.info(msgBuilder.toString())
         }
     }
 
     String getSAXParseExceptionMessage(SAXParseException e) {
         return "Ошибка: ${e.getLineNumber() != -1 ? "Строка: ${e.getLineNumber()}" : ""}" +
-                "${e.getColumnNumber() != -1 ? "; Столбец: ${e.getColumnNumber()}" : ""}" +
-                "${e.getLocalizedMessage() ? "; ${e.getLocalizedMessage()}" : ""}"
+                "${e.getColumnNumber() != -1 ? " Столбец: ${e.getColumnNumber()}" : ""}" +
+                "${e.getLocalizedMessage() ? " ${e.getLocalizedMessage()}" : ""}"
     }
 
     String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
-        def dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : "";
+        def dateFormat = new SimpleDateFormat("dd.MM.yyyy")
+        return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : ""
     }
 
     // кол-во созданных строк в Приложении2
@@ -1428,7 +1401,7 @@ class DeclarationType extends AbstractScriptClass {
      * Поле 13 должно быть заполнено, если выполняется хотя бы одно из следующих условий:
      1) Заполнено хотя бы одно из полей: 12, 14-20.
      2) Графы 21 и 22 не заполнены.
-     3) Поле 7 (статус налогоплательщика) равно значению «1» (налоговый резидент РФ);
+     3) Поле 7 (статус налогоплательщика) равно значению «1» (налоговый резидент РФ)
      4) Значение поля «Код» записи справочника «ОК 025-2001 (Общероссийский классификатор стран мира» (000) Справочник ОКСМ), указанной в поле 9, равно «643»
      */
     void check10(App2PersonRateRowGroup personRateRowGroup) {
