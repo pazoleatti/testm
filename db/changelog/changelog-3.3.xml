@@ -19,4 +19,16 @@
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
+
+    <changeSet id="3.3-snazin-1" author="snazin" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.3/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
