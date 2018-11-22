@@ -62,7 +62,13 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
             d.setVersionEnd(rs.getDate("version_end"));
-			d.setType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declaration_type_id")));
+
+            DeclarationType declarationType = new DeclarationType();
+            declarationType.setId(SqlUtils.getInteger(rs, "declaration_type_id"));
+            declarationType.setName(rs.getString("dtype_name"));
+            declarationType.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"dtype_status")));
+			d.setType(declarationType);
+
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
             d.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs, "status")));
@@ -97,7 +103,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		try {
 			return getJdbcTemplate().query(
 					"select dt.*, " +
-                            " ft.id form_type_id, ft.code form_type_code, ft.name form_type_name " +
+                            " ft.id form_type_id, ft.code form_type_code, ft.name form_type_name, dtype.name dtype_name, dtype.status dtype_status " +
                             " from " +
                             "(SELECT dt.*, " +
                             (isSupportOver() ?
@@ -107,7 +113,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             "  FROM declaration_template dt " +
                             "  where status != -1)" +
                             " dt " +
-                            " left outer join ref_book_form_type ft on ft.id = dt.form_type ",
+                            " left outer join ref_book_form_type ft on ft.id = dt.form_type " +
+                            " left join declaration_type dtype on dtype.id = dt.declaration_type_id ",
 					new DeclarationTemplateRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
@@ -121,7 +128,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		try {
 			return getJdbcTemplate().queryForObject(
 					"select dt.id, dt.name, dt.version, dt.declaration_type_id, dt.xsd, dt.jrxml, dt.status, dt.form_kind, " +
-                            "  ft.id form_type_id, ft.code form_type_code, ft.name form_type_name, dt.version_end " +
+                            "  ft.id form_type_id, ft.code form_type_code, ft.name form_type_name, dt.version_end, dtype.name dtype_name, dtype.status dtype_status " +
                             " from " +
                             "(SELECT dt.*, " +
                             (isSupportOver() ?
@@ -132,6 +139,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             "  where status != -1)" +
                             " dt " +
                             " left outer join ref_book_form_type ft on ft.id = dt.form_type " +
+                            " left join declaration_type dtype on dtype.id = dt.declaration_type_id " +
                             " where dt.id = ?",
 					new Object[] { declarationTemplateId },
 					new DeclarationTemplateRowMapper()
