@@ -86,7 +86,8 @@ public abstract class AbstractReportBuilder {
     /**
      * Заполнение подвала отчета.
      */
-    protected abstract void fillFooter();
+    protected void fillFooter() {
+    }
 
     /**
      * Выставление области печати для отчета.

@@ -57,7 +57,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId) {
-        return ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId);
+        return ndflPersonDao.findAllIncomesByDeclarationId(declarationDataId);
     }
 
     @Override

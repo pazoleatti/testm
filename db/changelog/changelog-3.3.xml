@@ -162,4 +162,21 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-5461 новый спецотчет-->
+    <changeSet id="3.3-dnovikov-3" author="dnovikov">
+        <sql>
+            insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+            values(SEQ_DECLARATION_SUBREPORT.nextval, 100, 'Отчет в разрезе ставок', 4, 'rnu_karmannikova_rate_report');
+            insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+            values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'Отчет в разрезе ставок', 4, 'rnu_karmannikova_rate_report');
+        </sql>
+    </changeSet>
+
+    <changeSet id="3.3-dnovikov-4" author="dnovikov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.3/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

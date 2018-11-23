@@ -183,6 +183,7 @@
         "link.ndfl.reporting.createNdflReport": "Сформировать Отчетные формы",
         "link.ndfl.reporting.formForFL": "Сформировать \"РНУ НДФЛ по физическому лицу\"",
         "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
+        "link.ndfl.reporting.karmannikova.rateReport": "Сформировать \"Отчет в разрезе ставок\"",
         "link.ndfl.reporting.formForKppOktmo": "Сформировать \"Реестр сформированной отчетности\"",
         "link.ndfl.reporting.download": "(Скачать)",
         "link.ndfl.historyOfChange": "История изменений",

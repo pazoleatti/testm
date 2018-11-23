@@ -277,14 +277,15 @@ public interface DeclarationDataService {
     CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long ndflPersonId, NdflPersonFilter ndflPersonFilter);
 
     /**
-     * Формирование рну ндфл по всем физ лицам`
+     * Формирование спецотчета по форме
      *
-     * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
+     * @param alias             вид спецотчета (subreport)
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @param force             признак для перезапуска задачи
      * @return результат о формировании отчета
      */
-    CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force);
+    CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, TAUserInfo userInfo, boolean force);
 
     /**
      * Формирование Реестра сформированной отчетности

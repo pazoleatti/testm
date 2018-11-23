@@ -1258,9 +1258,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReportAllRnu(final TAUserInfo userInfo,
-                                                            final long declarationDataId, boolean force) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportAllRnu by %s. declarationDataId: %s; force: %s",
+    public CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, final TAUserInfo userInfo, boolean force) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateSpecificReport by %s. declarationDataId: %s; force: %s",
                 userInfo, declarationDataId, force));
         DeclarationData declaration = get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
@@ -1275,7 +1274,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
                 final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
 
-                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB));
+                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
                 final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                 Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
@@ -1399,9 +1398,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 switch (subreport.getAlias()) {
                     case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB: {
                         reportAvailableResult.setDownloadRnuNdflPersonAllDb((reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                        break;
                     }
                     case SubreportAliasConstants.REPORT_KPP_OKTMO: {
                         reportAvailableResult.setDownloadReportKppOktmo((reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                        break;
+                    }
+                    case SubreportAliasConstants.RNU_KARMANNIKOVA_RATE_REPORT: {
+                        reportAvailableResult.setDownloadKarmannikovaRateReportAvailable((reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                        break;
                     }
                 }
             }

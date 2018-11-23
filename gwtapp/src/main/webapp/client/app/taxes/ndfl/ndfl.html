@@ -24,20 +24,20 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReportXlsx()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formXLSX'
-                                | translate}}</a>
+                            <a ng-click="createReportXlsx()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.formXLSX' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
                                 {{::'link.ndfl.reporting.formXLSX' | translate}}
                             </div>
                             <a ng-click="downloadXlsx()"
-                               ng-show="availableXlsxReport && declarationData.ndflPersonCount > 0">{{::'link.ndfl.reporting.download'
-                                | translate}}</a>
+                               ng-show="availableXlsxReport && declarationData.ndflPersonCount > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formForFL'
-                                | translate}}</a>
+                            <a ng-click="createReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.formForFL' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
                                 {{::'link.ndfl.reporting.formForFL' | translate}}
                             </div>
@@ -45,50 +45,58 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReportAllRnu()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formForFLs'
-                                |
-                                translate}}</a>
+                            <a ng-click="createReportAllRnu()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.formForFLs' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
                                 {{::'link.ndfl.reporting.formForFLs' | translate}}
                             </div>
                             <a ng-click="downloadSpecific()"
-                               ng-show="availableRnuNdflPersonAllDb && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.download'
-                                | translate}}</a>
+                               ng-show="availableRnuNdflPersonAllDb && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createKarmannikovaRateReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.karmannikova.rateReport' | translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.karmannikova.rateReport' | translate}}
+                            </div>
+                            <a ng-click="downloadKarmannikovaRateReport()"
+                               ng-show="availableKarmannikovaRateReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem"
                         ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <div class="row menuitem">
                             <a ng-click="createPairKppOktmo(false)"
-                               ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.formForKppOktmo'
-                                |
-                                translate}}</a>
+                               ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.formForKppOktmo' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
                                 {{::'link.ndfl.reporting.formForKppOktmo' | translate}}
                             </div>
                             <a ng-click="downloadPairKppOktmo()"
-                               ng-show="availableReportKppOktmo && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">{{::'link.ndfl.reporting.download'
-                                | translate}}</a>
+                               ng-show="availableReportKppOktmo && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem"
                         ng-show="canCreateExcelTemplate()">
                         <div class="row menuitem">
-                            <a ng-click="createExcelTemplate()">{{::'link.ndfl.reporting.formTemplateExcel' |
-                                translate}}</a>
-                            <a ng-click="downloadExcelTemplate()" ng-show="availableExcelTemplate">{{::'link.ndfl.reporting.download'
-                                | translate}}</a>
+                            <a ng-click="createExcelTemplate()">
+                                {{::'link.ndfl.reporting.formTemplateExcel' | translate}}</a>
+                            <a ng-click="downloadExcelTemplate()" ng-show="availableExcelTemplate">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem">
                         <hr style="margin: 0;">
                         <div class="row menuitem">
-                            <a ng-click="createNdflReport()" ng-show="canCreateNdflReport()">{{::'link.ndfl.reporting.createNdflReport'
-                                |
-                                translate}}</a>
+                            <a ng-click="createNdflReport()" ng-show="canCreateNdflReport()">
+                                {{::'link.ndfl.reporting.createNdflReport' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
-                                {{::'link.ndfl.reporting.createNdflReport' |
-                                translate}}
+                                {{::'link.ndfl.reporting.createNdflReport' | translate}}
                             </div>
                         </div>
                     </li>

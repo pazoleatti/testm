@@ -112,7 +112,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> findNdflPersonWithOperations(long declarationDataId) {
         List<NdflPerson> persons = ndflPersonDao.fetchByDeclarationData(declarationDataId);
-        Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId));
+        Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.findAllIncomesByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId));
         for (NdflPerson person : persons) {
@@ -138,7 +138,12 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId) {
-        return ndflPersonDao.fetchNdflPersonIncomeByDeclarationData(declarationDataId);
+        return ndflPersonDao.findAllIncomesByDeclarationId(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId) {
+        return ndflPersonDao.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationDataId);
     }
 
     @Override

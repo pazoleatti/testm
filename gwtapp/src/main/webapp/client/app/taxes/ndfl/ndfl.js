@@ -152,6 +152,7 @@
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                    $scope.availableKarmannikovaRateReport = data.downloadKarmannikovaRateReportAvailable;
                                     $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
                                     $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
                                 }
@@ -728,7 +729,10 @@
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
                 };
                 $scope.downloadSpecific = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB;
+                };
+                $scope.downloadKarmannikovaRateReport = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_RATE_REPORT;
                 };
                 $scope.downloadPairKppOktmo = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO;
@@ -757,12 +761,28 @@
                     force = typeof force !== 'undefined' ? force : false;
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/allRnuReport",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB,
                         params: {
                             force: force ? force : false
                         }
                     }).success(function (response) {
                         performReportSuccessResponse(response, $scope.createReportAllRnu, "availableRnuNdflPersonAllDb");
+                    });
+                };
+
+                /**
+                 *
+                 */
+                $scope.createKarmannikovaRateReport = function (force) {
+                    force = typeof force !== 'undefined' ? force : false;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_RATE_REPORT,
+                        params: {
+                            force: force ? force : false
+                        }
+                    }).success(function (response) {
+                        performReportSuccessResponse(response, $scope.createReportAllRnu, "availableKarmannikovaRateReport");
                     });
                 };
 

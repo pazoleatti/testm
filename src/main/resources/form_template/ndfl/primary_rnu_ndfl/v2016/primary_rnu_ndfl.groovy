@@ -2,13 +2,21 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.BlobData
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.DateColumn
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateFile
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormSources
+import com.aplana.sbrf.taxaccounting.model.PagingResult
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
+import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -16,7 +24,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
@@ -28,8 +38,11 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
+import groovy.transform.Canonical
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
+import groovy.transform.builder.Builder
+import groovy.transform.builder.SimpleStrategy
 import groovy.util.slurpersupport.GPathResult
 import groovy.util.slurpersupport.NodeChild
 import org.apache.poi.ss.usermodel.*
@@ -39,6 +52,8 @@ import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import java.text.SimpleDateFormat
+
+import static form_template.ndfl.primary_rnu_ndfl.v2016.PrimaryRnuNdfl.DataFormatEnum.*
 
 new PrimaryRnuNdfl(this).run();
 
@@ -61,8 +76,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     LogBusinessService logBusinessService
     List<NdflPerson> ndflPersonCache = new ArrayList<>()
     Date formCreationDate = null
-
-    private PrimaryRnuNdfl() {}
+    Date date = new Date()
 
     @TypeChecked(TypeCheckingMode.SKIP)
     public PrimaryRnuNdfl(scriptClass) {
@@ -442,18 +456,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
-                loadPersonDataToExcel()
-                break;
+                exportPersonDataToExcel()
+                break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
-                loadAllDeclarationDataToExcel();
+                exportAllDeclarationDataToExcel()
                 scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                break;
+                break
+            case SubreportAliasConstants.RNU_KARMANNIKOVA_RATE_REPORT:
+                createKarmannikovaRateReport()
+                scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ставок_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                break
             default:
-                throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
+                throw new ServiceException("Обработка данного спец. отчета не предусмотрена!")
         }
     }
 
-    void loadPersonDataToExcel() {
+    void exportPersonDataToExcel() {
         List<NdflPerson> ndflPersonList = []
         NdflPerson ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
         ndflPersonList.add(ndflPerson)
@@ -553,10 +571,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 .toString();
     }
 
-/**
- * Спецотчет РНУ-НДФЛ по всем ФЛ
- */
-    public void loadAllDeclarationDataToExcel() {
+    /**
+     * Спецотчет РНУ-НДФЛ по всем ФЛ
+     */
+    void exportAllDeclarationDataToExcel() {
 
         ScriptUtils.checkInterrupted();
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
@@ -597,7 +615,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-// Находит в базе данных шаблон спецотчета
+    // Находит в базе данных шаблон спецотчета
     XSSFWorkbook getSpecialReportTemplate(String reportFileName) {
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
         String blobDataId = null;
@@ -609,6 +627,302 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         BlobData blobData = blobDataService.get(blobDataId)
         return new XSSFWorkbook(blobData.getInputStream())
+    }
+
+    /**
+     * Отчет Карманниковой: Отчет в разрезе ставок
+     */
+    void createKarmannikovaRateReport() {
+        List<NdflPersonIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id)
+        defineTaxRates(incomes)
+        def incomesByKey = incomes.groupBy { new KarmannikovaRateReportKey(it.kpp, it.asnuId, it.taxRate) }
+        List<KarmannikovaRateReportRow> rows = []
+        incomesByKey.each { key, incomesGroup ->
+            def row = new KarmannikovaRateReportRow()
+            row.kpp = key.kpp
+            row.asnu = incomesGroup.first().asnu
+            row.rate = key.rate
+            for (def income : incomesGroup) {
+                row.incomeAccruedSum += (income.incomeAccruedSumm ?: 0)
+                row.incomePayoutSum += (income.incomePayoutSumm ?: 0)
+                row.totalDeductionsSum += (income.totalDeductionsSumm ?: 0)
+                row.calculatedTax += (income.calculatedTax ?: 0)
+                row.withholdingTax += (income.withholdingTax ?: 0)
+                row.refoundTax += (income.refoundTax ?: 0)
+                row.notHoldingTax += (income.notHoldingTax ?: 0)
+                row.overholdingTax += (income.overholdingTax ?: 0)
+                row.taxSum += (income.taxSumm ?: 0)
+            }
+            rows.add(row)
+        }
+        rows.sort({ def a, def b ->
+            a.kpp <=> b.kpp ?: a.asnu <=> b.asnu ?:
+                    (a.rate == null && b.rate == null ? 0 : a.rate == null ? 1 : b.rate == null ? -1 : a.rate <=> b.rate)
+        })
+        new KarmannikovaRateReportBuilder(rows).build()
+    }
+
+    void defineTaxRates(List<NdflPersonIncome> incomes) {
+        def incomesByOperationIdAndAsnuId = incomes.groupBy { new Pair<String, Long>(it.operationId, it.asnuId) }
+        incomesByOperationIdAndAsnuId.each { key, incomesOfOperation ->
+            NdflPersonIncome последняяСтрокаПеречисления = null
+            NdflPersonIncome последняяСтрокаСодержащаяСтавку = null
+            Map<Date, NdflPersonIncome> incomeByTaxTransferDate = [:]
+            for (def income : incomesOfOperation) {
+                if (income.taxRate != null && income.taxTransferDate) {
+                    incomeByTaxTransferDate.put(income.taxTransferDate, income)
+                }
+            }
+            for (def income : incomesOfOperation) {
+                if (income.taxRate == null) {
+                    def строкаУдержанияПоСрокуПеречисления = incomeByTaxTransferDate.get(income.taxTransferDate)
+                    if (строкаУдержанияПоСрокуПеречисления && строкаУдержанияПоСрокуПеречисления.taxRate != null) {
+                        income.taxRate = строкаУдержанияПоСрокуПеречисления.taxRate
+                    } else {
+                        income.taxRate = последняяСтрокаСодержащаяСтавку?.taxRate
+                    }
+                    последняяСтрокаПеречисления = income
+                } else {
+                    последняяСтрокаСодержащаяСтавку = income
+                }
+            }
+            if (последняяСтрокаПеречисления) {
+                последняяСтрокаПеречисления.taxRate = последняяСтрокаСодержащаяСтавку?.taxRate
+            }
+        }
+    }
+
+    class KarmannikovaRateReportBuilder {
+
+        Workbook workbook
+        Sheet sheet
+
+        List<String> header = ["КПП", "АСНУ", "Ставка", "Сумма дохода начисленного", "Сумма дохода выплаченного", "Сумма вычетов", "Налог исчисленный",
+                               "Налог удержанный", "Возврат", "Долг за НП", "Долг за НА", "Налог перечисленный"]
+        List<KarmannikovaRateReportRow> rows
+
+        private int currentRowIndex = 0
+
+        KarmannikovaRateReportBuilder(List<KarmannikovaRateReportRow> rows) {
+            this.rows = rows
+            workbook = new SXSSFWorkbook()
+            workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
+            this.sheet = workbook.createSheet("Отчет")
+        }
+
+        void build() {
+            fillHeader()
+            createTableHeaders()
+            createDataForTable()
+            cellAlignment()
+            flush()
+        }
+
+        void fillHeader() {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+
+            def styleHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build()
+            def styleLeftHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_RIGHT).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            def styleNormal = new StyleBuilder(workbook).build()
+            Row row = sheet.createRow(0)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(styleHeader)
+            cell.setCellValue("Отчет в разрезе ставок")
+
+            row = sheet.createRow(1)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Год:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue(departmentReportPeriod.reportPeriod.taxPeriod.year)
+
+            row = sheet.createRow(2)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Период:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue(departmentReportPeriod.reportPeriod.name)
+
+            row = sheet.createRow(3)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("№ формы:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue(declarationData.id)
+
+            row = sheet.createRow(4)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Подразделение:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue("/Банк/" + departmentService.getParentsHierarchy(declarationData.departmentId))
+
+            row = sheet.createRow(5)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Сформирован:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue(date.format('dd.MM.yyyy HH:mm:ss'))
+        }
+
+        void createTableHeaders() {
+            def style = new StyleBuilder(workbook).borders(true).wrapText(true).hAlign(CellStyle.ALIGN_CENTER).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            Row row = sheet.createRow(9)
+            for (int colIndex = 0; colIndex < header.size(); colIndex++) {
+                Cell cell = row.createCell(colIndex)
+                cell.setCellValue(header.get(colIndex))
+                cell.setCellStyle(style)
+            }
+        }
+
+        void createDataForTable() {
+            currentRowIndex = 9
+            for (def dataRow : rows) {
+                sheet.createRow(++currentRowIndex)
+                int colIndex = 0
+                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+                createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
+                createCell(++colIndex, dataRow.asnu, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
+                createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.incomeAccruedSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
+                createCell(++colIndex, dataRow.incomePayoutSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
+                createCell(++colIndex, dataRow.totalDeductionsSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
+                createCell(++colIndex, dataRow.calculatedTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.withholdingTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.refoundTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.deptTaxPayer, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.deptAgent, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.taxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+            }
+        }
+
+        void cellAlignment() {
+            Map<Integer, Integer> widths = [0: 16, 2: 10, 3: 16, 4: 16, 5: 16, 6: 16, 7: 16, 8: 16, 9: 16, 10: 16, 11: 16]
+            for (int i = 0; i < header.size(); i++) {
+                sheet.autoSizeColumn(i)
+                if (widths.get(i)) {
+                    sheet.setColumnWidth(i, widths.get(i) * 269)
+                } else {
+                    if (sheet.getColumnWidth(i) > 10000) {
+                        sheet.setColumnWidth(i, 10000)
+                    } else if (sheet.getColumnWidth(i) < 3000) {
+                        sheet.setColumnWidth(i, 3000)
+                    }
+                }
+            }
+        }
+
+        void flush() {
+            OutputStream writer = null
+            try {
+                writer = scriptSpecificReportHolder.getFileOutputStream()
+                workbook.write(writer)
+            } finally {
+                writer.close()
+            }
+        }
+
+        private void createCell(int colIndex, Object value, CellStyle style) {
+            Row row = sheet.getRow(currentRowIndex)
+            Cell cell = row.createCell(colIndex)
+            if (value != null) {
+                if (value instanceof String) {
+                    cell.setCellValue(value.toString())
+                } else if (value instanceof BigDecimal) {
+                    cell.setCellValue(((BigDecimal) value).doubleValue())
+                } else if (value instanceof Number) {
+                    cell.setCellValue(((Number) value).doubleValue())
+                }
+            }
+            cell.setCellStyle(style)
+        }
+    }
+
+    @Builder(builderStrategy = SimpleStrategy, prefix = "")
+    class StyleBuilder {
+        Workbook workbook
+        boolean borders = false
+        boolean wrapText = false
+        short vAlign = CellStyle.VERTICAL_CENTER
+        short hAlign = CellStyle.ALIGN_LEFT
+        short boldweight = Font.BOLDWEIGHT_NORMAL
+        short fontHeight = 11
+        DataFormatEnum dataFormat = STRING
+
+        StyleBuilder(Workbook workbook) {
+            this.workbook = workbook
+        }
+
+        CellStyle build() {
+            CellStyle style = workbook.createCellStyle()
+            if (borders) {
+                style.setBorderRight(CellStyle.BORDER_THIN)
+                style.setBorderLeft(CellStyle.BORDER_THIN)
+                style.setBorderBottom(CellStyle.BORDER_THIN)
+                style.setBorderTop(CellStyle.BORDER_THIN)
+            }
+            if (dataFormat == STRING) {
+                style.setDataFormat(workbook.createDataFormat().getFormat("@"))
+            } else if (dataFormat == NUMBER) {
+                style.setDataFormat((short) 1)
+            } else if (dataFormat == NUMBER_2) {
+                style.setDataFormat((short) 2)
+            }
+            style.setAlignment(hAlign)
+            style.setWrapText(wrapText)
+            style.setVerticalAlignment(vAlign)
+            Font font = workbook.createFont()
+            font.setBoldweight(boldweight)
+            font.setFontHeightInPoints(fontHeight)
+            style.setFont(font)
+            return style
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    enum DataFormatEnum {
+        STRING, NUMBER, NUMBER_2
+    }
+
+    @Canonical
+    class KarmannikovaRateReportKey {
+        String kpp
+        long asnu
+        Integer rate
+
+        KarmannikovaRateReportKey(String kpp, long asnu, Integer rate) {
+            this.kpp = kpp
+            this.asnu = asnu
+            this.rate = rate
+        }
+    }
+
+    class KarmannikovaRateReportRow {
+        String kpp
+        String asnu
+        Integer rate
+        BigDecimal incomeAccruedSum = 0
+        BigDecimal incomePayoutSum = 0
+        BigDecimal totalDeductionsSum = 0
+        BigDecimal calculatedTax = 0
+        BigDecimal withholdingTax = 0
+        Long refoundTax = 0
+        BigDecimal notHoldingTax = 0
+        BigDecimal overholdingTax = 0
+        Long taxSum = 0
+
+        BigDecimal getDeptTaxPayer() {
+            return notHoldingTax > overholdingTax ? notHoldingTax - overholdingTax : 0
+        }
+
+        BigDecimal getDeptAgent() {
+            return notHoldingTax < overholdingTax ? overholdingTax - notHoldingTax : 0
+        }
     }
 
     /**
@@ -2432,7 +2746,7 @@ class Styler {
      * тип поля Числовой
      * @return
      */
-    CellStyle createBorderStyleCenterAlignedTypeNumber(){
+    CellStyle createBorderStyleCenterAlignedTypeNumber() {
         CellStyle style = workbook.createCellStyle()
         style.setAlignment(CellStyle.ALIGN_CENTER)
         addThinBorderStyle(style)
@@ -2441,7 +2755,7 @@ class Styler {
         return style
     }
 
-    XSSFFont createBoldFont(){
+    XSSFFont createBoldFont() {
         XSSFFont boldFont = workbook.createFont()
         boldFont.setBold(true)
         return boldFont

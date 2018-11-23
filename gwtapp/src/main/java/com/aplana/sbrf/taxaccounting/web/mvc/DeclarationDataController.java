@@ -639,10 +639,10 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/allRnuReport")
-    public CreateDeclarationReportResult createReportAllRnus(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
+    public CreateDeclarationReportResult createReportAllRnus(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias, @RequestParam boolean force) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createReportAllRnu(userInfo, declarationDataId, force);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, userInfo, force);
     }
 
     /**

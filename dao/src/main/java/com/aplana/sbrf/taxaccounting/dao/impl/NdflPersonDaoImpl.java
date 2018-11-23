@@ -134,12 +134,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> fetchNdflPersonIncomeByDeclarationData(long declarationDataId) {
+    public List<NdflPersonIncome> findAllIncomesByDeclarationId(long declarationDataId) {
         return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
-                "from ndfl_person_income npi "
-                + " inner join ndfl_person np on npi.ndfl_person_id = np.id"
-                + " left join ref_book_asnu rba on npi.asnu_id = rba.id"
-                + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+                "from ndfl_person_income npi " +
+                "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
+                "where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+    }
+
+    @Override
+    public List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
+                "from ndfl_person_income npi " +
+                "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
+                "where np.declaration_data_id = ? " +
+                "order by row_num", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
     }
 
     @Override

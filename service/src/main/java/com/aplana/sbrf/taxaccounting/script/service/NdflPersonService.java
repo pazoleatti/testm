@@ -75,6 +75,13 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
 
     /**
+     * Найти все "Сведения о доходах физического лица" привязанные к декларации, отсортированные по rowNum
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId);
+
+    /**
      * Возвращяет список строк из раздела 2 по списку ид форм
      *
      * @param declarationDataIds список ид форм
