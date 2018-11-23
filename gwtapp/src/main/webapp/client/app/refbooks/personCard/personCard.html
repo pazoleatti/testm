@@ -1,13 +1,15 @@
-<form class="flex-column" data-aplana-submit-valid="save()" novalidate>
+<form class="flex-column" id="personCardForm" name="personCardForm" data-aplana-submit-valid="save()" novalidate>
     <div>
         <div class="content-header pull-left" data-ng-show="mode == 'VIEW'">
             <a href="index.html#/refbooks/registryFL">{{::'move_back' | translate}}</a>
             <h1>{{'— (' + person.recordId + ')' + (person.lastName ? ' ' + person.lastName:"") + (person.firstName ? ' '
                 + person.firstName :"") + (person.middleName ? ' ' + person.middleName :"" ) +
-                ', ' + (person.birthDate | dateFormatter) + (person.recordId !== person.oldId ?', ' + ('refBook.fl.table.label.duplicateString' | translate):'')}}</h1>
+                ', ' + (person.birthDate | dateFormatter) + (person.recordId !== person.oldId ?', ' +
+                ('refBook.fl.table.label.duplicateString' | translate):'')}}</h1>
         </div>
         <div class="content-header pull-left" data-ng-show="mode == 'EDIT'">
-            <h1>{{('refBook.fl.table.label.editing' | translate) + ' - (' + person.recordId + ') ' + person.lastName + ' ' + person.firstName + ' ' +
+            <h1>{{('refBook.fl.table.label.editing' | translate) + ' - (' + person.recordId + ') ' + person.lastName + '
+                ' + person.firstName + ' ' +
                 person.middleName + ', ' + (person.birthDate | dateFormatter)}}</h1>
         </div>
         <div class="pull-right" style="margin: 5px 10px 10px 0;" data-ng-show="mode == 'VIEW'">
@@ -53,12 +55,15 @@
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
+                        <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' |
+                            translate}}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="span2">
-            <div class="row-fluid form-group-view" >
+            <div class="row-fluid form-group-view">
                 <div class="span3" style="text-align: right">{{::'refBook.fl.card.label.versionTo' | translate}}</div>
                 <div class="span9 person-card-data" data-ng-show="mode == 'VIEW'">
                     {{person.endDate ? (person.endDate | dateFormatter) : " -"}}
@@ -70,6 +75,9 @@
                              data-min-date="personParam.startDate">
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
+                        </div>
+                        <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' |
                             translate}}
                         </div>
                     </div>

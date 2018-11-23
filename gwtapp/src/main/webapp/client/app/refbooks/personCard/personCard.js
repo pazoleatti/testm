@@ -609,6 +609,31 @@
                     $scope.personParam.duplicates.push(duplicate);
                     $scope.duplicatesGrid.ctrl.refreshGridData($scope.personParam.duplicates)
                 });
+
+                $scope.$watchGroup(['personParam.startDate', 'personParam.endDate'], function () {
+                    $scope.validateVersionDates();
+                });
+
+                /**
+                 * Валидация периода актуальности записи.
+                 * Нужна так как стандартная валидация min-date, max-date не умеет работать с динамическими ограничениями, но они все равно используются для блокировки дат в самом календаре
+                 */
+                $scope.validateVersionDates = function () {
+                    var generatedVersionFromId = 'personparam_startdate';
+                    var generatedVersionToId = 'personparam_enddate';
+                    if ($scope.personCardForm && $scope.personCardForm[generatedVersionFromId] && $scope.personCardForm[generatedVersionToId]) {
+                        var versionFrom = $scope.personParam.startDate;
+                        var versionTo = $scope.personParam.endDate;
+
+                        if (versionFrom != null && versionTo != null && versionTo < versionFrom) {
+                            $scope.personCardForm[generatedVersionFromId].$setValidity('versionDate', false);
+                            $scope.personCardForm[generatedVersionToId].$setValidity('versionDate', false);
+                        } else {
+                            $scope.personCardForm[generatedVersionFromId].$setValidity('versionDate', true);
+                            $scope.personCardForm[generatedVersionToId].$setValidity('versionDate', true);
+                        }
+                    }
+                };
             }
         ]);
 }());
