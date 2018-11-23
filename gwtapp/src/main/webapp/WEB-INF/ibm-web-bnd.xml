@@ -8,14 +8,5 @@
 	<virtual-host name="default_host" />
 
     <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationType" binding-name="services/cache/aplana/taxaccounting/DeclarationType${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplate" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplate${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript${releasePostfix}"/>
-	<resource-ref name="services/cache/aplana/taxaccounting/DepartmentReportPeriod" binding-name="services/cache/aplana/taxaccounting/DepartmentReportPeriod${releasePostfix}"/>
-	<resource-ref name="services/cache/aplana/taxaccounting/TaxPeriod" binding-name="services/cache/aplana/taxaccounting/TaxPeriod${releasePostfix}"/>
-	<resource-ref name="services/cache/aplana/taxaccounting/User" binding-name="services/cache/aplana/taxaccounting/User${releasePostfix}"/>
-	<resource-ref name="services/cache/aplana/taxaccounting/Department" binding-name="services/cache/aplana/taxaccounting/Department${releasePostfix}"/>
-	<resource-ref name="services/cache/aplana/taxaccounting/RefBook" binding-name="services/cache/aplana/taxaccounting/RefBook${releasePostfix}"/>
-	<resource-ref name="services/cache/aplana/taxaccounting/RefBookAttribute" binding-name="services/cache/aplana/taxaccounting/RefBookAttribute${releasePostfix}"/>
 
 </web-bnd>
