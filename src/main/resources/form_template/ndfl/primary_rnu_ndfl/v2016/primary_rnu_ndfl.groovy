@@ -38,7 +38,9 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
-import groovy.transform.Canonical
+import groovy.transform.AutoClone
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.transform.builder.Builder
@@ -469,6 +471,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 createKarmannikovaRateReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ставок_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
+            case SubreportAliasConstants.RNU_KARMANNIKOVA_PAYMENT_REPORT:
+                createKarmannikovaPaymentReport()
+                scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                break
             default:
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!")
         }
@@ -636,15 +642,18 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * Отчет Карманниковой: Отчет в разрезе ставок
      */
     void createKarmannikovaRateReport() {
-        List<NdflPersonIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id)
-        defineTaxRates(incomes)
-        def incomesByKey = incomes.groupBy { new KarmannikovaRateReportKey(it.kpp, it.asnuId, it.taxRate) }
+        List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
+            new KarmannikovaIncome(it)
+        }
+        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy { new Pair<String, Long>(it.operationId, it.asnuId) }.values()
+        defineTaxRates(operations)
+        correctTaxRates(operations)
+        def incomesByKey = incomes.groupBy { new KarmannikovaRateReportKey(it.kpp, it.asnuId, it.definedTaxRate) }
         List<KarmannikovaRateReportRow> rows = []
         incomesByKey.each { key, incomesGroup ->
             def row = new KarmannikovaRateReportRow()
-            row.kpp = key.kpp
-            row.asnu = incomesGroup.first().asnu
-            row.rate = key.rate
+            row.key = key
+            row.asnuName = incomesGroup.first().asnu
             for (def income : incomesGroup) {
                 row.incomeAccruedSum += (income.incomeAccruedSumm ?: 0)
                 row.incomePayoutSum += (income.incomePayoutSumm ?: 0)
@@ -659,43 +668,162 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             rows.add(row)
         }
         rows.sort({ def a, def b ->
-            a.kpp <=> b.kpp ?: a.asnu <=> b.asnu ?:
+            a.kpp <=> b.kpp ?: a.asnuName <=> b.asnuName ?:
                     (a.rate == null && b.rate == null ? 0 : a.rate == null ? 1 : b.rate == null ? -1 : a.rate <=> b.rate)
         })
         new KarmannikovaRateReportBuilder(rows).build()
     }
 
-    void defineTaxRates(List<NdflPersonIncome> incomes) {
-        def incomesByOperationIdAndAsnuId = incomes.groupBy { new Pair<String, Long>(it.operationId, it.asnuId) }
-        incomesByOperationIdAndAsnuId.each { key, incomesOfOperation ->
-            NdflPersonIncome последняяСтрокаПеречисления = null
-            NdflPersonIncome последняяСтрокаСодержащаяСтавку = null
-            Map<Date, NdflPersonIncome> incomeByTaxTransferDate = [:]
+    /**
+     * Отчет Карманниковой: Отчет в разрезе платёжных поручений
+     */
+    void createKarmannikovaPaymentReport() {
+        List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
+            new KarmannikovaIncome(it)
+        }
+        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy { new Pair<String, Long>(it.operationId, it.asnuId) }.values()
+        defineTaxRates(operations)
+        definePaymentNumber(operations)
+        correctTaxRates(operations)
+        defineCorrection(operations)
+        def incomesByKey = incomes.groupBy { new KarmannikovaPaymentReportKey(it.kpp, it.asnuId, it.paymentNumber, it.definedTaxRate, it.correction) }
+        List<KarmannikovaPaymentReportRow> rows = []
+        incomesByKey.each { key, incomesGroup ->
+            def row = new KarmannikovaPaymentReportRow()
+            row.key = key
+            row.asnuName = incomesGroup.first().asnu
+            for (def income : incomesGroup) {
+                row.calculatedTax += (income.calculatedTax ?: 0)
+                row.withholdingTax += (income.withholdingTax ?: 0)
+                row.refoundTax += (income.refoundTax ?: 0)
+                row.taxSum += (income.taxSumm ?: 0)
+            }
+            rows.add(row)
+        }
+        rows.sort({ def a, def b ->
+            a.kpp <=> b.kpp ?: a.asnuName <=> b.asnuName ?: a.paymentNumber <=> b.paymentNumber ?:
+                            a.correction <=> b.correction
+        })
+        new KarmannikovaPaymentReportBuilder(rows).build()
+    }
+
+    /**
+     * Определяет ставки у строк 2 раздела
+     */
+    void defineTaxRates(Collection<List<KarmannikovaIncome>> operations) {
+        operations.each { incomesOfOperation ->
+            KarmannikovaIncome prevRateIncome = null // предыдущая строка, содержащая ставку
+            Map<Date, KarmannikovaIncome> withholdingIncomesByTransferDate = [:] // строки удержания по сроку перечисления
             for (def income : incomesOfOperation) {
                 if (income.taxRate != null && income.taxTransferDate) {
-                    incomeByTaxTransferDate.put(income.taxTransferDate, income)
+                    withholdingIncomesByTransferDate.put(income.taxTransferDate, income)
                 }
             }
-            for (def income : incomesOfOperation) {
-                if (income.taxRate == null) {
-                    def строкаУдержанияПоСрокуПеречисления = incomeByTaxTransferDate.get(income.taxTransferDate)
-                    if (строкаУдержанияПоСрокуПеречисления && строкаУдержанияПоСрокуПеречисления.taxRate != null) {
-                        income.taxRate = строкаУдержанияПоСрокуПеречисления.taxRate
+            Integer taxRate = findSingleTaxRate(incomesOfOperation)
+            if (taxRate != null) {
+                // Если ставка только одна, то определяем её для всех строк перечисления
+                for (def income : incomesOfOperation) {
+                    income.definedTaxRate = taxRate
+                }
+            } else {
+                for (def income : incomesOfOperation) {
+                    if (income.taxRate == null) {
+                        def withholdingIncome = withholdingIncomesByTransferDate.get(income.taxTransferDate)
+                        if (withholdingIncome && withholdingIncome.taxRate != null) {
+                            income.definedTaxRate = withholdingIncome.taxRate
+                        } else if (prevRateIncome) {
+                            income.definedTaxRate = prevRateIncome.taxRate
+                        }
                     } else {
-                        income.taxRate = последняяСтрокаСодержащаяСтавку?.taxRate
+                        income.definedTaxRate = income.taxRate
+                        prevRateIncome = income
                     }
-                    последняяСтрокаПеречисления = income
-                } else {
-                    последняяСтрокаСодержащаяСтавку = income
                 }
-            }
-            if (последняяСтрокаПеречисления) {
-                последняяСтрокаПеречисления.taxRate = последняяСтрокаСодержащаяСтавку?.taxRate
             }
         }
     }
 
-    class KarmannikovaRateReportBuilder extends KarmannikovaReportBuilder {
+    /**
+     * Если в строках операции только одна ставка, то возвращяет её, иначе null
+     */
+    Integer findSingleTaxRate(List<KarmannikovaIncome> incomesOfOperation) {
+        Integer taxRate = null
+        for (def income : incomesOfOperation) {
+            if (income.taxRate != null) {
+                if (taxRate != null && taxRate != income.taxRate) {
+                    return null
+                }
+                taxRate = income.taxRate
+            }
+        }
+        return taxRate
+    }
+
+    /**
+     * Заполняет номер платежного поручения у строк 2 раздела
+     */
+    void definePaymentNumber(Collection<List<KarmannikovaIncome>> operations) {
+        operations.each { incomesOfOperation ->
+            KarmannikovaIncome prevTransferIncome = null // предыдущая строка перечисления
+            for (int i = 0; i < incomesOfOperation.size(); i++) {
+                KarmannikovaIncome income = incomesOfOperation[i]
+                if (income.taxRate == null) {// строка Перечисления
+                    prevTransferIncome = income
+                } else {
+                    KarmannikovaIncome nextTransferIncome = null // следующая строка перечисления
+                    for (int j = i + 1; j < incomesOfOperation.size(); j++) {
+                        if (incomesOfOperation[j].taxRate == null) {
+                            nextTransferIncome = incomesOfOperation[j]
+                            break
+                        }
+                    }
+                    income.paymentNumber = nextTransferIncome?.definedTaxRate == income.taxRate ? nextTransferIncome.paymentNumber :
+                            (prevTransferIncome?.paymentNumber ?: nextTransferIncome?.paymentNumber)
+                }
+            }
+        }
+    }
+
+    /**
+     * Корректирует ставку у последней строки перечисления
+     */
+    void correctTaxRates(Collection<List<KarmannikovaIncome>> operations) {
+        operations.each { incomesOfOperation ->
+            KarmannikovaIncome lastTransferIncome = null // последняя строка перечисления
+            KarmannikovaIncome lastRateIncome = null // последняя строка, содержащая ставку
+            for (def income : incomesOfOperation) {
+                if (income.taxRate == null) {
+                    lastTransferIncome = income
+                } else {
+                    lastRateIncome = income
+                }
+            }
+            if (lastTransferIncome) {
+                lastTransferIncome.definedTaxRate = lastRateIncome?.taxRate
+            }
+        }
+    }
+
+    /**
+     * Определяет является ли строка корректирующей
+     */
+    void defineCorrection(Collection<List<KarmannikovaIncome>> operations) {
+        operations.each { incomesOfOperation ->
+            for (int i = incomesOfOperation.size() - 1; i >= 0; i--) {
+                KarmannikovaIncome income = incomesOfOperation[i]
+                if (income.taxRate != null) {
+                    income.correction = true
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
+    /**
+     * Отчет Карманниковой: Отчет в разрезе ставок
+     */
+    class KarmannikovaRateReportBuilder extends AbstractKarmannikovaReportBuilder {
         List<String> header = ["КПП", "АСНУ", "Ставка", "Сумма дохода начисленного", "Сумма дохода выплаченного", "Сумма вычетов", "Налог исчисленный",
                                "Налог удержанный", "Возврат", "Долг за НП", "Долг за НА", "Налог перечисленный"]
         List<KarmannikovaRateReportRow> rows
@@ -715,6 +843,15 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             flush()
         }
 
+        @Override
+        protected void fillHeader() {
+            Row row = sheet.createRow(0)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build())
+            cell.setCellValue("Отчет в разрезе ставок")
+            super.fillHeader()
+        }
+
         void createTableHeaders() {
             def style = new StyleBuilder(workbook).borders(true).wrapText(true).hAlign(CellStyle.ALIGN_CENTER).boldweight(Font.BOLDWEIGHT_BOLD).build()
             Row row = sheet.createRow(9)
@@ -732,7 +869,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 int colIndex = 0
                 def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
                 createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
-                createCell(++colIndex, dataRow.asnu, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
+                createCell(++colIndex, dataRow.asnuName, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
                 createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
                 createCell(++colIndex, dataRow.incomeAccruedSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
                 createCell(++colIndex, dataRow.incomePayoutSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
@@ -747,6 +884,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         void cellAlignment() {
+            // фиксированная ширина для столбцов. Если не указана, то будет автоподбор ширины, но в определенном пределе
             Map<Integer, Integer> widths = [0: 16, 2: 10, 3: 16, 4: 16, 5: 16, 6: 16, 7: 16, 8: 16, 9: 16, 10: 16, 11: 16]
             for (int i = 0; i < header.size(); i++) {
                 sheet.autoSizeColumn(i)
@@ -763,7 +901,85 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    abstract class KarmannikovaReportBuilder {
+    /**
+     * для Отчет Карманниковой: Отчет в разрезе платёжных поручений
+     */
+    class KarmannikovaPaymentReportBuilder extends AbstractKarmannikovaReportBuilder {
+
+        List<String> header = ["КПП", "АСНУ", "Платёжное поручение", "Ставка", "Налог исчисленный",
+                               "Налог удержанный", "Возврат", "Налог перечисленный", "Корректировка"]
+        List<KarmannikovaPaymentReportRow> rows
+
+        KarmannikovaPaymentReportBuilder(List<KarmannikovaPaymentReportRow> rows) {
+            this.rows = rows
+            workbook = new SXSSFWorkbook()
+            workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
+            this.sheet = workbook.createSheet("Отчет")
+        }
+
+        void build() {
+            fillHeader()
+            createTableHeaders()
+            createDataForTable()
+            cellAlignment()
+            flush()
+        }
+
+        @Override
+        protected void fillHeader() {
+            Row row = sheet.createRow(0)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build())
+            cell.setCellValue("Отчет в разрезе платёжных поручений")
+            super.fillHeader()
+        }
+
+        void createTableHeaders() {
+            def style = new StyleBuilder(workbook).borders(true).wrapText(true).hAlign(CellStyle.ALIGN_CENTER).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            Row row = sheet.createRow(9)
+            for (int colIndex = 0; colIndex < header.size(); colIndex++) {
+                Cell cell = row.createCell(colIndex)
+                cell.setCellValue(header.get(colIndex))
+                cell.setCellStyle(style)
+            }
+        }
+
+        void createDataForTable() {
+            currentRowIndex = 9
+            for (def dataRow : rows) {
+                sheet.createRow(++currentRowIndex)
+                int colIndex = 0
+                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+                createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.asnuName, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.paymentNumber, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.calculatedTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.withholdingTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.refoundTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.taxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.correction ? "корр." : "", styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+            }
+        }
+
+        void cellAlignment() {
+            Map<Integer, Integer> widths = [0: 16, 2: 16, 3: 16, 4: 16, 5: 16, 6: 16, 7: 16, 8: 16, 9: 16, 10: 16, 11: 16]
+            for (int i = 0; i < header.size(); i++) {
+                sheet.autoSizeColumn(i)
+                if (widths.get(i)) {
+                    sheet.setColumnWidth(i, widths.get(i) * 269)
+                } else {
+                    if (sheet.getColumnWidth(i) > 10000) {
+                        sheet.setColumnWidth(i, 10000)
+                    } else if (sheet.getColumnWidth(i) < 3000) {
+                        sheet.setColumnWidth(i, 3000)
+                    }
+                }
+            }
+        }
+    }
+
+    abstract class AbstractKarmannikovaReportBuilder {
         protected Workbook workbook
         protected Sheet sheet
         protected int currentRowIndex = 0
@@ -774,13 +990,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             def styleHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build()
             def styleLeftHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_RIGHT).boldweight(Font.BOLDWEIGHT_BOLD).build()
             def styleNormal = new StyleBuilder(workbook).build()
-            Row row = sheet.createRow(0)
-            Cell cell = row.createCell(0)
-            cell.setCellStyle(styleHeader)
-            cell.setCellValue("Отчет в разрезе ставок")
 
-            row = sheet.createRow(++currentRowIndex)
-            cell = row.createCell(0)
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
             cell.setCellValue("Год:")
             cell = row.createCell(1)
@@ -801,7 +1013,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             cell.setCellValue("Тип формы:")
             cell = row.createCell(1)
             cell.setCellStyle(styleNormal)
-            cell.setCellValue(declarationTemplate.getDeclarationFormKind().getName())
+            cell.setCellValue(declarationTemplate.getName())
 
             row = sheet.createRow(++currentRowIndex)
             cell = row.createCell(0)
@@ -855,6 +1067,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     @Builder(builderStrategy = SimpleStrategy, prefix = "")
+    @AutoClone
     class StyleBuilder {
         Workbook workbook
         boolean borders = false
@@ -902,23 +1115,23 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         STRING, NUMBER, NUMBER_2, DATE_LONG
     }
 
-    @Canonical
+    @EqualsAndHashCode
     class KarmannikovaRateReportKey {
         String kpp
-        long asnu
+        long asnuId
         Integer rate
 
-        KarmannikovaRateReportKey(String kpp, long asnu, Integer rate) {
+        KarmannikovaRateReportKey(String kpp, long asnuId, Integer rate) {
             this.kpp = kpp
-            this.asnu = asnu
+            this.asnuId = asnuId
             this.rate = rate
         }
     }
 
     class KarmannikovaRateReportRow {
-        String kpp
-        String asnu
-        Integer rate
+        @Delegate
+        KarmannikovaRateReportKey key
+        String asnuName
         BigDecimal incomeAccruedSum = 0
         BigDecimal incomePayoutSum = 0
         BigDecimal totalDeductionsSum = 0
@@ -935,6 +1148,57 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         BigDecimal getDeptAgent() {
             return notHoldingTax < overholdingTax ? overholdingTax - notHoldingTax : 0
+        }
+    }
+
+    @EqualsAndHashCode
+    @ToString
+    class KarmannikovaPaymentReportKey {
+        String kpp
+        long asnuId
+        String paymentNumber
+        Integer rate
+        boolean correction
+
+        KarmannikovaPaymentReportKey(String kpp, long asnuId, String paymentNumber, Integer rate, boolean correction) {
+            this.kpp = kpp
+            this.asnuId = asnuId
+            this.paymentNumber = paymentNumber
+            this.rate = rate
+            this.correction = correction
+        }
+    }
+
+    @ToString
+    class KarmannikovaPaymentReportRow {
+        @Delegate
+        KarmannikovaPaymentReportKey key
+        String asnuName
+        BigDecimal calculatedTax = 0
+        BigDecimal withholdingTax = 0
+        Long refoundTax = 0
+        Long taxSum = 0
+    }
+
+    /**
+     * Расширение {@link NdflPersonIncome}
+     */
+    class KarmannikovaIncome {
+        @Delegate
+        NdflPersonIncome delegate
+        // Та же ставка, что в NdflPersonIncome, но заполненная для всех строк (в том числе для строк перечисления, где она изначально пустая)
+        // Отдельно, т.к. нужно будет ещё знать изначальное значение
+        Integer definedTaxRate
+        // Является ли строка корректирующей
+        boolean correction
+
+        KarmannikovaIncome(NdflPersonIncome delegate) {
+            this.delegate = delegate
+        }
+
+        @Override
+        String toString() {
+            return "{rowNum: $rowNum, taxRate: $taxRate, definedTaxRate: $definedTaxRate, paymentNumber: $paymentNumber, correction: $correction}"
         }
     }
 

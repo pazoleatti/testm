@@ -149,12 +149,13 @@
                                     cancelAllIntervals();
                                     showDeclarationDataNotExistsError();
                                 } else {
-                                    $scope.availableReports = data.downloadXmlAvailable;
-                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
-                                    $scope.availableKarmannikovaRateReport = data.downloadKarmannikovaRateReportAvailable;
-                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
-                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
+                                    $scope.availableReports = data.reportAvailable.XML_DEC;
+                                    $scope.availableXlsxReport = data.reportAvailable.EXCEL_DEC;
+                                    $scope.availableExcelTemplate = data.reportAvailable.EXCEL_TEMPLATE_DEC;
+                                    $scope.availableRnuNdflPersonAllDb = data.reportAvailable.rnu_ndfl_person_all_db;
+                                    $scope.availableKarmannikovaRateReport = data.reportAvailable.rnu_karmannikova_rate_report;
+                                    $scope.availableKarmannikovaPaymentReport = data.reportAvailable.rnu_karmannikova_payment_report;
+                                    $scope.availableReportKppOktmo = data.reportAvailable.report_kpp_oktmo;
                                 }
                             }
                         }
@@ -734,6 +735,9 @@
                 $scope.downloadKarmannikovaRateReport = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_RATE_REPORT;
                 };
+                $scope.downloadKarmannikovaPaymentReport = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_PAYMENT_REPORT;
+                };
                 $scope.downloadPairKppOktmo = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO;
                 };
@@ -746,7 +750,7 @@
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
                         params: {
-                            force: force ? force : false
+                            force: !!force
                         }
                     }).success(function (response) {
                         performReportSuccessResponse(response, $scope.createReportXlsx, "availableXlsxReport");
@@ -755,15 +759,13 @@
 
                 /**
                  * формирование спецотчета "РНУ НДФЛ по всем ФЛ"
-                 * @param force
                  */
                 $scope.createReportAllRnu = function (force) {
-                    force = typeof force !== 'undefined' ? force : false;
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB,
                         params: {
-                            force: force ? force : false
+                            force: !!force
                         }
                     }).success(function (response) {
                         performReportSuccessResponse(response, $scope.createReportAllRnu, "availableRnuNdflPersonAllDb");
@@ -771,31 +773,44 @@
                 };
 
                 /**
-                 *
+                 * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе ставок"
                  */
                 $scope.createKarmannikovaRateReport = function (force) {
-                    force = typeof force !== 'undefined' ? force : false;
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_RATE_REPORT,
                         params: {
-                            force: force ? force : false
+                            force: !!force
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createReportAllRnu, "availableKarmannikovaRateReport");
+                        performReportSuccessResponse(response, $scope.createKarmannikovaRateReport, "availableKarmannikovaRateReport");
+                    });
+                };
+
+                /**
+                 * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе платёжных поручений"
+                 */
+                $scope.createKarmannikovaPaymentReport = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_PAYMENT_REPORT,
+                        params: {
+                            force: !!force
+                        }
+                    }).success(function (response) {
+                        performReportSuccessResponse(response, $scope.createReportAllRnu, "availableKarmannikovaPaymentReport");
                     });
                 };
 
                 /**+
                  * Создание спецотчета "Реестр сформированной отчетности"
-                 * @param force
                  */
                 $scope.createPairKppOktmo = function (force) {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pairKppOktmoReport",
                         params: {
-                            force: force
+                            force: !!force
                         }
                     }).success(function (response) {
                         performReportSuccessResponse(response, $scope.createPairKppOktmo, "availableReportKppOktmo");

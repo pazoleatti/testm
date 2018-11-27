@@ -179,4 +179,14 @@
         </update>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5461 новый спецотчет-->
+	<changeSet id="3.3-dnovikov-5" author="dnovikov">
+		<sql>
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 100, 'Отчет в разрезе платёжных поручений', 4, 'rnu_karmannikova_payment_report');
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'Отчет в разрезе платёжных поручений', 4, 'rnu_karmannikova_payment_report');
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

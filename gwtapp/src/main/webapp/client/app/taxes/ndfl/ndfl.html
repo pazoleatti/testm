@@ -67,6 +67,18 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createKarmannikovaPaymentReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.karmannikova.paymentReport' | translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.karmannikova.paymentReport' | translate}}
+                            </div>
+                            <a ng-click="downloadKarmannikovaPaymentReport()"
+                               ng-show="availableKarmannikovaPaymentReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
+                        </div>
+                    </li>
                     <li role="menuitem"
                         ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <div class="row menuitem">

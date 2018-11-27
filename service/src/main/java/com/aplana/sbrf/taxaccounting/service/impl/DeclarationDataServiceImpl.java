@@ -1388,27 +1388,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!existDeclarationData(declarationDataId)) {
             reportAvailableResult.setDeclarationDataExist(false);
         } else {
-            reportAvailableResult.setDownloadXlsxAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
-            reportAvailableResult.setDownloadXmlAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.XML_DEC) != null);
-            reportAvailableResult.setDownloadExcelTemplateAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC) != null);
+            reportAvailableResult.setReportAvailable(DeclarationDataReportType.EXCEL_DEC.getReportAlias(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
+            reportAvailableResult.setReportAvailable(DeclarationDataReportType.XML_DEC.getReportAlias(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.XML_DEC) != null);
+            reportAvailableResult.setReportAvailable(DeclarationDataReportType.EXCEL_TEMPLATE_DEC.getReportAlias(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC) != null);
 
             DeclarationData declaration = get(declarationDataId, userInfo);
             List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
             for (DeclarationSubreport subreport : subreports) {
-                switch (subreport.getAlias()) {
-                    case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB: {
-                        reportAvailableResult.setDownloadRnuNdflPersonAllDb((reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
-                        break;
-                    }
-                    case SubreportAliasConstants.REPORT_KPP_OKTMO: {
-                        reportAvailableResult.setDownloadReportKppOktmo((reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
-                        break;
-                    }
-                    case SubreportAliasConstants.RNU_KARMANNIKOVA_RATE_REPORT: {
-                        reportAvailableResult.setDownloadKarmannikovaRateReportAvailable((reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
-                        break;
-                    }
-                }
+                reportAvailableResult.setReportAvailable(subreport.getAlias(), reportService.getReportFileUuid(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport)) != null);
             }
         }
         return reportAvailableResult;
