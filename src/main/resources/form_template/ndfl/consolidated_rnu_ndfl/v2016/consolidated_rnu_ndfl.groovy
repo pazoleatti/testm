@@ -59,9 +59,11 @@ import static form_template.ndfl.consolidated_rnu_ndfl.v2016.ConsolidatedRnuNdfl
 new ConsolidatedRnuNdfl(this).run();
 
 @TypeChecked
+@SuppressWarnings("GrMethodMayBeStatic")
 class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     DeclarationData declarationData
+    DeclarationTemplate declarationTemplate
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
@@ -79,7 +81,8 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     public ConsolidatedRnuNdfl(scriptClass) {
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
@@ -718,16 +721,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    class KarmannikovaRateReportBuilder {
-
-        Workbook workbook
-        Sheet sheet
-
+    class KarmannikovaRateReportBuilder extends KarmannikovaReportBuilder {
         List<String> header = ["КПП", "АСНУ", "Ставка", "Сумма дохода начисленного", "Сумма дохода выплаченного", "Сумма вычетов", "Налог исчисленный",
                                "Налог удержанный", "Возврат", "Долг за НП", "Долг за НА", "Налог перечисленный"]
         List<KarmannikovaRateReportRow> rows
-
-        private int currentRowIndex = 0
 
         KarmannikovaRateReportBuilder(List<KarmannikovaRateReportRow> rows) {
             this.rows = rows
@@ -742,58 +739,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             createDataForTable()
             cellAlignment()
             flush()
-        }
-
-        void fillHeader() {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-
-            def styleHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build()
-            def styleLeftHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_RIGHT).boldweight(Font.BOLDWEIGHT_BOLD).build()
-            def styleNormal = new StyleBuilder(workbook).build()
-            Row row = sheet.createRow(0)
-            Cell cell = row.createCell(0)
-            cell.setCellStyle(styleHeader)
-            cell.setCellValue("Отчет в разрезе ставок")
-
-            row = sheet.createRow(1)
-            cell = row.createCell(0)
-            cell.setCellStyle(styleLeftHeader)
-            cell.setCellValue("Год:")
-            cell = row.createCell(1)
-            cell.setCellStyle(styleNormal)
-            cell.setCellValue(departmentReportPeriod.reportPeriod.taxPeriod.year)
-
-            row = sheet.createRow(2)
-            cell = row.createCell(0)
-            cell.setCellStyle(styleLeftHeader)
-            cell.setCellValue("Период:")
-            cell = row.createCell(1)
-            cell.setCellStyle(styleNormal)
-            cell.setCellValue(departmentReportPeriod.reportPeriod.name)
-
-            row = sheet.createRow(3)
-            cell = row.createCell(0)
-            cell.setCellStyle(styleLeftHeader)
-            cell.setCellValue("№ формы:")
-            cell = row.createCell(1)
-            cell.setCellStyle(styleNormal)
-            cell.setCellValue(declarationData.id)
-
-            row = sheet.createRow(4)
-            cell = row.createCell(0)
-            cell.setCellStyle(styleLeftHeader)
-            cell.setCellValue("Подразделение:")
-            cell = row.createCell(1)
-            cell.setCellStyle(styleNormal)
-            cell.setCellValue("/Банк/" + departmentService.getParentsHierarchy(declarationData.departmentId))
-
-            row = sheet.createRow(5)
-            cell = row.createCell(0)
-            cell.setCellStyle(styleLeftHeader)
-            cell.setCellValue("Сформирован:")
-            cell = row.createCell(1)
-            cell.setCellStyle(styleNormal)
-            cell.setCellValue(date.format('dd.MM.yyyy HH:mm:ss'))
         }
 
         void createTableHeaders() {
@@ -842,18 +787,74 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 }
             }
         }
+    }
 
-        void flush() {
-            OutputStream writer = null
-            try {
-                writer = scriptSpecificReportHolder.getFileOutputStream()
-                workbook.write(writer)
-            } finally {
-                writer.close()
-            }
+    abstract class KarmannikovaReportBuilder {
+        protected Workbook workbook
+        protected Sheet sheet
+        protected int currentRowIndex = 0
+
+        protected void fillHeader() {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+
+            def styleHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build()
+            def styleLeftHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_RIGHT).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            def styleNormal = new StyleBuilder(workbook).build()
+            Row row = sheet.createRow(0)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(styleHeader)
+            cell.setCellValue("Отчет в разрезе ставок")
+
+            row = sheet.createRow(++currentRowIndex)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Год:")
+            cell = row.createCell(1)
+            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(NUMBER).build())
+            cell.setCellValue(departmentReportPeriod.reportPeriod.taxPeriod.year)
+
+            row = sheet.createRow(++currentRowIndex)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Период:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue(departmentReportPeriod.reportPeriod.name)
+
+            row = sheet.createRow(++currentRowIndex)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Тип формы:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue(declarationTemplate.getDeclarationFormKind().getName())
+
+            row = sheet.createRow(++currentRowIndex)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("№ формы:")
+            cell = row.createCell(1)
+            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(NUMBER).build())
+            cell.setCellValue(declarationData.id)
+
+            row = sheet.createRow(++currentRowIndex)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Подразделение:")
+            cell = row.createCell(1)
+            cell.setCellStyle(styleNormal)
+            cell.setCellValue("/Банк/" + departmentService.getParentsHierarchy(declarationData.departmentId))
+
+            row = sheet.createRow(++currentRowIndex)
+            cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Сформирован:")
+            cell = row.createCell(1)
+            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(DATE_LONG).build())
+            cell.setCellValue(date)
         }
 
-        private void createCell(int colIndex, Object value, CellStyle style) {
+        protected void createCell(int colIndex, Object value, CellStyle style) {
             Row row = sheet.getRow(currentRowIndex)
             Cell cell = row.createCell(colIndex)
             if (value != null) {
@@ -866,6 +867,16 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 }
             }
             cell.setCellStyle(style)
+        }
+
+        protected void flush() {
+            OutputStream writer = null
+            try {
+                writer = scriptSpecificReportHolder.getFileOutputStream()
+                workbook.write(writer)
+            } finally {
+                writer.close()
+            }
         }
     }
 
@@ -898,6 +909,8 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 style.setDataFormat((short) 1)
             } else if (dataFormat == NUMBER_2) {
                 style.setDataFormat((short) 2)
+            } else if (dataFormat == DATE_LONG) {
+                style.setDataFormat(workbook.createDataFormat().getFormat("dd.MM.yyyy hh:m:ss"))
             }
             style.setAlignment(hAlign)
             style.setWrapText(wrapText)
@@ -912,7 +925,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     @TypeChecked(TypeCheckingMode.SKIP)
     enum DataFormatEnum {
-        STRING, NUMBER, NUMBER_2
+        STRING, NUMBER, NUMBER_2, DATE_LONG
     }
 
     @Canonical
