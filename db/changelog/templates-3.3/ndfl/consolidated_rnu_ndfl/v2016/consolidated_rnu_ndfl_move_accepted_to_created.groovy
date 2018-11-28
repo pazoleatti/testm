@@ -1,4 +1,4 @@
-package form_template.ndfl.primary_rnu_ndfl.v2016
+package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
@@ -62,33 +62,13 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
         List<Relation> destinations = sourceService.getDestinationsInfo(declarationData)
         List<Relation> notStateCreatedDestinations = destinations.findAll { it.declarationState != State.CREATED }
         // Все формы-приёмники "Созданы", проверка пройдена
-        if (notStateCreatedDestinations.isEmpty()) {
-            return
+        if (!notStateCreatedDestinations.isEmpty()) {
+            logDeclarationHasNotAcceptedDestinationsError()
         }
-
-        // Имеются формы-приёмники в ином состоянии, формируем предупреждения или ошибки.
-
-        // ТБ декларации
-        Department declarationTB = departmentService.getParentTB(declarationData.departmentId)
-        logger.info("ТБ декларации: $declarationTB.id")
-
-        // Множество id тербанков форм-приёмников
-        Set<Integer> destinationTBIds = notStateCreatedDestinations.collect {
-            departmentService.getParentTBId(it.departmentId)
-        }.toSet()
-        logger.info("ТБ приёмников: ${destinationTBIds.join(", ")}")
-
-        // Если есть форма-приёмник из того же тербанка, что декларация, выдаём ошибку, иначе предупреждение
-        MessageKind messageKind = (declarationTB.id in destinationTBIds) ? MessageKind.SAME_TB_ERROR : MessageKind.OTHER_TB_WARNING
-        logDeclarationHasNotAcceptedDestinations(messageKind)
     }
 
-    private enum MessageKind {
-        OTHER_TB_WARNING, SAME_TB_ERROR
-    }
-
-    // Логгирование ситуации возникновения ошибок
-    private void logDeclarationHasNotAcceptedDestinations(MessageKind messageKind) {
+    // Логгирование ситуации возникновения ошибки
+    private void logDeclarationHasNotAcceptedDestinationsError() {
         // Данные для вывода в логгер
         Department declarationDepartment = departmentService.get(declarationData.departmentId)
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
@@ -96,17 +76,11 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
         String periodName = departmentReportPeriod.reportPeriod.name
         String correctionDate = departmentReportPeriod.correctionDate ? " (корр. ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")})" : ""
 
-        if (messageKind == MessageKind.SAME_TB_ERROR) {
-            Department declarationTB = departmentService.getParentTB(declarationData.departmentId)
-            logger.error("Не выполнена операция \"Возврат в Создана\" для налоговой формы: № $declarationData.id, " +
-                    "Период: \"$periodYear, $periodName$correctionDate\", Подразделение: \"$declarationDepartment.shortName\". " +
-                    "Причина: Одна или несколько налоговых форм - приемников в ТБ $declarationTB.shortName находятся в статусе, " +
-                    "отличном от \"Создана\""
-            )
-        } else {
-            logger.warn("Для налоговой формы № $declarationData.id, Период: \"$periodYear, $periodName$correctionDate\", " +
-                    "Подразделение: \"$declarationDepartment.shortName\" в других ТБ имеются налоговые формы-приемники," +
-                    " статус которых отличен от \"Создана\"")
-        }
+        Department declarationTB = departmentService.getParentTB(declarationData.departmentId)
+        logger.error("Не выполнена операция \"Возврат в Создана\" для налоговой формы: № $declarationData.id, " +
+                "Период: \"$periodYear, $periodName$correctionDate\", Подразделение: \"$declarationDepartment.shortName\". " +
+                "Причина: Одна или несколько налоговых форм - приемников в ТБ $declarationTB.shortName находятся в статусе, " +
+                "отличном от \"Создана\""
+        )
     }
 }
