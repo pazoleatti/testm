@@ -111,4 +111,19 @@ public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
         RefBook refBook = commonRefBookService.get(refBookId);
         return String.format(getAsyncTaskType().getDescription(), specificReportType, refBook.getName(), version, filter);
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public String getLockExistErrorMessage() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

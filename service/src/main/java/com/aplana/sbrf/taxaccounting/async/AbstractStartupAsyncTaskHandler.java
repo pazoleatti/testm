@@ -76,10 +76,6 @@ public abstract class AbstractStartupAsyncTaskHandler {
         return AsyncQueue.SHORT;
     }
 
-    public String createLockExistErrorMessage() {
-        return "";
-    }
-
     /**
      * Выполняет логику после создания задачи
      *

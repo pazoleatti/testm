@@ -171,4 +171,19 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         long declarationDataId = (Long) params.get("declarationDataId");
         return String.format(ddReportType.getReportType().getDescription(), ddReportType.getSubreport().getName(), declarationDataService.getDeclarationFullName(declarationDataId, ddReportType));
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public String getLockExistErrorMessage() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

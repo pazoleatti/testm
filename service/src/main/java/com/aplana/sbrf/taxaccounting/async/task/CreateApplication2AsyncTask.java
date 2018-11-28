@@ -61,4 +61,19 @@ public class CreateApplication2AsyncTask extends AbstractAsyncTask {
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.CREATE_APPLICATION_2;
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public String getLockExistErrorMessage() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

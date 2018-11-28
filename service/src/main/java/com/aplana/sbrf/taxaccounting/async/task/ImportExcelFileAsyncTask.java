@@ -98,4 +98,19 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.IMPORT_DECLARATION_EXCEL;
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public String getLockExistErrorMessage() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

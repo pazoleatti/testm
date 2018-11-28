@@ -96,4 +96,19 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.LOAD_TRANSPORT_FILE;
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public String getLockExistErrorMessage() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

@@ -259,7 +259,7 @@
                  */
                 $scope.searchFilter.isClearByFilterParams = function () {
                     $scope.searchFilter.isClear = !(isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income)
-                        && isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
+                    && isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
                 };
 
                 function isEmpty(object) {
@@ -562,31 +562,15 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"
                  */
-                $scope.check = function (force) {
+                $scope.check = function () {
 
-                    force = typeof force !== 'undefined' ? force : false;
-
-                    checkDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
-                        force: force
-                    }, function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                            updateDeclarationInfo();
-                        } else {
-                            if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                $dialogs.confirmDialog({
-                                    content: response.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.check(true);
-                                    }
-                                });
-                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                                $window.alert($filter('translate')('title.checkImpossible'));
+                    checkDeclarationData.query({declarationDataId: $stateParams.declarationDataId},
+                        function (response) {
+                            if (response.uuid && response.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.uuid);
+                                updateDeclarationInfo();
                             }
-                        }
-                    });
+                        });
                 };
 
                 /**

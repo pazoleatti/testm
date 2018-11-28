@@ -90,4 +90,19 @@ public class CreateTaxNotificationAsyncTask extends AbstractAsyncTask {
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.CREATE_NOT_HOLDING_TAX_NOTIFICATIONS;
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public String getLockExistErrorMessage() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

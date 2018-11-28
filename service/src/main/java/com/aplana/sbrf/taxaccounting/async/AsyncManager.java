@@ -188,4 +188,15 @@ public interface AsyncManager {
      * @return задача активна?
      */
     boolean isTaskActive(long taskId);
+
+    /**
+     * Проверить и создать блокировку. Метод делегирует объекту {@param task} проверку на блокировки и в случае успеха создает блокировку для задачи.
+     * @param task      задача для которой создается болкировка
+     * @param params    параметры задачи
+     * @param logger    логгер
+     * @param lockKey   сгененрированный ключ блокировки
+     * @param userInfo  информация опользователе
+     * @return  {@code true} если блокировка установлена
+     */
+    boolean checkAndCreateLocks(Task task, Map<String, Object> params, Logger logger, String lockKey, TAUserInfo userInfo);
 }

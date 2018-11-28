@@ -3,7 +3,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -928,59 +931,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, final long declarationDataId,
-                                                   final boolean force) {
+    public ActionResult checkDeclaration(TAUserInfo userInfo, final long declarationDataId) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
-        final CheckDeclarationResult result = new CheckDeclarationResult();
+        final ActionResult result = new ActionResult();
+        Logger logger = new Logger();
+        String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
+        asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
-        if (!existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-        } else {
-            Logger logger = new Logger();
-            LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
-            if (lockDataAccept == null) {
-                String uuidXml = reportService.getReportFileUuidSafe(declarationDataId, DeclarationDataReportType.XML_DEC);
-                if (uuidXml != null || !isXmlRequired(userInfo, declarationDataId)) {
-                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                        result.setRestartMsg(restartStatus.getSecond());
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    } else {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("declarationDataId", declarationDataId);
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                            @Override
-                            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                                return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
-                            }
-                        });
-                    }
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
-                }
-            } else {
-                try {
-                    asyncManager.addUserWaitingForTask(lockDataAccept.getTaskId(), userInfo.getUser().getId());
-                } catch (Exception ignored) {
-                }
-                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-                AsyncTaskData acceptTaskData = asyncTaskDao.findByIdLight(lockDataAccept.getTaskId());
-                logger.error(
-                        String.format(
-                                AsyncTask.LOCK_CURRENT,
-                                sdf.format(lockDataAccept.getDateLock()),
-                                taUserService.getUser(lockDataAccept.getUserId()).getName(),
-                                acceptTaskData.getDescription())
-                );
-                throw new ServiceLoggerException("Для текущего экземпляра налоговой формы запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()));
-            }
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
         return result;
     }
 

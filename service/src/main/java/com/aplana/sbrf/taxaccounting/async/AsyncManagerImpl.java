@@ -54,8 +54,6 @@ public class AsyncManagerImpl implements AsyncManager {
     private AsyncTaskDao asyncTaskDao;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
-    @Autowired
-    private StartupAsyncTaskHandlerFactory startupAsyncTaskHandlerFactory;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -200,90 +198,68 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public AsyncTaskData createTask(final String lockKey, final AsyncTaskType taskType, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
+    public synchronized AsyncTaskData createTask(final String lockKey, final AsyncTaskType taskType, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
         LOG.info(String.format("AsyncManagerImpl.executeTask by %s. lockKey: %s; taskType: %s; params: %s", user, lockKey, taskType, params));
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
                 LOG.info(String.format("Выполнение проверок перед запуском для задачи с ключом %s", lockKey));
-                AbstractStartupAsyncTaskHandler handler = startupAsyncTaskHandlerFactory.getHandler();
-                if (handler instanceof AsyncTaskExecutePossibilityVerifier) {
-                    AsyncTaskExecutePossibilityVerifier verifier = (AsyncTaskExecutePossibilityVerifier) handler;
+                AsyncTask task = getAsyncTaskBean(taskType.getAsyncTaskTypeId());
+                if (task instanceof AsyncTaskExecutePossibilityVerifier) {
+                    AsyncTaskExecutePossibilityVerifier verifier = (AsyncTaskExecutePossibilityVerifier) task;
                     if (!verifier.canExecuteByLimit()) {
                         logger.error(verifier.createExecuteByLimitErrorMessage());
                     } else {
-                        if (handler.checkLocks(taskType, user, logger)) {
-                            LOG.info(String.format("Найдены запущенные задачи, по которым требуется удалить блокировку для задачи с ключом %s", lockKey));
-                            logger.error("");
-                        } else {
-                            //Задачи найдены и подтверждена их отмена
-                            LOG.info(String.format("Создание блокировки для задачи с ключом %s", lockKey));
-                            LockData lockData = handler.lockObject(lockKey, taskType, user);
+                        System.out.println("before sleep " + Thread.currentThread().getName());
+                        if (checkAndCreateLocks(task, params, logger, lockKey, user)) {
                             AsyncTaskData taskData = null;
-                            if (lockData == null) {
-                                //Блокировка успешно установлена
-                                try {
-                                    //Постановка новой задачи в очередь
-                                    LOG.info(String.format("Постановка в очередь задачи с ключом %s", lockKey));
-                                    lockData = lockDataService.getLock(lockKey);
+                            try {
+                                //Постановка новой задачи в очередь
+                                LOG.info(String.format("Постановка в очередь задачи с ключом %s", lockKey));
+                                LockData lockData = lockDataService.getLock(lockKey);
 
-                                    if (lockData != null) {
-                                        try {
-                                            if (!MapUtils.isEmpty(params)) {
-                                                checkParams(params);
-                                            }
-                                            // Получение и проверка класса обработчика задачи
-                                            AsyncTask task = getAsyncTaskBean(taskType.getAsyncTaskTypeId());
-                                            String description = task.getDescription(user, params);
-                                            AsyncQueue queue = task.checkTaskLimit(description, user, params);
-
-                                            // Сохранение в очереди асинхронных задач - запись в БД
-                                            String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                                            taskData = asyncTaskDao.create(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
-                                            lockDataService.bindTask(lockKey, taskData.getId());
-
-                                            LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
-                                                    taskData.getId(), queue.name(), taskType.getId(), priorityNode));
-                                        } catch (Exception e) {
-                                            LOG.error("Async task creation has been failed!", e);
-                                            throw new AsyncTaskException(e.getMessage(), e);
+                                if (lockData != null) {
+                                    try {
+                                        if (!MapUtils.isEmpty(params)) {
+                                            checkParams(params);
                                         }
-                                    } else {
-                                        throw new AsyncTaskException("Cannot execute task. Lock doesn't exists.");
-                                    }
 
-                                    /********************************************************************************/
-                                    //Выполнение пост-обработки
-                                    handler.afterTaskCreated(taskData, logger);
-                                    return taskData;
-                                } catch (Exception e) {
-                                    if (taskData != null) {
-                                        finishTask(taskData.getId());
-                                    } else {
-                                        lockDataService.unlock(lockKey, user.getUser().getId(), true);
+                                        String description = task.getDescription(user, params);
+                                        AsyncQueue queue = task.checkTaskLimit(description, user, params);
+
+                                        // Сохранение в очереди асинхронных задач - запись в БД
+                                        String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
+                                        taskData = asyncTaskDao.create(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
+                                        lockDataService.bindTask(lockKey, taskData.getId());
+
+                                        LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
+                                                taskData.getId(), queue.name(), taskType.getId(), priorityNode));
+                                    } catch (Exception e) {
+                                        LOG.error("Async task creation has been failed!", e);
+                                        throw new AsyncTaskException(e.getMessage(), e);
                                     }
-                                    int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
-                                    if (i != -1) {
-                                        throw (ServiceLoggerException) ExceptionUtils.getThrowableList(e).get(i);
-                                    }
-                                    throw new ServiceException(e.getMessage(), e);
+                                } else {
+                                    throw new AsyncTaskException("Cannot execute task. Lock doesn't exists.");
                                 }
-                            } else {
-                                //Блокировка не была установлена, т.к этот объект был заблокирован ранее - добавляем пользователя в подписчики на задачу
-                                LOG.info(String.format("Уже существует блокировка задачи с ключом %s", lockKey));
-                                addUserWaitingForTask(lockData.getTaskId(), user.getUser().getId());
-                                logger.info(String.format(AsyncTask.LOCK_INFO_MSG,
-                                        sdf.get().format(lockData.getDateLock()),
-                                        userService.getUser(lockData.getUserId()).getName()));
+                                return taskData;
+                            } catch (Exception e) {
+                                if (taskData != null) {
+                                    finishTask(taskData.getId());
+                                } else {
+                                    lockDataService.unlock(lockKey, user.getUser().getId(), true);
+                                }
+                                int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                                if (i != -1) {
+                                    throw (ServiceLoggerException) ExceptionUtils.getThrowableList(e).get(i);
+                                }
+                                throw new ServiceException(e.getMessage(), e);
                             }
                         }
                     }
                 }
-
                 return null;
             }
         });
-
         return null;
     }
 
@@ -467,6 +443,19 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public boolean isTaskActive(long taskId) {
         return asyncTaskDao.isTaskActive(taskId);
+    }
+
+    @Override
+    public synchronized boolean checkAndCreateLocks(Task task, Map<String, Object> params, Logger logger, String lockKey, TAUserInfo userInfo) {
+        if (task.checkLocks(params)) {
+            LOG.info(String.format("Найдены запущенные задачи, по которым требуется удалить блокировку для задачи с ключом %s", lockKey));
+            logger.error(task.getLockExistErrorMessage());
+            return false;
+        } else {
+            LOG.info(String.format("Создание блокировки для задачи с ключом %s", lockKey));
+            task.lockObject(lockKey, userInfo, params);
+            return true;
+        }
     }
 
     /**

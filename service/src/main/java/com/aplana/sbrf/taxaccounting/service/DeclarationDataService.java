@@ -216,10 +216,9 @@ public interface DeclarationDataService {
      *
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
+     * @return модель {@link ActionResult}, в которой содержаться данные о результате проверки декларации
      */
-    CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
+    ActionResult checkDeclaration(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Проверить список деклараций
