@@ -726,9 +726,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             }
             rows.add(row)
         }
+        defineOrder(rows, operations)
         rows.sort({ def a, def b ->
             a.kpp <=> b.kpp ?: a.asnuName <=> b.asnuName ?: a.paymentNumber <=> b.paymentNumber ?:
-                            a.correction <=> b.correction
+                    a.order <=> b.order ?: a.correction <=> b.correction
         })
         new KarmannikovaPaymentReportBuilder(rows).build()
     }
@@ -842,6 +843,33 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 } else {
                     break
                 }
+            }
+        }
+    }
+
+    void defineOrder(List<KarmannikovaPaymentReportRow> rows, Collection<List<KarmannikovaIncome>> operations) {
+        Map<String, Set<String>> operationsIdsByPaymentNumber = [:]
+        operations.each { incomesOfOperation ->
+            for (def income : incomesOfOperation) {
+                if (income.paymentNumber) {
+                    def operationIds = operationsIdsByPaymentNumber.get(income.paymentNumber)
+                    if (operationIds) {
+                        operationIds.add(income.operationId)
+                    } else {
+                        operationsIdsByPaymentNumber.put(income.paymentNumber, [income.operationId] as Set)
+                    }
+                }
+            }
+        }
+        Map<KarmannikovaPaymentReportKey, Integer> orders = [:]
+        for (def row : rows) {
+            if (operationsIdsByPaymentNumber.get(row.paymentNumber)?.size() ?: 0 == 1) {
+                def key = new KarmannikovaPaymentReportKey(row.key.kpp, row.key.asnuId, row.key.paymentNumber, null, row.key.correction)
+                Integer order = orders.get(key)
+                row.order = order ? order + 1 : 1
+                orders.put(key, row.order)
+            } else {
+                row.order = row.rate
             }
         }
     }
@@ -1178,7 +1206,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     @EqualsAndHashCode
-    @ToString
     class KarmannikovaPaymentReportKey {
         String kpp
         long asnuId
@@ -1193,9 +1220,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             this.rate = rate
             this.correction = correction
         }
+
+        @Override
+        String toString() {
+            return "$kpp, $asnuId, $paymentNumber, $rate, $correction"
+        }
     }
 
-    @ToString
     class KarmannikovaPaymentReportRow {
         @Delegate
         KarmannikovaPaymentReportKey key
@@ -1204,6 +1235,12 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         BigDecimal withholdingTax = 0
         Long refoundTax = 0
         Long taxSum = 0
+        int order
+
+        @Override
+        String toString() {
+            return "$order, $key, $asnuName"
+        }
     }
 
     /**
