@@ -8,7 +8,6 @@ set NEWP NONE;
 WHENEVER SQLERROR EXIT;
 
 variable v_count number;
-
 exec :v_count:=0;
 
 select count(*) into :v_count 

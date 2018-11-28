@@ -11,6 +11,7 @@ begin
   select count(*) into v_exist_status from user_tab_columns where lower(table_name)='ref_book_person' and lower(column_name)='status';
   select count(*) into v_exist_version from user_tab_columns where lower(table_name)='ref_book_person' and lower(column_name)='version';
   select count(*) into v_exist_end_date from user_tab_columns where lower(table_name)='ref_book_person' and lower(column_name)='end_date';
+  
   IF v_exist_status=1 AND v_exist_version=1 AND v_exist_end_date=1 THEN
   
 	  v_rows := -1;
