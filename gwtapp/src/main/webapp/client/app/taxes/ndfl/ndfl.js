@@ -637,13 +637,6 @@
                 };
 
                 /**
-                 * Возможность выгружать шаблон Excel-файла для загрузки
-                 */
-                $scope.canCreateExcelTemplate = function () {
-                    return $scope.declarationData && $scope.declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.name;
-                };
-
-                /**
                  * @description Запрос на подтверждение выполнения опрерации
                  */
                 $scope.confirmImport = function () {

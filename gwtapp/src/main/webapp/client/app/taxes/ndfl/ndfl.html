@@ -94,7 +94,7 @@
                         </div>
                     </li>
                     <li role="menuitem"
-                        ng-show="canCreateExcelTemplate()">
+                        ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
                         <div class="row menuitem">
                             <a ng-click="createExcelTemplate()">
                                 {{::'link.ndfl.reporting.formTemplateExcel' | translate}}</a>
@@ -102,12 +102,13 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem">
+                    <li role="menuitem"
+                        ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <hr style="margin: 0;">
                         <div class="row menuitem">
                             <a ng-click="createNdflReport()" ng-show="canCreateNdflReport()">
                                 {{::'link.ndfl.reporting.createNdflReport' | translate}}</a>
-                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                            <div ng-show="!canCreateNdflReport()">
                                 {{::'link.ndfl.reporting.createNdflReport' | translate}}
                             </div>
                         </div>
