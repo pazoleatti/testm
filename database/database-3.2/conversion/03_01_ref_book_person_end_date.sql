@@ -61,7 +61,7 @@ begin
 			WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
 			ELSE
 				dbms_output.put_line(v_task_name||'[INFO]:'||' Success. Updated '||to_char(v_rows)||' rows');
-			END;
+			END CASE;
 
 			v_task_name :='ref_book_person_end_date block #2 - update REF_BOOK_ID_DOC person_id = null';  
 			begin
