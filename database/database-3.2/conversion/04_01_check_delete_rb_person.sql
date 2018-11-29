@@ -16,7 +16,8 @@ where
 exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=a.person_id)
 and record_id is not null
 and version is not null
-and status = 0;
+and status = 0
+and duplicate_record_id is not null;
 
 spool &1
 
