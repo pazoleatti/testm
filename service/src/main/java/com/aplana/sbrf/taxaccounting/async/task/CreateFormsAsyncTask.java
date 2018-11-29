@@ -73,28 +73,22 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(taskData.getUserId()));
-        Integer declarationTypeId = (Integer) taskData.getParams().get("declarationTypeId");
-        Integer departmentReportPeriodId = (Integer) taskData.getParams().get("departmentReportPeriodId");
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
-        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
-
-        String strCorrPeriod = "";
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
-        }
-
-        return String.format("Выполнено создание отчетных форм %s для %s за период %s, %s%s",
-                declarationTemplate.getName(),
-                department.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
+        String taskName = generateTaskName(taskData);
+        return String.format("Выполнена операция \"%s\"", taskName);
     }
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
+        String taskName = generateTaskName(taskData);
+        if (unexpected) {
+            Throwable exceptionThrown = (Throwable) taskData.getParams().get("exceptionThrown");
+            return String.format("Не выполнена операция \"%s\". Причина: %s", taskName, exceptionThrown.getMessage());
+        } else {
+            return String.format("Не выполнена операция \"%s\"", taskName);
+        }
+    }
+
+    private String generateTaskName(AsyncTaskData taskData) {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
         Integer declarationTypeId = (Integer) taskData.getParams().get("declarationTypeId");
@@ -102,18 +96,23 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
+        int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(activeDeclarationTemplateId);
 
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
+            strCorrPeriod = " (корр. " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate()) + ")";
         }
 
-        return String.format("Произошла непредвиденная ошибка при создании отчетных форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationTemplate.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
-                department.getName());
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                departmentReportPeriod.getReportPeriod().getName(),
+                strCorrPeriod,
+                department.getName()
+        );
     }
+
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
