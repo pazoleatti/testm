@@ -104,7 +104,7 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
             strCorrPeriod = " (корр. " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate()) + ")";
         }
 
-        return String.format("Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Создание отчетных форм: \"%s\", Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationTemplate.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 departmentReportPeriod.getReportPeriod().getName(),
