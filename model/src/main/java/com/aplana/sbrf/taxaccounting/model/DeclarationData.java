@@ -88,4 +88,11 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * КПП, включаемые в КНФ для обособленного подразделения (см {@link RefBookKnfType})
      */
     private Set<String> includedKpps;
+
+    /**
+     * Проверка статуса формы.
+     */
+    public boolean is(State checkedState) {
+        return this.state == checkedState;
+    }
 }
