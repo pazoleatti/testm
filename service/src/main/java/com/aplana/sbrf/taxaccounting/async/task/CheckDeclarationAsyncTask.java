@@ -35,6 +35,8 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask impl
     @Autowired
     private LockDataService lockDataService;
 
+
+
     @Override
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.CHECK_DEC;
@@ -78,19 +80,26 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask impl
     }
 
     @Override
-    public boolean checkLocks(Map<String, Object> params) {
+    public boolean checkLocks(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long) params.get("declarationDataId");
-        return lockDataService.isLockExists(declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CHECK_DEC), false);
+        String checkKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CHECK_DEC);
+        String acceptKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC);
+
+        if (lockDataService.isLockExists(checkKey, false)) {
+            logger.error(getLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), checkKey));
+            return true;
+        }
+        if (lockDataService.isLockExists(acceptKey, false)) {
+            logger.error(getLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), acceptKey));
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
         return lockDataService.lock(lockKey, user.getUser().getId(), getDescription(user, params));
-    }
-
-    @Override
-    public String getLockExistErrorMessage() {
-        return "";
     }
 
     @Override

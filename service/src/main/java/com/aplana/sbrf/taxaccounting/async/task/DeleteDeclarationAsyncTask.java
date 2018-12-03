@@ -132,12 +132,7 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
-    public boolean checkLocks(Map<String, Object> paramsr) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
-
-    @Override
-    public String getLockExistErrorMessage() {
+    public boolean checkLocks(Map<String, Object> params, Logger logger) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 }

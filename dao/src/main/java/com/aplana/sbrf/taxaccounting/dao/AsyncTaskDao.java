@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -139,4 +132,11 @@ public interface AsyncTaskDao {
      * @return true если задача существует и имеет статус отличный от AsyncTaskState.CANCELLED
      */
     boolean isTaskActive(long id);
+
+    /**
+     * Находит задачу в списке по ключу блокировки
+     * @param lockKey   строка ключа блокировки
+     * @return данные конкретной задачи либо null, если подходящая задача не найдена
+     */
+    AsyncTaskData findAsyncTaskByLockKey(String lockKey);
 }

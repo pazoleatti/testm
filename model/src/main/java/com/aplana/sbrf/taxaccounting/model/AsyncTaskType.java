@@ -1,15 +1,18 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.Getter;
+
 /**
  * Типы асинхронных задач с привязкой их к обработчикам в таблице ASYNC_TASK_TYPE
  */
+@Getter
 public enum AsyncTaskType {
     //Асинхронные задачи
     XML_DEC(1, "XML", "Расчет НФ. %s", 6L),
     CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Выгрузка отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L),
-    CHECK_DEC(0, "CHECK_DECLARATION", "Проверка налоговой формы. %s", 14L),
-    ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие налоговой формы. %s", 15L),
+    CHECK_DEC(0, "CHECK_DECLARATION", "Проверка формы", "Проверка налоговой формы. %s", 14L),
+    ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие формы", "Принятие налоговой формы. %s", 15L),
     DELETE_DEC(5, "DELETE_DECLARATION", "Удаление налоговой формы. %s", 32L),
     EXCEL_DEC(0, "XLSX", "Формирование XLSX-отчета для НФ. ", 5L),
     PDF_DEC(2, "PDF", "Создание формы предварительного просмотра. %s", 7L),
@@ -45,8 +48,14 @@ public enum AsyncTaskType {
 
     private int id;
     private String name;
+    private String viewName;
     private String description;
     private Long asyncTaskTypeId;
+
+    AsyncTaskType(int id, String name,  String viewName, String description, Long asyncTaskTypeId) {
+        this(id, name, description, asyncTaskTypeId);
+        this.viewName = viewName;
+    }
 
     AsyncTaskType(int id, String name, String description, Long asyncTaskTypeId) {
         this.id = id;
@@ -59,34 +68,6 @@ public enum AsyncTaskType {
         this.id = id;
         this.name = name;
         this.description = description;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Long getAsyncTaskTypeId() {
-        return asyncTaskTypeId;
-    }
-
-    public void setAsyncTaskTypeId(Long asyncTaskTypeId) {
-        this.asyncTaskTypeId = asyncTaskTypeId;
     }
 
     public static AsyncTaskType getByAsyncTaskTypeId(long id) {

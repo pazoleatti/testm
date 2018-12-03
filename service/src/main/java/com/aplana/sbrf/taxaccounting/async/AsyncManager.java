@@ -68,10 +68,8 @@ public interface AsyncManager {
      * @param taskType тип задачи
      * @param user пользователь, от имени которого была запущена задача
      * @param params кастомные параметры задачи
-     * @return данные задачи, которая была поставлена в очередь, либо null, если она поставлена не была
      */
-    // TODO: проработать аргументы
-    AsyncTaskData createTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger);
+    void createTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger);
 
     /**
      * Выполняет попытку запуска асинхронной задачи, если не удалось - возвращает сообщение для диалога

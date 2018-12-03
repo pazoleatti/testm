@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
@@ -210,15 +209,6 @@ public interface DeclarationDataService {
      * Найти все формы созданные в отчетном периоде
      */
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
-
-    /**
-     * Проверить декларацию
-     *
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param declarationDataId идентификатор декларации
-     * @return модель {@link ActionResult}, в которой содержаться данные о результате проверки декларации
-     */
-    ActionResult checkDeclaration(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Проверить список деклараций
@@ -624,15 +614,6 @@ public interface DeclarationDataService {
     CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo);
 
     /**
-     * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
-     *
-     * @param userInfo информация о пользователе
-     * @param action   объект с параметрами для выполнения операции по принятию налоговой формы
-     * @return объект с данными для представления об операции по принятию налоговой формы
-     */
-    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, AcceptDeclarationDataAction action);
-
-    /**
      * Запускает ассинхронную задачу на выгрузку отчетности для форм
      *
      * @param filter   фильтр, по которому выбираются формы
@@ -800,4 +781,11 @@ public interface DeclarationDataService {
      * @return данные файла
      */
     BlobData downloadFile(DeclarationDataFile declarationDataFile);
+
+    /**
+     * Описание налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @return строка с описанием
+     */
+    String getStandardDeclarationDescription(Long declarationDataId);
 }

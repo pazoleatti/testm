@@ -276,4 +276,17 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             return false;
         }
     }
+
+    @Override
+    public AsyncTaskData findAsyncTaskByLockKey(String lockKey) {
+        String query = "select * from async_task asy\n" +
+                "left join lock_data ld on asy.id = ld.task_id\n" +
+                "where ld.key = :key";
+        MapSqlParameterSource params = new MapSqlParameterSource("key", lockKey);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(query, params, new AsyncTaskDataMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

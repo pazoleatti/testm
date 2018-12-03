@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.async;
 
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-
-import java.util.Map;
 
 /**
  * Обработчик для разных этапов в ходе постановки в очередь асинхронной задачи.
@@ -49,31 +49,6 @@ public abstract class AbstractStartupAsyncTaskHandler {
      * @param user     пользователь, который инициировал операцию
      */
     protected void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
-    }
-
-    /**
-     * Проверока существования блокировок, которые мешают постановке в очередь текущей задачи
-     *
-     * @param taskType тип асинхронной задачи, которая будет выполнена
-     * @param user     пользователь, который инициировал операцию
-     * @param logger   логгер с сообщениями о ходе выполнения операции
-     * @return true, если задачи существуют
-     */
-    protected boolean checkLocks(AsyncTaskType taskType, TAUserInfo user, Logger logger) {
-        return false;
-    }
-
-    /**
-     * Выполняет проверку возможности выполения задачи, если выполнение задачи возможно, то возвращает в какой очереди выполнять иначе выбрасывает исключение
-     *
-     * @param taskDescription описание задачи
-     * @param user            пользователь, который выполняет задачу
-     * @param params          произвольные параметры для выполнения задачи
-     * @return очередь, в которой будет выполнена задача
-     * @throws AsyncTaskException в случае невозможности выполнения задачи
-     */
-    public AsyncQueue findTaskQueue(String taskDescription, TAUserInfo user, Map<String, Object> params) throws AsyncTaskException {
-        return AsyncQueue.SHORT;
     }
 
     /**

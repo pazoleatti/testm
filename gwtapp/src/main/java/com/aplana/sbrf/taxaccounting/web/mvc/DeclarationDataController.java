@@ -433,7 +433,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/check", produces = MediaType.APPLICATION_JSON_VALUE)
     public ActionResult checkDeclaration(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.checkDeclaration(userInfo, declarationDataId);
+        return declarationService.checkDeclarationList(userInfo, Collections.singletonList(declarationDataId));
     }
 
     /**
@@ -451,13 +451,11 @@ public class DeclarationDataController {
     /**
      * Принять НФ
      *
-     * @param action
      * @return
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/accept", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public AcceptDeclarationResult accept(@PathVariable final long declarationDataId, @RequestBody AcceptDeclarationDataAction action) {
-        action.setDeclarationId(declarationDataId);
-        return declarationService.createAcceptDeclarationTask(securityService.currentUserInfo(), action);
+    public ActionResult accept(@PathVariable final long declarationDataId) {
+        return declarationService.acceptDeclarationList(securityService.currentUserInfo(), Collections.singletonList(declarationDataId));
     }
 
     /**
