@@ -1055,6 +1055,12 @@ public class NdflPersonDaoTest {
     }
 
     @Test
+    public void ndflPersonExistsByDeclarationId() {
+        Assert.assertTrue(ndflPersonDao.ndflPersonExistsByDeclarationId(1));
+        Assert.assertFalse(ndflPersonDao.ndflPersonExistsByDeclarationId(111999555));
+    }
+
+    @Test
     public void testCheckDeductionsExists() {
         Assert.assertTrue(ndflPersonDao.checkDeductionExists(1, 1));
         Assert.assertFalse(ndflPersonDao.checkDeductionExists(1, 2));

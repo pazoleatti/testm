@@ -883,8 +883,7 @@
 
                 $scope.canCreateNdflReport = function () {
                     return $scope.declarationData && $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id &&
-                        $scope.ndfFLTab.getGrid && $scope.ndfFLTab.getGrid().ctrl && $scope.ndfFLTab.getGrid().ctrl.getCountRecords &&
-                        $scope.ndfFLTab.getGrid().ctrl.getCountRecords() > 0 &&
+                        $scope.declarationData.hasNdflPersons &&
                         PermissionChecker.check($scope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
                 };
 

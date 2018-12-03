@@ -571,6 +571,13 @@ public interface NdflPersonDao {
     void deleteNdflPersonBatch(List<Long> ids);
 
     /**
+     * Возвращяет true, если в форме имеются строки раздела 1, иначе false
+     * @param declarationDataId ид формы РНУ
+     * @return true, если в форме имеются строки раздела 1, иначе false
+     */
+    boolean ndflPersonExistsByDeclarationId(long declarationDataId);
+
+    /**
      * Проеряет наличие дохода в налоговой форме
      *
      * @param ndflPersonIncomeId идентификатор дохода

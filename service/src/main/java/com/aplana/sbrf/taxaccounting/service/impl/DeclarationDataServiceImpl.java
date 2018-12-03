@@ -898,6 +898,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setLastDataModifiedDate(declaration.getLastDataModifiedDate());
             result.setActualDataDate(new Date());
             result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
+            result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
 
             String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
             if (userLogin != null && !userLogin.isEmpty()) {

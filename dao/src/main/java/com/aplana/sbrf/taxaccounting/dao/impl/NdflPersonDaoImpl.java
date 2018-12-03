@@ -1744,6 +1744,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public boolean ndflPersonExistsByDeclarationId(long declarationDataId) {
+        return getJdbcTemplate().queryForObject(
+                "select case when exists (select * from ndfl_person where declaration_data_id = ?) then 1 else 0 end from dual",
+                Boolean.class, declarationDataId);
+    }
+
+    @Override
     public boolean checkIncomeExists(long ndflPersonIncomeId, long declarationDataId) {
         String query = "SELECT count(1) FROM ndfl_person_income npi " +
                 "JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +

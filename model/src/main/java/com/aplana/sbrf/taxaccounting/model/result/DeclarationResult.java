@@ -18,6 +18,10 @@ public class DeclarationResult {
      */
     private boolean declarationDataExists;
     /**
+     * Имеются ли в форме строки в разделе 1
+     */
+    private boolean hasNdflPersons;
+    /**
      * Ид формы
      */
     private long id;
