@@ -196,9 +196,9 @@
                         ],
                         colModel: [
                             {name: 'id', index: 'id', width: 100, key: true, hidden: true},
-                            {name: 'lastName', index: 'last_name', width: 140},
-                            {name: 'firstName', index: 'first_name', width: 140},
-                            {name: 'middleName', index: 'middle_name', width: 140},
+                            {name: 'lastName', index: 'last_name', width: 130},
+                            {name: 'firstName', index: 'first_name', width: 130},
+                            {name: 'middleName', index: 'middle_name', width: 130},
                             {name: 'snils', index: 'snils', width: 100},
                             {name: 'innNp', index: 'inn_np', width: 100},
                             {name: 'innForeign', index: 'inn_foreign', width: 100},
