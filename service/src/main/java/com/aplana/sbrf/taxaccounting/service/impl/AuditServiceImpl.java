@@ -1,11 +1,24 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.model.AuditFormType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LogSystem;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +29,12 @@ import java.util.List;
 
 @Service
 public class AuditServiceImpl implements AuditService {
+    private static final Log LOG = LogFactory.getLog(AuditServiceImpl.class);
 
-	@Autowired
-	private AuditDao auditDao;
-	@Autowired
-	private DepartmentService departmentService;
+    @Autowired
+    private AuditDao auditDao;
+    @Autowired
+    private DepartmentService departmentService;
     @Autowired
     private TransactionHelper tx;
     @Autowired
@@ -93,8 +107,8 @@ public class AuditServiceImpl implements AuditService {
                 }
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, AuditFormType.FORM_TEMPLATE_VERSION,  null, mnote, logId);
-				return null;
+                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, AuditFormType.FORM_TEMPLATE_VERSION, null, mnote, logId);
+                return null;
             }
         });
     }
@@ -131,11 +145,11 @@ public class AuditServiceImpl implements AuditService {
     }
 
     private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
-                     String declarationTypeName, String formTypeName, AuditFormType auditFormType, Integer formKindId, String note, String logId){
+                     String declarationTypeName, String formTypeName, AuditFormType auditFormType, Integer formKindId, String note, String logId) {
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event.getCode());
-		log.setUserLogin(userInfo.getUser().getLogin());
+        log.setUserLogin(userInfo.getUser().getLogin());
 
         StringBuilder roles = new StringBuilder();
         List<TARole> taRoles = userInfo.getUser().getRoles();
@@ -145,7 +159,7 @@ public class AuditServiceImpl implements AuditService {
                 roles.append(", ");
             }
         }
-        log.setRoles(roles.toString().substring(0 , Math.min(roles.toString().length(), 200)));
+        log.setRoles(roles.toString().substring(0, Math.min(roles.toString().length(), 200)));
 
         log.setFormDepartmentName(departmentName != null ? departmentName.substring(0, Math.min(departmentName.length(), 2000)) : null);
         log.setFormDepartmentId(departmentId);
@@ -157,10 +171,14 @@ public class AuditServiceImpl implements AuditService {
         log.setAuditFormTypeId(auditFormType == null ? null : auditFormType.getId());
         int userDepId = userInfo.getUser().getDepartmentId();
         String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
-        log.setUserDepartmentName(userDepartmentName != null ? userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)):null);
+        log.setUserDepartmentName(userDepartmentName != null ? userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)) : null);
         log.setLogId(logId);
         log.setServer(serverInfo.getServerName());
 
-        auditDao.add(log);
+        try {
+            auditDao.add(log);
+        } catch (Exception e) {
+            LOG.error("Ошибка при записи в ЖА", e);
+        }
     }
 }
