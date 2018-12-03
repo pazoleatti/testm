@@ -1234,7 +1234,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             cell.setCellValue("Подразделение:")
             cell = row.createCell(1)
             cell.setCellStyle(styleNormal)
-            cell.setCellValue("/Банк/" + departmentService.getParentsHierarchy(declarationData.departmentId))
+            cell.setCellValue("/Банк/" + departmentService.getParentsHierarchyShortNames(declarationData.departmentId))
         }
 
         void createReportDateRow() {
