@@ -57,25 +57,25 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createKarmannikovaRateReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
-                                {{::'link.ndfl.reporting.karmannikova.rateReport' | translate}}</a>
+                            <a ng-click="createRateReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.rateReport' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
-                                {{::'link.ndfl.reporting.karmannikova.rateReport' | translate}}
+                                {{::'link.ndfl.reporting.rateReport' | translate}}
                             </div>
-                            <a ng-click="downloadKarmannikovaRateReport()"
-                               ng-show="availableKarmannikovaRateReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                            <a ng-click="downloadRateReport()"
+                               ng-show="availableRateReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createKarmannikovaPaymentReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
-                                {{::'link.ndfl.reporting.karmannikova.paymentReport' | translate}}</a>
+                            <a ng-click="createPaymentReport()" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.paymentReport' | translate}}</a>
                             <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
-                                {{::'link.ndfl.reporting.karmannikova.paymentReport' | translate}}
+                                {{::'link.ndfl.reporting.paymentReport' | translate}}
                             </div>
-                            <a ng-click="downloadKarmannikovaPaymentReport()"
-                               ng-show="availableKarmannikovaPaymentReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                            <a ng-click="downloadPaymentReport()"
+                               ng-show="availablePaymentReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>

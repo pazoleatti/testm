@@ -30,9 +30,9 @@
                             dateFrom: $scope.form.dateFrom,
                             dateTo: $scope.form.dateTo,
                             adjustNegativeValues: $scope.form.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT,
-                            kppList: $scope.form.kppSelectList.map(function (a) {
+                            kppList: $scope.form.kppSelectList ? $scope.form.kppSelectList.map(function (a) {
                                 return a.kpp;
-                            })
+                            }) : undefined
                         },
                         params: {
                             force: !!force

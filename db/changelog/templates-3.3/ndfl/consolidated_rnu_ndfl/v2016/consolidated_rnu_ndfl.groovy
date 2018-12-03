@@ -461,12 +461,12 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 exportAllDeclarationDataToExcel()
                 scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
-            case SubreportAliasConstants.RNU_KARMANNIKOVA_RATE_REPORT:
-                createKarmannikovaRateReport()
+            case SubreportAliasConstants.RNU_RATE_REPORT:
+                createRateReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ставок_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
-            case SubreportAliasConstants.RNU_KARMANNIKOVA_PAYMENT_REPORT:
-                createKarmannikovaPaymentReport()
+            case SubreportAliasConstants.RNU_PAYMENT_REPORT:
+                createPaymentReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
             case SubreportAliasConstants.RNU_NDFL_DETAIL_REPORT:
@@ -694,19 +694,19 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Отчет Карманниковой: Отчет в разрезе ставок
      */
-    void createKarmannikovaRateReport() {
-        List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
-            new KarmannikovaIncome(it)
+    void createRateReport() {
+        List<IncomeExt> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
+            new IncomeExt(it)
         }
-        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy {
+        Collection<List<IncomeExt>> operations = incomes.groupBy {
             new Pair<String, Long>(it.operationId, it.asnuId)
         }.values()
         defineTaxRates(operations)
         correctTaxRates(operations)
-        def incomesByKey = incomes.groupBy { new KarmannikovaRateReportKey(it.kpp, it.asnuId, it.definedTaxRate) }
-        List<KarmannikovaRateReportRow> rows = []
+        def incomesByKey = incomes.groupBy { new RateReportKey(it.kpp, it.asnuId, it.definedTaxRate) }
+        List<RateReportRow> rows = []
         incomesByKey.each { key, incomesGroup ->
-            def row = new KarmannikovaRateReportRow()
+            def row = new RateReportRow()
             row.key = key
             row.asnuName = incomesGroup.first().asnu
             for (def income : incomesGroup) {
@@ -726,17 +726,17 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             a.kpp <=> b.kpp ?: a.asnuName <=> b.asnuName ?:
                     (a.rate == null && b.rate == null ? 0 : a.rate == null ? 1 : b.rate == null ? -1 : a.rate <=> b.rate)
         })
-        new KarmannikovaRateReportBuilder(rows).build()
+        new RateReportBuilder(rows).build()
     }
 
     /**
      * Отчет Карманниковой: Отчет в разрезе платёжных поручений
      */
-    void createKarmannikovaPaymentReport() {
-        List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
-            new KarmannikovaIncome(it)
+    void createPaymentReport() {
+        List<IncomeExt> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
+            new IncomeExt(it)
         }
-        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy {
+        Collection<List<IncomeExt>> operations = incomes.groupBy {
             new Pair<String, Long>(it.operationId, it.asnuId)
         }.values()
         defineTaxRates(operations)
@@ -744,11 +744,11 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         correctTaxRates(operations)
         defineCorrection(operations)
         def incomesByKey = incomes.groupBy {
-            new KarmannikovaPaymentReportKey(it.kpp, it.asnuId, it.paymentNumber, it.definedTaxRate, it.correction)
+            new PaymentReportKey(it.kpp, it.asnuId, it.paymentNumber, it.definedTaxRate, it.correction)
         }
-        List<KarmannikovaPaymentReportRow> rows = []
+        List<PaymentReportRow> rows = []
         incomesByKey.each { key, incomesGroup ->
-            def row = new KarmannikovaPaymentReportRow()
+            def row = new PaymentReportRow()
             row.key = key
             row.asnuName = incomesGroup.first().asnu
             for (def income : incomesGroup) {
@@ -764,17 +764,17 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             a.kpp <=> b.kpp ?: a.asnuName <=> b.asnuName ?: a.paymentNumber <=> b.paymentNumber ?:
                     a.order <=> b.order ?: a.correction <=> b.correction
         })
-        new KarmannikovaPaymentReportBuilder(rows).build()
+        new PaymentReportBuilder(rows).build()
     }
 
     /**
      * Отчет Карманниковой: Детализация – доходы, вычеты, налоги
      */
     void createNdflDetailReport() {
-        List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
-            new KarmannikovaIncome(it)
+        List<IncomeExt> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
+            new IncomeExt(it)
         }
-        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy {
+        Collection<List<IncomeExt>> operations = incomes.groupBy {
             new Pair<String, Long>(it.operationId, it.asnuId)
         }.values()
         defineTaxRates(operations)
@@ -809,10 +809,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Определяет ставки у строк 2 раздела
      */
-    void defineTaxRates(Collection<List<KarmannikovaIncome>> operations) {
+    void defineTaxRates(Collection<List<IncomeExt>> operations) {
         operations.each { incomesOfOperation ->
-            KarmannikovaIncome prevRateIncome = null // предыдущая строка, содержащая ставку
-            Map<Date, KarmannikovaIncome> withholdingIncomesByTransferDate = [:] // строки удержания по сроку перечисления
+            IncomeExt prevRateIncome = null // предыдущая строка, содержащая ставку
+            Map<Date, IncomeExt> withholdingIncomesByTransferDate = [:] // строки удержания по сроку перечисления
             for (def income : incomesOfOperation) {
                 if (income.taxRate != null && income.taxTransferDate) {
                     withholdingIncomesByTransferDate.put(income.taxTransferDate, income)
@@ -845,7 +845,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Если в строках операции только одна ставка, то возвращяет её, иначе null
      */
-    Integer findSingleTaxRate(List<KarmannikovaIncome> incomesOfOperation) {
+    Integer findSingleTaxRate(List<IncomeExt> incomesOfOperation) {
         Integer taxRate = null
         for (def income : incomesOfOperation) {
             if (income.taxRate != null) {
@@ -861,15 +861,15 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Заполняет номер платежного поручения у строк 2 раздела
      */
-    void definePaymentNumber(Collection<List<KarmannikovaIncome>> operations) {
+    void definePaymentNumber(Collection<List<IncomeExt>> operations) {
         operations.each { incomesOfOperation ->
-            KarmannikovaIncome prevTransferIncome = null // предыдущая строка перечисления
+            IncomeExt prevTransferIncome = null // предыдущая строка перечисления
             for (int i = 0; i < incomesOfOperation.size(); i++) {
-                KarmannikovaIncome income = incomesOfOperation[i]
+                IncomeExt income = incomesOfOperation[i]
                 if (income.taxRate == null) {// строка Перечисления
                     prevTransferIncome = income
                 } else {
-                    KarmannikovaIncome nextTransferIncome = null // следующая строка перечисления
+                    IncomeExt nextTransferIncome = null // следующая строка перечисления
                     for (int j = i + 1; j < incomesOfOperation.size(); j++) {
                         if (incomesOfOperation[j].taxRate == null) {
                             nextTransferIncome = incomesOfOperation[j]
@@ -886,10 +886,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Корректирует ставку у последней строки перечисления
      */
-    void correctTaxRates(Collection<List<KarmannikovaIncome>> operations) {
+    void correctTaxRates(Collection<List<IncomeExt>> operations) {
         operations.each { incomesOfOperation ->
-            KarmannikovaIncome lastTransferIncome = null // последняя строка перечисления
-            KarmannikovaIncome lastRateIncome = null // последняя строка, содержащая ставку
+            IncomeExt lastTransferIncome = null // последняя строка перечисления
+            IncomeExt lastRateIncome = null // последняя строка, содержащая ставку
             for (def income : incomesOfOperation) {
                 if (income.taxRate == null) {
                     lastTransferIncome = income
@@ -906,10 +906,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Определяет является ли строка корректирующей
      */
-    void defineCorrection(Collection<List<KarmannikovaIncome>> operations) {
+    void defineCorrection(Collection<List<IncomeExt>> operations) {
         operations.each { incomesOfOperation ->
             for (int i = incomesOfOperation.size() - 1; i >= 0; i--) {
-                KarmannikovaIncome income = incomesOfOperation[i]
+                IncomeExt income = incomesOfOperation[i]
                 if (income.taxRate != null) {
                     income.correction = true
                 } else {
@@ -919,7 +919,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    void defineOrder(List<KarmannikovaPaymentReportRow> rows, Collection<List<KarmannikovaIncome>> operations) {
+    void defineOrder(List<PaymentReportRow> rows, Collection<List<IncomeExt>> operations) {
         Map<String, Set<String>> operationsIdsByPaymentNumber = [:]
         operations.each { incomesOfOperation ->
             for (def income : incomesOfOperation) {
@@ -933,10 +933,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 }
             }
         }
-        Map<KarmannikovaPaymentReportKey, Integer> orders = [:]
+        Map<PaymentReportKey, Integer> orders = [:]
         for (def row : rows) {
             if (operationsIdsByPaymentNumber.get(row.paymentNumber)?.size() ?: 0 == 1) {
-                def key = new KarmannikovaPaymentReportKey(row.key.kpp, row.key.asnuId, row.key.paymentNumber, null, row.key.correction)
+                def key = new PaymentReportKey(row.key.kpp, row.key.asnuId, row.key.paymentNumber, null, row.key.correction)
                 Integer order = orders.get(key)
                 row.order = order ? order + 1 : 1
                 orders.put(key, row.order)
@@ -949,12 +949,12 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Отчет Карманниковой: Отчет в разрезе ставок
      */
-    class KarmannikovaRateReportBuilder extends AbstractReportBuilder {
+    class RateReportBuilder extends AbstractReportBuilder {
         List<String> header = ["КПП", "АСНУ", "Ставка", "Сумма дохода начисленного", "Сумма дохода выплаченного", "Сумма вычетов", "Налог исчисленный",
                                "Налог удержанный", "Возврат", "Долг за НП", "Долг за НА", "Налог перечисленный"]
-        List<KarmannikovaRateReportRow> rows
+        List<RateReportRow> rows
 
-        KarmannikovaRateReportBuilder(List<KarmannikovaRateReportRow> rows) {
+        RateReportBuilder(List<RateReportRow> rows) {
             super()
             this.rows = rows
             this.sheet = workbook.createSheet("Отчет")
@@ -1030,13 +1030,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * для Отчет Карманниковой: Отчет в разрезе платёжных поручений
      */
-    class KarmannikovaPaymentReportBuilder extends AbstractReportBuilder {
+    class PaymentReportBuilder extends AbstractReportBuilder {
 
         List<String> header = ["КПП", "АСНУ", "Платёжное поручение", "Ставка", "Налог исчисленный",
                                "Налог удержанный", "Возврат", "Налог перечисленный", "Корректировка"]
-        List<KarmannikovaPaymentReportRow> rows
+        List<PaymentReportRow> rows
 
-        KarmannikovaPaymentReportBuilder(List<KarmannikovaPaymentReportRow> rows) {
+        PaymentReportBuilder(List<PaymentReportRow> rows) {
             super()
             this.rows = rows
             this.sheet = workbook.createSheet("Отчет")
@@ -1176,7 +1176,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
 
         void cellAlignment() {
-            Map<Integer, Integer> widths = [0: 16, 3: 10]
+            Map<Integer, Integer> widths = [0: 16, 1: 18, 3: 10]
             (4..16).each { widths.put((int) it, 13) }
             for (int i = 0; i < header.size(); i++) {
                 sheet.autoSizeColumn(i)
@@ -1359,21 +1359,21 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     @EqualsAndHashCode
-    class KarmannikovaRateReportKey {
+    class RateReportKey {
         String kpp
         long asnuId
         Integer rate
 
-        KarmannikovaRateReportKey(String kpp, long asnuId, Integer rate) {
+        RateReportKey(String kpp, long asnuId, Integer rate) {
             this.kpp = kpp
             this.asnuId = asnuId
             this.rate = rate
         }
     }
 
-    class KarmannikovaRateReportRow {
+    class RateReportRow {
         @Delegate
-        KarmannikovaRateReportKey key
+        RateReportKey key
         String asnuName
         BigDecimal incomeAccruedSum = 0
         BigDecimal incomePayoutSum = 0
@@ -1395,14 +1395,14 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     @EqualsAndHashCode
-    class KarmannikovaPaymentReportKey {
+    class PaymentReportKey {
         String kpp
         long asnuId
         String paymentNumber
         Integer rate
         boolean correction
 
-        KarmannikovaPaymentReportKey(String kpp, long asnuId, String paymentNumber, Integer rate, boolean correction) {
+        PaymentReportKey(String kpp, long asnuId, String paymentNumber, Integer rate, boolean correction) {
             this.kpp = kpp
             this.asnuId = asnuId
             this.paymentNumber = paymentNumber
@@ -1416,9 +1416,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    class KarmannikovaPaymentReportRow {
+    class PaymentReportRow {
         @Delegate
-        KarmannikovaPaymentReportKey key
+        PaymentReportKey key
         String asnuName
         BigDecimal calculatedTax = 0
         BigDecimal withholdingTax = 0
@@ -1499,7 +1499,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Расширение {@link NdflPersonIncome}
      */
-    class KarmannikovaIncome {
+    class IncomeExt {
         @Delegate
         NdflPersonIncome delegate
         // Та же ставка, что в NdflPersonIncome, но заполненная для всех строк (в том числе для строк перечисления, где она изначально пустая)
@@ -1508,7 +1508,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         // Является ли строка корректирующей
         boolean correction
 
-        KarmannikovaIncome(NdflPersonIncome delegate) {
+        IncomeExt(NdflPersonIncome delegate) {
             this.delegate = delegate
         }
 

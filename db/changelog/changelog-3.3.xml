@@ -235,4 +235,12 @@
 			values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'Детализация – доходы, вычеты, налоги', 6, 'rnu_ndfl_detail_report');
 		</sql>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5459 новые спецотчеты, убрал karmannikova из названий-->
+	<changeSet id="3.3-dnovikov-8" author="dnovikov">
+		<sql>
+			update DECLARATION_SUBREPORT set alias = 'rnu_payment_report' where alias = 'rnu_karmannikova_payment_report';
+			update DECLARATION_SUBREPORT set alias = 'rnu_rate_report' where alias = 'rnu_karmannikova_rate_report';
+		</sql>
+	</changeSet>
 </databaseChangeLog>
