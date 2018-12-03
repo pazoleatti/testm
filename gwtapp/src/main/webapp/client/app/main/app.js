@@ -185,6 +185,7 @@
         "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
         "link.ndfl.reporting.karmannikova.rateReport": "Сформировать \"Отчет в разрезе ставок\"",
         "link.ndfl.reporting.karmannikova.paymentReport": "Сформировать \"Отчет в разрезе платёжных поручений\"",
+        "link.ndfl.reporting.ndflDetailReport": "Сформировать \"Детализация - доходы, вычеты, налоги\"",
         "link.ndfl.reporting.ndfl2_6XlsxReport": "Сформировать отчет \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"",
         "link.ndfl.reporting.ndfl2_6TxtReport": "Сформировать файл выгрузки \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"",
         "link.ndfl.reporting.formForKppOktmo": "Сформировать \"Реестр сформированной отчетности\"",

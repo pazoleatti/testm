@@ -489,6 +489,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 createKarmannikovaPaymentReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
+            case SubreportAliasConstants.RNU_NDFL_DETAIL_REPORT:
+                createNdflDetailReport()
+                scriptSpecificReportHolder.setFileName("Детализация_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT:
                 create2_6NdflDataReport('xlsx')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
@@ -734,6 +738,45 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                     a.order <=> b.order ?: a.correction <=> b.correction
         })
         new KarmannikovaPaymentReportBuilder(rows).build()
+    }
+
+    /**
+     * Отчет Карманниковой: Детализация – доходы, вычеты, налоги
+     */
+    void createNdflDetailReport() {
+        List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
+            new KarmannikovaIncome(it)
+        }
+        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy {
+            new Pair<String, Long>(it.operationId, it.asnuId)
+        }.values()
+        defineTaxRates(operations)
+        defineCorrection(operations)
+        def incomesByKey = incomes.groupBy {
+            new NdflDetailReportKey(it.kpp, it.oktmo, it.asnuId, it.definedTaxRate, it.incomeAccruedDate, it.incomePayoutDate, it.taxDate, it.taxTransferDate)
+        }
+        List<NdflDetailReportRow> rows = []
+        incomesByKey.each { key, incomesGroup ->
+            def row = new NdflDetailReportRow()
+            row.key = key
+            row.asnuName = incomesGroup.first().asnu
+            for (def income : incomesGroup) {
+                row.incomeAccruedSum += (income.incomeAccruedSumm ?: 0)
+                row.incomePayoutSum += (income.incomePayoutSumm ?: 0)
+                row.totalDeductionsSum += (income.totalDeductionsSumm ?: 0)
+                row.calculatedTax += (income.calculatedTax ?: 0)
+                row.withholdingTax += (income.withholdingTax ?: 0)
+                row.refoundTax += (income.refoundTax ?: 0)
+                row.notHoldingTax += (income.notHoldingTax ?: 0)
+                row.overholdingTax += (income.overholdingTax ?: 0)
+                row.taxSum += (income.taxSumm ?: 0)
+            }
+            rows.add(row)
+        }
+        rows.sort({ def a, def b ->
+            a.orderDate <=> b.orderDate ?: a.rowType <=> b.rowType
+        })
+        new NdflDetailReportBuilder(rows).build()
     }
 
     /**
@@ -1035,6 +1078,94 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
+    /**
+     * для Отчет Карманниковой: Отчет в разрезе платёжных поручений
+     */
+    class NdflDetailReportBuilder extends AbstractReportBuilder {
+
+        List<String> header = ["КПП", "ОКТМО", "АСНУ", "Ставка", "Дата начисления дохода", "Дата выплаты дохода", "Дата налога", "Срок перечисления",
+                               "Сумма начисленного дохода", "Сумма выплаченного дохода", "Сумма вычетов", "Налог исчисленный", "Налог удержанный",
+                               "Возврат", "Долг за НП", "Долг за НА", "Налог перечисленный"]
+        List<NdflDetailReportRow> rows
+
+        NdflDetailReportBuilder(List<NdflDetailReportRow> rows) {
+            super()
+            this.rows = rows
+            this.sheet = workbook.createSheet("Отчет")
+        }
+
+        void build() {
+            fillHeader()
+            createTableHeaders()
+            createDataForTable()
+            cellAlignment()
+            flush()
+        }
+
+        protected void fillHeader() {
+            createReportNameRow("Детализация - доходы, вычеты, налоги")
+            createYearRow()
+            createPeriodRow()
+            createFormTypeRow()
+            createForNumRow()
+            createDepartmentRow()
+            createReportDateRow()
+        }
+
+        void createTableHeaders() {
+            def style = new StyleBuilder(workbook).borders(true).wrapText(true).hAlign(CellStyle.ALIGN_CENTER).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            Row row = sheet.createRow(9)
+            for (int colIndex = 0; colIndex < header.size(); colIndex++) {
+                Cell cell = row.createCell(colIndex)
+                cell.setCellValue(header.get(colIndex))
+                cell.setCellStyle(style)
+            }
+        }
+
+        void createDataForTable() {
+            currentRowIndex = 9
+            for (def dataRow : rows) {
+                sheet.createRow(++currentRowIndex)
+                int colIndex = 0
+                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+                createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.oktmo, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.asnuName, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.incomeAccruedDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.incomePayoutDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.taxDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.taxTransferDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.incomeAccruedSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.incomePayoutSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.totalDeductionsSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.calculatedTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.withholdingTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.refoundTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.deptTaxPayer, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.deptAgent, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(++colIndex, dataRow.taxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+            }
+        }
+
+        void cellAlignment() {
+            Map<Integer, Integer> widths = [0: 16, 3: 10]
+            (4..16).each { widths.put((int) it, 13) }
+            for (int i = 0; i < header.size(); i++) {
+                sheet.autoSizeColumn(i)
+                if (widths.get(i)) {
+                    sheet.setColumnWidth(i, widths.get(i) * 269)
+                } else {
+                    if (sheet.getColumnWidth(i) > 10000) {
+                        sheet.setColumnWidth(i, 10000)
+                    } else if (sheet.getColumnWidth(i) < 2000) {
+                        sheet.setColumnWidth(i, 2000)
+                    }
+                }
+            }
+        }
+    }
+
     abstract class AbstractReportBuilder {
         protected Workbook workbook
         protected Sheet sheet
@@ -1271,6 +1402,70 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         @Override
         String toString() {
             return "$order, $key, $asnuName"
+        }
+    }
+
+    @EqualsAndHashCode
+    class NdflDetailReportKey {
+        String kpp
+        String oktmo
+        long asnuId
+        Integer rate
+        Date incomeAccruedDate
+        Date incomePayoutDate
+        Date taxDate
+        Date taxTransferDate
+
+        NdflDetailReportKey(String kpp, String oktmo, long asnuId, Integer rate, Date incomeAccruedDate, Date incomePayoutDate, Date taxDate, Date taxTransferDate) {
+            this.kpp = kpp
+            this.oktmo = oktmo
+            this.asnuId = asnuId
+            this.rate = rate
+            this.incomeAccruedDate = incomeAccruedDate
+            this.incomePayoutDate = incomePayoutDate
+            this.taxDate = taxDate
+            this.taxTransferDate = taxTransferDate
+        }
+
+        @Override
+        String toString() {
+            return "$kpp, $oktmo, $asnuId, $rate, $incomeAccruedDate, $incomePayoutDate, $taxDate, $taxTransferDate"
+        }
+    }
+
+    class NdflDetailReportRow {
+        @Delegate
+        NdflDetailReportKey key
+        String asnuName
+        BigDecimal incomeAccruedSum = 0
+        BigDecimal incomePayoutSum = 0
+        BigDecimal totalDeductionsSum = 0
+        BigDecimal calculatedTax = 0
+        BigDecimal withholdingTax = 0
+        Long refoundTax = 0
+        BigDecimal notHoldingTax = 0
+        BigDecimal overholdingTax = 0
+        Long taxSum = 0
+
+        BigDecimal getDeptTaxPayer() {
+            return notHoldingTax > overholdingTax ? notHoldingTax - overholdingTax : 0
+        }
+
+        BigDecimal getDeptAgent() {
+            return notHoldingTax < overholdingTax ? overholdingTax - notHoldingTax : 0
+        }
+
+        Date getOrderDate() {
+            return taxDate ?: taxTransferDate
+        }
+
+        int getRowType() {
+            return incomeAccruedDate ? 100 : incomePayoutDate ? 200 : 300
+        }
+
+        @Override
+        String toString() {
+            return "$key, $asnuName, $incomeAccruedSum, $incomePayoutSum, $totalDeductionsSum, $calculatedTax ..."
         }
     }
 

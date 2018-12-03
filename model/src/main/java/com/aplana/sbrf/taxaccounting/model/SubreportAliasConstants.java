@@ -12,6 +12,7 @@ public class SubreportAliasConstants {
     public static final String RNU_KARMANNIKOVA_PAYMENT_REPORT = "rnu_karmannikova_payment_report"; // Отчет Карманниковой: Отчет в разрезе платёжных поручений
     public static final String RNU_NDFL_2_6_DATA_XLSX_REPORT = "rnu_ndfl_2_6_data_xlsx_report"; // Отчет xlsx Данные для включения в 2-НДФЛ и 6-НДФЛ
     public static final String RNU_NDFL_2_6_DATA_TXT_REPORT = "rnu_ndfl_2_6_data_txt_report"; // Отчет txt Данные для включения в 2-НДФЛ и 6-НДФЛ
+    public static final String RNU_NDFL_DETAIL_REPORT = "rnu_ndfl_detail_report"; // Спецотчет "Детализация – доходы, вычеты, налоги"
     public static final String REPORT_KPP_OKTMO = "report_kpp_oktmo"; // Реестр сформированной отчетности
     public static final String REPORT_2NDFL = "report_2ndfl"; // 2-НДФЛ (1) по физическому лицу
 

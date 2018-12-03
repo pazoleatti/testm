@@ -156,6 +156,7 @@
                                     $scope.availableRnuNdflPersonAllDb = data.reportAvailable.rnu_ndfl_person_all_db;
                                     $scope.availableKarmannikovaRateReport = data.reportAvailable.rnu_karmannikova_rate_report;
                                     $scope.availableKarmannikovaPaymentReport = data.reportAvailable.rnu_karmannikova_payment_report;
+                                    $scope.availableNdflDetailReport = data.reportAvailable.rnu_ndfl_detail_report;
                                     $scope.availableNdfl2_6DataXlsxReport = data.reportAvailable.rnu_ndfl_2_6_data_xlsx_report;
                                     $scope.availableNdfl2_6DataTxtReport = data.reportAvailable.rnu_ndfl_2_6_data_txt_report;
                                     $scope.availableReportKppOktmo = data.reportAvailable.report_kpp_oktmo;
@@ -734,6 +735,9 @@
                 $scope.downloadKarmannikovaPaymentReport = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_PAYMENT_REPORT;
                 };
+                $scope.downloadNdflDetailReport = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT;
+                };
                 $scope.downloadNdfl2_6DataXlsxReport = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_XLSX_REPORT;
                 };
@@ -800,7 +804,22 @@
                             force: !!force
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createReportAllRnu, "availableKarmannikovaPaymentReport");
+                        performReportSuccessResponse(response, $scope.createKarmannikovaPaymentReport, "availableKarmannikovaPaymentReport");
+                    });
+                };
+
+                /**
+                 * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе платёжных поручений"
+                 */
+                $scope.createNdflDetailReport = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT,
+                        params: {
+                            force: !!force
+                        }
+                    }).success(function (response) {
+                        performReportSuccessResponse(response, $scope.createNdflDetailReport, "availableNdflDetailReport");
                     });
                 };
 

@@ -225,4 +225,14 @@
 			values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'файл выгрузки "Данные для включения в разделы 2-НДФЛ и 6-НДФЛ"', 7, 'rnu_ndfl_2_6_data_txt_report');
 		</sql>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5459 новые спецотчеты-->
+	<changeSet id="3.3-dnovikov-7" author="dnovikov">
+		<sql>
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 100, 'Детализация – доходы, вычеты, налоги', 6, 'rnu_ndfl_detail_report');
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'Детализация – доходы, вычеты, налоги', 6, 'rnu_ndfl_detail_report');
+		</sql>
+	</changeSet>
 </databaseChangeLog>
