@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
@@ -92,4 +93,14 @@ public interface NdflPersonService {
      * @return число ФЛ
      */
     int getNdflPersonCount(Long declarationDataId);
+
+    /**
+     * Возвращяет страницу из значений КПП, полученных из строк раздела 2 формы РНУ
+     *
+     * @param declarationDataId ид формы РНУ
+     * @param kpp               фильтр поиска
+     * @param pagingParams      данные пагинатора
+     * @return страница из значений КПП, полученных из строк раздела 2 формы РНУ
+     */
+    PagingResult<KppSelect> findAllKppByDeclarationDataId(long declarationDataId, String kpp, PagingParams pagingParams);
 }

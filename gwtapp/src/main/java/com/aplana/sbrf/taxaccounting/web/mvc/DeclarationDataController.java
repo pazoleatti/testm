@@ -108,6 +108,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
         binder.registerCustomEditor(RefBookKnfType.class, new RequestParamEditor(RefBookKnfType.class));
+        binder.registerCustomEditor(Ndfl2_6DataReportParams.class, new RequestParamEditor(Ndfl2_6DataReportParams.class));
     }
 
     /**
@@ -640,9 +641,12 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
-    public CreateDeclarationReportResult createReportAllRnus(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias, @RequestParam boolean force) {
+    public CreateDeclarationReportResult createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias, @RequestParam boolean force,
+                                                              @RequestBody(required = false) Ndfl2_6DataReportParams params) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, userInfo, force);
+        Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("params", params);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo, force);
     }
 
     /**

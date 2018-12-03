@@ -3,11 +3,18 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -16,7 +23,11 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
@@ -34,7 +45,11 @@ import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
@@ -898,6 +913,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
             result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
             result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+            result.setCalendarStartDate(departmentReportPeriod.getReportPeriod().getCalendarStartDate());
+            result.setEndDate(departmentReportPeriod.getReportPeriod().getEndDate());
             result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
             if (declaration.getAsnuId() != null) {
@@ -1258,7 +1275,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, final TAUserInfo userInfo, boolean force) {
+    public CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams,
+                                                                          final TAUserInfo userInfo, boolean force) {
         LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateSpecificReport by %s. declarationDataId: %s; force: %s",
                 userInfo, declarationDataId, force));
         DeclarationData declaration = get(declarationDataId, userInfo);
@@ -1290,6 +1308,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     params.put("declarationDataId", declarationDataId);
                     params.put("alias", ddReportType.getReportAlias());
                     params.put("viewParamValues", new LinkedHashMap<String, String>());
+                    if (reportParams != null) {
+                        params.put("subreportParamValues", reportParams);
+                    }
 
                     asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                         @Override

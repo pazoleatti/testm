@@ -42,6 +42,14 @@ public class DeclarationResult {
      */
     private Integer reportPeriodYear;
     /**
+     * Календарная дата начала отчетного периода (квартала)
+     */
+    private Date calendarStartDate;
+    /**
+     * Дата окончания отчетного периода
+     */
+    private Date endDate;
+    /**
      * Состояние
      */
     private String state;

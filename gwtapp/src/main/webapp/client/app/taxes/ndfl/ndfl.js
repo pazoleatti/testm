@@ -20,7 +20,8 @@
             'app.filesComments',
             'app.rest',
             'app.rnuNdflPersonFace',
-            'app.returnToCreatedDialog'])
+            'app.returnToCreatedDialog',
+            'app.createNdfl2_6DataReport'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
@@ -155,6 +156,8 @@
                                     $scope.availableRnuNdflPersonAllDb = data.reportAvailable.rnu_ndfl_person_all_db;
                                     $scope.availableKarmannikovaRateReport = data.reportAvailable.rnu_karmannikova_rate_report;
                                     $scope.availableKarmannikovaPaymentReport = data.reportAvailable.rnu_karmannikova_payment_report;
+                                    $scope.availableNdfl2_6DataXlsxReport = data.reportAvailable.rnu_ndfl_2_6_data_xlsx_report;
+                                    $scope.availableNdfl2_6DataTxtReport = data.reportAvailable.rnu_ndfl_2_6_data_txt_report;
                                     $scope.availableReportKppOktmo = data.reportAvailable.report_kpp_oktmo;
                                 }
                             }
@@ -731,6 +734,12 @@
                 $scope.downloadKarmannikovaPaymentReport = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_KARMANNIKOVA_PAYMENT_REPORT;
                 };
+                $scope.downloadNdfl2_6DataXlsxReport = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_XLSX_REPORT;
+                };
+                $scope.downloadNdfl2_6DataTxtReport = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_TXT_REPORT;
+                };
                 $scope.downloadPairKppOktmo = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO;
                 };
@@ -792,6 +801,34 @@
                         }
                     }).success(function (response) {
                         performReportSuccessResponse(response, $scope.createReportAllRnu, "availableKarmannikovaPaymentReport");
+                    });
+                };
+
+                /**
+                 * Создание спецотчета "Данные для включения в разделы 2-НДФЛ и 6-НДФЛ" (type = 'xlsx' или 'txt')
+                 */
+                $scope.showCreateNdfl2_6DataReport = function (type) {
+                    $aplanaModal.open({
+                        title: $filter('translate')('ndfl.report.ndfl2_6XlsxReport.modal.title'),
+                        templateUrl: 'client/app/taxes/ndfl/createNdfl2_6DataReportModal.html',
+                        controller: 'createNdfl2_6DataReportCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    type: type,
+                                    declarationData: $scope.declarationData
+                                };
+                            }
+                        }
+                    }).result.then(function (success) {
+                        if (success) {
+                            if (type === 'xlsx') {
+                                $scope.availableNdfl2_6DataXlsxReport = false;
+                            } else {
+                                $scope.availableNdfl2_6DataTxtReport = false;
+                            }
+                        }
                     });
                 };
 

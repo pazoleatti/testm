@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -92,5 +93,10 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public int getNdflPersonCount(Long declarationDataId) {
         return ndflPersonDao.getNdflPersonCount(declarationDataId);
+    }
+
+    @Override
+    public PagingResult<KppSelect> findAllKppByDeclarationDataId(long declarationDataId, String kpp, PagingParams pagingParams) {
+        return ndflPersonDao.findAllKppByDeclarationDataId(declarationDataId, kpp, pagingParams);
     }
 }

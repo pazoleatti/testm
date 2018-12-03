@@ -1,0 +1,89 @@
+<form class="form-horizontal" name="createNdfl2_6DataReport" data-aplana-submit-valid="create()">
+    <div class="modal-body" style="min-height: 155px">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="control-label">
+                        {{::'ndfl.report.ndfl2_6XlsxReport.modal.dateFrom' | translate}}:</label>
+                </td>
+                <td>
+                    <div style="width: 120px;">
+                        <div data-aplana-field>
+                            <div data-aplana-datepicker
+                                 data-required
+                                 data-ng-model="form.dateFrom"></div>
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">
+                        {{::'ndfl.report.ndfl2_6XlsxReport.modal.dateTo' | translate}}:</label>
+                </td>
+                <td>
+                    <div style="width: 120px;">
+                        <div data-aplana-field>
+                            <div data-aplana-datepicker
+                                 data-required
+                                 data-ng-model="form.dateTo"></div>
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label" style="white-space: normal">{{::'ndfl.report.ndfl2_6XlsxReport.modal.adjustNegativeValues'
+                        | translate}}</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 370px;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="form.negativeValuesAdjustment"
+                             data-ng-init="init([APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT, APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT])"
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'ndfl.report.ndfl2_6XlsxReport.modal.kpp' | translate}}:</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div data-ng-controller="SelectFormKppCtrl" style="width: 370px;"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initSelectKppByFormId(kppSelectFilter)"
+                                 data-ng-model="form.kppSelectList">
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton">
+            <span data-translate-once="button.create"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

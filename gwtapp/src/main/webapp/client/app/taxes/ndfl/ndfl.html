@@ -79,6 +79,30 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="showCreateNdfl2_6DataReport('xlsx')" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.ndfl2_6XlsxReport' | translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.ndfl2_6XlsxReport' | translate}}
+                            </div>
+                            <a ng-click="downloadNdfl2_6DataXlsxReport()"
+                               ng-show="availableNdfl2_6DataXlsxReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="showCreateNdfl2_6DataReport('txt')" ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.ndfl2_6TxtReport' | translate}}</a>
+                            <div ng-show="ndfFLTab.getGrid().ctrl.getCountRecords() == 0">
+                                {{::'link.ndfl.reporting.ndfl2_6TxtReport' | translate}}
+                            </div>
+                            <a ng-click="downloadNdfl2_6DataTxtReport()"
+                               ng-show="availableNdfl2_6DataTxtReport && ndfFLTab.getGrid().ctrl.getCountRecords() > 0">
+                                {{::'link.ndfl.reporting.download' | translate}}</a>
+                        </div>
+                    </li>
                     <li role="menuitem"
                         ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <div class="row menuitem">
