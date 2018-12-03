@@ -1514,7 +1514,22 @@ class Check extends AbstractScriptClass {
                                     s2 += income.calculatedTax ?: 0
                                 }
                                 // "S3" = ∑ Р.4.Гр.4 по операции, указанной в проверяемой строке
-                                BigDecimal s3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
+                                BigDecimal s3 = new BigDecimal("0")
+                                List<String> operationIdList = []
+                                for (NdflPersonIncome income : groupIncomes) {
+                                    operationIdList << income.operationId
+                                    if (income == ndflPersonIncome) {
+                                        break
+                                    }
+                                }
+                                for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
+                                    NdflPerson incomePerson = personsCache.get(ndflPersonIncome.getNdflPersonId())
+                                    NdflPerson prepaymentPerson = personsCache.get(ndflPersonPrepayment.getNdflPersonId())
+                                    if (incomePerson.inp == prepaymentPerson.inp) {
+                                        s3 = s3.add(ndflPersonPrepayment.summ)
+                                    }
+                                }
+
                                 // ОКРУГЛ (S1 x Р.2.Гр.14 / 100)
                                 BigDecimal var1 = ScriptUtils.round(s1 * (ndflPersonIncome.taxRate ?: 0) / 100)
                                 // где ВычисленноеЗначениеНалога = ОКРУГЛ (S1 x Р.2.Гр.14 / 100) - S2 - S3
