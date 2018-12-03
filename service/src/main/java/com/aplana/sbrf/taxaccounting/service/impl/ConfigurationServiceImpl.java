@@ -341,7 +341,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             if (param != null) {
                 configurationDao.createCommonParam(commonParam);
                 String message = ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\": " + commonParam.getValue();
-                auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo, userInfo.getUser().getDepartmentId(), null, null,
+                auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
                         null, null, message, null);
                 logger.info(message);
             }
@@ -376,7 +376,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             params.add(param);
             String message = ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption();
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                    userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, null, message, null);
             logger.info(message);
         }
         configurationDao.removeCommonParam(params);
@@ -393,7 +393,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             configurationDao.update(commonParam);
             String message = ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + commonParam.getDescription() + "\": " + commonParam.getValue();
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                    userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, null, message, null);
             logger.info(message);
         }
         return logEntryService.save(logger.getEntries());
@@ -418,7 +418,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : "")));
 
         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+                userInfo.getUser().getDepartmentId(), null, null, null, null, null, message, null);
         logger.info(message);
 
         if (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) && !Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit())) {
@@ -430,7 +430,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? (asyncParam.getShortQueueLimit() != null ? asyncParam.getShortQueueLimit() : "") : ""));
 
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                    userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, null, message, null);
             logger.info(message);
         }
 
@@ -444,7 +444,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         configurationDao.updateEmailParam(emailParam);
         String message = ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" + emailParam.getCode() + "\": " + emailParam.getValue();
         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+                userInfo.getUser().getDepartmentId(), null, null, null, null, null, message, null);
         logger.info(message);
 
         return logEntryService.save(logger.getEntries());

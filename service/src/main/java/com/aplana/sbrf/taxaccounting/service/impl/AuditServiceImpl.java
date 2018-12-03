@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
@@ -16,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class AuditServiceImpl implements AuditService {
 
 	@Autowired
@@ -49,29 +47,16 @@ public class AuditServiceImpl implements AuditService {
         }
     };
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-                    String declarationTypeName, String formTypeName, Integer formKindId, String note, String logId, Integer formTypeId) {
-        add(event, userInfo, departmentId, reportPeriodId, declarationTypeName, formTypeName, formKindId, note, logId);
-	}
-
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String logId) {
-        String rpName = null;
+                    final String declarationTypeName, final String formTypeName, final AuditFormType auditFormType, final Integer formKindId, final String note, final String logId) {
+        ReportPeriod reportPeriod = null;
         if (reportPeriodId != null) {
-            ReportPeriod reportPeriod = periodService.fetchReportPeriod(reportPeriodId);
-            rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
+            reportPeriod = periodService.fetchReportPeriod(reportPeriodId);
         }
-        add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, null, logId);
-    }
+        final String reportPeriodName = reportPeriod == null ? null : String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
 
-    @Override
-    @Transactional(readOnly = false)
-    public void add(final FormDataEvent event, final TAUserInfo userInfo, final String reportPeriodName, final Integer departmentId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final AuditFormType formType, final String logId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -85,14 +70,14 @@ public class AuditServiceImpl implements AuditService {
                         );
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, formKindId, mnote, formType, logId);
+                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, auditFormType, formKindId, mnote, logId);
                 return null;
             }
         });
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Date startDate, final Date endDate,
                     final String declarationTemplateName, final String formTemplateName, final String note, final String logId) {
         tx.executeInNewTransaction(new TransactionLogic() {
@@ -108,7 +93,7 @@ public class AuditServiceImpl implements AuditService {
                 }
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, null, mnote, null, logId);
+                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, AuditFormType.FORM_TEMPLATE_VERSION,  null, mnote, logId);
 				return null;
             }
         });
@@ -138,31 +123,15 @@ public class AuditServiceImpl implements AuditService {
                             reportPeriod.getName(),
                             corrStr);
                     String decTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                    add(event, userInfo, departmentName, departmentId, rpName, decTypeName, null, null, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, logId);
+                    add(event, userInfo, departmentName, departmentId, rpName, decTypeName, null, AuditFormType.FORM_TYPE_TAX, null, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, logId);
                 }
                 return null;
             }
         });
     }
 
-    // TODO в метод add передавать параметр AuditFormType извне, а не вычислять как тут
-    private AuditFormType getAuditFormType(String formTypeName, String declarationTypeName, String departmentName){
-        if (formTypeName != null) {
-            if (departmentName != null)
-                return AuditFormType.FORM_TYPE_TAX;
-            else
-                return AuditFormType.FORM_TEMPLATE_VERSION;
-        } else if (declarationTypeName != null) {
-            if (departmentName != null)
-                return AuditFormType.FORM_TYPE_DECLARATION;
-            else
-                return AuditFormType.DECLARATION_VERSION;
-        }
-        return null;
-    }
-
     private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
-                     String declarationTypeName, String formTypeName, Integer formKindId, String note, AuditFormType formType, String logId){
+                     String declarationTypeName, String formTypeName, AuditFormType auditFormType, Integer formKindId, String note, String logId){
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event.getCode());
@@ -185,10 +154,6 @@ public class AuditServiceImpl implements AuditService {
         log.setFormKindId(formKindId);
         log.setFormTypeName(formTypeName);
         log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-        AuditFormType auditFormType = formType;
-        if (formType == null) {
-            auditFormType = getAuditFormType(formTypeName, declarationTypeName, departmentName);
-        }
         log.setAuditFormTypeId(auditFormType == null ? null : auditFormType.getId());
         int userDepId = userInfo.getUser().getDepartmentId();
         String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);

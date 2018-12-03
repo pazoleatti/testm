@@ -225,7 +225,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Override
     public void saveScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
         saveScript(refBookId, script, FormDataEvent.TEMPLATE_MODIFIED, log, userInfo);
-        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null, null,
+        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null,
                 null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
     }
 
@@ -238,7 +238,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
         auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, null, null,
-                null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
+                null, null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
     }
 
     private void saveScript(long refBookId, String script, FormDataEvent formDataEvent, Logger log, TAUserInfo userInfo) {

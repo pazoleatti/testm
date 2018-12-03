@@ -25,44 +25,44 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AuthenticationUserDetailsServiceImpl implements  AuthenticationUserDetailsService<Authentication> {
+public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserDetailsService<Authentication> {
 
-	private static final Log LOG = LogFactory.getLog(AuthenticationUserDetailsServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(AuthenticationUserDetailsServiceImpl.class);
 
-	@Autowired
+    @Autowired
     private TAUserService userService;
-	@Autowired
-	private AuditService auditService;
+    @Autowired
+    private AuditService auditService;
 
-	@Override
-	public UserDetails loadUserDetails(Authentication token) {
-		String userName = token.getName();
+    @Override
+    public UserDetails loadUserDetails(Authentication token) {
+        String userName = token.getName();
 
-		if (!userService.existsUser(userName)) {
-			String message = "User with login '" + userName + "' was not found in TaxAccounting database";
-			LOG.error(message);
-			throw new UsernameNotFoundException(message);
-		}
+        if (!userService.existsUser(userName)) {
+            String message = "User with login '" + userName + "' was not found in TaxAccounting database";
+            LOG.error(message);
+            throw new UsernameNotFoundException(message);
+        }
 
-		LOG.info("Получение информации пользователя по логину \"" + userName + "\" getUser()");
-		TAUser user = userService.getUser(userName.toLowerCase());
+        LOG.info("Получение информации пользователя по логину \"" + userName + "\" getUser()");
+        TAUser user = userService.getUser(userName.toLowerCase());
 
         if (!user.isActive()) {
             throw new UsernameNotFoundException("Пользователь не активен!");
         }
 
-		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(user.getRoles().size());
-		for (TARole role : user.getRoles()) {
-			grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
-		}
+        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(user.getRoles().size());
+        for (TARole role : user.getRoles()) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
+        }
 
-		TAUserInfo info = new TAUserInfo();
-		info.setUser(user);
-		info.setIp(getRemoteAddress(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest()));
-		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null, null);
+        TAUserInfo info = new TAUserInfo();
+        info.setUser(user);
+        info.setIp(getRemoteAddress(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest()));
+        auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null, null, null);
 
-		return new User(userName, "notused", grantedAuthorities);
-	}
+        return new User(userName, "notused", grantedAuthorities);
+    }
 
     private String getRemoteAddress(HttpServletRequest request) {
         Validate.notNull(request);

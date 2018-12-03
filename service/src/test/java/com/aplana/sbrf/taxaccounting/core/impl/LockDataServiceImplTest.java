@@ -1,13 +1,10 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.TAUserDaoImpl;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.impl.LockDataServiceImpl;
@@ -107,7 +104,7 @@ public class LockDataServiceImplTest {
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(dao, times(2)).unlock(argument.capture());
         verify(auditService, times(2)).add(eq(FormDataEvent.DELETE_LOCK), any(TAUserInfo.class), isNull(Integer.class), isNull(Integer.class), isNull(String.class),
-                isNull(String.class), isNull(Integer.class), any(String.class), isNull(String.class));
+                isNull(String.class), isNull(AuditFormType.class), isNull(Integer.class), any(String.class), isNull(String.class));
 
         Assert.assertEquals("lock1", argument.getAllValues().get(0));
         Assert.assertEquals("lock2", argument.getAllValues().get(1));

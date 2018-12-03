@@ -180,7 +180,7 @@ public abstract class AbstractLoadTransportDataService {
             String lockInfo = String.format("Номер загрузки: %s. ", taskId);
             String note = String.format(logData.getText(), args);
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + lockInfo + note, null);
+                    null, null, null, null, prefix + lockInfo + note, null);
             return note;
         }
         return null;

@@ -1,17 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
-import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
@@ -38,18 +34,17 @@ public class RefBookScriptingServiceImplTest {
     private RefBookScriptingServiceImpl rbScriptingService;
     private TemplateChangesService templateChangesService;
     private AuditService auditService;
-    private static String SCRIPT_TEST_DATA =
-            "switch (formDataEvent) {\n" +
-            "   case FormDataEvent.IMPORT:\n" +
-            "   break\n" +
-            "}";
 
     @Before
     public void init() {
         rbScriptingService = new RefBookScriptingServiceImpl();
         // BlobDataDao
-		BlobDataService blobDataService = mock(BlobDataService.class);
+        BlobDataService blobDataService = mock(BlobDataService.class);
         BlobData bd = new BlobData();
+        String SCRIPT_TEST_DATA = "switch (formDataEvent) {\n" +
+                "   case FormDataEvent.IMPORT:\n" +
+                "   break\n" +
+                "}";
         bd.setInputStream(new ByteArrayInputStream(SCRIPT_TEST_DATA.getBytes()));
         when(blobDataService.get("test-test")).thenReturn(bd);
         ReflectionTestUtils.setField(rbScriptingService, "blobDataService", blobDataService);
@@ -112,7 +107,7 @@ public class RefBookScriptingServiceImplTest {
         verify(templateChangesService, times(1)).save(argument.capture());
         Assert.assertEquals(FormDataEvent.TEMPLATE_MODIFIED, argument.getAllValues().get(0).getEvent());
         verify(auditService).add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null, null,
-                null, null, null, "Обнорвлен скрипт справочника \"test\"", null);
+                null, null, "Обнорвлен скрипт справочника \"test\"", null);
     }
 
     @Test(expected = ServiceLoggerException.class)
