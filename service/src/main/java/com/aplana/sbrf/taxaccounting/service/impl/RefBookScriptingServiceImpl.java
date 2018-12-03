@@ -12,7 +12,15 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
@@ -220,13 +228,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             }
         }
         return writer.toString();
-    }
-
-    @Override
-    public void saveScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
-        saveScript(refBookId, script, FormDataEvent.TEMPLATE_MODIFIED, log, userInfo);
-        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null,
-                null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
     }
 
     @Override

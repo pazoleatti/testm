@@ -4,10 +4,15 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
@@ -93,31 +98,6 @@ public class RefBookScriptingServiceImplTest {
     @Test
     public void executeScriptTest() {
         Assert.assertTrue(rbScriptingService.executeScript(null, 0L, FormDataEvent.IMPORT, new Logger(), null));
-    }
-
-    @Test
-    public void saveScript1() throws IOException {
-        TAUserInfo userInfo = new TAUserInfo();
-        long refBookId = 0L;
-        InputStream stream = RefBookScriptingServiceImplTest.class.getResourceAsStream("saveRefBookScript1.groovy");
-        String script = IOUtils.toString(stream, "UTF-8");
-        Logger logger = new Logger();
-        rbScriptingService.saveScript(refBookId, script, logger, userInfo);
-        ArgumentCaptor<TemplateChanges> argument = ArgumentCaptor.forClass(TemplateChanges.class);
-        verify(templateChangesService, times(1)).save(argument.capture());
-        Assert.assertEquals(FormDataEvent.TEMPLATE_MODIFIED, argument.getAllValues().get(0).getEvent());
-        verify(auditService).add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null, null,
-                null, null, "Обнорвлен скрипт справочника \"test\"", null);
-    }
-
-    @Test(expected = ServiceLoggerException.class)
-    public void saveScript2() throws IOException {
-        TAUserInfo userInfo = new TAUserInfo();
-        long refBookId = 0L;
-        InputStream stream = RefBookScriptingServiceImplTest.class.getResourceAsStream("saveRefBookScript2.groovy");
-        String script = IOUtils.toString(stream, "UTF-8");
-        Logger logger = new Logger();
-        rbScriptingService.saveScript(refBookId, script, logger, userInfo);
     }
 
     @Test

@@ -49,15 +49,6 @@ public interface RefBookScriptingService {
     String getScript(Long refBookId);
 
     /**
-     * Сохранение скрипта
-     * В зависимости от переданных параметров скрипт может создаваться, обновляться и удаляться
-     *
-     * @param refBookId идентификатор справочника
-     * @param script скрипт
-     */
-    void saveScript(long refBookId, String script, Logger logger, TAUserInfo userInfo);
-
-    /**
      * Импорт скрипта
      * В зависимости от переданных параметров скрипт может создаваться, обновляться и удаляться
      *
