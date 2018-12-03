@@ -627,10 +627,8 @@
 
                         if (versionFrom != null && versionTo != null && versionTo < versionFrom) {
                             $scope.personCardForm[generatedVersionFromId].$setValidity('versionDate', false);
-                            $scope.personCardForm[generatedVersionToId].$setValidity('versionDate', false);
                         } else {
                             $scope.personCardForm[generatedVersionFromId].$setValidity('versionDate', true);
-                            $scope.personCardForm[generatedVersionToId].$setValidity('versionDate', true);
                         }
                     }
                 };
