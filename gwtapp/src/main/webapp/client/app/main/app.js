@@ -185,6 +185,8 @@
         "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
         "link.ndfl.reporting.karmannikova.rateReport": "Сформировать \"Отчет в разрезе ставок\"",
         "link.ndfl.reporting.karmannikova.paymentReport": "Сформировать \"Отчет в разрезе платёжных поручений\"",
+        "link.ndfl.reporting.ndfl2_6XlsxReport": "Сформировать отчет \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"",
+        "link.ndfl.reporting.ndfl2_6TxtReport": "Сформировать файл выгрузки \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"",
         "link.ndfl.reporting.formForKppOktmo": "Сформировать \"Реестр сформированной отчетности\"",
         "link.ndfl.reporting.download": "(Скачать)",
         "link.ndfl.historyOfChange": "История изменений",
@@ -193,6 +195,12 @@
         "link.ndflReport.reporting.formForFL21": "Сформировать \"2-НДФЛ (1) по физическому лицу\"",
         "link.ndflReport.reporting.formForFL22": "Сформировать \"2-НДФЛ (2) по физическому лицу\"",
         "link.ndflReport.reporting.deptNotice": "Сформировать \"Уведомление о задолженности\"",
+        "ndfl.report.ndfl2_6XlsxReport.modal.title": "Параметры отбора Данных для включения в 2-НДФЛ и 6-НДФЛ",
+        "ndfl.report.ndfl2_6XlsxReport.modal.dateFrom": "Включать данные с",
+        "ndfl.report.ndfl2_6XlsxReport.modal.dateTo": "Включать данные по",
+        "ndfl.report.ndfl2_6XlsxReport.modal.adjustNegativeValues": "Отрицительные значения",
+        "ndfl.report.ndfl2_6XlsxReport.modal.kpp": "КПП",
+        "ndfl.report.ndfl2_6XlsxReport.modal.kpp.all": "Все КПП формы",
 
         "ndfl.button.importExcel": "Загрузить из ТФ (Excel)",
 

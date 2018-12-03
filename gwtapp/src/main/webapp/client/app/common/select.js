@@ -906,11 +906,17 @@
         /**
          * Контроллер для выбора АСНУ
          */
-        .controller('SelectFormKppCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', '$http',
-            function ($scope, APP_CONSTANTS, GetSelectOption) {
-                $scope.initSelectFormKpp = function (filter) {
+        .controller('SelectFormKppCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', '$filter',
+            function ($scope, APP_CONSTANTS, GetSelectOption, $filter) {
+                $scope.initSelectKppByTB = function (filter) {
                     $scope.select = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/departmentConfig/kppSelect",
                         filter, {}, 'kppSelectFormatter', "kpp");
+                };
+
+                $scope.initSelectKppByFormId = function (filter) {
+                    $scope.select = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/ndflPerson/kppSelect",
+                        filter, {}, 'kppSelectFormatter', "kpp", "kppSelectResultFormatter");
+                    $scope.select.options.placeholder = $filter('translate')('ndfl.report.ndfl2_6XlsxReport.modal.kpp.all');
                 };
             }]
         )

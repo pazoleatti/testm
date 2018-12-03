@@ -50,12 +50,12 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
+        params.put("ddReportType", ddReportType);
 
-        Map<String, Object> subreportParamValues = null;
+        Map<String, Object> subreportParamValues = (Map<String, Object>) params.get("subreportParamValues");
         Map<String, String> viewParamValues = Collections.EMPTY_MAP;
         DataRow<Cell> selectedRecord = null;
         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-            subreportParamValues = (Map<String, Object>) params.get("subreportParamValues");
             viewParamValues = (Map<String, String>) params.get("viewParamValues");
             if (params.containsKey("selectedRecord")) {
                 selectedRecord = (DataRow<Cell>) params.get("selectedRecord");
@@ -130,11 +130,19 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
+        DeclarationDataReportType ddReportType = (DeclarationDataReportType) taskData.getParams().get("ddReportType");
         String reportName = getReportName(taskData);
         String declarationDescription = getDeclarationDescription(taskData);
-        return String.format("Сформирован отчет \"%s\": %s",
-                reportName,
-                declarationDescription);
+        if (ddReportType.getSubreport().getAlias().equals(SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT) ||
+                ddReportType.getSubreport().getAlias().equals(SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT)) {
+            return String.format("Сформирован %s: %s",
+                    reportName,
+                    declarationDescription);
+        } else {
+            return String.format("Сформирован отчет \"%s\": %s",
+                    reportName,
+                    declarationDescription);
+        }
     }
 
     /**

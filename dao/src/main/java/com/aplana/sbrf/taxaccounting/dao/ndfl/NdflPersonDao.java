@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.ndfl;
 
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -734,4 +735,14 @@ public interface NdflPersonDao {
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
     List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> personIdList, Date actualDate);
+
+    /**
+     * Возвращяет страницу из значений КПП, полученных из строк раздела 2 формы РНУ
+     *
+     * @param declarationDataId ид формы РНУ
+     * @param kpp               фильтр поиска
+     * @param pagingParams      данные пагинатора
+     * @return страница из значений КПП, полученных из строк раздела 2 формы РНУ
+     */
+    PagingResult<KppSelect> findAllKppByDeclarationDataId(long declarationDataId, String kpp, PagingParams pagingParams);
 }

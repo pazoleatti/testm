@@ -149,6 +149,16 @@
         })
 
         /**
+         * @description Форматтер для получения наименования сущности
+         * @param entity Сущность
+         */
+        .filter('kppSelectResultFormatter', ['$filter', function ($filter) {
+            return function (kppModel) {
+                return kppModel ? kppModel.kpp : $filter('translate')('ndfl.report.ndfl2_6XlsxReport.modal.kpp.all');
+            };
+        }])
+
+        /**
          * @description Форматтер для enum DeclarationCheckCode
          */
         .filter('declarationCheckCodeEnumFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {

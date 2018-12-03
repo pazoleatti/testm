@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
@@ -231,6 +232,25 @@ public class NdflPersonController {
     @GetMapping(value = "/rest/getPersonDocTypeName/{idDocType}")
     public String getPersonDocTypeName(@PathVariable Long idDocType) {
         return ndflPersonService.getPersonDocTypeName(idDocType);
+    }
+
+    /**
+     * Возвращяет страницу КПП, полученных из строк раздела 2 формы РНУ
+     *
+     * @param declarationDataId ид формы РНУ
+     * @param kpp               значение поиска по КПП
+     * @param pagingParams      параметры пагинации
+     * @return возвращает страницу из списка КПП, полученных из строк раздела 2 формы РНУ
+     */
+    @GetMapping(value = "/rest/ndflPerson/kppSelect")
+    public JqgridPagedList<KppSelect> findAllKppByDepartmentIdAndKpp(@RequestParam String kpp, @RequestParam int declarationDataId, @RequestParam PagingParams pagingParams) {
+        PagingResult<KppSelect> result = ndflPersonService.findAllKppByDeclarationDataId(declarationDataId, kpp, pagingParams);
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                result,
+                result.getTotalCount(),
+                pagingParams
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)

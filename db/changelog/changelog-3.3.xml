@@ -211,4 +211,18 @@
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 106</where>
 		</update>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6092 новые спецотчеты-->
+	<changeSet id="3.3-dnovikov-6" author="dnovikov">
+		<sql>
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 100, 'отчет "Данные для включения в разделы 2-НДФЛ и 6-НДФЛ"', 6, 'rnu_ndfl_2_6_data_xlsx_report');
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'отчет "Данные для включения в разделы 2-НДФЛ и 6-НДФЛ"', 6, 'rnu_ndfl_2_6_data_xlsx_report');
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 100, 'файл выгрузки "Данные для включения в разделы 2-НДФЛ и 6-НДФЛ"', 7, 'rnu_ndfl_2_6_data_txt_report');
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 101, 'файл выгрузки "Данные для включения в разделы 2-НДФЛ и 6-НДФЛ"', 7, 'rnu_ndfl_2_6_data_txt_report');
+		</sql>
+	</changeSet>
 </databaseChangeLog>

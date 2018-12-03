@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormSources
+import com.aplana.sbrf.taxaccounting.model.Ndfl2_6DataReportParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -33,6 +34,7 @@ import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import groovy.transform.AutoClone
@@ -45,14 +47,18 @@ import groovy.transform.builder.SimpleStrategy
 import net.sf.jasperreports.engine.JasperPrint
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
+import org.apache.commons.io.IOUtils
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 
+import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.formatDate
 import static form_template.ndfl.consolidated_rnu_ndfl.v2016.ConsolidatedRnuNdfl.DataFormatEnum.*
 
 /**
@@ -66,6 +72,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
+    DepartmentReportPeriod departmentReportPeriod
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
@@ -77,17 +84,22 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     FileWriter xml
     BlobDataService blobDataService
+    RefBookService refBookService
+    boolean adjustNegativeValues
+    List<String> kppList
+    Date dateFrom, dateTo
     Date date = new Date()
 
     @TypeChecked(TypeCheckingMode.SKIP)
     public ConsolidatedRnuNdfl(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
             this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-        }
-        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
-            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
@@ -106,6 +118,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookService")) {
+            this.refBookService = (RefBookService) scriptClass.getBinding().getProperty("refBookService")
         }
         if (scriptClass.getBinding().hasVariable("needSources")) {
             this.needSources = (Boolean) scriptClass.getProperty("needSources");
@@ -454,6 +469,14 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 createKarmannikovaPaymentReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
+            case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT:
+                create2_6NdflDataReport('xlsx')
+                scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                break
+            case SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT:
+                create2_6NdflDataReport('txt')
+                scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.txt")
+                break
             default:
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
         }
@@ -671,7 +694,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
             new KarmannikovaIncome(it)
         }
-        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy { new Pair<String, Long>(it.operationId, it.asnuId) }.values()
+        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy {
+            new Pair<String, Long>(it.operationId, it.asnuId)
+        }.values()
         defineTaxRates(operations)
         correctTaxRates(operations)
         def incomesByKey = incomes.groupBy { new KarmannikovaRateReportKey(it.kpp, it.asnuId, it.definedTaxRate) }
@@ -707,12 +732,16 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         List<KarmannikovaIncome> incomes = ndflPersonService.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationData.id).collect {
             new KarmannikovaIncome(it)
         }
-        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy { new Pair<String, Long>(it.operationId, it.asnuId) }.values()
+        Collection<List<KarmannikovaIncome>> operations = incomes.groupBy {
+            new Pair<String, Long>(it.operationId, it.asnuId)
+        }.values()
         defineTaxRates(operations)
         definePaymentNumber(operations)
         correctTaxRates(operations)
         defineCorrection(operations)
-        def incomesByKey = incomes.groupBy { new KarmannikovaPaymentReportKey(it.kpp, it.asnuId, it.paymentNumber, it.definedTaxRate, it.correction) }
+        def incomesByKey = incomes.groupBy {
+            new KarmannikovaPaymentReportKey(it.kpp, it.asnuId, it.paymentNumber, it.definedTaxRate, it.correction)
+        }
         List<KarmannikovaPaymentReportRow> rows = []
         incomesByKey.each { key, incomesGroup ->
             def row = new KarmannikovaPaymentReportRow()
@@ -877,15 +906,14 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Отчет Карманниковой: Отчет в разрезе ставок
      */
-    class KarmannikovaRateReportBuilder extends AbstractKarmannikovaReportBuilder {
+    class KarmannikovaRateReportBuilder extends AbstractReportBuilder {
         List<String> header = ["КПП", "АСНУ", "Ставка", "Сумма дохода начисленного", "Сумма дохода выплаченного", "Сумма вычетов", "Налог исчисленный",
                                "Налог удержанный", "Возврат", "Долг за НП", "Долг за НА", "Налог перечисленный"]
         List<KarmannikovaRateReportRow> rows
 
         KarmannikovaRateReportBuilder(List<KarmannikovaRateReportRow> rows) {
+            super()
             this.rows = rows
-            workbook = new SXSSFWorkbook()
-            workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
             this.sheet = workbook.createSheet("Отчет")
         }
 
@@ -897,13 +925,14 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             flush()
         }
 
-        @Override
         protected void fillHeader() {
-            Row row = sheet.createRow(0)
-            Cell cell = row.createCell(0)
-            cell.setCellStyle(new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build())
-            cell.setCellValue("Отчет в разрезе ставок")
-            super.fillHeader()
+            createReportNameRow("Отчет в разрезе ставок")
+            createYearRow()
+            createPeriodRow()
+            createFormTypeRow()
+            createForNumRow()
+            createDepartmentRow()
+            createReportDateRow()
         }
 
         void createTableHeaders() {
@@ -958,16 +987,15 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * для Отчет Карманниковой: Отчет в разрезе платёжных поручений
      */
-    class KarmannikovaPaymentReportBuilder extends AbstractKarmannikovaReportBuilder {
+    class KarmannikovaPaymentReportBuilder extends AbstractReportBuilder {
 
         List<String> header = ["КПП", "АСНУ", "Платёжное поручение", "Ставка", "Налог исчисленный",
                                "Налог удержанный", "Возврат", "Налог перечисленный", "Корректировка"]
         List<KarmannikovaPaymentReportRow> rows
 
         KarmannikovaPaymentReportBuilder(List<KarmannikovaPaymentReportRow> rows) {
+            super()
             this.rows = rows
-            workbook = new SXSSFWorkbook()
-            workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
             this.sheet = workbook.createSheet("Отчет")
         }
 
@@ -979,13 +1007,14 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             flush()
         }
 
-        @Override
         protected void fillHeader() {
-            Row row = sheet.createRow(0)
-            Cell cell = row.createCell(0)
-            cell.setCellStyle(new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build())
-            cell.setCellValue("Отчет в разрезе платёжных поручений")
-            super.fillHeader()
+            createReportNameRow("Отчет в разрезе платёжных поручений")
+            createYearRow()
+            createPeriodRow()
+            createFormTypeRow()
+            createForNumRow()
+            createDepartmentRow()
+            createReportDateRow()
         }
 
         void createTableHeaders() {
@@ -1033,18 +1062,28 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    abstract class AbstractKarmannikovaReportBuilder {
+    abstract class AbstractReportBuilder {
         protected Workbook workbook
         protected Sheet sheet
         protected int currentRowIndex = 0
+        protected CellStyle styleLeftHeader
+        protected CellStyle styleNormal
 
-        protected void fillHeader() {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        AbstractReportBuilder() {
+            workbook = new SXSSFWorkbook()
+            workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
+            styleLeftHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_RIGHT).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            styleNormal = new StyleBuilder(workbook).build()
+        }
 
-            def styleHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build()
-            def styleLeftHeader = new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_RIGHT).boldweight(Font.BOLDWEIGHT_BOLD).build()
-            def styleNormal = new StyleBuilder(workbook).build()
+        void createReportNameRow(String name) {
+            Row row = sheet.createRow(0)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(new StyleBuilder(workbook).hAlign(CellStyle.ALIGN_LEFT).boldweight(Font.BOLDWEIGHT_BOLD).fontHeight((short) 14).build())
+            cell.setCellValue(name)
+        }
 
+        void createYearRow() {
             Row row = sheet.createRow(++currentRowIndex)
             Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
@@ -1052,45 +1091,55 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             cell = row.createCell(1)
             cell.setCellStyle(new StyleBuilder(workbook).dataFormat(NUMBER).build())
             cell.setCellValue(departmentReportPeriod.reportPeriod.taxPeriod.year)
+        }
 
-            row = sheet.createRow(++currentRowIndex)
-            cell = row.createCell(0)
+        void createPeriodRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
             cell.setCellValue("Период:")
             cell = row.createCell(1)
             cell.setCellStyle(styleNormal)
             cell.setCellValue(departmentReportPeriod.reportPeriod.name)
+        }
 
-            row = sheet.createRow(++currentRowIndex)
-            cell = row.createCell(0)
+        void createFormTypeRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
             cell.setCellValue("Тип формы:")
             cell = row.createCell(1)
             cell.setCellStyle(styleNormal)
             cell.setCellValue(declarationTemplate.getName())
+        }
 
-            row = sheet.createRow(++currentRowIndex)
-            cell = row.createCell(0)
+        void createForNumRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
             cell.setCellValue("№ формы:")
             cell = row.createCell(1)
             cell.setCellStyle(new StyleBuilder(workbook).dataFormat(NUMBER).build())
             cell.setCellValue(declarationData.id)
+        }
 
-            row = sheet.createRow(++currentRowIndex)
-            cell = row.createCell(0)
+        void createDepartmentRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
             cell.setCellValue("Подразделение:")
             cell = row.createCell(1)
             cell.setCellStyle(styleNormal)
             cell.setCellValue("/Банк/" + departmentService.getParentsHierarchy(declarationData.departmentId))
+        }
 
-            row = sheet.createRow(++currentRowIndex)
-            cell = row.createCell(0)
+        void createReportDateRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
             cell.setCellStyle(styleLeftHeader)
             cell.setCellValue("Сформирован:")
             cell = row.createCell(1)
-            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(DATE_LONG).build())
+            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(DATE_TIME).build())
             cell.setCellValue(date)
         }
 
@@ -1104,6 +1153,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                     cell.setCellValue(((BigDecimal) value).doubleValue())
                 } else if (value instanceof Number) {
                     cell.setCellValue(((Number) value).doubleValue())
+                } else if (value instanceof Date) {
+                    def date = (Date) value
+                    if (formatDate(date) == SharedConstants.DATE_ZERO_AS_DATE) {
+                        cell.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
+                    } else {
+                        cell.setCellValue(date)
+                    }
                 }
             }
             cell.setCellStyle(style)
@@ -1150,7 +1206,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 style.setDataFormat((short) 1)
             } else if (dataFormat == NUMBER_2) {
                 style.setDataFormat((short) 2)
-            } else if (dataFormat == DATE_LONG) {
+            } else if (dataFormat == DATE) {
+                style.setDataFormat((short) 14)
+            } else if (dataFormat == DATE_TIME) {
                 style.setDataFormat(workbook.createDataFormat().getFormat("dd.MM.yyyy hh:m:ss"))
             }
             style.setAlignment(hAlign)
@@ -1166,7 +1224,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     @TypeChecked(TypeCheckingMode.SKIP)
     enum DataFormatEnum {
-        STRING, NUMBER, NUMBER_2, DATE_LONG
+        STRING, NUMBER, NUMBER_2, DATE, DATE_TIME
     }
 
     @EqualsAndHashCode
@@ -1262,6 +1320,352 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         @Override
         String toString() {
             return "{rowNum: $rowNum, taxRate: $taxRate, definedTaxRate: $definedTaxRate, paymentNumber: $paymentNumber, correction: $correction}"
+        }
+    }
+
+    /**
+     * Отчет Данные для включения в 2-НДФЛ и 6-НДФЛ
+     */
+    void create2_6NdflDataReport(type) {
+        readParams()
+        def incomes = ndflPersonService.findNdflPersonIncome(declarationData.id)
+        if (kppList) {
+            incomes = incomes.findAll { it.kpp in kppList }
+        }
+        Map<Pair<String, String>, List<NdflPersonIncome>> incomesByKppAndOkmto = incomes.groupBy {
+            new Pair<String, String>(it.kpp, it.oktmo)
+        }
+        List<Ndfl2_6Row> rows = []
+        String periodCode = refBookService.getRecordData(RefBook.Id.PERIOD_CODE.getId(), departmentReportPeriod.reportPeriod.dictTaxPeriodId)?.CODE?.stringValue
+        incomesByKppAndOkmto.each { key, incomesOfKppAndOktmo ->
+            def rowsOfKppAndOktmo = collectRowsFor2_6NdflDataReport(incomesOfKppAndOktmo)
+            rows.addAll(rowsOfKppAndOktmo)
+            for (def row : rowsOfKppAndOktmo) {
+                row.periodCode = periodCode
+                row.kpp = key.first
+                row.oktmo = key.second
+            }
+        }
+        rows.sort { def a, def b ->
+            a.kpp <=> b.kpp ?: a.oktmo <=> b.oktmo ?: a.witholdingDate <=> b.witholdingDate
+        }
+        if (type == "xlsx") {
+            new Ndfl2_6DataXlsxReportBuilder(rows).build()
+        } else if (type == "txt") {
+            new Ndfl2_6DataTxtReportBuilder(rows).build()
+        }
+    }
+
+    void readParams() {
+        def params = (Ndfl2_6DataReportParams) scriptSpecificReportHolder.getSubreportParam("params")
+        dateFrom = params.dateFrom
+        dateTo = params.dateTo
+        adjustNegativeValues = params.adjustNegativeValues
+        kppList = params.kppList
+    }
+
+    /**
+     * Формирует строки для отчета "Данные для включения в 2-НДФЛ и 6-НДФЛ" из строк раздела-2 по определенной паре КПП-ОКТМО
+     * !Код скопирован из скрипта report_6ndfl.groovy
+     */
+    @TypeChecked(TypeCheckingMode.SKIP)
+    List<Ndfl2_6Row> collectRowsFor2_6NdflDataReport(List<NdflPersonIncome> ndflPersonIncomeList) {
+        List<Ndfl2_6Row> rows = []
+        // Необходимо сгруппировать доходы по ИдОперации для поиска даты начисления
+        def pairOperationIdMap = ndflPersonIncomeList.groupBy { it.operationId }
+
+        // Список содержащий данные для формирования раздела 2
+        Map<Section2Key, Section2> section2Data = [:]
+
+        // Определяем строки для заполнения раздела 2
+        for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+            if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
+                    && (dateFrom <= ndflPersonIncome.taxTransferDate && dateTo >= ndflPersonIncome.taxTransferDate)) {
+                List<Date> incomeAccruedDateList = []
+                for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
+                    if (incomeGrouped.incomeAccruedDate != null) {
+                        incomeAccruedDateList << incomeGrouped.incomeAccruedDate
+                    }
+                }
+                def accruedDate = incomeAccruedDateList.isEmpty() ? ndflPersonIncome.incomePayoutDate : Collections.min(incomeAccruedDateList)
+                def key = new Section2Key(accruedDate, ndflPersonIncome.taxDate, ndflPersonIncome.taxTransferDate)
+
+                if (!section2Data.containsKey(key)) {
+                    section2Data.put(key, new Section2())
+                }
+                section2Data.get(key).withholdingRows.add(ndflPersonIncome)
+            }
+        }
+
+        for (def section2Item : section2Data.values()) {
+            section2Item.incomeSum = 0
+            section2Item.withholdingTaxSum = 0
+            for (def income : section2Item.withholdingRows) {
+                section2Item.incomeSum += income.incomePayoutSumm ?: 0
+                section2Item.withholdingTaxSum += income.withholdingTax ?: 0
+            }
+        }
+
+        BigDecimal minusIncome = 0
+        BigDecimal minusWithholding = 0
+        if (!section2Data.isEmpty()) {
+            for (def section2Entry : section2Data.entrySet()) {
+                def value = section2Entry.value
+
+                // Корректировка отрицательных значений
+                if (adjustNegativeValues) {
+                    if (value.incomeSum > 0) {
+                        def tmp = value.incomeSum
+                        value.incomeSum += minusIncome
+                        minusIncome += tmp
+                        if (minusIncome > 0) {
+                            minusIncome = 0
+                        }
+                    } else {
+                        minusIncome += value.incomeSum
+                    }
+                    if (value.withholdingTaxSum > 0) {
+                        def tmp = value.withholdingTaxSum
+                        value.withholdingTaxSum += minusWithholding
+                        minusWithholding += tmp
+                        if (minusWithholding > 0) {
+                            minusWithholding = 0
+                        }
+                    } else {
+                        minusWithholding += value.withholdingTaxSum
+                    }
+
+                    if (value.incomeSum < 0) {
+                        value.incomeSum = 0
+                    }
+                    if (value.withholdingTaxSum < 0) {
+                        value.withholdingTaxSum = 0
+                    }
+                }
+
+                // Исключение из списка строки, для которых СуммаФактическогоДохода =0 И СуммаУдержанногоНалога =0
+                // ИЛИ СрокПеречисленияНалога НЕ принадлежит последним 3 месяцам отчетного периода
+                if ((section2Entry.value.incomeSum || section2Entry.value.withholdingTaxSum) &&
+                        (dateFrom <= section2Entry.key.taxTransferDate && section2Entry.key.taxTransferDate <= dateTo)) {
+                    def row = new Ndfl2_6Row()
+                    row.incomeDate = section2Entry.key.virtuallyReceivedIncomeDate
+                    row.witholdingDate = section2Entry.key.witholdingDate
+                    row.taxTransferDate = section2Entry.key.taxTransferDate
+                    row.incomeSum = value.incomeSum
+                    row.withholdingTaxSum = value.withholdingTaxSum
+                    rows.add(row)
+                }
+            }
+        }
+        return rows
+    }
+
+    @ToString
+    class Ndfl2_6Row {
+        // Код периода
+        String periodCode
+        // КПП
+        String kpp
+        // ОКТМО
+        String oktmo
+        // Дата фактического получения дохода
+        Date incomeDate
+        // Дата удержания налога
+        Date witholdingDate
+        // Срок перечисления налога
+        Date taxTransferDate
+        // Сумма фактически полученного дохода
+        BigDecimal incomeSum
+        // Сумма удержанного налога
+        BigDecimal withholdingTaxSum
+    }
+
+    /**
+     * Класс содержащий данные неоходимые для формирования раздела 2 формы 6НДФЛ
+     */
+    class Section2 {
+        // Строки удержания налога
+        List<NdflPersonIncome> withholdingRows = []
+        BigDecimal incomeSum
+        BigDecimal withholdingTaxSum
+    }
+
+    class Section2Key {
+        // Дата Фактического Получения Дохода
+        Date virtuallyReceivedIncomeDate
+        // Дата Удержания Налога
+        Date witholdingDate
+        // Срок Перечисления Налога
+        Date taxTransferDate
+
+        Section2Key(Date virtuallyReceivedIncomeDate, Date witholdingDate, Date taxTransferDate) {
+            this.virtuallyReceivedIncomeDate = virtuallyReceivedIncomeDate
+            this.witholdingDate = witholdingDate
+            this.taxTransferDate = taxTransferDate
+        }
+
+        boolean equals(o) {
+            if (this.is(o)) return true
+            if (getClass() != o.class) return false
+
+            Section2Key that = (Section2Key) o
+
+            if (taxTransferDate != that.taxTransferDate) return false
+            if (virtuallyReceivedIncomeDate != that.virtuallyReceivedIncomeDate) return false
+            if (witholdingDate != that.witholdingDate) return false
+
+            return true
+        }
+
+        int hashCode() {
+            int result
+            result = (virtuallyReceivedIncomeDate != null ? virtuallyReceivedIncomeDate.hashCode() : 0)
+            result = 31 * result + (witholdingDate != null ? witholdingDate.hashCode() : 0)
+            result = 31 * result + (taxTransferDate != null ? taxTransferDate.hashCode() : 0)
+            return result
+        }
+    }
+
+    /**
+     * для Отчет Данные для включения в 2-НДФЛ и 6-НДФЛ
+     */
+    class Ndfl2_6DataXlsxReportBuilder extends AbstractReportBuilder {
+
+        List<String> header = ["Код периода", "КПП", "ОКТМО", "Дата фактического получения дохода", "Дата удержания налога",
+                               "Срок перечисления налога", "Сумма фактически полученного дохода", "Сумма удержанного налога"]
+        List<Ndfl2_6Row> rows
+
+        Ndfl2_6DataXlsxReportBuilder(List<Ndfl2_6Row> rows) {
+            super()
+            this.rows = rows
+            this.sheet = workbook.createSheet("Отчет")
+        }
+
+        void build() {
+            fillHeader()
+            createTableHeaders()
+            createDataForTable()
+            cellAlignment()
+            flush()
+        }
+
+        protected void fillHeader() {
+            createReportNameRow("Данные для включения в разделы 2-НДФЛ и 6-НДФЛ")
+            createYearRow()
+            createPeriodRow()
+            createFormTypeRow()
+            createForNumRow()
+            createDepartmentRow()
+            createDateFromRow()
+            createDateToRow()
+            createReportDateRow()
+        }
+
+        void createDateFromRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Дата с:")
+            cell = row.createCell(1)
+            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(DATE).build())
+            cell.setCellValue(dateFrom)
+        }
+
+        void createDateToRow() {
+            Row row = sheet.createRow(++currentRowIndex)
+            Cell cell = row.createCell(0)
+            cell.setCellStyle(styleLeftHeader)
+            cell.setCellValue("Дата по:")
+            cell = row.createCell(1)
+            cell.setCellStyle(new StyleBuilder(workbook).dataFormat(DATE).build())
+            cell.setCellValue(dateTo)
+        }
+
+        void createTableHeaders() {
+            currentRowIndex = 11
+            def style = new StyleBuilder(workbook).borders(true).wrapText(true).hAlign(CellStyle.ALIGN_CENTER).boldweight(Font.BOLDWEIGHT_BOLD).build()
+            Row row = sheet.createRow(currentRowIndex)
+            for (int colIndex = 0; colIndex < header.size(); colIndex++) {
+                Cell cell = row.createCell(colIndex)
+                cell.setCellValue(header.get(colIndex))
+                cell.setCellStyle(style)
+            }
+        }
+
+        void createDataForTable() {
+            for (def dataRow : rows) {
+                sheet.createRow(++currentRowIndex)
+                int colIndex = 0
+                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+                createCell(colIndex, dataRow.periodCode, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.oktmo, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(++colIndex, dataRow.incomeDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.witholdingDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.taxTransferDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
+                createCell(++colIndex, dataRow.incomeSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
+                createCell(++colIndex, dataRow.withholdingTaxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+            }
+        }
+
+        void cellAlignment() {
+            Map<Integer, Integer> widths = [0: 16, 2: 16, 3: 16, 4: 16, 5: 16, 6: 16, 7: 16]
+            for (int i = 0; i < header.size(); i++) {
+                sheet.autoSizeColumn(i)
+                if (widths.get(i)) {
+                    sheet.setColumnWidth(i, widths.get(i) * 269)
+                } else {
+                    if (sheet.getColumnWidth(i) > 10000) {
+                        sheet.setColumnWidth(i, 10000)
+                    } else if (sheet.getColumnWidth(i) < 3000) {
+                        sheet.setColumnWidth(i, 3000)
+                    }
+                }
+            }
+        }
+    }
+
+    class Ndfl2_6DataTxtReportBuilder {
+        List<Ndfl2_6Row> rows
+        OutputStream outputStream = scriptSpecificReportHolder.getFileOutputStream()
+        DecimalFormat formatN_2
+
+        Ndfl2_6DataTxtReportBuilder(List<Ndfl2_6Row> rows) {
+            this.rows = rows
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault())
+            symbols.setDecimalSeparator('.' as char)
+            formatN_2 = new DecimalFormat("0.00", symbols)
+        }
+
+        void build() {
+            if (rows) {
+                def lastRow = rows.last()
+                for (def row : rows) {
+                    StringBuilder stringBuilder = new StringBuilder()
+                    stringBuilder << row.periodCode << "|"
+                    stringBuilder << row.kpp << "|"
+                    stringBuilder << row.oktmo << "|"
+                    stringBuilder << format(row.incomeDate) << "|"
+                    stringBuilder << format(row.witholdingDate) << "|"
+                    stringBuilder << (format(row.taxTransferDate) == SharedConstants.DATE_ZERO_AS_DATE ? SharedConstants.DATE_ZERO_AS_STRING : format(row.taxTransferDate)) << "|"
+                    stringBuilder << formatN_2.format(row.incomeSum) << "|"
+                    stringBuilder << row.withholdingTaxSum << "|"
+                    if (!row.is(lastRow)) {
+                        stringBuilder << "\r\n"
+                    }
+                    write(stringBuilder.toString())
+                }
+            } else {
+                write("\r\n")
+            }
+        }
+
+        String format(Date date) {
+            return date?.format(SharedConstants.DATE_FORMAT) ?: ""
+        }
+
+        void write(String string) {
+            IOUtils.write(string, outputStream, "IBM866")
         }
     }
 

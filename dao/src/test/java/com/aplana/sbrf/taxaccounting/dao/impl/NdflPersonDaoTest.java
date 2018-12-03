@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
@@ -1268,14 +1269,23 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testfindIncomesForPersonByKppOktmo() {
-        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmo(Arrays.asList(1001L, 1002L), "2222", "111222333");
-        assertThat(result).hasSize(5);
+        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmo(Arrays.asList(1001L, 1002L), "99222", "111222333");
+        assertThat(result).hasSize(2);
     }
 
     @Test
     public void testfetchNdflPersonByPairKppOktmo() {
-        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(Arrays.asList(100L), "2222", "111222333", false);
+        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(Arrays.asList(100L), "99222", "111222333", false);
         assertThat(result).hasSize(1);
+    }
+
+    public void testFindAllKppByDeclarationDataId() {
+        List<KppSelect> kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, null, PagingParams.getInstance(0, 100));
+        assertThat(kppList).hasSize(4);
+        kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, null, PagingParams.getInstance(0, 3));
+        assertThat(kppList).hasSize(3);
+        kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, "99", PagingParams.getInstance(0, 100));
+        assertThat(kppList).hasSize(3);
     }
 
     public static Date toDate(String dateStr) {

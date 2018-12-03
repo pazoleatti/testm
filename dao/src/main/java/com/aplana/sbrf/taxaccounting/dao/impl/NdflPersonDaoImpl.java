@@ -7,15 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.URM;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -35,6 +27,7 @@ import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2446,6 +2439,36 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             return person;
         }
+    }
+
+    @Override
+    public PagingResult<KppSelect> findAllKppByDeclarationDataId(long declarationDataId, String kpp, PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId);
+        String baseSelect = "select distinct kpp from ndfl_person_income npi " +
+                "join ndfl_person np on np.id = npi.ndfl_person_id  " +
+                "where np.declaration_data_id = :declarationDataId";
+        if (!StringUtils.isEmpty(kpp)) {
+            baseSelect += " and kpp like '%' || :kpp || '%'";
+            params.addValue("kpp", kpp);
+        }
+
+        params.addValue("startIndex", pagingParams.getStartIndex());
+        params.addValue("count", pagingParams.getCount());
+        List<KppSelect> kppSelects = getNamedParameterJdbcTemplate().query("" +
+                        "select * from (\n" +
+                        "   select rownum rn, t.* from (" + baseSelect + " order by kpp) t\n" +
+                        ") where rn > :startIndex and rownum <= :count",
+                params, new RowMapper<KppSelect>() {
+                    @Override
+                    public KppSelect mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new KppSelect(rs.getInt("rn"),
+                                rs.getString("kpp"));
+                    }
+                });
+
+        int count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSelect + ")", params, Integer.class);
+        return new PagingResult<>(kppSelects, count);
     }
 }
 

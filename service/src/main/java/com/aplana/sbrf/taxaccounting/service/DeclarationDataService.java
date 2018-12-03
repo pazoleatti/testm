@@ -281,11 +281,12 @@ public interface DeclarationDataService {
      *
      * @param declarationDataId идентификатор декларации
      * @param alias             вид спецотчета (subreport)
+     * @param reportParams            параметры для формирования отчета
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param force             признак для перезапуска задачи
      * @return результат о формировании отчета
      */
-    CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, TAUserInfo userInfo, boolean force);
+    CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams, TAUserInfo userInfo, boolean force);
 
     /**
      * Формирование Реестра сформированной отчетности
