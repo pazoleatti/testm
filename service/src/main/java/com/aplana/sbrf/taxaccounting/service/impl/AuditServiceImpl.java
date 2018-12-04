@@ -137,7 +137,7 @@ public class AuditServiceImpl implements AuditService {
                             reportPeriod.getName(),
                             corrStr);
                     String decTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                    add(event, userInfo, departmentName, departmentId, rpName, decTypeName, null, AuditFormType.FORM_TYPE_TAX, null, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, logId);
+                    add(event, userInfo, departmentName, departmentId, rpName, decTypeName, decTypeName, AuditFormType.FORM_TYPE_TAX, null, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, logId);
                 }
                 return null;
             }
