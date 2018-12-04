@@ -175,10 +175,6 @@ public class AuditServiceImpl implements AuditService {
         log.setLogId(logId);
         log.setServer(serverInfo.getServerName());
 
-        try {
-            auditDao.add(log);
-        } catch (Exception e) {
-            LOG.error("Ошибка при записи в ЖА", e);
-        }
+        auditDao.add(log);
     }
 }
