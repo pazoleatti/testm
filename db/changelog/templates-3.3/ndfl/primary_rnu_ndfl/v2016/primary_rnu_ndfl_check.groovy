@@ -1525,7 +1525,7 @@ class Check extends AbstractScriptClass {
                                 for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
                                     NdflPerson incomePerson = personsCache.get(ndflPersonIncome.getNdflPersonId())
                                     NdflPerson prepaymentPerson = personsCache.get(ndflPersonPrepayment.getNdflPersonId())
-                                    if (incomePerson.inp == prepaymentPerson.inp) {
+                                    if (incomePerson.inp == prepaymentPerson.inp && operationIdList.contains(ndflPersonPrepayment.operationId)) {
                                         s3 = s3.add(ndflPersonPrepayment.summ)
                                     }
                                 }
