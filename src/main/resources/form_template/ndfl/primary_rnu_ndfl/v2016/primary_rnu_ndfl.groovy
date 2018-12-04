@@ -1313,7 +1313,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             } else if (dataFormat == DATE) {
                 style.setDataFormat((short) 14)
             } else if (dataFormat == DATE_TIME) {
-                style.setDataFormat(workbook.createDataFormat().getFormat("dd.MM.yyyy hh:m:ss"))
+                style.setDataFormat(workbook.createDataFormat().getFormat("dd.MM.yyyy hh:mm:ss"))
             }
             style.setAlignment(hAlign)
             style.setWrapText(wrapText)
