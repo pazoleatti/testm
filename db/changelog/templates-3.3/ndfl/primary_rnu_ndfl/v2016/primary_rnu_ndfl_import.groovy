@@ -1370,44 +1370,53 @@ class Import extends AbstractScriptClass {
      */
     void removeOperations() {
         List<NdflPerson> ndflPersonFromDeclarationData = ndflPersonService.findNdflPerson(declarationData.id)
-        int initialCounter = 0
-        int removedCounter = 0
+        int rowsCount = 0
+        int personsCount = ndflPersonFromDeclarationData.size()
+        int incomesCount = 0
+        int deductionsCount = 0
+        int prepaymentsCount = 0
         List<LogEntry> removeMessages = []
         List<Long> incomesForRemove = []
         List<Long> deductionsForRemove = []
         List<Long> prepaymentsForRemove = []
-        List<Long> ndflPersonIdForRemove = []
-        for (NdflPerson np : ndflPersonFromDeclarationData) {
-            List<Long> incomesIdList = ndflPersonService.fetchIncomeIdByNdflPerson(np.id)
-            List<Long> deductionsIdList = ndflPersonService.fetchDeductionIdByNdflPerson(np.id)
-            List<Long> prepaymentsIdList = ndflPersonService.fetchPrepaymentIdByNdflPerson(np.id)
-            int incomesInitialSize = incomesIdList.size()
-            int deductionsInitialSize = deductionsIdList.size()
-            int prepaymentInitialSize = prepaymentsIdList.size()
-            initialCounter += (incomesInitialSize + deductionsInitialSize + prepaymentInitialSize)
+        List<Long> personIdsForRemove = []
+        for (NdflPerson person : ndflPersonFromDeclarationData) {
+            List<Long> incomesIdList = ndflPersonService.fetchIncomeIdByNdflPerson(person.id)
+            List<Long> deductionsIdList = ndflPersonService.fetchDeductionIdByNdflPerson(person.id)
+            List<Long> prepaymentsIdList = ndflPersonService.fetchPrepaymentIdByNdflPerson(person.id)
+            int personIncomesCount = incomesIdList.size()
+            incomesCount += personIncomesCount
+            int personDeductionsCount = deductionsIdList.size()
+            deductionsCount += personDeductionsCount
+            int personPrepaymentCount = prepaymentsIdList.size()
+            prepaymentsCount += personPrepaymentCount
+            rowsCount += (personIncomesCount + personDeductionsCount + personPrepaymentCount)
             incomesIdList.removeAll(incomeImportIdList)
             deductionsIdList.removeAll(deductionImportIdList)
             prepaymentsIdList.removeAll(prepaymentImportIdList)
-            int incomesRemovedCount = incomesIdList.size()
-            int deductionsRemovedCount = deductionsIdList.size()
-            int prepaymentsRemovedCount = prepaymentsIdList.size()
+            int personIncomesRemovedCount = incomesIdList.size()
+            int personDeductionsRemovedCount = deductionsIdList.size()
+            int personPrepaymentsRemovedCount = prepaymentsIdList.size()
             incomesForRemove.addAll(incomesIdList)
             deductionsForRemove.addAll(deductionsIdList)
             prepaymentsForRemove.addAll(prepaymentsIdList)
-            removedCounter += incomesRemovedCount
-            removedCounter += deductionsRemovedCount
-            removedCounter += prepaymentsRemovedCount
-            if (incomesRemovedCount != 0) {
-                removeMessages << createRemoveMessage(np, INCOME_TITLE, incomesRemovedCount)
+            def personInfo = "${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""}, ИНП: ${person.inp ?: ""}, " +
+                    "ДУЛ: ${person.idDocType ?: ""}, ${person.idDocNumber ?: ""}"
+            if (personIncomesCount == personIncomesRemovedCount) {
+                removeMessages << new LogEntry(LogLevel.INFO, "Удалено физическое лицо: $personInfo".toString())
+                personIdsForRemove << person.id
             }
-            if (deductionsRemovedCount != 0) {
-                removeMessages << createRemoveMessage(np, DEDUCTION_TITLE, deductionsRemovedCount)
+            if (personIncomesRemovedCount != 0) {
+                removeMessages << new LogEntry(LogLevel.INFO, "Удалены данные у ФЛ: $personInfo. " +
+                        "В Разделе ${INCOME_TITLE} удалено строк ($personIncomesRemovedCount)")
             }
-            if (prepaymentsRemovedCount != 0) {
-                removeMessages << createRemoveMessage(np, PREPAYMENTS_TITLE, prepaymentsRemovedCount)
+            if (personDeductionsRemovedCount != 0) {
+                removeMessages << new LogEntry(LogLevel.INFO, "Удалены данные у ФЛ: $personInfo. " +
+                        "В Разделе ${DEDUCTION_TITLE} удалено строк ($personDeductionsRemovedCount)")
             }
-            if (incomesInitialSize == incomesRemovedCount) {
-                ndflPersonIdForRemove << np.id
+            if (personPrepaymentsRemovedCount != 0) {
+                removeMessages << new LogEntry(LogLevel.INFO, "Удалены данные у ФЛ: $personInfo. " +
+                        "В Разделе ${PREPAYMENTS_TITLE} удалено строк ($personPrepaymentsRemovedCount)")
             }
         }
         if (!incomesForRemove.isEmpty()) {
@@ -1419,31 +1428,14 @@ class Import extends AbstractScriptClass {
         if (!prepaymentsForRemove.isEmpty()) {
             ndflPersonService.deleteNdflPersonPrepayment(prepaymentsForRemove)
         }
-        if (!ndflPersonIdForRemove.isEmpty()) {
-            ndflPersonService.deleteNdflPersonBatch(ndflPersonIdForRemove)
+        if (!personIdsForRemove.isEmpty()) {
+            ndflPersonService.deleteNdflPersonBatch(personIdsForRemove)
         }
-        removedCounter != 0 ? logger.info("При загрузке файла было удалено: %d, из: %d", removedCounter, initialCounter) :
-                logger.getEntries().addAll(removeMessages)
-    }
-
-    /**
-     * Создает сообщение о удалении даннух у ФЛ
-     * @param ndflPerson объект физлица
-     * @param sectionName название раздела
-     * @param removedCount количество удаленных записей
-     * @return запись для логгера с сообщением
-     */
-    LogEntry createRemoveMessage(NdflPerson ndflPerson, String sectionName, int removedCount) {
-        return new LogEntry(LogLevel.INFO, String.format("Удалены данные у ФЛ: (%s %s %s, ИНП: %s, ДУЛ: %s, %s). В Разделе %s удалено строк (%d)",
-                ndflPerson.lastName ?: "",
-                ndflPerson.firstName ?: "",
-                ndflPerson.middleName ?: "",
-                ndflPerson.inp ?: "",
-                ndflPerson.idDocType ?: "",
-                ndflPerson.idDocNumber ?: "",
-                sectionName,
-                removedCount
-        ))
+        logger.info("При загрузке файла: в Разделе 1 удалено ${personIdsForRemove.size()} строк из $personsCount, " +
+                "в Разделе 2 удалено ${incomesForRemove.size()} строк из $incomesCount, " +
+                "в Разделе 3 удалено ${deductionsForRemove.size()} строк из $deductionsCount, " +
+                "в Разделе 4 удалено ${prepaymentsForRemove.size()} строк из $prepaymentsCount.")
+        logger.getEntries().addAll(removeMessages)
     }
 
     /**
