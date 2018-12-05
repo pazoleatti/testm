@@ -231,8 +231,6 @@ class Check extends AbstractScriptClass {
                 time = System.currentTimeMillis()
 
                 ScriptUtils.checkInterrupted()
-                // Проверка и удаление фиктивных строк
-                ndflPersonIncomeList = checkAndRemoveDummyIncomes(ndflPersonIncomeList)
 
                 logForDebug("Проверки на соответствие справочникам / Выгрузка Реестра физических лиц (" + (System.currentTimeMillis() - time) + " мс)")
 
@@ -991,6 +989,8 @@ class Check extends AbstractScriptClass {
                         List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, RegistryPerson> personMap) {
 
         long time = System.currentTimeMillis()
+        // Проверка и удаление фиктивных строк
+        ndflPersonIncomeList = checkAndRemoveDummyIncomes(ndflPersonIncomeList)
 
         Map<Long, NdflPerson> personsCache = [:]
         ndflPersonList.each { ndflPerson ->
@@ -1835,6 +1835,15 @@ class Check extends AbstractScriptClass {
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
 
+            // Выч0 Строка Раздела 3 не относится к операции с фиктивной строкой
+            for (def income : allIncomesOfOperation) {
+                if (income.isDummy()) {
+                    String errMsg = "относится к операции, для которой в Разделе 2 имеется строка $income.rowNum (ФЛ: $ndflPersonFL.fio, " +
+                            "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ."
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, income.rowNum ?: "")
+                    logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
+                }
+            }
             // Выч1 Документ о праве на налоговый вычет.Код источника (Графа 7)
             if (ndflPersonDeduction.notifType == "1" && ndflPersonDeduction.notifSource != "0000") {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
@@ -1971,14 +1980,26 @@ class Check extends AbstractScriptClass {
         long time = System.currentTimeMillis()
 
         Map<Long, NdflPerson> personByIdMap = ndflPersonList.collectEntries { [it.id, it] }
-
+        Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId =
+                ndflPersonIncomeList.groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
         for (def prepayment : ndflPersonPrepaymentList) {
             def operationId = prepayment.operationId
+            def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(prepayment.ndflPersonId)?.get(operationId) ?: []
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(prepayment.ndflPersonId)
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
 
             def person = personByIdMap[prepayment.ndflPersonId]
 
+            // 0 Строка Раздела 3 не относится к операции с фиктивной строкой
+            for (def income : allIncomesOfOperation) {
+                if (income.isDummy()) {
+                    String errMsg = "относится к операции, для которой в Разделе 2 имеется строка $income.rowNum (ФЛ: $ndflPersonFL.fio, " +
+                            "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ."
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, income.rowNum ?: "")
+                    logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
+                }
+            }
+            // 1 Заполнение Раздела 4 только для НП с кодом статуса = "6"
             if (person.status != "6" && person.inp == ndflPersonFL.inp) {
                 String errMsg = String.format("Наличие строки некорректно, так как для ФЛ ИНП: %s Статус (Код) не равен \"6\"", person.inp)
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
