@@ -908,12 +908,22 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
      */
     void defineCorrection(Collection<List<IncomeExt>> operations) {
         operations.each { incomesOfOperation ->
-            for (int i = incomesOfOperation.size() - 1; i >= 0; i--) {
-                IncomeExt income = incomesOfOperation[i]
-                if (income.taxRate != null) {
-                    income.correction = true
-                } else {
+            boolean containsTransferIncome = false
+            for (def income : incomesOfOperation) {
+                if (income.taxRate == null) {
+                    containsTransferIncome = true
                     break
+                }
+            }
+            if (containsTransferIncome) {
+                // Если содержит строку перечисления, то все строки после последней строки перечисления считаются корректирующими
+                for (int i = incomesOfOperation.size() - 1; i >= 0; i--) {
+                    IncomeExt income = incomesOfOperation[i]
+                    if (income.taxRate != null) {
+                        income.correction = true
+                    } else {
+                        break
+                    }
                 }
             }
         }
