@@ -164,6 +164,7 @@
                         hidegrid: false,
                         multiselect: true,
                         disableAutoLoad: true,
+                        fullScreen: true,
                         ondblClickRow: function (rowId) {
                             $state.go("ndfl", {
                                 declarationDataId: rowId

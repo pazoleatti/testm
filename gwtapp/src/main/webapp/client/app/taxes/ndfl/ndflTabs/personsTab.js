@@ -124,7 +124,8 @@
                         viewrecords: true,
                         sortorder: "asc",
                         hidegrid: false,
-                        multiselect: true
+                        multiselect: true,
+                        fullScreen: true
                     }
                 };
             }])

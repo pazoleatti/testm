@@ -97,6 +97,7 @@
                         hidegrid: false,
                         multiselect: true,
                         disableAutoLoad: true,
+                        fullScreen: true,
                         onSelectRow: function (rowId, status) {
                             if (status) {
                                 $rootScope.$emit("selectedRowCountChanged", $scope.prepaymentGrid.value.length + 1)
