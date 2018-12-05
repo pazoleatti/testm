@@ -27,7 +27,8 @@
                     </span>
                     <!-- Консолидировать-->
                     <span>
-                        <button type="button" class="btn btn-default" data-ng-click="consolidate()">
+                        <button type="button" class="btn btn-default" data-ng-click="consolidate()"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CONSOLIDATE)">
                             <span data-translate-once="button.consolidate"></span>
                         </button>
                     </span>
