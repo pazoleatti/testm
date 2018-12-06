@@ -68,5 +68,12 @@
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
+
+                function toDate(value) {
+                    return typeof value === 'string' ? new Date(value) : value;
+                }
+                $scope.isDatesValid = function (dateFrom, dateTo) {
+                    return !dateFrom || !dateTo || toDate(dateFrom) < toDate(dateTo);
+                };
             }]);
 }());

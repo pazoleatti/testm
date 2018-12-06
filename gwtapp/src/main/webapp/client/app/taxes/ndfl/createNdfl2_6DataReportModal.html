@@ -12,9 +12,13 @@
                         <div data-aplana-field>
                             <div data-aplana-datepicker
                                  data-required
-                                 data-ng-model="form.dateFrom"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                                 data-ng-model="form.dateFrom"
+                                 data-ui-validate="{versionDate : 'isDatesValid($value, form.dateTo)'}"></div>
+                            <div data-aplana-validator data-key='required'>
+                                {{::'common.validation.required' | translate}}
+                            </div>
+                            <div data-aplana-validator data-key='versionDate'>
+                                {{::'ndfl.report.ndfl2_6XlsxReport.modal.validation.dateFrom' | translate}}
                             </div>
                         </div>
                     </div>
@@ -30,9 +34,13 @@
                         <div data-aplana-field>
                             <div data-aplana-datepicker
                                  data-required
-                                 data-ng-model="form.dateTo"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                                 data-ng-model="form.dateTo"
+                                 data-ui-validate="{versionDate : 'isDatesValid(form.dateFrom, $value)'}"></div>
+                            <div data-aplana-validator data-key='required'>
+                                {{::'common.validation.required' | translate}}
+                            </div>
+                            <div data-aplana-validator data-key='versionDate'>
+                                {{::'ndfl.report.ndfl2_6XlsxReport.modal.validation.dateTo' | translate}}
                             </div>
                         </div>
                     </div>
@@ -51,8 +59,8 @@
                              data-ng-init="init([APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT, APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT])"
                              data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                     </div>
                 </td>
