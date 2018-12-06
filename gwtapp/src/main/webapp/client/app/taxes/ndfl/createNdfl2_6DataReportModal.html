@@ -1,4 +1,4 @@
-<form class="form-horizontal" name="createNdfl2_6DataReport" data-aplana-submit-valid="create()">
+<form class="form-horizontal" name="createNdfl2_6DataReportFrom" data-aplana-submit-valid="create()">
     <div class="modal-body" style="min-height: 155px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
             <tbody>
@@ -12,8 +12,7 @@
                         <div data-aplana-field>
                             <div data-aplana-datepicker
                                  data-required
-                                 data-ng-model="form.dateFrom"
-                                 data-ui-validate="{versionDate : 'isDatesValid($value, form.dateTo)'}"></div>
+                                 data-ng-model="form.dateFrom"></div>
                             <div data-aplana-validator data-key='required'>
                                 {{::'common.validation.required' | translate}}
                             </div>
@@ -34,13 +33,9 @@
                         <div data-aplana-field>
                             <div data-aplana-datepicker
                                  data-required
-                                 data-ng-model="form.dateTo"
-                                 data-ui-validate="{versionDate : 'isDatesValid(form.dateFrom, $value)'}"></div>
+                                 data-ng-model="form.dateTo"></div>
                             <div data-aplana-validator data-key='required'>
                                 {{::'common.validation.required' | translate}}
-                            </div>
-                            <div data-aplana-validator data-key='versionDate'>
-                                {{::'ndfl.report.ndfl2_6XlsxReport.modal.validation.dateTo' | translate}}
                             </div>
                         </div>
                     </div>
