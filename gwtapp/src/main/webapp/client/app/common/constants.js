@@ -86,6 +86,7 @@
                 SHOW: 1 << 9,
                 IMPORT_EXCEL: 1 << 10,
                 IDENTIFY: 1 << 11,
+                CONSOLIDATE: 1 << 12,
                 EDIT: 1 << 13
             },
             USER_ACTIVITY: {

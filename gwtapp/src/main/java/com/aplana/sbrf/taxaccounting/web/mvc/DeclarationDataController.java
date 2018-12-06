@@ -613,8 +613,8 @@ public class DeclarationDataController {
                     declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
                             DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
                             DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                            DeclarationDataPermission.CREATE,
-                            DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS, DeclarationDataPermission.IDENTIFY);
+                            DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS,
+                            DeclarationDataPermission.IDENTIFY, DeclarationDataPermission.CONSOLIDATE);
                     item.setPermissions(declaration.getPermissions());
                 }
             }
