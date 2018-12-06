@@ -1810,6 +1810,7 @@ class Check extends AbstractScriptClass {
                             "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ."
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, income.rowNum ?: "")
                     logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
+                    break
                 }
             }
             // Выч1 Документ о праве на налоговый вычет.Код источника (Графа 7)
@@ -1824,19 +1825,27 @@ class Check extends AbstractScriptClass {
             }
 
             // Выч2 Начисленный доход.Дата (Графы 10)
-            // Если "Графа 10" заполнена
-            if (ndflPersonDeduction.incomeAccrued != null) {
+            // Если одновременно заполнены графы проверяемой строки Раздела 3 "Графа 10","Графа 11","Графа 12", "Графа 15"
+            if (ndflPersonDeduction.incomeAccrued != null && ndflPersonDeduction.incomeCode != null &&
+                    ndflPersonDeduction.incomeSumm != null && ndflPersonDeduction.periodCurrDate != null) {
                 // Существует строка Раздела 2, для которой одновременно выполняются условия:
-                // - "Раздел 2. Графа 2" = "Раздел 3. Графа 2" проверяемой строки
-                // - "Раздел 2. Графа 3" = "Раздел 3. Графа 9" проверяемой строки
-                // - "Раздел 2. Графа 6" = "Разде 3. Графа 10" проверяемой строки
+                // - "Раздел 2. Графа 2" = "Раздел 3. Графа 2" проверяемой строки (ИНП)
+                // - "Раздел 2. Графа 3" = "Раздел 3. Графа 9" проверяемой строки (ID операции)
+                // - "Раздел 2. Графа 6" = "Раздел 3. Графа 10" проверяемой строки (Дата начисления дохода)
+                // - "Раздел 2. Графа 4" = "Раздел 3. Графа 11" проверяемой строки (Код дохода)
+                // - "Раздел 2. Графа 10" = "Раздел 3. Графа 12" проверяемой строки (Сумма дохода)
+                // - "Раздел 2. Графа 15" = "Раздел 3. Графа 15" проверяемой строки (Дата применения вычета)
+                // - "Раздел 2. Графа 12" заполнена
                 def incomeExists = allIncomesOfOperation.find {
-                    it.incomeAccruedDate == ndflPersonDeduction.incomeAccrued
+                    it.incomeAccruedDate == ndflPersonDeduction.incomeAccrued && it.incomeCode == ndflPersonDeduction.incomeCode &&
+                            it.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && it.taxDate == ndflPersonDeduction.periodCurrDate &&
+                            it.totalDeductionsSumm != null
                 } != null
                 if (!incomeExists) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в гр. \"%s\"  в строках операции Раздела 2",
-                            C_INCOME_ACCRUED, formatDate(ndflPersonDeduction.incomeAccrued), C_INCOME_ACCRUED_DATE
-                    )
+                    String errMsg = "В разделе 2 отсутствует соответствующая строка начисления, содержащая информацию о вычете, с параметрами " +
+                            "\"ID операции\": $ndflPersonDeduction.operationId, \"Дата начисления\": ${formatDate(ndflPersonDeduction.incomeAccrued)}, " +
+                            "\"Код дохода\": $ndflPersonDeduction.incomeCode, \"Сумма начисленного дохода\": $ndflPersonDeduction.incomeSumm, " +
+                            "\"Дата НДФЛ\": ${formatDate(ndflPersonDeduction.periodCurrDate)}"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.logCheck("%s. %s.",
                             declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
@@ -1848,13 +1857,11 @@ class Check extends AbstractScriptClass {
             if (ndflPersonDeduction.periodCurrDate != null) {
                 // "Графа 15" принадлежит к отчетному периоду
                 if (!dateRelateToCurrentPeriod(ndflPersonDeduction.periodCurrDate)) {
-                    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
                     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
                     String strCorrPeriod = ""
                     if (departmentReportPeriod.getCorrectionDate() != null) {
                         strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy")
                     }
-                    Department department = departmentService.get(departmentReportPeriod.departmentId)
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не входит в отчетный период налоговой формы \"%s\"",
                             C_PERIOD_CURR_DATE, formatDate(ndflPersonDeduction.periodCurrDate),
                             departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod)
@@ -1864,35 +1871,6 @@ class Check extends AbstractScriptClass {
                             LOG_TYPE_3_15, fioAndInpAndOperId, pathError, errMsg)
                 }
             }
-
-            // Выч4 Начисленный доход.Код дохода (Графы 11)
-            if (ndflPersonDeduction.incomeCode != null) {
-                def incomeExists = allIncomesOfOperation.find {
-                    it.incomeCode == ndflPersonDeduction.incomeCode
-                } != null
-                if (!incomeExists) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в гр. \"%s\" в строках операции Раздела 2",
-                            C_INCOME_ACCRUED_CODE, ndflPersonDeduction.incomeCode ?: "", C_INCOME_CODE
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_3_11, fioAndInpAndOperId, pathError, errMsg)
-                }
-            }
-
-            // Выч5 Начисленный доход.Сумма (Графы 12)
-            //TODO проверка закомментирована согласно https://jira.aplana.com/browse/SBRFNDFL-4390. Не удалять закомментированный кусок без соответствующей задачи.
-            /*if (ndflPersonDeduction.incomeSumm != null) {
-                BigDecimal deductionsIncomeSum = (BigDecimal) allDeductionsOfOperation.sum { NdflPersonDeduction deduction -> deduction.incomeSumm ?: 0 } ?: 0
-                BigDecimal incomesSum = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.incomeAccruedSumm ?: 0 } ?: 0
-                if (deductionsIncomeSum != incomesSum) {
-                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") Раздела 3 должна быть равна сумме значений гр. \"%s\" (\"%s\") Раздела 2 для всех строк одной операции.",
-                            C_INCOME_ACCRUED_P_SUMM, deductionsIncomeSum, C_INCOME_ACCRUED_SUMM, incomesSum
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_3_12, fioAndInpAndOperId, pathError, errMsg)
-                }
-            }*/
 
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
