@@ -21,6 +21,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public Date getLastWorkDayByYear(int year) {
+        return calendarDao.getLastWorkDayByYear(year);
+    }
+
+    @Override
     public int getDateDif(Date startDate, Date endDate) {
         return calendarDao.getDateDif(startDate, endDate);
     }

@@ -8,6 +8,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -17,81 +18,77 @@ import java.util.Date;
 @Repository
 public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
 
-	private static final String GET_NEXT_WORK_DAY_SQL =
-			"select cdate from (select c.*, ROWNUM AS rn from (select cdate from ref_book_calendar where ctype = 1 and cdate = trunc(:startDate) union \n" +
-					"  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
-					") c) where rn = :offset";
-	private static final String GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL =
-			"select cdate from (select c.*, ROWNUM AS rn from (\n" +
-					"  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
-					") c) where rn = :offset";
-	private static final String GET_PREV_WORK_DAY_SQL =
-			"select cdate from (select c.*, ROWNUM AS rn from (\n" +
-					"  select cdate from ref_book_calendar where cdate <= trunc(:startDate) AND ctype = 0 ORDER BY cdate desc\n" +
-					") c) where rn = :offset";
+    private static final String GET_NEXT_WORK_DAY_SQL =
+            "select cdate from (select c.*, ROWNUM AS rn from (select cdate from ref_book_calendar where ctype = 1 and cdate = trunc(:startDate) union \n" +
+                    "  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
+                    ") c) where rn = :offset";
+    private static final String GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL =
+            "select cdate from (select c.*, ROWNUM AS rn from (\n" +
+                    "  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
+                    ") c) where rn = :offset";
+    private static final String GET_PREV_WORK_DAY_SQL =
+            "select cdate from (select c.*, ROWNUM AS rn from (\n" +
+                    "  select cdate from ref_book_calendar where cdate <= trunc(:startDate) AND ctype = 0 ORDER BY cdate desc\n" +
+                    ") c) where rn = :offset";
 
-	// Количество нерабочих дней между датами
-	private static final String HOLIDAY_COUNT_SQL =
-			"SELECT COUNT(*) FROM ref_book_calendar " +
-					"WHERE cdate >= :startDate AND cdate <= :endDate AND ctype = 1";
+    // Количество нерабочих дней между датами
+    private static final String HOLIDAY_COUNT_SQL =
+            "SELECT COUNT(*) FROM ref_book_calendar " +
+                    "WHERE cdate >= :startDate AND cdate <= :endDate AND ctype = 1";
 
-	/**
-	 * Возвращает дату рабочего дня, смещенного относительно даты startDate.
-	 *
-	 * @param startDate начальная дата, может быть и рабочим днем и выходным
-	 * @param offset на сколько рабочих дней необходимо сдвинуть начальную дату. Может быть меньше 0, тогда сдвигается в обратную сторону
-	 * @return смещенная на offset рабочих дней дата
-	 */
-	@Override
-	public Date getWorkDay(Date startDate, int offset) {
-		if (startDate == null) {
-			throw new NullPointerException();
-		}
+    @Override
+    public Date getWorkDay(Date startDate, int offset) {
+        if (startDate == null) {
+            throw new NullPointerException();
+        }
 
-		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("startDate", startDate);
-		params.addValue("offset", Math.abs(offset) + 1);
-		try {
-			if (offset >= 1) {
-				return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_SQL, params, Date.class);
-			} else if (offset == 0) {
-				return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL, params, Date.class);
-			} else {
-				return getNamedParameterJdbcTemplate().queryForObject(GET_PREV_WORK_DAY_SQL, params, Date.class);
-			}
-		} catch (EmptyResultDataAccessException e) {
-			//Календарь не заполнен в нужном диапазоне - сдвигаем без учета производственного календаря
-			return DateUtils.addDays(startDate, offset);
-		}
-	}
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("startDate", startDate);
+        params.addValue("offset", Math.abs(offset) + 1);
+        try {
+            if (offset >= 1) {
+                return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_SQL, params, Date.class);
+            } else if (offset == 0) {
+                return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL, params, Date.class);
+            } else {
+                return getNamedParameterJdbcTemplate().queryForObject(GET_PREV_WORK_DAY_SQL, params, Date.class);
+            }
+        } catch (EmptyResultDataAccessException e) {
+            //Календарь не заполнен в нужном диапазоне - сдвигаем без учета производственного календаря
+            return DateUtils.addDays(startDate, offset);
+        }
+    }
 
-	/**
-	 * Разница в днях между двумя датами
-	 *
-	 * @param startDate начальная дата
-	 * @param endDate конечная дата
-	 * @return
-	 */
-	public int getDateDif(Date startDate, Date endDate) {
-		Days daysBetween = Days.daysBetween(new LocalDate(startDate), new LocalDate(endDate));
-		Integer period = daysBetween.getDays();
-		//Результат возвращаем по модулю, чтобы не зависеть от того, какая дата раньше startDate, или endDate
-		return Math.abs(period);
-	}
+    @Override
+    public Date getLastWorkDayByYear(int year) {
+        try {
+            return getJdbcTemplate().queryForObject("select max(cdate) from (\n" +
+                    "  select extract(year from cdate) year, cal.* from ref_book_calendar cal\n" +
+                    ") cal\n" +
+                    "where ctype = 0 and year = ?\n" +
+                    "group by year", Date.class, year);
+        } catch (EmptyResultDataAccessException e) {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.MONTH, Calendar.DECEMBER);
+            cal.set(Calendar.DAY_OF_MONTH, 31);
+            return cal.getTime();
+        }
+    }
 
-	/**
-	 * Возвращает количество рабочих дней между двумя датами
-	 *
-	 * @param startDate начальная дата
-	 * @param endDate конечная дата
-	 * @return количество рабочих дней
-	 */
-	public int getWorkDayCount(Date startDate, Date endDate) {
-		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("startDate", startDate);
-		params.addValue("endDate", endDate);
-		int holidayCount = getNamedParameterJdbcTemplate().queryForObject(HOLIDAY_COUNT_SQL, params, int.class);
+    public int getDateDif(Date startDate, Date endDate) {
+        Days daysBetween = Days.daysBetween(new LocalDate(startDate), new LocalDate(endDate));
+        Integer period = daysBetween.getDays();
+        //Результат возвращаем по модулю, чтобы не зависеть от того, какая дата раньше startDate, или endDate
+        return Math.abs(period);
+    }
 
-		return getDateDif(startDate, endDate) - holidayCount + 1;
-	}
+    public int getWorkDayCount(Date startDate, Date endDate) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("startDate", startDate);
+        params.addValue("endDate", endDate);
+        int holidayCount = getNamedParameterJdbcTemplate().queryForObject(HOLIDAY_COUNT_SQL, params, int.class);
+
+        return getDateDif(startDate, endDate) - holidayCount + 1;
+    }
 }

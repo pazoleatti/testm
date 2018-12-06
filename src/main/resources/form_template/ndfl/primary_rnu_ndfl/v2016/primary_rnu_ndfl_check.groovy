@@ -1016,12 +1016,12 @@ class Check extends AbstractScriptClass {
                 "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") для кода дохода и признака дохода, " +
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
-        // 6. Соответствует маске 31.12.20**
+        // 6. Соответствует последнему рабочему календарному дню года
         dateConditionDataList << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
-                                                        "1541", "1542", "1551", "1553", "1554"],
-                ["04"], new MatchMask("31.12.20\\d{2}"),
-                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню года, за который был начислен доход, " +
-                        "для кода дохода и признака дохода, указанных в гр. \"%5\$s\" (\"%6\$s\") и гр. \"%7\$s\" (\"%8\$s\")")
+                                                        "1541", "1542", "1544", "1546", "1548", "1551", "1553", "1554"],
+                ["04"], new LastYearWorkDay(),
+                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему календарному дню года, за который был начислен доход (%4\$s), " +
+                        "для Кода дохода = \"%6\$s\" и Признака дохода = \"%8\$s\"")
 
         // 7. Последний календарный день месяца
         dateConditionDataList << new DateConditionData(["2000", "2003"], ["05"], new LastMonthCalendarDay(),
@@ -1115,7 +1115,7 @@ class Check extends AbstractScriptClass {
                 NdflPersonIncome totalOperationIncome = sumIncomes(allIncomesOfOperation)
                 NdflPersonDeduction totalOperationDeduction = sumDeductions(allDeductionsOfOperation)
                 /**
-                 * Проверки по операции
+                 * Проверки по операциям
                  */
                 // СведДох2 Сумма вычета (Графа 12)
                 if (totalOperationIncome.totalDeductionsSumm != null && totalOperationIncome.incomeAccruedSumm != null) {
@@ -1176,7 +1176,7 @@ class Check extends AbstractScriptClass {
                                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                     String errMsg = String.format(dateConditionData.conditionMessage,
                                             C_INCOME_ACCRUED_DATE, formatDate(ndflPersonIncome.incomeAccruedDate),
-                                            C_INCOME_PAYOUT_DATE, formatDate(dateConditionData.checker.getIncomePayoutDateCompared(ndflPersonIncome)),
+                                            C_INCOME_PAYOUT_DATE, formatDate(dateConditionData.checker.getDateCompared(ndflPersonIncome)),
                                             C_INCOME_CODE, ndflPersonIncome.incomeCode,
                                             C_INCOME_TYPE, ndflPersonIncome.incomeType
                                     )
@@ -1281,43 +1281,32 @@ class Check extends AbstractScriptClass {
                         List<CheckData> logTypeMessagePairList = []
                         boolean section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
                         // П.1
-                        // В проверяемой строке: "Графа 18" НЕ заполнена и "Графа 6" заполнена
-                        if (ndflPersonIncome.notHoldingTax == null && ndflPersonIncome.incomeAccruedDate != null) {
-                            // По операции («Графа 3»), указанной в проверяемой строке, существует только одна строка, у которой "Графы 16" > "0" или = "0"
-                            def countNonnegativeCol16 = allIncomesOfOperation.count {
-                                it.calculatedTax != null && it.calculatedTax >= 0
-                            }
-                            if (countNonnegativeCol16 == 1) {
-                                // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
-                                if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
-                                    logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
-                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
-                                            section_2_15_fatal))
-                                }
+                        if (ndflPersonIncome.calculatedTax >= 0 && ndflPersonIncome.incomeAccruedDate &&
+                                ndflPersonIncome.incomeAccruedDate >= getReportPeriodCalendarStartDate() &&
+                                ndflPersonIncome.incomeAccruedDate <= getReportPeriodEndDate()) {
+                            // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
+                            if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
+                                logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
+                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
+                                                "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
+                                        section_2_15_fatal))
                             }
                         }
                         // П.2
                         // У проверяемой строки "Графы 16" < "0"
-                        if (ndflPersonIncome.calculatedTax != null && ndflPersonIncome.calculatedTax < 0) {
-                            // По операции («Графа 3»), указанной в проверяемой строке, существует хотя бы одна строка, в которой заполнена "Графа 12"
-                            def isIncomeWithCol12FilledExists = allIncomesOfOperation.find {
-                                it.totalDeductionsSumm != null
+                        if (ndflPersonIncome.calculatedTax != null && ndflPersonIncome.calculatedTax < 0 && ndflPersonIncome.totalDeductionsSumm != null) {
+                            // Существует хотя бы одна строка, по которой выполняются условия:
+                            // 1. "Раздел 3.Графа 2" = "Раздел 2. Графа 2" проверяемой строки
+                            // 2. "Раздел 3. Графа 9" = "Раздел 2. Графа 3" проверяемой строки
+                            // 3. "Раздел 3. Графа 15" = "Раздел 2. Графа 15" проверяемой строки
+                            def isDeductionExists = allDeductionsOfOperation.find {
+                                it.periodCurrDate == ndflPersonIncome.taxDate
                             } != null
-                            if (isIncomeWithCol12FilledExists) {
-                                // Существует хотя бы одна строка, по которой выполняются условия:
-                                // 1. "Раздел 3.Графа 2" = "Раздел 2. Графа 2" проверяемой строки
-                                // 2. "Раздел 3. Графа 9" = "Раздел 2. Графа 3" проверяемой строки
-                                // 3. "Раздел 3. Графа 15" = "Раздел 2. Графа 15" проверяемой строки
-                                def isDeductionExists = allDeductionsOfOperation.find {
-                                    it.periodCurrDate == ndflPersonIncome.taxDate
-                                } != null
-                                if (!isDeductionExists) {
-                                    logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
-                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") отсутствует в гр. " +
-                                                    "\"${C_PERIOD_CURR_DATE}\" Раздела 3 для всех строк одной операции").toString(),
-                                            section_2_15_fatal))
-                                }
+                            if (!isDeductionExists) {
+                                logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
+                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") отсутствует в гр. " +
+                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3").toString(),
+                                        section_2_15_fatal))
                             }
                         }
                         // П.3
@@ -2265,12 +2254,14 @@ class Check extends AbstractScriptClass {
         private Map<Date, Date> workDayWithOffset0Cache
         private Map<Date, Date> workDayWithOffset1Cache
         private Map<Date, Date> workDayWithOffset30Cache
+        private Map<Integer, Date> lastWorkDayOfTheYear
         CalendarService calendarService
 
         DateConditionWorkDay(CalendarService calendarService) {
             workDayWithOffset0Cache = [:]
             workDayWithOffset1Cache = [:]
             workDayWithOffset30Cache = [:]
+            lastWorkDayOfTheYear = [:]
             this.calendarService = calendarService
         }
 
@@ -2304,6 +2295,15 @@ class Check extends AbstractScriptClass {
             }
             return resultDate
         }
+
+        Date getLastDayOfTheYear(int year) {
+            Date resultDate = lastWorkDayOfTheYear.get(year)
+            if (resultDate == null) {
+                resultDate = calendarService.getLastWorkDayByYear(year)
+                lastWorkDayOfTheYear.put(year, resultDate)
+            }
+            return resultDate
+        }
     }
 
     /**
@@ -2330,7 +2330,7 @@ class Check extends AbstractScriptClass {
         /**
          * Дата выплаты может находится не в проверяемой строке, в таком случае checker выдаёт ту дату с которой сравнивал
          */
-        Date getIncomePayoutDateCompared(NdflPersonIncome checkedIncome) {
+        Date getDateCompared(NdflPersonIncome checkedIncome) {
             return checkedIncome.incomePayoutDate
         }
     }
@@ -2379,33 +2379,30 @@ class Check extends AbstractScriptClass {
         }
 
         @Override
-        Date getIncomePayoutDateCompared(NdflPersonIncome checkedIncome) {
+        Date getDateCompared(NdflPersonIncome checkedIncome) {
             return incomePayoutDate
         }
     }
 
     /**
-     * Проверка: Соответствия маске
+     * Проверка "Последний рабочий день года"
      */
-    class MatchMask extends IncomeAccruedDateConditionChecker {
-        String maskRegex
-
-        MatchMask(String maskRegex) {
-            this.maskRegex = maskRegex
-        }
+    class LastYearWorkDay extends IncomeAccruedDateConditionChecker {
+        Date comparedDate
 
         @Override
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
             if (checkedIncome.incomeAccruedDate == null) {
-                return false
-            }
-            String accrued = checkedIncome.incomeAccruedDate.format("dd.MM.yyyy")
-            Pattern pattern = Pattern.compile(maskRegex)
-            Matcher matcher = pattern.matcher(accrued)
-            if (matcher.matches()) {
                 return true
             }
-            return false
+            Calendar calendar = Calendar.getInstance()
+            calendar.setTime(checkedIncome.incomeAccruedDate)
+            comparedDate = dateConditionWorkDay.getLastDayOfTheYear(calendar.get(Calendar.YEAR))
+            return checkedIncome.incomeAccruedDate == comparedDate
+        }
+
+        Date getDateCompared(NdflPersonIncome checkedIncome) {
+            return comparedDate
         }
     }
 
