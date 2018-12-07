@@ -1735,7 +1735,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         protected void fillHeader() {
-            createReportNameRow("Данные для включения в разделы 2-НДФЛ и 6-НДФЛ")
+            createReportNameRow("Данные для включения в 2-НДФЛ и 6-НДФЛ")
             createYearRow()
             createPeriodRow()
             createFormTypeRow()
