@@ -28,10 +28,8 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
 import org.apache.commons.lang3.time.DateUtils
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 new Check(this).run()
 
@@ -157,6 +155,9 @@ class Check extends AbstractScriptClass {
     // Дата начала отчетного периода
     Date reportPeriodStartDate = null
 
+    // Сведения о доходах и НДФЛ
+    List<NdflPersonIncome> ndflPersonIncomeList
+
     Check(scriptClass) {
         //noinspection GroovyAssignabilityCheck
         super(scriptClass)
@@ -210,7 +211,7 @@ class Check extends AbstractScriptClass {
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_NAME, ndflPersonList.size())
 
                 // Сведения о доходах и НДФЛ
-                List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME_NAME, ndflPersonIncomeList.size())
 
                 // Сведения о вычетах
@@ -1038,55 +1039,53 @@ class Check extends AbstractScriptClass {
                 "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца, за который был начислен доход, " +
                         "для кода дохода и признака дохода, указанных в гр. \"%5\$s\" (\"%6\$s\") и гр. \"%7\$s\" (\"%8\$s\")")
 
-        // 1,2 "Графа 21" = "Графа 7" + "1 день"
+        // 1,2 "Графа 21" = "Графа 7" + "1 рабочий день"
         dateConditionDataListForBudget << new DateConditionData(["1010", "1011", "3020", "3023",
                                                                  "1110", "1400", "2001", "2010", "2301", "2710", "2760",
                                                                  "2762", "2770", "2900", "4800"], ["00"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+                new Column21EqualsColumn7Plus1WorkingDay(), null)
 
-        // 3 "Графа 21" <= "Графа 7" + "30 дней"
-        dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
-                                                                 "1541", "1542", "1551", "1552", "1553", "1554"], ["01", "03", "04"],
-                new Column21LEColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть меньше или равно значению гр. \"%s\" (\"%s\") + 30 дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
-
-        // 4 "Графа 21" ≤ "Графа 7" + "30 дней"
-        dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
-                                                                 "1541", "1542", "1543", "1551", "1552", "1553", "1554"], ["02"],
-                new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 30 дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
-
-        // 5 ?
-
-        // 6 "Графа 21" = "Графа 7" + "1 день"
+        // 3 "Графа 21" = "Графа 7" + 1 рабочий день
         dateConditionDataListForBudget << new DateConditionData(["2000"], ["05", "06", "11", "12"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+                new Column21EqualsColumn7Plus1WorkingDay(), null)
 
-        // 7 "Графа 21" = "Графа 7" + "1 день"
+        // 4 "Графа 21" = "Графа 7" + 1 рабочий день
         dateConditionDataListForBudget << new DateConditionData(["2002"], ["07", "08", "09", "10"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+                new Column21EqualsColumn7Plus1WorkingDay(), null)
 
-        // 8 "Графа 21" = "Графа 7" + "1 рабочий день"
+        // 5 "Графа 21" = "Графа 7" + 1 рабочий день
         dateConditionDataListForBudget << new DateConditionData(["2003"], ["05", "06", "07", "08", "09", "10"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+                new Column21EqualsColumn7Plus1WorkingDay(), null)
 
-        // 9 "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
-        dateConditionDataListForBudget << new DateConditionData(["2012", "2300"], ["00"],
-                new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
-
-        // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
+        // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
         dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800", "2013", "2014"], ["13"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+                new Column21EqualsColumn7Plus1WorkingDay(), null)
 
-        // 11.1 "Графа 21" = "Графа 7" + "1 день"
+        // 7,8,9 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["2610", "2611", "2640", "2641", "2800"], ["00"],
+                new Column21EqualsColumn7Plus1WorkingDay(), null)
+
+        // 10 "Графа 21" <= "Графа 7" + "30 календарных дней"
+        dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
+                                                                 "1541", "1542", "1551", "1552", "1553", "1554"], ["01", "03"],
+                new Column21EqualsColumn7Plus30WorkingDays(), null)
+
+        // 11 "Графа 21" ≤ "Графа 7" + "30 календарных дней"
+        dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
+                                                                 "1541", "1542", "1551", "1552", "1553", "1554"], ["02"],
+                new Column21EqualsColumn7Plus30WorkingDays(), null)
+
+        // 12 "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
+        dateConditionDataListForBudget << new DateConditionData(["2012", "2300"], ["00"],
+                new Column21EqualsColumn7LastDayOfMonth(), null)
+
+        // 13
         dateConditionDataListForBudget << new DateConditionData(["2720", "2740", "2750", "2790", "4800"], ["14"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+                new Column21ForNaturalIncome(), null)
 
-        // 11.2 "Графа 21" ≤ ("31.12.20**" + "1 день"), где 31.12.20** - последний день налогового периода
-        dateConditionDataListForBudget << new DateConditionData(["2720", "2740", "2750", "2790", "4800"], ["14"],
-                new Column21LEFirstWorkingDayOfNextYear(), "Значение гр. \"%s\" (\"%s\") должно быть меньше или равно первого рабочего дня следующего налогового периода")
-
-        // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
-        dateConditionDataListForBudget << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
-                new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 день. Если дата попадает на выходной день, то дата переносится на следующий рабочий день")
+        //14 "Графа 21" = последний календарный день первого месяца года, следующего за годом, указанным в "Графа 7"
+        dateConditionDataListForBudget << new DateConditionData([], ["04"],
+                new Column21EqualsLastDayOfFirstMonthOfNextYear(), null)
 
         // Сгруппируем Сведения о доходах на основании принадлежности к плательщику
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = ndflPersonIncomeList.groupBy { it.ndflPersonId }
@@ -1660,31 +1659,12 @@ class Check extends AbstractScriptClass {
 
                     // СведДох10 НДФЛ.Перечисление в бюджет.Срок (Графа 21)
                     if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null) {
-                        // Найдена строка, у которой указано (выполняются все условия):
-                        // 1. Совпадает ИНП ("Графа 2") с ИНП текущей записи
-                        // 2. "Графа 5" ≠ "02" ИЛИ "14"
-                        // 3. "Графа 7" ≥ "Графа 7" проверяемой строки
-                        // 4. Если найдено несколько строк, то брать одну строку, у которой значение "Граф 7" является минимальной.
-                        // При этом если найдено несколько строк с одинаковыми значениями минимальной даты, то брать строку, созданную первой
-                        def nextMinIncomePayoutOfPerson = {
-                            return allIncomesOfPerson.findAll {
-                                it != ndflPersonIncome && it.incomeType != "02" && it.incomeType != "14" &&
-                                        it.incomePayoutDate >= ndflPersonIncome.incomePayoutDate
-                            }.min { it.incomePayoutDate }
-                        }
-
                         dateConditionDataListForBudget.each { dateConditionData ->
-                            if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
+                            if ((dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) || dateConditionData.incomeCodes.isEmpty()) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)
+                                    && !ndflPersonIncome.isDummy()) {
                                 def checkedIncome = ndflPersonIncome
-                                // для пп 4 и 11 используется nextMinIncomePayoutOfPerson для проверки
-                                if ("02" in dateConditionData.incomeTypes || "14" in dateConditionData.incomeTypes) {
-                                    checkedIncome = nextMinIncomePayoutOfPerson()
-                                }
-                                if (checkedIncome != null && !dateConditionData.checker.check(checkedIncome, allIncomesOfOperation)) {
-                                    String errMsg = String.format(dateConditionData.conditionMessage,
-                                            C_TAX_TRANSFER_DATE, checkedIncome.taxTransferDate ? ScriptUtils.formatDate(checkedIncome.taxTransferDate) : "",
-                                            C_INCOME_PAYOUT_DATE, checkedIncome.incomePayoutDate ? ScriptUtils.formatDate(checkedIncome.incomePayoutDate) : ""
-                                    )
+                                String errMsg = dateConditionData.checker.check(checkedIncome)
+                                if (checkedIncome != null && errMsg != null) {
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, checkedIncome.rowNum ?: "")
                                     logger.logCheck("%s. %s.",
                                             declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
@@ -1897,9 +1877,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                        ?.get(ndflPersonDeduction.notifSumm) ?: []
+                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1920,7 +1900,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId) ?: []
+                ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -2309,7 +2289,7 @@ class Check extends AbstractScriptClass {
     /**
      * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
      */
-    class DateConditionData<T extends DateConditionChecker> {
+    class DateConditionData<T> {
         List<String> incomeCodes
         List<String> incomeTypes
         T checker
@@ -2338,7 +2318,7 @@ class Check extends AbstractScriptClass {
     /**
      * Используется для проверки НДФЛ.Перечисление в бюджет.Срок (Графа 21)
      */
-    abstract class TaxTransferDateConditionChecker implements DateConditionChecker {
+    abstract class TaxTransferDateConditionChecker implements DateConditionCheckerForBudget {
     }
 
     interface DateConditionChecker {
@@ -2350,6 +2330,16 @@ class Check extends AbstractScriptClass {
          * @return пройдена ли проверка
          */
         boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOf)
+    }
+
+    interface DateConditionCheckerForBudget {
+        /**
+         * Выполняет проверку в строке раздела 2
+         *
+         * @param checkedIncome проверяемая строка раздела 2
+         * @return если проверка не пройдена, то сообщение с ошибкой, если пройдена {@code null}
+         */
+        String check(NdflPersonIncome checkedIncome)
     }
 
     /**
@@ -2429,7 +2419,7 @@ class Check extends AbstractScriptClass {
      */
     class Column21EqualsColumn7Plus1WorkingDay extends TaxTransferDateConditionChecker {
         @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
+        String check(NdflPersonIncome checkedIncome) {
             Calendar calendar21 = Calendar.getInstance()
             calendar21.setTime(checkedIncome.taxTransferDate)
 
@@ -2439,21 +2429,14 @@ class Check extends AbstractScriptClass {
             Calendar calendar7 = Calendar.getInstance()
             calendar7.setTime(workDay)
 
-            return calendar21.equals(calendar7)
-        }
-    }
+            if (calendar21.equals(calendar7)) {
+                return null
+            }
 
-    /**
-     * "Графа 21" <= "Графа 7" + "30 дней"
-     */
-    class Column21LEColumn7Plus30WorkingDays extends TaxTransferDateConditionChecker {
-        @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
-            // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
-            Date incomePayoutPlus30CalendarDays = DateUtils.addDays(checkedIncome.incomePayoutDate, 30)
-            Date incomePayoutPlus30CalendarDaysWorkingDay = dateConditionWorkDay.getWorkDay(incomePayoutPlus30CalendarDays, 0)
-
-            return checkedIncome.taxTransferDate <= incomePayoutPlus30CalendarDaysWorkingDay
+            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 1 рабочий день. Корректное значение срока перечисления в бюджет: %s",
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
+                    ScriptUtils.formatDate(calendar7.getTime()))
         }
     }
 
@@ -2462,21 +2445,26 @@ class Check extends AbstractScriptClass {
      */
     class Column21EqualsColumn7Plus30WorkingDays extends TaxTransferDateConditionChecker {
         @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
+        String check(NdflPersonIncome checkedIncome) {
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
             Date incomePayoutPlus30CalendarDays = DateUtils.addDays(checkedIncome.incomePayoutDate, 30)
             Date incomePayoutPlus30CalendarDaysWorkingDay = dateConditionWorkDay.getWorkDay(incomePayoutPlus30CalendarDays, 0)
 
-            return checkedIncome.taxTransferDate.equals(incomePayoutPlus30CalendarDaysWorkingDay)
+            if (checkedIncome.taxTransferDate.equals(incomePayoutPlus30CalendarDaysWorkingDay)) {
+                return null
+            }
+            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 30 календарных дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
+                    ScriptUtils.formatDate(incomePayoutPlus30CalendarDaysWorkingDay))
         }
     }
-
     /**
      * "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
      */
     class Column21EqualsColumn7LastDayOfMonth extends TaxTransferDateConditionChecker {
         @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
+        String check(NdflPersonIncome checkedIncome) {
             if (checkedIncome.taxTransferDate == null || checkedIncome.incomePayoutDate == null) {
                 return false
             }
@@ -2494,33 +2482,74 @@ class Check extends AbstractScriptClass {
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
             calendar7.setTime(workDay)
 
-            return calendar21.equals(calendar7)
+            if (calendar21.equals(calendar7)) {
+                return null
+            }
+            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, указанного в гр.\"Дата выплаты дохода\" (%s). Корректное значение срока перечисления в бюджет: %s",
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
+                    ScriptUtils.formatDate(calendar7.getTime()))
         }
     }
 
-    /**
-     * "Графа 21" ≤ ("31.12.20**" + "1 день"), где 31.12.20** - последний день налогового периода
-     */
-    class Column21LEFirstWorkingDayOfNextYear extends TaxTransferDateConditionChecker {
+    class Column21ForNaturalIncome extends TaxTransferDateConditionChecker {
         @Override
-        boolean check(NdflPersonIncome checkedIncome, List<NdflPersonIncome> allIncomesOfOperation) {
-            return checkedIncome.taxTransferDate <= getFirstWorkingDayOfNextYear()
+        String check(NdflPersonIncome checkedIncome) {
+            List<NdflPersonIncome> matchedIncomes = []
+            NdflPersonFL checkedIncomeFl = ndflPersonFLMap.get(checkedIncome.ndflPersonId)
+            for (NdflPersonIncome income : ndflPersonIncomeList) {
+                if (income.getId() != checkedIncome.getId()) {
+                    NdflPersonFL ndflPersonFl = ndflPersonFLMap.get(income.ndflPersonId)
+                    if (checkedIncomeFl?.inp == ndflPersonFl.inp && !["02", "14"].contains(income.incomeType) && income.incomePayoutDate >= checkedIncome.incomePayoutDate && income.asnuId == checkedIncome.asnuId) {
+                        matchedIncomes << income
+                    }
+                }
+            }
+            Calendar zeroDate = Calendar.getInstance()
+            zeroDate.set(1901, Calendar.JANUARY, 1)
+            if (matchedIncomes.isEmpty() && checkedIncome.taxTransferDate != SimpleDateUtils.toStartOfDay(zeroDate.getTime())) {
+                return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению (00.00.0000), так как не найдена строка выплаты, у которой \"Признак дохода\" не равен 02 или 14",
+                        ScriptUtils.formatDate(checkedIncome.taxTransferDate))
+            } else if (matchedIncomes.isEmpty()) {
+                return null
+            } else {
+                Collections.sort(matchedIncomes, new Comparator<NdflPersonIncome>() {
+                    @Override
+                    int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                        int payoutDate = o1.incomePayoutDate.compareTo(o2.incomePayoutDate)
+                        if (payoutDate != 0) return payoutDate
+                        return o1.taxTransferDate.compareTo(o2.taxTransferDate)
+                    }
+                })
+                if (checkedIncome.getTaxTransferDate() == matchedIncomes.get(0).getTaxTransferDate()) {
+                    return null
+                } else {
+                    return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должен быть равен значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
+                }
+            }
+
         }
     }
 
-    // Возвращяет 1-ый рабочий день следующего года
-    Date getFirstWorkingDayOfNextYear() {
-        Calendar firstWorkingDay = Calendar.getInstance()
-        firstWorkingDay.setTime(getReportPeriodStartDate())
-        firstWorkingDay.set(Calendar.DAY_OF_YEAR, firstWorkingDay.getActualMaximum(Calendar.DAY_OF_YEAR))
-        firstWorkingDay.add(Calendar.DATE, 1)
-        if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            firstWorkingDay.add(Calendar.DATE, 2)
+    class Column21EqualsLastDayOfFirstMonthOfNextYear extends TaxTransferDateConditionChecker {
+        @Override
+        String check(NdflPersonIncome checkedIncome) {
+            Calendar calendar7 = Calendar.getInstance()
+            calendar7.setTime(checkedIncome.incomePayoutDate)
+            calendar7.set(calendar7.get(Calendar.YEAR) + 1, Calendar.JANUARY, 31)
+
+            Date referenceValue = dateConditionWorkDay.getWorkDay(calendar7.getTime(), 0)
+
+            if (referenceValue == SimpleDateUtils.toStartOfDay(checkedIncome.taxTransferDate)) {
+                return null
+            }
+            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должен быть равен последнему календарному дню месяца, следующим за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
+            ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+            ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
+            ScriptUtils.formatDate(referenceValue))
         }
-        if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            firstWorkingDay.add(Calendar.DATE, 1)
-        }
-        return firstWorkingDay.getTime()
     }
 
     String formatDate(Date date) {
