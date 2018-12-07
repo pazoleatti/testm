@@ -1131,7 +1131,7 @@ class Check extends AbstractScriptClass {
                     }
                     if (incomesAccruedSum.abs() < incomesDeductionsSum.abs()) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" Модуль суммы значений гр\"Сумма вычета\" (\"%s\") должен быть меньше " +
+                        String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" Модуль суммы значений гр. \"Сумма вычета\" (\"%s\") должен быть меньше " +
                                 "или равен модулю суммы значений гр. \"Сумма начисленного дохода\" (\"%s\")",
                                 operationId, incomesDeductionsSum, incomesAccruedSum)
                         String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
