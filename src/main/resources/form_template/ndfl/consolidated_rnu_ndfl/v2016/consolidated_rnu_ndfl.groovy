@@ -943,15 +943,22 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 }
             }
         }
-        Map<PaymentReportKey, Integer> orders = [:]
-        for (def row : rows) {
-            if (operationsIdsByPaymentNumber.get(row.paymentNumber)?.size() ?: 0 == 1) {
-                def key = new PaymentReportKey(row.key.kpp, row.key.asnuId, row.key.paymentNumber, null, row.key.correction)
-                Integer order = orders.get(key)
-                row.order = order ? order + 1 : 1
-                orders.put(key, row.order)
+        def rowsGroups = rows.groupBy { new PaymentReportKey(it.key.kpp, it.key.asnuId, it.key.paymentNumber, null, false) }
+        rowsGroups.each { key, groupRows ->
+            if ((operationsIdsByPaymentNumber.get(key.paymentNumber)?.size() ?: 0) == 1) {
+                List<Integer> orders = []
+                for (def row : groupRows) {
+                    int order = orders.indexOf(row.rate)
+                    if (order == -1) {
+                        order = orders.size()
+                        orders.add(row.rate)
+                    }
+                    row.order = order
+                }
             } else {
-                row.order = row.rate
+                for (def row : groupRows) {
+                    row.order = row.rate
+                }
             }
         }
     }
