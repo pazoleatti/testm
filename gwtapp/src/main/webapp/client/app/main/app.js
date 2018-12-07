@@ -199,6 +199,7 @@
         "ndfl.report.ndfl2_6XlsxReport.modal.title": "Параметры отбора Данных для включения в 2-НДФЛ и 6-НДФЛ",
         "ndfl.report.ndfl2_6XlsxReport.modal.dateFrom": "Включать данные с",
         "ndfl.report.ndfl2_6XlsxReport.modal.dateTo": "Включать данные по",
+        "ndfl.report.ndfl2_6XlsxReport.modal.validation.dateFrom": "Дата в поле \"Включать данные с\" должна быть меньше или равна дате в поле \"Включать данные по\"",
         "ndfl.report.ndfl2_6XlsxReport.modal.adjustNegativeValues": "Отрицательные значения",
         "ndfl.report.ndfl2_6XlsxReport.modal.kpp": "КПП",
         "ndfl.report.ndfl2_6XlsxReport.modal.kpp.all": "Все КПП формы",

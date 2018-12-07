@@ -1,4 +1,4 @@
-<form class="form-horizontal" name="createNdfl2_6DataReport" data-aplana-submit-valid="create()">
+<form class="form-horizontal" name="createNdfl2_6DataReportFrom" data-aplana-submit-valid="create()">
     <div class="modal-body" style="min-height: 155px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
             <tbody>
@@ -13,8 +13,11 @@
                             <div data-aplana-datepicker
                                  data-required
                                  data-ng-model="form.dateFrom"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                            <div data-aplana-validator data-key='required'>
+                                {{::'common.validation.required' | translate}}
+                            </div>
+                            <div data-aplana-validator data-key='versionDate'>
+                                {{::'ndfl.report.ndfl2_6XlsxReport.modal.validation.dateFrom' | translate}}
                             </div>
                         </div>
                     </div>
@@ -31,8 +34,8 @@
                             <div data-aplana-datepicker
                                  data-required
                                  data-ng-model="form.dateTo"></div>
-                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                translate}}
+                            <div data-aplana-validator data-key='required'>
+                                {{::'common.validation.required' | translate}}
                             </div>
                         </div>
                     </div>
@@ -51,8 +54,8 @@
                              data-ng-init="init([APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT, APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT])"
                              data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                     </div>
                 </td>

@@ -268,4 +268,13 @@
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
 		</update>
 	</changeSet>
+
+	<changeSet id="3.3-dnovikov-12" author="dnovikov">
+		<sql>
+			update DECL_TEMPLATE_CHECKS set
+			CHECK_TYPE = 'Строка вычета не соответствует строке начисления',
+			DESCRIPTION = 'Соответствие строки вычета строке начисления'
+			where CHECK_CODE = '003-0001-00002'
+		</sql>
+	</changeSet>
 </databaseChangeLog>
