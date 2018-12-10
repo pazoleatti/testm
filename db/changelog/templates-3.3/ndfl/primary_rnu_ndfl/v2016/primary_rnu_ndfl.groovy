@@ -71,6 +71,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
+    ReportPeriod reportPeriod
     TAUserInfo userInfo
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
@@ -102,6 +103,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
             this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
             this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            this.reportPeriod = departmentReportPeriod.reportPeriod
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
@@ -1565,7 +1567,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         // Определяем строки для заполнения раздела 2
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
-                    && (dateFrom <= ndflPersonIncome.taxTransferDate && dateTo >= ndflPersonIncome.taxTransferDate)) {
+                    && (reportPeriod.startDate <= ndflPersonIncome.taxTransferDate && reportPeriod.endDate >= ndflPersonIncome.taxTransferDate)) {
                 List<Date> incomeAccruedDateList = []
                 for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
                     if (incomeGrouped.incomeAccruedDate != null) {
@@ -2394,8 +2396,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
 
-    ReportPeriod sourceReportPeriod = null
-
     Map<Integer, DepartmentReportPeriod> departmentReportPeriodMap = [:]
 
     Map<Integer, DeclarationTemplate> declarationTemplateMap = [:]
@@ -2416,13 +2416,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             declarationTemplateMap.put(id, (DeclarationTemplate) declarationService.getTemplate(id))
         }
         return declarationTemplateMap.get(id)
-    }
-
-    ReportPeriod getReportPeriod() {
-        if (sourceReportPeriod == null) {
-            sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        }
-        return sourceReportPeriod
     }
 
 
