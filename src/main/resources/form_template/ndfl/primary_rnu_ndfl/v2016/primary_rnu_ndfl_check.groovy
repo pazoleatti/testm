@@ -2366,7 +2366,7 @@ class Check extends AbstractScriptClass {
             Calendar calendar = Calendar.getInstance()
             calendar.setTime(checkedIncome.incomeAccruedDate)
             comparedDate = dateConditionWorkDay.getLastDayOfTheYear(calendar.get(Calendar.YEAR))
-            return checkedIncome.incomeAccruedDate == comparedDate
+            return checkedIncome.incomeAccruedDate.equals(comparedDate)
         }
 
         Date getDateCompared(NdflPersonIncome checkedIncome) {

@@ -1879,9 +1879,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                        ?.get(ndflPersonDeduction.notifSumm) ?: []
+                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1902,7 +1902,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId) ?: []
+                ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -2409,7 +2409,7 @@ class Check extends AbstractScriptClass {
             Calendar calendar = Calendar.getInstance()
             calendar.setTime(checkedIncome.incomeAccruedDate)
             comparedDate = dateConditionWorkDay.getLastDayOfTheYear(calendar.get(Calendar.YEAR))
-            return checkedIncome.incomeAccruedDate == comparedDate
+            return checkedIncome.incomeAccruedDate.equals(comparedDate)
         }
 
         Date getDateCompared(NdflPersonIncome checkedIncome) {
