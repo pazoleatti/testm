@@ -110,20 +110,9 @@ public interface DeclarationDataDao extends PermissionDao {
     void delete(long declarationDataId);
 
     /**
-     * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
-     * по декларациям, соответствующие критериям поиска
-     *
-     * @param declarationDataFilter - фильтр, по которому происходит поиск
-     * @param ordering              - способ сортировки
-     * @param ascSorting            - true, если сортируем по возрастанию, false - по убыванию
-     * @param paginatedSearchParams - диапазон индексов, задающий страницу
-     * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
+     * @deprecated см. {@link #findAllIdsByFilter(DeclarationDataFilter)}
      */
-    PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter,
-                                                           DeclarationDataSearchOrdering ordering,
-                                                           boolean ascSorting,
-                                                           PagingParams paginatedSearchParams);
-
+    @Deprecated
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
     /**
@@ -188,14 +177,6 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param fileName - имя файла
      */
     List<DeclarationData> find(String fileName);
-
-    /**
-     * Получить количество записей, удовлетворяющих запросу
-     *
-     * @param filter фильтр, по которому происходит поиск
-     * @return количество записей, удовлетворяющих фильтру
-     */
-    int getCount(DeclarationDataFilter filter);
 
     List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
 

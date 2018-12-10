@@ -107,7 +107,7 @@
                                     formKindIds: $filter('idExtractor')($scope.searchFilter.params.declarationKinds),
                                     declarationDataId: $scope.searchFilter.params.declarationNumber,
                                     declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
-                                    formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
+                                    formStates: $scope.searchFilter.params.state ? [$scope.searchFilter.params.state.id] : undefined,
                                     fileName: $scope.searchFilter.params.file,
                                     correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
                                     reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
@@ -319,7 +319,7 @@
                                 params: {
                                     reason: reason
                                 }
-                            })
+                            });
                         });
                 };
 

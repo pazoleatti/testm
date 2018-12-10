@@ -408,7 +408,7 @@ public class PeriodServiceImpl implements PeriodService {
         DeclarationDataFilter dataFilter = new DeclarationDataFilter();
         dataFilter.setDepartmentIds(departments);
         dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-        dataFilter.setFormState(State.CREATED);
+        dataFilter.setFormStates(Arrays.asList(State.CREATED.getId(), State.PREPARED.getId()));
         if (departmentReportPeriod.getCorrectionDate() != null) {
             dataFilter.setCorrectionTag(true);
             dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
@@ -417,8 +417,6 @@ public class PeriodServiceImpl implements PeriodService {
         }
 
         List<DeclarationData> declarations = declarationDataSearchService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
-        dataFilter.setFormState(State.PREPARED);
-        declarations.addAll(declarationDataSearchService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false));
         for (DeclarationData dd : declarations) {
             DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.warn("Форма \"%s\" № %s существует в подразделении \"%s\" в периоде %s.",

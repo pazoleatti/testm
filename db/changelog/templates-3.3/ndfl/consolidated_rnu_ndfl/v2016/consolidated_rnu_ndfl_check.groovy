@@ -1149,15 +1149,15 @@ class Check extends AbstractScriptClass {
                     if (incomesAccruedSum && incomesDeductionsSum && signOf(incomesAccruedSum) != signOf(incomesDeductionsSum)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" сумма значений гр. \"Сумма вычета\" (\"%s\") и сумма значений гр. " +
-                                "\"Сумма начисленного дохода\" (\"%s\") должны иметь одинаковый знак.",
+                                "\"Сумма начисленного дохода\" (\"%s\") должны иметь одинаковый знак",
                                 operationId, incomesDeductionsSum, incomesAccruedSum)
                         String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                         logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                     }
                     if (incomesAccruedSum.abs() < incomesDeductionsSum.abs()) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" Модуль суммы значений гр\"Сумма вычета\" (\"%s\") должен быть меньше " +
-                                "или равен модулю суммы значений гр. \"Сумма начисленного дохода\" (\"%s\").",
+                        String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" Модуль суммы значений гр. \"Сумма вычета\" (\"%s\") должен быть меньше " +
+                                "или равен модулю суммы значений гр. \"Сумма начисленного дохода\" (\"%s\")",
                                 operationId, incomesDeductionsSum, incomesAccruedSum)
                         String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                         logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
@@ -1415,7 +1415,7 @@ class Check extends AbstractScriptClass {
                                 int month = calendarPayout.get(Calendar.MONTH)
                                 if (!(dayOfMonth == 31 && month == 12)) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" указана некорректно",
-                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода.").toString()))
+                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода").toString()))
                                 }
                             }
                         }
@@ -1559,7 +1559,7 @@ class Check extends AbstractScriptClass {
 
                                     // Для КНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | < 1
                                     if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
-                                        String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р).",
+                                        String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                                 ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога)
                                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                         logger.logCheck("%s. %s.",
@@ -1811,7 +1811,7 @@ class Check extends AbstractScriptClass {
             for (def income : allIncomesOfOperation) {
                 if (income.isDummy()) {
                     String errMsg = "относится к операции, для которой в Разделе 2 имеется строка $income.rowNum (ФЛ: $ndflPersonFL.fio, " +
-                            "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ."
+                            "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, income.rowNum ?: "")
                     logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
                     break
@@ -1879,9 +1879,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                ?.get(ndflPersonDeduction.notifSumm) ?: []
+                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                        ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1902,7 +1902,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId) ?: []
+                        ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -1940,11 +1940,11 @@ class Check extends AbstractScriptClass {
 
             def person = personByIdMap[prepayment.ndflPersonId]
 
-            // 0 Строка Раздела 3 не относится к операции с фиктивной строкой
+            // 0 Строка Раздела 4 не относится к операции с фиктивной строкой
             for (def income : allIncomesOfOperation) {
                 if (income.isDummy()) {
                     String errMsg = "относится к операции, для которой в Разделе 2 имеется строка $income.rowNum (ФЛ: $ndflPersonFL.fio, " +
-                            "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ."
+                            "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, income.rowNum ?: "")
                     logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
                 }
