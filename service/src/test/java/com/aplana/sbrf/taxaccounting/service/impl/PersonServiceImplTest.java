@@ -5,19 +5,20 @@ import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
+import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.*;
+import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,7 +41,7 @@ public class PersonServiceImplTest {
     @Mock
     private CommonRefBookService commonRefBookService;
     @Mock
-    private BasePermissionEvaluator basePermissionEvaluator;
+    private BasePermissionEvaluator permissionEvaluator;
     @Mock
     private IdDocDaoImpl idDocDaoImpl;
     @Mock
@@ -55,10 +56,16 @@ public class PersonServiceImplTest {
     ArgumentCaptor<List<PersonIdentifier>> idTaxPayers;
     @Captor
     ArgumentCaptor<List<PersonTb>> personTbs;
+    @Captor
+    ArgumentCaptor<RegistryPerson> person;
+    @Captor
+    ArgumentCaptor<List<RegistryPerson>> batchSavePersons;
 
     private static Method resolvePersonMethod;
 
     private static Method convertPersonToDTO;
+
+    private static Method forbidVipsDataByUserPermissions;
 
     @BeforeClass
     public static void initClass() throws NoSuchMethodException {
@@ -67,6 +74,8 @@ public class PersonServiceImplTest {
         resolvePersonMethod.setAccessible(true);
         convertPersonToDTO = clazz.getDeclaredMethod("convertPersonToDTO", Collection.class, int.class);
         convertPersonToDTO.setAccessible(true);
+        forbidVipsDataByUserPermissions = clazz.getDeclaredMethod("forbidVipsDataByUserPermissions", List.class);
+        forbidVipsDataByUserPermissions.setAccessible(true);
     }
 
     @Before
@@ -309,6 +318,169 @@ public class PersonServiceImplTest {
         assertThat(result.get(0).isVip()).isFalse();
     }
 
+    @Test
+    public void test_forbidVipsDataByUserPermissions_granted() throws InvocationTargetException, IllegalAccessException {
+        RegistryPersonDTO person = new RegistryPersonDTO();
+        person.setReportDoc(Permissive.of(new IdDoc()));
+        person.setInn(Permissive.of(""));
+        person.setInnForeign(Permissive.of(""));
+        person.setSnils(Permissive.of(""));
+        person.setAddress(Permissive.of(new Address()));
+        person.setDocuments(Permissive.of(Collections.singletonList(new IdDoc())));
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(person), eq(PersonVipDataPermission.VIEW_VIP_DATA))).thenReturn(true);
+        forbidVipsDataByUserPermissions.invoke(personService, Collections.singletonList(person));
+        assertThat(person.getReportDoc().hasPermission()).isTrue();
+        assertThat(person.getInn().hasPermission()).isTrue();
+        assertThat(person.getInnForeign().hasPermission()).isTrue();
+        assertThat(person.getSnils().hasPermission()).isTrue();
+        assertThat(person.getAddress().hasPermission()).isTrue();
+        assertThat(person.getDocuments().hasPermission()).isTrue();
+    }
+
+    @Test
+    public void test_forbidVipsDataByUserPermissions_denied() throws InvocationTargetException, IllegalAccessException {
+        RegistryPersonDTO person = new RegistryPersonDTO();
+        person.setReportDoc(Permissive.of(new IdDoc()));
+        person.setInn(Permissive.of(""));
+        person.setInnForeign(Permissive.of(""));
+        person.setSnils(Permissive.of(""));
+        person.setAddress(Permissive.of(new Address()));
+        person.setDocuments(Permissive.of(Collections.singletonList(new IdDoc())));
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(person), eq(PersonVipDataPermission.VIEW_VIP_DATA))).thenReturn(false);
+        forbidVipsDataByUserPermissions.invoke(personService, Collections.singletonList(person));
+        assertThat(person.getReportDoc().hasPermission()).isFalse();
+        assertThat(person.getInn().hasPermission()).isFalse();
+        assertThat(person.getInnForeign().hasPermission()).isFalse();
+        assertThat(person.getSnils().hasPermission()).isFalse();
+        assertThat(person.getAddress().hasPermission()).isFalse();
+        assertThat(person.getDocuments().hasPermission()).isFalse();
+    }
+
+    @Test
+    public void test_getPersonsCount() {
+        RefBookPersonFilter filter = mock(RefBookPersonFilter.class);
+        personService.getPersonsCount(filter);
+        verify(personDao).getPersonsCount(filter);
+    }
+
+    @Test
+    public void test_updateRegistryPerson() {
+        RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
+        IdDoc idDoc = mock(IdDoc.class);
+        when(registryPersonDTO.getDocuments()).thenReturn(Permissive.of(Collections.singletonList(idDoc)));
+        when(registryPersonDTO.getCitizenship()).thenReturn(Permissive.of(new RefBookCountry()));
+        when(registryPersonDTO.getReportDoc()).thenReturn(Permissive.of(idDoc));
+        when(registryPersonDTO.getInn()).thenReturn(Permissive.of("1234567890"));
+        when(registryPersonDTO.getInnForeign()).thenReturn(Permissive.of("2345678901"));
+        when(registryPersonDTO.getSnils()).thenReturn(Permissive.of("3456789012"));
+        when(registryPersonDTO.getTaxPayerState()).thenReturn(Permissive.of(new RefBookTaxpayerState()));
+        when(registryPersonDTO.getAddress()).thenReturn(Permissive.of(new Address()));
+        personService.updateRegistryPerson(registryPersonDTO);
+
+        verify(personDao).updateRegistryPerson(person.capture());
+    }
+
+    @Test
+    public void test_updateIdentificatedPersons() {
+        NaturalPerson naturalPerson = mock(NaturalPerson.class);
+
+        personService.updateIdentificatedPersons(Collections.singletonList(naturalPerson));
+
+        verify(personDao, times(2)).updateBatch(batchSavePersons.capture());
+    }
+
+    @Test
+    public void test_checkVersionOverlapping_success() {
+        RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2018, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2018, Calendar.DECEMBER, 31);
+
+        when(registryPersonDTO.getStartDate()).thenReturn(startDate.getTime());
+        when(registryPersonDTO.getEndDate()).thenReturn(endDate.getTime());
+        when(registryPersonDTO.getRecordId()).thenReturn(1L);
+        when(registryPersonDTO.getId()).thenReturn(1L);
+        when(registryPersonDTO.getOldId()).thenReturn(1L);
+
+        RegistryPerson relatedPerson = mock(RegistryPerson.class);
+        Calendar relatedPersonStartDate = new GregorianCalendar();
+        relatedPersonStartDate.set(2019, Calendar.JANUARY, 1);
+        Calendar relatedPersonEndDate = new GregorianCalendar();
+        relatedPersonEndDate.set(2019, Calendar.DECEMBER, 31);
+
+        when(relatedPerson.getStartDate()).thenReturn(relatedPersonStartDate.getTime());
+        when(relatedPerson.getEndDate()).thenReturn(relatedPersonEndDate.getTime());
+        when(relatedPerson.getRecordId()).thenReturn(1L);
+        when(relatedPerson.getId()).thenReturn(2L);
+        when(relatedPerson.getOldId()).thenReturn(1L);
+
+        when(personDao.fetchNonDuplicatesVersions(1L)).thenReturn(Collections.singletonList(relatedPerson));
+
+        personService.checkVersionOverlapping(registryPersonDTO);
+    }
+
+    @Test (expected = ServiceException.class)
+    public void test_checkVersionOverlapping_overlapped() {
+        RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2018, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2018, Calendar.DECEMBER, 31);
+
+        when(registryPersonDTO.getStartDate()).thenReturn(startDate.getTime());
+        when(registryPersonDTO.getEndDate()).thenReturn(endDate.getTime());
+        when(registryPersonDTO.getRecordId()).thenReturn(1L);
+        when(registryPersonDTO.getId()).thenReturn(1L);
+        when(registryPersonDTO.getOldId()).thenReturn(1L);
+
+        RegistryPerson relatedPerson = mock(RegistryPerson.class);
+        Calendar relatedPersonStartDate = new GregorianCalendar();
+        relatedPersonStartDate.set(2018, Calendar.DECEMBER, 1);
+        Calendar relatedPersonEndDate = new GregorianCalendar();
+        relatedPersonEndDate.set(2019, Calendar.DECEMBER, 31);
+
+        when(relatedPerson.getStartDate()).thenReturn(relatedPersonStartDate.getTime());
+        when(relatedPerson.getEndDate()).thenReturn(relatedPersonEndDate.getTime());
+        when(relatedPerson.getRecordId()).thenReturn(1L);
+        when(relatedPerson.getId()).thenReturn(2L);
+        when(relatedPerson.getOldId()).thenReturn(1L);
+
+        when(personDao.fetchNonDuplicatesVersions(1L)).thenReturn(Collections.singletonList(relatedPerson));
+
+        personService.checkVersionOverlapping(registryPersonDTO);
+    }
+
+    @Test (expected = ServiceException.class)
+    public void test_checkVersionOverlapping_gaped() {
+        RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2018, Calendar.JANUARY, 1);
+        Calendar endDate = new GregorianCalendar();
+        endDate.set(2018, Calendar.DECEMBER, 31);
+
+        when(registryPersonDTO.getStartDate()).thenReturn(startDate.getTime());
+        when(registryPersonDTO.getEndDate()).thenReturn(endDate.getTime());
+        when(registryPersonDTO.getRecordId()).thenReturn(1L);
+        when(registryPersonDTO.getId()).thenReturn(1L);
+        when(registryPersonDTO.getOldId()).thenReturn(1L);
+
+        RegistryPerson relatedPerson = mock(RegistryPerson.class);
+        Calendar relatedPersonStartDate = new GregorianCalendar();
+        relatedPersonStartDate.set(2019, Calendar.JANUARY, 2);
+        Calendar relatedPersonEndDate = new GregorianCalendar();
+        relatedPersonEndDate.set(2019, Calendar.DECEMBER, 31);
+
+        when(relatedPerson.getStartDate()).thenReturn(relatedPersonStartDate.getTime());
+        when(relatedPerson.getEndDate()).thenReturn(relatedPersonEndDate.getTime());
+        when(relatedPerson.getRecordId()).thenReturn(1L);
+        when(relatedPerson.getId()).thenReturn(2L);
+        when(relatedPerson.getOldId()).thenReturn(1L);
+
+        when(personDao.fetchNonDuplicatesVersions(1L)).thenReturn(Collections.singletonList(relatedPerson));
+
+        personService.checkVersionOverlapping(registryPersonDTO);
+    }
 
     private static class VersionComparator implements Comparator<RegistryPerson> {
         @Override
