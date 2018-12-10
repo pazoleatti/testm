@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.PagingResult
@@ -42,6 +43,8 @@ class Check extends AbstractScriptClass {
 
     NdflPersonService ndflPersonService
     DeclarationData declarationData
+    DepartmentReportPeriod departmentReportPeriod
+    ReportPeriod reportPeriod
     DepartmentService departmentService
     CalendarService calendarService
     FiasRefBookService fiasRefBookService
@@ -173,8 +176,13 @@ class Check extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
         }
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
+        }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+            declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+            departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            reportPeriod = departmentReportPeriod.reportPeriod
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
@@ -187,9 +195,6 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
-        }
-        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
-            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
         }
         if (scriptClass.getBinding().hasVariable("declarationService")) {
             this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
@@ -1306,8 +1311,8 @@ class Check extends AbstractScriptClass {
                         boolean section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
                         // П.1
                         if (ndflPersonIncome.calculatedTax >= 0 && ndflPersonIncome.incomeAccruedDate &&
-                                ndflPersonIncome.incomeAccruedDate >= getReportPeriodStartDate() &&
-                                ndflPersonIncome.incomeAccruedDate <= getReportPeriodEndDate()) {
+                                ndflPersonIncome.incomeAccruedDate >= reportPeriod.calendarStartDate &&
+                                ndflPersonIncome.incomeAccruedDate <= reportPeriod.endDate) {
                             // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
@@ -2769,10 +2774,7 @@ class Check extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodStartDate() {
-        if (reportPeriodStartDate == null) {
-            reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
-        }
-        return reportPeriodStartDate
+        return reportPeriod.startDate
     }
 
     /**
@@ -2780,10 +2782,7 @@ class Check extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodCalendarStartDate() {
-        if (reportPeriodStartDate == null) {
-            reportPeriodStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
-        }
-        return reportPeriodStartDate
+        return reportPeriod.calendarStartDate
     }
 
     /**
@@ -2791,10 +2790,7 @@ class Check extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodEndDate() {
-        if (periodEndDate == null) {
-            periodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-        }
-        return periodEndDate
+        return reportPeriod.endDate
     }
 
     /**
