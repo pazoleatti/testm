@@ -73,6 +73,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
+    ReportPeriod reportPeriod
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
@@ -100,6 +101,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
             this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
             this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            this.reportPeriod = departmentReportPeriod.reportPeriod
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
@@ -1592,7 +1594,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         // Определяем строки для заполнения раздела 2
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
-                    && (dateFrom <= ndflPersonIncome.taxTransferDate && dateTo >= ndflPersonIncome.taxTransferDate)) {
+                    && (reportPeriod.startDate <= ndflPersonIncome.taxTransferDate && reportPeriod.endDate >= ndflPersonIncome.taxTransferDate)) {
                 List<Date> incomeAccruedDateList = []
                 for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
                     if (incomeGrouped.incomeAccruedDate != null) {
