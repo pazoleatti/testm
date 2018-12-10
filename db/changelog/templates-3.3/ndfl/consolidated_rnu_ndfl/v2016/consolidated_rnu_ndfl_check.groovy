@@ -161,6 +161,9 @@ class Check extends AbstractScriptClass {
     // Дата начала отчетного периода
     Date reportPeriodStartDate = null
 
+    // Сведения о доходах и НДФЛ
+    List<NdflPersonIncome> ndflPersonIncomeList
+
     public Check(scriptClass) {
         //noinspection GroovyAssignabilityCheck
         super(scriptClass)
@@ -216,7 +219,7 @@ class Check extends AbstractScriptClass {
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_NAME, ndflPersonList.size())
 
                 // Сведения о доходах и НДФЛ
-                List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME_NAME, ndflPersonIncomeList.size())
 
                 // Сведения о вычетах
