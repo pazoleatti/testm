@@ -56,8 +56,7 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            declarationDataScriptingService.executeScript(userInfo,
-                    declarationData, FormDataEvent.DELETE, new Logger(), null);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.DELETE, logger, null);
 
             // Проверяем ошибки
             if (logger.containsLevel(LogLevel.ERROR)) {
