@@ -69,7 +69,8 @@
                             </div>
                             <div data-ng-controller="SelectDeclarationStateCtrl"
                                  data-ui-select2="stateSelect.options"
-                                 data-ng-model="searchFilter.params.state"
+                                 data-ng-init="initMultiSelectDeclarationState()"
+                                 data-ng-model="searchFilter.params.states"
                                  class="span8">
                             </div>
                         </div>

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class DeclarationDataFilter implements Serializable {
 
     private List<Long> declarationTypeIds;
 
-    private State formState;
+    private List<Integer> formStates;
 
     private Boolean correctionTag;
 
@@ -78,4 +79,8 @@ public class DeclarationDataFilter implements Serializable {
      */
     @JsonIgnore
     private Map<Integer, Set<Integer>> declarationTypeDepartmentMap;
+
+    public void setFormState(State state) {
+        formStates = Collections.singletonList(state.getId());
+    }
 }

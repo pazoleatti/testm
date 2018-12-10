@@ -195,8 +195,16 @@
         .controller('SelectDeclarationStateCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
                 var declarationStates = [APP_CONSTANTS.STATE.CREATED, APP_CONSTANTS.STATE.PREPARED, APP_CONSTANTS.STATE.ACCEPTED];
-                $scope.stateSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, declarationStates);
-            }])
+
+                $scope.initSingleSelectDeclarationState = function () {
+                    $scope.stateSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, declarationStates);
+                };
+
+                $scope.initMultiSelectDeclarationState = function () {
+                    $scope.stateSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, declarationStates);
+                };
+            }]
+        )
 
         /**
          * Контроллер для выбора состояния документа

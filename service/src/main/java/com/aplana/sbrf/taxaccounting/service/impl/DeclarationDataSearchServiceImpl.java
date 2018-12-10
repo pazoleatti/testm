@@ -20,13 +20,6 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
     }
 
     @Override
-    public PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter) {
-        return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
-                declarationFilter.isAscSorting(), new PagingParams(declarationFilter.getStartIndex(),
-                        declarationFilter.getCountOfRecords()));
-    }
-
-    @Override
     public List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc) {
         return declarationDao.findIdsByFilter(declarationFilter, ordering, asc);
     }

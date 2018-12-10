@@ -166,49 +166,10 @@ public class DeclarationDataDaoTest {
     }
 
     @Test
-    public void findPageTest() {
-        DeclarationDataFilter filter = new DeclarationDataFilter();
-        PagingParams pageParams = new PagingParams(0, 1);
-        PagingResult<DeclarationDataSearchResultItem> res;
-        final long TOTAL_RECORDS_COUNT = declarationDataDao.getCount(filter);
-
-        for (int requestedCount = 1; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 2) {
-            pageParams.setStartIndex(0);
-            pageParams.setCount(requestedCount);
-            res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
-            assertEquals(requestedCount, res.size());
-            assertEquals(TOTAL_RECORDS_COUNT, res.getTotalCount());
-        }
-    }
-
-    @Test
     public void findPageByFilterTest() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         assertArrayEquals(new Long[]{123l, 5l, 4l, 3l, 2l, 1l}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
         assertArrayEquals(new Long[]{1l, 2l, 3l, 4l, 5l, 123l}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
-    }
-
-    @Test
-    public void findPageSortingTest() {
-        DeclarationDataFilter filter = new DeclarationDataFilter();
-        PagingParams pageParams = new PagingParams(0, 5);
-
-        PagingResult<DeclarationDataSearchResultItem> res;
-
-        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
-        assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res);
-        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, false, pageParams);
-        assertIdsEquals(new long[]{123, 5, 4, 3, 2}, res);
-
-        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
-        assertIdsEquals(new long[]{2, 123, 3, 4, 5}, res);
-        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
-        assertIdsEquals(new long[]{1, 5, 4, 3, 123}, res);
-
-        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
-        assertIdsEquals(new long[]{1, 3, 123, 4, 5}, res);
-        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
-        assertIdsEquals(new long[]{2, 5, 4, 123, 3}, res);
     }
 
     private PagingParams getPagingParams(int page, int count) {
@@ -240,7 +201,7 @@ public class DeclarationDataDaoTest {
     public void findPage_filter1() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDeclarationDataId(2L);
-        filter.setFormState(State.ACCEPTED);
+        filter.setFormStates(Arrays.asList(State.ACCEPTED.getId()));
         filter.setFileName("ilenam");
         filter.setTaxOrganKpp("456");
         filter.setOktmo("ktm");

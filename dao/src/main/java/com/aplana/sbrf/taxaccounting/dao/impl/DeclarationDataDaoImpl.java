@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -230,26 +229,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
-                                                                  boolean ascSorting, PagingParams pageParams) {
-        StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
-        HashMap<String, Object> values = new HashMap<>();
-        appendSelectClause(sql);
-        appendFromAndWhereClause(sql, values, declarationFilter);
-        appendOrderByClause(sql, ordering, ascSorting);
-        sql.append(") dat) ordDat where ordDat.rn between :fromIndex and :toIndex")
-                .append(" order by ordDat.rn");
-        values.put("fromIndex", pageParams.getStartIndex() + 1);
-        values.put("toIndex", pageParams.getStartIndex() + pageParams.getCount());
-        List<DeclarationDataSearchResultItem> records = getNamedParameterJdbcTemplate().query(
-                sql.toString(),
-                values,
-                new DeclarationDataSearchResultItemMapper()
-        );
-        return new PagingResult<>(records, getCount(declarationFilter));
-    }
-
-    @Override
     public PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams pagingParams) {
         QueryData queryData = buildQueryByFilter(filter);
         String query = queryData.getQuery();
@@ -327,7 +306,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "inner join DEPARTMENT_FULLPATH dep_fullpath on dep_fullpath.id = dep.id\n" +
                         "left join REF_BOOK_DOC_STATE doc_state on doc_state.id = dd.doc_state_id\n" +
                         "where (:declarationDataId is null or dd.id like '%' || :declarationDataId || '%')\n" +
-                        "   and (:state is null or dd.state = :state)\n" +
                         "   and (:fileName is null or upper(dd.file_name) like '%' || upper(:fileName) || '%')\n" +
                         "   and (:kpp is null or upper(dd.kpp) like '%' || upper(:kpp) || '%')\n" +
                         "   and (:oktmo is null or upper(dd.oktmo) like '%' || upper(:oktmo) || '%')\n" +
@@ -335,7 +313,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "   and (:taxOrganCode is null or upper(dd.tax_organ_code) like '%' || upper(:taxOrganCode) || '%')\n"
         );
         params.addValue("declarationDataId", filter.getDeclarationDataId());
-        params.addValue("state", filter.getFormState() != null ? filter.getFormState().getId() : null);
         params.addValue("fileName", filter.getFileName());
         params.addValue("kpp", filter.getTaxOrganKpp());
         params.addValue("oktmo", filter.getOktmo());
@@ -348,6 +325,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             } else {
                 sql.append(" and drp.correction_date is null ");
             }
+        }
+
+        if (!isEmpty(filter.getFormStates())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatement("dd.state", filter.getFormStates()));
         }
 
         if (!isEmpty(filter.getAsnuIds())) {
@@ -493,14 +474,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
     }
 
-    @Override
-    public int getCount(DeclarationDataFilter filter) {
-        StringBuilder sql = new StringBuilder("select count(*)");
-        HashMap<String, Object> values = new HashMap<>();
-        appendFromAndWhereClause(sql, values, filter);
-        return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), values, Integer.class);
-    }
-
+    @Deprecated
     private void appendFromAndWhereClause(StringBuilder sql, Map<String, Object> values, DeclarationDataFilter filter) {
         sql.append(" FROM declaration_data dec, department_report_period drp, declaration_type dectype, department dp, report_period rp, tax_period tp, declaration_template dectemplate")
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
@@ -558,10 +532,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     .append(transformToSqlInStatement("dectype.id", filter.getDeclarationTypeIds()));
         }
 
-        if (filter.getFormState() != null) {
-            sql.append(" AND dec.state = ").append(filter.getFormState().getId());
-        }
-
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionDate() != null) {
                 sql.append(" and drp.correction_date = '").append(new SimpleDateFormat("dd.MM.yyyy").format(filter.getCorrectionDate())).append("\'");
@@ -570,6 +540,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
+        if (filter.getFormStates() != null && !filter.getFormStates().isEmpty()) {
+            sql.append(" AND ")
+                    .append(SqlUtils.transformToSqlInStatement("dec.state", filter.getFormStates()));
+        }
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
             sql.append(" AND ")
                     .append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));

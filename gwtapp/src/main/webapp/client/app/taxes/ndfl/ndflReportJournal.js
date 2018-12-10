@@ -116,7 +116,7 @@
                         formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
                         declarationDataId: $scope.searchFilter.params.declarationNumber,
                         declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
-                        formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
+                        formStates: $filter('idExtractor')($scope.searchFilter.params.states),
                         fileName: $scope.searchFilter.params.file,
                         note: $scope.searchFilter.params.note,
                         oktmo: $scope.searchFilter.params.oktmo,
@@ -267,7 +267,7 @@
                             params: {
                                 reason: reason
                             }
-                        })
+                        });
                     });
                 };
 
