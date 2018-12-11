@@ -12,7 +12,7 @@ new MoveAcceptedToCreated(this).run()
 class MoveAcceptedToCreated extends AbstractScriptClass {
 
     ReportPeriodService reportPeriodService
-    DeclarationData declarationData
+    DeclarationData theDeclaration
     DepartmentService departmentService
     DepartmentReportPeriodService departmentReportPeriodService
     SourceService sourceService
@@ -30,7 +30,7 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
             this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
         }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+            this.theDeclaration = (DeclarationData) scriptClass.getProperty("declarationData")
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
@@ -44,43 +44,69 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
     void run() {
         switch (formDataEvent) {
             case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
-                checkDeclarationHasNoConflictingDestinations()
+                checkTheDeclarationHasNoModificationConflictsWithDestinations()
         }
     }
+
+    // переменные, кэширующие данные из базы
+    private Department declarationDepartment, declarationTerbank
+    private List<Relation> conflictingDestinations
 
     /**
-     * Проверяем, нет ли конфликтов с формами-приёмниками при возврате в "Создана"
+     * Проверка, можно ли редактировать декларацию, не вступит ли это в конфликт с формами-приёмниками
      */
-    def checkDeclarationHasNoConflictingDestinations() {
-
-        // Если декларация не "Принята", то её не надо проверять
-        if (declarationData.state != State.ACCEPTED) {
-            return
-        }
-
-        // Проверяем, все ли формы-приёмники находятся в состоянии "Создана"
-        List<Relation> destinations = sourceService.getDestinationsInfo(declarationData)
-        List<Relation> notStateCreatedDestinations = destinations.findAll { it.declarationState != State.CREATED }
-        // Все формы-приёмники "Созданы", проверка пройдена
-        if (!notStateCreatedDestinations.isEmpty()) {
-            logDeclarationHasNotAcceptedDestinationsError()
+    def checkTheDeclarationHasNoModificationConflictsWithDestinations() {
+        if (theDeclaration.is(State.ACCEPTED) && thereIsConflictingDestinations()) {
+            printConflictMessage()
         }
     }
 
-    // Логгирование ситуации возникновения ошибки
-    private void logDeclarationHasNotAcceptedDestinationsError() {
-        // Данные для вывода в логгер
-        Department declarationDepartment = departmentService.get(declarationData.departmentId)
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    private boolean thereIsConflictingDestinations() {
+        return conflictingDestinations()
+    }
+
+    private void printConflictMessage() {
+        printSameTerbankError()
+    }
+
+    private void printSameTerbankError() {
+        logger.error("Не выполнена операция \"Возврат в Создана\" для налоговой формы: № $theDeclaration.id, " +
+                "Период: \"${theDeclarationPeriodName()}\", Подразделение: \"${theDeclarationDepartment().shortName}\". " +
+                "Причина: Одна или несколько налоговых форм - приемников в Тербанке ${theDeclarationTerbank().shortName} находятся в статусе, " +
+                "отличном от \"Создана\""
+        )
+    }
+
+    // метод с кэшем
+    private Department theDeclarationTerbank() {
+        if (!declarationTerbank) {
+            declarationTerbank = departmentService.getParentTB(theDeclaration.departmentId)
+        }
+        return declarationTerbank
+    }
+
+    // метод с кэшем
+    private Department theDeclarationDepartment() {
+        if (!declarationDepartment) {
+            declarationDepartment = departmentService.get(theDeclaration.departmentId)
+        }
+        return declarationDepartment
+    }
+
+    // метод с кэшем
+    private List<Relation> conflictingDestinations() {
+        if (!conflictingDestinations) {
+            List<Relation> destinations = sourceService.getDestinationsInfo(theDeclaration)
+            conflictingDestinations = destinations.findAll { it.declarationState != State.CREATED }
+        }
+        return conflictingDestinations
+    }
+
+    private String theDeclarationPeriodName() {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(theDeclaration.departmentReportPeriodId)
         int periodYear = departmentReportPeriod.reportPeriod.taxPeriod.year
         String periodName = departmentReportPeriod.reportPeriod.name
         String correctionDate = departmentReportPeriod.correctionDate ? " (корр. ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")})" : ""
-
-        Department declarationTB = departmentService.getParentTB(declarationData.departmentId)
-        logger.error("Не выполнена операция \"Возврат в Создана\" для налоговой формы: № $declarationData.id, " +
-                "Период: \"$periodYear, $periodName$correctionDate\", Подразделение: \"$declarationDepartment.shortName\". " +
-                "Причина: Одна или несколько налоговых форм - приемников в ТБ $declarationTB.shortName находятся в статусе, " +
-                "отличном от \"Создана\""
-        )
+        return periodYear + ", " + periodName + correctionDate
     }
 }

@@ -73,6 +73,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
+    ReportPeriod reportPeriod
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
@@ -100,6 +101,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
             this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
             this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            this.reportPeriod = departmentReportPeriod.reportPeriod
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
@@ -943,15 +945,22 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 }
             }
         }
-        Map<PaymentReportKey, Integer> orders = [:]
-        for (def row : rows) {
-            if (operationsIdsByPaymentNumber.get(row.paymentNumber)?.size() ?: 0 == 1) {
-                def key = new PaymentReportKey(row.key.kpp, row.key.asnuId, row.key.paymentNumber, null, row.key.correction)
-                Integer order = orders.get(key)
-                row.order = order ? order + 1 : 1
-                orders.put(key, row.order)
+        def rowsGroups = rows.groupBy { new PaymentReportKey(it.key.kpp, it.key.asnuId, it.key.paymentNumber, null, false) }
+        rowsGroups.each { key, groupRows ->
+            if ((operationsIdsByPaymentNumber.get(key.paymentNumber)?.size() ?: 0) == 1) {
+                List<Integer> orders = []
+                for (def row : groupRows) {
+                    int order = orders.indexOf(row.rate)
+                    if (order == -1) {
+                        order = orders.size()
+                        orders.add(row.rate)
+                    }
+                    row.order = order
+                }
             } else {
-                row.order = row.rate
+                for (def row : groupRows) {
+                    row.order = row.rate
+                }
             }
         }
     }
@@ -1585,7 +1594,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         // Определяем строки для заполнения раздела 2
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
-                    && (dateFrom <= ndflPersonIncome.taxTransferDate && dateTo >= ndflPersonIncome.taxTransferDate)) {
+                    && (reportPeriod.startDate <= ndflPersonIncome.taxTransferDate && reportPeriod.endDate >= ndflPersonIncome.taxTransferDate)) {
                 List<Date> incomeAccruedDateList = []
                 for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
                     if (incomeGrouped.incomeAccruedDate != null) {
@@ -1755,7 +1764,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
 
         protected void fillHeader() {
-            createReportNameRow("Данные для включения в разделы 2-НДФЛ и 6-НДФЛ")
+            createReportNameRow("Данные для включения в 2-НДФЛ и 6-НДФЛ")
             createYearRow()
             createPeriodRow()
             createFormTypeRow()
