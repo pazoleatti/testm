@@ -345,7 +345,8 @@
                             <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="consolidate()"
-                                        data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                                        data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id"
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CONSOLIDATE)">
                                     <span data-translate-once="button.consolidate"></span>
                                 </button>
                             </span>
