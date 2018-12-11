@@ -294,8 +294,10 @@ class Check extends AbstractScriptClass {
         }
     }
 
-    def checkAndRemoveDummyIncomes(List<NdflPersonIncome> incomes) {
-        List<NdflPersonIncome> nonDummyIncomes = []
+    /**
+     * Проверка. Для ФЛ в разделе 2 есть только одна фиктивная строка
+     */
+    def checkDummyIncomes(List<NdflPersonIncome> incomes) {
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = incomes.groupBy { NdflPersonIncome it -> it.ndflPersonId }
         for (def personId : incomesByPersonId.keySet()) {
             ScriptUtils.checkInterrupted()
@@ -313,12 +315,9 @@ class Check extends AbstractScriptClass {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, income.rowNum ?: "")
                         logger.errorExp("%s. %s.", "Для ФЛ в разделе 2 есть только одна фиктивная строка", fioAndInpAndOperId, pathError, errMsg)
                     }
-                } else {
-                    nonDummyIncomes.add(income)
                 }
             }
         }
-        return nonDummyIncomes
     }
 
     /**
@@ -537,29 +536,29 @@ class Check extends AbstractScriptClass {
 
         time = System.currentTimeMillis()
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+            if (!ndflPersonIncome.isDummy()) {
+                ScriptUtils.checkInterrupted()
 
-            ScriptUtils.checkInterrupted()
+                NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
-            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
+                // Спр5 Код вида дохода (Необязательное поле)
+                if (ndflPersonIncome.incomeCode && ndflPersonIncome.incomeAccruedDate != null &&
+                        !incomeCodeMap.find { key, value ->
+                            value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
+                                    ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                                    ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
+                        }
+                ) {
+                    String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
+                            C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
+                            R_INCOME_CODE
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError, errMsg)
+                }
 
-            // Спр5 Код вида дохода (Необязательное поле)
-            if (ndflPersonIncome.incomeCode && ndflPersonIncome.incomeAccruedDate != null &&
-                    !incomeCodeMap.find { key, value ->
-                        value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
-                                ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
-                                ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
-                    }
-            ) {
-                String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                        C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
-                        R_INCOME_CODE
-                )
-                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError, errMsg)
-            }
-
-            /*
+                /*
                 Спр6
                 При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
 
@@ -569,38 +568,39 @@ class Check extends AbstractScriptClass {
                 Доход.Вид.Код (Графа 4) - (Необязательное поле)
                 incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
              */
-            if (ndflPersonIncome.incomeType && ndflPersonIncome.incomeCode) {
-                List<Map<String, RefBookValue>> incomeTypeRowList = incomeTypeMap.get(ndflPersonIncome.incomeType)
-                if (incomeTypeRowList == null || incomeTypeRowList.isEmpty()) {
-                    String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                            C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
-                            R_INCOME_TYPE
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError, errMsg)
-                } else {
-                    if (ndflPersonIncome.incomeAccruedDate != null) {
-                        List<Map<String, RefBookValue>> incomeCodeRefList = []
-                        incomeTypeRowList.each { incomeTypeRow ->
-                            if (ndflPersonIncome.incomeAccruedDate >= incomeTypeRow.record_version_from?.dateValue &&
-                                    ndflPersonIncome.incomeAccruedDate <= incomeTypeRow.record_version_to?.dateValue) {
-                                RefBookValue refBookValue = incomeTypeRow?.INCOME_TYPE_ID
-                                def incomeCodeRef = incomeCodeMap.get((Long) refBookValue?.getValue())
-                                incomeCodeRefList.add(incomeCodeRef)
+                if (ndflPersonIncome.incomeType && ndflPersonIncome.incomeCode) {
+                    List<Map<String, RefBookValue>> incomeTypeRowList = incomeTypeMap.get(ndflPersonIncome.incomeType)
+                    if (incomeTypeRowList == null || incomeTypeRowList.isEmpty()) {
+                        String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
+                                C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
+                                R_INCOME_TYPE
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError, errMsg)
+                    } else {
+                        if (ndflPersonIncome.incomeAccruedDate != null) {
+                            List<Map<String, RefBookValue>> incomeCodeRefList = []
+                            incomeTypeRowList.each { incomeTypeRow ->
+                                if (ndflPersonIncome.incomeAccruedDate >= incomeTypeRow.record_version_from?.dateValue &&
+                                        ndflPersonIncome.incomeAccruedDate <= incomeTypeRow.record_version_to?.dateValue) {
+                                    RefBookValue refBookValue = incomeTypeRow?.INCOME_TYPE_ID
+                                    def incomeCodeRef = incomeCodeMap.get((Long) refBookValue?.getValue())
+                                    incomeCodeRefList.add(incomeCodeRef)
+                                }
                             }
-                        }
-                        Map<String, RefBookValue> incomeCodeRef = incomeCodeRefList.find { Map<String, RefBookValue> value ->
-                            value?.CODE?.stringValue == ndflPersonIncome.incomeCode
-                        }
-                        if (!incomeCodeRef) {
-                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\"",
-                                    C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
-                                    C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
-                                    R_INCOME_TYPE
-                            )
-                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError,
-                                    errMsg)
+                            Map<String, RefBookValue> incomeCodeRef = incomeCodeRefList.find { Map<String, RefBookValue> value ->
+                                value?.CODE?.stringValue == ndflPersonIncome.incomeCode
+                            }
+                            if (!incomeCodeRef) {
+                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\"",
+                                        C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
+                                        C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
+                                        R_INCOME_TYPE
+                                )
+                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                                logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError,
+                                        errMsg)
+                            }
                         }
                     }
                 }
@@ -749,236 +749,240 @@ class Check extends AbstractScriptClass {
         Department department = departmentService.get(declarationData.departmentId)
 
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
-            ScriptUtils.checkInterrupted()
+            if (!ndflPersonIncome.isDummy()) {
+                ScriptUtils.checkInterrupted()
 
-            def operationId = ndflPersonIncome.operationId ?: ""
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
-            String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
+                def operationId = ndflPersonIncome.operationId ?: ""
+                NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+                String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
 
-            // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
+                // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
 
-            // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
-            List<ColumnFillConditionData> columnFillConditionDataList = []
-            //1 Раздел 2. Графа 4 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column4Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_CODE,
-                            C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column11Fill(),
-                    new Column4Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_CODE,
-                            C_INCOME_PAYOUT_SUMM
-                    )
-            )
-            //2 Раздел 2. Графа 5 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column5Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_TYPE,
-                            C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column11Fill(),
-                    new Column5Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_TYPE,
-                            C_INCOME_PAYOUT_SUMM
-                    )
-            )
-            //3 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column6Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
-                            C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            //4 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column11Fill(),
-                    new Column7Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_PAYOUT_DATE,
-                            C_INCOME_PAYOUT_SUMM
-                    )
-            )
-            //5 Раздел 2. Графа 8 Должна быть всегда заполнена
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new ColumnTrueFillOrNotFill(),
-                    new Column8Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Не заполнена гр. \"%s\"",
-                            C_OKTMO
-                    )
-            )
-            //6 Раздел 2. Графа 9 Должна быть всегда заполнена
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new ColumnTrueFillOrNotFill(),
-                    new Column9Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Не заполнена гр. \"%s\"",
-                            C_KPP
-                    )
-            )
-            //7 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column6Fill(),
-                    new Column10Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_SUMM,
-                            C_INCOME_ACCRUED_DATE
-                    )
-            )
-            //8 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column7Fill(),
-                    new Column11Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_PAYOUT_SUMM,
-                            C_INCOME_PAYOUT_DATE
-                    )
-            )
-            //9 Раздел 2. Графа 13 Должна быть заполнена, если заполнена Раздел 2. Графа 10.
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column13Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_BASE,
-                            C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            //10 Раздел 2. Графы 14 Должна быть заполнена, если заполнена Раздел 2. Графа 10 ИЛИ Раздел 2. Графа 11.
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column14Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_RATE, C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column11Fill(),
-                    new Column14Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_RATE, C_INCOME_PAYOUT_SUMM
-                    )
-            )
-            //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column15Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_DATE, C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column11Fill(),
-                    new Column15Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_DATE, C_INCOME_PAYOUT_SUMM
-                    )
-            )
-            //12 Раздел 2. Графа 16 Должна быть заполнена, если заполнена "Раздел 2. Графа 10"
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column10Fill(),
-                    new Column16Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_CALCULATED_TAX, C_INCOME_ACCRUED_SUMM
-                    )
-            )
-            //13 Раздел 2. Графа 17 Должна быть заполнена, если заполнена "Раздел 2. Графа 11"
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column11Fill(),
-                    new Column17Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_WITHHOLDING_TAX, C_INCOME_PAYOUT_SUMM
-                    )
-            )
-            //14 Раздел 2. Графа 21 Должна быть заполнена, если выполняется одно из условий:
-            // 1. заполнена "Раздел 2. Графа 7"
-            // 2. одновременно заполнены "Раздел 2. Графа 22" И "Раздел 2. Графа 23" И "Раздел 2. Графа 24"
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column7Fill(),
-                    new Column21Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_TAX_TRANSFER_DATE, C_INCOME_PAYOUT_DATE
-                    )
+                // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
+                List<ColumnFillConditionData> columnFillConditionDataList = []
+                //1 Раздел 2. Графа 4 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column4Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_CODE,
+                                C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column11Fill(),
+                        new Column4Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_CODE,
+                                C_INCOME_PAYOUT_SUMM
+                        )
+                )
+                //2 Раздел 2. Графа 5 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column5Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_TYPE,
+                                C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column11Fill(),
+                        new Column5Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_TYPE,
+                                C_INCOME_PAYOUT_SUMM
+                        )
+                )
+                //3 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column6Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_ACCRUED_DATE,
+                                C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                //4 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column11Fill(),
+                        new Column7Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_PAYOUT_DATE,
+                                C_INCOME_PAYOUT_SUMM
+                        )
+                )
+                //5 Раздел 2. Графа 8 Должна быть всегда заполнена
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new ColumnTrueFillOrNotFill(),
+                        new Column8Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Не заполнена гр. \"%s\"",
+                                C_OKTMO
+                        )
+                )
+                //6 Раздел 2. Графа 9 Должна быть всегда заполнена
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new ColumnTrueFillOrNotFill(),
+                        new Column9Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Не заполнена гр. \"%s\"",
+                                C_KPP
+                        )
+                )
+                //7 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column6Fill(),
+                        new Column10Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_ACCRUED_SUMM,
+                                C_INCOME_ACCRUED_DATE
+                        )
+                )
+                //8 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column7Fill(),
+                        new Column11Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_INCOME_PAYOUT_SUMM,
+                                C_INCOME_PAYOUT_DATE
+                        )
+                )
+                //9 Раздел 2. Графа 13 Должна быть заполнена, если заполнена Раздел 2. Графа 10.
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column13Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_TAX_BASE,
+                                C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                //10 Раздел 2. Графы 14 Должна быть заполнена, если заполнена Раздел 2. Графа 10 ИЛИ Раздел 2. Графа 11.
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column14Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_TAX_RATE, C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column11Fill(),
+                        new Column14Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_TAX_RATE, C_INCOME_PAYOUT_SUMM
+                        )
+                )
+                //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column15Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_TAX_DATE, C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column11Fill(),
+                        new Column15Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_TAX_DATE, C_INCOME_PAYOUT_SUMM
+                        )
+                )
+                //12 Раздел 2. Графа 16 Должна быть заполнена, если заполнена "Раздел 2. Графа 10"
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column10Fill(),
+                        new Column16Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_CALCULATED_TAX, C_INCOME_ACCRUED_SUMM
+                        )
+                )
+                //13 Раздел 2. Графа 17 Должна быть заполнена, если заполнена "Раздел 2. Графа 11"
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column11Fill(),
+                        new Column17Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_WITHHOLDING_TAX, C_INCOME_PAYOUT_SUMM
+                        )
+                )
+                //14 Раздел 2. Графа 21 Должна быть заполнена, если выполняется одно из условий:
+                // 1. заполнена "Раздел 2. Графа 7"
+                // 2. одновременно заполнены "Раздел 2. Графа 22" И "Раздел 2. Графа 23" И "Раздел 2. Графа 24"
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column7Fill(),
+                        new Column21Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                                C_TAX_TRANSFER_DATE, C_INCOME_PAYOUT_DATE
+                        )
 
-            )
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new Column22And23And24Fill(),
-                    new Column21Fill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            C_TAX_TRANSFER_DATE,
-                            C_PAYMENT_DATE,
-                            C_PAYMENT_NUMBER,
-                            C_TAX_SUMM
-                    )
+                )
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new Column22And23And24Fill(),
+                        new Column21Fill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
+                                C_TAX_TRANSFER_DATE,
+                                C_PAYMENT_DATE,
+                                C_PAYMENT_NUMBER,
+                                C_TAX_SUMM
+                        )
 
-            )
-            //15 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
-            columnFillConditionDataList << new ColumnFillConditionData(
-                    new ColumnTrueFillOrNotFill(),
-                    new Column22And23And24FillOrColumn22And23And24NotFill(),
-                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\", гр. \"%s\", гр. \"%s\" должны быть заполнены одновременно или не заполнена ни одна из них",
-                            C_PAYMENT_DATE,
-                            C_PAYMENT_NUMBER,
-                            C_TAX_SUMM
-                    )
+                )
+                //15 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
+                columnFillConditionDataList << new ColumnFillConditionData(
+                        new ColumnTrueFillOrNotFill(),
+                        new Column22And23And24FillOrColumn22And23And24NotFill(),
+                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                        String.format("Гр. \"%s\", гр. \"%s\", гр. \"%s\" должны быть заполнены одновременно или не заполнена ни одна из них",
+                                C_PAYMENT_DATE,
+                                C_PAYMENT_NUMBER,
+                                C_TAX_SUMM
+                        )
 
-            )
-            columnFillConditionDataList.each { columnFillConditionData ->
-                if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
-                        !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
-                    logger.logCheck("%s. %s.",
-                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
-                            "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
-                            fioAndInpAndOperId, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
+                )
+                columnFillConditionDataList.each { columnFillConditionData ->
+                    if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
+                            !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
+                        logger.logCheck("%s. %s.",
+                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
+                                "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
+                                fioAndInpAndOperId, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
+                    }
                 }
-            }
 
-            // Общ10 Соответствие КПП и ОКТМО Тербанку
-            if (ndflPersonIncome.oktmo != null) {
-                List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
-                if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_KPP, ndflPersonIncome.kpp ?: "",
-                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, pathError,
-                            errMsg)
+                // Общ10 Соответствие КПП и ОКТМО Тербанку
+                if (ndflPersonIncome.oktmo != null) {
+                    List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
+                    if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                                C_KPP, ndflPersonIncome.kpp ?: "",
+                                C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                                R_DETAIL,
+                                department ? department.name : ""
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, pathError,
+                                errMsg)
+                    }
                 }
             }
         }
+        // Общ16 Для ФЛ в разделе 2 есть только одна фиктивная строка
+        checkDummyIncomes(ndflPersonIncomeList)
 
         ScriptUtils.checkInterrupted()
 
@@ -998,8 +1002,6 @@ class Check extends AbstractScriptClass {
                         List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, RegistryPerson> personMap) {
 
         long time = System.currentTimeMillis()
-        // Проверка и удаление фиктивных строк
-        ndflPersonIncomeList = checkAndRemoveDummyIncomes(ndflPersonIncomeList)
 
         Map<Long, NdflPerson> personsCache = [:]
         ndflPersonList.each { ndflPerson ->
@@ -1177,7 +1179,7 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
-                // СведДох7 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
+                // СведДох7 Заполнение Раздела 2 Графы 18 и 19
                 BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
                 BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
                 BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
@@ -1197,7 +1199,7 @@ class Check extends AbstractScriptClass {
                  */
                 for (NdflPersonIncome ndflPersonIncome : allIncomesOfOperation) {
                     // СведДох1 Доход.Дата.Начисление (Графа 6)
-                    if (ndflPersonIncome.incomeAccruedSumm != null) {
+                    if (!ndflPersonIncome.isDummy() && ndflPersonIncome.incomeAccruedSumm != null) {
                         dateConditionDataList.each { dateConditionData ->
                             if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                                 boolean check = dateConditionData.checker.check(ndflPersonIncome, allIncomesOfOperation)
@@ -1217,7 +1219,7 @@ class Check extends AbstractScriptClass {
                     }
 
                     // СведДох3 НДФЛ.Процентная ставка (Графа 14)
-                    if (ndflPersonIncome.taxRate != null) {
+                    if (!ndflPersonIncome.isDummy() && ndflPersonIncome.taxRate != null) {
                         boolean checkNdflPersonIncomingTaxRateTotal = false
 
                         boolean presentCitizenship = ndflPerson.citizenship != null
@@ -1306,7 +1308,7 @@ class Check extends AbstractScriptClass {
                     }
 
                     // СведДох4 НДФЛ.Расчет.Дата (Графа 15)
-                    if (ndflPersonIncome.taxDate != null) {
+                    if (!ndflPersonIncome.isDummy() && ndflPersonIncome.taxDate != null) {
                         List<CheckData> logTypeMessagePairList = []
                         boolean section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
                         // П.1
@@ -1456,7 +1458,7 @@ class Check extends AbstractScriptClass {
                     }
 
                     // СведДох5 НДФЛ.Расчет.Сумма.Исчисленный (Заполнение Раздела 2 Графы 16)
-                    if (ndflPersonIncome.calculatedTax != null) {
+                    if (!ndflPersonIncome.isDummy() && ndflPersonIncome.calculatedTax != null) {
                         if (ndflPersonIncome.taxRate != 13) {
                             // условие | ∑ Р.2.Гр.16 - ∑ ОКРУГЛ(Р.2.Гр.13 x Р.2.Гр.14/100) – ∑ Р.4.Гр.4 | < 1
                             // ∑ Р.2.Гр.16
@@ -1578,7 +1580,7 @@ class Check extends AbstractScriptClass {
 
                     /* todo Убрал проверку Заполнения Раздела 2 Графы 17, в SBRFNDFL-3997 её доработают
                 // СведДох6 НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
-                if (ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
+                if (!ndflPersonIncome.isDummy() && ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
                     // СведДох7.1
                     if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
                             || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543", "1544",
@@ -1675,7 +1677,7 @@ class Check extends AbstractScriptClass {
 
                     // СведДох9 НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)
                     // Проверка не должна выполняться.
-                    /*if (ndflPersonIncome.refoundTax != null && ndflPersonIncome.refoundTax > 0) {
+                    /*if (!ndflPersonIncome.isDummy() && ndflPersonIncome.refoundTax != null && ndflPersonIncome.refoundTax > 0) {
                     if (!(refoundTaxSum <= overholdingTaxSum)) {
                         String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") не должна превышать сумму значений гр.\"%s\" (\"%s\") для всех строк одной операции",
                                 C_REFOUND_TAX, refoundTaxSum ?: "0",
@@ -1687,10 +1689,10 @@ class Check extends AbstractScriptClass {
                 }*/
 
                     // СведДох10 НДФЛ.Перечисление в бюджет.Срок (Графа 21)
-                    if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null) {
+                    if (!ndflPersonIncome.isDummy() && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null) {
                         dateConditionDataListForBudget.each { dateConditionData ->
-                            if ((dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) || dateConditionData.incomeCodes.isEmpty()) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)
-                                    && !ndflPersonIncome.isDummy()) {
+                            if ((dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) || dateConditionData.incomeCodes.isEmpty()) &&
+                                    dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                                 def checkedIncome = ndflPersonIncome
                                 String errMsg = dateConditionData.checker.check(checkedIncome)
                                 if (checkedIncome != null && errMsg != null) {
@@ -1884,9 +1886,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                ?.get(ndflPersonDeduction.notifSumm) ?: []
+                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                        ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1907,7 +1909,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId) ?: []
+                        ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
