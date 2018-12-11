@@ -142,6 +142,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
 
+    private static final String STANDARD_DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"";
+
     static {
         CALENDAR.clear();
         CALENDAR.set(9999, Calendar.DECEMBER, 31);
@@ -1463,7 +1465,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public ActionResult deleteIfExists(long id, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.deleteIfExists by %s. id: %s",
                 userInfo, id));
@@ -1475,42 +1476,48 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public ActionResult delete(final long id, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.delete by %s. id: %s",
                 userInfo, id));
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
-        LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
-        LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
-        LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
-        if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
-            final String lockKey = generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC);
-            Map<String, Object> params = new HashMap<>();
-            params.put("declarationDataId", id);
-            asyncManager.executeTask(lockKey, AsyncTaskType.DELETE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lock(lockKey, userInfo.getUser().getId(), getDeclarationFullName(id, DeclarationDataReportType.DELETE_DEC));
+        if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                new TargetIdAndLogger(id, logger),
+                "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.DELETE)) {
+            logger = new Logger();
+            LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
+            LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
+            LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
+            if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
+                final String lockKey = generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC);
+                Map<String, Object> params = new HashMap<>();
+                params.put("declarationDataId", id);
+                asyncManager.executeTask(lockKey, AsyncTaskType.DELETE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lock(lockKey, userInfo.getUser().getId(), getDeclarationFullName(id, DeclarationDataReportType.DELETE_DEC));
+                    }
+                });
+            } else {
+                if (lockData == null) {
+                    lockData = lockDataAccept;
                 }
-            });
+                if (lockData == null) {
+                    lockData = lockDataCheck;
+                }
+                TAUser blocker = taUserService.getUser(lockData.getUserId());
+                String description = lockData.getDescription();
+                if (lockData.getTaskId() != null) {
+                    AsyncTaskData taskData = asyncManager.getLightTaskData(lockData.getTaskId());
+                    if (taskData != null) {
+                        description = taskData.getDescription();
+                    }
+                }
+                logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), description);
+                                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            }
         } else {
-            if (lockData == null) {
-                lockData = lockDataAccept;
-            }
-            if (lockData == null) {
-                lockData = lockDataCheck;
-            }
-            TAUser blocker = taUserService.getUser(lockData.getUserId());
-            String description = lockData.getDescription();
-            if (lockData.getTaskId() != null) {
-                AsyncTaskData taskData = asyncManager.getLightTaskData(lockData.getTaskId());
-                if (taskData != null) {
-                    description = taskData.getDescription();
-                }
-            }
-            logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), description);
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            makeNotificationForAccessDenied(logger);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
@@ -1590,7 +1597,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (existDeclarationData(declarationId)) {
                 try {
                     ActionResult preResult = delete(declarationId, userInfo);
-                    logger.getEntries().addAll(logEntryService.getAll(preResult.getUuid()));
+                    for (LogEntry logEntry : logEntryService.getAll(preResult.getUuid())) {
+                        if (!logEntry.getLevel().equals(LogLevel.ERROR)) {
+                            logger.getEntries().add(logEntry);
+                        }
+                    }
                 } catch (ServiceLoggerException e) {
                     logger.getEntries().addAll(logEntryService.getAll(e.getUuid()));
                 } catch (Exception e) {
@@ -1600,10 +1611,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
             }
         }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            logger.logTopMessage(LogLevel.ERROR, "При удалении возникли ошибки:");
-            throw new ServiceLoggerException("При удалении возникли ошибки", logEntryService.save(logger.getEntries()));
-        }
+
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
@@ -3652,7 +3660,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
         return reportPeriod.getCorrectionDate() != null ?
-                String.format(" с датой сдачи корректировки %s", sdf.get().format(reportPeriod.getCorrectionDate())) :
+                String.format(" корр. %s", sdf.get().format(reportPeriod.getCorrectionDate())) :
                 "";
     }
 
@@ -3779,6 +3787,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return blobDataService.get(declarationDataFile.getUuid());
     }
 
+    @Override
+    public String getStandardDeclarationDescription(Long declarationDataId) {
+        DeclarationData declaration = declarationDataDao.get(declarationDataId);
+        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
+
+        return String.format(STANDARD_DECLARATION_DESCRIPTION,
+                declaration.getId(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getReportPeriod().getName(),
+                getCorrectionDateString(reportPeriod),
+                department.getName());
+    }
+
     /**
      * Проверяет необходимо ли использовать xml формы для проведения операций с ней.
      *
@@ -3807,5 +3829,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             rowNum = rowNum != null ? rowNum.add(new BigDecimal("1")) : null;
         }
         return operations;
+    }
+
+    private void makeNotificationForAccessDenied(Logger logger) {
+        if (logger.getEntries().size() != 0) {
+            Notification notification = new Notification();
+            notification.setUserId(userService.getCurrentUser().getId());
+            notification.setCreateDate(new Date());
+            notification.setText(logger.getEntries().get(logger.getEntries().size() - 1).getMessage());
+            notification.setLogId(logEntryService.save(Collections.singletonList(logger.getEntries().get(logger.getEntries().size() - 1))));
+            notification.setReportId(null);
+            notification.setNotificationType(NotificationType.DEFAULT);
+            notificationService.create(Collections.singletonList(notification));
+        }
     }
 }

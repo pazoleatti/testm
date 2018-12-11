@@ -802,4 +802,11 @@ public interface DeclarationDataService {
      * @return данные файла
      */
     BlobData downloadFile(DeclarationDataFile declarationDataFile);
+
+    /**
+     * Описание налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @return строка с описанием
+     */
+    String getStandardDeclarationDescription(Long declarationDataId);
 }

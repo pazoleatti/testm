@@ -1,10 +1,18 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.Relation
+import com.aplana.sbrf.taxaccounting.model.State
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.SourceService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import com.aplana.sbrf.taxaccounting.script.service.*
 
 new Delete(this).run()
 
@@ -44,7 +52,12 @@ class Delete extends AbstractScriptClass {
     void run() {
         switch (formDataEvent) {
             case FormDataEvent.DELETE:
-                checkTheDeclarationHasNoModificationConflictsWithDestinations()
+                try {
+                    checkTheDeclarationHasNoModificationConflictsWithDestinations()
+                } catch (Throwable e) {
+                    scriptClass.getBinding().setProperty("exceptionThrown", e)
+                    e.printStackTrace()
+                }
         }
     }
 
