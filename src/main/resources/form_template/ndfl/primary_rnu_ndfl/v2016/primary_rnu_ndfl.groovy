@@ -1826,7 +1826,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         void build() {
             if (rows) {
-                def lastRow = rows.last()
                 for (def row : rows) {
                     StringBuilder stringBuilder = new StringBuilder()
                     stringBuilder << row.periodCode << "|"
@@ -1837,9 +1836,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                     stringBuilder << (format(row.taxTransferDate) == SharedConstants.DATE_ZERO_AS_DATE ? SharedConstants.DATE_ZERO_AS_STRING : format(row.taxTransferDate)) << "|"
                     stringBuilder << formatN_2.format(row.incomeSum) << "|"
                     stringBuilder << row.withholdingTaxSum << "|"
-                    if (!row.is(lastRow)) {
-                        stringBuilder << "\r\n"
-                    }
+                    stringBuilder << "\r\n"
                     write(stringBuilder.toString())
                 }
             } else {
