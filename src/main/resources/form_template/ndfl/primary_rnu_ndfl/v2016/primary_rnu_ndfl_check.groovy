@@ -1795,7 +1795,7 @@ class Check extends AbstractScriptClass {
                 if (income.isDummy()) {
                     String errMsg = "относится к операции, для которой в Разделе 2 имеется строка $income.rowNum (ФЛ: $ndflPersonFL.fio, " +
                             "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ"
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, income.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
                     break
                 }
@@ -1928,8 +1928,9 @@ class Check extends AbstractScriptClass {
                 if (income.isDummy()) {
                     String errMsg = "относится к операции, для которой в Разделе 2 имеется строка $income.rowNum (ФЛ: $ndflPersonFL.fio, " +
                             "ИНП: $ndflPersonFL.inp, ставка налога = 0, ID операции = 0), показывающая отсутствие операций по данному ФЛ"
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, income.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, prepayment.rowNum ?: "")
                     logger.errorExp("%s %s", "", fioAndInpAndOperId, pathError, errMsg)
+                    break
                 }
             }
             // 1 Заполнение Раздела 4 только для НП с кодом статуса = "6"
