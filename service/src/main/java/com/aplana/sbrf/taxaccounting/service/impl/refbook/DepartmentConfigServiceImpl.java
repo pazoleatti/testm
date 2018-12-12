@@ -389,7 +389,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Override
     public void checkDepartmentConfig(DepartmentConfig departmentConfig, List<DepartmentConfig> relatedDepartmentConfigs) {
-        if (departmentConfig.getEndDate() != null && !departmentConfig.getStartDate().before(departmentConfig.getEndDate())) {
+        if (departmentConfig.getEndDate() != null && departmentConfig.getStartDate().after(departmentConfig.getEndDate())) {
             throw new ServiceException("Дата начала актуальности записи не может быть больше даты окончания актуальности");
         }
         Date minDate = null, maxDate = new Date(0);

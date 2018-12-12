@@ -769,8 +769,7 @@
 
                 // Список конфигов для разных справочников
                 $scope.refBookConfig = {};
-                // ОКТМО
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO] = {
+                var codeNameConfig = {
                     sort: {
                         property: "CODE",
                         direction: "asc"
@@ -780,18 +779,22 @@
                     },
                     formatter: "codeNameFormatter"
                 };
+                // ОКТМО
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO] = codeNameConfig;
                 // Коды места представления расчета
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PRESENT_PLACE] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PRESENT_PLACE] = codeNameConfig;
                 // Признак лица, подписавшего документ
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.SIGNATORY_MARK] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.SIGNATORY_MARK] = codeNameConfig;
                 // Коды форм реорганизации (ликвидации) организации
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.REORGANIZATION] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.REORGANIZATION] = codeNameConfig;
                 // Тип ДУЛ
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DOC_TYPE] = codeNameConfig;
                 // Страны
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.COUNTRY] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.COUNTRY] = codeNameConfig;
                 // Система-источник
-                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.ASNU] = $scope.refBookConfig[APP_CONSTANTS.REFBOOK.OKTMO];
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.ASNU] = codeNameConfig;
+                // Признак кода вычета
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DEDUCTION_MARK] = codeNameConfig;
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
                     filter: {

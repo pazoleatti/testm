@@ -71,7 +71,8 @@
                 TAXPAYER_STATUS: 903,
                 DOC_TYPE: 360,
                 ID_DOC: 902,
-                KNF_TYPE: 909
+                KNF_TYPE: 909,
+                DEDUCTION_MARK: 927
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

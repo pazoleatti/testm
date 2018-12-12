@@ -142,12 +142,23 @@
                                 value = refBookValue && typeof refBookValue.value !== 'undefined' && (!$scope.isEditMode || !isNaN(refBookValue.value)) ? formatter(refBookValue.value) : "";
                                 break;
                             case 'REFERENCE':
-                                value = refBookValue && typeof refBookValue.referenceObject !== 'undefined' ? refBookValue.referenceObject[attribute.refBookAttribute.alias].value : "";
+                                value = refBookValue && typeof refBookValue.referenceObject !== 'undefined' ? refCellFormatter(attribute, refBookValue) : "";
                                 break;
                         }
                         return value;
                     }
                 };
+
+                function refCellFormatter(attribute, refBookValue) {
+                    if (attribute.refBookId === APP_CONSTANTS.REFBOOK.DEDUCTION_MARK) {
+                        return $filter("codeNameFormatter")({
+                            'code': refBookValue.referenceObject["CODE"].value,
+                            'name': refBookValue.referenceObject["NAME"].value
+                        });
+                    } else {
+                        return refBookValue.referenceObject[attribute.refBookAttribute.alias].value;
+                    }
+                }
 
                 /**
                  * Получает "красивое" значение атрибута, отображаемое в GUI.
