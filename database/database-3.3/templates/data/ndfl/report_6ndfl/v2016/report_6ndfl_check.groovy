@@ -99,7 +99,7 @@ class Check extends AbstractScriptClass {
             kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
         }
         def sumDataNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_DATA6 }
-        def mathError = sumDataNodes.size() * kolFl6
+        def ДопустимаяПогрешность = sumDataNodes.size() * kolFl6
 
         def sumStavkaNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
         sumStavkaNodes.each { sumStavkaNode ->
