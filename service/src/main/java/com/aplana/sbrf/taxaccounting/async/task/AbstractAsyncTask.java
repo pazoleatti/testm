@@ -181,11 +181,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             }
 
                             // Кладём в данные о таске ошибку для возможности формирования текста на её основе
-                            if (e instanceof ServiceException) {
-                                taskData.getParams().put("exceptionThrown", e.getMessage());
-                            } else {
-                                taskData.getParams().put("exceptionThrown", e.toString());
-                            }
+                            taskData.getParams().put("exceptionThrown", e);
 
                             // Извлекаем из логгера тексты ошибок и складываем их в данные о таске
                             String errorsText = collectErrorsText(logger);

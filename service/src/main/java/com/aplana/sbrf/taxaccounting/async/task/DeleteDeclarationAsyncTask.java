@@ -76,9 +76,9 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         String message = getMessage(taskData, false);
-        String e = (String) taskData.getParams().get("exceptionThrown");
+        Exception e = (Exception) taskData.getParams().get("exceptionThrown");
         if (e != null) {
-            message = message + String.format(CAUSE, e);
+            message = message + String.format(CAUSE, e.toString());
         }
         return message;
     }
