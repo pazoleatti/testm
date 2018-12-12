@@ -323,21 +323,32 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final class DeletePermission extends DeclarationDataPermission {
 
+        private final static String OPERATION_NAME = "Удаление";
+
         public DeletePermission(long mask) {
             super(mask);
         }
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (targetDomainObject.getState() == State.CREATED) {
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
                         if (departmentReportPeriod.isActive()) {
                             return true;
                         }
+                    } else {
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, CREDENTIAL_ERROR, logger);
+                        return false;
                     }
+                } else {
+                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, CREDENTIAL_ERROR, logger);
+                    return false;
                 }
+            } else {
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
+                return false;
             }
             return false;
         }

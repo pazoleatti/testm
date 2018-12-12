@@ -6,12 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.ScriptComponentContextHolder;
-import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import groovy.lang.Binding;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -163,6 +158,10 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private boolean executeScript(Bindings bindings, String script, Logger logger) {
 		try {
             getScriptEngine().eval(script, bindings);
+			Exception catchedException = (Exception) bindings.get("exceptionThrown");
+			if (catchedException != null) {
+				throw new ServiceException("%s", catchedException.toString());
+			}
             return true;
         } catch (ScriptException e) {
             int i = ExceptionUtils.indexOfThrowable(e, ScriptServiceException.class);
@@ -170,10 +169,6 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
                 throw (ScriptServiceException)ExceptionUtils.getThrowableList(e).get(i);
             }
 			logScriptException(e, logger);
-			return false;
-		} catch (Exception e) {
-            //TODO: Добавить вывод номера строки в скрипте
-			logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
 			return false;
 		}
 	}

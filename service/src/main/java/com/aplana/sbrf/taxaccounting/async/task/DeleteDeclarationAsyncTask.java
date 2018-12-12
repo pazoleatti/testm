@@ -40,8 +40,7 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Autowired
     private ReportService reportService;
 
-    private static final String SUCCESS = "Успешно выполнена операция: %s";
-    private static final String FAIL = "Произошла непредвиденная ошибка выполнении операции: %s";
+    private static final String SUCCESS = "Успешно выполнена операция \"Удаление\" для налоговой формы: %s";
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
@@ -51,13 +50,13 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
+        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getStandardDeclarationDescription(declarationDataId));
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            declarationDataScriptingService.executeScript(userInfo,
-                    declarationData, FormDataEvent.DELETE, new Logger(), null);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.DELETE, logger, null);
 
             // Проверяем ошибки
             if (logger.containsLevel(LogLevel.ERROR)) {
@@ -76,7 +75,12 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
-        return getMessage(taskData, false);
+        String message = getMessage(taskData, false);
+        String e = (String) taskData.getParams().get("exceptionThrown");
+        if (e != null) {
+            message = message + String.format(CAUSE, e);
+        }
+        return message;
     }
 
     @Override
@@ -85,8 +89,12 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     private String getMessage(AsyncTaskData taskData, boolean isSuccess) {
-        String template = isSuccess ? SUCCESS : FAIL;
-        return String.format(template, taskData.getDescription());
+        String standardDeclarationDescription = (String) taskData.getParams().get("standardDeclarationDescription");
+        if (isSuccess) {
+            return String.format(SUCCESS, standardDeclarationDescription);
+        } else {
+            return String.format(FAIL, "Удаление", standardDeclarationDescription);
+        }
     }
 
     @Override
