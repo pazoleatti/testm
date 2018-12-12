@@ -430,12 +430,12 @@ public final class SqlUtils extends AbstractDao {
     }
 
 
-    public static String createInsert(String table, String seq, String[] columns, String[] fields) {
+    public static String createInsert(String table, String[] columns, String[] fields) {
         StringBuilder sb = new StringBuilder();
         sb.append("insert into ").append(table);
         sb.append(toSqlString(columns));
         sb.append(" VALUES ");
-        sb.append(toSqlParameters(fields, seq));
+        sb.append(toSqlParameters(fields));
         return sb.toString();
     }
 
@@ -486,7 +486,7 @@ public final class SqlUtils extends AbstractDao {
         }
     }
 
-    public static String toSqlParameters(String[] fields, String seq) {
+    public static String toSqlParameters(String[] fields) {
         List<String> result = new ArrayList<String>();
         for (int i = 0; i < fields.length; i++) {
             result.add(":" + fields[i]);

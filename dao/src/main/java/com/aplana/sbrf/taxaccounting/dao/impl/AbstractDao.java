@@ -120,7 +120,7 @@ public abstract class AbstractDao {
      */
     protected  <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
         List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
-        String insert = SqlUtils.createInsert(table, seq, columns, fields);
+        String insert = SqlUtils.createInsert(table, columns, fields);
         BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
         int i = 0;
         for (E identityObject : identityObjects) {
