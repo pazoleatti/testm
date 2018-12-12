@@ -99,7 +99,7 @@ class Check extends AbstractScriptClass {
             kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
         }
         def sumDataNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_DATA6 }
-        def mathError = sumDataNodes.size() * kolFl6
+        def ДопустимаяПогрешность = sumDataNodes.size() * kolFl6
 
         def sumStavkaNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
         sumStavkaNodes.each { sumStavkaNode ->
@@ -117,7 +117,7 @@ class Check extends AbstractScriptClass {
             def ИсчислНалРасч = Math.round((НачислДох - ВычетНал) / 100 * Ставка)
             def Дельта = ИсчислНалРасч - ИсчислНал
             // ВнДок2 Исчисленный налог
-            if (Math.abs(Дельта) > ДопустимаяПогрешность) {
+            if (!(Math.abs(Дельта) < ДопустимаяПогрешность)) {
                 logger.warnExp(msgError + " неверно рассчитана «Cумма исчисленного налога. Модуль разности ($Дельта) рассчитанного " +
                         "значения суммы исчисленного налога ($ИсчислНалРасч) и указанного в строке 040 ($ИсчислНал) больше допустимого " +
                         "значения погрешности ($ДопустимаяПогрешность).", "«Cумма исчисленного налога» рассчитана некорректно", "")
