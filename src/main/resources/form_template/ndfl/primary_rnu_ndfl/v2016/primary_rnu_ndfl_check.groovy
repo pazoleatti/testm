@@ -1862,9 +1862,9 @@ class Check extends AbstractScriptClass {
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                ?.get(ndflPersonDeduction.notifSumm) ?: []
+                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
+                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
+                        ?.get(ndflPersonDeduction.notifSumm) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1885,7 +1885,7 @@ class Check extends AbstractScriptClass {
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
                 List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                ?.get(ndflPersonDeduction.operationId) ?: []
+                        ?.get(ndflPersonDeduction.operationId) ?: []
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -2511,8 +2511,8 @@ class Check extends AbstractScriptClass {
                     return null
                 } else {
                     return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должен быть равен значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
-                    ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
+                            ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                            ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
                 }
             }
 
@@ -2532,9 +2532,9 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должен быть равен последнему календарному дню месяца, следующим за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-            ScriptUtils.formatDate(checkedIncome.taxTransferDate),
-            ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
-            ScriptUtils.formatDate(referenceValue))
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
+                    ScriptUtils.formatDate(referenceValue))
         }
     }
 
