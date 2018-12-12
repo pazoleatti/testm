@@ -8,13 +8,16 @@ set NEWP NONE;
 WHENEVER SQLERROR EXIT;
 
 variable v_count number;
-
 exec :v_count:=0;
 
 select count(*) into :v_count 
 from REF_BOOK_ID_DOC a 
 where 
-exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=a.person_id);
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=a.person_id)
+and record_id is not null
+and version is not null
+and status = 0
+and duplicate_record_id is not null;
 
 spool &1
 
@@ -84,7 +87,11 @@ spool off;
 select count(*) into :v_count 
 from REF_BOOK_ID_TAX_PAYER e 
 where 
-exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=e.person_id);
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=e.person_id)
+and record_id is not null
+and version is not null
+and status = 0;
+
 
 spool &5
 
@@ -101,7 +108,10 @@ spool off;
 select count(*) into :v_count 
 from REF_BOOK_PERSON_TB f 
 where 
-exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=f.person_id);
+exists (select 1 from REF_BOOK_PERSON p where p.status<>0 and p.id=f.person_id)
+and record_id is not null
+and version is not null
+and status = 0;
 
 spool &6
 

@@ -23,6 +23,9 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
 
     private static final String DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s";
 
+    protected static final String FAIL = "Не выполнена операция \"%s\" для налоговой формы: %s.";
+    protected static final String CAUSE = " Причина: %s";
+
     @Autowired
     private DeclarationDataService declarationDataService;
     @Autowired
