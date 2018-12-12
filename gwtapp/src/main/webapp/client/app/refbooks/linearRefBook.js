@@ -96,7 +96,7 @@
                                     index: attribute.alias,
                                     width: attribute.width * APP_CONSTANTS.REFBOOK_EM_TO_PX_CONVERSION_INDEX, //TODO: пока так, потому что в БД ширина задана в em, а оно не поддерживается в jqgrid
                                     type: attribute.attributeType,
-                                    referenceAttribute: attribute.refBookAttribute,
+                                    attribute: attribute,
                                     formatter: refBookValueFormatter,
                                     sortable: !$scope.versionMode && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_FROM_ALIAS && attribute.alias !== APP_CONSTANTS.REFBOOK_ALIAS.RECORD_VERSION_TO_ALIAS
                                 }
@@ -123,10 +123,21 @@
                             value = record && typeof record.value !== 'undefined' ? formatter(record.value) : "";
                             break;
                         case 'REFERENCE':
-                            value = record && typeof record.referenceObject !== 'undefined' ? record.referenceObject[colModel.referenceAttribute.alias].value : "";
+                            value = record && typeof record.referenceObject !== 'undefined' ? refCellFormatter(colModel, record) : "";
                             break;
                     }
                     return value;
+                }
+
+                function refCellFormatter(colModel, record) {
+                    if (colModel.attribute.refBookId === APP_CONSTANTS.REFBOOK.DEDUCTION_MARK) {
+                        return $filter("codeNameFormatter")({
+                            'code': record.referenceObject["CODE"].value,
+                            'name': record.referenceObject["NAME"].value
+                        });
+                    } else {
+                        return record.referenceObject[colModel.attribute.refBookAttribute.alias].value;
+                    }
                 }
 
                 /**
