@@ -443,7 +443,7 @@
                              data-ng-if="mode == 'EDIT' && person.address.permission">
                             <div data-aplana-field>
                                 <input data-ng-model="personParam.address.value.addressIno"
-                                       type="text"
+                                       type="text" maxlength="255"
                                        style="width: 800px"
                                        data-ui-validate="{requiredByCountrId : 'isAddressValid($value)'}"
                                        data-ui-validate-watch="['personParam.address.value.country.code']"/>
