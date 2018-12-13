@@ -53,6 +53,7 @@
                     }
                 };
 
+                // поля со значениями null, undefined или "" будут считаться эквивалентными
                 function stringify(value) {
                     return JSON.stringify(value, function (key, value) {
                         return value ? value : undefined;
