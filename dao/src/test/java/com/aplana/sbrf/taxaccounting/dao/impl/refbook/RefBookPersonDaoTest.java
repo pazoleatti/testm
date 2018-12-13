@@ -4,8 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.main.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.Address;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,8 +301,13 @@ public class RefBookPersonDaoTest {
         assertThat(person.getRecordId()).isEqualTo(person.getOldId());
     }
 
+    @Test
+    public void test_getPersonsCount() {
 
-    // --- Методы работы с  RegistryPerson ---
+        int result = personDao.getPersonsCount(null);
+
+        assertThat(result).isEqualTo(7);
+    }
 
     @Test
     public void test_setOriginal() {
@@ -355,4 +359,81 @@ public class RefBookPersonDaoTest {
                 .containsExactlyInAnyOrder(3L, 4L, 12122L);
     }
 
+    @Test
+    public void test_fetchPersonVersion() {
+        RegistryPerson result = personDao.fetchPersonVersion(1L);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getLastName()).isEqualTo("Иванов");
+    }
+
+    @Test
+    public void test_fetchDuplicates() {
+        List<RegistryPerson> result = personDao.fetchDuplicates(1L);
+
+        assertThat(result)
+                .hasSize(3)
+                .extracting("id")
+                .containsExactlyInAnyOrder(3L, 4L, 12122L);
+    }
+
+    @Test
+    public void test_updateBatch() {
+        RegistryPerson registryPerson1 = new RegistryPerson();
+        RegistryPerson registryPerson2 = new RegistryPerson();
+        String lastName1 = "ОбновляторОдин";
+        String lastName2 = "ОбновляторДва";
+
+        registryPerson1.setId(1L);
+        registryPerson1.setLastName(lastName1);
+        registryPerson1.setTaxPayerState(new RefBookTaxpayerState());
+        registryPerson1.setCitizenship(new RefBookCountry());
+        registryPerson1.setReportDoc(new IdDoc());
+        registryPerson1.setSource(new RefBookAsnu());
+        registryPerson1.getAddress().setCountry(new RefBookCountry());
+        registryPerson2.setId(2L);
+        registryPerson2.setLastName(lastName2);
+        registryPerson2.setTaxPayerState(new RefBookTaxpayerState());
+        registryPerson2.setCitizenship(new RefBookCountry());
+        registryPerson2.setReportDoc(new IdDoc());
+        registryPerson2.setSource(new RefBookAsnu());
+        registryPerson2.getAddress().setCountry(new RefBookCountry());
+
+        personDao.updateBatch(new ArrayList<>(Arrays.asList(registryPerson1, registryPerson2)));
+
+        RegistryPerson result1 = personDao.fetchPersonVersion(1L);
+        RegistryPerson result2 = personDao.fetchPersonVersion(2L);
+
+        Calendar startDateCalendar = new GregorianCalendar();
+        startDateCalendar.set(2016, Calendar.JANUARY, 1, 0, 0, 0);
+        startDateCalendar.set(Calendar.MILLISECOND, 0);
+        Calendar endDateCalendar = new GregorianCalendar();
+        endDateCalendar.set(2016, Calendar.DECEMBER, 31, 0, 0, 0);
+        endDateCalendar.set(Calendar.MILLISECOND, 0);
+
+        assertThat(result1.getRecordId()).isEqualTo(1L);
+        assertThat(result1.getOldId()).isEqualTo(1L);
+        assertThat(result1.getStartDate()).isEqualTo(startDateCalendar.getTime());
+        assertThat(result1.getEndDate()).isEqualTo(endDateCalendar.getTime());
+        assertThat(result1.getLastName()).isEqualTo(lastName1);
+
+        assertThat(result2.getRecordId()).isEqualTo(2L);
+        assertThat(result2.getOldId()).isEqualTo(2L);
+        assertThat(result2.getStartDate()).isEqualTo(startDateCalendar.getTime());
+        assertThat(result2.getLastName()).isEqualTo(lastName2);
+    }
+
+    @Test
+    public void test_fetchNonDuplicatesVersions() {
+        List<RegistryPerson> result = personDao.fetchNonDuplicatesVersions(1L);
+
+        assertThat(result).hasSize(1).extracting("id").contains(1L);
+    }
+
+    @Test
+    public void test_fetchOriginalDuplicatesCandidates() {
+        PagingResult<RegistryPerson> result = personDao.fetchOriginalDuplicatesCandidates(null, null);
+
+        assertThat(result).hasSize(7);
+    }
 }

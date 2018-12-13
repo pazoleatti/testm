@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
-import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,8 +37,6 @@ public class PersonServiceImplTest {
     private PersonServiceImpl personService;
     @Mock
     private RefBookPersonDao personDao;
-    @Mock
-    private CommonRefBookService commonRefBookService;
     @Mock
     private BasePermissionEvaluator permissionEvaluator;
     @Mock
@@ -480,6 +477,32 @@ public class PersonServiceImplTest {
         when(personDao.fetchNonDuplicatesVersions(1L)).thenReturn(Collections.singletonList(relatedPerson));
 
         personService.checkVersionOverlapping(registryPersonDTO);
+    }
+
+    @Test
+    public void test_fetchOriginalDuplicatesCandidates() {
+        PagingParams params = mock(PagingParams.class);
+        RefBookPersonFilter filter = mock(RefBookPersonFilter.class);
+        TAUser user = mock(TAUser.class);
+
+        PagingResult<RegistryPerson> result = new PagingResult<>();
+
+        when(personDao.fetchOriginalDuplicatesCandidates(params, filter)).thenReturn(result);
+
+        personService.fetchOriginalDuplicatesCandidates(params, filter, user);
+
+        verify(personDao).fetchOriginalDuplicatesCandidates(params, filter);
+    }
+
+    @Test
+    public void test_findActualRefPersonsByDeclarationDataId() {
+        Long declarationDataId = 1L;
+
+        when(personService.findActualRefPersonsByDeclarationDataId(declarationDataId)).thenReturn(new ArrayList<RegistryPerson>());
+
+        personService.findActualRefPersonsByDeclarationDataId(declarationDataId);
+
+        verify(personDao).findActualRefPersonsByDeclarationDataId(eq(declarationDataId), any(Date.class));
     }
 
     private static class VersionComparator implements Comparator<RegistryPerson> {
