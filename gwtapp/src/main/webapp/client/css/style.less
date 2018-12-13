@@ -1832,3 +1832,34 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 #registryFLTable .ui-jqgrid .ui-pg-input {
   width: 40px;
 }
+
+// правка бага https://jira.aplana.com/browse/SBRFNDFL-5575
+#departmentConfigForm {
+  .select2-container .select2-choice {
+    height: auto;
+  }
+  .row-fluid [class*='span'] {
+    min-height: 0;
+  }
+  .form-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .form-group label {
+    margin: 0 0 1px;
+    padding: 0;
+  }
+  [class*='span'] {
+    min-height: 0;
+  }
+  .form-group .form-group {
+    margin-bottom: 0;
+  }
+  .row {
+    margin-bottom: 0;
+  }
+  form {
+    margin: 0 0 8px;
+  }
+}
