@@ -279,7 +279,10 @@
                         method: "POST",
                         url: "controller/actions/declarationData/downloadReportsByFilter",
                         params: {
-                            filter: JSON.stringify({formState: APP_CONSTANTS.STATE.ACCEPTED.id})
+                            filter: JSON.stringify({
+                                formStates: [APP_CONSTANTS.STATE.ACCEPTED.id],
+                                formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id]
+                            })
                         }
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
