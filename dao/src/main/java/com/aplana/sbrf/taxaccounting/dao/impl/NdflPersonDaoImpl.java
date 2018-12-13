@@ -1284,7 +1284,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             throw new DaoException(DUPLICATE_ERORR_MSG);
         }
 
-        String insert = SqlUtils.createInsert(table, seq, columns, fields);
+        String insert = SqlUtils.createInsert(table, columns, fields);
         NamedParameterJdbcTemplate jdbcTemplate = getNamedParameterJdbcTemplate();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
