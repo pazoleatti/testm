@@ -32,48 +32,40 @@
         </div>
     </div>
 
-    <div class="info-wrapper">
-        <div class="span2">
-            <div class="row-fluid form-group-view">
-                <div class="span5">{{::'refBook.fl.card.label.version' | translate}}</div>
-                <div class="span7 person-card-data">{{person.id}}</div>
-            </div>
+    <div class="info-wrapper" style="height: 50px;">
+        <div style="display: inline-block;">
+            <span style="margin-left: 20px;">{{::'refBook.fl.card.label.version' | translate}}</span>
+            <span class="strong" style="margin-left: 5px;">{{person.id}}</span>
         </div>
-        <div class="span3">
-            <div class="row-fluid form-group-view">
-                <div class="span5" style="text-align: right">{{::'refBook.fl.card.label.versionFrom' | translate}}</div>
-                <div class="span7 person-card-data"
-                     data-ng-show="mode == 'VIEW'">{{person.startDate | dateFormatter}}
-                </div>
-                <div class="span7" data-ng-show="mode == 'EDIT'">
-                    <div data-aplana-field>
-                        <div data-aplana-datepicker
-                             data-max-date="personParam.endDate"
-                             data-ng-model="personParam.startDate"
-                             required>
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
-                        </div>
-                        <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' |
-                            translate}}
-                        </div>
+        <div style="display: inline-block;">
+            <span style="margin-left: 30px;">{{::'refBook.fl.card.label.versionFrom' | translate}}</span>
+            <span class="strong" data-ng-show="mode == 'VIEW'" style="margin-left: 5px;">{{person.startDate | dateFormatter}}</span>
+            <div data-ng-show="mode == 'EDIT'" style="display: inline-block; margin-left: 5px; width: 120px;">
+                <div data-aplana-field>
+                    <div data-aplana-datepicker
+                         data-max-date="personParam.endDate"
+                         data-ng-model="personParam.startDate"
+                         required>
+                    </div>
+                    <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                        translate}}
+                    </div>
+                    <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' |
+                        translate}}
                     </div>
                 </div>
             </div>
         </div>
-        <div class="span2">
-            <div class="row-fluid form-group-view">
-                <div class="span3" style="text-align: right">{{::'refBook.fl.card.label.versionTo' | translate}}</div>
-                <div class="span9 person-card-data" data-ng-show="mode == 'VIEW'">
-                    {{person.endDate ? (person.endDate | dateFormatter) : " -"}}
-                </div>
-                <div class="span8" data-ng-show="mode == 'EDIT'">
-                    <div data-aplana-field>
-                        <div data-aplana-datepicker
-                             data-ng-model="personParam.endDate"
-                             data-min-date="personParam.startDate">
-                        </div>
+        <div style="display: inline-block;">
+            <span style="margin-left: 20px;">{{::'refBook.fl.card.label.versionTo' | translate}}</span>
+            <span class="strong" data-ng-show="mode == 'VIEW'" style="margin-left: 5px;">
+                {{person.endDate ? (person.endDate | dateFormatter) : " -"}}
+            </span>
+            <div data-ng-show="mode == 'EDIT'" style="display: inline-block; margin-left: 5px; width: 120px;">
+                <div data-aplana-field>
+                    <div data-aplana-datepicker
+                         data-ng-model="personParam.endDate"
+                         data-min-date="personParam.startDate">
                     </div>
                 </div>
             </div>
