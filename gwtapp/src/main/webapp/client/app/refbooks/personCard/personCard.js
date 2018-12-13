@@ -133,7 +133,7 @@
                         colModel: [
                             {name: 'id', index: 'id', width: 100, key: true, hidden: true},
                             {name: 'oldId', index: 'oldId', width: 100, sortable: true},
-                            {name: 'lastName', index: 'lastName', width: 120, sortable: true},
+                            {name: 'lastName', index: 'lastName', width: 120, sortable: true, formatter: personLinkFormatter},
                             {name: 'firstName', index: 'firstName', width: 120, sortable: true},
                             {name: 'middleName', index: 'middleName', width: 120, sortable: true},
                             {
@@ -168,6 +168,14 @@
                         hidegrid: false
                     }
                 };
+
+                function personLinkFormatter(cellValue, options) {
+                    var value = cellValue;
+                    if (!cellValue) {
+                        value = $filter('translate')('refBook.fl.table.label.undefined');
+                    }
+                    return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "' target='_blank'>" + value + "</a>";
+                }
 
                 /**
                  * @description Грид тербанков
@@ -357,7 +365,7 @@
                         }
                     });
                     if (!$scope.personParam.reportDoc.value) {
-                        $scope.personParam.reportDoc.value = {id: null}
+                        $scope.personParam.reportDoc.value = {id: null};
                     }
                     $scope.personParam.vip = $scope.personParam.vipSelect.value;
                     $scope.personParam.duplicates = $scope.personParam.duplicates.concat($scope.deletedDuplicates);
@@ -416,24 +424,24 @@
                                 return {
                                     idDoc: idDoc,
                                     mode: mode
-                                }
+                                };
                             }
                         }
-                    })
+                    });
                 };
 
                 /**
                  * @description Добавить ДУЛ
                  */
                 $scope.addIdDoc = function () {
-                    editIdDoc(APP_CONSTANTS.MODE.CREATE)
+                    editIdDoc(APP_CONSTANTS.MODE.CREATE);
                 };
 
                 /**
                  * @description Изменить ДУЛ
                  */
                 $scope.editIdDoc = function () {
-                    editIdDoc(APP_CONSTANTS.MODE.EDIT)
+                    editIdDoc(APP_CONSTANTS.MODE.EDIT);
                 };
 
                 /**
@@ -465,7 +473,7 @@
                             $rootScope.$broadcast("addIdDoc", $scope.personParam);
                             $scope.idDocsGrid.ctrl.refreshGridData($scope.personParam.documents.value);
                         }
-                    })
+                    });
                 };
 
                 /**
@@ -503,7 +511,7 @@
                         $scope.personParam.address.value.city ||
                         $scope.personParam.address.value.locality ||
                         $scope.personParam.address.value.house ||
-                        $scope.personParam.address.value.build)
+                        $scope.personParam.address.value.build);
                 };
 
                 /**
@@ -512,7 +520,7 @@
                  * @returns {*|boolean}
                  */
                 $scope.isAddressValid = function (value) {
-                    return value || !$scope.personParam.address.value.country.code
+                    return value || !$scope.personParam.address.value.country.code;
                 };
 
                 /**
@@ -521,7 +529,7 @@
                  * @returns {*|boolean}
                  */
                 $scope.isCountryValid = function (value) {
-                    return value.code || !$scope.personParam.address.value.addressIno
+                    return value.code || !$scope.personParam.address.value.addressIno;
                 };
 
                 var addPerson = function (title, mode) {
@@ -535,24 +543,24 @@
                                 return {
                                     recordId: $scope.person.recordId,
                                     mode: mode
-                                }
+                                };
                             }
                         }
-                    })
+                    });
                 };
 
                 /**
                  * @description Добавить оригинал
                  */
                 $scope.addOriginal = function () {
-                    addPerson($filter('translate')('refBook.fl.card.tabs.original.modal.title'), APP_CONSTANTS.MODE.ORIGINAL)
+                    addPerson($filter('translate')('refBook.fl.card.tabs.original.modal.title'), APP_CONSTANTS.MODE.ORIGINAL);
                 };
 
                 /**
                  * @description Добавить дубликат
                  */
                 $scope.addDuplicate = function () {
-                    addPerson($filter('translate')('refBook.fl.card.tabs.duplicate.modal.title'), APP_CONSTANTS.MODE.DUPLICATE)
+                    addPerson($filter('translate')('refBook.fl.card.tabs.duplicate.modal.title'), APP_CONSTANTS.MODE.DUPLICATE);
                 };
 
                 /**
@@ -568,7 +576,7 @@
                             $scope.personParam.original = null;
                             $scope.person.original = null;
                         }
-                    })
+                    });
                 };
 
                 /**
@@ -584,10 +592,10 @@
                             var indexOfDeleting = -1;
                             var i = 0;
                             angular.forEach($scope.personParam.duplicates, function (item) {
-                                if (item.id == $scope.duplicatesGrid.value[0].id) {
+                                if (item.id === $scope.duplicatesGrid.value[0].id) {
                                     indexOfDeleting = i;
                                     item.recordId = item.oldId;
-                                    $scope.deletedDuplicates.push(item)
+                                    $scope.deletedDuplicates.push(item);
                                 }
                                 i++;
                             });
@@ -607,7 +615,7 @@
                 $scope.$on("addDuplicate", function (event, duplicate) {
                     duplicate.recordId = $scope.personParam.recordId;
                     $scope.personParam.duplicates.push(duplicate);
-                    $scope.duplicatesGrid.ctrl.refreshGridData($scope.personParam.duplicates)
+                    $scope.duplicatesGrid.ctrl.refreshGridData($scope.personParam.duplicates);
                 });
 
                 $scope.$watchGroup(['personParam.startDate', 'personParam.endDate'], function () {
