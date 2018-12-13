@@ -35,7 +35,7 @@
                         allVersions: APP_CONSTANTS.SHOW_VERSIONS.BY_DATE,
                         versionDate: new Date().format("yyyy-mm-dd"),
                         showDuplicates: APP_CONSTANTS.SHOW_DUPLICATES.NO
-                    }
+                    };
                 }
 
                 $scope.searchFilter = {
@@ -49,9 +49,15 @@
                         $scope.searchFilter.params = getDefaultFilterParams();
                     },
                     isClearByFilterParams: function () {
-                        $scope.searchFilter.isClear = JSON.stringify($scope.searchFilter.params) !== JSON.stringify(getDefaultFilterParams());
+                        $scope.searchFilter.isClear = stringify($scope.searchFilter.params) !== stringify(getDefaultFilterParams());
                     }
                 };
+
+                function stringify(value) {
+                    return JSON.stringify(value, function (key, value) {
+                        return value ? value : undefined;
+                    });
+                }
 
                 /**
                  * Строковое представление содержимого фильтра.
@@ -107,7 +113,7 @@
                             return {
                                 filter: $scope.filterRequestParam(),
                                 projection: 'common'
-                            }
+                            };
                         },
                         colNames: [
                             $filter('translate')('refBook.fl.table.title.id'),
@@ -276,5 +282,5 @@
                 }
                 return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "' target='_blank'>" + value + "</a>";
             };
-        }])
+        }]);
 }());
