@@ -44,4 +44,11 @@
         </sql>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6201 сделать спр. "Признак лица, подписавшего документ" нередактируемым-->
+	<changeSet id="3.4-dnovikov-4" author="dnovikov">
+		<sql>
+			update REF_BOOK set read_only = 1 where id = 35;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
