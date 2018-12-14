@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
@@ -20,9 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
@@ -32,9 +35,6 @@ public class ReportPeriodDaoTest {
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
-
-    @Autowired
-    private TaxPeriodDao taxPeriodDao;
 
     private TaxPeriod taxPeriod;
 
@@ -46,9 +46,9 @@ public class ReportPeriodDaoTest {
     @Before
     public void init() {
         taxPeriod = new TaxPeriod();
+        taxPeriod.setId(31);
         taxPeriod.setTaxType(TaxType.NDFL);
-        taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
-        taxPeriod.setId(taxPeriodDao.create(taxPeriod));
+        taxPeriod.setYear(2018);
     }
 
     @Test

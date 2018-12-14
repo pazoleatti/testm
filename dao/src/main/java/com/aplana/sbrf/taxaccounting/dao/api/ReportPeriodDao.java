@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 
 import java.util.Date;
@@ -23,6 +24,14 @@ public interface ReportPeriodDao extends PermissionDao {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
      */
     ReportPeriod fetchOne(Integer reportPeriodId);
+
+    /**
+     * Получить или создать объект налогового периода по году
+     *
+     * @param year год
+     * @return объект {@link TaxPeriod}
+     */
+    TaxPeriod fetchOrCreateTaxPeriod(int year);
 
     /**
      * Получение отчетного периода по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
@@ -61,6 +70,13 @@ public interface ReportPeriodDao extends PermissionDao {
      * @param reportPeriodId идентификатор периода
      */
     void remove(int reportPeriodId);
+
+    /**
+     * Удалениие налогового периода
+     *
+     * @param taxPeriodId идентификатор налогового периода
+     */
+    void removeTaxPeriod(int taxPeriodId);
 
     /**
      * Получение списка отчетных периодов для указанных подразделений

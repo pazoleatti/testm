@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,20 +22,15 @@ import static com.aplana.sbrf.taxaccounting.web.handlers.SUDIRRedirectLogoutSucc
 @RestController
 public class CacheController {
 
-    private CacheManagerDecorator cacheManagerDecorator;
-
-    public CacheController(CacheManagerDecorator cacheManagerDecorator) {
-        this.cacheManagerDecorator = cacheManagerDecorator;
-    }
-
     /**
      * Сбрасывает кэш
      *
      * @return сообщение о сбросе кэша
      */
     @GetMapping(value = "/actions/cache/clear-cache", produces = CustomMediaType.TEXT_HTML_UTF8_VALUE)
+    @CacheEvict(cacheNames = {CacheConstants.DECLARATION_TEMPLATE, CacheConstants.DECLARATION_TEMPLATE_EVENT_SCRIPT, CacheConstants.DECLARATION_TYPE,
+            CacheConstants.DEPARTMENT, CacheConstants.REF_BOOK, CacheConstants.REF_BOOK_ATTRIBUTE, CacheConstants.USER}, allEntries = true)
     public String clearCache() {
-        cacheManagerDecorator.clearAll();
         return "Кэш сброшен";
     }
 

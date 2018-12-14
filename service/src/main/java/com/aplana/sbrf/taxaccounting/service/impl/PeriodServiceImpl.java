@@ -4,17 +4,12 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReopenPeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -28,15 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.singletonList;
 
@@ -54,12 +41,6 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Autowired
     private ReportPeriodService reportPeriodService;
-
-    @Autowired
-    private TaxPeriodDao taxPeriodDao;
-
-    @Autowired
-    private TaxPeriodService taxPeriodService;
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
@@ -101,7 +82,7 @@ public class PeriodServiceImpl implements PeriodService {
         ReportPeriod reportPeriod = null;
         Logger logger = new Logger();
         try {
-            TaxPeriod taxPeriod = taxPeriodService.fetchOrCreate(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+            TaxPeriod taxPeriod = reportPeriodDao.fetchOrCreateTaxPeriod(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
             ReportPeriodType reportPeriodType = reportPeriodDao.getReportPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
             reportPeriod = reportPeriodService.fetchOrCreate(taxPeriod, reportPeriodType);
             departmentReportPeriod.setIsActive(true);
@@ -366,7 +347,7 @@ public class PeriodServiceImpl implements PeriodService {
 
             if (reportPeriodDao.fetchAllByTaxPeriod(reportPeriod.getTaxPeriod().getId()).isEmpty()) {
                 // Неиспользующияся TaxPeriod удаляем
-                taxPeriodDao.delete(reportPeriod.getTaxPeriod().getId());
+                reportPeriodDao.removeTaxPeriod(reportPeriod.getTaxPeriod().getId());
             }
         }
     }

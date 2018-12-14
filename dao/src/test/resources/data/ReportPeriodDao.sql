@@ -14,6 +14,7 @@ INSERT INTO tax_type (id, name) VALUES ('N', 'НДФЛ');
 INSERT INTO tax_period(id, tax_type, year) VALUES (1, 'N', 2013);
 INSERT INTO tax_period(id, tax_type, year) VALUES (11, 'N', 2012);
 INSERT INTO tax_period(id, tax_type, year) VALUES (21, 'N', 2015);
+INSERT INTO tax_period(id, tax_type, year) VALUES (31, 'N', 2018);
 
 INSERT INTO ref_book(id, name) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) VALUES
