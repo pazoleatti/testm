@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
@@ -23,11 +22,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
@@ -45,11 +40,7 @@ import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
@@ -142,7 +133,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
 
-    private static final String STANDARD_DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"";
+    private static final String STANDARD_DECLARATION_DESCRIPTION = "налоговой формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"";
 
     static {
         CALENDAR.clear();
