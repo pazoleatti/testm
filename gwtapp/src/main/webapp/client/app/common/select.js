@@ -1063,16 +1063,16 @@
                  * @param person изменяемое ФЛ
                  */
                 $scope.initVip = function (person) {
-                    $scope.vipSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [{
+                    $scope.vipSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, [{
                         id: 1,
                         value: true,
                         name: 'VIP'
                     }, {id: 2, value: false, name: 'не VIP'}], false);
                     angular.forEach($scope.vipSelect.options.data.results, function (value) {
                         if (value.value === person.vip) {
-                            person.vipSelect = value
+                            person.vipSelect = value;
                         }
-                    })
+                    });
                 };
 
                 /**
