@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuilder;
@@ -41,11 +40,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.anySetOf;
 import static org.mockito.Mockito.*;
 
@@ -56,8 +51,6 @@ public class PeriodServiceImplTest {
     PeriodService periodService;
     @Autowired
     ReportPeriodDao reportPeriodDao;
-    @Autowired
-    TaxPeriodDao taxPeriodDao;
     @Autowired
     RefBookDataProvider provider;
     @Autowired
@@ -74,8 +67,6 @@ public class PeriodServiceImplTest {
     DepartmentService departmentService;
     @Autowired
     DepartmentDao departmentDao;
-    @Autowired
-    TaxPeriodService taxPeriodService;
     @Autowired
     ReportPeriodService reportPeriodService;
     @Autowired

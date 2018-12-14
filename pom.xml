@@ -7,7 +7,7 @@
     <artifactId>ndfl</artifactId>
 
     <description>АС "Учёт налогов"</description>
-    <version>3.3</version>
+    <version>3.4</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -15,7 +15,6 @@
         <module>dao</module>
         <module>service</module>
         <module>gwtapp</module>
-        <module>dynacache-spring</module>
         <module>fonts</module>
         <module>schematron</module>
     </modules>
@@ -39,6 +38,7 @@
         <releaseName>ndfl${releasePostfix}</releaseName>
         <jackson.version>2.6.5</jackson.version>
         <ttddyy.version>1.4.4</ttddyy.version>
+        <ehcache.version>2.4.3</ehcache.version>
     </properties>
 
     <dependencyManagement>
@@ -64,6 +64,11 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
                 <version>${springframework.version}</version>
             </dependency>
             <dependency>
@@ -354,6 +359,11 @@
                 <groupId>net.ttddyy</groupId>
                 <artifactId>datasource-proxy</artifactId>
                 <version>${ttddyy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.ehcache</groupId>
+                <artifactId>ehcache-core</artifactId>
+                <version>${ehcache.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>

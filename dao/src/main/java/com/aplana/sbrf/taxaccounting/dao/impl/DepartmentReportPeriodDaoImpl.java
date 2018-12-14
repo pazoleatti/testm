@@ -1,16 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -18,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -33,11 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @Repository
@@ -47,9 +35,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
-
-    @Autowired(required = false)
-    private CacheManagerDecorator cacheManagerDecorator;
 
     private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -238,6 +223,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void create(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
         final List<Integer> ids = generateIds("seq_department_report_period", departmentIds.size(), Integer.class);
         getJdbcTemplate().batchUpdate("INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
@@ -257,14 +243,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 return departmentIds.size();
             }
         });
-
-        for (Integer id : ids) {
-            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
-        }
     }
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void merge(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
         final List<Integer> ids = generateIds("seq_department_report_period", departmentReportPeriods.size(), Integer.class);
         getJdbcTemplate().batchUpdate("MERGE INTO DEPARTMENT_REPORT_PERIOD dest " +
@@ -292,10 +275,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 return departmentReportPeriods.size();
             }
         });
-
-        for (Integer id : ids) {
-            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
-        }
     }
 
     @Override
@@ -311,6 +290,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void updateActive(final List<Integer> ids, final Integer reportPeriodId, final boolean active) {
         getJdbcTemplate().batchUpdate("UPDATE department_report_period SET is_active = ? WHERE report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
             @Override
@@ -325,14 +305,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 return ids.size();
             }
         });
-
-        for (Integer id : ids) {
-            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
-        }
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void delete(final List<Integer> ids) {
         getJdbcTemplate().batchUpdate("DELETE FROM department_report_period WHERE id = ?",
                 new BatchPreparedStatementSetter() {
@@ -347,10 +324,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     }
                 }
         );
-
-        for (Integer id : ids) {
-            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, id);
-        }
     }
 
     @Override

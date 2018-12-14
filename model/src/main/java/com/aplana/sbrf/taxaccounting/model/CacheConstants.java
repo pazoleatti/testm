@@ -22,10 +22,6 @@ public final class CacheConstants {
      */
     public static final String DEPARTMENT_REPORT_PERIOD = "DepartmentReportPeriod";
     /**
-     * Отчётный периот
-     */
-    public static final String TAX_PERIOD = "TaxPeriod";
-    /**
      * Пользователь
      */
     public static final String USER = "User";

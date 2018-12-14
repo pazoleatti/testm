@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.aplana.sbrf</groupId>
         <artifactId>ndfl</artifactId>
-        <version>3.3</version>
+        <version>3.4</version>
     </parent>
 
     <artifactId>gwtapp</artifactId>
@@ -34,11 +34,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>dao</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>dynacache-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

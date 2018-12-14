@@ -1,15 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -31,14 +27,6 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao {
 
-    private TaxPeriodDao taxPeriodDao;
-
-    @Autowired
-    public ReportPeriodDaoImpl(TaxPeriodDao taxPeriodDao) {
-        this.taxPeriodDao = taxPeriodDao;
-    }
-
-
     @Override
     public SecuredEntity getSecuredEntity(long id) {
         return fetchOne((int) id);
@@ -54,7 +42,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             Integer id = SqlUtils.getInteger(rs, "id");
             reportPeriod.setId(id);
             reportPeriod.setName(rs.getString("name"));
-            reportPeriod.setTaxPeriod(taxPeriodDao.fetchOne(SqlUtils.getInteger(rs, "tax_period_id")));
+
+            TaxPeriod taxPeriod = new TaxPeriod();
+            taxPeriod.setId(SqlUtils.getInteger(rs, "tax_period_id"));
+            taxPeriod.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            taxPeriod.setYear(SqlUtils.getInteger(rs, "year"));
+            reportPeriod.setTaxPeriod(taxPeriod);
+
             reportPeriod.setStartDate(rs.getDate("start_date"));
             reportPeriod.setEndDate(rs.getDate("end_date"));
             reportPeriod.setDictTaxPeriodId(SqlUtils.getInteger(rs, "dict_tax_period_id"));
@@ -110,8 +104,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         try {
             return 0 == id ? null :
                     getJdbcTemplate().queryForObject(
-                            "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date  " +
-                                    "from report_period where id = ?",
+                            "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date " +
+                                    "from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+                                    "where rp.id = ?",
                             new Object[]{id},
                             new int[]{Types.NUMERIC},
                             new ReportPeriodMapper()
@@ -122,10 +117,56 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     }
 
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link TaxPeriod}
+     */
+    private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
+        @Override
+        public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
+            TaxPeriod t = new TaxPeriod();
+            t.setId(SqlUtils.getInteger(rs, "id"));
+            t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            t.setYear(SqlUtils.getInteger(rs, "year"));
+            return t;
+        }
+    }
+
+    @Override
+    public TaxPeriod fetchOrCreateTaxPeriod(int year) {
+        TaxPeriod taxPeriod;
+        try {
+            taxPeriod = getJdbcTemplate().queryForObject(
+                    "SELECT id, tax_type, year FROM tax_period WHERE year = ?",
+                    new Object[]{year},
+                    new int[]{Types.NUMERIC},
+                    new TaxPeriodRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            taxPeriod = new TaxPeriod();
+            taxPeriod.setYear(year);
+
+            Integer id = generateId("seq_tax_period", Integer.class);
+            taxPeriod.setId(id);
+
+            getJdbcTemplate().update(
+                    "INSERT INTO tax_period (id, tax_type, year)" +
+                            " VALUES (?, ?, ?)",
+                    new Object[]{
+                            taxPeriod.getId(),
+                            taxPeriod.getTaxType().getCode(),
+                            taxPeriod.getYear()
+                    },
+                    new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC}
+
+            );
+        }
+        return taxPeriod;
+    }
+
     @Override
     public List<ReportPeriod> fetchAll() {
-        return getJdbcTemplate().query("" +
-                        "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date \n" +
+        return getJdbcTemplate().query(
+                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date \n" +
                         "from report_period rp, tax_period tp \n" +
                         "where rp.tax_period_id = tp.id \n" +
                         "order by tp.year desc, calendar_start_date",
@@ -136,8 +177,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> fetchAllByTaxPeriod(int taxPeriodId) {
         return getJdbcTemplate().query(
-                "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date " +
-                        "from report_period where tax_period_id = ? order by end_date, calendar_start_date desc",
+                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date " +
+                        "from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+                        "where rp.tax_period_id = ? order by rp.end_date, rp.calendar_start_date desc",
                 new Object[]{taxPeriodId},
                 new int[]{Types.NUMERIC},
                 new ReportPeriodMapper()
@@ -180,9 +222,18 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
+    public void removeTaxPeriod(int taxPeriodId) {
+        getJdbcTemplate().update(
+                "delete from tax_period where id = ?",
+                new Object[]{taxPeriodId},
+                new int[]{Types.NUMERIC}
+        );
+    }
+
+    @Override
     public List<ReportPeriod> fetchAllByDepartments(List<Integer> departmentList) {
         return getJdbcTemplate().query(
-                "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
                         "rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
                         "(select distinct report_period_id from department_report_period " +
                         "where correction_date is null and " + SqlUtils.transformToSqlInStatement("department_id", departmentList) + ") " +
@@ -194,7 +245,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> getOpenPeriodsAndDepartments(List<Integer> departmentList, boolean withoutCorrect) {
         return getJdbcTemplate().query(
-                "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
                         "rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
                         "(select distinct report_period_id from department_report_period " +
                         "where " + SqlUtils.transformToSqlInStatement("department_id", departmentList) + " and is_active=1 " +
@@ -227,8 +278,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date " +
-                            "from report_period where tax_period_id = ? and dict_tax_period_id = ?",
+                    "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                            "rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+                            "where rp.tax_period_id = ? and rp.dict_tax_period_id = ?",
                     new Object[]{taxPeriodId, dictTaxPeriodId},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
                     new ReportPeriodMapper()
@@ -242,7 +294,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public List<ReportPeriod> getReportPeriodsByDate(Date startDate, Date endDate) {
         try {
             return getJdbcTemplate().query(
-                    "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                    "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
                             "rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
                             "where rp.end_date>=? and (rp.calendar_start_date<=? or ? is null)",
                     new Object[]{startDate, endDate, endDate},
@@ -262,7 +314,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             params.addValue("year", year);
 
             return getNamedParameterJdbcTemplate().queryForObject(
-                    "SELECT rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date  " +
+                    "SELECT rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date  " +
                             "FROM report_period rp  " +
                             "JOIN report_period_type rpt ON (rpt.id = rp.dict_tax_period_id AND rpt.code = :code)" +
                             "JOIN tax_period tp ON (tp.id = rp.tax_period_id AND tp.year = :year)",
@@ -298,7 +350,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     @Override
     public List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId) {
-        String sql = "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+        String sql = "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
                 "rp.calendar_start_date, drp.correction_date from report_period rp " +
                 "left join department_report_period drp on rp.id = drp.report_period_id " +
                 "left join tax_period tp on tp.id = rp.tax_period_id " +

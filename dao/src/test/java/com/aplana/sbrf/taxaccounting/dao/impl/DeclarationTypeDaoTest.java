@@ -71,13 +71,6 @@ public class DeclarationTypeDaoTest {
         Assert.assertEquals(0, declarationTypeDao.getByFilter(filter).size());
     }
 
-    @Test(expected = DaoException.class)
-    public void testDelete(){
-        DeclarationType dt = declarationTypeDao.get(1);
-        declarationTypeDao.delete(dt.getId());
-        declarationTypeDao.get(dt.getId());
-    }
-
     @Test
     public void testGetTypes(){
         Calendar calendar = Calendar.getInstance();

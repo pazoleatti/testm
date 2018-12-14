@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -144,6 +145,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
+    @CacheEvict(value = CacheConstants.REF_BOOK, key = "'id_'+#refBookId")
     public void updateScriptId(Long refBookId, String scriptId) {
         getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
     }

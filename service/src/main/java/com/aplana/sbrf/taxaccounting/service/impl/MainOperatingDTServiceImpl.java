@@ -24,9 +24,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
-    private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
-    private static final String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
     private static final String CHECK_ROLE_MESSAGE = "Нет прав доступа к данному виду налогу \"%s\"!";
 
     @Autowired
@@ -83,7 +80,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 Calendar c = Calendar.getInstance();
                 c.setTime(declarationTemplate.getVersion());
                 c.add(Calendar.DATE, -1);
-                beginRange = new Pair<Date, Date>(dbVersionBeginDate, c.getTime());
+                beginRange = new Pair<>(dbVersionBeginDate, c.getTime());
             }
             if (
                     (dbVersionEndDate == null && templateActualEndDate != null)
@@ -92,7 +89,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 Calendar c = Calendar.getInstance();
                 c.setTime(templateActualEndDate);
                 c.add(Calendar.DATE, 1);
-                endRange = new Pair<Date, Date>(c.getTime(), dbVersionEndDate);
+                endRange = new Pair<>(c.getTime(), dbVersionEndDate);
             }
             versionOperatingService.checkDestinationsSources(declarationTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);

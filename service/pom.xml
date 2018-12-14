@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.aplana.sbrf</groupId>
         <artifactId>ndfl</artifactId>
-        <version>3.3</version>
+        <version>3.4</version>
     </parent>
 
     <artifactId>service</artifactId>
@@ -27,11 +27,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>fonts</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>dynacache-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
 
