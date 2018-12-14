@@ -521,7 +521,7 @@
                  * @returns {*|boolean}
                  */
                 $scope.isAddressValid = function (value) {
-                    return value || !$scope.personParam.address.value.country.code;
+                    return value || !$scope.personParam.address.value.country;
                 };
 
                 /**
@@ -530,7 +530,7 @@
                  * @returns {*|boolean}
                  */
                 $scope.isCountryValid = function (value) {
-                    return value.code || !$scope.personParam.address.value.addressIno;
+                    return value || !$scope.personParam.address.value.addressIno;
                 };
 
                 var addPerson = function (title, mode) {
