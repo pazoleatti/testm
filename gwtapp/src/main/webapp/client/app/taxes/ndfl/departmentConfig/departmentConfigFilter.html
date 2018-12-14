@@ -46,7 +46,7 @@
                                     <input class="form-control"
                                            data-ng-model="searchFilter.params.kpp" type="text"
                                            maxlength="9"
-                                           data-ng-pattern="patterns.number"
+                                           data-ng-pattern="/^\d*$/"
                                            placeholder="{{'filter.placeholder.search' | translate}}"/>
                                     <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
                                 </div>
@@ -64,7 +64,7 @@
                                     <input class="form-control"
                                            data-ng-model="searchFilter.params.oktmo" type="text"
                                            maxlength="11"
-                                           data-ng-pattern="patterns.number"
+                                           data-ng-pattern="/^\d*$/"
                                            placeholder="{{'filter.placeholder.search' | translate}}"/>
                                     <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
                                 </div>
@@ -81,7 +81,7 @@
                                 <div data-aplana-field>
                                     <input class="form-control"
                                            maxlength="4"
-                                           data-ng-pattern="patterns.number"
+                                           data-ng-pattern="/^\d*$/"
                                            data-ng-model="searchFilter.params.taxOrganCode" type="text"
                                            placeholder="{{'filter.placeholder.search' | translate}}"/>
                                     <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
