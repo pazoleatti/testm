@@ -174,7 +174,8 @@
                     if (!cellValue) {
                         value = $filter('translate')('refBook.fl.table.label.undefined');
                     }
-                    return "<a href='index.html#/personRegistry/personCard/" + options.rowId + "' target='_blank'>" + value + "</a>";
+                    var url = $state.href('personCard', {id: options.rowId});
+                    return "<a href='" + url + "' target='_blank'>" + value + "</a>";
                 }
 
                 /**
@@ -520,7 +521,7 @@
                  * @returns {*|boolean}
                  */
                 $scope.isAddressValid = function (value) {
-                    return value || !$scope.personParam.address.value.country.code;
+                    return value || !$scope.personParam.address.value.country;
                 };
 
                 /**
@@ -529,7 +530,7 @@
                  * @returns {*|boolean}
                  */
                 $scope.isCountryValid = function (value) {
-                    return value.code || !$scope.personParam.address.value.addressIno;
+                    return value || !$scope.personParam.address.value.addressIno;
                 };
 
                 var addPerson = function (title, mode) {

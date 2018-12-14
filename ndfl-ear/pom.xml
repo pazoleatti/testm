@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ndfl</artifactId>
         <groupId>com.aplana.sbrf</groupId>
-        <version>3.3</version>
+        <version>3.4</version>
     </parent>
 
     <artifactId>ndfl-ear</artifactId>

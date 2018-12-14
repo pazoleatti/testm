@@ -195,7 +195,8 @@
                                 </div>
                                 <div data-aplana-validator data-key="length">
                                     {{::'common.validation.length' | translate:'{length: 4}'}}
-                                </div></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -220,11 +221,9 @@
                                        data-ng-model="record.signatorySurName"
                                        maxlength="60"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
-                                       data-ui-validate="{requiredBySignatoryMark : 'isNameRequiredBySignatoryMark($value)'}"
-                                       data-ui-validate-watch="['record.signatoryMark']"/>
-                                <div data-aplana-validator data-key='requiredBySignatoryMark'>
-                                    {{::'common.validation.required' |
-                                    translate}}
+                                       data-ng-required="isNameRequiredBySignatoryMark($value)"/>
+                                <div data-aplana-validator data-key='required'>
+                                    {{::'common.validation.required' | translate}}
                                 </div>
                             </div>
                         </div>
@@ -243,11 +242,9 @@
                                        data-ng-model="record.signatoryFirstName"
                                        maxlength="60"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
-                                       data-ui-validate="{requiredBySignatoryMark : 'isNameRequiredBySignatoryMark($value)'}"
-                                       data-ui-validate-watch="['record.signatoryMark']"/>
-                                <div data-aplana-validator data-key='requiredBySignatoryMark'>
-                                    {{::'common.validation.required' |
-                                    translate}}
+                                       data-ng-required="isNameRequiredBySignatoryMark($value)"/>
+                                <div data-aplana-validator data-key='required'>
+                                    {{::'common.validation.required' | translate}}
                                 </div>
                             </div>
                         </div>
@@ -392,7 +389,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-default iconed-btn" ng-show="mode === 'CREATE' || mode === 'EDIT'">
+        <button type="submit" class="btn btn-default iconed-btn" ng-show="mode === 'CREATE' || mode === 'EDIT'"
+                data-ng-disabled="departmentConfigForm.$invalid">
             <span data-translate-once="button.save"></span>
             <span class="btn-icon-ok"></span>
         </button>
