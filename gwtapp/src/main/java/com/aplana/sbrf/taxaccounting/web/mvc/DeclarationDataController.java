@@ -1,13 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CheckDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.model.action.MoveToCreateAction;
-import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -17,12 +11,7 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -36,14 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,11 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -451,13 +429,12 @@ public class DeclarationDataController {
      * Проверить декларацию
      *
      * @param declarationDataId идентификатор декларации
-     * @param action
      * @return модель , в которой содержаться данные о результате проверки декларации
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/check", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestBody CheckDeclarationDataAction action) {
+    public ActionResult checkDeclaration(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.checkDeclaration(userInfo, declarationDataId, action.isForce());
+        return declarationService.checkDeclarationList(userInfo, Collections.singletonList(declarationDataId));
     }
 
     /**
@@ -475,13 +452,11 @@ public class DeclarationDataController {
     /**
      * Принять НФ
      *
-     * @param action
      * @return
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/accept", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public AcceptDeclarationResult accept(@PathVariable final long declarationDataId, @RequestBody AcceptDeclarationDataAction action) {
-        action.setDeclarationId(declarationDataId);
-        return declarationService.createAcceptDeclarationTask(securityService.currentUserInfo(), action);
+    public ActionResult accept(@PathVariable final long declarationDataId) {
+        return declarationService.acceptDeclarationList(securityService.currentUserInfo(), Collections.singletonList(declarationDataId));
     }
 
     /**

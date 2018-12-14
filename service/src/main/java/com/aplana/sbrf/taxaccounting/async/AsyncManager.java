@@ -30,24 +30,28 @@ public interface AsyncManager {
      * @param params кастомные параметры задачи
      * @return данные задачи, которая была поставлена в очередь, либо null, если она поставлена не была
      */
+    @Deprecated
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, AsyncQueue queue, Map<String, Object> params) throws AsyncTaskException;
 
     /**
      * Аналогично {@link AsyncManager#executeTask(java.lang.String, com.aplana.sbrf.taxaccounting.model.AsyncTaskType, com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.AsyncQueue, java.util.Map)}
      * но вместо произвольных параметров используется пустая мапа
      */
+    @Deprecated
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, AsyncQueue queue) throws AsyncTaskException;
 
     /**
      * Аналогично {@link AsyncManager#executeTask(java.lang.String, com.aplana.sbrf.taxaccounting.model.AsyncTaskType, com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.AsyncQueue, java.util.Map)}
      * Очередь будет определена на основе расчета лимитирующих параметров
      */
+    @Deprecated
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user) throws AsyncTaskException;
 
     /**
      * Аналогично com.aplana.sbrf.taxaccounting.async.AsyncManager#executeTask(java.lang.String, com.aplana.sbrf.taxaccounting.model.AsyncTaskType, com.aplana.sbrf.taxaccounting.model.TAUserInfo)
      * но вместо произвольных параметров используется пустая мапа
      */
+    @Deprecated
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params) throws AsyncTaskException;
 
     /**
@@ -56,7 +60,16 @@ public interface AsyncManager {
      * @param handler обработчик постановки задачи в очередь
      * @return данные задачи, которая была поставлена в очередь, либо null, если она поставлена не была
      */
+    @Deprecated
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger, boolean cancelConfirmed, AbstractStartupAsyncTaskHandler handler);
+
+    /**
+     * @param lockKey блокировка, к которой будет привязана задача
+     * @param taskType тип задачи
+     * @param user пользователь, от имени которого была запущена задача
+     * @param params кастомные параметры задачи
+     */
+    void createTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger);
 
     /**
      * Выполняет попытку запуска асинхронной задачи, если не удалось - возвращает сообщение для диалога
@@ -173,4 +186,15 @@ public interface AsyncManager {
      * @return задача активна?
      */
     boolean isTaskActive(long taskId);
+
+    /**
+     * Проверить и создать блокировку. Метод делегирует объекту {@param task} проверку на блокировки и в случае успеха создает блокировку для задачи.
+     * @param task      задача для которой создается болкировка
+     * @param params    параметры задачи
+     * @param logger    логгер
+     * @param lockKey   сгененрированный ключ блокировки
+     * @param userInfo  информация опользователе
+     * @return  {@code true} если блокировка установлена
+     */
+    boolean checkAndCreateLocks(Task task, Map<String, Object> params, Logger logger, String lockKey, TAUserInfo userInfo);
 }

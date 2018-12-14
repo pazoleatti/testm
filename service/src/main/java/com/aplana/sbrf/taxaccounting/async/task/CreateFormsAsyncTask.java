@@ -120,4 +120,14 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
         int departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
         return declarationDataService.getDeclarationFullName(declarationTypeId, departmentReportPeriodId, getAsyncTaskType());
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params, Logger logger) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

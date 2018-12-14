@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
@@ -210,16 +209,6 @@ public interface DeclarationDataService {
      * Найти все формы созданные в отчетном периоде
      */
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
-
-    /**
-     * Проверить декларацию
-     *
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
-     */
-    CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
 
     /**
      * Проверить список деклараций
@@ -624,15 +613,6 @@ public interface DeclarationDataService {
      * @return результат создания отчетности
      */
     CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo);
-
-    /**
-     * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
-     *
-     * @param userInfo информация о пользователе
-     * @param action   объект с параметрами для выполнения операции по принятию налоговой формы
-     * @return объект с данными для представления об операции по принятию налоговой формы
-     */
-    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, AcceptDeclarationDataAction action);
 
     /**
      * Запускает ассинхронную задачу на выгрузку отчетности для форм

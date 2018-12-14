@@ -1,11 +1,13 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.async.AsyncTaskExecutePossibilityVerifier;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,7 @@ import java.util.Map;
  * Проверка налоговой формы
  */
 @Component("CheckDeclarationAsyncTask")
-public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
+public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask implements AsyncTaskExecutePossibilityVerifier {
 
     private static final String SUCCESS = "Выполнена проверка налоговой формы: %s";
     private static final String FAIL = "Выполнена проверка налоговой формы: %s. Найдены фатальные ошибки.";
@@ -29,6 +31,11 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     @Autowired
     private AsyncManager asyncManager;
+
+    @Autowired
+    private LockDataService lockDataService;
+
+
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
@@ -73,9 +80,35 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
-    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+    public boolean checkLocks(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long) params.get("declarationDataId");
-        return String.format(getAsyncTaskType().getDescription(),
-                declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
+        String checkKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CHECK_DEC);
+        String acceptKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC);
+
+        if (lockDataService.isLockExists(checkKey, false)) {
+            logger.error(getLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), checkKey));
+            return true;
+        }
+        if (lockDataService.isLockExists(acceptKey, false)) {
+            logger.error(getLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), acceptKey));
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        return lockDataService.lock(lockKey, user.getUser().getId(), getDescription(user, params));
+    }
+
+    @Override
+    public boolean canExecuteByLimit() {
+        return true;
+    }
+
+    @Override
+    public String createExecuteByLimitErrorMessage() {
+        return "";
     }
 }

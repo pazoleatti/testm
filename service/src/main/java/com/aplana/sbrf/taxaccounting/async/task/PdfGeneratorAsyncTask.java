@@ -73,4 +73,14 @@ public class PdfGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
         return String.format(getAsyncTaskType().getDescription(),
                 declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
     }
+
+    @Override
+    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public boolean checkLocks(Map<String, Object> params, Logger logger) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

@@ -5,7 +5,7 @@ package com.aplana.sbrf.taxaccounting.async.exception;
  *
  * @author dloshkarev
  */
-public class AsyncTaskException extends Exception {
+public class AsyncTaskException extends RuntimeException {
     private static final long serialVersionUID = 8993699486853641401L;
 
     public AsyncTaskException(String errorStr, Throwable cause) {

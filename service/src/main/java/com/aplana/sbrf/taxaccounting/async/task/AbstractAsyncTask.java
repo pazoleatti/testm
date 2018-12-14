@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -53,6 +54,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected TAUserService userService;
     @Autowired
     private ConfigurationDao configurationDao;
+    @Autowired
+    private AsyncTaskDao asyncTaskDao;
 
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -271,6 +274,20 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     logEntryService.save(logger.getEntries()));
         }
         return result;
+    }
+
+    @Override
+    public String getLockExistErrorMessage(String objectName, String lockKey) {
+        AsyncTaskData asyncTaskData = asyncTaskDao.findAsyncTaskByLockKey(lockKey);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        TAUser user = userService.getUser(asyncTaskData.getUserId());
+        return String.format("Для %s запущены задачи, \n" +
+                        "блокирующие задачу %s : \"%s пользователем %s запущена задача \"%s\".",
+                objectName,
+                getAsyncTaskType().getViewName(),
+                dateFormat.format(asyncTaskData.getCreateDate()),
+                user.getName(),
+                asyncTaskData.getType().getViewName());
     }
 
     /**
