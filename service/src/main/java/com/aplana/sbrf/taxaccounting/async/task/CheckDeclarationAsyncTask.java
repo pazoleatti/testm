@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.AsyncTaskExecutePossibilityVerifier;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -18,7 +17,7 @@ import java.util.Map;
  * Проверка налоговой формы
  */
 @Component("CheckDeclarationAsyncTask")
-public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask implements AsyncTaskExecutePossibilityVerifier {
+public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     private static final String SUCCESS = "Выполнена проверка налоговой формы: %s";
     private static final String FAIL = "Выполнена проверка налоговой формы: %s. Найдены фатальные ошибки.";
@@ -102,13 +101,4 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask impl
         return lockDataService.lock(lockKey, user.getUser().getId(), getDescription(user, params));
     }
 
-    @Override
-    public boolean canExecuteByLimit() {
-        return true;
-    }
-
-    @Override
-    public String createExecuteByLimitErrorMessage() {
-        return "";
-    }
 }
