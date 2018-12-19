@@ -330,7 +330,9 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         AsyncTaskType taskType = AsyncTaskType.IMPORT_DEPARTMENT_CONFIGS;
         TAUser user = userInfo.getUser();
 
+        // Извлечение id подразделения из названия файла и валидация названия файла
         int fileNameDepartmentId = parseDepartmentIdFromFileName(action.getFileName());
+        // Валидация id подразделения
         Department fileNameDepartment;
         if (!departmentService.existDepartment(fileNameDepartmentId) ||
                 (fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId)).getType() != DepartmentType.TERR_BANK) {

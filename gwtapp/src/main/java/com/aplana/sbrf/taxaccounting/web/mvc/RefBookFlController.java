@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
@@ -58,7 +59,7 @@ public class RefBookFlController {
      */
     @GetMapping(value = "/rest/refBookFL", params = "projection=common")
     public JqgridPagedList<RegistryPersonDTO> fetchRefBookRecords(@RequestParam(required = false) RefBookPersonFilter filter,
-                                                              @RequestParam(required = false) PagingParams pagingParams) {
+                                                                  @RequestParam(required = false) PagingParams pagingParams) {
         PagingResult<RegistryPersonDTO> records = personService.getPersonsData(pagingParams, filter);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
@@ -72,7 +73,7 @@ public class RefBookFlController {
      */
     @GetMapping(value = "/rest/refBookFL", params = "projection=originalAndDuplicates")
     public JqgridPagedList<RegistryPersonDTO> fetchOriginalDuplicatesCandidates(@RequestParam(required = false) RefBookPersonFilter filter,
-                                                                            @RequestParam(required = false) PagingParams pagingParams) {
+                                                                                @RequestParam(required = false) PagingParams pagingParams) {
         TAUser currentUser = securityService.currentUserInfo().getUser();
         PagingResult<RegistryPersonDTO> records = personService.fetchOriginalDuplicatesCandidates(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
@@ -102,7 +103,13 @@ public class RefBookFlController {
      */
     @PostMapping(value = "/actions/registryPerson/updatePerson")
     public ResponseEntity updateRegistryPerson(@RequestBody RegistryPersonDTO person) {
-        personService.updateRegistryPerson(person);
+        try {
+            personService.updateRegistryPerson(person);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new ServiceException("Редактирование карточки физического лица не может быть выполнено. Причина: " + e.getMessage());
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

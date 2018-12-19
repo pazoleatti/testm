@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
@@ -143,6 +144,8 @@ public class DepartmentConfigController {
     public ImportDepartmentConfigsResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
                                                      @RequestParam ImportDepartmentConfigsAction action)
             throws IOException {
+        if (file.isEmpty()) throw new ServiceException("Загружаемый файл пуст. Загружать в Систему пустые файлы настроек подразделений запрещено.");
+
         TAUserInfo userInfo = securityService.currentUserInfo();
         try (InputStream inputStream = file.getInputStream()) {
             action.setInputStream(inputStream);
