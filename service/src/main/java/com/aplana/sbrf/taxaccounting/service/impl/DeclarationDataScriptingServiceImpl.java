@@ -17,7 +17,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
-import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -158,18 +157,14 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private boolean executeScript(Bindings bindings, String script, Logger logger) {
 		try {
             getScriptEngine().eval(script, bindings);
-			Exception catchedException = (Exception) bindings.get("exceptionThrown");
-			if (catchedException != null) {
-				throw new ServiceException("%s", catchedException.toString());
-			}
             return true;
-        } catch (ScriptException e) {
+        } catch (Exception e) {
             int i = ExceptionUtils.indexOfThrowable(e, ScriptServiceException.class);
             if (i != -1) {
                 throw (ScriptServiceException)ExceptionUtils.getThrowableList(e).get(i);
             }
 			logScriptException(e, logger);
-			return false;
+			throw new ServiceException("%s", e.toString());
 		}
 	}
 }

@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -25,6 +26,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -72,6 +74,10 @@ public class DeclarationDataServiceImplTest {
     RefBookFactory refBookFactory;
     @Autowired
     TransactionHelper transactionHelper;
+    @Autowired
+    LockDataService lockDataService;
+    @Autowired
+    BasePermissionEvaluator basePermissionEvaluator;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -464,7 +470,6 @@ public class DeclarationDataServiceImplTest {
 
     @Test
     public void testCancel() {
-        Logger logger = mock(Logger.class);
         long declarationDataId = 1L;
         String note = "note";
         TAUserInfo userInfo = mock(TAUserInfo.class);
@@ -491,9 +496,11 @@ public class DeclarationDataServiceImplTest {
 
 
         when(declarationDataDao.get(declarationDataId)).thenReturn(declarationData);
+        when(declarationDataDao.get(anyListOf(Long.class))).thenReturn(Collections.singletonList(declarationData));
 
         when(declarationData.getDeclarationTemplateId()).thenReturn(100);
         when(declarationTemplateService.get(100)).thenReturn(declarationTemplate);
+        when(declarationData.getId()).thenReturn(declarationDataId);
 
         when(declarationTemplate.getType()).thenReturn(type);
         when(type.getName()).thenReturn("declarationTypeName");
@@ -511,8 +518,9 @@ public class DeclarationDataServiceImplTest {
         when(department.getName()).thenReturn("departmentName");
         when(provider.getRecordData(anyLong())).thenReturn(asnu);
         when(asnu.get("NAME")).thenReturn(name);
+        when(basePermissionEvaluator.hasPermission(any(Authentication.class), any(Serializable.class), anyString(), any(Object.class))).thenReturn(true);
 
-        declarationDataService.cancel(logger, declarationDataId, note, userInfo);
+        declarationDataService.cancelDeclarationList(Collections.singletonList(declarationDataId), note, userInfo);
 
         verify(declarationDataDao).setStatus(eq(declarationDataId), any(State.class));
 

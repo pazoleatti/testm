@@ -135,6 +135,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final String STANDARD_DECLARATION_DESCRIPTION = "налоговой формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"";
 
+    private static final String FAIL = "Не выполнена операция \"%s\" для %s.";
+
     static {
         CALENDAR.clear();
         CALENDAR.set(9999, Calendar.DECEMBER, 31);
@@ -830,14 +832,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         }
                     } else {
                         if (logger.getEntries().size() != 0) {
-                            Notification notification = new Notification();
-                            notification.setUserId(userService.getCurrentUser().getId());
-                            notification.setCreateDate(new Date());
-                            notification.setText(logger.getEntries().get(logger.getEntries().size() - 1).getMessage());
-                            notification.setLogId(logEntryService.save(Collections.singletonList(logger.getEntries().get(logger.getEntries().size() - 1))));
-                            notification.setReportId(null);
-                            notification.setNotificationType(NotificationType.DEFAULT);
-                            notificationService.create(Collections.singletonList(notification));
+                            makeNotificationForAccessDenied(logger);
                         }
                     }
                 } catch (Exception e) {
@@ -945,14 +940,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final ActionResult result = new ActionResult();
         Logger logger = new Logger();
         for (final Long declarationDataId : declarationDataIds) {
-            if (existDeclarationData(declarationDataId)) {
-                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                Map<String, Object> params = new HashMap<>();
-                params.put("declarationDataId", declarationDataId);
-                asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
-            } else {
-                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
+            try {
+                if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                        new TargetIdAndLogger(declarationDataId, logger),
+                        "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.CHECK)) {
+                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("declarationDataId", declarationDataId);
+                    asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
+                } else {
+                    makeNotificationForAccessDenied(logger);
+                }
+            } catch (Throwable e) {
+                makeNotificationForUnexpected(e, logger, "Проверка формы", declarationDataId);
+                LOG.error(e.getMessage(), e);
             }
+
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
@@ -1397,7 +1400,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 }
                 logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), description);
-                                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
             }
         } else {
             makeNotificationForAccessDenied(logger);
@@ -1536,73 +1539,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final ActionResult result = new ActionResult();
         Logger logger = new Logger();
         for (final Long declarationDataId : declarationDataIds) {
-            if (existDeclarationData(declarationDataId)) {
-                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                Map<String, Object> params = new HashMap<>();
-                params.put("declarationDataId", declarationDataId);
-                asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
-            } else {
-                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
+            try {
+                if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                        new TargetIdAndLogger(declarationDataId, logger),
+                        "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.ACCEPTED)) {
+                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("declarationDataId", declarationDataId);
+                    asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
+                } else {
+                    makeNotificationForAccessDenied(logger);
+                }
+            } catch (Throwable e) {
+                makeNotificationForUnexpected(e, logger, "Принятие формы", declarationDataId);
+                LOG.error(e.getMessage(), e);
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
-    }
-
-    @Override
-    @Transactional
-    public void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo) {
-        LOG.info(String.format("DeclarationDataServiceImpl.cancel by %s. id: %s; note: %s",
-                userInfo, declarationDataId, note));
-        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
-        ReportPeriodType reportPeriodType = reportPeriodService.getPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
-        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-        Map<String, RefBookValue> asnu = provider.getRecordData(declarationData.getAsnuId());
-        String asnuClause = declarationTemplate.getType().getId() == DeclarationType.NDFL_PRIMARY ? String.format(", АСНУ: \"%s\"", asnu.get("NAME").getStringValue()) : "";
-        try {
-            Map<String, Object> exchangeParams = new HashMap<>();
-            moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-            }
-
-            declarationData.setState(State.CREATED);
-
-            logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
-            auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
-
-            declarationDataDao.setStatus(declarationDataId, declarationData.getState());
-
-            String message = String.format("Выполнена операция \"Возврат в Создана\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
-                    declarationDataId,
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    reportPeriodType.getName(),
-                    formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
-                    department.getName(),
-                    declarationTemplate.getType().getName(),
-                    asnuClause);
-
-            logger.info(message);
-            sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-            logger.clear();
-        } catch (Exception e) {
-            logger.error(e);
-            String message = String.format("Ошибка выполнения операции \"Возврат в Создана\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
-                    declarationDataId,
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    reportPeriodType.getName(),
-                    departmentReportPeriod.getCorrectionDate() != null ? sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "",
-                    department.getName(),
-                    declarationTemplate.getType().getName(),
-                    asnuClause);
-            logger.error(message);
-            sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-        } finally {
-            lockDataService.unlock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
-        }
     }
 
     private String formatCorrectionDate(Date correctionDate) {
@@ -1615,7 +1569,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
     @Override
-    @Transactional
+    @Transactional (noRollbackFor = {Throwable.class})
     public void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
@@ -1624,19 +1578,60 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         for (Long declarationId : sortedDeclarationIds) {
             final Logger logger = new Logger();
-            if (existDeclarationData(declarationId)) {
-                String declarationFullName = getDeclarationFullName(declarationId, DeclarationDataReportType.TO_CREATE_DEC);
-                LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId(), declarationFullName);
-                if (lockData == null) {
-                    cancel(logger, declarationId, note, userInfo);
+            try {
+                if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                        new TargetIdAndLogger(declarationId, logger),
+                        "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.RETURN_TO_CREATED)) {
+                    String declarationFullName = getDeclarationFullName(declarationId, DeclarationDataReportType.TO_CREATE_DEC);
+                    LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId(), declarationFullName);
+                    if (lockData == null) {
+                        LOG.info(String.format("DeclarationDataServiceImpl.cancel by %s. id: %s; note: %s",
+                                userInfo, declarationId, note));
+                        DeclarationData declarationData = declarationDataDao.get(declarationId);
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+                        ReportPeriodType reportPeriodType = reportPeriodService.getPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
+                        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+                        Map<String, RefBookValue> asnu = provider.getRecordData(declarationData.getAsnuId());
+                        String asnuClause = declarationTemplate.getType().getId() == DeclarationType.NDFL_PRIMARY ? String.format(", АСНУ: \"%s\"", asnu.get("NAME").getStringValue()) : "";
+                        Map<String, Object> exchangeParams = new HashMap<>();
+                        moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
+
+                        declarationData.setState(State.CREATED);
+                        declarationDataDao.setStatus(declarationId, declarationData.getState());
+
+                        logBusinessService.add(null, declarationId, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
+                        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
+
+                        String message = String.format("Выполнена операция \"Возврат в Создана\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+                                declarationId,
+                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                                reportPeriodType.getName(),
+                                formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                                department.getName(),
+                                declarationTemplate.getType().getName(),
+                                asnuClause);
+
+                        logger.info(message);
+                        sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                        logger.clear();
+                    } else {
+                        DeclarationData declaration = get(declarationId, userInfo);
+                        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+                        logger.error("Форма \"%s\" из \"%s\" заблокирована", declarationTemplate.getType().getName(), department.getName());
+                    }
                 } else {
-                    DeclarationData declaration = get(declarationId, userInfo);
-                    Department department = departmentService.getDepartment(declaration.getDepartmentId());
-                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-                    logger.error("Форма \"%s\" из \"%s\" заблокирована", declarationTemplate.getType().getName(), department.getName());
+                    makeNotificationForAccessDenied(logger);
                 }
-            } else {
-                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
+            } catch (Throwable e) {
+                String errorMessage = String.format(FAIL, "Возврат в Создана", getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString()));
+                logger.error(errorMessage);
+                sendNotification(errorMessage, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                LOG.error(e.getMessage(), e);
+            } finally {
+                lockDataService.unlock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
             }
         }
     }
@@ -3617,5 +3612,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             notification.setNotificationType(NotificationType.DEFAULT);
             notificationService.create(Collections.singletonList(notification));
         }
+    }
+
+    private void makeNotificationForUnexpected(Throwable e, Logger logger, String operationName, Long declarationId) {
+        Notification notification = new Notification();
+        notification.setUserId(userService.getCurrentUser().getId());
+        notification.setCreateDate(new Date());
+        notification.setText(String.format(FAIL, operationName, getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString())));
+        notification.setLogId(logEntryService.save(Collections.singletonList(logger.getEntries().get(logger.getEntries().size() - 1))));
+        notification.setReportId(null);
+        notification.setNotificationType(NotificationType.DEFAULT);
+        notificationService.create(Collections.singletonList(notification));
     }
 }

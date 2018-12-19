@@ -355,16 +355,6 @@ public interface DeclarationDataService {
                              String xsdBlobDataId);
 
     /**
-     * Отмена принятия декларации
-     *
-     * @param logger            объект журнала
-     * @param declarationDataId идентификатор декларации
-     * @param note              причина возврата
-     * @param userInfo          информация о пользователе, выполняющего действие     *
-     */
-    void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo);
-
-    /**
      * Отмена принятия списка налоговых форм
      *
      * @param declarationDataIds идентификаторы налоговых форм

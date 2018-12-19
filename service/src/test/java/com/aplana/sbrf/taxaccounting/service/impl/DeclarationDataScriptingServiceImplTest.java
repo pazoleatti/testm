@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -133,7 +134,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		assertFalse(logger.containsLevel(LogLevel.ERROR));
 	}
 	
-	@Test
+	@Test (expected = RuntimeException.class)
 	public void executeScriptError() {
 		Logger logger = new Logger();
 		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, State.CREATED, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
@@ -143,11 +144,10 @@ public class DeclarationDataScriptingServiceImplTest {
 		StringWriter writer = new StringWriter();
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
-		assertTrue(service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams));
-        assertTrue(logger.containsLevel(LogLevel.ERROR));
+		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 	}
 
-    @Test
+    @Test (expected = ServiceException.class)
     public void checkScript1() throws IOException {
         Logger logger = new Logger();
 
@@ -160,8 +160,6 @@ public class DeclarationDataScriptingServiceImplTest {
         template.setCreateScript(script);
 
         service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
-
-        assertTrue(logger.containsLevel(LogLevel.ERROR));
     }
 
     @Test

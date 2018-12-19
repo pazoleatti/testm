@@ -118,11 +118,4 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
         String str = StringUtils.join(messages.toArray(), ", ", null);
         return str.isEmpty() ? "" : (", " + str);
     }
-
-    @Override
-    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        long declarationDataId = (Long) params.get("declarationDataId");
-        return String.format(getAsyncTaskType().getDescription(),
-                declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
-    }
 }

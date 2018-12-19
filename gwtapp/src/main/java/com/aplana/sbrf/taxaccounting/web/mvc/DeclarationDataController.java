@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
@@ -348,18 +347,6 @@ public class DeclarationDataController {
     public CreateResult<Long> createDeclaration(CreateDeclarationDataAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.create(userInfo, action);
-    }
-
-    /**
-     * Вернуть в создана
-     *
-     * @param declarationDataId идентификатор декларации
-     */
-    @PostMapping(value = "/rest/declarationData/{declarationDataId}/moveToCreated")
-    public ResponseEntity returnToCreatedDeclaration(@PathVariable int declarationDataId, @RequestBody MoveToCreateAction action) {
-        Logger logger = new Logger();
-        declarationService.cancel(logger, declarationDataId, action.getReason(), securityService.currentUserInfo());
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

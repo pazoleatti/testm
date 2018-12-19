@@ -19,7 +19,6 @@ import java.util.Map;
 public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     private static final String SUCCESS = "Успешно выполнено принятие налоговой формы: %s";
-    private static final String FAIL = "Не удалось принять налоговую форму: %s. Найдены фатальные ошибки.";
 
     @Autowired
     private TAUserService userService;
@@ -38,6 +37,7 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
+        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getStandardDeclarationDescription(declarationDataId));
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
@@ -55,7 +55,12 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
-        return getMessage(taskData, false);
+        String message = getMessage(taskData, false);
+        Exception e = (Exception) taskData.getParams().get("exceptionThrown");
+        if (e != null) {
+            message = message + String.format(CAUSE, e.toString());
+        }
+        return message;
     }
 
     @Override
@@ -64,9 +69,12 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     private String getMessage(AsyncTaskData taskData, boolean isSuccess) {
-        String template = isSuccess ? SUCCESS : FAIL;
-        return String.format(template,
-                getDeclarationDescription(taskData.getUserId(), taskData.getParams()));
+        String standardDeclarationDescription = (String) taskData.getParams().get("standardDeclarationDescription");
+        if (isSuccess) {
+            return String.format(SUCCESS, standardDeclarationDescription);
+        } else {
+            return String.format(FAIL, "Принятие", standardDeclarationDescription);
+        }
     }
 
     @Override

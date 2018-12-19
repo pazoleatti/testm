@@ -400,12 +400,14 @@
                         }
                     }).result.then(
                         function (reason) {
-                            moveToCreatedDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/returnToCreated",
+                                data: [$stateParams.declarationDataId],
+                                params: {
                                     reason: reason
-                                }, function (response) {
-                                    $scope.updateDeclarationInfo();
                                 }
-                            );
+                            });
                         });
                 };
 

@@ -39,7 +39,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     private static final String KIND_ERROR = "операция \"%s\" не допустима для форм типа %s";
     private static final String ACTIVE_ERROR = "период формы закрыт";
     private static final String STATE_ERROR = "операция \"%s\" не допустима для форм в состоянии \"%s\"";
-    private static final String CREDENTIAL_ERROR = "недостаточно прав (обратитесь к администратору)";
+    private static final String ROLE_ERROR = "недостаточно прав (обратитесь к администратору)";
 
     /**
      * Право на создание декларации вручную
@@ -264,29 +264,34 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final class CheckPermission extends DeclarationDataPermission {
 
+        private final static String OPERATION_NAME = "Проверка формы";
+
         public CheckPermission(long mask) {
             super(mask);
         }
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
                 if (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
-                        if (departmentReportPeriod.isActive()) {
-                            DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
-                            if (declarationKind == DeclarationFormKind.PRIMARY &&
-                                    targetDomainObject.isManuallyCreated() &&
-                                    targetDomainObject.getLastDataModifiedDate() == null) {
-                                return false;
-                            }
-                            return true;
+                        DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+                        if (declarationKind == DeclarationFormKind.PRIMARY &&
+                                targetDomainObject.isManuallyCreated() &&
+                                targetDomainObject.getLastDataModifiedDate() == null) {
+                            return false;
                         }
+                        return true;
+                    } else {
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                     }
+                } else {
+                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                 }
+            } else {
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
             }
-
             return false;
         }
     }
@@ -295,6 +300,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      * Право на принятие декларации
      */
     public static final class AcceptedPermission extends DeclarationDataPermission {
+
+        private final static String OPERATION_NAME = "Принятие формы";
 
         public AcceptedPermission(long mask) {
             super(mask);
@@ -309,11 +316,18 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     if (targetDomainObject.getState() == State.PREPARED) {
                         if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
                             return true;
+                        } else {
+                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                         }
+                    } else {
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                     }
+                } else {
+                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                 }
+            } else {
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ACTIVE_ERROR, logger);
             }
-
             return false;
         }
     }
@@ -339,11 +353,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             return true;
                         }
                     } else {
-                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, CREDENTIAL_ERROR, logger);
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                         return false;
                     }
                 } else {
-                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, CREDENTIAL_ERROR, logger);
+                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                     return false;
                 }
             } else {
@@ -358,6 +372,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      * Право на возврат декларации в статус "Создана"
      */
     public static final class ReturnToCreatedPermission extends DeclarationDataPermission {
+
+        private final static String OPERATION_NAME = "Возврат в Создана";
 
         public ReturnToCreatedPermission(long mask) {
             super(mask);
@@ -377,12 +393,21 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     if (targetDomainObject.getState() == State.PREPARED || targetDomainObject.getState() == State.ACCEPTED) {
 
                         // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)"
-                        return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
+                            return true;
+                        } else {
+                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                        }
+                    } else {
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, STATE_ERROR, logger);
                     }
+                } else {
+                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                 }
+            } else {
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ACTIVE_ERROR, logger);
             }
-
-            return false;
+            return  false;
         }
     }
 
@@ -484,7 +509,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
 
             if (!canView || !hasRoles) {
-                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, CREDENTIAL_ERROR, logger);
+                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                 return false;
             }
 

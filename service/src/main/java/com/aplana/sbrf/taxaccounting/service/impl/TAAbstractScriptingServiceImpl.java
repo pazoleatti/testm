@@ -256,15 +256,8 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
             config.setSourceEncoding("UTF-8");
             GroovyShell groovyShell = new GroovyShell(binding, config);
             groovyShell.evaluate(scriptFile);
-            Exception catchedException = null;
-            if (binding.hasVariable("exceptionThrown")) {
-                catchedException = (Exception) binding.getVariable("exceptionThrown");
-            }
-            if (catchedException != null) {
-                throw new ServiceException("%s", catchedException.toString());
-            }
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             logScriptException(e, logger);
             throw new ServiceException("%s", e.toString());
         }
