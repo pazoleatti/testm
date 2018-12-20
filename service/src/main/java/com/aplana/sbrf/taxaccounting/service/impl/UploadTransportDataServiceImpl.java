@@ -180,7 +180,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             RefBook refBook = commonRefBookService.get(refBookId);
 
             String refBookLockKey = commonRefBookService.generateTaskKey(refBookId);
-            LockData refBookLockData = lockDataService.getLock(refBookLockKey);
+            LockData refBookLockData = lockDataService.findLock(refBookLockKey);
             if (refBookLockData != null && refBookLockData.getUserId() != user.getId()) {
                 logger.error(commonRefBookService.getRefBookLockDescription(refBookLockData, refBook.getId()));
                 logger.error("Загрузка файла \"%s\" не может быть выполнена.", fileName);

@@ -246,7 +246,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo) {
         if (declarationTemplateId != null) {
-            LockData objectLock = lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
+            LockData objectLock = lockDataService.findLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
             if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
                 throw new AccessDeniedException("Шаблон налоговой формы заблокирован другим пользователем");
             }
@@ -259,7 +259,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData execute() {
-                return lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
+                return lockDataService.findLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
             }
         });
     }

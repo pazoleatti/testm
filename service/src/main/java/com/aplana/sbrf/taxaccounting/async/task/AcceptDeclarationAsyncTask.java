@@ -78,29 +78,29 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
-    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
         return String.format(getAsyncTaskType().getDescription(),
                 declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
     }
 
     @Override
-    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
-        return lockDataService.lock(lockKey, user.getUser().getId(), getDescription(user, params));
+    public LockData establishLock(String lockKey, TAUserInfo user, Map<String, Object> params) {
+        return lockDataService.lock(lockKey, user.getUser().getId(), createDescription(user, params));
     }
 
     @Override
-    public boolean checkLocks(Map<String, Object> params, Logger logger) {
+    public boolean prohibitiveLockExists(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long) params.get("declarationDataId");
         String acceptKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC);
         String checkKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CHECK_DEC);
 
         if (lockDataService.isLockExists(checkKey, false)) {
-            logger.error(getLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), checkKey));
+            logger.error(createLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), checkKey));
             return true;
         }
         if (lockDataService.isLockExists(acceptKey, false)) {
-            logger.error(getLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), acceptKey));
+            logger.error(createLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), acceptKey));
             return true;
         }
 

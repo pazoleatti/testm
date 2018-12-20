@@ -103,7 +103,7 @@ public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long refBookId = (Long) params.get("refBookId");
         String specificReportType = (String) params.get("specificReportType");
         String filter = (String) params.get("filter");
@@ -113,12 +113,12 @@ public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+    public LockData establishLock(String lockKey, TAUserInfo user, Map<String, Object> params) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public boolean checkLocks(Map<String, Object> params, Logger logger) {
+    public boolean prohibitiveLockExists(Map<String, Object> params, Logger logger) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 }

@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Assert;
@@ -136,7 +134,7 @@ public class ScriptExecutionServiceTest {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(11);
         LockData lockData = new LockData();
         lockData.setUserId(1);
-        when(lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplate.getId())).thenReturn(lockData);
+        when(lockDataService.findLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplate.getId())).thenReturn(lockData);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(2, logger.getEntries().size());
@@ -157,7 +155,7 @@ public class ScriptExecutionServiceTest {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(11);
         LockData lockData = new LockData();
         lockData.setUserId(10);
-        when(lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplate.getId())).thenReturn(lockData);
+        when(lockDataService.findLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplate.getId())).thenReturn(lockData);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(2, logger.getEntries().size());
@@ -175,7 +173,7 @@ public class ScriptExecutionServiceTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(new TAUser(){{setId(1);}});
 
-        when(lockDataService.getLock(anyString())).thenReturn(null);
+        when(lockDataService.findLock(anyString())).thenReturn(null);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(3, logger.getEntries().size());
@@ -194,7 +192,7 @@ public class ScriptExecutionServiceTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(new TAUser(){{setId(1);}});
 
-        when(lockDataService.getLock(anyString())).thenReturn(null);
+        when(lockDataService.findLock(anyString())).thenReturn(null);
         when(declarationTemplateService.get(anyInt(), anyInt())).thenReturn(null);
         when(refBookDao.isRefBookExist(anyLong())).thenReturn(false);
 
@@ -215,7 +213,7 @@ public class ScriptExecutionServiceTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(new TAUser(){{setId(1);}});
 
-        when(lockDataService.getLock(anyString())).thenReturn(null);
+        when(lockDataService.findLock(anyString())).thenReturn(null);
         when(declarationTemplateService.get(anyInt(), anyInt())).thenReturn(null);
         when(refBookDao.isRefBookExist(anyLong())).thenReturn(false);
 
@@ -236,7 +234,7 @@ public class ScriptExecutionServiceTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(new TAUser(){{setId(1);}});
 
-        when(lockDataService.getLock(anyString())).thenReturn(null);
+        when(lockDataService.findLock(anyString())).thenReturn(null);
         when(declarationTemplateService.get(anyInt(), anyInt())).thenReturn(null);
         when(refBookDao.isRefBookExist(anyLong())).thenReturn(false);
 

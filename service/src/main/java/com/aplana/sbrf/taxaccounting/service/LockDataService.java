@@ -74,7 +74,7 @@ public interface LockDataService {
      * @param key ключ блокировки
      * @return данные блокировки. Если блокировки не существует - возвращается null
      */
-    LockData getLock(String key);
+    LockData findLock(String key);
 
     /**
      * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.

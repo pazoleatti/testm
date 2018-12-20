@@ -57,17 +57,17 @@ public class ImportExcelDepartmentConfigsAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
         return "Загрузка файла настроек подразделений \"" + params.get("fileName") + "\".";
     }
 
     @Override
-    public LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params) {
+    public LockData establishLock(String lockKey, TAUserInfo user, Map<String, Object> params) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public boolean checkLocks(Map<String, Object> params, Logger logger) {
+    public boolean prohibitiveLockExists(Map<String, Object> params, Logger logger) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 }

@@ -428,7 +428,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         ActionResult result = new ActionResult();
         RefBook refBook = get(refBookId);
 
-        LockData lockData = lockDataService.getLock(generateTaskKey(refBook.getId()));
+        LockData lockData = lockDataService.findLock(generateTaskKey(refBook.getId()));
         if (lockData == null) {
             RefBookAttribute sortAttribute;
             String direction = "asc";

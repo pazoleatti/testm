@@ -54,7 +54,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractDeclarationAsyncTask
     }
 
     @Override
-    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
         return String.format(getAsyncTaskType().getDescription(),
                 declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));

@@ -593,7 +593,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else {
             Logger logger = new Logger();
             String keyTask = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CONSOLIDATE);
-            LockData lockData = lockDataService.getLock(keyTask);
+            LockData lockData = lockDataService.findLock(keyTask);
             try {
                 if (lockData == null) {
                     Map<String, Object> params = new HashMap<String, Object>();
@@ -732,7 +732,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         new TargetIdAndLogger(declarationDataId, logger),
                         "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.CONSOLIDATE)) {
                     String keyTask = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CONSOLIDATE);
-                    LockData lockData = lockDataService.getLock(keyTask);
+                    LockData lockData = lockDataService.findLock(keyTask);
                     if (lockData == null) {
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("declarationDataId", declarationDataId);
@@ -854,7 +854,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DeclarationData declarationData = get(declarationDataId, taUserInfo);
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
             Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, null));
+            LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, null));
             TAUser taUser = userService.getUser(lock.getUserId());
             logger.error("Форма №: %d, Период: \"%s, %s %s\", Подразделение: \"%s\" заблокирована пользователем %s (%s)",
                     declarationDataId,
@@ -1371,9 +1371,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 new TargetIdAndLogger(id, logger),
                 "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.DELETE)) {
             logger = new Logger();
-            LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
-            LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
-            LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
+            LockData lockData = lockDataService.findLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
+            LockData lockDataAccept = lockDataService.findLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
+            LockData lockDataCheck = lockDataService.findLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
             if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
                 final String lockKey = generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC);
                 Map<String, Object> params = new HashMap<>();
@@ -1415,9 +1415,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void deleteSync(long id, TAUserInfo userInfo, boolean createLock) {
         LOG.info(String.format("DeclarationDataServiceImpl.deleteSync by %s. id: %s",
                 userInfo, id));
-        LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
-        LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
-        LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
+        LockData lockData = lockDataService.findLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
+        LockData lockDataAccept = lockDataService.findLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
+        LockData lockDataCheck = lockDataService.findLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
         LockData lockDataDelete = null;
         if (lockData == null && lockDataAccept == null && lockDataCheck == null && createLock) {
             lockDataDelete = lockDataService.lock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId(),
@@ -2300,7 +2300,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private LockData getLock(long declarationDataId) {
-        return lockDataService.getLock(generateAsyncTaskKey(declarationDataId, null));
+        return lockDataService.findLock(generateAsyncTaskKey(declarationDataId, null));
     }
 
     @Override
@@ -2377,7 +2377,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private boolean checkExistTasks(long declarationDataId, DeclarationDataReportType ddReportType, Logger logger) {
-        LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+        LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
         if (lock != null) {
             AsyncTaskData taskData = asyncTaskDao.findByIdLight(lock.getTaskId());
             if (taskData != null) {
@@ -2418,7 +2418,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 taskKeyList.add(generateAsyncTaskKey(declarationDataId, ddReportType));
             }
             for (String key : taskKeyList) {
-                LockData lock = lockDataService.getLock(key);
+                LockData lock = lockDataService.findLock(key);
                 if (lock != null) {
                     asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
                 }
@@ -2824,7 +2824,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId) {
         Map<DeclarationDataReportType, LockData> result = new HashMap<DeclarationDataReportType, LockData>();
         for (DeclarationDataReportType reportType : reportTypes) {
-            LockData lockData = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
+            LockData lockData = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, reportType));
             if (lockData != null) {
                 result.put(reportType, lockData);
             }
@@ -3455,13 +3455,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
                 for (DeclarationSubreport subreport : subreports) {
                     ddReportType.setSubreport(subreport);
-                    LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                    LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
                     if (lock != null) {
                         asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
                     }
                 }
             } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
-                LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
                 if (lock != null) {
                     asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
                 }
@@ -3489,7 +3489,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String createUpdatePersonsDataTask(Long declarationDataId, TAUserInfo userInfo) {
         Logger logger = new Logger();
         if (ndflPersonService.getNdflPersonCount(declarationDataId) > 0) {
-            LockData lockData = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, UPDATE_PERSONS_DATA));
+            LockData lockData = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, UPDATE_PERSONS_DATA));
             if (lockData == null) {
                 String keyTask = generateAsyncTaskKey(declarationDataId, UPDATE_PERSONS_DATA);
                 Map<String, Object> params = new HashMap<String, Object>();

@@ -94,7 +94,7 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public LockData getLock(String key) {
+    public LockData findLock(String key) {
         synchronized (LockDataServiceImpl.class) {
             return dao.get(key, false);
         }

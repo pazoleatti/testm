@@ -313,7 +313,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             if (lockData != null) {
                 return null;
             }
-            return lockDataService.getLock(deleteLockKey);
+            return lockDataService.findLock(deleteLockKey);
         }
         return null;
     }

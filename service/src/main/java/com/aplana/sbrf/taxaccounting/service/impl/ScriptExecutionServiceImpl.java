@@ -150,7 +150,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
      * @return если блокировка существует, то возвращается логин пользователя (тевущий пользователь не учитывается)
      */
     private String canImportScript(String lockKey, TAUser user) {
-        LockData lockData = lockDataService.getLock(lockKey);
+        LockData lockData = lockDataService.findLock(lockKey);
         if (lockData != null && lockData.getUserId() != user.getId()) {
             return userService.getUser(lockData.getUserId()).getLogin();
         }

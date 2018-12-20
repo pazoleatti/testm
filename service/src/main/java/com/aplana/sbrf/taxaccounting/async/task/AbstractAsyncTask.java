@@ -265,7 +265,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
 
     @Override
-    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params) throws AsyncTaskException {
+    public AsyncQueue defineTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params) throws AsyncTaskException {
         Logger logger = new Logger();
         AsyncQueue result = checkTaskLimit(taskDescription, userInfo, params, logger);
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -277,7 +277,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     }
 
     @Override
-    public String getLockExistErrorMessage(String objectName, String lockKey) {
+    public String createLockExistErrorMessage(String objectName, String lockKey) {
         AsyncTaskData asyncTaskData = asyncTaskDao.findAsyncTaskByLockKey(lockKey);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         TAUser user = userService.getUser(asyncTaskData.getUserId());

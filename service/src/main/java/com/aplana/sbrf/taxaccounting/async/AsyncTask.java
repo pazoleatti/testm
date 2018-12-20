@@ -32,7 +32,7 @@ public interface AsyncTask extends Task {
     void execute(AsyncTaskData taskData);
 
     /**
-     * Выполняет проверку возможности выполения задачи, если выполнение задачи возможно, то возвращает в какой очереди выполнять иначе выбрасывает исключение
+     * Определяет очередь размещения задачи: кратковременная или длительная.
      *
      * @param taskDescription описание задачи
      * @param user            пользователь, который выполняет задачу
@@ -40,7 +40,7 @@ public interface AsyncTask extends Task {
      * @return очередь, в которой будет выполнена задача
      * @throws AsyncTaskException в случае невозможности выполнения задачи
      */
-    AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params) throws AsyncTaskException;
+    AsyncQueue defineTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params) throws AsyncTaskException;
 
     /**
      * Возвращает описание задачи с указание конкретных объектов, над которыми она выполняется. Шаблон описания берется из {@link AsyncTaskType}
@@ -49,5 +49,5 @@ public interface AsyncTask extends Task {
      * @param params   произвольные параметры для выполнения задачи
      * @return описание задачи
      */
-    String getDescription(TAUserInfo userInfo, Map<String, Object> params);
+    String createDescription(TAUserInfo userInfo, Map<String, Object> params);
 }

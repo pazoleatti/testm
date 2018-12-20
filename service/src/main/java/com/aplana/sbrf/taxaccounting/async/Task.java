@@ -7,7 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import java.util.Map;
 
 /**
- * Интерфейс создаваемой задачи
+ * Интерфейс для действий с задачами.
+ * Здесь находятся методы которые могут быть общими как для асинхронных, так и для синхронных задач.
+ * Этот интерфейс создан как задел на будущее, когда будет готова постановка по работе с синхронными задачами. До указанного момента
+ * напрямую этот интерфейс классы не имплементят. И все же если он окажется ненужным от него легко будет избавиться, копипастнув объявленные методы
+ * в интерфейс который наследуется от этого.
+ *
  */
 public interface Task {
 
@@ -18,7 +23,7 @@ public interface Task {
      * @param user     пользователь, который инициировал операцию
      * @return null, если была установлена новая блокировка, иначе возвращается ранее установленная блокировка на этом объъекте
      */
-    LockData lockObject(String lockKey, TAUserInfo user, Map<String, Object> params);
+    LockData establishLock(String lockKey, TAUserInfo user, Map<String, Object> params);
 
     /**
      * Проверка существования блокировок, которые мешают постановке в очередь текущей задачи
@@ -26,11 +31,11 @@ public interface Task {
      * @param logger    логгер
      * @return true, если задачи существуют
      */
-    boolean checkLocks(Map<String, Object> params, Logger logger);
+    boolean prohibitiveLockExists(Map<String, Object> params, Logger logger);
 
     /**
-     * Получить сообщение об ошибке при существовании блокировок не дающих создать задачу
+     * Создать сообщение об ошибке при существовании блокировок не дающих создать задачу
      * @return  строка сообщения
      */
-    String getLockExistErrorMessage(String objectName, String lockKey);
+    String createLockExistErrorMessage(String objectName, String lockKey);
 }
