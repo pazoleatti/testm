@@ -66,6 +66,7 @@
     </changeSet>
 
     <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяется в changeSet 11, 12 -->
     <changeSet id="3.4-amandzyak-5" author="amandzyak">
         <sql>
 			alter table ndfl_person drop constraint ndfl_person_fk_person_id
@@ -73,6 +74,7 @@
     </changeSet>
 
     <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяется в changeSet 11, 12 -->
     <changeSet id="3.4-amandzyak-6" author="amandzyak">
         <sql>
 			alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_person (id) on delete cascade
@@ -80,6 +82,7 @@
     </changeSet>
 
     <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяется в changeSet 13, 14 -->
     <changeSet id="3.4-amandzyak-7" author="amandzyak">
         <sql>
 			alter table ndfl_references drop constraint fk_ndfl_refers_person
@@ -87,6 +90,7 @@
     </changeSet>
 
     <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяется в changeSet 13, 14 -->
     <changeSet id="3.4-amandzyak-8" author="amandzyak">
         <sql>
 			alter table ndfl_references add constraint fk_ndfl_refers_person foreign key (person_id) references ref_book_person (id) on delete cascade
@@ -164,5 +168,37 @@
 			alter table log_business modify event_id NUMBER(9,0);
 		</sql>
 	</changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяет changeSet 5, 6 -->
+    <changeSet id="3.4-amandzyak-11" author="amandzyak">
+        <sql>
+			alter table ndfl_person drop constraint ndfl_person_fk_person_id
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяет changeSet 5, 6 -->
+    <changeSet id="3.4-amandzyak-12" author="amandzyak">
+        <sql>
+			alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_person (id)
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяет changeSet 7, 8 -->
+    <changeSet id="3.4-amandzyak-13" author="amandzyak">
+        <sql>
+			alter table ndfl_references drop constraint fk_ndfl_refers_person
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6247 Каскадное удаление для записи ФЛ-->
+	<!-- В патч не включать, отменяет changeSet 7, 8 -->
+    <changeSet id="3.4-amandzyak-14" author="amandzyak">
+        <sql>
+			alter table ndfl_references add constraint fk_ndfl_refers_person foreign key (person_id) references ref_book_person (id)
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
