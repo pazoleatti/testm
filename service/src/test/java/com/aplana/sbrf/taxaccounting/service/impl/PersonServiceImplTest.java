@@ -5,7 +5,12 @@ import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -13,15 +18,29 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -47,6 +66,8 @@ public class PersonServiceImplTest {
     private PersonTbDaoImpl personTbDaoImpl;
     @Mock
     private DBUtils dbUtils;
+    @Mock
+    private LogBusinessService logBusinessService;
     @Captor
     ArgumentCaptor<List<IdDoc>> idDocs;
     @Captor
@@ -171,7 +192,7 @@ public class PersonServiceImplTest {
 
         //verify
         verify(personDao).saveBatch(personList);
-        verify(idDocDaoImpl).saveBatch(idDocs.capture());
+        verify(idDocDaoImpl).createBatch(idDocs.capture());
         verify(idTaxPayerDaoImpl).saveBatch(idTaxPayers.capture());
         verify(personTbDaoImpl).saveBatch(personTbs.capture());
         verify(personDao).updateBatch(personList);
@@ -364,6 +385,7 @@ public class PersonServiceImplTest {
     public void test_updateRegistryPerson() {
         RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
         IdDoc idDoc = mock(IdDoc.class);
+        when(personDao.fetchPersonVersion(anyLong())).thenReturn(new RegistryPerson());
         when(registryPersonDTO.getDocuments()).thenReturn(Permissive.of(Collections.singletonList(idDoc)));
         when(registryPersonDTO.getCitizenship()).thenReturn(Permissive.of(new RefBookCountry()));
         when(registryPersonDTO.getReportDoc()).thenReturn(Permissive.of(idDoc));
@@ -372,7 +394,7 @@ public class PersonServiceImplTest {
         when(registryPersonDTO.getSnils()).thenReturn(Permissive.of("3456789012"));
         when(registryPersonDTO.getTaxPayerState()).thenReturn(Permissive.of(new RefBookTaxpayerState()));
         when(registryPersonDTO.getAddress()).thenReturn(Permissive.of(new Address()));
-        personService.updateRegistryPerson(registryPersonDTO);
+        personService.updateRegistryPerson(registryPersonDTO, new TAUserInfo());
 
         verify(personDao).updateRegistryPerson(person.capture());
     }
@@ -417,7 +439,7 @@ public class PersonServiceImplTest {
         personService.checkVersionOverlapping(registryPersonDTO);
     }
 
-    @Test (expected = ServiceException.class)
+    @Test(expected = ServiceException.class)
     public void test_checkVersionOverlapping_overlapped() {
         RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
         Calendar startDate = new GregorianCalendar();
@@ -448,7 +470,7 @@ public class PersonServiceImplTest {
         personService.checkVersionOverlapping(registryPersonDTO);
     }
 
-    @Test (expected = ServiceException.class)
+    @Test(expected = ServiceException.class)
     public void test_checkVersionOverlapping_gaped() {
         RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
         Calendar startDate = new GregorianCalendar();

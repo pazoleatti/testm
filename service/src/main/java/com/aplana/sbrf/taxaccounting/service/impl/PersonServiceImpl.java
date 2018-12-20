@@ -7,22 +7,40 @@ import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.Permissive;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.Address;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -33,8 +51,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис работы Физическими лицами. Заменяет некоторые операции провайдера справочников для лучшей производительности
@@ -60,17 +84,11 @@ public class PersonServiceImpl implements PersonService {
     private PersonTbDaoImpl personTbDaoImpl;
     @Autowired
     private DBUtils dbUtils;
-
-
-    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
+    @Autowired
+    private LogBusinessService logBusinessService;
 
     @Override
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public PagingResult<RegistryPersonDTO> getPersonsData(PagingParams pagingParams, RefBookPersonFilter filter) {
         PagingResult<RegistryPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
         PagingResult<RegistryPersonDTO> result = convertPersonToDTO(persons, persons.getTotalCount());
@@ -123,7 +141,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public int getPersonsCount(RefBookPersonFilter filter) {
         return refBookPersonDao.getPersonsCount(filter);
     }
@@ -201,52 +219,59 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP')")
     @Transactional
-    public void updateRegistryPerson(RegistryPersonDTO person) {
-        checkVersionOverlapping(person);
-        final RegistryPerson persistedPerson = new RegistryPerson();
+    public void updateRegistryPerson(RegistryPersonDTO personDTO, TAUserInfo userInfo) {
+        checkVersionOverlapping(personDTO);
+        RegistryPerson persistedPerson = refBookPersonDao.fetchPersonVersion(personDTO.getId());
+        RegistryPerson personToPersist = new RegistryPerson();
+        personToPersist.setRecordId(personDTO.getRecordId());
+        PersonChangeLogBuilder changeLogBuilder = new PersonChangeLogBuilder();
 
+        List<IdDoc> persistedIdDocs = idDocDaoImpl.getByPerson(personToPersist);
         List<IdDoc> idDocsToCreate = new ArrayList<>();
         List<IdDoc> idDocsToUpdate = new ArrayList<>();
-        List<Long> idDocsToDelete = new ArrayList<>();
+        List<IdDoc> idDocsToDelete = new ArrayList<>(persistedIdDocs);
 
-        persistedPerson.setRecordId(person.getRecordId());
-
-        List<IdDoc> persistedIdDocs = idDocDaoImpl.getByPerson(persistedPerson);
-
-        for (IdDoc persistedIdDoc : persistedIdDocs) {
-            idDocsToDelete.add(persistedIdDoc.getId());
-        }
-
-        for (IdDoc idDoc : person.getDocuments().value()) {
+        for (IdDoc idDoc : personDTO.getDocuments().value()) {
             if (idDoc.getId() == null) {
                 idDocsToCreate.add(idDoc);
             } else {
-                idDocsToUpdate.add(idDoc);
-                idDocsToDelete.remove(idDoc.getId());
+                if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
+                    idDocsToUpdate.add(idDoc);
+                }
+                deleteById(idDocsToDelete, idDoc.getId());
             }
         }
 
         if (CollectionUtils.isNotEmpty(idDocsToCreate)) {
-            idDocDaoImpl.saveBatch(idDocsToCreate);
+            idDocDaoImpl.createBatch(idDocsToCreate);
+            for (IdDoc idDoc : idDocsToCreate) {
+                changeLogBuilder.dulCreated(idDoc);
+            }
         }
         if (CollectionUtils.isNotEmpty(idDocsToUpdate)) {
             idDocDaoImpl.updateBatch(idDocsToUpdate);
+            for (IdDoc idDoc : idDocsToUpdate) {
+                changeLogBuilder.dulUpdated(idDoc);
+            }
         }
         if (CollectionUtils.isNotEmpty(idDocsToDelete)) {
-            idDocDaoImpl.deleteByIds(idDocsToDelete);
+            idDocDaoImpl.deleteByIds(getIds(idDocsToDelete));
+            for (IdDoc idDoc : idDocsToDelete) {
+                changeLogBuilder.dulDeleted(idDoc);
+            }
         }
 
-        if (person.getOriginal() == null) {
-            persistedPerson.setRecordId(person.getOldId());
+        if (personDTO.getOriginal() == null) {
+            personToPersist.setRecordId(personDTO.getOldId());
         } else {
-            persistedPerson.setRecordId(person.getOriginal().getRecordId());
-            refBookPersonDao.setOriginal(person.getOriginal().getRecordId(), person.getRecordId());
+            personToPersist.setRecordId(personDTO.getOriginal().getRecordId());
+            refBookPersonDao.setOriginal(personDTO.getOriginal().getRecordId(), personDTO.getRecordId());
         }
 
         List<Long> deletedDuplicates = new ArrayList<>();
         List<Long> duplicates = new ArrayList<>();
-        if (person.getOriginal() == null && CollectionUtils.isNotEmpty(person.getDuplicates())) {
-            for (RegistryPersonDTO duplicate : person.getDuplicates()) {
+        if (personDTO.getOriginal() == null && CollectionUtils.isNotEmpty(personDTO.getDuplicates())) {
+            for (RegistryPersonDTO duplicate : personDTO.getDuplicates()) {
 
                 if (duplicate.getRecordId().equals(duplicate.getOldId())) {
                     deletedDuplicates.add(duplicate.getRecordId());
@@ -256,53 +281,58 @@ public class PersonServiceImpl implements PersonService {
             }
         }
         if (CollectionUtils.isNotEmpty(duplicates)) {
-            refBookPersonDao.setDuplicates(duplicates, person.getRecordId());
+            refBookPersonDao.setDuplicates(duplicates, personDTO.getRecordId());
         }
 
         if (CollectionUtils.isNotEmpty(deletedDuplicates)) {
             refBookPersonDao.deleteDuplicates(deletedDuplicates);
         }
 
-        persistedPerson.setId(person.getId());
-        persistedPerson.setOldId(person.getOldId());
-        persistedPerson.setStartDate(SimpleDateUtils.toStartOfDay(person.getStartDate()));
-        persistedPerson.setEndDate(SimpleDateUtils.toStartOfDay(person.getEndDate()));
-        persistedPerson.setLastName(person.getLastName());
-        persistedPerson.setFirstName(person.getFirstName());
-        persistedPerson.setMiddleName(person.getMiddleName());
-        persistedPerson.setBirthDate(SimpleDateUtils.toStartOfDay(person.getBirthDate()));
-        persistedPerson.setCitizenship(person.getCitizenship().value() != null ? person.getCitizenship().value() : new RefBookCountry());
-        persistedPerson.setSource(person.getSource() != null ? person.getSource() : new RefBookAsnu());
-        if (person.getReportDoc().value() != null) {
-            IdDoc idDoc = person.getReportDoc().value();
+        personToPersist.setId(personDTO.getId());
+        personToPersist.setOldId(personDTO.getOldId());
+        personToPersist.setStartDate(SimpleDateUtils.toStartOfDay(personDTO.getStartDate()));
+        personToPersist.setEndDate(SimpleDateUtils.toStartOfDay(personDTO.getEndDate()));
+        personToPersist.setLastName(personDTO.getLastName());
+        personToPersist.setFirstName(personDTO.getFirstName());
+        personToPersist.setMiddleName(personDTO.getMiddleName());
+        personToPersist.setBirthDate(SimpleDateUtils.toStartOfDay(personDTO.getBirthDate()));
+        // Тут и ниже устанавливаем пустые объекты вместо null, т.к. сохранение работает через BeanPropertySqlParameterSource
+        personToPersist.setCitizenship(personDTO.getCitizenship().value() != null ? personDTO.getCitizenship().value() : new RefBookCountry());
+        personToPersist.setSource(personDTO.getSource() != null ? personDTO.getSource() : new RefBookAsnu());
+        if (personDTO.getReportDoc().value() != null) {
+            IdDoc idDoc = personDTO.getReportDoc().value();
             if (idDoc.getId() == null) {
-                persistedIdDocs = idDocDaoImpl.getByPerson(persistedPerson);
+                persistedIdDocs = idDocDaoImpl.getByPerson(personToPersist);
             }
             for (IdDoc persistedIdDoc : persistedIdDocs) {
                 if (persistedIdDoc.getDocumentNumber().equals(idDoc.getDocumentNumber()) && persistedIdDoc.getDocType().getCode().equals(idDoc.getDocType().getCode())) {
                     idDoc.setId(persistedIdDoc.getId());
                 }
             }
-            persistedPerson.setReportDoc(idDoc);
+            personToPersist.setReportDoc(idDoc);
+        } else {
+            personToPersist.setReportDoc(new IdDoc());
         }
-        persistedPerson.setInn(person.getInn().value());
-        persistedPerson.setInnForeign(person.getInnForeign().value());
-        persistedPerson.setSnils(person.getSnils().value());
-        persistedPerson.setTaxPayerState(person.getTaxPayerState().value() != null ? person.getTaxPayerState().value() : new RefBookTaxpayerState());
-        persistedPerson.setVip(person.isVip());
-        persistedPerson.getAddress().setRegionCode(person.getAddress().value().getRegionCode());
-        persistedPerson.getAddress().setPostalCode(person.getAddress().value().getPostalCode());
-        persistedPerson.getAddress().setDistrict(person.getAddress().value().getDistrict());
-        persistedPerson.getAddress().setCity(person.getAddress().value().getCity());
-        persistedPerson.getAddress().setLocality(person.getAddress().value().getLocality());
-        persistedPerson.getAddress().setStreet(person.getAddress().value().getStreet());
-        persistedPerson.getAddress().setHouse(person.getAddress().value().getHouse());
-        persistedPerson.getAddress().setBuild(person.getAddress().value().getBuild());
-        persistedPerson.getAddress().setAppartment(person.getAddress().value().getAppartment());
-        persistedPerson.getAddress().setCountry(person.getAddress().value().getCountry() != null ? person.getAddress().value().getCountry() : new RefBookCountry());
-        persistedPerson.getAddress().setAddressIno(person.getAddress().value().getAddressIno());
+        personToPersist.setInn(personDTO.getInn().value());
+        personToPersist.setInnForeign(personDTO.getInnForeign().value());
+        personToPersist.setSnils(personDTO.getSnils().value());
+        personToPersist.setTaxPayerState(personDTO.getTaxPayerState().value() != null ? personDTO.getTaxPayerState().value() : new RefBookTaxpayerState());
+        personToPersist.setVip(personDTO.isVip());
+        personToPersist.getAddress().setRegionCode(personDTO.getAddress().value().getRegionCode());
+        personToPersist.getAddress().setPostalCode(personDTO.getAddress().value().getPostalCode());
+        personToPersist.getAddress().setDistrict(personDTO.getAddress().value().getDistrict());
+        personToPersist.getAddress().setCity(personDTO.getAddress().value().getCity());
+        personToPersist.getAddress().setLocality(personDTO.getAddress().value().getLocality());
+        personToPersist.getAddress().setStreet(personDTO.getAddress().value().getStreet());
+        personToPersist.getAddress().setHouse(personDTO.getAddress().value().getHouse());
+        personToPersist.getAddress().setBuild(personDTO.getAddress().value().getBuild());
+        personToPersist.getAddress().setAppartment(personDTO.getAddress().value().getAppartment());
+        personToPersist.getAddress().setCountry(personDTO.getAddress().value().getCountry() != null ? personDTO.getAddress().value().getCountry() : new RefBookCountry());
+        personToPersist.getAddress().setAddressIno(personDTO.getAddress().value().getAddressIno());
+        changeLogBuilder.personInfoUpdated(persistedPerson, personToPersist);
 
-        refBookPersonDao.updateRegistryPerson(persistedPerson);
+        refBookPersonDao.updateRegistryPerson(personToPersist);
+        logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, changeLogBuilder.build(), userInfo);
     }
 
     @Override
@@ -334,7 +364,7 @@ public class PersonServiceImpl implements PersonService {
         }
 
         refBookPersonDao.updateBatch(toSave);
-        idDocDaoImpl.saveBatch(idDocToSave);
+        idDocDaoImpl.createBatch(idDocToSave);
         idDocDaoImpl.updateBatch(idDocToUpdate);
         idTaxPayerDaoImpl.saveBatch(idTaxPayers);
         personTbDaoImpl.saveBatch(personTbs);
@@ -423,7 +453,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @PreAuthorize("hasPermission(#requestingUser, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_NSI)")
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public PagingResult<RegistryPersonDTO> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser) {
         if (filter == null) {
             return new PagingResult<>();
@@ -451,7 +481,7 @@ public class PersonServiceImpl implements PersonService {
             personTbs.addAll(person.getPersonTbList());
         }
         refBookPersonDao.saveBatch(personList);
-        idDocDaoImpl.saveBatch(idDocs);
+        idDocDaoImpl.createBatch(idDocs);
         idTaxPayerDaoImpl.saveBatch(idTaxPayers);
         personTbDaoImpl.saveBatch(personTbs);
 
@@ -461,7 +491,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId) {
         List<RegistryPerson> result = refBookPersonDao.findActualRefPersonsByDeclarationDataId(declarationDataId, new Date());
         for (RegistryPerson person : result) {
@@ -503,5 +533,32 @@ public class PersonServiceImpl implements PersonService {
             }
         }
         return null;
+    }
+
+    private <T extends Number, E extends IdentityObject<T>> List<T> getIds(Collection<E> objects) {
+        List<T> ids = new ArrayList<>();
+        for (E object : objects) {
+            ids.add(object.getId());
+        }
+        return ids;
+    }
+
+    private <T extends Number, E extends IdentityObject<T>> E findById(Collection<E> objects, T id) {
+        for (E object : objects) {
+            if (id.equals(object.getId())) {
+                return object;
+            }
+        }
+        return null;
+    }
+
+    private <T extends Number, E extends IdentityObject<T>> void deleteById(Collection<E> objects, T id) {
+        for (Iterator<E> iterator = objects.iterator(); iterator.hasNext(); ) {
+            E object = iterator.next();
+            if (id.equals(object.getId())) {
+                iterator.remove();
+                return;
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ public interface IdDocDao {
      * Сохранить группу ДУЛ
      * @param idDocs коллекция ДУЛ
      */
-    void saveBatch(final Collection<IdDoc> idDocs);
+    void createBatch(final Collection<IdDoc> idDocs);
 
     /**
      * Массовое обновление ДУЛ

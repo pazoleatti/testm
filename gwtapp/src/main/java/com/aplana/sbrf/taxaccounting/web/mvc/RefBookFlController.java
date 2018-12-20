@@ -104,7 +104,7 @@ public class RefBookFlController {
     @PostMapping(value = "/actions/registryPerson/updatePerson")
     public ResponseEntity updateRegistryPerson(@RequestBody RegistryPersonDTO person) {
         try {
-            personService.updateRegistryPerson(person);
+            personService.updateRegistryPerson(person, securityService.currentUserInfo());
         } catch (ServiceException e) {
             throw e;
         } catch (Throwable e) {

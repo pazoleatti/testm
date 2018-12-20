@@ -326,7 +326,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                 long id = declarationDataDao.create(newDeclaration);
 
-                logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
+                logBusinessService.logFormEvent(id, FormDataEvent.CREATE, null, userInfo);
                 if (writeAudit) {
                     auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
                 }
@@ -499,7 +499,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         }
 
-        logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
+        logBusinessService.logFormEvent(declarationData.getId(), FormDataEvent.SAVE, null, userInfo);
         auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
     }
 
@@ -533,7 +533,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         }
 
-        logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
+        logBusinessService.logFormEvent(declarationData.getId(), FormDataEvent.SAVE, null, userInfo);
         auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
         declarationDataDao.updateLastDataModified(declarationData.getId());
     }
@@ -560,7 +560,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (departmentReportPeriodService.fetchOne(dd.getDepartmentReportPeriodId()).isActive()) {
                 if (State.PREPARED.equals(dd.getState())) {
                     declarationDataDao.setStatus(id, State.CREATED);
-                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_PREPARED_TO_CREATED, null);
+                    logBusinessService.logFormEvent(id, FormDataEvent.MOVE_PREPARED_TO_CREATED, null, userInfo);
                 }
             }
         } else {
@@ -568,7 +568,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (State.CREATED.equals(dd.getState())) {
                     // Переводим в состояние подготовлено
                     declarationDataDao.setStatus(id, State.PREPARED);
-                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_PREPARED, null);
+                    logBusinessService.logFormEvent(id, FormDataEvent.MOVE_CREATED_TO_PREPARED, null, userInfo);
                 }
             }
             logger.info("Проверка завершена, ошибок не обнаружено");
@@ -1524,7 +1524,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         declarationData.setState(State.ACCEPTED);
 
-        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, null);
+        logBusinessService.logFormEvent(id, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, null, userInfo);
         auditService.add(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, userInfo, declarationData, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getTitle(), null);
 
         lockStateLogger.updateState(AsyncTaskState.FORM_STATUS_CHANGE);
@@ -1601,7 +1601,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         declarationData.setState(State.CREATED);
                         declarationDataDao.setStatus(declarationId, declarationData.getState());
 
-                        logBusinessService.add(null, declarationId, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
+                        logBusinessService.logFormEvent(declarationId, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note, userInfo);
                         auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
                         String message = String.format("Выполнена операция \"Возврат в Создана\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
@@ -3351,10 +3351,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 int ndflPersonCount = ndflPersonDao.getNdflPersonCount(declarationDataId);
                 if (ndflPersonCount == 0) {
                     auditService.add(FormDataEvent.IMPORT, userInfo, declarationData, note, null);
-                    logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.IMPORT, note);
+                    logBusinessService.logFormEvent(declarationDataId, FormDataEvent.IMPORT, note, userInfo);
                 } else {
                     auditService.add(FormDataEvent.DATA_MODIFYING, userInfo, declarationData, note, null);
-                    logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.DATA_MODIFYING, note);
+                    logBusinessService.logFormEvent(declarationDataId, FormDataEvent.DATA_MODIFYING, note, userInfo);
                 }
                 declarationDataDao.updateLastDataModified(declarationDataId);
             }

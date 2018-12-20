@@ -85,7 +85,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                 throw new ServiceException("Импорт данных не предусмотрен");
             }
 
-            logBusinessService.add(null, declarationId, userInfo, FormDataEvent.IMPORT_TRANSPORT_FILE, null);
+            logBusinessService.logFormEvent(declarationId, FormDataEvent.IMPORT_TRANSPORT_FILE, null, userInfo);
             String note = "Загрузка данных из файла \"" + xmlFileName + "\" в налоговую форму";
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, declaration, note, null);
         } finally {

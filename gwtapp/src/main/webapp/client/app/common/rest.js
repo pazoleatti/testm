@@ -487,5 +487,13 @@
                 }
             });
         }])
+        /**
+         * @description История изменений
+         */
+        .factory('LogBusinessResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/logBusiness/:objectId?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

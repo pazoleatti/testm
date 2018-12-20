@@ -559,22 +559,22 @@ create table log_business (
   user_login           varchar2(255)  not null,
   roles                varchar2(2000)  not null,
   declaration_data_id  number(9, 0),
-  form_data_id         number(9, 0),
-  note                 varchar2(510),
+  person_id            number(9, 0),
+  note                 varchar2(4000),
   user_department_name varchar2(4000) not null
 );
 comment on table log_business is 'Журнал событий налоговых форм';
 comment on column log_business.id is 'Код записи';
 comment on column log_business.log_date is 'Дата события';
-comment on column log_business.event_id is 'Код события (1 - создать,2 - удалить,3 - рассчитать,4 - обобщить,5 - проверить,6 - сохранить,7 - импорт данных,101 - утвердить,102 - вернуть из \утверждена\ в \создана\,103 - принять из \утверждена\,104 - вернуть из \принята\ в \утверждена\,105 - принять из \создана\,106 - вернуть из \принята\ в \создана\,107 - подготовить,108, вернуть из \подготовлена\ в \создана\,109, принять из \подготовлена\,110, вернуть из \принята\ в \подготовлена\,203 - после принять из \утверждена\,204 - после вернуть из \принята\ в \утверждена\,205 - после принять из \создана\,206 - после вернуть из \принята\ в \создана\,207 - после принять из \"подготовлена\,301 - добавить строку,303 - удалить строку,302 - загрузка)';
+comment on column log_business.event_id is 'Идентификатор события';
 comment on column log_business.user_login is 'Логин пользователя';
 comment on column log_business.roles is 'Список ролей пользователя';
-comment on column log_business.declaration_data_id is 'Код налоговой формы';
-comment on column log_business.form_data_id is 'Код налоговой формы';
+comment on column log_business.declaration_data_id is 'Идентификатор формы';
+comment on column log_business.person_id is 'Идентификатор ФЛ';
 comment on column log_business.note is 'Текст сообщения';
 comment on column log_business.user_department_name is 'Подразделение пользователя';
 
-create sequence seq_log_business;
+create sequence seq_log_businessseq_notification start with 10000;;
 ------------------------------------------------------------------------------------------------------
 create table department_report_period (
   id                number(18, 0)       not null,
@@ -1331,7 +1331,7 @@ create table ref_book_person
   start_date     date                not null,
   end_date       date,
   source_id      number(18),
-  old_id         number(18),
+  old_id         number(18)
 );
 
 comment on table ref_book_person is 'Физические лица';

@@ -8,8 +8,8 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('logBusinesFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter', '$http', 'DeclarationDataResource', 'APP_CONSTANTS',
-            function ($scope, $modalInstance, $shareData, $filter, $http, DeclarationDataResource, APP_CONSTANTS) {
+        .controller('logBusinesFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter', '$http', 'LogBusinessResource', 'APP_CONSTANTS',
+            function ($scope, $modalInstance, $shareData, $filter, $http, LogBusinessResource, APP_CONSTANTS) {
             /**
              * @description Закрытие окна
              */
@@ -24,11 +24,11 @@
                 ctrl: {},
                 options: {
                     datatype: "angularResource",
-                    angularResource: DeclarationDataResource,
+                    angularResource: LogBusinessResource,
                     requestParameters: function () {
                         return {
-                            projection: "businessLogs",
-                            declarationDataId: $shareData.declarationDataId
+                            projection: "declarationBusinessLogs",
+                            objectId: $shareData.declarationDataId
                         };
                     },
                     value: [],
@@ -44,17 +44,16 @@
                     ],
                     colModel: [
                         {name: 'id', index: 'id', width: 176, key: true, hidden: true},
-                        {name: 'eventName', index: 'event', width: 216},
-                        {name: 'logDate', index: 'date', width: 130, formatter: $filter('dateTimeFormatter')},
-                        {name: 'userFullName', index: 'user', width: 173},
-                        {name: 'roles', index: 'user_role', width: 150},
-                        {name: 'departmentName', index: 'department', width: 220},
+                        {name: 'eventName', index: 'event_name', width: 216},
+                        {name: 'logDate', index: 'log_date', width: 130, formatter: $filter('dateTimeFormatter')},
+                        {name: 'userName', index: 'user_name', width: 173},
+                        {name: 'roles', index: 'roles', width: 150},
+                        {name: 'userDepartmentName', index: 'user_department_name', width: 220},
                         {name: 'note', index: 'note', width: 273}
                     ],
                     rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                     rowList: APP_CONSTANTS.COMMON.PAGINATION,
-
-                    sortname: 'logDate',
+                    sortname: 'log_date',
                     sortorder: "desc",
                     hidegrid: false
                 }

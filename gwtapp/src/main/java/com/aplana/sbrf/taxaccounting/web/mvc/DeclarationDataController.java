@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.*;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
@@ -11,9 +14,11 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -25,7 +30,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +47,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -51,22 +68,18 @@ public class DeclarationDataController {
     private ReportService reportService;
     private BlobDataService blobDataService;
     private DeclarationTemplateService declarationTemplateService;
-    private LogBusinessService logBusinessService;
-    private TAUserService taUserService;
     private DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter;
     private DeclarationDataPermissionSetter declarationDataPermissionSetter;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
-                                     BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter,
+                                     BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService,
+                                     DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter,
                                      DeclarationDataPermissionSetter declarationDataPermissionSetter) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
         this.blobDataService = blobDataService;
         this.declarationTemplateService = declarationTemplateService;
-        this.logBusinessService = logBusinessService;
-        this.taUserService = taUserService;
         this.declarationDataFilePermissionSetter = declarationDataFilePermissionSetter;
         this.declarationDataPermissionSetter = declarationDataPermissionSetter;
     }
@@ -309,7 +322,9 @@ public class DeclarationDataController {
                                                     @RequestParam boolean force,
                                                     @PathVariable int declarationDataId)
             throws IOException {
-        if (file.isEmpty()) throw new ServiceException("Ошибка при загрузке файла \"" + file.getOriginalFilename() + "\". Выбранный файл пуст.");
+        if (file.isEmpty()) {
+            throw new ServiceException("Ошибка при загрузке файла \"" + file.getOriginalFilename() + "\". Выбранный файл пуст.");
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         try (InputStream inputStream = file.getInputStream()) {
             return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, userInfo, force);
@@ -488,35 +503,6 @@ public class DeclarationDataController {
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.saveDeclarationFilesComment(userInfo, dataFileComment);
-    }
-
-    /**
-     * Возвращает историю измений декларации по её идентификатору
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param pagingParams      параметры пагинации
-     * @return список изменений декларации {@link LogBusinessModel}
-     */
-    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=businessLogs")
-    public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@PathVariable long declarationDataId, @RequestParam PagingParams pagingParams) {
-        ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
-        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, pagingParams)) {
-            LogBusinessModel logBusinessModel;
-            if (FormDataEvent.SAVE.getCode() == logBusiness.getEventId()) {
-                logBusinessModel = new LogBusinessModel(logBusiness, FormDataEvent.DECLARATION_SAVE_EVENT_TITLE_2,
-                        taUserService.getUser(logBusiness.getUserLogin()).getName());
-            } else {
-                logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
-                        taUserService.getUser(logBusiness.getUserLogin()).getName());
-            }
-            logBusinessModelArrayList.add(logBusinessModel);
-        }
-        PagingResult<LogBusinessModel> result = new PagingResult<LogBusinessModel>(logBusinessModelArrayList, logBusinessModelArrayList.size());
-        return JqgridPagedResourceAssembler.buildPagedList(
-                result,
-                result.size(),
-                pagingParams
-        );
     }
 
     /**

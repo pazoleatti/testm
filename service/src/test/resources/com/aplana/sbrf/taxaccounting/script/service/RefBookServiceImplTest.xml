@@ -39,6 +39,10 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ConfigurationService"/>
     </bean>
 
+    <bean id="logBusinessService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.impl.LogBusinessServiceImpl"/>
+    </bean>
+
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.impl.PersonServiceImpl"/>
     </bean>

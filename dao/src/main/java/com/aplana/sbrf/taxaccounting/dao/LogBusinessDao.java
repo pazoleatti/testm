@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -11,48 +14,42 @@ import java.util.List;
 public interface LogBusinessDao {
 
     /**
-     * Получить информацию об истории событий деклараций
+     * Возвращяет список записей историй событий для ФЛ
      *
-     * @param declarationId идентификатор пользователя
-     * @param ordering      столбец, по которому сортировать
-     * @param isAscSorting  сорировать по возрастанию или убыванию
-     * @return объект, представляющий историю событий для декларации
+     * @param declarationId идентификатор формы
+     * @param pagingParams  данные для сортировки
+     * @return страница историй событий
      */
-    List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
+    List<LogBusinessDTO> findAllByDeclarationId(long declarationId, PagingParams pagingParams);
 
     /**
-     * Получить информацию об истории событий налоговой формы
+     * Возвращяет страницу записей историй событий для ФЛ
      *
-     * @param formId       идентификатор пользователя
-     * @param ordering     столбец, по которому сортировать
-     * @param isAscSorting сорировать по возрастанию или убыванию
-     * @return объект, представляющий историю событий для декларации
+     * @param personId     идентификатор ФЛ
+     * @param pagingParams данные для сортировки и пагинации
+     * @return страница историй событий
      */
-    List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
+    PagingResult<LogBusinessDTO> findAllByPersonId(long personId, PagingParams pagingParams);
 
-	/**
-	 * Получить дату последнего принятия налоговой формы
-	 * @param formId идентификатор пользователя
-	 * @return объект, представляющий дату принятия нф
-	 */
-	Date getFormAcceptanceDate(long formId);
+    /**
+     * Получить дату создания налоговой формы
+     *
+     * @param formId идентификатор пользователя
+     * @return объект, представляющий дату принятия нф
+     */
+    Date getFormCreationDate(long formId);
 
-	/**
-	 * Получить дату создания налоговой формы
-	 * @param formId идентификатор пользователя
-	 * @return объект, представляющий дату принятия нф
-	 */
-	Date getFormCreationDate(long formId);
+    /**
+     * Получить имя пользователя, загрузившего ТФ
+     *
+     * @param declarationDataId код декларации
+     */
+    String getFormCreationUserName(long declarationDataId);
 
-	/**
-	 * Получить имя пользователя, загрузившего ТФ
-	 * @param declarationDataId код декларации
-	 */
-	String getFormCreationUserName(long declarationDataId);
-
-	/**
-	 * добавить информацию в историю событий деклараций
-	 * @param logBusiness информация для хранения истории
-	 */
-	void add(LogBusiness logBusiness);
+    /**
+     * Создаёт запись истории событий
+     *
+     * @param logBusiness запись истории событий
+     */
+    void create(LogBusiness logBusiness);
 }

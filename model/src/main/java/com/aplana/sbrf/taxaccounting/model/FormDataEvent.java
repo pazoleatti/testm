@@ -17,7 +17,7 @@ public enum FormDataEvent implements Serializable {
 	DELETE(2, "Удалить"),
 	CALCULATE(3, "Рассчитать"),
 	CHECK(5, "Проверить"),
-	SAVE(6, "Сохранить"),
+	SAVE(6, "Обновление"),
 	IMPORT(7, "Импорт данных"),
 	GET_LEVEL0(8, "Получение данных"),
 	GET_LEVEL1(9, "Получение защищенных данных"),
@@ -78,9 +78,10 @@ public enum FormDataEvent implements Serializable {
 
     EDIT_CONFIG_PARAMS(951, "Редактирование конфигурационного параметра"),
 
-	DELETE_LOCK(960, "Удаление блокировки");
+	DELETE_LOCK(960, "Удаление блокировки"),
 
-	public static final String DECLARATION_SAVE_EVENT_TITLE_2 = "Обновление";
+	CREATE_PERSON(10000, "Создание ФЛ"),
+	UPDATE_PERSON(10001, "Изменение данных ФЛ");
 
 	private String title;
 	private int code;

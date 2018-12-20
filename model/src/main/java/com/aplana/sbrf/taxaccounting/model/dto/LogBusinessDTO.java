@@ -1,15 +1,16 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.model.dto;
 
-
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
 /**
- * Модельный класс для хранения истории изменений
+ * DTO истории изменений
  */
-@Data
-public class LogBusiness {
+@Setter
+@Getter
+public class LogBusinessDTO {
     /**
      * Идентификатор
      */
@@ -21,11 +22,11 @@ public class LogBusiness {
     /**
      * Событие
      */
-    private int eventId;
+    private String eventName;
     /**
-     * Логин пользователя, инициировавшего событие
+     * Имя пользователя, инициировавшего событие
      */
-    private String userLogin;
+    private String userName;
     /**
      * Роли пользователя
      */

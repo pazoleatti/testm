@@ -1,7 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,41 +22,26 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class LogBusinessServiceImpl implements LogBusinessService {
 
-	@Autowired
-	private LogBusinessDao logBusinessDao;
+    @Autowired
+    private LogBusinessDao logBusinessDao;
     @Autowired
     private DepartmentService departmentService;
 
     @Override
-	public List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
-		return logBusinessDao.getFormLogsBusiness(formId, ordering, isAscSorting);
-	}
+    @Transactional
+    public void logFormEvent(Long declarationId, FormDataEvent event, String note, TAUserInfo userInfo) {
+        LogBusiness log = makeLogBusiness(event, note, userInfo.getUser());
+        log.setDeclarationDataId(declarationId);
+        logBusinessDao.create(log);
+    }
 
     @Override
-	@Transactional(readOnly = false)
-	public void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note) {
-		LogBusiness log = new LogBusiness();
-		log.setFormId(formDataId);
-		log.setDeclarationId(declarationId);
-		log.setEventId(event.getCode());
-		log.setUserLogin(userInfo.getUser().getLogin());
-		log.setLogDate(new Date());
-		log.setNote(note);
-
-		log.setDepartmentName(departmentService.getParentsHierarchyShortNames(userInfo.getUser().getDepartmentId()));
-
-		StringBuilder roles = new StringBuilder();
-        List<TARole> taRoles = userInfo.getUser().getRoles();
-        for (int i = 0; i < taRoles.size(); i++) {
-            roles.append(taRoles.get(i).getName());
-            if (i != taRoles.size() - 1) {
-                roles.append(", ");
-            }
-        }
-        log.setRoles(roles.toString());
-
-		logBusinessDao.add(log);
-	}
+    @Transactional
+    public void logPersonEvent(Long personId, FormDataEvent event, String note, TAUserInfo userInfo) {
+        LogBusiness log = makeLogBusiness(event, note, userInfo.getUser());
+        log.setPersonId(personId);
+        logBusinessDao.create(log);
+    }
 
     @Override
     public Date getFormCreationDate(long declarationDataId) {
@@ -62,18 +54,32 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     }
 
     @Override
-	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
-		return logBusinessDao.getDeclarationLogsBusiness(declarationId, ordering, isAscSorting);
-	}
+    public List<LogBusinessDTO> findAllByDeclarationId(long declarationId, PagingParams pagingParams) {
+        return logBusinessDao.findAllByDeclarationId(declarationId, pagingParams);
+    }
 
     @Override
-    public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, PagingParams pagingParams) {
-        boolean sortFlg = pagingParams.getDirection().equals("asc");
-        for (HistoryBusinessSearchOrdering histBusOrd : HistoryBusinessSearchOrdering.values()) {
-            if (histBusOrd.name().toUpperCase().equals(pagingParams.getProperty().toUpperCase())){
-               return logBusinessDao.getDeclarationLogsBusiness(declarationId, histBusOrd, sortFlg);
+    public PagingResult<LogBusinessDTO> findAllByPersonId(long personId, PagingParams pagingParams) {
+        return logBusinessDao.findAllByPersonId(personId, pagingParams);
+    }
+
+    private LogBusiness makeLogBusiness(FormDataEvent event, String note, TAUser user) {
+        LogBusiness log = new LogBusiness();
+        log.setEventId(event.getCode());
+        log.setUserLogin(user.getLogin());
+        log.setLogDate(new Date());
+        log.setNote(note);
+        log.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
+
+        StringBuilder roles = new StringBuilder();
+        List<TARole> taRoles = user.getRoles();
+        for (int i = 0; i < taRoles.size(); i++) {
+            roles.append(taRoles.get(i).getName());
+            if (i != taRoles.size() - 1) {
+                roles.append(", ");
             }
         }
-        return logBusinessDao.getDeclarationLogsBusiness(declarationId, HistoryBusinessSearchOrdering.DATE, false);
+        log.setRoles(roles.toString());
+        return log;
     }
 }

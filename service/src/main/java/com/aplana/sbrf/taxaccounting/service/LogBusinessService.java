@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -10,55 +14,57 @@ import java.util.List;
  */
 @ScriptExposed
 public interface LogBusinessService {
+
     /**
-     * Получить информацию об истории событий деклараций
+     * Добавить информацию об логировании
      *
-     * @param declarationId идентификатор декларации
-     * @param ordering      столбец, по которому сортировать
-     * @param isAscSorting  сорировать по возрастанию или убыванию
-     * @return объект, представляющий историю событий для декларации
+     * @param declarationId идентификатор формы
+     * @param event         событие
+     * @param note          текст
+     * @param userInfo      информация о пользователе, инициирующего событие
      */
-    List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
+    void logFormEvent(Long declarationId, FormDataEvent event, String note, TAUserInfo userInfo);
+
+    /**
+     * Добавить информацию об логировании
+     *
+     * @param personId идентификатор ФЛ
+     * @param event    событие
+     * @param note     текст
+     * @param userInfo информация о пользователе, инициирующего событие
+     */
+    void logPersonEvent(Long personId, FormDataEvent event, String note, TAUserInfo userInfo);
+
+    /**
+     * Возвращяет дату создания формы (по событию {@link FormDataEvent#CREATE})
+     *
+     * @param declarationDataId идентификатор формы
+     * @return дата созданий формы
+     */
+    Date getFormCreationDate(long declarationDataId);
+
+    /**
+     * Получить имя пользователя, загрузившего ТФ
+     *
+     * @param declarationDataId идентификатор формы
+     */
+    String getFormCreationUserName(long declarationDataId);
 
     /**
      * Получить информацию об истории событий налоговой формы
      *
-     * @param formId       идентификатор формы
-     * @param ordering     столбец, по которому сортировать
-     * @param isAscSorting сорировать по возрастанию или убыванию
-     * @return объект, представляющий историю событий для налоговой формы
+     * @param declarationId идентификатор формы
+     * @param pagingParams  данные для сортировки (пагинации нет)
+     * @return список  истории событий для налоговой формы
      */
-    List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
-
-	/**
-	 * Добавить информацию об логировании
-	 * @param formDataId идентификатор формы
-	 * @param declarationId идентификатор декларации
-	 * @param userInfo информация о пользователе, инициирующего событие
-	 * @param event событие
-	 * @param note текст
-	 */
-	void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note);
+    List<LogBusinessDTO> findAllByDeclarationId(long declarationId, PagingParams pagingParams);
 
     /**
-     * Получить дату создания файла
-     * @param declarationDataId
-     * @return
+     * Возвращяет страницу историй событий для ФЛ
+     *
+     * @param personId     идентификатор ФЛ
+     * @param pagingParams данные для сортировки и пагинации
+     * @return страница историй событий
      */
-    Date getFormCreationDate(long declarationDataId);
-	/**
-	 * Получить имя пользователя, загрузившего ТФ
-     * @param declarationDataId код декларации
-	 */
-	String getFormCreationUserName(long declarationDataId);
-
-	/**
-	 * Получить информацию об истории событий налоговой формы
-	 *
-	 * @param declarationId       идентификатор формы
-	 * @param pagingParams     данные для сортировки
-
-	 * @return  список  истории событий для налоговой формы
-	 */
-	List<LogBusiness> getDeclarationLogsBusiness(long declarationId, PagingParams pagingParams);
+    PagingResult<LogBusinessDTO> findAllByPersonId(long personId, PagingParams pagingParams);
 }

@@ -19,8 +19,8 @@
             });
         }])
 
-        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs',
-            function ($scope, $rootScope, $filter, RefBookListResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs) {
+        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'LogBusinessResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs',
+            function ($scope, $rootScope, $filter, RefBookListResource, LogBusinessResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs) {
 
                 $scope.mode = APP_CONSTANTS.MODE.VIEW;
 
@@ -216,8 +216,14 @@
                 $scope.changelogGrid = {
                     ctrl: {},
                     options: {
-                        datatype: "local",
-                        data: $scope.changelogGrid,
+                        datatype: "angularResource",
+                        angularResource: LogBusinessResource,
+                        requestParameters: function () {
+                            return {
+                                projection: "personBusinessLogs",
+                                objectId: $scope.person.id
+                            };
+                        },
                         colNames: [
                             '',
                             $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.event'),
@@ -228,21 +234,20 @@
                             $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.userDepartment')
                         ],
                         colModel: [
-                            {name: 'id', width: 100, key: true, hidden: true},
-                            {name: 'event', width: 120},
-                            {name: 'dateAndTime', width: 100},
-                            {name: 'description', width: 120},
-                            {name: 'userName', width: 400},
-                            {name: 'userRoles', width: 220},
-                            {name: 'userDepartment', width: 240}
+                            {name: 'id', index: 'id', width: 100, key: true, hidden: true},
+                            {name: 'eventName', index: 'event_name', width: 110, classes: 'grid-cell-white-space'},
+                            {name: 'logDate', index: 'log_date', width: 130, formatter: $filter('dateTimeFormatter')},
+                            {name: 'note', index: 'note', width: 380, classes: 'grid-cell-white-space'},
+                            {name: 'userName', index: 'user_name', width: 170, classes: 'grid-cell-white-space'},
+                            {name: 'roles', index: 'roles', width: 200, classes: 'grid-cell-white-space'},
+                            {name: 'userDepartmentName', index: 'user_department_name', width: 180, classes: 'grid-cell-white-space'}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
-                        sortname: 'id',
-                        sortorder: "asc",
-                        hidegrid: false,
-                        multiselect: false
+                        sortname: 'log_date',
+                        sortorder: "desc",
+                        hidegrid: false
                     }
                 };
 
@@ -365,9 +370,6 @@
                             item.id = null;
                         }
                     });
-                    if (!$scope.personParam.reportDoc.value) {
-                        $scope.personParam.reportDoc.value = {id: null};
-                    }
                     $scope.personParam.vip = $scope.personParam.vipSelect.value;
                     $scope.personParam.duplicates = $scope.personParam.duplicates.concat($scope.deletedDuplicates);
                     $http({

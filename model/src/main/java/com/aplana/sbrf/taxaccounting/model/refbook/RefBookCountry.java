@@ -1,14 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
  * Справочник "ОК 025-2001 (Общероссийский классификатор стран мира)"
- * @author Andrey Drunk
  */
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class RefBookCountry extends RefBookSimple<Long> {
     private String code;
     private String name;

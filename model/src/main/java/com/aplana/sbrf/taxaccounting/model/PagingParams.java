@@ -1,10 +1,16 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.Data;
+
 import java.io.Serializable;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Класс, содержащий параметры разбивки списка записей на страницы
  */
+@Data
 public class PagingParams implements Serializable {
     private static final long serialVersionUID = 5113425251692266554L;
 
@@ -63,15 +69,6 @@ public class PagingParams implements Serializable {
     }
 
     /**
-     * Получить количество записей, которые нужно вернуть (может быть возвращено меньше)
-     *
-     * @return количество записей (по умолчанию - значение 10)
-     */
-    public Integer getCount() {
-        return count;
-    }
-
-    /**
      * Поскольку удалено поле startIndex метод сделал deprecated
      * Метод устанавливает номер страницы в зависимости от количества возвращаемых объектов и стартового индекса.
      *
@@ -83,44 +80,39 @@ public class PagingParams implements Serializable {
     }
 
     /**
-     * Задать количество записей, которые нужно вернуть (может быть возвращено меньше)
-     *
-     * @param count количество записей (по умолчанию - значение 10)
+     * Возвращяет true, если пагинация не задана и значит надо возвращять все записи с сортировкой, иначе - false
      */
-    public final void setCount(Integer count) {
-        this.count = count;
+    public boolean isNoPaging() {
+        return count == -1;
     }
 
-    public int getPage() {
-        return page;
-    }
-
-    public void setPage(int page) {
-        this.page = page;
-    }
-
-    public String getProperty() {
-        return property;
-    }
-
-    public void setProperty(String property) {
-        this.property = property;
-    }
-
-    public String getDirection() {
-        return direction;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
-    }
-
-    public void setWithoutPaging() {
+    /**
+     * Устанавливает что пагинация не задана и значит надо возвращять все записи с сортировкой
+     */
+    public void setNoPaging() {
         count = -1;
     }
 
-    @Override
-    public String toString() {
-        return "PagingParams [count=" + count + ", page=" + page + ", property=" + property + ", direction=" + direction + "]";
+    /**
+     * Оборачивает основной запрос в запрос, добавляя пагинацию и сортировку
+     *
+     * @param query  основной запрос без пагинации и сортировки
+     * @param params параметры запроса
+     * @return запрос с пагинацией и сортировкой
+     */
+    public String wrapQuery(String query, List<Object> params) {
+        if (isNotBlank(property) && isNotBlank(direction)) {
+            query = query + " order by " + property + " " + direction + ", id";
+        } else {
+            query = query + " order by id";
+        }
+        params.add(getStartIndex());
+        params.add(count);
+        return "select * \n" +
+                "from ( \n" +
+                "   select a.*, rownum rn \n" +
+                "   from ( \n" + query + ") a \n" +
+                ") \n" +
+                "where rn > ? and rownum <= ?";
     }
 }

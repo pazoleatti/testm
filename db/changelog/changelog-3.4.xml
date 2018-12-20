@@ -107,4 +107,62 @@
         </sql>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5489 изменения истории изменений-->
+	<changeSet id="3.4-dnovikov-5" author="dnovikov">
+		<sql>
+			alter table log_business drop constraint LOG_BUSINESS_CHK_EVENT_ID;
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-6" author="dnovikov">
+		<sql>
+			alter table log_business drop constraint LOG_BUSINESS_CHK_FRM_DCL_EV;
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-7" author="dnovikov">
+		<sql>
+			alter table log_business drop column form_data_id;
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-8" author="dnovikov">
+		<sql>
+			alter table log_business modify note VARCHAR2(4000 BYTE);
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-9" author="dnovikov">
+		<sql>
+			alter table log_business add person_id NUMBER(18,0);
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-10" author="dnovikov">
+		<sql>
+			alter table log_business add constraint log_business_fk_person foreign key (person_id) references
+			ref_book_person(id) on delete cascade;
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-11" author="dnovikov">
+		<sql>
+			alter table log_business add constraint log_business_chk_obj_id check(declaration_data_id is not null and
+			person_id is null or declaration_data_id is null and person_id is not null);
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-12" author="dnovikov">
+		<sql>
+			comment on column log_business.declaration_data_id is 'Идентификатор формы';
+			comment on column log_business.person_id is 'Идентификатор ФЛ';
+			comment on column log_business.event_id is 'Идентификатор события';
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-13" author="dnovikov">
+		<sql>
+			update event set name = 'Обновление' where id = 6;
+			insert into event(id, name) values(10000, 'Создание ФЛ');
+			insert into event(id, name) values(10001, 'Изменение данных ФЛ');
+		</sql>
+	</changeSet>
+	<changeSet id="3.4-dnovikov-14" author="dnovikov">
+		<sql>
+			alter table log_business modify event_id NUMBER(9,0);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

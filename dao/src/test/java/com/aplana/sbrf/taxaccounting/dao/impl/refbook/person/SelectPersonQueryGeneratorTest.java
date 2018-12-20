@@ -231,7 +231,7 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generatePagedAndFilteredQuery_orderByFirstName() {
-        pagingParams.setWithoutPaging();
+        pagingParams.setNoPaging();
         pagingParams.setProperty("firstName");
 
         String query = generator.generatePagedAndFilteredQuery();
@@ -240,7 +240,7 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generatePagedAndFilteredQuery_orderByFirstNameDesc() {
-        pagingParams.setWithoutPaging();
+        pagingParams.setNoPaging();
         pagingParams.setProperty("firstName");
         pagingParams.setDirection("desc");
 
@@ -250,7 +250,7 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generatePagedAndFilteredQuery_orderByVip() {
-        pagingParams.setWithoutPaging();
+        pagingParams.setNoPaging();
         pagingParams.setProperty("vip");
         pagingParams.setDirection("asc");
 
@@ -260,7 +260,7 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generatePagedAndFilteredQuery_orderByAddressDesc() {
-        pagingParams.setWithoutPaging();
+        pagingParams.setNoPaging();
         pagingParams.setProperty("address");
         pagingParams.setDirection("desc");
 

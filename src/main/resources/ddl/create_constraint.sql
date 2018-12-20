@@ -111,15 +111,12 @@ alter table declaration_source add constraint decl_source_fk_dept_decltype forei
 alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (user_id) references sec_user(id);
 alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (role_id) references sec_role(id);
 alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_id) references department(id);
-alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
-alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table notification add constraint notification_fk_report_period foreign key (report_period_id) references report_period (id) on delete cascade;
 alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department (id) on delete cascade;
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id) on delete cascade;
 alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
-alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
 alter table template_changes add constraint template_changes_fk_event foreign key (event) references event(id);
 alter table template_changes add constraint template_changes_fk_dec_t foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
@@ -199,8 +196,6 @@ alter table form_data add constraint form_data_chk_accruing check (accruing in (
 alter table form_data add constraint form_data_chk_edited check (edited in (0, 1));
 alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 alter table sec_user add constraint sec_user_chk_is_active check (is_active in (0, 1));
-alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 26, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
-alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
 alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705, 904));
@@ -323,3 +318,8 @@ alter table decl_template_event_script add constraint pk_decl_template_event_scr
 alter table decl_template_event_script add constraint fk_dec_temp_event_scr_dec_temp foreign key (declaration_template_id) references declaration_template(id);
 alter table decl_template_event_script add constraint fk_dec_temp_event_id foreign key (event_id) references event(id);
 alter table decl_template_event_script add constraint uc_dec_temp_even_dec_temp_even unique (declaration_template_id, event_id);
+--------------
+alter table log_business add constraint log_business_fk_person foreign key (person_id) references ref_book_person(id) on delete cascade;
+alter table log_business add constraint log_business_chk_obj_id check(declaration_data_id is not null and person_id is null or declaration_data_id is null and person_id is not null);
+alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
+alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);

@@ -6,22 +6,48 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @author Andrey Drunk
+ * Адрес
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
 public class Address {
-
+    /**
+     * Код региона
+     */
     private String regionCode;
+    /**
+     * Почтовый индекс
+     */
     private String postalCode;
-    private String district; //Район
+    /**
+     * Район
+     */
+    private String district;
+    /**
+     * Город
+     */
     private String city;
+    /**
+     * Населенный пункт
+     */
     private String locality;
+    /**
+     * Улица
+     */
     private String street;
+    /**
+     * Номер дома
+     */
     private String house;
+    /**
+     * Номер корпуса
+     */
     private String build;
+    /**
+     * Номер квартиры
+     */
     private String appartment;
 
     /**

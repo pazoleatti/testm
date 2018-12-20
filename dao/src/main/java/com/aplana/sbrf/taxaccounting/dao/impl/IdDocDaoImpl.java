@@ -32,7 +32,7 @@ public class IdDocDaoImpl extends AbstractDao implements IdDocDao {
         getJdbcTemplate().update(deleteDocsQuery);
     }
 
-    public void saveBatch(final Collection<IdDoc> idDocs) {
+    public void createBatch(final Collection<IdDoc> idDocs) {
         saveNewObjects(idDocs, IdDoc.TABLE_NAME, DBUtils.Sequence.REF_BOOK_RECORD.getName(), IdDoc.COLUMNS, IdDoc.FIELDS);
     }
 

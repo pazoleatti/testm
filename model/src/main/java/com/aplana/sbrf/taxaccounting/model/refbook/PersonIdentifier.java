@@ -6,11 +6,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Идентификатор ФЛ
- *
- * @author Andrey Drunk
+ * Идентификатор ФЛ (таблица REF_BOOK_ID_TAX_PAYER)
  */
-@Getter @Setter
+@Getter
+@Setter
 @ToString
 public class PersonIdentifier extends IdentityObject<Long> {
 

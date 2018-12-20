@@ -52,18 +52,21 @@ public interface PersonService {
     /**
      * Обновить запись в реестре ФЛ
      *
-     * @param person данные ФЛ для обновления
+     * @param person   данные ФЛ для обновления
+     * @param userInfo пользователь, запустивший операцию
      */
-    void updateRegistryPerson(RegistryPersonDTO person);
+    void updateRegistryPerson(RegistryPersonDTO person, TAUserInfo userInfo);
 
     /**
      * Обновить несколько записей объектов идентификации - физлиц
+     *
      * @param personList список ФЛ
      */
     void updateIdentificatedPersons(List<NaturalPerson> personList);
 
     /**
      * Проверяет корректность ДУЛ
+     *
      * @param docCode   код документа
      * @param docNumber номер документа
      */
@@ -71,23 +74,26 @@ public interface PersonService {
 
     /**
      * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
-     * @param filter        фильтр выборки
-     * @param pagingParams  параметры постраничной выдачи
-     * @return  Страница списка записей
+     *
+     * @param filter       фильтр выборки
+     * @param pagingParams параметры постраничной выдачи
+     * @return Страница списка записей
      */
     PagingResult<RegistryPersonDTO> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter, TAUser requestingUser);
 
     /**
      * Сохранить группу Физлиц.
+     *
      * @param personList коллекция Физлиц
      * @return список ФЛ с добавленными идентификаторами ФЛ
      */
-     List<RegistryPerson> savePersons(List<RegistryPerson> personList);
+    List<RegistryPerson> savePersons(List<RegistryPerson> personList);
 
     /**
      * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
+     *
      * @param declarationDataId идентификатор налоговой формы
      * @return список найденных записей реестра ФЛ
      */
-     List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
+    List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
 }

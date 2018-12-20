@@ -114,11 +114,13 @@ public abstract class AbstractDao {
      * @param identityObjects объекты обладающий суррогатным ключом
      * @param table           наименование таблицы используемой для хранения данных объекта
      * @param seq             наименование последовательностт используемой для генерации ключей
-     * @param columns         массив содержащий наименование столбцов таблицы для вставки в insert
-     * @param fields          массив содержащий наименования параметров соответствующих столбцам
+     * @param columns         массив, содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields          массив, содержащий пути в объекте до полей, соответствующих столбцам
+     *                        !!! Не допускаются null во вложенных объектах,
+     *                        например, для "country.id" country не должен быть равен null, так что используем пустой объект вместо null (TODO?)
      * @param <E>             тип объекта
      */
-    protected  <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
+    protected <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
         List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
         String insert = SqlUtils.createInsert(table, columns, fields);
         BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
@@ -136,11 +138,13 @@ public abstract class AbstractDao {
      *
      * @param identityObjects объекты обладающий суррогатным ключом
      * @param table           наименование таблицы используемой для хранения данных объекта
-     * @param columns         массив содержащий наименование столбцов таблицы для вставки в insert
-     * @param fields          массив содержащий наименования параметров соответствующих столбцам
+     * @param columns         массив, содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields          массив, содержащий пути в объекте до полей, соответствующих столбцам
+     *                        !!! Не допускаются null во вложенных объектах,
+     *                        например, для "country.id" country не должен быть равен null, так что используем пустой объект вместо null (TODO?)
      * @param <E>             тип объекта
      */
-    protected  <E extends IdentityObject> void updateObjects(Collection<E> identityObjects, String table, String[] columns, String[] fields) {
+    protected <E extends IdentityObject> void updateObjects(Collection<E> identityObjects, String table, String[] columns, String[] fields) {
         String update = SqlUtils.createUpdate(table, columns, fields);
         BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
         int i = 0;

@@ -274,7 +274,7 @@ public class PrintingServiceImpl implements PrintingService {
 
     @Override
     public String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams, TAUser user) {
-        pagingParams.setCount(-1);// выбираем все записи выбираем
+        pagingParams.setNoPaging();
         List<RegistryPersonDTO> persons = personService.getPersonsData(pagingParams, filter);
         PersonsReportBuilder reportBuilder = new PersonsReportBuilder(persons, filter);
         String reportPath = null;
@@ -295,7 +295,7 @@ public class PrintingServiceImpl implements PrintingService {
         filter.setDepartmentId(departmentId);
         // pagingParams не null, т.к. нужна сортировка по-умолчанию (по КПП/ОКТМО/Код НО)
         PagingParams pagingParams = new PagingParams();
-        pagingParams.setCount(-1);// выбираем все записи
+        pagingParams.setNoPaging();
         List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchAllByFilter(filter, pagingParams);
         Department department = departmentService.getDepartment(filter.getDepartmentId());
         DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, department);

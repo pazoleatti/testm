@@ -1,15 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
  * АСНУ
- *
- * @author dloshkarev
  */
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class RefBookAsnu extends RefBookSimple<Long> {
     //Наименование АСНУ
     private String name;
