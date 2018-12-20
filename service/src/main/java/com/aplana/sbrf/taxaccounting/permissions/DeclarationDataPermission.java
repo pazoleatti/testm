@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,7 +130,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     declarationData.getId(),
                     departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     departmentReportPeriod.getReportPeriod().getName(),
-                    departmentReportPeriod.getCorrectionDate() != null ? "корр. " + departmentReportPeriod.getCorrectionDate() : "",
+                    departmentReportPeriod.getCorrectionDate() != null ? "корр. " + new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) : "",
                     department.getName(),
                     reason);
         }
@@ -399,7 +400,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                         }
                     } else {
-                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, STATE_ERROR, logger);
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                     }
                 } else {
                     logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
