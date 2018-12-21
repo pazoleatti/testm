@@ -8,13 +8,31 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Getter @Setter
+/**
+ * Данные ФЛ из реестра ФЛ
+ */
+@Getter
+@Setter
 public class RegistryPerson extends IdentityObject<Long> {
 
+    /**
+     * Общий ид всех версий ФЛ. Не изменяется.
+     * В постановках "Исходный идентификатор ФЛ"
+     */
+    private Long oldId;
+    /**
+     * Общий ид всех версий ФЛ-оригинала и всех его дубликатов, причем у оригинала recordId=oldId.
+     * Т.е. получается для дубликатов это ссылка на old оригинала. Изменяется.
+     * В постановках "Идентификатор ФЛ"
+     */
     private Long recordId;
-
+    /**
+     * Дата начала действия версии
+     */
     private Date startDate;
-
+    /**
+     * Дата окончания версии
+     */
     private Date endDate;
     /**
      * Фамилия
@@ -97,8 +115,6 @@ public class RegistryPerson extends IdentityObject<Long> {
      * Источник (АСНУ)
      */
     private RefBookAsnu source;
-
-    private Long oldId;
 
     private boolean vip;
 

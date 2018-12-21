@@ -101,11 +101,11 @@
                                 return {
                                     filter: $scope.filterRequestParam(),
                                     projection: 'originalAndDuplicates'
-                                }
+                                };
                             } else {
                                 return {
                                     projection: 'originalAndDuplicates'
-                                }
+                                };
                             }
 
                         },
@@ -214,26 +214,16 @@
                     $scope.showInfo = false;
                     $scope.isEmptySearchParams = false;
                     $scope.infoMessage = "";
-                    $scope.flGrid.ctrl.refreshGrid()
+                    $scope.flGrid.ctrl.refreshGrid();
                 };
 
-                $scope.complete = function() {
-                    if ($shareData.mode == APP_CONSTANTS.MODE.ORIGINAL) {
-                        $rootScope.$broadcast("addOriginal", $scope.flGrid.value[0]);
-                        $modalInstance.close()
-                    } else if($shareData.mode == APP_CONSTANTS.MODE.DUPLICATE) {
-                        $rootScope.$broadcast("addDuplicate", $scope.flGrid.value[0]);
-                        $modalInstance.close()
-                    }
+                $scope.complete = function () {
+                    $modalInstance.close($scope.flGrid.value[0]);
                 };
 
                 $scope.close = function () {
-                    $modalInstance.close()
-                }
-
+                    $modalInstance.close();
+                };
             }]);
-
-
-
 }());
 

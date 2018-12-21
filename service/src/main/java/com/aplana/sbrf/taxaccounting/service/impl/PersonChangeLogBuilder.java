@@ -10,12 +10,16 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.util.Date;
+import java.util.List;
 
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Objects.firstNonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Вспомогательный класс для формирования записи истории изменения ФЛ
@@ -64,6 +68,37 @@ class PersonChangeLogBuilder {
                 .append(format(doc.getDocumentNumber())).append("\" ]");
     }
 
+    public void originalSet(RegistryPersonDTO original) {
+        comma().append("[ Назначен ФЛ-оригинал. Идентификатор ФЛ: \"").append(original.getOldId().toString()).append("\", ФИО: \"")
+                .append(original.getLastName()).append(" ").append(original.getFirstName())
+                .append(isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "").append("\" ]");
+    }
+
+    public void originalDeleted(RegistryPerson original) {
+        comma().append("[ Откреплён ФЛ-оригинал. Идентификатор ФЛ: \"").append(original.getOldId().toString()).append("\", ФИО: \"")
+                .append(original.getLastName()).append(" ").append(original.getFirstName())
+                .append(isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "").append("\" ]");
+    }
+
+    public void duplicatesSet(List<RegistryPerson> duplicates) {
+        for (RegistryPerson duplicate : duplicates) {
+            comma().append("[ Прикреплен Дубликат ФЛ. Идентификатор ФЛ: \"").append(duplicate.getOldId().toString()).append("\", ФИО: \"")
+                    .append(duplicate.getLastName()).append(" ").append(duplicate.getFirstName())
+                    .append(isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "").append("\" ]");
+        }
+    }
+
+    public void duplicatesDeleted(List<RegistryPerson> duplicates) {
+        for (RegistryPerson duplicate : duplicates) {
+            comma().append("[ Откреплён Дубликат ФЛ. Идентификатор ФЛ: \"").append(duplicate.getOldId().toString()).append("\", ФИО: \"")
+                    .append(duplicate.getLastName()).append(" ").append(duplicate.getFirstName())
+                    .append(isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "").append("\" ]");
+        }
+    }
+
+    /**
+     * Записывает в историю все измененные поля
+     */
     public void personInfoUpdated(RegistryPerson personWas, RegistryPerson personBecome) {
         personPropertyUpdated("Дата начала действия", personWas.getStartDate(), personBecome.getStartDate());
         personPropertyUpdated("Дата окончания действия", personWas.getEndDate(), personBecome.getEndDate());

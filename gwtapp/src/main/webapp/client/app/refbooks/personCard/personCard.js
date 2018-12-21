@@ -24,8 +24,6 @@
 
                 $scope.mode = APP_CONSTANTS.MODE.VIEW;
 
-                $scope.deletedDuplicates = [];
-
                 $scope.personParam = {};
 
                 // Права на редактирование карточки. Временно только для Контролёра УНП, на расширение заведён баг SBRFNDFL-6008.
@@ -133,7 +131,13 @@
                         colModel: [
                             {name: 'id', index: 'id', width: 100, key: true, hidden: true},
                             {name: 'oldId', index: 'oldId', width: 100, sortable: true},
-                            {name: 'lastName', index: 'lastName', width: 120, sortable: true, formatter: personLinkFormatter},
+                            {
+                                name: 'lastName',
+                                index: 'lastName',
+                                width: 120,
+                                sortable: true,
+                                formatter: personLinkFormatter
+                            },
                             {name: 'firstName', index: 'firstName', width: 120, sortable: true},
                             {name: 'middleName', index: 'middleName', width: 120, sortable: true},
                             {
@@ -240,7 +244,12 @@
                             {name: 'note', index: 'note', width: 380, classes: 'grid-cell-white-space'},
                             {name: 'userName', index: 'user_name', width: 170, classes: 'grid-cell-white-space'},
                             {name: 'roles', index: 'roles', width: 200, classes: 'grid-cell-white-space'},
-                            {name: 'userDepartmentName', index: 'user_department_name', width: 180, classes: 'grid-cell-white-space'}
+                            {
+                                name: 'userDepartmentName',
+                                index: 'user_department_name',
+                                width: 180,
+                                classes: 'grid-cell-white-space'
+                            }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
@@ -371,7 +380,6 @@
                         }
                     });
                     $scope.personParam.vip = $scope.personParam.vipSelect.value;
-                    $scope.personParam.duplicates = $scope.personParam.duplicates.concat($scope.deletedDuplicates);
                     $http({
                         method: "POST",
                         url: "controller/actions/registryPerson/updatePerson",
@@ -544,9 +552,16 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    recordId: $scope.person.recordId,
-                                    mode: mode
+                                    recordId: $scope.person.recordId
                                 };
+                            }
+                        }
+                    }).result.then(function (person) {
+                        if (person) {
+                            if (mode === APP_CONSTANTS.MODE.DUPLICATE) {
+                                addDuplicate(person);
+                            } else if (mode === APP_CONSTANTS.MODE.ORIGINAL) {
+                                addOriginal(person);
                             }
                         }
                     });
@@ -593,15 +608,12 @@
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
                             var indexOfDeleting = -1;
-                            var i = 0;
-                            angular.forEach($scope.personParam.duplicates, function (item) {
-                                if (item.id === $scope.duplicatesGrid.value[0].id) {
+                            for (var i = 0; i < $scope.personParam.duplicates.length; i++) {
+                                if ($scope.personParam.duplicates[i].id === $scope.duplicatesGrid.value[0].id) {
                                     indexOfDeleting = i;
-                                    item.recordId = item.oldId;
-                                    $scope.deletedDuplicates.push(item);
+                                    break;
                                 }
-                                i++;
-                            });
+                            }
                             if (indexOfDeleting > -1) {
                                 $scope.personParam.duplicates.splice(indexOfDeleting, 1);
                             }
@@ -610,16 +622,16 @@
                     });
                 };
 
-                $scope.$on("addOriginal", function (event, original) {
+                function addOriginal(original) {
                     $scope.personParam.original = original;
                     $scope.person.original = original;
-                });
+                }
 
-                $scope.$on("addDuplicate", function (event, duplicate) {
+                function addDuplicate(duplicate) {
                     duplicate.recordId = $scope.personParam.recordId;
                     $scope.personParam.duplicates.push(duplicate);
                     $scope.duplicatesGrid.ctrl.refreshGridData($scope.personParam.duplicates);
-                });
+                }
 
                 $scope.$watchGroup(['personParam.startDate', 'personParam.endDate'], function () {
                     $scope.validateVersionDates();

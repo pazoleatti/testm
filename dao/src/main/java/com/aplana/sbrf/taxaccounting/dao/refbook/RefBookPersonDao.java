@@ -8,7 +8,11 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Интерфейс DAO для работы со справочником физлиц
@@ -23,13 +27,13 @@ public interface RefBookPersonDao {
 
     /**
      * Найти всех ФЛ по определяющим параметрам
+     *
      * @param declarationDataId идентификатор НФ
      */
     Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler);
 
     /**
      * Найти всех ФЛ по полному списку параметров
-     *
      */
     Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, NaturalPersonRefbookHandler naturalPersonHandler);
 
@@ -40,40 +44,43 @@ public interface RefBookPersonDao {
 
     /**
      * Установить дубликаты
-     * @param addedDuplicateRecordIds   идентификаторы ФЛ которые необходимо установить дубликатами
-     * @param changingPersonRecordId    идентификатор изменяемого ФЛ
+     *
+     * @param addedDuplicateRecordIds идентификаторы ФЛ которые необходимо установить дубликатами
+     * @param changingPersonRecordId  идентификатор изменяемого ФЛ
      */
     void setDuplicates(List<Long> addedDuplicateRecordIds, Long changingPersonRecordId);
 
     /**
      * Удалить дубликаты
+     *
      * @param deletedDuplicateOldIds идентификаторы ФЛ удаляемые из дубликатов
      */
     void deleteDuplicates(List<Long> deletedDuplicateOldIds);
 
     /**
      * Установить оригинал
-     * @param originalRecordId    идентификатор оригинала
-     * @param duplicateRecordId   идентификатор дубликата
+     *
+     * @param originalRecordId  идентификатор оригинала
+     * @param duplicateRecordId идентификатор дубликата
      */
     void setOriginal(Long originalRecordId, Long duplicateRecordId);
 
 
     /**
-     * Получение оригинала ФЛ
+     * Возвращяет список версий ФЛ-оригинала у заданного ФЛ
      *
      * @param id идентификатро версии ФЛ
      * @return Оригинал ФЛ
      */
-    List<RegistryPerson> fetchOriginal(Long id);
+    List<RegistryPerson> findAllOriginalVersions(Long id);
 
     /**
-     * Получение дубликатов ФЛ
+     * Возвращяет список версий ФЛ-дубликатов у заданного ФЛ
      *
-     * @param id           идентификатор версии ФЛ
+     * @param id идентификатор версии ФЛ
      * @return список дубликатов ФЛ
      */
-    List<RegistryPerson> fetchDuplicates(Long id);
+    List<RegistryPerson> findAllDuplicatesVersions(Long id);
 
     /**
      * Получает список идентификаторов ФЛ, являющихся дуликатами указанных ФЛ
@@ -120,12 +127,14 @@ public interface RefBookPersonDao {
 
     /**
      * Обновить данные записи реестра ФЛ
-     * @param person    данные ФЛ
+     *
+     * @param person данные ФЛ
      */
     void updateRegistryPerson(RegistryPerson person);
 
     /**
      * Получить все версии физлица, которые не являются дубликатами
+     *
      * @param recordId идентификатор ФЛ
      * @return список объектов найденных версий
      */
@@ -133,14 +142,16 @@ public interface RefBookPersonDao {
 
     /**
      * Получение записей реестра ФЛ для назначения Оригиналом/Дубликатом
-     * @param filter        фильтр выборки
-     * @param pagingParams  параметры постраничной выдачи
-     * @return  Страница списка записей
+     *
+     * @param filter       фильтр выборки
+     * @param pagingParams параметры постраничной выдачи
+     * @return Страница списка записей
      */
     PagingResult<RegistryPerson> fetchOriginalDuplicatesCandidates(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
      * Сохранить группу Физлиц.
+     *
      * @param persons коллекция Физлиц
      */
     void saveBatch(Collection<RegistryPerson> persons);
@@ -149,12 +160,14 @@ public interface RefBookPersonDao {
      * Обновить группу Физлиц. При групповом обновлении не обновляются поля id, record_id, old_id, start_date, end_date.
      * В версии 3.2 нет необходимости обновлять вышеуказанные поля массово и поскольку их обновление без проверок
      * потенциально ведёт к дефектам их массовое обновление недоступно.
+     *
      * @param persons коллекция Физлиц
      */
     void updateBatch(Collection<RegistryPerson> persons);
 
     /**
      * Найти актуальные на текущую дату записи реестра ФЛ связанные с определенной налоговой формой
+     *
      * @param declarationDataId идентификатор налоговой формы
      * @param actualDate        дата актуальности
      * @return список найденных записей реестра ФЛ

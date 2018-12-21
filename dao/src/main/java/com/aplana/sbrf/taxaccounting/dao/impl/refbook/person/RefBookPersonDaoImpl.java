@@ -193,7 +193,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<RegistryPerson> fetchOriginal(Long id) {
+    public List<RegistryPerson> findAllOriginalVersions(Long id) {
         String sql = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
                 "where person.old_id = person.record_id and \n" +
                 "person.record_id = (select record_id from ref_book_person where id = :id)\n" +
@@ -209,7 +209,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<RegistryPerson> fetchDuplicates(Long id) {
+    public List<RegistryPerson> findAllDuplicatesVersions(Long id) {
         String sql = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
                 "where person.old_id <> person.record_id and \n" +
                 "person.record_id = (select record_id from ref_book_person where id = :id)\n" +

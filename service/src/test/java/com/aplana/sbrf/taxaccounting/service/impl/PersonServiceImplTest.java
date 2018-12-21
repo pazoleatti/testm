@@ -119,7 +119,7 @@ public class PersonServiceImplTest {
 
         personService.fetchPersonData(id);
 
-        verify(personDao).fetchOriginal(id);
+        verify(personDao).findAllOriginalVersions(id);
     }
 
     @Test
@@ -386,6 +386,7 @@ public class PersonServiceImplTest {
         RegistryPersonDTO registryPersonDTO = mock(RegistryPersonDTO.class);
         IdDoc idDoc = mock(IdDoc.class);
         when(personDao.fetchPersonVersion(anyLong())).thenReturn(new RegistryPerson());
+        when(registryPersonDTO.getId()).thenReturn(1L);
         when(registryPersonDTO.getDocuments()).thenReturn(Permissive.of(Collections.singletonList(idDoc)));
         when(registryPersonDTO.getCitizenship()).thenReturn(Permissive.of(new RefBookCountry()));
         when(registryPersonDTO.getReportDoc()).thenReturn(Permissive.of(idDoc));

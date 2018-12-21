@@ -33,7 +33,7 @@ public class RefBookPersonDaoTest {
 
     @Test
     public void test_fetchOriginal() {
-        List<RegistryPerson> personVersions = personDao.fetchOriginal(3L);
+        List<RegistryPerson> personVersions = personDao.findAllOriginalVersions(3L);
         assertThat(personVersions).hasSize(1);
         assertThat(personVersions.get(0).getId()).isEqualTo(1L);
     }
@@ -369,7 +369,7 @@ public class RefBookPersonDaoTest {
 
     @Test
     public void test_fetchDuplicates() {
-        List<RegistryPerson> result = personDao.fetchDuplicates(1L);
+        List<RegistryPerson> result = personDao.findAllDuplicatesVersions(1L);
 
         assertThat(result)
                 .hasSize(3)

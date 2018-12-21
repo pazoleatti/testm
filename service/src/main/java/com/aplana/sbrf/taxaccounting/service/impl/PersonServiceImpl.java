@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -59,6 +58,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.*;
 
 /**
  * Сервис работы Физическими лицами. Заменяет некоторые операции провайдера справочников для лучшей производительности
@@ -156,9 +157,7 @@ public class PersonServiceImpl implements PersonService {
         forbidVipsDataByUserPermissions(resultData);
         RegistryPersonDTO result = resultData.get(0);
 
-        List<RegistryPerson> versions = refBookPersonDao.fetchOriginal(id);
-        RegistryPerson original = resolveVersion(versions, new Date());
-
+        RegistryPerson original = findOriginal(id);
         RegistryPersonDTO originalData = null;
         if (original != null) {
             originalData = convertPersonToDTO(Collections.singletonList(original), 1).get(0);
@@ -167,25 +166,8 @@ public class PersonServiceImpl implements PersonService {
         result.setOriginal(originalData);
 
         if (original == null) {
-            List<RegistryPerson> candidates = refBookPersonDao.fetchDuplicates(id);
-            Map<Long, List<RegistryPerson>> candidatesGroupedByOldId = new HashMap<>();
-            for (RegistryPerson candidate : candidates) {
-                List<RegistryPerson> group = candidatesGroupedByOldId.get(candidate.getOldId());
-                if (group == null) {
-                    group = new ArrayList<>();
-                    group.add(candidate);
-                    candidatesGroupedByOldId.put(candidate.getOldId(), group);
-                } else {
-                    group.add(candidate);
-                }
-            }
-
-            List<RegistryPerson> pickedDuplicates = new ArrayList<>();
-            for (List<RegistryPerson> groupContent : candidatesGroupedByOldId.values()) {
-                RegistryPerson duplicate = resolveVersion(groupContent, new Date());
-                pickedDuplicates.add(duplicate);
-            }
-            List<RegistryPersonDTO> duplicatesData = convertPersonToDTO(pickedDuplicates, pickedDuplicates.size());
+            List<RegistryPerson> duplicates = findAllDuplicates(id);
+            List<RegistryPersonDTO> duplicatesData = convertPersonToDTO(duplicates, duplicates.size());
             forbidVipsDataByUserPermissions(duplicatesData);
             result.setDuplicates(duplicatesData);
         }
@@ -226,66 +208,81 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setRecordId(personDTO.getRecordId());
         PersonChangeLogBuilder changeLogBuilder = new PersonChangeLogBuilder();
 
+        // Обновляем ДУЛы
         List<IdDoc> persistedIdDocs = idDocDaoImpl.getByPerson(personToPersist);
-        List<IdDoc> idDocsToCreate = new ArrayList<>();
-        List<IdDoc> idDocsToUpdate = new ArrayList<>();
-        List<IdDoc> idDocsToDelete = new ArrayList<>(persistedIdDocs);
+        {
+            List<IdDoc> idDocsToCreate = new ArrayList<>();
+            List<IdDoc> idDocsToUpdate = new ArrayList<>();
+            List<IdDoc> idDocsToDelete = new ArrayList<>(persistedIdDocs);
 
-        for (IdDoc idDoc : personDTO.getDocuments().value()) {
-            if (idDoc.getId() == null) {
-                idDocsToCreate.add(idDoc);
-            } else {
-                if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
-                    idDocsToUpdate.add(idDoc);
-                }
-                deleteById(idDocsToDelete, idDoc.getId());
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(idDocsToCreate)) {
-            idDocDaoImpl.createBatch(idDocsToCreate);
-            for (IdDoc idDoc : idDocsToCreate) {
-                changeLogBuilder.dulCreated(idDoc);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(idDocsToUpdate)) {
-            idDocDaoImpl.updateBatch(idDocsToUpdate);
-            for (IdDoc idDoc : idDocsToUpdate) {
-                changeLogBuilder.dulUpdated(idDoc);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(idDocsToDelete)) {
-            idDocDaoImpl.deleteByIds(getIds(idDocsToDelete));
-            for (IdDoc idDoc : idDocsToDelete) {
-                changeLogBuilder.dulDeleted(idDoc);
-            }
-        }
-
-        if (personDTO.getOriginal() == null) {
-            personToPersist.setRecordId(personDTO.getOldId());
-        } else {
-            personToPersist.setRecordId(personDTO.getOriginal().getRecordId());
-            refBookPersonDao.setOriginal(personDTO.getOriginal().getRecordId(), personDTO.getRecordId());
-        }
-
-        List<Long> deletedDuplicates = new ArrayList<>();
-        List<Long> duplicates = new ArrayList<>();
-        if (personDTO.getOriginal() == null && CollectionUtils.isNotEmpty(personDTO.getDuplicates())) {
-            for (RegistryPersonDTO duplicate : personDTO.getDuplicates()) {
-
-                if (duplicate.getRecordId().equals(duplicate.getOldId())) {
-                    deletedDuplicates.add(duplicate.getRecordId());
+            for (IdDoc idDoc : personDTO.getDocuments().value()) {
+                if (idDoc.getId() == null) {
+                    idDocsToCreate.add(idDoc);
                 } else {
-                    duplicates.add(duplicate.getOldId());
+                    if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
+                        idDocsToUpdate.add(idDoc);
+                    }
+                    removeById(idDocsToDelete, idDoc.getId());
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(idDocsToCreate)) {
+                idDocDaoImpl.createBatch(idDocsToCreate);
+                for (IdDoc idDoc : idDocsToCreate) {
+                    changeLogBuilder.dulCreated(idDoc);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(idDocsToUpdate)) {
+                idDocDaoImpl.updateBatch(idDocsToUpdate);
+                for (IdDoc idDoc : idDocsToUpdate) {
+                    changeLogBuilder.dulUpdated(idDoc);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(idDocsToDelete)) {
+                idDocDaoImpl.deleteByIds(getIds(idDocsToDelete));
+                for (IdDoc idDoc : idDocsToDelete) {
+                    changeLogBuilder.dulDeleted(idDoc);
                 }
             }
         }
-        if (CollectionUtils.isNotEmpty(duplicates)) {
-            refBookPersonDao.setDuplicates(duplicates, personDTO.getRecordId());
+
+        RegistryPerson persistedOriginal = findOriginal(personDTO.getId());
+        // Если оригинал изменился, то обновляем его
+        if (!(persistedOriginal == null && personDTO.getOriginal() == null ||
+                (persistedOriginal != null && persistedOriginal.getOldId().equals(personDTO.getOriginal() != null ? personDTO.getOriginal().getOldId() : null)))) {
+            if (personDTO.getOriginal() != null) { // Установлен оригинал
+                personToPersist.setRecordId(personDTO.getOriginal().getOldId());
+                refBookPersonDao.setOriginal(personDTO.getOriginal().getOldId(), personDTO.getRecordId());
+                changeLogBuilder.originalSet(personDTO.getOriginal());
+            } else { // Удален оригинал
+                personToPersist.setRecordId(personDTO.getOldId());
+                changeLogBuilder.originalDeleted(persistedOriginal);
+            }
         }
 
-        if (CollectionUtils.isNotEmpty(deletedDuplicates)) {
-            refBookPersonDao.deleteDuplicates(deletedDuplicates);
+        // Обновляем дубликаты (только если не назначен оригинал, в противном случае дубликаты сотрутся)
+        if (personDTO.getOriginal() == null && CollectionUtils.isNotEmpty(personDTO.getDuplicates())) {
+            List<RegistryPerson> persistedDuplicates = persistedOriginal == null ? findAllDuplicates(personDTO.getId()) : new ArrayList<RegistryPerson>();
+            List<RegistryPerson> duplicatesToPersist = new ArrayList<>();
+            for (RegistryPersonDTO duplicate : personDTO.getDuplicates()) {
+                duplicatesToPersist.add(refBookPersonDao.fetchPersonVersion(duplicate.getId()));
+            }
+            List<RegistryPerson> deletedDuplicates = new ArrayList<>(persistedDuplicates);
+            List<RegistryPerson> addedDuplicates = new ArrayList<>();
+            for (RegistryPerson duplicate : duplicatesToPersist) {
+                if (findByOldId(persistedDuplicates, duplicate.getOldId()) == null) {
+                    addedDuplicates.add(duplicate);
+                }
+                removeByOldId(deletedDuplicates, duplicate.getOldId());
+            }
+            if (CollectionUtils.isNotEmpty(addedDuplicates)) {
+                refBookPersonDao.setDuplicates(getOldIds(addedDuplicates), personDTO.getRecordId());
+                changeLogBuilder.duplicatesSet(addedDuplicates);
+            }
+            if (CollectionUtils.isNotEmpty(deletedDuplicates)) {
+                refBookPersonDao.deleteDuplicates(getOldIds(deletedDuplicates));
+                changeLogBuilder.duplicatesDeleted(deletedDuplicates);
+            }
         }
 
         personToPersist.setId(personDTO.getId());
@@ -296,7 +293,7 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setFirstName(personDTO.getFirstName());
         personToPersist.setMiddleName(personDTO.getMiddleName());
         personToPersist.setBirthDate(SimpleDateUtils.toStartOfDay(personDTO.getBirthDate()));
-        // Тут и ниже устанавливаем пустые объекты вместо null, т.к. сохранение работает через BeanPropertySqlParameterSource
+        // Тут и ниже устанавливаем пустые объекты вместо null, т.к. сохранение работает через BeanPropertySqlParameterSource, и оно иначе не будет работать
         personToPersist.setCitizenship(personDTO.getCitizenship().value() != null ? personDTO.getCitizenship().value() : new RefBookCountry());
         personToPersist.setSource(personDTO.getSource() != null ? personDTO.getSource() : new RefBookAsnu());
         if (personDTO.getReportDoc().value() != null) {
@@ -501,6 +498,33 @@ public class PersonServiceImpl implements PersonService {
         return result;
     }
 
+    private RegistryPerson findOriginal(long id) {
+        List<RegistryPerson> versions = refBookPersonDao.findAllOriginalVersions(id);
+        return resolveVersion(versions, new Date());
+    }
+
+    private List<RegistryPerson> findAllDuplicates(long id) {
+        List<RegistryPerson> candidates = refBookPersonDao.findAllDuplicatesVersions(id);
+        Map<Long, List<RegistryPerson>> candidatesGroupedByOldId = new HashMap<>();
+        for (RegistryPerson candidate : candidates) {
+            List<RegistryPerson> group = candidatesGroupedByOldId.get(candidate.getOldId());
+            if (group == null) {
+                group = new ArrayList<>();
+                group.add(candidate);
+                candidatesGroupedByOldId.put(candidate.getOldId(), group);
+            } else {
+                group.add(candidate);
+            }
+        }
+
+        List<RegistryPerson> pickedDuplicates = new ArrayList<>();
+        for (List<RegistryPerson> groupContent : candidatesGroupedByOldId.values()) {
+            RegistryPerson duplicate = resolveVersion(groupContent, new Date());
+            pickedDuplicates.add(duplicate);
+        }
+        return pickedDuplicates;
+    }
+
     /**
      * Выбирает версию из списка версий по следующему правилу:
      * 1. Если есть актуальная версия, выбирает эту версию.
@@ -535,30 +559,30 @@ public class PersonServiceImpl implements PersonService {
         return null;
     }
 
-    private <T extends Number, E extends IdentityObject<T>> List<T> getIds(Collection<E> objects) {
-        List<T> ids = new ArrayList<>();
-        for (E object : objects) {
-            ids.add(object.getId());
+    private static List<Long> getOldIds(Collection<RegistryPerson> persons) {
+        List<Long> ids = new ArrayList<>();
+        for (RegistryPerson person : persons) {
+            ids.add(person.getOldId());
         }
         return ids;
     }
 
-    private <T extends Number, E extends IdentityObject<T>> E findById(Collection<E> objects, T id) {
-        for (E object : objects) {
-            if (id.equals(object.getId())) {
-                return object;
-            }
-        }
-        return null;
-    }
-
-    private <T extends Number, E extends IdentityObject<T>> void deleteById(Collection<E> objects, T id) {
-        for (Iterator<E> iterator = objects.iterator(); iterator.hasNext(); ) {
-            E object = iterator.next();
-            if (id.equals(object.getId())) {
+    private static void removeByOldId(Collection<RegistryPerson> persons, long recordId) {
+        for (Iterator<RegistryPerson> iterator = persons.iterator(); iterator.hasNext(); ) {
+            RegistryPerson person = iterator.next();
+            if (recordId == person.getOldId()) {
                 iterator.remove();
                 return;
             }
         }
+    }
+
+    private static RegistryPerson findByOldId(Collection<RegistryPerson> persons, long recordId) {
+        for (RegistryPerson person : persons) {
+            if (recordId == person.getOldId()) {
+                return person;
+            }
+        }
+        return null;
     }
 }
