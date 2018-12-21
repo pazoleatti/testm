@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Сервис работы Физическими лицами. Заменяет некоторые операции провайдера справочников для лучшей производительности
@@ -261,7 +262,7 @@ public class PersonServiceImpl implements PersonService {
         }
 
         // Обновляем дубликаты (только если не назначен оригинал, в противном случае дубликаты сотрутся)
-        if (personDTO.getOriginal() == null && CollectionUtils.isNotEmpty(personDTO.getDuplicates())) {
+        if (personDTO.getOriginal() == null) {
             List<RegistryPerson> persistedDuplicates = persistedOriginal == null ? findAllDuplicates(personDTO.getId()) : new ArrayList<RegistryPerson>();
             List<RegistryPerson> duplicatesToPersist = new ArrayList<>();
             for (RegistryPersonDTO duplicate : personDTO.getDuplicates()) {
@@ -329,7 +330,10 @@ public class PersonServiceImpl implements PersonService {
         changeLogBuilder.personInfoUpdated(persistedPerson, personToPersist);
 
         refBookPersonDao.updateRegistryPerson(personToPersist);
-        logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, changeLogBuilder.build(), userInfo);
+        String note = changeLogBuilder.build();
+        if (isNotEmpty(note)) {
+            logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, note, userInfo);
+        }
     }
 
     @Override
