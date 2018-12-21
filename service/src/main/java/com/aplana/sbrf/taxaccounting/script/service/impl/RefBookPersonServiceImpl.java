@@ -110,18 +110,18 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                     if (identificatedPerson.getWeight() > treshold) {
                         StringBuilder msg = new StringBuilder();
                         //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
+                        NaturalPerson declarationDataPerson = identificationData.getNaturalPerson();
+                        msg.append("Раздел 1 Строка")
+                                .append(declarationDataPerson.getNum())
+                                .append(". ")
+                                .append("Для физического лица ")
+                                .append(buildFio(declarationDataPerson))
+                                .append(", ")
+                                .append(!declarationDataPerson.getDocuments().isEmpty() ? declarationDataPerson.getDocuments().get(0).getDocType().getName() : "")
+                                .append(" № ")
+                                .append(!declarationDataPerson.getDocuments().isEmpty() ? declarationDataPerson.getDocuments().get(0).getDocumentNumber() : "");
                         if (personDataList.size() > 1) {
-                            NaturalPerson declarationDataPerson = identificationData.getNaturalPerson();
-                            msg.append("Раздел 1 Строка")
-                                    .append(declarationDataPerson.getNum())
-                                    .append(". ")
-                                    .append("Для физического лица ")
-                                    .append(buildFio(declarationDataPerson))
-                                    .append(", ")
-                                    .append(!declarationDataPerson.getDocuments().isEmpty() ? declarationDataPerson.getDocuments().get(0).getDocType().getName() : "")
-                                    .append(" № ")
-                                    .append(!declarationDataPerson.getDocuments().isEmpty() ? declarationDataPerson.getDocuments().get(0).getDocumentNumber() : "")
-                                    .append(" Найдены записи в реестре ФЛ:\n");
+                            msg.append(" Найдены записи в реестре ФЛ:\n");
                             for (NaturalPerson refBookPerson : personDataList) {
                                 msg.append("Идентификатор ФЛ: ")
                                         .append(refBookPerson.getRecordId())
@@ -131,15 +131,15 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                                         .append(df.format(refBookPerson.getWeight()))
                                         .append(")\n");
                             }
-                            msg.append("Выбрана запись с параметрами  Идентификатор ФЛ: ")
-                                    .append(identificatedPerson.getRecordId())
-                                    .append(", ФИО: ")
-                                    .append(buildFio((identificatedPerson)))
-                                    .append(" (схожесть: ")
-                                    .append(df.format(identificatedPerson.getWeight()))
-                                    .append(")");
-                            logger.infoExp(msg.toString(), "", String.format("%s, ИНП: %s", buildFio(declarationDataPerson), declarationDataPerson.getPersonIdentifier().getInp()));
                         }
+                        msg.append(" Выбрана запись с параметрами  Идентификатор ФЛ: ")
+                                .append(identificatedPerson.getRecordId())
+                                .append(", ФИО: ")
+                                .append(buildFio((identificatedPerson)))
+                                .append(" (схожесть: ")
+                                .append(df.format(identificatedPerson.getWeight()))
+                                .append(")");
+                        logger.infoExp(msg.toString(), "", String.format("%s, ИНП: %s", buildFio(declarationDataPerson), declarationDataPerson.getPersonIdentifier().getInp()));
 
                         return (NaturalPerson) identificatedPerson;
                     } else {
