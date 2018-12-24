@@ -129,5 +129,9 @@ public class DeclarationResult {
      * Признак, показывающий необходимость корректировки отрицательных значений
      */
     private boolean adjustNegativeValues;
+    /**
+     * Номер корректировки
+     */
+    private Integer correctionNum;
 
 }

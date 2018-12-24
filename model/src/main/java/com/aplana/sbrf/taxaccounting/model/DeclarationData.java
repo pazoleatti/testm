@@ -88,7 +88,10 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * КПП, включаемые в КНФ для обособленного подразделения (см {@link RefBookKnfType})
      */
     private Set<String> includedKpps;
-
+    /**
+     * Номер корректировки
+     */
+    private Integer correctionNum;
     /**
      * Проверка статуса формы.
      */

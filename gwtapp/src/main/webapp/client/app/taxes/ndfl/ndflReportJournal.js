@@ -123,7 +123,8 @@
                         taxOrganKpp: $scope.searchFilter.params.kpp,
                         taxOrganCode: $scope.searchFilter.params.codeNo,
                         correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
-                        reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
+                        reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
+                        correctionNum: $scope.searchFilter.params.correctionNum
                     };
                 }
 
@@ -146,6 +147,7 @@
                             $filter('translate')('title.department'),
                             $filter('translate')('title.period'),
                             $filter('translate')('title.state'),
+                            $filter('translate')('title.correctionNum'),
                             $filter('translate')('title.kpp'),
                             $filter('translate')('title.oktmo'),
                             $filter('translate')('title.codeNO'),
@@ -165,6 +167,7 @@
                             {name: 'department', index: 'department', width: 200},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 175},
                             {name: 'state', index: 'state', width: 100},
+                            {name: 'correctionNum', index: 'correction_num', width: 110},
                             {name: 'kpp', index: 'kpp', width: 85},
                             {name: 'oktmo', index: 'oktmo', width: 80},
                             {name: 'taxOrganCode', index: 'taxOrganCode', width: 70},

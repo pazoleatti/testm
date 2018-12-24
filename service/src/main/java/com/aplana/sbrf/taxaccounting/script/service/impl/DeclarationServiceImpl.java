@@ -100,11 +100,6 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public List<DeclarationData> find(String fileName) {
-        return declarationDataDao.find(fileName);
-    }
-
-    @Override
     public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
     }

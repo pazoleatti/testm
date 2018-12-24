@@ -72,6 +72,10 @@ public class DeclarationDataFilter implements Serializable {
 
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
+    /**
+     * Номер корректировки
+     */
+    private Integer correctionNum;
 
     /**
      * мапа ключ-идентификатор типа налоговой формы, значение-Список идентификаторов подразделений,

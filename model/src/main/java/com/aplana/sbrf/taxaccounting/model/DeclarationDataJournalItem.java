@@ -83,6 +83,10 @@ public class DeclarationDataJournalItem implements Serializable {
      */
     private String note;
     /**
+     * Номер корректировки
+     */
+    private Integer correctionNum;
+    /**
      * Права
      */
     private long permissions;

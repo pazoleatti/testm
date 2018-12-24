@@ -376,7 +376,8 @@ create table declaration_data (
   doc_state_id                number(18),
   manually_created            number(1) default 0 not null,
   last_data_modified          date,
-  adjust_negative_values      number(1) default 0 not null
+  adjust_negative_values      number(1) default 0 not null,
+  correction_num              number(3)
 );
 
 comment on table declaration_data is 'Налоговые формы';

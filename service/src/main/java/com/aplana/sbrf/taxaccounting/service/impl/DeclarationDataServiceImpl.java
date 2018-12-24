@@ -324,6 +324,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             logEntryService.save(logger.getEntries()));
                 }
 
+                if (declarationTemplate.getDeclarationFormKind() == DeclarationFormKind.REPORTS && newDeclaration.getCorrectionNum() == null) {
+                    newDeclaration.setCorrectionNum(0);
+                }
                 long id = declarationDataDao.create(newDeclaration);
 
                 logBusinessService.logFormEvent(id, FormDataEvent.CREATE, null, userInfo);
@@ -919,6 +922,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setKpp(declaration.getKpp());
             result.setOktmo(declaration.getOktmo());
             result.setTaxOrganCode(declaration.getTaxOrganCode());
+            result.setCorrectionNum(declaration.getCorrectionNum());
             if (declaration.getDocState() != null) {
                 RefBookDataProvider stateEDProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
                 result.setDocState(stateEDProvider.getRecordData(declaration.getDocState()).get("NAME").getStringValue());
