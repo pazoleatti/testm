@@ -29,12 +29,11 @@ public interface DeclarationDataScriptingService {
      * Выполняет скрипт декларации (DeclarationTemplate.script) по определенному событию(без сохранения изменений в БД).
      * @param userInfo информация о текущем пользоваетеле
      * @param declarationTemplate макет декларации
-     * @param declarationData данные декларации
      * @param event событие
      * @param logger логгер для сохранения ошибок выполнения скриптов
      * @param exchangeParams параметры для обратной связи ядра со скриптом
      * @return true - скрипт был исполнен, false - скрипт не запускался
      */
-    boolean executeScriptInNewReadOnlyTransaction(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DeclarationData declarationData, FormDataEvent event, Logger logger,
-                          Map<String, Object> exchangeParams);
+    boolean executeScriptInNewReadOnlyTransaction(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, FormDataEvent event, Logger logger,
+                                                  Map<String, Object> exchangeParams);
 }

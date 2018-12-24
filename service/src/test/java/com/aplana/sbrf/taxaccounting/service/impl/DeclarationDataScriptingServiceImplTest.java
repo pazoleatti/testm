@@ -159,7 +159,7 @@ public class DeclarationDataScriptingServiceImplTest {
         template.setType(declarationType);
         template.setCreateScript(script);
 
-        service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
+        service.executeScriptInNewReadOnlyTransaction(null, template, FormDataEvent.CHECK_SCRIPT, logger, null);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class DeclarationDataScriptingServiceImplTest {
         template.setType(declarationType);
         template.setCreateScript(script);
 
-        service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
+        service.executeScriptInNewReadOnlyTransaction(null, template, FormDataEvent.CHECK_SCRIPT, logger, null);
 
         assertFalse(logger.containsLevel(LogLevel.ERROR));
     }

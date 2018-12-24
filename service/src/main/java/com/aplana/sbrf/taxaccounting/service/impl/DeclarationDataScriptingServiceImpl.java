@@ -101,12 +101,12 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     }
 
     @Override
-    public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final DeclarationTemplate declarationTemplate, final DeclarationData declarationData, final FormDataEvent event,
+    public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final DeclarationTemplate declarationTemplate, final FormDataEvent event,
                                                          final Logger logger, final Map<String, Object> exchangeParams) {
         return tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
             @Override
             public Boolean execute() {
-                return executeScript(userInfo, declarationTemplate, declarationData, null, event, logger, exchangeParams);
+                return executeScript(userInfo, declarationTemplate, null, null, event, logger, exchangeParams);
             }
         });
     }
@@ -131,7 +131,9 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
         b.put("userInfo", userInfo);
-		b.put("declarationData", declarationData);
+        if (declarationData != null) {
+			b.put("declarationData", declarationData);
+		}
 
 		String applicationVersion = "ФП «НДФЛ»";
 		applicationVersion += " " + applicationInfo.getVersion();

@@ -189,10 +189,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return;
         Logger tempLogger = new Logger();
         try {
-            // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
-            DeclarationData declaration = new DeclarationData();
-
-            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userInfo, declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
+            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userInfo, declarationTemplate, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
             if (tempLogger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceException("Обнаружены фатальные ошибки!");
             }
