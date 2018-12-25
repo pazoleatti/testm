@@ -122,11 +122,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         if (checks != null && !oldChecks.containsAll(checks) && !checks.containsAll(oldChecks)) {
             declarationTemplateService.updateChecks(checks, declarationTemplate.getId());
             auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),
-                    declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, "Обновлена информация о фатальности проверок НФ", null);
+                    declarationTemplateService.getDTEndDate(id), null, declarationTemplate.getName(), "Обновлена информация о фатальности проверок НФ", null);
         }
 
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),
-                declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
+                declarationTemplateService.getDTEndDate(id), null, declarationTemplate.getName(), null, null);
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
 
         return true;
