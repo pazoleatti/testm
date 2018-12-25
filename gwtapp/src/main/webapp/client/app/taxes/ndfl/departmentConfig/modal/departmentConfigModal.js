@@ -23,15 +23,17 @@
                 // Валидация КПП полей
                 $scope.isKppValid = function ($value) {
                     var set = ["01", "02", "03", "05", "31", "32", "43", "45"];
-                    return !$value || $value.length !== 9 || set.indexOf($value.substring(4, 6)) !== -1
+                    return !$value || $value.length !== 9 || set.indexOf($value.substring(4, 6)) !== -1;
                 };
                 // Валидация дат актуальности
-                $scope.isVersionDatesValid = function(dateFrom, dateTo) {
-                    return dateFrom == null || dateTo == null || toDate(dateFrom)< toDate(dateTo);
+                $scope.isVersionDatesValid = function (dateFrom, dateTo) {
+                    return !dateFrom || !dateTo || toDate(dateFrom) < toDate(dateTo);
                 };
+
                 function toDate(value) {
                     return typeof value === 'string' ? new Date(value) : value;
                 }
+
                 // Создание записи настроек подразделений
                 function createDepartmentConfig() {
                     $logPanel.close();
@@ -39,11 +41,11 @@
                         method: "POST",
                         url: "controller/actions/departmentConfig/create",
                         data: JSON.stringify(angular.extend({}, $scope.record, {
-                            department: {id : $scope.record.department.id, name: $scope.record.department.name},
-                            oktmo: {id : $scope.record.oktmo.id, code : $scope.record.oktmo.code},
-                            presentPlace: {id : $scope.record.presentPlace.id},
-                            signatoryMark: {id : $scope.record.signatoryMark.id},
-                            reorganization: $scope.record.reorganization ? {id : $scope.record.reorganization.id} : undefined
+                            department: {id: $scope.record.department.id, name: $scope.record.department.name},
+                            oktmo: {id: $scope.record.oktmo.id, code: $scope.record.oktmo.code},
+                            presentPlace: {id: $scope.record.presentPlace.id},
+                            signatoryMark: {id: $scope.record.signatoryMark.id},
+                            reorganization: $scope.record.reorganization ? {id: $scope.record.reorganization.id} : undefined
                         }))
                     }).then(function (response) {
                         if (response.data.uuid) {
@@ -56,6 +58,7 @@
                         }
                     });
                 }
+
                 // Изменение записи настроек подразделений
                 function updateDepartmentConfig() {
                     $logPanel.close();
@@ -63,11 +66,11 @@
                         method: "POST",
                         url: "controller/actions/departmentConfig/update",
                         data: JSON.stringify(angular.extend({}, $scope.record, {
-                            department: {id : $scope.record.department.id, name: $scope.record.department.name},
-                            oktmo: {id : $scope.record.oktmo.id, code : $scope.record.oktmo.code},
-                            presentPlace: {id : $scope.record.presentPlace.id},
-                            signatoryMark: {id : $scope.record.signatoryMark.id},
-                            reorganization: $scope.record.reorganization ? {id : $scope.record.reorganization.id} : undefined
+                            department: {id: $scope.record.department.id, name: $scope.record.department.name},
+                            oktmo: {id: $scope.record.oktmo.id, code: $scope.record.oktmo.code},
+                            presentPlace: {id: $scope.record.presentPlace.id},
+                            signatoryMark: {id: $scope.record.signatoryMark.id},
+                            reorganization: $scope.record.reorganization ? {id: $scope.record.reorganization.id} : undefined
                         }))
                     }).then(function (response) {
                         if (response.data.uuid) {
@@ -80,6 +83,7 @@
                         }
                     });
                 }
+
                 // Вход в режим редактирования
                 $scope.edit = function () {
                     $scope.mode = 'EDIT';

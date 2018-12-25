@@ -66,13 +66,6 @@ public interface DeclarationService {
     DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     /**
-     * Поиск деклараций по имени файла
-     *
-     * @param fileName - имя файла
-     */
-    List<DeclarationData> find(String fileName);
-
-    /**
      * Найти все декларации созданные в отчетном периоде
      */
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
@@ -177,6 +170,7 @@ public interface DeclarationService {
     /**
      * Получние id для всех деклараций по фильтру.
      */
+    @Deprecated
     List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
 
 

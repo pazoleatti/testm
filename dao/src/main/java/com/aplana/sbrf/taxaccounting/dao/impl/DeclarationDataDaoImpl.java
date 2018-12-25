@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,9 +64,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public DeclarationData get(long declarationDataId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.last_data_modified, " +
-                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id AS knf_type_id, knf_type.name AS knf_type_name " +
+                    "select " + DeclarationDataRowMapper.FIELDS +
                             "from declaration_data dd " +
                             "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
                             "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
@@ -82,9 +81,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> get(List<Long> declarationDataIds) {
         try {
             return getJdbcTemplate().query(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.last_data_modified, " +
-                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
+                    "select " + DeclarationDataRowMapper.FIELDS +
                             "from declaration_data dd " +
                             "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
                             "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
@@ -145,9 +142,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             params.addValue("asnuId", asnuId);
             params.addValue("fileName", fileName != null ? fileName.toLowerCase() : null);
             return getNamedParameterJdbcTemplate().queryForObject(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
+                    "select " + DeclarationDataRowMapper.FIELDS +
                             "from declaration_data dd " +
                             "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
                             "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
@@ -167,22 +162,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     departmentReportPeriodId
             );
         }
-    }
-
-    @Override
-    public List<DeclarationData> find(String fileName) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("fileName", fileName.toLowerCase());
-        return getNamedParameterJdbcTemplate().query(
-                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                        "dd.department_report_periodd, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_cr_ieated, " +
-                        "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
-                        "from declaration_data dd " +
-                        "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
-                        "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                        "where lower(file_name) = :fileName",
-                params, new DeclarationDataRowMapper()
-        );
     }
 
     @Override
@@ -210,9 +189,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentReportPeriodId", departmentReportPeriodId);
         params.addValue("declarationTypeId", declarationTypeId);
-        String sql = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                "dd.adjust_negative_values, drp.report_period_id, drp.department_id, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
+        String sql = "select " + DeclarationDataRowMapper.FIELDS +
                 "from declaration_data dd " +
                 "inner join department_report_period drp on dd.department_report_period_id = drp.id\n" +
                 "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
@@ -264,6 +241,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         item.setTaxOrganCode(rs.getString("taxOrganCode"));
                         item.setDocState(rs.getString("docState"));
                         item.setNote(rs.getString("note"));
+                        item.setCorrectionNum(SqlUtils.getInteger(rs, "correction_num"));
                         return item;
                     }
                 }
@@ -285,16 +263,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder(
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
-                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, log_b.log_date creationDate, su.name creationUserName,\n" +
+                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, log_b.log_date creationDate, " +
+                        "   nvl(su.name, log_b.user_login) creationUserName,\n" +
                         "   case when drp.correction_date is not null then" +
                         "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')'" +
                         "       else tp.year || ': ' || rp.name end as reportPeriod,\n" +
-                        "   dd.kpp, dd.oktmo, dd.tax_organ_code taxOrganCode, doc_state.name docState, dd.note\n" +
+                        "   dd.kpp, dd.oktmo, dd.tax_organ_code taxOrganCode, doc_state.name docState, dd.note, dd.correction_num\n" +
                         "from DECLARATION_DATA dd\n" +
                         "left join REF_BOOK_ASNU asnu on asnu.id = dd.asnu_id\n" +
                         "left join REF_BOOK_KNF_TYPE knf_type on knf_type.id = dd.knf_type_id\n" +
                         "inner join LOG_BUSINESS log_b on log_b.DECLARATION_DATA_ID = dd.id and log_b.event_id = 1\n" +
-                        "inner join SEC_USER su on su.login = log_b.user_login\n" +
+                        "left join SEC_USER su on su.login = log_b.user_login\n" +
                         "inner join DECLARATION_TEMPLATE dt on dt.id = dd.declaration_template_id\n" +
                         "inner join DECLARATION_TYPE dtype on dtype.id = dt.declaration_type_id\n" +
                         "inner join DECLARATION_KIND dkind on dkind.id = dt.form_kind\n" +
@@ -306,6 +285,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "inner join DEPARTMENT_FULLPATH dep_fullpath on dep_fullpath.id = dep.id\n" +
                         "left join REF_BOOK_DOC_STATE doc_state on doc_state.id = dd.doc_state_id\n" +
                         "where (:declarationDataId is null or dd.id like '%' || :declarationDataId || '%')\n" +
+                        "   and (:correctionNum is null or dd.correction_num like '%' || :correctionNum || '%')\n" +
                         "   and (:fileName is null or upper(dd.file_name) like '%' || upper(:fileName) || '%')\n" +
                         "   and (:kpp is null or upper(dd.kpp) like '%' || upper(:kpp) || '%')\n" +
                         "   and (:oktmo is null or upper(dd.oktmo) like '%' || upper(:oktmo) || '%')\n" +
@@ -313,6 +293,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "   and (:taxOrganCode is null or upper(dd.tax_organ_code) like '%' || upper(:taxOrganCode) || '%')\n"
         );
         params.addValue("declarationDataId", filter.getDeclarationDataId());
+        params.addValue("correctionNum", filter.getCorrectionNum());
         params.addValue("fileName", filter.getFileName());
         params.addValue("kpp", filter.getTaxOrganKpp());
         params.addValue("oktmo", filter.getOktmo());
@@ -417,12 +398,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("manually_created", declarationData.isManuallyCreated());
         params.addValue("last_data_modified", declarationData.isManuallyCreated() ? null : new Date());
         params.addValue("adjust_negative_values", declarationData.isAdjustNegativeValues());
+        params.addValue("correction_num", declarationData.getCorrectionNum());
 
         getNamedParameterJdbcTemplate().update("" +
                         "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
-                        "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values) " +
+                        "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, correction_num) " +
                         "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
-                        "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values)",
+                        "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, :correction_num)",
                 params);
 
         if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
@@ -587,6 +569,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
     }
 
+    @Deprecated
     private void appendSelectClause(StringBuilder sql) {
         sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.state, dec.tax_organ_code, dec.kpp, dec.oktmo, ")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
@@ -595,8 +578,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
-                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,").append(" (select lb.log_date from log_business lb where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date,")
-                .append(" (select su.name from log_business lb join sec_user su on su.login=lb.user_login where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_name");
+                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,").append(" (select lb.log_date from log_business lb where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date");
     }
 
     private void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
@@ -757,9 +739,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         try {
-            String select = "SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, dd.department_report_period_id, " +
-                    "dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.adjust_negative_values, drp.report_period_id, " +
-                    "drp.department_id, rownum, knf_type.id AS knf_type_id, knf_type.name AS knf_type_name \n" +
+            String select = "SELECT " + DeclarationDataRowMapper.FIELDS +
                     "FROM declaration_data dd \n" +
                     "INNER JOIN department_report_period drp ON dd.department_report_period_id = drp.id\n" +
                     "INNER JOIN declaration_template dt ON dt.id = dd.declaration_template_id\n" +
@@ -780,9 +760,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         String sql =
-                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                        "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
+                "select " + DeclarationDataRowMapper.FIELDS +
                         "from DECLARATION_DATA dd " +
                         "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
                         "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
@@ -809,10 +787,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo) {
-        String query = "select " +
-                "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, knf_type.name as knf_type_name " +
+        String query = "select " + DeclarationDataRowMapper.FIELDS +
                 "from declaration_data dd " +
                 "join declaration_template dt on dt.id = dd.declaration_template_id " +
                 "join department_report_period drp on drp.ID = dd.department_report_period_id " +
@@ -905,6 +880,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
+        final static String FIELDS = " dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
+                "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, " +
+                "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num ";
+
         @Override
         public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
             DeclarationData d = new DeclarationData();
@@ -927,9 +907,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
             d.setManuallyCreated(SqlUtils.getInteger(rs, "manually_created") == 1);
             d.setAdjustNegativeValues(SqlUtils.getInteger(rs, "adjust_negative_values") == 1);
-            if (SqlUtils.isExistColumn(rs, "last_data_modified") && rs.getTimestamp("last_data_modified") != null) {
-                d.setLastDataModifiedDate(new Date(rs.getTimestamp("last_data_modified").getTime()));
+            Timestamp modifiedDate = rs.getTimestamp("last_data_modified");
+            if (modifiedDate != null) {
+                d.setLastDataModifiedDate(new Date(modifiedDate.getTime()));
             }
+            d.setCorrectionNum(SqlUtils.getInteger(rs, "correction_num"));
             return d;
         }
     }

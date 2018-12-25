@@ -88,6 +88,6 @@ public class LogBusinessDaoTest {
         logBusiness.setNote("the best note");
         logBusinessDao.create(logBusiness);
 
-        assertEquals("controlBank", logBusinessDao.getFormCreationUserName(1));
+        assertEquals("Контролёр Банка", logBusinessDao.getFormCreationUserName(1));
     }
 }

@@ -171,13 +171,6 @@ public interface DeclarationDataDao extends PermissionDao {
                          Long asnuId,
                          String fileName);
 
-    /**
-     * Поиск деклараций по имени файла
-     *
-     * @param fileName - имя файла
-     */
-    List<DeclarationData> find(String fileName);
-
     List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
 
     /**

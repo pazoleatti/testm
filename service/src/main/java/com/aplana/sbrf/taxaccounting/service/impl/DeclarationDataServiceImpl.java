@@ -324,6 +324,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             logEntryService.save(logger.getEntries()));
                 }
 
+                if (declarationTemplate.getDeclarationFormKind() == DeclarationFormKind.REPORTS && newDeclaration.getCorrectionNum() == null) {
+                    newDeclaration.setCorrectionNum(0);
+                }
                 long id = declarationDataDao.create(newDeclaration);
 
                 logBusinessService.logFormEvent(id, FormDataEvent.CREATE, null, userInfo);
@@ -878,8 +881,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DeclarationData declaration = get(declarationDataId, userInfo);
             result.setId(declarationDataId);
             result.setDepartmentId(declaration.getDepartmentId());
-            result.setDepartment(departmentService.getParentsHierarchy(
-                    declaration.getDepartmentId()));
+            result.setDepartment(departmentService.getParentsHierarchy(declaration.getDepartmentId()));
 
             result.setState(declaration.getState().getTitle());
             result.setManuallyCreated(declaration.isManuallyCreated());
@@ -887,11 +889,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setActualDataDate(new Date());
             result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
             result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
-
-            String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
-            if (userLogin != null && !userLogin.isEmpty()) {
-                result.setCreationUserName(taUserService.getUser(userLogin).getName());
-            }
+            result.setCreationUserName(logBusinessService.getFormCreationUserName(declaration.getId()));
 
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
             result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
@@ -919,6 +917,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setKpp(declaration.getKpp());
             result.setOktmo(declaration.getOktmo());
             result.setTaxOrganCode(declaration.getTaxOrganCode());
+            result.setCorrectionNum(declaration.getCorrectionNum());
             if (declaration.getDocState() != null) {
                 RefBookDataProvider stateEDProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
                 result.setDocState(stateEDProvider.getRecordData(declaration.getDocState()).get("NAME").getStringValue());

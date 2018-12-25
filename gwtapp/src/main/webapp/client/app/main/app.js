@@ -98,6 +98,7 @@
         "messageDialog.toDo.message": "Функционал находится в разработке",
 
         "common.validation.pattern.number": "Поле должно содержать только цифры от 0 до 9",
+        "common.validation.pattern.number3": "Поле должно содержать только цифры от 0 до 3",
         "common.validation.pattern.error": "Некорректный формат записи",
         "common.validation.snils": "Значение поля должно соответствовать формату \"ХХХ-ХХХ-ХХХ ХХ\"",
         "common.validation.number": "В поле могут вводиться только цифры",
@@ -352,6 +353,7 @@
         "title.terBank": "Тербанк",
         "title.importance": "Важность",
         "title.region": "Регион",
+        "title.correctionNum": "Номер корректировки",
 
         "title.amountCalcIncome": "Начислено",
         "title.amountPaymentIncome": "Выплачено",
@@ -1136,7 +1138,7 @@
         'aplana.modal',
         'aplana.modal.dialogs',
         // Модули приложения
-        'app.inputDecorator',
+        'app.FixIEClearButton',
         'app.treeMenu',
         'app.header',
         'app.footer',
