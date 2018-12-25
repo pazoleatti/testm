@@ -232,4 +232,32 @@
 		</update>
 	</changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6298 - Обязательность полей таблиц связанных с ФЛ-->
+    <changeSet id="3.4-amandzyak-15" author="amandzyak">
+        <sql>
+			alter table ref_book_id_doc modify person_id not null
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6298 - Обязательность полей таблиц связанных с ФЛ-->
+    <changeSet id="3.4-amandzyak-16" author="amandzyak">
+        <sql>
+			alter table ref_book_id_doc modify doc_id not null
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6298 - Обязательность полей таблиц связанных с ФЛ-->
+    <changeSet id="3.4-amandzyak-17" author="amandzyak">
+        <sql>
+			alter table ref_book_id_doc modify doc_number not null
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6298 - Обязательность полей таблиц связанных с ФЛ-->
+    <changeSet id="3.4-amandzyak-18" author="amandzyak">
+        <sql>
+			alter table ref_book_person modify old_id not null
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
