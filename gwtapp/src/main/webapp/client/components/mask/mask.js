@@ -547,6 +547,7 @@ angular.module('ui.mask', [])
                         if (eventWhich === 16 || eventWhich === 91) {
                             return;
                         }
+                        console.log(e.type);
 
                         var val = iElement.val(),
                             valOld = oldValue,
