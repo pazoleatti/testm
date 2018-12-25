@@ -86,8 +86,8 @@
                         data: $scope.inpList,
                         colNames: [
                             '',
-                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.asnu'),
-                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.inp')
+                            $filter('translate')('refBook.fl.card.tabs.inp.tabColumnHeader.asnu'),
+                            $filter('translate')('refBook.fl.card.tabs.inp.tabColumnHeader.inp')
                         ],
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
@@ -191,8 +191,8 @@
                         datatype: "local",
                         colNames: [
                             '',
-                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.tb'),
-                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.date')
+                            $filter('translate')('refBook.fl.card.tabs.tb.tabColumnHeader.tb'),
+                            $filter('translate')('refBook.fl.card.tabs.tb.tabColumnHeader.date')
                         ],
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
@@ -371,14 +371,23 @@
                 };
 
                 /**
-                 * @description Сохранить изменения
+                 * Очистить временные идентификаторы у созданных элементов
                  */
-                $scope.save = function () {
-                    angular.forEach($scope.personParam.documents.value, function (item) {
+                var eraseTempId = function(items) {
+                    angular.forEach(items, function (item) {
                         if (item.tempId) {
                             item.id = null;
                         }
-                    });
+                    })
+                };
+
+                /**
+                 * @description Сохранить изменения
+                 */
+                $scope.save = function () {
+                    eraseTempId($scope.personParam.documents.value);
+                    eraseTempId($scope.personParam.personIdentityList);
+                    eraseTempId($scope.personParam.personTbList);
                     $scope.personParam.vip = $scope.personParam.vipSelect.value;
                     $http({
                         method: "POST",
@@ -635,6 +644,209 @@
 
                 $scope.$watchGroup(['personParam.startDate', 'personParam.endDate'], function () {
                     $scope.validateVersionDates();
+                });
+
+                /**
+                 * @description Редактировать ИНП
+                 * @param mode  режим редактирования
+                 */
+                var editInp = function(mode) {
+                    var title;
+                    var inp;
+                    switch (mode) {
+                        case APP_CONSTANTS.MODE.CREATE:
+                            title = $filter('translate')('refBook.fl.card.tabs.inp.modal.title.create');
+                            inp = {
+                                id: new Date().getTime(),
+                                person: {id: $scope.personParam.id},
+                                tempId: true
+                            };
+                            break;
+                        case APP_CONSTANTS.MODE.EDIT:
+                            title = $filter('translate')('refBook.fl.card.tabs.inp.modal.title.edit');
+                            inp = $scope.inpListGrid.value[0];
+                            break;
+                    }
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/refbooks/personCard/modal/inpModal.html',
+                        controller: 'inpModalCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    inp: inp,
+                                    mode: mode
+                                };
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Добавить ИНП
+                 */
+                $scope.addInp = function() {
+                    editInp(APP_CONSTANTS.MODE.CREATE)
+                };
+
+                /**
+                 * @description Редактировать ИНП
+                 */
+                $scope.editInp = function() {
+                    editInp(APP_CONSTANTS.MODE.EDIT)
+                };
+
+                /**
+                 * @description Удалить ИНП
+                 */
+                $scope.deleteInp = function() {
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('refBook.fl.card.tabs.inp.deleteDialog.title'),
+                        content: $filter('translate')('refBook.fl.card.tabs.inp.deleteDialog.content'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            var i = 0;
+                            var deleteIndex = -1;
+                            angular.forEach($scope.personParam.personIdentityList, function (item) {
+                                if (item.id === $scope.inpListGrid.value[0].id) {
+                                    deleteIndex = i;
+                                }
+                                i++;
+                            });
+                            if (deleteIndex > -1) {
+                                $scope.personParam.personIdentityList.splice(deleteIndex, 1);
+                            }
+                            $scope.inpListGrid.ctrl.refreshGridData($scope.personParam.personIdentityList);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Обработка события создания ИНП
+                 */
+                $scope.$on("createInp", function (event, inp) {
+                    $scope.personParam.personIdentityList.push(inp);
+                    $scope.inpListGrid.ctrl.refreshGridData($scope.personParam.personIdentityList);
+                });
+
+                /**
+                 * @description Обпработка события изменения ИНП
+                 */
+                $scope.$on("updateInp", function (event, inp) {
+                    var i = 0;
+                    angular.forEach($scope.personParam.personIdentityList, function (item) {
+                        if (item.id === inp.id) {
+                            $scope.personParam.personIdentityList.splice(i, 1, inp);
+                        }
+                        i++;
+                    });
+                    $scope.inpListGrid.ctrl.refreshGridData($scope.personParam.personIdentityList);
+                });
+
+                /**
+                 * @description Редактировать Тербанк
+                 * @param mode  режим редактирования
+                 */
+                var editTb = function(mode) {
+                    var title;
+                    var tb;
+                    var presentedTb = [];
+                    angular.forEach($scope.personParam.personTbList, function(item) {
+                        presentedTb.push(item.tbDepartment.id)
+                    });
+                     switch (mode) {
+                        case APP_CONSTANTS.MODE.CREATE:
+                            title = $filter('translate')('refBook.fl.card.tabs.tb.modal.title.create');
+                            tb = {
+                                id: new Date().getTime(),
+                                person: {id: $scope.personParam.id},
+                                tempId: true
+};
+                            break;
+                        case APP_CONSTANTS.MODE.EDIT:
+                            title = $filter('translate')('refBook.fl.card.tabs.tb.modal.title.edit');
+                            tb = $scope.tbListGrid.value[0];
+                            break;
+                    }
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/refbooks/personCard/modal/personTbModal.html',
+                        controller: 'personTbModalCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    tb: tb,
+                                    mode: mode,
+                                    presentedTb: presentedTb
+                                };
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Добавить Тербанк
+                 */
+                $scope.addTb = function() {
+                    editTb(APP_CONSTANTS.MODE.CREATE)
+                };
+
+                /**
+                 * @description Редактировать Тербанк
+                 */
+                $scope.editTb = function() {
+                    editTb(APP_CONSTANTS.MODE.EDIT)
+                };
+
+                /**
+                 * @description Удалить Тербанк
+                 */
+                $scope.deleteTb = function() {
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('refBook.fl.card.tabs.tb.deleteDialog.title'),
+                        content: $filter('translate')('refBook.fl.card.tabs.tb.deleteDialog.content'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            var i = 0;
+                            var deleteIndex = -1;
+                            angular.forEach($scope.personParam.personTbList, function (item) {
+                                if (item.id === $scope.tbListGrid.value[0].id) {
+                                    deleteIndex = i;
+                                }
+                                i++;
+                            });
+                            if (deleteIndex > -1) {
+                                $scope.personParam.personTbList.splice(deleteIndex, 1);
+                            }
+                            $scope.tbListGrid.ctrl.refreshGridData($scope.personParam.personTbList);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Обработка события создания Тербанка
+                 */
+                $scope.$on("createTb", function (event, tb) {
+                    $scope.personParam.personTbList.push(tb);
+                    $scope.tbListGrid.ctrl.refreshGridData($scope.personParam.personTbList);
+                });
+
+                /**
+                 * @description Обпработка события изменения Тербанка
+                 */
+                $scope.$on("updateTb", function (event, tb) {
+                    var i = 0;
+                    angular.forEach($scope.personParam.personTbList, function (item) {
+                        if (item.id === tb.id) {
+                            $scope.personParam.personTbList.splice(i, 1, tb);
+                        }
+                        i++;
+                    });
+                    $scope.tbListGrid.ctrl.refreshGridData($scope.personParam.personTbList);
                 });
 
                 /**

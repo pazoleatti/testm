@@ -1,9 +1,30 @@
 <form data-ng-controller="regPersonInpCtrl">
-    <div style="margin-left: 20px; width: 624px">
-        <div class="person-card" style="margin-top: 10px; margin-bottom: 10px;">
+    <div>
+        <div class="tab-block-title" style="margin-top: 10px; margin-bottom: 10px;">
             {{::'refBook.fl.card.tabs.title.inp' | translate}}
         </div>
-        <div>
+        <div class="row">
+            <div class="pull-left">
+                <div class="row-fluid" style="margin-left: 20px">
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="addInp()"
+                            data-ng-disabled="mode !== 'EDIT'">
+                        <span>{{::'refBook.fl.card.button.add' | translate}}</span>
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="editInp()"
+                            data-ng-disabled="mode !== 'EDIT' || inpListGrid.value.length != 1">
+                        <span>{{::'refBook.fl.card.button.edit' | translate}}</span>
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="deleteInp()"
+                            data-ng-disabled="mode !== 'EDIT' || inpListGrid.value.length != 1">
+                        <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 20px; width: 624px">
             <div class="ng-cloak" data-aplana-grid style="height: 100%;"
                  data-ng-if="inpTab.active"
                  data-grid-fill-space="false"

@@ -2,15 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.util.Date;
@@ -18,7 +10,6 @@ import java.util.List;
 
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Objects.firstNonNull;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -40,11 +31,15 @@ class PersonChangeLogBuilder {
     }
 
     public void inpUpdated(PersonIdentifier identifier) {
-        comma().append("[ Добавлен ИНП: \"").append(format(identifier.getInp())).append(", АСНУ: \"").append(format(identifier.getAsnu().getCode())).append("\" ]");
+        comma().append("[ Изменён ИНП: \"").append(format(identifier.getInp())).append(", АСНУ: \"").append(format(identifier.getAsnu().getCode())).append("\" ]");
     }
 
     public void tbAdded(PersonTb tb) {
         comma().append("[ Добавлен Тербанк: \"").append(format(tb.getTbDepartment().getShortName())).append("\" ]");
+    }
+
+    public void tbUpdated(PersonTb tb) {
+        comma().append("[ Изменён Тербанк: \"").append(format(tb.getTbDepartment().getShortName())).append("\"]");
     }
 
     public void tbDeleted(PersonTb tb) {

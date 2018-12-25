@@ -15,7 +15,19 @@ public interface IdTaxPayerDao {
      * Сохранить группу ИНП
      * @param personIdentifiers коллекция ИНП
      */
-    void saveBatch(final Collection<PersonIdentifier> personIdentifiers);
+    void createBatch(final Collection<PersonIdentifier> personIdentifiers);
+
+    /**
+     * Обновление списка ИНП
+     * @param personIdentifiers коллекция ИНП
+     */
+    void updateBatch(final Collection<PersonIdentifier> personIdentifiers);
+
+    /**
+     * Удаление ИНП по идентификатору
+     * @param ids   список идентификаторов объектов ИНП
+     */
+    void deleteByIds(final Collection<Long> ids);
 
     /**
      * Получить список ИНП физлица. Метод возвращает ИНП версии физлица переданной в аргумента, также ИНП дубликатов и неактуальных версий

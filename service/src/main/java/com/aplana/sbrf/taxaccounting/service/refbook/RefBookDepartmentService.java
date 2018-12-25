@@ -98,4 +98,11 @@ public interface RefBookDepartmentService {
      * @return список подразделений
      */
     List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
+
+    /**
+     *  Получение ТБ справочника подразделений, исключая присутствующие
+     * @param presentedTbidList список идентификаторов присутствующих тербанков
+     * @return  список подразделений
+     */
+    List<RefBookDepartment> findTbExcludingPresented(List<Integer> presentedTbidList);
 }

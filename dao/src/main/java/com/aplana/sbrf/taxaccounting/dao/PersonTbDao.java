@@ -15,7 +15,20 @@ public interface PersonTbDao {
      * Сохранить группу назначенных физлицу Тербанков
      * @param personTbs коллекция назначенных физлицу Тербанков
      */
-    void saveBatch(final Collection<PersonTb> personTbs);
+    void createBatch(final Collection<PersonTb> personTbs);
+
+
+    /**
+     * Обновление группы назначенных физлицу Тербанков
+     * @param personTbList коллекция назначенных физлицу Тербанков
+     */
+    void updateBatch(final Collection<PersonTb> personTbList);
+
+    /**
+     * Удаление назначенных физлицу Тербанков по идентификатору
+     * @param ids   список идентификаторов назначенных физлицу Тербанков
+     */
+    void deleteByIds(final Collection<Long> ids);
 
     /**
      * Получить список тербанков физлица

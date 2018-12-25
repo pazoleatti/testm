@@ -220,7 +220,7 @@ public class PersonServiceImpl implements PersonService {
                 if (idDoc.getId() == null) {
                     idDocsToCreate.add(idDoc);
                 } else {
-                    if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
+                    if (!Objects.equal(idDoc.getId(), findById(persistedIdDocs, idDoc.getId()).getId())) {
                         idDocsToUpdate.add(idDoc);
                     }
                     removeById(idDocsToDelete, idDoc.getId());
@@ -285,6 +285,81 @@ public class PersonServiceImpl implements PersonService {
                 changeLogBuilder.duplicatesDeleted(deletedDuplicates);
             }
         }
+
+        List<PersonIdentifier> persistedInpList = idTaxPayerDaoImpl.getByPerson(personToPersist);
+        {
+            List<PersonIdentifier> inpToCreate = new ArrayList<>();
+            List<PersonIdentifier> inpToDelete = new ArrayList<>(persistedInpList);
+            List<PersonIdentifier> inpToUpdate = new ArrayList<>();
+
+            for (PersonIdentifier inp : personDTO.getPersonIdentityList()) {
+                if (inp.getId() == null) {
+                    inpToCreate.add(inp);
+                } else {
+                    if (!Objects.equal(inp, findById(persistedInpList, inp.getId()))) {
+                        inpToUpdate.add(inp);
+                    }
+                    removeById(inpToDelete, inp.getId());
+                }
+            }
+            if (CollectionUtils.isNotEmpty(inpToCreate)) {
+                idTaxPayerDaoImpl.createBatch(inpToCreate);
+                for (PersonIdentifier inp : inpToCreate) {
+                    changeLogBuilder.inpCreated(inp);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(inpToUpdate)) {
+                idTaxPayerDaoImpl.updateBatch(inpToUpdate);
+                for (PersonIdentifier inp : inpToUpdate) {
+                    changeLogBuilder.inpUpdated(inp);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(inpToDelete)) {
+                idTaxPayerDaoImpl.deleteByIds(getIds(inpToDelete));
+                for (PersonIdentifier inp : inpToDelete) {
+                    changeLogBuilder.inpDeleted(inp);
+                }
+            }
+        }
+
+        List<PersonTb> persistedTbList = personTbDaoImpl.getByPerson(personToPersist);
+        {
+            List<PersonTb> tbToCreate = new ArrayList<>();
+            List<PersonTb> tbToDelete = new ArrayList<>(persistedTbList);
+            List<PersonTb> tBToUpdate = new ArrayList<>();
+
+            for (PersonTb editingPersonTb : personDTO.getPersonTbList()) {
+                if (editingPersonTb.getId() == null) {
+                    tbToCreate.add(editingPersonTb);
+                } else {
+                    PersonTb persistedPersonTb = findById(persistedTbList, editingPersonTb.getId());
+                    if (persistedPersonTb != null && !Objects.equal(SimpleDateUtils.toStartOfDay(editingPersonTb.getImportDate()), SimpleDateUtils.toStartOfDay(persistedPersonTb.getImportDate()))) {
+                        tBToUpdate.add(editingPersonTb);
+                    }
+                    removeById(tbToDelete, editingPersonTb.getId());
+                }
+            }
+            if (CollectionUtils.isNotEmpty(tbToCreate)) {
+                personTbDaoImpl.createBatch(tbToCreate);
+                for (PersonTb personTb : tbToCreate) {
+                    changeLogBuilder.tbAdded(personTb);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(tBToUpdate)) {
+                personTbDaoImpl.updateBatch(tBToUpdate);
+                for (PersonTb personTb : tBToUpdate) {
+                    changeLogBuilder.tbUpdated(personTb);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(tbToDelete)) {
+                personTbDaoImpl.deleteByIds(getIds(tbToDelete));
+                for (PersonTb personTb : tbToDelete) {
+                    changeLogBuilder.tbDeleted(personTb);
+                }
+            }
+        }
+
+
 
         personToPersist.setId(personDTO.getId());
         personToPersist.setOldId(personDTO.getOldId());
@@ -367,8 +442,8 @@ public class PersonServiceImpl implements PersonService {
         refBookPersonDao.updateBatch(toSave);
         idDocDaoImpl.createBatch(idDocToSave);
         idDocDaoImpl.updateBatch(idDocToUpdate);
-        idTaxPayerDaoImpl.saveBatch(idTaxPayers);
-        personTbDaoImpl.saveBatch(personTbs);
+        idTaxPayerDaoImpl.createBatch(idTaxPayers);
+        personTbDaoImpl.createBatch(personTbs);
 
         refBookPersonDao.updateBatch(toSave);
     }
@@ -483,8 +558,8 @@ public class PersonServiceImpl implements PersonService {
         }
         refBookPersonDao.saveBatch(personList);
         idDocDaoImpl.createBatch(idDocs);
-        idTaxPayerDaoImpl.saveBatch(idTaxPayers);
-        personTbDaoImpl.saveBatch(personTbs);
+        idTaxPayerDaoImpl.createBatch(idTaxPayers);
+        personTbDaoImpl.createBatch(personTbs);
 
         refBookPersonDao.updateBatch(personList);
 

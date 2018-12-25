@@ -98,4 +98,12 @@ public interface RefBookDepartmentDao {
      * напрмер, "Банк/Байкальский банк"
      */
     String fetchFullName(Integer departmentId);
+
+    /**
+     * Найти активные подразделения исключая присутствующие
+     * @param type              тип подразделения
+     * @param presentedTbidList идентификаторы подразделений которые нужно исключить из выборки
+     * @return  список подразделений
+     */
+    List<RefBookDepartment> findActiveByTypeExcludingPresented(DepartmentType type, List<Integer> presentedTbidList);
 }

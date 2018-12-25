@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -14,10 +15,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.in;
+
 @Repository
 public class IdTaxPayerDaoImpl extends AbstractDao implements IdTaxPayerDao {
     @Override
-    public void saveBatch(Collection<PersonIdentifier> personIdentifiers) {
+    public void createBatch(Collection<PersonIdentifier> personIdentifiers) {
         saveNewObjects(personIdentifiers, PersonIdentifier.TABLE_NAME, DBUtils.Sequence.REF_BOOK_RECORD.getName(), PersonIdentifier.COLUMNS, PersonIdentifier.FIELDS);
     }
 
@@ -35,6 +38,19 @@ public class IdTaxPayerDaoImpl extends AbstractDao implements IdTaxPayerDao {
             inp.setPerson(person);
         }
         return result;
+    }
+
+    @Override
+    public void updateBatch(Collection<PersonIdentifier> personIdentifiers) {
+        updateObjects(personIdentifiers, PersonIdentifier.TABLE_NAME, PersonIdentifier.COLUMNS, PersonIdentifier.FIELDS);
+    }
+
+    @Override
+    public void deleteByIds(Collection<Long> ids) {
+        if (CollectionUtils.isNotEmpty(ids)) {
+            String query = "delete from ref_book_id_tax_payer where " + in("id", ids);
+            getJdbcTemplate().update(query);
+        }
     }
 
     private static RowMapper<PersonIdentifier> ID_TAX_PAYER_MAPPER = new RowMapper<PersonIdentifier>() {

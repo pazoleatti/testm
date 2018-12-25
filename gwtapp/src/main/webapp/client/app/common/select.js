@@ -981,9 +981,10 @@
          */
         .controller('SelectRegistryPersonController', ['$scope', 'GetSelectOption', '$http', 'APP_CONSTANTS',
             'RefBookRecordResource', 'TaxPayerStateResource', 'RefBookAsnuResource', 'RefBookCountryResource',
-            'RefBookDocTypeResource',
+            'RefBookDocTypeResource', 'RefBookValuesResource',
             function ($scope, GetSelectOption, $http, APP_CONSTANTS, RefBookRecordResource,
-                      TaxPayerStateResource, RefBookAsnuResource, RefBookCountryResource, RefBookDocTypeResource) {
+                      TaxPayerStateResource, RefBookAsnuResource, RefBookCountryResource, RefBookDocTypeResource,
+                      RefBookValuesResource) {
 
                 /**
                  * Инициализировать выпадашку для выбора главного ДУЛ
@@ -1019,15 +1020,6 @@
                         return 0;
                     });
                     $scope.selectedDocs.options.data.results = person.documents.value;
-                    /*if ($scope.selectedDocs) {
-                        $scope.selectedDocs.options.data.results = person.documents.value;
-                        angular.forEach($scope.selectedDocs.options.data.results, function (value) {
-                            if (person.reportDoc && person.reportDoc.value
-                                && value.id === person.reportDoc.value.id) {
-                                person.reportDoc.value = value
-                            }
-                        })
-                    }*/
                 };
 
                 $scope.$on("addIdDoc", function (event, person) {
@@ -1056,6 +1048,11 @@
                     }, function (data) {
                         $scope.asnuSelect.options.data.results = data;
                     });
+                };
+
+                $scope.initSingleAsnu = function(asnu) {
+                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [asnu], true, 'codeNameFormatter');
+                    $scope.asnuSelect.options.data.results = [asnu];
                 };
 
                 /**
@@ -1111,7 +1108,27 @@
                     }, function (data) {
                         $scope.docTypeSelect.options.data.results = data;
                     });
-                }
+                };
+
+                /**
+                 * Инициализировать список ТБ
+                 * @param presentedTbIdList
+                 */
+                $scope.loadTBs = function (presentedTbIdList){
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'nameFormatter');
+                    RefBookValuesResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
+                        presentedTbIdList: presentedTbIdList,
+                        projection: "activeTBExcluding"
+                    }, function (availableTBs) {
+                        $scope.departmentsSelect.options.data.results = availableTBs;
+                    });
+                };
+
+                $scope.initSingleTb = function(tb) {
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [tb], true, 'codeNameFormatter');
+                    $scope.departmentsSelect.options.data.results = [tb];
+                };
             }])
     ;
 }());

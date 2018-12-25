@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -101,7 +102,7 @@ public class RefBookFlController {
      * @param person данные записи из реестра ФЛ
      * @return ответ сервера
      */
-    @PostMapping(value = "/actions/registryPerson/updatePerson")
+    @PostMapping(value = "/actions/registryPerson/updatePerson", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateRegistryPerson(@RequestBody RegistryPersonDTO person) {
         try {
             personService.updateRegistryPerson(person, securityService.currentUserInfo());

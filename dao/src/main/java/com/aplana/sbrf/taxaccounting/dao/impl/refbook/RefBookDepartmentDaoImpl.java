@@ -195,6 +195,14 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         return new PagingResult<>(departments, totalCount);
     }
 
+    @Override
+    public List<RefBookDepartment> findActiveByTypeExcludingPresented(DepartmentType type, List<Integer> presentedTbIdList) {
+        String query = REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = :type AND dep.is_active = 1 and dep.id not in (:presentedTbList) order by full_name";
+        MapSqlParameterSource params = new MapSqlParameterSource("type", type.getCode());
+        params.addValue("presentedTbList", presentedTbIdList);
+        return getNamedParameterJdbcTemplate().query(query, params, new RefBookDepartmentRowMapper());
+    }
+
     /**
      * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      * Также можно выбрать все подразделения или только действующие

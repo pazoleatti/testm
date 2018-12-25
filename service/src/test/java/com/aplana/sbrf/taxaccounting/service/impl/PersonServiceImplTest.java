@@ -193,8 +193,8 @@ public class PersonServiceImplTest {
         //verify
         verify(personDao).saveBatch(personList);
         verify(idDocDaoImpl).createBatch(idDocs.capture());
-        verify(idTaxPayerDaoImpl).saveBatch(idTaxPayers.capture());
-        verify(personTbDaoImpl).saveBatch(personTbs.capture());
+        verify(idTaxPayerDaoImpl).createBatch(idTaxPayers.capture());
+        verify(personTbDaoImpl).createBatch(personTbs.capture());
         verify(personDao).updateBatch(personList);
 
     }

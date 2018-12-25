@@ -156,6 +156,16 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение активных подразделениЙ исключая присутствующие
+     * @param presentedTbIdList идентификаторы подразделений которые нужно исключить из выборки
+     * @return  список подразделений
+     */
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeTBExcluding")
+    public List<RefBookDepartment> findTbExcludingPresented(@RequestParam List<Integer> presentedTbIdList) {
+        return refBookDepartmentService.findTbExcludingPresented(presentedTbIdList);
+    }
+
+    /**
      * Получение всех значений справочника Виды форм
      *
      * @return Значения справочника

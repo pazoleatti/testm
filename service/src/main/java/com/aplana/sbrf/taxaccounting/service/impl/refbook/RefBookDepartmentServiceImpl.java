@@ -2,12 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
@@ -107,5 +102,10 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
             TBIds.add(userTBId);
             return refBookDepartmentDao.findAllActiveByIds(TBIds);
         }
+    }
+
+    @Override
+    public List<RefBookDepartment> findTbExcludingPresented(List<Integer> presentedTbidList) {
+        return refBookDepartmentDao.findActiveByTypeExcludingPresented(DepartmentType.TERR_BANK, presentedTbidList);
     }
 }

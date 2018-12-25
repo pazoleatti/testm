@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,6 +12,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode(of = {"asnu", "inp"}, callSuper = false)
 public class PersonIdentifier extends IdentityObject<Long> {
 
     /**

@@ -1036,14 +1036,22 @@
         "refBook.fl.card.tabs.duplicate.deleteDialog.content": "Вы действительно хотите удалить выбранный дубликат?",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocCode": "Код ДУЛ",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumber": "Серия и номер",
-        "refBook.fl.card.tabs.idDoc.tabColumnHeader.asnu": "АС НУ",
-        "refBook.fl.card.tabs.idDoc.tabColumnHeader.inp": "ИНП",
+        "refBook.fl.card.tabs.inp.tabColumnHeader.asnu": "АС НУ",
+        "refBook.fl.card.tabs.inp.tabColumnHeader.inp": "ИНП",
+        "refBook.fl.card.tabs.inp.modal.title.create": "Создание нового ИНП",
+        "refBook.fl.card.tabs.inp.modal.title.edit": "Редактирование ИНП",
+        "refBook.fl.card.tabs.inp.deleteDialog.title": "Удаление ИНП",
+        "refBook.fl.card.tabs.inp.deleteDialog.content": "Вы действительно хотите удалить выбранный ИНП?",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.personId": "ИД ФЛ",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocType": "Тип документа",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumberExpanded": "Серия и номер документа",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.innRF": "ИНН в РФ",
-        "refBook.fl.card.tabs.idDoc.tabColumnHeader.tb": "Тербанк",
-        "refBook.fl.card.tabs.idDoc.tabColumnHeader.date": "Дата",
+        "refBook.fl.card.tabs.tb.tabColumnHeader.tb": "Тербанк",
+        "refBook.fl.card.tabs.tb.tabColumnHeader.date": "Дата",
+        "refBook.fl.card.tabs.tb.modal.title.create": "Создание нового Тербанка ФЛ",
+        "refBook.fl.card.tabs.tb.modal.title.edit": "Редактирование Тербанка ФЛ",
+        "refBook.fl.card.tabs.tb.deleteDialog.title": "Удаление Тербанка",
+        "refBook.fl.card.tabs.tb.deleteDialog.content": "Вы действительно хотите удалить выбранный Тербанк?",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.event": "Событие",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.dateAndTime": "Дата и время",
         "refBook.fl.card.tabs.idDoc.tabColumnHeader.description": "Описание",
@@ -1158,7 +1166,9 @@
         'app.departmentRefBook',
         'app.refBookConfList',
         'app.departmentConfig',
-        'app.idDocRecordModal'
+        'app.idDocRecordModal',
+        'app.inpModal',
+        'app.personTbModal'
     ]);
 
     /**
