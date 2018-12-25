@@ -199,10 +199,11 @@
                                     </div>
                                     <div class="row-fluid">
                                         <div class="span4">
-                                            <label class="control-label">{{::'title.creator' | translate}}:</label>
+                                            <label class="control-label">{{::'title.period' | translate}}:</label>
                                         </div>
                                         <div class="span8">
-                                            <label class="font-normal info-text">{{declarationData.creationUserName}}</label>
+                                            <label class="font-normal info-text"
+                                                   data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                         </div>
                                     </div>
                                 </div>
@@ -215,13 +216,22 @@
                                             <label class="font-normal info-text">{{declarationData.declarationFormKind}}</label>
                                         </div>
                                     </div>
-                                    <div class="row-fluid">
+                                    <div class="row-fluid"
+                                         ng-show="declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
                                         <div class="span5">
-                                            <label class="control-label">{{::'title.period' | translate}}:</label>
+                                            <label class="control-label">{{::'title.knfType' | translate}}:</label>
                                         </div>
                                         <div class="span7">
-                                            <label class="font-normal info-text"
-                                                   data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
+                                            <label class="font-normal info-text">{{declarationData.knfType.name}}</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid"
+                                         ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
+                                        <div class="span5">
+                                            <label class="control-label">{{::'title.nameAsnu' | translate}}:</label>
+                                        </div>
+                                        <div class="span7">
+                                            <label class="font-normal info-text">{{declarationData.asnuName}}</label>
                                         </div>
                                     </div>
                                     <div class="row-fluid">
@@ -232,26 +242,19 @@
                                             <label class="font-normal info-text">{{declarationData.state}}</label>
                                         </div>
                                     </div>
+                                    <div data-ng-if="declarationData.kppList" class="row-fluid">
+                                        <div class="span5">
+                                            <label class="control-label">{{::'title.kpp' | translate}}:</label>
+                                        </div>
+                                        <div class="span7">
+                                            <label class="font-normal info-text" style="width: 138px;"
+                                                   title="{{::declarationData.kppList.join(',')}}">
+                                                {{::declarationData.kppList | joinAndTruncateFormatter : ',': 2}}
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="span4" style="margin: 0;">
-                                    <div class="row-fluid"
-                                         ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
-                                        <div class="span6">
-                                            <label class="control-label">{{::'title.nameAsnu' | translate}}:</label>
-                                        </div>
-                                        <div class="span6">
-                                            <label class="font-normal info-text">{{declarationData.asnuName}}</label>
-                                        </div>
-                                    </div>
-                                    <div class="row-fluid"
-                                         ng-show="declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
-                                        <div class="span6">
-                                            <label class="control-label">{{::'title.knfType' | translate}}:</label>
-                                        </div>
-                                        <div class="span6">
-                                            <label class="font-normal info-text">{{declarationData.knfType.name}}</label>
-                                        </div>
-                                    </div>
                                     <div class="row-fluid">
                                         <div class="span6">
                                             <label class="control-label">{{::'title.dateAndTimeCreate' |
@@ -264,23 +267,20 @@
                                     </div>
                                     <div class="row-fluid">
                                         <div class="span6">
+                                            <label class="control-label">{{::'title.creator' | translate}}:</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="font-normal info-text">{{declarationData.creationUserName}}</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span6">
                                             <label class="control-label">{{::'title.manuallyCreated' |
                                                 translate}}:</label>
                                         </div>
                                         <div class="span6">
                                             <label class="font-normal info-text" style="width: 138px;">{{declarationData.manuallyCreated
                                                 | yesNoFormatter}}</label>
-                                        </div>
-                                    </div>
-                                    <div data-ng-if="declarationData.kppList" class="row-fluid">
-                                        <div class="span6">
-                                            <label class="control-label">{{::'title.kpp' | translate}}:</label>
-                                        </div>
-                                        <div class="span6">
-                                            <label class="font-normal info-text" style="width: 138px;"
-                                                   title="{{::declarationData.kppList.join(',')}}">
-                                                {{::declarationData.kppList | joinAndTruncateFormatter : ',': 2}}
-                                            </label>
                                         </div>
                                     </div>
                                 </div>
