@@ -170,6 +170,7 @@ public interface DeclarationService {
     /**
      * Получние id для всех деклараций по фильтру.
      */
+    @Deprecated
     List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
 
 

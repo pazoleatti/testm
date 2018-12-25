@@ -881,8 +881,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DeclarationData declaration = get(declarationDataId, userInfo);
             result.setId(declarationDataId);
             result.setDepartmentId(declaration.getDepartmentId());
-            result.setDepartment(departmentService.getParentsHierarchy(
-                    declaration.getDepartmentId()));
+            result.setDepartment(departmentService.getParentsHierarchy(declaration.getDepartmentId()));
 
             result.setState(declaration.getState().getTitle());
             result.setManuallyCreated(declaration.isManuallyCreated());
@@ -890,11 +889,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setActualDataDate(new Date());
             result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
             result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
-
-            String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
-            if (userLogin != null && !userLogin.isEmpty()) {
-                result.setCreationUserName(taUserService.getUser(userLogin).getName());
-            }
+            result.setCreationUserName(logBusinessService.getFormCreationUserName(declaration.getId()));
 
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
             result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());

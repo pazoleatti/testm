@@ -263,7 +263,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder(
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
-                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, log_b.log_date creationDate, su.name creationUserName,\n" +
+                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, log_b.log_date creationDate, " +
+                        "   nvl(su.name, log_b.user_login) creationUserName,\n" +
                         "   case when drp.correction_date is not null then" +
                         "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')'" +
                         "       else tp.year || ': ' || rp.name end as reportPeriod,\n" +
@@ -272,7 +273,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "left join REF_BOOK_ASNU asnu on asnu.id = dd.asnu_id\n" +
                         "left join REF_BOOK_KNF_TYPE knf_type on knf_type.id = dd.knf_type_id\n" +
                         "inner join LOG_BUSINESS log_b on log_b.DECLARATION_DATA_ID = dd.id and log_b.event_id = 1\n" +
-                        "inner join SEC_USER su on su.login = log_b.user_login\n" +
+                        "left join SEC_USER su on su.login = log_b.user_login\n" +
                         "inner join DECLARATION_TEMPLATE dt on dt.id = dd.declaration_template_id\n" +
                         "inner join DECLARATION_TYPE dtype on dtype.id = dt.declaration_type_id\n" +
                         "inner join DECLARATION_KIND dkind on dkind.id = dt.form_kind\n" +
@@ -568,6 +569,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
     }
 
+    @Deprecated
     private void appendSelectClause(StringBuilder sql) {
         sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.state, dec.tax_organ_code, dec.kpp, dec.oktmo, ")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
@@ -576,8 +578,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
-                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,").append(" (select lb.log_date from log_business lb where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date,")
-                .append(" (select su.name from log_business lb join sec_user su on su.login=lb.user_login where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_name");
+                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,").append(" (select lb.log_date from log_business lb where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date");
     }
 
     private void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
