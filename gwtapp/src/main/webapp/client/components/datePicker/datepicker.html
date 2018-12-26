@@ -1,7 +1,7 @@
 <div>
     <div class="cbr-picker">
         <div class="cbr-picker-button">
-            <button type="button" class="btn btn-popover btn-default btn-sm"
+            <button type="button" class="btn btn-popover btn-default btn-sm" tabindex="-1"
                     data-aplana-popover-template='<div class="popover"><div class="arrow"></div>
                                               <div class="popover-content" style="padding: 2px;"></div></div>'
                     data-placement="bottom-right"
@@ -11,7 +11,7 @@
             </button>
         </div>
         <div class="cbr-picker-input">
-            <input ui-mask="99.99.9999" model-view-value="true" type="text" data-aplana-date-input>
+            <input ui-mask="{{mask}}" model-view-value="true" type="text" data-aplana-date-input>
         </div>
     </div>
 </div>

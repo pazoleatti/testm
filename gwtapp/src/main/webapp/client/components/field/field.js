@@ -96,6 +96,19 @@
                                     // Our template will have its own child scope
                                     var childScope = scope.$new();
 
+                                    // пропускает некоторые ошибки, если на них нет сообщений
+                                    childScope.filterValidity = function (id) {
+                                        var form = angular.isDefined(childScope.$form) ? childScope.$form[id] : undefined;
+                                        if (form) {
+                                            angular.forEach(['mask', 'parse'], function (key) {
+                                                if (form.$error[key] && !childScope.$validationMessages[key]) {
+                                                    form.$setValidity(key, true);
+                                                }
+                                            });
+                                        }
+                                        return true;
+                                    };
+
                                     // Функция реализует "позднее связывание" между контроллерами ngModel поля ввода, формы и сообщений валидатора
                                     childScope.getFieldByModelId = function (id) {
                                         return angular.isDefined(childScope.$form) ? childScope.$form[id] : undefined;

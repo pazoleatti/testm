@@ -14,7 +14,7 @@
                         <span data-aplana-field>
                             <span data-aplana-datepicker
                                   data-ng-model="record.startDate"
-                                  data-ng-required="true"
+                                  data-required
                                   data-ui-validate="{versionDate : 'isVersionDatesValid($value, record.endDate)'}"></span>
                             <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>

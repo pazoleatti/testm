@@ -1,5 +1,5 @@
 <div class="control-group"
-     data-ng-class="{'error' : getFieldByModelId($modelId).$invalid && ( getFieldByModelId($modelId).$dirty || $form.attempt )}">
+     data-ng-class="{'error' : filterValidity($modelId) && getFieldByModelId($modelId).$invalid && ( getFieldByModelId($modelId).$dirty || $form.attempt )}">
     <div class="controls">
         <div data-aplana-transclude></div>
         <div class="help-bottom-popup"

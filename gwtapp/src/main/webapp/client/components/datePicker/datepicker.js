@@ -76,6 +76,7 @@
                             minDate: -Infinity,
                             maxDate: +Infinity
                         };
+                        scope.mask = scope.options.dateFormat.replace(/[dmy]/gi, '9');
 
                         scope.options.roundTime = attr.aplanaDateWithoutTime ? true : false;
 
