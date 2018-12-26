@@ -161,7 +161,7 @@ public class RefBookValuesController {
      * @return  список подразделений
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeTBExcluding")
-    public List<RefBookDepartment> findTbExcludingPresented(@RequestParam List<Integer> presentedTbIdList) {
+    public List<RefBookDepartment> findTbExcludingPresented(@RequestParam(required = false) List<Integer> presentedTbIdList) {
         return refBookDepartmentService.findTbExcludingPresented(presentedTbIdList);
     }
 

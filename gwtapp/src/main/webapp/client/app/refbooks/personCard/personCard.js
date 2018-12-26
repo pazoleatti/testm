@@ -196,10 +196,10 @@
                         ],
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
-                            {name: 'tbDepartment.name', width: 450},
+                            {name: 'tbDepartment.name', width: 471},
                             {
                                 name: 'importDate',
-                                width: 100,
+                                width: 150,
                                 formatter: $filter('dateFormatter'),
                                 sortable: false
                             }
@@ -373,7 +373,7 @@
                 /**
                  * Очистить временные идентификаторы у созданных элементов
                  */
-                var eraseTempId = function(items) {
+                var eraseTempId = function (items) {
                     angular.forEach(items, function (item) {
                         if (item.tempId) {
                             item.id = null;
@@ -650,7 +650,7 @@
                  * @description Редактировать ИНП
                  * @param mode  режим редактирования
                  */
-                var editInp = function(mode) {
+                var editInp = function (mode) {
                     var title;
                     var inp;
                     switch (mode) {
@@ -686,21 +686,21 @@
                 /**
                  * @description Добавить ИНП
                  */
-                $scope.addInp = function() {
+                $scope.addInp = function () {
                     editInp(APP_CONSTANTS.MODE.CREATE)
                 };
 
                 /**
                  * @description Редактировать ИНП
                  */
-                $scope.editInp = function() {
+                $scope.editInp = function () {
                     editInp(APP_CONSTANTS.MODE.EDIT)
                 };
 
                 /**
                  * @description Удалить ИНП
                  */
-                $scope.deleteInp = function() {
+                $scope.deleteInp = function () {
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.inp.deleteDialog.title'),
                         content: $filter('translate')('refBook.fl.card.tabs.inp.deleteDialog.content'),
@@ -749,21 +749,25 @@
                  * @description Редактировать Тербанк
                  * @param mode  режим редактирования
                  */
-                var editTb = function(mode) {
+                var editTb = function (mode) {
                     var title;
                     var tb;
-                    var presentedTb = [];
-                    angular.forEach($scope.personParam.personTbList, function(item) {
-                        presentedTb.push(item.tbDepartment.id)
+                    var presentedTb = null;
+                    angular.forEach($scope.personParam.personTbList, function (item) {
+                        if (presentedTb) {
+                            presentedTb.push(item.tbDepartment.id)
+                        } else {
+                            presentedTb = [item.tbDepartment.id]
+                        }
                     });
-                     switch (mode) {
+                    switch (mode) {
                         case APP_CONSTANTS.MODE.CREATE:
                             title = $filter('translate')('refBook.fl.card.tabs.tb.modal.title.create');
                             tb = {
                                 id: new Date().getTime(),
                                 person: {id: $scope.personParam.id},
                                 tempId: true
-};
+                            };
                             break;
                         case APP_CONSTANTS.MODE.EDIT:
                             title = $filter('translate')('refBook.fl.card.tabs.tb.modal.title.edit');
@@ -790,21 +794,21 @@
                 /**
                  * @description Добавить Тербанк
                  */
-                $scope.addTb = function() {
+                $scope.addTb = function () {
                     editTb(APP_CONSTANTS.MODE.CREATE)
                 };
 
                 /**
                  * @description Редактировать Тербанк
                  */
-                $scope.editTb = function() {
+                $scope.editTb = function () {
                     editTb(APP_CONSTANTS.MODE.EDIT)
                 };
 
                 /**
                  * @description Удалить Тербанк
                  */
-                $scope.deleteTb = function() {
+                $scope.deleteTb = function () {
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.tb.deleteDialog.title'),
                         content: $filter('translate')('refBook.fl.card.tabs.tb.deleteDialog.content'),
