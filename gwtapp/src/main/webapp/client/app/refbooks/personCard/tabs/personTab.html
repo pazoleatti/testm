@@ -194,7 +194,7 @@
                     <div class="span8 field-wrapper" data-ng-if="mode == 'EDIT' && person.snils.permission"
                          style="min-width: 370px">
                         <div data-aplana-field>
-                            <input ui-mask="999-999-999-99" model-view-value="true" data-ng-model="personParam.snils.value"
+                            <input ui-mask="999-999-999-99" model-view-value="true" ui-options="{clearOnBlur: false}" data-ng-model="personParam.snils.value"
                                    type="text" style="width: 370px"/>
                             <div data-aplana-validator data-key="mask">{{::'refBook.fl.card.validation.snils.mask' |
                                 translate}}
