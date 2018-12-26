@@ -19,6 +19,7 @@ class PersonChangeLogBuilder {
     private StringBuilder sb = new StringBuilder();
 
     public String build() {
+        sb.insert(0, "В ходе редактирования карточки ФЛ изменено: ");
         return sb.toString();
     }
 
