@@ -425,7 +425,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public Set<ReportPeriod> getOpenReportPeriodForUser(TAUser user) {
-        List<Integer> departments = departmentService.getTaxFormDepartments(user);
+        List<Integer> departments = departmentService.findAllAvailableIds(user);
         if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             return new LinkedHashSet<>(getOpenPeriodsByDepartments(departments, false));
         } else {

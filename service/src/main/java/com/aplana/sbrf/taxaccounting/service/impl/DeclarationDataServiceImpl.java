@@ -414,7 +414,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         // Контролёр НС
         if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
-            List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser());
+            List<Integer> departments = departmentService.findAllAvailableIds(userInfo.getUser());
             if (departments.contains(declDepartment.getId())) {
                 return;
             }
@@ -426,7 +426,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 throw new AccessDeniedException("Нет прав на доступ к форме");
             }
 
-            List<Integer> executors = departmentService.getTaxFormDepartments(userInfo.getUser());
+            List<Integer> executors = departmentService.findAllAvailableIds(userInfo.getUser());
             if (executors.contains(declDepartment.getId())) {
                 if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
                     return;
@@ -1055,7 +1055,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         // Отбираем подразделения (и соответственно их формы), доступные пользователю в соотстветствии с его ролями
-        List<Integer> availableDepartments = departmentService.getTaxFormDepartments(currentUser);
+        List<Integer> availableDepartments = departmentService.findAllAvailableIds(currentUser);
         List<Integer> departmentIds = new ArrayList<>();
         if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
             departmentIds = availableDepartments;

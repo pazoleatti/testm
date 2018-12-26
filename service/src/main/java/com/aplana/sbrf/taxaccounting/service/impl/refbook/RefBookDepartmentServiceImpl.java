@@ -86,7 +86,7 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public PagingResult<RefBookDepartment> findAllByFilter(DepartmentFilter filter, PagingParams pagingParams, TAUser user) {
-        List<Integer> availableForUserDepartmentIds = departmentService.getTaxFormDepartments(user);
+        List<Integer> availableForUserDepartmentIds = departmentService.findAllAvailableIds(user);
         filter.setIds(availableForUserDepartmentIds);
         return refBookDepartmentDao.findAllByFilter(filter, pagingParams);
     }

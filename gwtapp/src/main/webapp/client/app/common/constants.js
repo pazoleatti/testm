@@ -45,10 +45,16 @@
                 VIEW_ADMINISTRATION: Math.pow(2, 31),
                 TAX_NOTIFICATION: Math.pow(2, 32)
             },
+            PERSON_PERMISSION: {
+                VIEW: 1 << 0,
+                VIEW_VIP_DATA: 1 << 1,
+                EDIT: 1 << 2
+            },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",
                 N_ROLE_CONTROL_UNP: "N_ROLE_CONTROL_UNP",
                 N_ROLE_CONTROL_NS: "N_ROLE_CONTROL_NS",
+                N_ROLE_EDITOR_FL: "N_ROLE_EDITOR_FL",
                 N_ROLE_CONF: "N_ROLE_CONF",
                 N_ROLE_ADMIN: "N_ROLE_ADMIN",
                 ROLE_ADMIN: "ROLE_ADMIN"

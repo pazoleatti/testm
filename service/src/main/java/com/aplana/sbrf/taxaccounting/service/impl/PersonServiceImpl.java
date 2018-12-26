@@ -31,7 +31,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
-import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.PersonPermission;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
@@ -130,7 +130,7 @@ public class PersonServiceImpl implements PersonService {
 
     private void forbidVipsDataByUserPermissions(List<RegistryPersonDTO> persons) {
         for (RegistryPersonDTO person : persons) {
-            boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonVipDataPermission.VIEW_VIP_DATA);
+            boolean viewVipDataGranted = permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(), person, PersonPermission.VIEW_VIP_DATA);
             if (!viewVipDataGranted) {
                 person.setReportDoc(Permissive.<IdDoc>forbidden());
                 person.setInn(Permissive.<String>forbidden());

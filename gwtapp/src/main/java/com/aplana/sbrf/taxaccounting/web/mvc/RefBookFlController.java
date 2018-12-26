@@ -9,7 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
-import com.aplana.sbrf.taxaccounting.service.IdDocService;
+import com.aplana.sbrf.taxaccounting.permissions.PersonPermission;
+import com.aplana.sbrf.taxaccounting.permissions.PersonPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -34,9 +35,9 @@ public class RefBookFlController {
     @Autowired
     private PersonService personService;
     @Autowired
-    private IdDocService idDocService;
-    @Autowired
     private SecurityService securityService;
+    @Autowired
+    private PersonPermissionSetter personPermissionSetter;
 
     /**
      * Привязка данных из параметров запроса
@@ -88,7 +89,9 @@ public class RefBookFlController {
      */
     @GetMapping(value = "/rest/personRegistry/fetch/{id}")
     public RegistryPersonDTO fetchPerson(@PathVariable Long id) {
-        return personService.fetchPersonData(id);
+        RegistryPersonDTO person = personService.fetchPersonData(id);
+        personPermissionSetter.setPermissions(person, PersonPermission.EDIT);
+        return person;
     }
 
     @PostMapping(value = "/actions/refBookFL/export/excel")

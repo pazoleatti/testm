@@ -162,7 +162,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Cacheable(value = CacheConstants.DEPARTMENT, key = "'user_departments_'+#tAUser.id")
-    public List<Integer> getTaxFormDepartments(TAUser tAUser) {
+    public List<Integer> findAllAvailableIds(TAUser tAUser) {
         if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
             return departmentDao.fetchAllIds();
@@ -184,6 +184,21 @@ public class DepartmentServiceImpl implements DepartmentService {
             return departmentDao.findAllChildrenIdsByIds(departmentIds);
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<Integer> findAllAvailableTBIds(TAUser user) {
+        if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+            return departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
+        } else {
+            Integer userTBId = departmentDao.getParentTBId(user.getDepartmentId());
+            // Все ТБ, для которых подразделение пользователя назначено исполнителем.
+            List<Integer> TBIds = departmentDao.findAllTBIdsByPerformerId(user.getDepartmentId());
+            if (!TBIds.contains(userTBId)) {
+                TBIds.add(userTBId);
+            }
+            return TBIds;
+        }
     }
 
     @Override

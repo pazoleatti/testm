@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
-import com.aplana.sbrf.taxaccounting.permissions.PersonVipDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.PersonPermission;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -345,7 +345,7 @@ public class PersonServiceImplTest {
         person.setSnils(Permissive.of(""));
         person.setAddress(Permissive.of(new Address()));
         person.setDocuments(Permissive.of(Collections.singletonList(new IdDoc())));
-        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(person), eq(PersonVipDataPermission.VIEW_VIP_DATA))).thenReturn(true);
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(person), eq(PersonPermission.VIEW_VIP_DATA))).thenReturn(true);
         forbidVipsDataByUserPermissions.invoke(personService, Collections.singletonList(person));
         assertThat(person.getReportDoc().hasPermission()).isTrue();
         assertThat(person.getInn().hasPermission()).isTrue();
@@ -364,7 +364,7 @@ public class PersonServiceImplTest {
         person.setSnils(Permissive.of(""));
         person.setAddress(Permissive.of(new Address()));
         person.setDocuments(Permissive.of(Collections.singletonList(new IdDoc())));
-        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(person), eq(PersonVipDataPermission.VIEW_VIP_DATA))).thenReturn(false);
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(person), eq(PersonPermission.VIEW_VIP_DATA))).thenReturn(false);
         forbidVipsDataByUserPermissions.invoke(personService, Collections.singletonList(person));
         assertThat(person.getReportDoc().hasPermission()).isFalse();
         assertThat(person.getInn().hasPermission()).isFalse();

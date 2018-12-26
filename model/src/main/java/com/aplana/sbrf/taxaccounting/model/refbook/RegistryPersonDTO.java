@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.Permissive;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,13 +14,23 @@ import java.util.List;
  * Модель физлица для работы с реестром физлиц. Записи реестра физлиц содержат ссылки на таблицы справочники.
  * Чтобы работать с таким ссылками как с объектами, ссылки разыменовываются и объекты представляются в виде Мапы строка-значение справочника.
  */
-@Getter @Setter @EqualsAndHashCode(exclude = {"oldId"}, callSuper = false)
-public class RegistryPersonDTO extends PermissivePerson {
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"oldId"}, callSuper = false)
+public class RegistryPersonDTO extends IdentityObject<Long> implements PermissivePerson {
 
     /**
      * Исходный идентификатор физлица
      */
     private Long oldId;
+    /**
+     * Идентификатор группы версий
+     */
+    private Long recordId;
+
+    private long permissions;
+
+    private boolean vip;
 
     /**
      * Статус из справочника

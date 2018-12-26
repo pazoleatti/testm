@@ -215,7 +215,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             // Контролёр НС
             if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
                 // Подразделение формы = (ТБ подразделения пользователя + все дочерние + иерархия подразделений от подразделения, для которого являемся исполнителем, вверх до ТБ и всех дочерних вниз)
-                List<Integer> departments = departmentService.getTaxFormDepartments(taUser);
+                List<Integer> departments = departmentService.findAllAvailableIds(taUser);
                 if (departments.contains(targetDomainObject.getDepartmentId())) {
                     return true;
                 }
@@ -232,7 +232,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     if (hasUserAsnuAccess(currentUser, taUser, asnuId)) {
                         //TODO: надо проверить правильность после https://jira.aplana.com/browse/SBRFNDFL-3835
                         // Подразделение формы = подразделению пользователя (либо дочернему) или подразделению (либо дочернему) для которого исполнителем назначено подразделение пользователя
-                        List<Integer> departments = departmentService.getTaxFormDepartments(taUser);
+                        List<Integer> departments = departmentService.findAllAvailableIds(taUser);
                         if (departments.contains(targetDomainObject.getDepartmentId())) {
                             return true;
                         }

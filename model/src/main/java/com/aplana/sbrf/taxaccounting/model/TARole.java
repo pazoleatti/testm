@@ -32,6 +32,14 @@ public class TARole implements Serializable {
      * Алиас роли "Контролёр НС (НДФЛ)"
      */
     public static final String N_ROLE_CONTROL_NS = "N_ROLE_CONTROL_NS";
+	/**
+	 * Алиас роли "Оператор формирования Уведомлений о неудержанном налоге (НДФЛ)"
+	 */
+	public static final String N_ROLE_OPER_NOTICE = "N_ROLE_OPER_NOTICE";
+	/**
+	 * Алиас роли "Редактор Реестра физических лиц (НДФЛ)"
+	 */
+	public static final String N_ROLE_EDITOR_FL = "N_ROLE_EDITOR_FL";
     /**
      * Алиас роли "Настройщик (НДФЛ)"
      */
@@ -40,10 +48,6 @@ public class TARole implements Serializable {
      * Алиас роли "Администратор"
      */
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
-	/**
-	 * Алиас роли "Оператор формирования Уведомлений о неудержанном налоге (НДФЛ)"
-	 */
-	public static final String N_ROLE_OPER_NOTICE = "N_ROLE_OPER_NOTICE";
 
 	private static final long serialVersionUID = 1L;
 	

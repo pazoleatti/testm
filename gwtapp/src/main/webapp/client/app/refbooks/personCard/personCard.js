@@ -19,15 +19,14 @@
             });
         }])
 
-        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'LogBusinessResource', 'APP_CONSTANTS', '$state', '$http', 'PersonCardResource', '$aplanaModal', '$dialogs',
-            function ($scope, $rootScope, $filter, RefBookListResource, LogBusinessResource, APP_CONSTANTS, $state, $http, PersonCardResource, $aplanaModal, $dialogs) {
+        .controller('personCardCtrl', ['$scope', '$rootScope', '$filter', 'RefBookListResource', 'LogBusinessResource', 'APP_CONSTANTS', '$state', '$http',
+            'PersonCardResource', '$aplanaModal', '$dialogs', 'PermissionChecker',
+            function ($scope, $rootScope, $filter, RefBookListResource, LogBusinessResource, APP_CONSTANTS, $state, $http,
+                      PersonCardResource, $aplanaModal, $dialogs, PermissionChecker) {
 
                 $scope.mode = APP_CONSTANTS.MODE.VIEW;
 
                 $scope.personParam = {};
-
-                // Права на редактирование карточки. Временно только для Контролёра УНП, на расширение заведён баг SBRFNDFL-6008.
-                $scope.userHasEditPermission = $rootScope.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP);
 
                 /**
                  * @description Получить данные физлица открытой карточки
@@ -35,6 +34,11 @@
                 $scope.dataExtract = function () {
                     var data = PersonCardResource.query({
                         id: $state.params.id
+                    });
+                    data.$promise.then(function (value) {
+                        // Права на редактирование карточки.
+                        $scope.userHasEditPermission = PermissionChecker.check($scope.person, APP_CONSTANTS.PERSON_PERMISSION.EDIT);
+                        return value;
                     });
                     return data;
                 };
