@@ -195,12 +195,11 @@ public interface AsyncManager {
      * При конкуррентном вызове метода есть вероятность
      * что 2 потока одновременно проверят возможность установления взаимоисключающих блокировок, а потом одновременно установят
      * взаимоисключающие блокировки. Если сделать реализацию synchronized, то для одного узла исключится такая ситуация.
-     * @param task      задача для которой создается болкировка
+     * @param taskType  задача для которой создается болкировка
      * @param params    параметры задачи
      * @param logger    логгер
-     * @param lockKey   сгененрированный ключ блокировки
      * @param userInfo  информация опользователе
      * @return  {@code true} если блокировка установлена
      */
-    boolean checkAndCreateLocks(Task task, Map<String, Object> params, Logger logger, String lockKey, TAUserInfo userInfo);
+    boolean checkAndCreateLocks(LockTaskType taskType, Map<String, Object> params, Logger logger, TAUserInfo userInfo);
 }

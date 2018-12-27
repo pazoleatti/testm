@@ -4,12 +4,33 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.model.LockTaskType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.component.DeclarationDataKeyLockDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.DeclarationProhibitiveLockExistsVerifier;
+import com.aplana.sbrf.taxaccounting.service.component.SimpleDeclarationDataLockKeyGenerator;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -23,7 +44,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Реализация менеджера асинхронных задач на Spring
@@ -54,6 +79,12 @@ public class AsyncManagerImpl implements AsyncManager {
     private AsyncTaskDao asyncTaskDao;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private DeclarationProhibitiveLockExistsVerifier declarationProhibitiveLockExistsVerifier;
+    @Autowired
+    private SimpleDeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
+    @Autowired
+    private DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -215,7 +246,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 if (!MapUtils.isEmpty(params)) {
                     checkParams(params);
                 }
-                if (checkAndCreateLocks(task, params, logger, lockKey, user)) {
+                if (checkAndCreateLocks(taskType, params, logger, user)) {
                     AsyncTaskData taskData = null;
                     try {
                         //Постановка новой задачи в очередь
@@ -443,15 +474,19 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public synchronized boolean checkAndCreateLocks(Task task, Map<String, Object> params, Logger logger, String lockKey, TAUserInfo userInfo) {
-        if (task.prohibitiveLockExists(params, logger)) {
-            LOG.info(String.format("Найдены запущенные задачи, по которым требуется удалить блокировку для задачи с ключом %s", lockKey));
-            return false;
-        } else {
-            LOG.info(String.format("Создание блокировки для задачи с ключом %s", lockKey));
-            task.establishLock(lockKey, userInfo, params);
-            return true;
+    public synchronized boolean checkAndCreateLocks(LockTaskType taskType, Map<String, Object> params, Logger logger, TAUserInfo userInfo) {
+        if (params.containsKey("declarationDataId")) {
+            Long declarationDataId = (Long) params.get("declarationDataId");
+            String lockKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, taskType);
+            if (declarationProhibitiveLockExistsVerifier.verify(declarationDataId, taskType, logger)) {
+                LOG.info(String.format("Создание блокировки для задачи с ключом %s", lockKey));
+                lockDataService.lock(lockKey, userInfo.getUser().getId(), declarationDataKeyLockDescriptor.createKeyLockDescription(declarationDataId, taskType));
+            } else {
+                LOG.info(String.format("Найдены запущенные задачи, по которым требуется удалить блокировку для задачи с ключом %s", lockKey));
+                return false;
+            }
         }
+        return true;
     }
 
     /**

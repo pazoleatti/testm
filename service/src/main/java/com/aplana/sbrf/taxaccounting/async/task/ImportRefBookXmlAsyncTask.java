@@ -80,13 +80,4 @@ public class ImportRefBookXmlAsyncTask extends AbstractAsyncTask {
         return AsyncTaskType.IMPORT_REF_BOOK_XML;
     }
 
-    @Override
-    public LockData establishLock(String lockKey, TAUserInfo user, Map<String, Object> params) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
-
-    @Override
-    public boolean prohibitiveLockExists(Map<String, Object> params, Logger logger) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
 }

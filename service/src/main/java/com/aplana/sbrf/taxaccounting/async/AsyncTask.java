@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author dloshkarev
  */
-public interface AsyncTask extends Task {
+public interface AsyncTask {
 
     String LOCK_INFO_MSG = "Запрашиваемая операция уже запущена %s пользователем %s. Вы добавлены в список получателей оповещения о выполнении данной операции.";
     String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";

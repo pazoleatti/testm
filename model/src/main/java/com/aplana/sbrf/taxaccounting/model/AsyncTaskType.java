@@ -6,7 +6,7 @@ import lombok.Getter;
  * Типы асинхронных задач с привязкой их к обработчикам в таблице ASYNC_TASK_TYPE
  */
 @Getter
-public enum AsyncTaskType {
+public enum AsyncTaskType implements LockTaskType {
     //Асинхронные задачи
     XML_DEC(1, "XML", "Расчет НФ. %s", 6L),
     CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Выгрузка отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
