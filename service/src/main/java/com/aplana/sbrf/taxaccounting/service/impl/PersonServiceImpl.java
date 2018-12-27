@@ -209,8 +209,11 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setRecordId(personDTO.getRecordId());
         PersonChangeLogBuilder changeLogBuilder = new PersonChangeLogBuilder();
 
-        // Обновляем ДУЛы
         List<IdDoc> persistedIdDocs = idDocDaoImpl.getByPerson(personToPersist);
+        List<PersonIdentifier> persistedInpList = idTaxPayerDaoImpl.getByPerson(personToPersist);
+        List<PersonTb> persistedTbList = personTbDaoImpl.getByPerson(personToPersist);
+
+        // Обновляем ДУЛы
         {
             List<IdDoc> idDocsToCreate = new ArrayList<>();
             List<IdDoc> idDocsToUpdate = new ArrayList<>();
@@ -286,7 +289,7 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-        List<PersonIdentifier> persistedInpList = idTaxPayerDaoImpl.getByPerson(personToPersist);
+        // Обновляем ИНП
         {
             List<PersonIdentifier> inpToCreate = new ArrayList<>();
             List<PersonIdentifier> inpToDelete = new ArrayList<>(persistedInpList);
@@ -322,7 +325,7 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-        List<PersonTb> persistedTbList = personTbDaoImpl.getByPerson(personToPersist);
+        // Обновляем Тербанки
         {
             List<PersonTb> tbToCreate = new ArrayList<>();
             List<PersonTb> tbToDelete = new ArrayList<>(persistedTbList);
