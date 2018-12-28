@@ -902,8 +902,8 @@ class Calculate extends AbstractScriptClass {
             refBookPerson.setBirthDate(primaryPerson.getBirthDate())
             updated = true
         }
-        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getCitizenship().getCode(), primaryPerson.getCitizenship().getCode())) {
-            infoBuilder.append(makeUpdateMessage("Гражданство", refBookPerson.getCitizenship().getCode(), primaryPerson.getCitizenship().getCode()))
+        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode())) {
+            infoBuilder.append(makeUpdateMessage("Гражданство", refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode()))
             refBookPerson.setCitizenship(primaryPerson.getCitizenship())
             updated = true
         }
@@ -946,12 +946,12 @@ class Calculate extends AbstractScriptClass {
             refBookPerson.setSnils(primaryPerson.getSnils())
             updated = true
         }
-        if (!ScriptUtils.equalsNullSafe(refBookPerson.getTaxPayerState().getCode(), primaryPerson.getTaxPayerState().getCode())) {
-            infoBuilder.append(makeUpdateMessage("Статус налогоплательщика", refBookPerson.getTaxPayerState().getCode(), primaryPerson.getTaxPayerState().getCode()))
+        if (!ScriptUtils.equalsNullSafe(refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode())) {
+            infoBuilder.append(makeUpdateMessage("Статус налогоплательщика", refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode()))
             refBookPerson.setTaxPayerState(primaryPerson.getTaxPayerState())
             updated = true
         }
-        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getSource().getCode(), primaryPerson.getSource().getCode())) {
+        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getSource()?.getCode(), primaryPerson.getSource()?.getCode())) {
             refBookPerson.setSource(primaryPerson.getSource())
             updated = true
         }
