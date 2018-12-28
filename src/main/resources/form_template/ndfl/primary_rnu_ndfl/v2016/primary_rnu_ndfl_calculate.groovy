@@ -782,7 +782,7 @@ class Calculate extends AbstractScriptClass {
 
                 if (changed) {
                     logger.infoExp("Обновлена запись в Реестре физических лиц. Идентификатор ФЛ: %s, ФИО: %s. Изменено:  %s", "", String.format("%s, ИНП: %s", buildFio(primaryPerson), primaryPerson.getPersonIdentifier().getInp()), refBookPerson.getRecordId(), buildFio(primaryPerson), infoMsgBuilder.toString())
-                    logBusinessService.logPersonEvent(primaryPerson.id, FormDataEvent.CREATE_PERSON,
+                    logBusinessService.logPersonEvent(primaryPerson.id, FormDataEvent.UPDATE_PERSON,
                             "В ходе идентификации ФЛ первичной формы № $declarationData.id изменено: " + infoMsgBuilder.toString(),
                             taUserService.getSystemUserInfo())
                     updCnt++
