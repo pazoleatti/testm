@@ -48,19 +48,17 @@ class PersonChangeLogBuilder {
     }
 
     public void dulCreated(IdDoc doc) {
-        comma().append("[ Добавлен ДУЛ: \"Код ДУЛ\"=\"")
-                .append(format(doc.getDocType()))
-                .append("\", \"Серия и номер ДУЛ\"=\"")
+        comma().append("[ Добавлен ДУЛ. \"Код ДУЛ\": \"").append(format(doc.getDocType())).append("\", \"Серия и номер ДУЛ\": \"")
                 .append(format(doc.getDocumentNumber())).append("\" ]");
     }
 
     public void dulDeleted(IdDoc doc) {
-        comma().append("[ Удалён ДУЛ: \"Код ДУЛ\"=\"").append(format(doc.getDocType().getCode())).append("\", \"Серия и номер ДУЛ\"=\"")
+        comma().append("[ Удалён ДУЛ. \"Код ДУЛ\": \"").append(format(doc.getDocType().getCode())).append("\", \"Серия и номер ДУЛ\": \"")
                 .append(format(doc.getDocumentNumber())).append("\" ]");
     }
 
     public void dulUpdated(IdDoc doc) {
-        comma().append("[ Изменён ДУЛ: \"Код ДУЛ\"=\"").append(format(doc.getDocType().getCode())).append("\", \"Серия и номер ДУЛ\"=\"")
+        comma().append("[ Изменён ДУЛ. \"Код ДУЛ\": \"").append(format(doc.getDocType().getCode())).append("\", \"Серия и номер ДУЛ\": \"")
                 .append(format(doc.getDocumentNumber())).append("\" ]");
     }
 
