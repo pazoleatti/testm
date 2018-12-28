@@ -260,4 +260,21 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6290 - Удалить поле ref_book_person.address-->
+    <changeSet id="3.4-amandzyak-19" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body15.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6290 - Удалить поле ref_book_person.address-->
+    <changeSet id="3.4-amandzyak-20" author="amandzyak">
+        <sql>
+            alter table ref_book_person drop column address;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
