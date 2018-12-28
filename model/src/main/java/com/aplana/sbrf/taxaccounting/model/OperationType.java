@@ -9,8 +9,24 @@ import lombok.Getter;
  * Содержит поля соответствующие идентификатору типа асинхронной задачи и описанию операции. Для синхронных операций идентификатор типа асинхронной задачи равен null.
  */
 @Getter @AllArgsConstructor
-public enum OperationType implements LockTaskType {
+public enum OperationType {
 
+    LOAD_TRANSPORT_FILE(12L, "Загрузка данных из ТФ xml"),
+    IMPORT_DECLARATION_EXCEL(30L, "Загрузка данных из Excel файла"),
+    IDENTIFY_PERSON(8L, "Идентификация ФЛ"),
+    UPDATE_PERSONS_DATA(34L, "Обновление данных физических лиц в налоговой форме"),
+    CHECK_DEC(14L, "Проверка налоговой формы"),
+    ACCEPT_DEC(15L, "Принятие налоговой формы"),
+    DELETE_DEC(32L, "Удаление налоговой формы"),
+    CONSOLIDATE(9L, "Консолидация данных в налоговую форму"),
+    EXCEL_DEC(5L, "Формирование xlsx"),
+    EXCEL_TEMPLATE_DEC(31L, "Формирование шаблона ТФ  в Excel"),
+    DECLARATION_2NDFL1(28L, "Формирование ОНФ 2НДФЛ 1"),
+    DECLARATION_2NDFL2(28L, "Формирование ОНФ 2НДФЛ 2"),
+    DECLARATION_6NDFL(28L, "Формирование ОНФ 6НДФЛ"),
+    PDF_DEC(7L, "Выгрузка данных из формы в PDF формате"),
+    DEPT_NOTICE_DEC(35L, "Формирование уведомления о задолженности"),
+    EXPORT_REPORTS(29L, "Выгрузка отчетности"),
     RETURN_DECLARATION(null, "Возврат формы из подготовлена/принята в создана"),
     EDIT(null, "Редактирование строки налоговой формы"),
     EDIT_FILE(null, "Добавление/удаление файлов/комментариев"),

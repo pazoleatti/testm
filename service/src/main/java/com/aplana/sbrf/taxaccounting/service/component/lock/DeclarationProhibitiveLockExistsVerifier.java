@@ -1,6 +1,8 @@
-package com.aplana.sbrf.taxaccounting.service.component;
+package com.aplana.sbrf.taxaccounting.service.component.lock;
 
-import com.aplana.sbrf.taxaccounting.model.LockTaskType;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.OperationType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 /**
@@ -10,8 +12,10 @@ public interface DeclarationProhibitiveLockExistsVerifier {
     /**
      * Проверка существования блокировок, которые мешают постановке в очередь текущей задачи
      * @param declarationDataId идентификатор налоговой формы
+     * @param operationType     операция
+     * @param userInfo          информация о пользователе
      * @param logger            логгер
-     * @return  true, если проверка пройдена
+     * @return  объект блокировки в случае успешной установки блокировки иначе null
      */
-    boolean verify(Long declarationDataId, LockTaskType task, Logger logger);
+    LockData verify(Long declarationDataId, OperationType operationType, TAUserInfo userInfo, Logger logger);
 }

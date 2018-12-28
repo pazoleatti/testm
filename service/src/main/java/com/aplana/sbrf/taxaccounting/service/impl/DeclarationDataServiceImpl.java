@@ -935,7 +935,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public ActionResult checkDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
         final ActionResult result = new ActionResult();
         Logger logger = new Logger();
         for (final Long declarationDataId : declarationDataIds) {
@@ -943,10 +942,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
                         new TargetIdAndLogger(declarationDataId, logger),
                         "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.CHECK)) {
-                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                     Map<String, Object> params = new HashMap<>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
+                    params.put("taskDescription", getStandardDeclarationDescription(declarationDataId));
+                    asyncManager.createTask(OperationType.CHECK_DEC, userInfo, params, logger);
                 } else {
                     makeNotificationForAccessDenied(logger);
                 }
@@ -1534,7 +1533,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public ActionResult acceptDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
         final ActionResult result = new ActionResult();
         Logger logger = new Logger();
         for (final Long declarationDataId : declarationDataIds) {
@@ -1542,10 +1540,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
                         new TargetIdAndLogger(declarationDataId, logger),
                         "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.ACCEPTED)) {
-                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                     Map<String, Object> params = new HashMap<>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncManager.createTask(keyTask, ddReportType.getReportType(), userInfo, params, logger);
+                    asyncManager.createTask(OperationType.ACCEPT_DEC, userInfo, params, logger);
                 } else {
                     makeNotificationForAccessDenied(logger);
                 }

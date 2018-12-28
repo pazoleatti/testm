@@ -1,17 +1,17 @@
-package com.aplana.sbrf.taxaccounting.service.component;
+package com.aplana.sbrf.taxaccounting.service.component.lock;
 
-import com.aplana.sbrf.taxaccounting.model.LockTaskType;
+import com.aplana.sbrf.taxaccounting.model.OperationType;
 
 /**
  * Интерфейс содержащий логику по генерированию ключей блокировки
  */
-public interface SimpleDeclarationDataLockKeyGenerator {
+public interface DeclarationDataLockKeyGenerator {
 
     /**
      * Сгенерировать ключ блокировки
      * @param declarationDataId идентификатор налоговой формы
-     * @param task  тип задачи
+     * @param operationType     тип задачи
      * @return  строку ключа блокировки
      */
-    public String generateLockKey(Long declarationDataId, LockTaskType task);
+    String generateLockKey(Long declarationDataId, OperationType operationType);
 }

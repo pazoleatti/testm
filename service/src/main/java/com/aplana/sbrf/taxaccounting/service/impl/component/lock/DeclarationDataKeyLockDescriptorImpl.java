@@ -1,18 +1,16 @@
-package com.aplana.sbrf.taxaccounting.service.impl.component;
+package com.aplana.sbrf.taxaccounting.service.impl.component.lock;
 
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.OperationType;
-import com.aplana.sbrf.taxaccounting.model.LockTaskType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.component.DeclarationDataKeyLockDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataKeyLockDescriptor;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
@@ -34,57 +32,57 @@ public class DeclarationDataKeyLockDescriptorImpl implements DeclarationDataKeyL
     }
 
     @Override
-    public String createKeyLockDescription(Long declarationDataId, LockTaskType task) {
-        if (task.equals(AsyncTaskType.LOAD_TRANSPORT_FILE))
+    public String createKeyLockDescription(Long declarationDataId, OperationType operationType) {
+        if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.IMPORT_DECLARATION_EXCEL))
+        else if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.IDENTIFY_PERSON))
+        else if (operationType.equals(OperationType.IDENTIFY_PERSON))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.UPDATE_PERSONS_DATA))
+        else if (operationType.equals(OperationType.UPDATE_PERSONS_DATA))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.CHECK_DEC))
+        else if (operationType.equals(OperationType.CHECK_DEC))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.ACCEPT_DEC))
+        else if (operationType.equals(OperationType.ACCEPT_DEC))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.DELETE_DEC))
+        else if (operationType.equals(OperationType.DELETE_DEC))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.CONSOLIDATE))
+        else if (operationType.equals(OperationType.CONSOLIDATE))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.EXCEL_DEC))
+        else if (operationType.equals(OperationType.EXCEL_DEC))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.EXCEL_TEMPLATE_DEC))
+        else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.PDF_DEC)) return createExtendDescription(declarationDataId);
-        else if (task.equals(AsyncTaskType.DEPT_NOTICE_DEC))
+        else if (operationType.equals(OperationType.PDF_DEC)) return createExtendDescription(declarationDataId);
+        else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
             return createExtendDescription(declarationDataId);
-        else if (task.equals(OperationType.RETURN_DECLARATION))
+        else if (operationType.equals(OperationType.RETURN_DECLARATION))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.EDIT)) return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.EDIT_FILE))
+        else if (operationType.equals(OperationType.EDIT)) return createBaseDescription(declarationDataId);
+        else if (operationType.equals(OperationType.EDIT_FILE))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_NDFL_PERSON_DB))
+        else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
+        else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.REPORT_KPP_OKTMO))
+        else if (operationType.equals(OperationType.REPORT_KPP_OKTMO))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_RATE_REPORT))
+        else if (operationType.equals(OperationType.RNU_RATE_REPORT))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_PAYMENT_REPORT))
+        else if (operationType.equals(OperationType.RNU_PAYMENT_REPORT))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_NDFL_DETAIL_REPORT))
+        else if (operationType.equals(OperationType.RNU_NDFL_DETAIL_REPORT))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT))
+        else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
+        else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
             return createBaseDescription(declarationDataId);
-        else if (task.equals(OperationType.REPORT_2NDFL1))
+        else if (operationType.equals(OperationType.REPORT_2NDFL1))
             return createExtendDescription(declarationDataId);
-        else if (task.equals(OperationType.REPORT_2NDFL2))
+        else if (operationType.equals(OperationType.REPORT_2NDFL2))
             return createExtendDescription(declarationDataId);
         else
-            throw new IllegalArgumentException("Unknown task type!");
+            throw new IllegalArgumentException("Unknown operationType type!");
     }
 
     private String createBaseDescription(Long declarationDataId) {
