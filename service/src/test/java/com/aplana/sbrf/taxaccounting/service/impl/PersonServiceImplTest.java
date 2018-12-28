@@ -190,7 +190,7 @@ public class PersonServiceImplTest {
         // execute
         personService.savePersons(personList);
 
-        //verify
+        //establishLock
         verify(personDao).saveBatch(personList);
         verify(idDocDaoImpl).createBatch(idDocs.capture());
         verify(idTaxPayerDaoImpl).createBatch(idTaxPayers.capture());

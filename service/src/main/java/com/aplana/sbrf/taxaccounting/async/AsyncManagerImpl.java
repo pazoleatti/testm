@@ -28,9 +28,7 @@ import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataKeyLockDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationProhibitiveLockExistsVerifier;
+import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -80,11 +78,7 @@ public class AsyncManagerImpl implements AsyncManager {
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
-    private DeclarationProhibitiveLockExistsVerifier declarationProhibitiveLockExistsVerifier;
-    @Autowired
-    private DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
-    @Autowired
-    private DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
+    private DeclarationLocker declarationLocker;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -229,7 +223,7 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public synchronized Boolean createTask(final OperationType operationType, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
+    public synchronized Boolean createTask(final OperationType operationType, final String operationObjectDescription, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
         LOG.info(String.format("AsyncManagerImpl.executeTask by %s. taskType: %s; params: %s", user, operationType, params));
         return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
             @Override
@@ -265,13 +259,10 @@ public class AsyncManagerImpl implements AsyncManager {
                         return true;
                     } catch (Exception e) {
                         LOG.error("Async task creation has been failed!", e);
-                        if (params.containsKey("taskDescription")) {
+
                             logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
-                                    params.get("taskDescription"),
+                                    operationObjectDescription,
                                     operationType.getName());
-                        } else {
-                            logger.error(e.getMessage());
-                        }
                         if (taskData != null) {
                             asyncTaskDao.delete(taskData.getId());
                             lockDataService.unlockAllByTask(taskData.getId());;
@@ -481,7 +472,7 @@ public class AsyncManagerImpl implements AsyncManager {
      */
     private synchronized LockData checkAndCreateLocks(OperationType operationType, Map<String, Object> params, Logger logger, TAUserInfo userInfo) {
         Long declarationDataId = (Long) params.get("declarationDataId");
-        return declarationProhibitiveLockExistsVerifier.verify(declarationDataId, operationType, userInfo, logger);
+        return declarationLocker.establishLock(declarationDataId, operationType, userInfo, logger);
     }
 
     /**

@@ -67,12 +67,13 @@ public interface AsyncManager {
      * Создает асинхронную задачу, выполняет проверки и размещает ее в очереди. При конкуррентном вызове метода есть вероятность
      * что 2 потока одновременно проверят возможность установления взаимоисключающих блокировок, а потом одновременно установят
      * взаимоисключающие блокировки. Если сделать реализацию synchronized, то для одного узла исключится такая ситуация.
-     * @param operationType тип задачи
-     * @param user пользователь, от имени которого была запущена задача
-     * @param params кастомные параметры задачи
-     * @param logger логгер
+     * @param operationType                 тип задачи
+     * @param operationObjectDescription    описание объекта по которому создается задача
+     * @param user                          пользователь, от имени которого была запущена задача
+     * @param params                        кастомные параметры задачи
+     * @param logger                        логгер
      */
-    Boolean createTask(final OperationType operationType, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
+    Boolean createTask(final OperationType operationType, String operationObjectDescription, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
 
     /**
      * Выполняет попытку запуска асинхронной задачи, если не удалось - возвращает сообщение для диалога

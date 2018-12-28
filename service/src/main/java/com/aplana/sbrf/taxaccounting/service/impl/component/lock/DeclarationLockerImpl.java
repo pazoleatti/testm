@@ -15,7 +15,8 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationProhibitiveLockExistsVerifier;
+import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataKeyLockDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,12 +30,14 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class DeclarationProhibitiveLockExistsVerifierImpl implements DeclarationProhibitiveLockExistsVerifier {
+public class DeclarationLockerImpl implements DeclarationLocker {
 
-    private static final Log LOG = LogFactory.getLog(DeclarationProhibitiveLockExistsVerifierImpl.class);
+    private static final Log LOG = LogFactory.getLog(DeclarationLockerImpl.class);
 
     @Autowired
     private DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
+    @Autowired
+    private DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
     @Autowired
     private LockDataDao lockDataDao;
     @Autowired
@@ -58,7 +61,7 @@ public class DeclarationProhibitiveLockExistsVerifierImpl implements Declaration
     private final Set<OperationType> SET_EXCEL_TEMPLATE = new HashSet<>();
     private final Set<OperationType> SET_REPORT_KPP_OKTMO = new HashSet<>();
 
-    public DeclarationProhibitiveLockExistsVerifierImpl() {
+    public DeclarationLockerImpl() {
         SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY.addAll(Arrays.asList(OperationType.UPDATE_PERSONS_DATA,
                 OperationType.CHECK_DEC, OperationType.ACCEPT_DEC, OperationType.RETURN_DECLARATION,
                 OperationType.DELETE_DEC, OperationType.EXCEL_DEC, OperationType.RNU_NDFL_PERSON_DB,
@@ -110,62 +113,62 @@ public class DeclarationProhibitiveLockExistsVerifierImpl implements Declaration
     }
 
     @Override
-    public LockData verify(Long declarationDataId, OperationType operationType, TAUserInfo userInfo, Logger logger) {
+    public LockData establishLock(Long declarationDataId, OperationType operationType, TAUserInfo userInfo, Logger logger) {
         if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
-            return executeCheck(declarationDataId, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
         else if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
-            return executeCheck(declarationDataId, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
         else if (operationType.equals(OperationType.IDENTIFY_PERSON))
-            return executeCheck(declarationDataId, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
         else if (operationType.equals(OperationType.UPDATE_PERSONS_DATA))
-            return executeCheck(declarationDataId, operationType, SET_UPDATE_PERSONS_DATA, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_UPDATE_PERSONS_DATA, userInfo, logger);
         else if (operationType.equals(OperationType.CHECK_DEC))
-            return executeCheck(declarationDataId, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
         else if (operationType.equals(OperationType.ACCEPT_DEC))
-            return executeCheck(declarationDataId, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
         else if (operationType.equals(OperationType.DELETE_DEC))
-            return executeCheck(declarationDataId, operationType, SET_DELETE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_DELETE, userInfo, logger);
         else if (operationType.equals(OperationType.CONSOLIDATE))
-            return executeCheck(declarationDataId, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
         else if (operationType.equals(OperationType.EXCEL_DEC))
-            return executeCheck(declarationDataId, operationType, SET_XLSX, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_XLSX, userInfo, logger);
         else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
-            return executeCheck(declarationDataId, operationType, SET_EXCEL_TEMPLATE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_EXCEL_TEMPLATE, userInfo, logger);
         else if (operationType.equals(OperationType.PDF_DEC))
-            return executeCheck(declarationDataId, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
         else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
-            return executeCheck(declarationDataId, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
         else if (operationType.equals(OperationType.RETURN_DECLARATION))
-            return executeCheck(declarationDataId, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
         else if (operationType.equals(OperationType.EDIT))
-            return executeCheck(declarationDataId, operationType, SET_EDIT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_EDIT, userInfo, logger);
         else if (operationType.equals(OperationType.EDIT_FILE))
-            return executeCheck(declarationDataId, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.REPORT_KPP_OKTMO))
-            return executeCheck(declarationDataId, operationType, SET_REPORT_KPP_OKTMO, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_REPORT_KPP_OKTMO, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_RATE_REPORT))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_PAYMENT_REPORT))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_DETAIL_REPORT))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.REPORT_2NDFL1))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.REPORT_2NDFL2))
-            return executeCheck(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
+            return doCheckAndLock(declarationDataId, operationType, SET_SPEC_REPORT, userInfo, logger);
         else
             throw new IllegalArgumentException("Unknown operationType type!");
     }
 
-    private LockData executeCheck(final Long declarationDataId, final OperationType currentTask, Set<OperationType> lockingTasks, final TAUserInfo userinfo, final Logger logger) {
+    private LockData doCheckAndLock(final Long declarationDataId, final OperationType currentTask, Set<OperationType> lockingTasks, final TAUserInfo userinfo, final Logger logger) {
         lockingTasks.add(currentTask);
         final Set<String> lockKeys = new HashSet<>();
         final String currTaskKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, currentTask);
@@ -215,7 +218,7 @@ public class DeclarationProhibitiveLockExistsVerifierImpl implements Declaration
                     LOG.info(String.format("Создание блокировки для задачи с ключом %s", currTaskKey));
                     LockData result = null;
                     try {
-                        lockDataDao.lock(currTaskKey, userinfo.getUser().getId());
+                        lockDataDao.lock(currTaskKey, userinfo.getUser().getId(), declarationDataKeyLockDescriptor.createKeyLockDescription(declarationDataId, currentTask));
                         result = lockDataDao.get(currTaskKey, false);
                         if (result == null) {
                             throw new IllegalStateException();
