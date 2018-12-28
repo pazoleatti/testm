@@ -159,17 +159,6 @@ public interface DeclarationDataService {
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
-     * Идентифицировать ФЛ НФ
-     *
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @param cancelTask        признак для отмены задачи
-     * @return модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
-     */
-    RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
-
-    /**
      * Создает задачу по постановке операции "Консолидировать НФ" в очередь
      *
      * @param userInfo          информация о пользователе, выполняющего действие

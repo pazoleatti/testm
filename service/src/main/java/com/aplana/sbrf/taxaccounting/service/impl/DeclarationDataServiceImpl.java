@@ -691,12 +691,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    @Override
-    @Transactional
-    public RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask) {
-        return recalculateDeclaration(userInfo, declarationDataId, force, cancelTask, DeclarationDataReportType.IDENTIFY_PERSON);
-    }
-
     @Transactional
     @Override
     public RecalculateDeclarationResult createConsolidateDeclarationTask(TAUserInfo userInfo, final long declarationDataId) {
@@ -831,8 +825,32 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @Transactional
     public ActionResult identifyDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds) {
-        return recalculateDeclarationList(userInfo, DeclarationDataReportType.IDENTIFY_PERSON, declarationDataIds, DeclarationDataPermission.IDENTIFY);
+        LOG.info(String.format("DeclarationDataServiceImpl.identifyDeclarationDataList by %s. declarationDataIds: %s",
+                userInfo, declarationDataIds));
+        final ActionResult result = new ActionResult();
+        final Logger logger = new Logger();
+
+        for (final Long declarationDataId : declarationDataIds) {
+            try {
+                if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                        new TargetIdAndLogger(declarationDataId, logger),
+                        "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.IDENTIFY)) {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("declarationDataId", declarationDataId);
+                    params.put("docDate", new Date());
+                    asyncManager.createTask(OperationType.IDENTIFY_PERSON, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+                } else {
+                    makeNotificationForAccessDenied(logger);
+                }
+            } catch (Exception e) {
+                makeNotificationForUnexpected(e, logger, "Идентификация ФЛ", declarationDataId);
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     @Transactional
