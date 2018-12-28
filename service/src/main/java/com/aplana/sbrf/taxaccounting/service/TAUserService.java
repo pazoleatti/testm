@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
  *
  * @author avanteev
  */
+@ScriptExposed
 public interface TAUserService {
 	/**
 	 * Проверяет, есть ли пользователь с таким логином.

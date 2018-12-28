@@ -36,6 +36,7 @@ import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
+import com.aplana.sbrf.taxaccounting.service.TAUserService
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import groovy.transform.TypeChecked
@@ -77,6 +78,7 @@ class Calculate extends AbstractScriptClass {
     PersonService personService
     DepartmentService departmentService
     LogBusinessService logBusinessService
+    TAUserService taUserService
 
     // Дата окончания отчетного периода
     Date periodEndDate = null
@@ -172,6 +174,9 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("logBusinessService")) {
             this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
+        }
+        if (scriptClass.getBinding().hasVariable("taUserService")) {
+            this.taUserService = (TAUserService) scriptClass.getProperty("taUserService")
         }
     }
 
@@ -631,7 +636,7 @@ class Calculate extends AbstractScriptClass {
                 logger.infoExp("Создана новая запись в Реестре физических лиц. Идентификатор ФЛ: %s, ФИО: %s %s %s", "", String.format("%s, ИНП: %s", buildFio(person), person.getPersonIdentityList().get(0).inp), person.recordId, person.getLastName() ?: "", person.getFirstName() ?: "", person.getMiddleName() ?: "")
                 logBusinessService.logPersonEvent(person.id, FormDataEvent.CREATE_PERSON,
                         "ФЛ создано в ходе операции \"Идентификация\" первичной формы № $declarationData.id.",
-                        userInfo)
+                        taUserService.getSystemUserInfo())
                 createCnt++
             }
         }
@@ -777,9 +782,9 @@ class Calculate extends AbstractScriptClass {
 
                 if (changed) {
                     logger.infoExp("Обновлена запись в Реестре физических лиц. Идентификатор ФЛ: %s, ФИО: %s. Изменено:  %s", "", String.format("%s, ИНП: %s", buildFio(primaryPerson), primaryPerson.getPersonIdentifier().getInp()), refBookPerson.getRecordId(), buildFio(primaryPerson), infoMsgBuilder.toString())
-                    logBusinessService.logPersonEvent(primaryPerson.id, FormDataEvent.CREATE_PERSON,
+                    logBusinessService.logPersonEvent(primaryPerson.id, FormDataEvent.UPDATE_PERSON,
                             "В ходе идентификации ФЛ первичной формы № $declarationData.id изменено: " + infoMsgBuilder.toString(),
-                            userInfo)
+                            taUserService.getSystemUserInfo())
                     updCnt++
                 }
             }
@@ -897,8 +902,8 @@ class Calculate extends AbstractScriptClass {
             refBookPerson.setBirthDate(primaryPerson.getBirthDate())
             updated = true
         }
-        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getCitizenship().getCode(), primaryPerson.getCitizenship().getCode())) {
-            infoBuilder.append(makeUpdateMessage("Гражданство", refBookPerson.getCitizenship().getCode(), primaryPerson.getCitizenship().getCode()))
+        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode())) {
+            infoBuilder.append(makeUpdateMessage("Гражданство", refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode()))
             refBookPerson.setCitizenship(primaryPerson.getCitizenship())
             updated = true
         }
@@ -941,12 +946,12 @@ class Calculate extends AbstractScriptClass {
             refBookPerson.setSnils(primaryPerson.getSnils())
             updated = true
         }
-        if (!ScriptUtils.equalsNullSafe(refBookPerson.getTaxPayerState().getCode(), primaryPerson.getTaxPayerState().getCode())) {
-            infoBuilder.append(makeUpdateMessage("Статус налогоплательщика", refBookPerson.getTaxPayerState().getCode(), primaryPerson.getTaxPayerState().getCode()))
+        if (!ScriptUtils.equalsNullSafe(refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode())) {
+            infoBuilder.append(makeUpdateMessage("Статус налогоплательщика", refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode()))
             refBookPerson.setTaxPayerState(primaryPerson.getTaxPayerState())
             updated = true
         }
-        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getSource().getCode(), primaryPerson.getSource().getCode())) {
+        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getSource()?.getCode(), primaryPerson.getSource()?.getCode())) {
             refBookPerson.setSource(primaryPerson.getSource())
             updated = true
         }

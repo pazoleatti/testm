@@ -209,8 +209,11 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setRecordId(personDTO.getRecordId());
         PersonChangeLogBuilder changeLogBuilder = new PersonChangeLogBuilder();
 
-        // Обновляем ДУЛы
         List<IdDoc> persistedIdDocs = idDocDaoImpl.getByPerson(personToPersist);
+        List<PersonIdentifier> persistedInpList = idTaxPayerDaoImpl.getByPerson(personToPersist);
+        List<PersonTb> persistedTbList = personTbDaoImpl.getByPerson(personToPersist);
+
+        // Обновляем ДУЛы
         {
             List<IdDoc> idDocsToCreate = new ArrayList<>();
             List<IdDoc> idDocsToUpdate = new ArrayList<>();
@@ -220,7 +223,7 @@ public class PersonServiceImpl implements PersonService {
                 if (idDoc.getId() == null) {
                     idDocsToCreate.add(idDoc);
                 } else {
-                    if (!Objects.equal(idDoc.getId(), findById(persistedIdDocs, idDoc.getId()).getId())) {
+                    if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
                         idDocsToUpdate.add(idDoc);
                     }
                     removeById(idDocsToDelete, idDoc.getId());
@@ -286,7 +289,7 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-        List<PersonIdentifier> persistedInpList = idTaxPayerDaoImpl.getByPerson(personToPersist);
+        // Обновляем ИНП
         {
             List<PersonIdentifier> inpToCreate = new ArrayList<>();
             List<PersonIdentifier> inpToDelete = new ArrayList<>(persistedInpList);
@@ -322,7 +325,7 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-        List<PersonTb> persistedTbList = personTbDaoImpl.getByPerson(personToPersist);
+        // Обновляем Тербанки
         {
             List<PersonTb> tbToCreate = new ArrayList<>();
             List<PersonTb> tbToDelete = new ArrayList<>(persistedTbList);
@@ -405,9 +408,8 @@ public class PersonServiceImpl implements PersonService {
         changeLogBuilder.personInfoUpdated(persistedPerson, personToPersist);
 
         refBookPersonDao.updateRegistryPerson(personToPersist);
-        String note = changeLogBuilder.build();
-        if (isNotEmpty(note)) {
-            logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, note, userInfo);
+        if (!changeLogBuilder.isEmpty()) {
+            logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, changeLogBuilder.build(), userInfo);
         }
     }
 

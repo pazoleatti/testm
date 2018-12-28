@@ -66,7 +66,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     private LogBusiness makeLogBusiness(FormDataEvent event, String note, TAUser user) {
         LogBusiness log = new LogBusiness();
         log.setEventId(event.getCode());
-        log.setUserLogin(user.getLogin());
+        log.setUserLogin(user.getId() == TAUser.SYSTEM_USER_ID ? user.getName() : user.getLogin());
         log.setLogDate(new Date());
         log.setNote(note);
         log.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
