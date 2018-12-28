@@ -29,8 +29,8 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataKeyLockDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationProhibitiveLockExistsVerifier;
 import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
+import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationProhibitiveLockExistsVerifier;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -259,11 +259,9 @@ public class AsyncManagerImpl implements AsyncManager {
                         AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
                         taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
                         lockDataService.bindTask(lockData.getKey(), taskData.getId());
-                        if (asyncTaskType != null) {
-                            logger.info("Задача %s поставлена в очередь на исполнение", asyncTaskType.getViewName());
-                            LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
-                                    taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));
-                        }
+                        logger.info("Задача %s поставлена в очередь на исполнение", operationType.getName());
+                        LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
+                                taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));
                         return true;
                     } catch (Exception e) {
                         LOG.error("Async task creation has been failed!", e);
