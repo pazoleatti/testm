@@ -2,9 +2,19 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang3.time.FastDateFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,77 +26,74 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  * Вспомогательный класс для формирования записи истории изменения ФЛ
  */
 class PersonChangeLogBuilder {
-    private StringBuilder sb = new StringBuilder();
+
+    private List<String> changes = new ArrayList<>();
 
     public String build() {
-        sb.insert(0, "В ходе редактирования карточки ФЛ изменено: ");
-        return sb.toString();
+        return "В ходе редактирования карточки ФЛ изменено: " + Joiner.on(",\n").join(changes);
+    }
+
+    public boolean isEmpty() {
+        return changes.isEmpty();
     }
 
     public void inpCreated(PersonIdentifier identifier) {
-        comma().append("[ Добавлен ИНП: \"").append(format(identifier.getInp())).append(", АСНУ: \"").append(format(identifier.getAsnu().getCode())).append("\" ]");
+        changes.add("[ Добавлен ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void inpDeleted(PersonIdentifier identifier) {
-        comma().append("[ Удалён ИНП: \"").append(format(identifier.getInp())).append(", АСНУ: \"").append(format(identifier.getAsnu().getCode())).append("\" ]");
+        changes.add("[ Удалён ИНП: \"" + format(identifier.getInp()) + ", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void inpUpdated(PersonIdentifier identifier) {
-        comma().append("[ Изменён ИНП: \"").append(format(identifier.getInp())).append(", АСНУ: \"").append(format(identifier.getAsnu().getCode())).append("\" ]");
+        changes.add("[ Изменён ИНП: \"" + format(identifier.getInp()) + ", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void tbAdded(PersonTb tb) {
-        comma().append("[ Добавлен Тербанк: \"").append(format(tb.getTbDepartment().getShortName())).append("\" ]");
+        changes.add("[ Добавлен Тербанк: \"" + format(tb.getTbDepartment().getShortName()) + "\" ]");
     }
 
     public void tbUpdated(PersonTb tb) {
-        comma().append("[ Изменён Тербанк: \"").append(format(tb.getTbDepartment().getShortName())).append("\"]");
+        changes.add("[ Изменён Тербанк: \"" + format(tb.getTbDepartment().getShortName()) + "\"]");
     }
 
     public void tbDeleted(PersonTb tb) {
-        comma().append("[ Удалён Тербанк: \"").append(format(firstNonNull(tb.getTbDepartment().getShortName(), tb.getTbDepartment().getName()))).append("\" ]");
+        changes.add("[ Удалён Тербанк: \"" + format(firstNonNull(tb.getTbDepartment().getShortName(), tb.getTbDepartment().getName())) + "\" ]");
     }
 
     public void dulCreated(IdDoc doc) {
-        comma().append("[ Добавлен ДУЛ. \"Код ДУЛ\": \"").append(format(doc.getDocType())).append("\", \"Серия и номер ДУЛ\": \"")
-                .append(format(doc.getDocumentNumber())).append("\" ]");
+        changes.add("[ Добавлен ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
     }
 
     public void dulDeleted(IdDoc doc) {
-        comma().append("[ Удалён ДУЛ. \"Код ДУЛ\": \"").append(format(doc.getDocType().getCode())).append("\", \"Серия и номер ДУЛ\": \"")
-                .append(format(doc.getDocumentNumber())).append("\" ]");
+        changes.add("[ Удалён ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType().getCode()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
     }
 
     public void dulUpdated(IdDoc doc) {
-        comma().append("[ Изменён ДУЛ. \"Код ДУЛ\": \"").append(format(doc.getDocType().getCode())).append("\", \"Серия и номер ДУЛ\": \"")
-                .append(format(doc.getDocumentNumber())).append("\" ]");
+        changes.add("[ Изменён ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType().getCode()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
     }
 
     public void originalSet(RegistryPersonDTO original) {
-        comma().append("[ Назначен ФЛ-оригинал. Идентификатор ФЛ: \"").append(original.getOldId().toString()).append("\", ФИО: \"")
-                .append(original.getLastName()).append(" ").append(original.getFirstName())
-                .append(isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "").append("\" ]");
+        changes.add("[ Назначен ФЛ-оригинал. Идентификатор ФЛ: \"" + original.getOldId().toString() +
+                "\", ФИО: \"" + original.getLastName() + " " + original.getFirstName() + (isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "") + "\" ]");
     }
 
     public void originalDeleted(RegistryPerson original) {
-        comma().append("[ Откреплён ФЛ-оригинал. Идентификатор ФЛ: \"").append(original.getOldId().toString()).append("\", ФИО: \"")
-                .append(original.getLastName()).append(" ").append(original.getFirstName())
-                .append(isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "").append("\" ]");
+        changes.add("[ Откреплён ФЛ-оригинал. Идентификатор ФЛ: \"" + original.getOldId().toString() +
+                "\", ФИО: \"" + original.getLastName() + " " + original.getFirstName() + (isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "") + "\" ]");
     }
 
     public void duplicatesSet(List<RegistryPerson> duplicates) {
         for (RegistryPerson duplicate : duplicates) {
-            comma().append("[ Прикреплен Дубликат ФЛ. Идентификатор ФЛ: \"").append(duplicate.getOldId().toString()).append("\", ФИО: \"")
-                    .append(duplicate.getLastName()).append(" ").append(duplicate.getFirstName())
-                    .append(isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "").append("\" ]");
+            changes.add("[ Прикреплен Дубликат ФЛ. Идентификатор ФЛ: \"" + duplicate.getOldId().toString() +
+                    "\", ФИО: \"" + duplicate.getLastName() + " " + duplicate.getFirstName() + (isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "") + "\" ]");
         }
     }
 
     public void duplicatesDeleted(List<RegistryPerson> duplicates) {
         for (RegistryPerson duplicate : duplicates) {
-            comma().append("[ Откреплён Дубликат ФЛ. Идентификатор ФЛ: \"").append(duplicate.getOldId().toString()).append("\", ФИО: \"")
-                    .append(duplicate.getLastName()).append(" ").append(duplicate.getFirstName())
-                    .append(isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "").append("\" ]");
+            changes.add("[ Откреплён Дубликат ФЛ. Идентификатор ФЛ: \"" + duplicate.getOldId().toString() +
+                    "\", ФИО: \"" + duplicate.getLastName() + " " + duplicate.getFirstName() + (isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "") + "\" ]");
         }
     }
 
@@ -104,29 +111,19 @@ class PersonChangeLogBuilder {
         personPropertyUpdated("ИНН в стране гражданства", personWas.getInnForeign(), personBecome.getInnForeign());
         personPropertyUpdated("СНИЛС", personWas.getSnils(), personBecome.getSnils());
         if (!equal(emptyObjectToNull(personWas.getTaxPayerState()), emptyObjectToNull(personBecome.getTaxPayerState()))) {
-            comma().append("[ ").append("Статус налогоплательщика").append(": ").
-                    append(format(personWas.getTaxPayerState())).append(" -> ")
-                    .append(format(personBecome.getTaxPayerState())).append(" ]");
+            changes.add("[ " + "Статус налогоплательщика" + ": " + format(personWas.getTaxPayerState()) + " -> " + format(personBecome.getTaxPayerState()) + " ]");
         }
         if (!equal(emptyObjectToNull(personWas.getCitizenship()), emptyObjectToNull(personBecome.getCitizenship()))) {
-            comma().append("[ ").append("Гражданство").append(": ")
-                    .append(format(personWas.getCitizenship())).append(" -> ")
-                    .append(format(personBecome.getCitizenship())).append(" ]");
+            changes.add("[ " + "Гражданство" + ": " + format(personWas.getCitizenship()) + " -> " + format(personBecome.getCitizenship()) + " ]");
         }
         if (!equal(emptyObjectToNull(personWas.getReportDoc()), emptyObjectToNull(personBecome.getReportDoc()))) {
-            comma().append("[ ").append("Документ для отчетности").append(": ")
-                    .append(format(personWas.getReportDoc())).append(" -> ")
-                    .append(format(personBecome.getReportDoc())).append(" ]");
+            changes.add("[ " + "Документ для отчетности" + ": " + format(personWas.getReportDoc()) + " -> " + format(personBecome.getReportDoc()) + " ]");
         }
         if (!equal(emptyObjectToNull(personWas.getSource()), emptyObjectToNull(personBecome.getSource()))) {
-            comma().append("[ ").append("Система-источник").append(": ")
-                    .append(format(personWas.getSource())).append(" -> ")
-                    .append(format(personBecome.getSource())).append(" ]");
+            changes.add("[ " + "Система-источник" + ": " + format(personWas.getSource()) + " -> " + format(personBecome.getSource()) + " ]");
         }
         if (!equal(personWas.isVip(), personBecome.isVip())) {
-            comma().append("[ ").append("Важность").append(": ")
-                    .append(formatVip(personWas.isVip())).append(" -> ")
-                    .append(formatVip(personBecome.isVip())).append(" ]");
+            changes.add("[ " + "Важность" + ": " + formatVip(personWas.isVip()) + " -> " + formatVip(personBecome.isVip()) + " ]");
         }
         personPropertyUpdated("Индекс", personWas.getAddress().getPostalCode(), personBecome.getAddress().getPostalCode());
         personPropertyUpdated("Регион", personWas.getAddress().getRegionCode(), personBecome.getAddress().getRegionCode());
@@ -138,35 +135,21 @@ class PersonChangeLogBuilder {
         personPropertyUpdated("Корпус", personWas.getAddress().getBuild(), personBecome.getAddress().getBuild());
         personPropertyUpdated("Квартира", personWas.getAddress().getAppartment(), personBecome.getAddress().getAppartment());
         if (!equal(emptyObjectToNull(personWas.getAddress().getCountry()), emptyObjectToNull(personBecome.getAddress().getCountry()))) {
-            comma().append("[ ").append("Код страны проживания").append(": ")
-                    .append(format(personWas.getAddress().getCountry())).append(" -> ")
-                    .append(format(personBecome.getAddress().getCountry())).append(" ]");
+            changes.add("[ " + "Код страны проживания" + ": " + format(personWas.getAddress().getCountry()) + " -> " + format(personBecome.getAddress().getCountry()) + " ]");
         }
         personPropertyUpdated("Адрес за пределами РФ", personWas.getAddress().getAddressIno(), personBecome.getAddress().getAddressIno());
     }
 
     private void personPropertyUpdated(String name, String string1, String string2) {
         if (!equal(string1, string2)) {
-            comma().append("[ ").append(name).append(": ").append(format(string1)).append(" -> ").append(format(string2)).append(" ]");
+            changes.add("[ " + name + ": " + format(string1) + " -> " + format(string2) + " ]");
         }
     }
 
     private void personPropertyUpdated(String name, Date date1, Date date2) {
         if (!equal(date1, date2)) {
-            comma().append("[ ").append(name).append(": ").append(format(date1)).append(" -> ").append(format(date2)).append(" ]");
+            changes.add("[ " + name + ": " + format(date1) + " -> " + format(date2) + " ]");
         }
-    }
-
-    private PersonChangeLogBuilder comma() {
-        if (sb.length() > 0) {
-            sb.append(",\n");
-        }
-        return this;
-    }
-
-    private PersonChangeLogBuilder append(String string) {
-        sb.append(string);
-        return this;
     }
 
     /**

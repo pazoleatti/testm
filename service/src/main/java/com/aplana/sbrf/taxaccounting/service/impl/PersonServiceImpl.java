@@ -223,7 +223,7 @@ public class PersonServiceImpl implements PersonService {
                 if (idDoc.getId() == null) {
                     idDocsToCreate.add(idDoc);
                 } else {
-                    if (!Objects.equal(idDoc.getId(), findById(persistedIdDocs, idDoc.getId()).getId())) {
+                    if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
                         idDocsToUpdate.add(idDoc);
                     }
                     removeById(idDocsToDelete, idDoc.getId());
@@ -408,9 +408,8 @@ public class PersonServiceImpl implements PersonService {
         changeLogBuilder.personInfoUpdated(persistedPerson, personToPersist);
 
         refBookPersonDao.updateRegistryPerson(personToPersist);
-        String note = changeLogBuilder.build();
-        if (isNotEmpty(note)) {
-            logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, note, userInfo);
+        if (!changeLogBuilder.isEmpty()) {
+            logBusinessService.logPersonEvent(personToPersist.getId(), FormDataEvent.UPDATE_PERSON, changeLogBuilder.build(), userInfo);
         }
     }
 
