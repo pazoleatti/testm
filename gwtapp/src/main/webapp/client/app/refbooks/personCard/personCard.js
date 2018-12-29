@@ -427,7 +427,7 @@
                             title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.create');
                             idDoc = {
                                 id: new Date().getTime(),
-                                docType: {},
+                                docType: null,
                                 person: {id: $scope.personParam.id},
                                 tempId: true
                             };

@@ -7,33 +7,37 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * DAO для работы с объектами назначенных физлицу Тербанков ref_book_person_tb
+ * DAO для работы с объектами назначенных физлицу Тербанков (ref_book_person_tb)
  */
 public interface PersonTbDao {
 
     /**
-     * Сохранить группу назначенных физлицу Тербанков
+     * Возвращяет список тербанков физлица
+     *
+     * @param person ФЛ
+     * @return список тербанков ФЛ
+     */
+    List<PersonTb> getByPerson(RegistryPerson person);
+
+    /**
+     * Создаёт группу назначенных физлицу Тербанков
+     *
      * @param personTbs коллекция назначенных физлицу Тербанков
      */
     void createBatch(final Collection<PersonTb> personTbs);
 
 
     /**
-     * Обновление группы назначенных физлицу Тербанков
+     * Обновляет данные группы назначенных физлицу Тербанков
+     *
      * @param personTbList коллекция назначенных физлицу Тербанков
      */
     void updateBatch(final Collection<PersonTb> personTbList);
 
     /**
-     * Удаление назначенных физлицу Тербанков по идентификатору
-     * @param ids   список идентификаторов назначенных физлицу Тербанков
+     * Удаляет назначенные физлицу Тербанки по списку идентификаторов
+     *
+     * @param ids список идентификаторов назначенных физлицу Тербанков
      */
     void deleteByIds(final Collection<Long> ids);
-
-    /**
-     * Получить список тербанков физлица
-     * @param person
-     * @return
-     */
-    List<PersonTb> getByPerson(RegistryPerson person);
 }

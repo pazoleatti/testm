@@ -22,7 +22,7 @@ public interface RefBookAsnuDao {
      * @param ids идентификаторы
      * @return список записей справочника
      */
-    List<RefBookAsnu> fetchByIds(List<Long> ids);
+    List<RefBookAsnu> findAllByIdIn(List<Long> ids);
 
     /**
      * Возвращяет записи справочника по идентификатору
@@ -30,7 +30,7 @@ public interface RefBookAsnuDao {
      * @param id идентификатор
      * @return запись справочника или null
      */
-    RefBookAsnu fetchById(Long id);
+    RefBookAsnu findById(Long id);
 
     /**
      * Возвращяет запись справочника по наименованию
@@ -38,5 +38,5 @@ public interface RefBookAsnuDao {
      * @param name наименование АСНУ
      * @return запись справочника или null
      */
-    RefBookAsnu fetchByName(String name);
+    RefBookAsnu findByName(String name);
 }

@@ -1,44 +1,43 @@
-<form id="idDocRefBookRecordForm" name="idDocRefBookRecordForm" class="form-horizontal"
-      data-aplana-submit-valid="save()" novalidate>
+<form id="idDocRefBookRecordForm" name="idDocRefBookRecordForm" class="form-horizontal" data-aplana-submit-valid="checkAndAddIdDoc()" novalidate>
     <div class="modal-body">
         <div class="row-fluid form-group">
             <div class="span3">
-                <label class="control-label">{{:: 'refBook.fl.card.tabs.idDoc.modal.idDocCode.type' |
-                    translate}}:</label>
-            </div>
-            <div class="span9" data-ng-controller="SelectRegistryPersonController"
-                 data-ui-select2="docTypeSelect.options"
-                 aplana-input-outer-width="400"
-                 data-ng-init="initDocType()"
-                 data-ng-model="idDoc.docType">
-            </div>
-        </div>
-        <div class="row-fluid form-group" style="margin-bottom: 60px">
-            <div class="span3">
-                <label class="control-label">{{::
-                    'refBook.fl.card.tabs.idDoc.modal.idDocNumber' |
-                    translate}}:</label>
+                <label class="control-label">
+                    {{:: 'refBook.fl.card.tabs.idDoc.modal.idDocCode.type' | translate}}:
+                </label>
             </div>
             <div class="span9">
-                <input class="form-control" type="text"
-                       data-ng-model="idDoc.documentNumber"
-                       aplana-input-outer-width="400">
-                <div class="control-group"
-                     data-ng-class="{'error' : true}"
-                     data-ng-show="formatInvalid">
-                    <div class="controls">
-                        <div class="help-bottom-popup"
-                             data-ng-style="{'display' : 'block'}">
-                            <div class="help-container">
-                                <div class="help-top-arrow"></div>
-                                <div class="help-text">{{formatInvalidMessage}}</div>
-                            </div>
-                        </div>
+                <div data-aplana-field>
+                    <div data-ng-controller="SelectRegistryPersonController"
+                         data-ui-select2="docTypeSelect.options"
+                         aplana-input-outer-width="400"
+                         data-ng-init="initDocType()"
+                         data-ng-model="idDoc.docType"
+                         data-required></div>
+                    <div data-aplana-validator data-key='required'>
+                        {{::'common.validation.required' | translate}}
                     </div>
                 </div>
             </div>
         </div>
-
+        <div class="row-fluid form-group" style="margin-bottom: 60px">
+            <div class="span3">
+                <label class="control-label">
+                    {{::'refBook.fl.card.tabs.idDoc.modal.idDocNumber' | translate}}:
+                </label>
+            </div>
+            <div class="span9">
+                <div data-aplana-field>
+                    <input class="form-control" type="text"
+                           data-ng-model="idDoc.documentNumber"
+                           aplana-input-outer-width="400"
+                           data-required>
+                    <div data-aplana-validator data-key='required'>
+                        {{::'common.validation.required' | translate}}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="modal-footer">
         <div class="row-fluid">

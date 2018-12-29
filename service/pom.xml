@@ -227,7 +227,7 @@
                     <include>**/service.xml</include>
                     <include>**/script-support.xml</include>
                     <include>**/permissions.xml</include>
-                    <include>**/acctax.xlsm</include>
+                    <include>**/personExcelTemplate.xlsm</include>
                     <include>vsax3/*</include>
                 </includes>
             </resource>

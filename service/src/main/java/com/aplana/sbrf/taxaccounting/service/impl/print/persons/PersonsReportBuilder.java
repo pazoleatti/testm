@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.persons;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
@@ -9,9 +10,13 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,15 +46,23 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     private StyleBuilder styleBuilder;
 
     public PersonsReportBuilder(List<RegistryPersonDTO> persons, RefBookPersonFilter filter) {
-        super("tmp_физические_лица_", ".xlsx");
+        super("tmp_физические_лица_", ".xlsm");
         this.persons = persons;
         this.filter = filter;
 
-        workBook = new SXSSFWorkbook();
-        styleBuilder = new StyleBuilder(workBook);
+        XSSFWorkbook template;
+        try {
+            InputStream templateInputStream = this.getClass().getResourceAsStream("/excelTemplate/personExcelTemplate.xlsm");
+            template = new XSSFWorkbook(templateInputStream);
+            workBook = new SXSSFWorkbook(template);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
         workBook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK);
-        this.sheet = workBook.createSheet("Физические лица");
+        sheet = template.getSheetAt(0);
+        this.workBook.setSheetName(0, "Физические лица");
         sheet.setRowSumsBelow(false);
+        styleBuilder = new StyleBuilder(workBook);
     }
 
     @Override
@@ -69,11 +82,10 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void fillHeader() {
-        // TODO нужно сделать позже
-        /*row1();
+        row1();
         row2();
         row3();
-        row4();*/
+        row4();
     }
 
     @Override
@@ -119,14 +131,30 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
         sheet.addMergedRegion(region);
         cell = row2.createCell(3);
         if (filter != null) {
-            List<String> values = new ArrayList<>();
-            addIfNotEmpty(values, "Фамилия", filter.getLastName());
-            addIfNotEmpty(values, "Имя", filter.getFirstName());
-            addIfNotEmpty(values, "Отчество", filter.getMiddleName());
-            addIfNotEmpty(values, "Дата рождения", filter.getBirthDateFrom(), filter.getBirthDateTo());
-            addIfNotEmpty(values, "Серия и № ДУЛ", filter.getDocumentNumber());
-            addIfNotEmpty(values, "ИД ФЛ", filter.getId());
-            cell.setCellValue(values.isEmpty() ? "не заданы" : Joiner.on(", ").join(values));
+            FilterFieldsBuilder headerBuilder = new FilterFieldsBuilder();
+            headerBuilder.add("Фамилия", filter.getLastName());
+            headerBuilder.add("Имя", filter.getFirstName());
+            headerBuilder.add("Отчество", filter.getMiddleName());
+            headerBuilder.add("Дата рождения", filter.getBirthDateFrom(), filter.getBirthDateTo());
+            headerBuilder.addDepartments("Тербанк", filter.getTerBanks());
+            headerBuilder.addVip("Важность", filter.getVip());
+            headerBuilder.addDocTypes("Тип ДУЛ", filter.getDocTypes());
+            headerBuilder.add("Серия и № ДУЛ", filter.getDocumentNumber());
+            headerBuilder.addCountries("Гражданство", filter.getCitizenshipCountries());
+            headerBuilder.addTaxpayerStates("Статус НП", filter.getTaxpayerStates());
+            headerBuilder.addAsnus("Система-источник", filter.getSourceSystems());
+            headerBuilder.add("ИД ФЛ", filter.getId());
+            headerBuilder.add("ИНП", filter.getInp());
+            headerBuilder.add("ИНН РФ", filter.getInn());
+            headerBuilder.add("ИНН Ино", filter.getInnForeign());
+            headerBuilder.add("СНИЛС", filter.getSnils());
+            String header = headerBuilder.build();
+            cell.setCellValue(header.isEmpty() ? "не заданы" : header);
+
+            CellStyle style = workBook.createCellStyle();
+            style.setWrapText(true);
+            cell.setCellStyle(style);
+            row2.setRowStyle(style);
         }
     }
 
@@ -140,8 +168,17 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
         sheet.addMergedRegion(region);
         cell = row3.createCell(3);
         if (filter != null) {
-            List<String> values = new ArrayList<>();
-            cell.setCellValue(values.isEmpty() ? "не заданы" : Joiner.on(", ").join(values));
+            FilterFieldsBuilder headerBuilder = new FilterFieldsBuilder();
+            headerBuilder.add("Индекс", filter.getPostalCode());
+            headerBuilder.add("Регион", filter.getRegion());
+            headerBuilder.add("Район", filter.getDistrict());
+            headerBuilder.add("Город", filter.getCity());
+            headerBuilder.add("Нас. пункт", filter.getLocality());
+            headerBuilder.add("Улица", filter.getStreet());
+            headerBuilder.addCountries("Страна проживания", filter.getCountries());
+            headerBuilder.add("Адрес", filter.getForeignAddress());
+            String header = headerBuilder.build();
+            cell.setCellValue(header.isEmpty() ? "не задан" : header);
         }
     }
 
@@ -162,7 +199,9 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
                 values.add("Все версии");
             }
             if (filter.getDuplicates() != null) {
-                values.add("Дубликаты " + (filter.getDuplicates() ? "отображаются" : "не отображаются"));
+                values.add(!filter.getDuplicates() ? "дубликаты не отображаются" : "отображаются только дубликаты");
+            } else {
+                values.add("отображаются все записи");
             }
             cell.setCellValue(values.isEmpty() ? "не заданы" : Joiner.on(", ").join(values));
         }
@@ -216,19 +255,5 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void fillFooter() {
-    }
-
-    private void addIfNotEmpty(List<String> values, String fieldName, String value) {
-        if (!isEmpty(value)) {
-            values.add(fieldName + ": " + value);
-        }
-    }
-
-    private void addIfNotEmpty(List<String> values, String fieldName, Date dateFrom, Date dateTo) {
-        if (dateFrom != null || dateTo != null) {
-            values.add(fieldName + ": с " +
-                    (dateFrom != null ? dateFormat.format(dateFrom) : "-") + " по " +
-                    (dateTo != null ? dateFormat.format(dateTo) : "-"));
-        }
     }
 }

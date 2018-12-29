@@ -29,27 +29,27 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
         if (userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER_NOTICE)) {
             return refBookAsnuDao.findAll();
         } else {
-            return userInfo.getUser().getAsnuIds().isEmpty() ? new ArrayList<RefBookAsnu>() : refBookAsnuDao.fetchByIds(userInfo.getUser().getAsnuIds());
+            return userInfo.getUser().getAsnuIds().isEmpty() ? new ArrayList<RefBookAsnu>() : refBookAsnuDao.findAllByIdIn(userInfo.getUser().getAsnuIds());
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RefBookAsnu> fetchByIds(List<Long> ids) {
-        return refBookAsnuDao.fetchByIds(ids);
+        return refBookAsnuDao.findAllByIdIn(ids);
     }
 
 
     @Override
     @Transactional(readOnly = true)
     public RefBookAsnu fetchById(Long id) {
-        return refBookAsnuDao.fetchById(id);
+        return refBookAsnuDao.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public RefBookAsnu fetchByName(String name) {
-        return refBookAsnuDao.fetchByName(StringUtils.cleanString(name));
+        return refBookAsnuDao.findByName(StringUtils.cleanString(name));
     }
 
     @Override

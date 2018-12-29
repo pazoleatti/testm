@@ -119,7 +119,7 @@ public class RefBookPersonDaoTest {
     @Test
     public void test_getPersons_filterByCitizenshipCountries() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setCitizenshipCountries(Arrays.asList(1L, 2L));
+        filter.setCitizenshipCountryIds(Arrays.asList(1L, 2L));
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
@@ -132,7 +132,7 @@ public class RefBookPersonDaoTest {
     @Test
     public void test_getPersons_filterByTaxpayerStates() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setTaxpayerStates(Arrays.asList(2L, 3L));
+        filter.setTaxpayerStateIds(Arrays.asList(2L, 3L));
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
@@ -144,7 +144,7 @@ public class RefBookPersonDaoTest {
     @Test
     public void test_getPersons_filterBySourceSystems() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setSourceSystems(Arrays.asList(1L, 2L));
+        filter.setSourceSystemIds(Arrays.asList(1L, 2L));
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
@@ -253,7 +253,7 @@ public class RefBookPersonDaoTest {
     @Test
     public void test_getPersons_filterByForeignAddressCountry() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setCountries(Arrays.asList(2L, 3L));
+        filter.setCountryIds(Arrays.asList(2L, 3L));
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 

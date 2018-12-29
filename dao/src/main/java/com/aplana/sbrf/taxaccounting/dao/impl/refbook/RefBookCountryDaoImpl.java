@@ -12,8 +12,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+
 @Repository
-public class RefBookCountryDaoImpl extends AbstractDao implements RefBookCountryDao{
+public class RefBookCountryDaoImpl extends AbstractDao implements RefBookCountryDao {
 
     @Autowired
     private RefBookMapperFactory refBookMapperFactory;
@@ -30,9 +32,22 @@ public class RefBookCountryDaoImpl extends AbstractDao implements RefBookCountry
                 "from ref_book_country c where status = 0) r\n" +
                 "where r.start_date <= :actualDate and (r.end_date >= :actualDate or r.end_date is null)";
         try {
-            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), refBookMapperFactory.new CountryMapper<>() );
+            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), refBookMapperFactory.new CountryMapper<>());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<RefBookCountry> findAllByIdIn(List<Long> ids) {
+        if (!isEmpty(ids)) {
+            return getNamedParameterJdbcTemplate().query(
+                    "select c.id, c.name, c.code \n" +
+                            "from ref_book_country c \n" +
+                            "where c.id in (:ids)",
+                    new MapSqlParameterSource("ids", ids),
+                    refBookMapperFactory.new CountryMapper<>());
+        }
+        return new ArrayList<>();
     }
 }

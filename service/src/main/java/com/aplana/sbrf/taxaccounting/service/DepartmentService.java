@@ -224,7 +224,7 @@ public interface DepartmentService {
      * @param ids список идентификаторов
      * @return список {@link Department} или пустой список
      */
-    List<Department> fetchAllDepartmentByIds(List<Integer> ids);
+    List<Department> findAllByIdIn(List<Integer> ids);
 
     /**
      * Получение DTO всех подразделений.

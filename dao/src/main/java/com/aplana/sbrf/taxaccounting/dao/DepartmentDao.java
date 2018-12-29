@@ -213,7 +213,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param ids список идентификаторов
      * @return список {@link Department} или пустой список
      */
-    List<Department> fetchAllDepartmentByIds(Collection<Integer> ids);
+    List<Department> findAllByIdIn(Collection<Integer> ids);
 
     /**
      * Получение списка названий всех подразделений.

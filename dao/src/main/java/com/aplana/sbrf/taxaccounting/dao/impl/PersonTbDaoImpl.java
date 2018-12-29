@@ -18,7 +18,24 @@ import java.util.List;
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.in;
 
 @Repository
-public class PersonTbDaoImpl extends AbstractDao implements PersonTbDao{
+public class PersonTbDaoImpl extends AbstractDao implements PersonTbDao {
+
+    @Override
+    public List<PersonTb> getByPerson(RegistryPerson person) {
+        Long recordId = person.getRecordId();
+        String query = "select distinct \n" +
+                "tb.id, tb.import_date, \n" +
+                "dep.id dep_id, dep.name dep_name, dep.shortname \n" +
+                "from ref_book_person_tb tb \n" +
+                "left join department dep on dep.id = tb.tb_department_id \n" +
+                "where person_id in (select id from ref_book_person where record_id = :recordId)";
+        List<PersonTb> result = getNamedParameterJdbcTemplate().query(query, new MapSqlParameterSource("recordId", recordId), PERSON_TB_MAPPER);
+        for (PersonTb personTb : result) {
+            personTb.setPerson(person);
+        }
+        return result;
+    }
+
     @Override
     public void createBatch(Collection<PersonTb> personTbs) {
         saveNewObjects(personTbs, PersonTb.TABLE_NAME, DBUtils.Sequence.REF_BOOK_RECORD.getName(), PersonTb.COLUMNS, PersonTb.FIELDS);
@@ -35,22 +52,6 @@ public class PersonTbDaoImpl extends AbstractDao implements PersonTbDao{
             String query = "delete from ref_book_person_tb where " + in("id", ids);
             getJdbcTemplate().update(query);
         }
-    }
-
-    @Override
-    public List<PersonTb> getByPerson(RegistryPerson person) {
-        Long recordId = person.getRecordId();
-        String query = "select distinct \n" +
-                "tb.id, tb.import_date, \n" +
-                "dep.id dep_id, dep.name dep_name, dep.shortname \n" +
-                "from ref_book_person_tb tb \n" +
-                "left join department dep on dep.id = tb.tb_department_id \n" +
-                "where person_id in (select id from ref_book_person where record_id = :recordId)";
-        List<PersonTb> result = getNamedParameterJdbcTemplate().query(query, new MapSqlParameterSource("recordId", recordId), PERSON_TB_MAPPER);
-        for (PersonTb personTb : result) {
-            personTb.setPerson(person);
-        }
-        return result;
     }
 
     private static RowMapper<PersonTb> PERSON_TB_MAPPER = new RowMapper<PersonTb>() {

@@ -12,8 +12,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+
 @Repository
-public class RefBookDocTypeDaoImpl extends AbstractDao implements RefBookDocTypeDao{
+public class RefBookDocTypeDaoImpl extends AbstractDao implements RefBookDocTypeDao {
 
     @Autowired
     private RefBookMapperFactory refBookMapperFactory;
@@ -34,5 +36,18 @@ public class RefBookDocTypeDaoImpl extends AbstractDao implements RefBookDocType
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<RefBookDocType> findAllByIdIn(List<Long> ids) {
+        if (!isEmpty(ids)) {
+            return getNamedParameterJdbcTemplate().query(
+                    "select dt.id, dt.name, dt.code, dt.priority \n" +
+                            "from ref_book_doc_type dt \n" +
+                            "where dt.id in (:ids)",
+                    new MapSqlParameterSource("ids", ids),
+                    refBookMapperFactory.new DocTypeMapper<>());
+        }
+        return new ArrayList<>();
     }
 }

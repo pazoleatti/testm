@@ -37,19 +37,19 @@ public class RefBookAsnuDaoTest {
     //Проверка получения значений справочника по id
     @Test
     public void testFetchByIds() {
-        List<RefBookAsnu> asnuList = refBookAsnuDao.fetchByIds(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L));
+        List<RefBookAsnu> asnuList = refBookAsnuDao.findAllByIdIn(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L));
         assertEquals(asnuList.size(), ASNU_BY_IDS_COUNT);
     }
 
     public void testFetchById() {
-        RefBookAsnu refBookAsnu = refBookAsnuDao.fetchById(1L);
+        RefBookAsnu refBookAsnu = refBookAsnuDao.findById(1L);
         assertNotNull(refBookAsnu);
         assertEquals("1000", refBookAsnu.getCode());
     }
 
     @Test
     public void fetchByName() {
-        RefBookAsnu refBookAsnu = refBookAsnuDao.fetchByName("АИС \"Дивиденд\"");
+        RefBookAsnu refBookAsnu = refBookAsnuDao.findByName("АИС \"Дивиденд\"");
         assertNotNull(refBookAsnu);
         assertEquals("2000", refBookAsnu.getCode());
     }
