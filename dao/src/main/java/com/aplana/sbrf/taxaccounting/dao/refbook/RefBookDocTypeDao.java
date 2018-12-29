@@ -9,9 +9,17 @@ import java.util.List;
  */
 public interface RefBookDocTypeDao {
     /**
-     * Найти все действующие записи
+     * Возвращяет все действующие записи
      *
-     * @return список действующих записей
+     * @return список действующих записей справочника
      */
     List<RefBookDocType> findAllActive();
+
+    /**
+     * Возвращяет список записей справочника по списку идентификаторов
+     *
+     * @param ids список идентификаторов
+     * @return список записей справочника
+     */
+    List<RefBookDocType> findAllByIdIn(List<Long> ids);
 }

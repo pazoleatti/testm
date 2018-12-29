@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+
 @Repository
 public class RefBookTaxpayerStateDaoImpl extends AbstractDao implements RefBookTaxpayerStateDao {
 
@@ -34,6 +36,18 @@ public class RefBookTaxpayerStateDaoImpl extends AbstractDao implements RefBookT
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
+    }
 
+    @Override
+    public List<RefBookTaxpayerState> findAllByIdIn(List<Long> ids) {
+        if (!isEmpty(ids)) {
+            return getNamedParameterJdbcTemplate().query(
+                    "select ts.id, ts.name, ts.code \n" +
+                            "from ref_book_taxpayer_state ts \n" +
+                            "where ts.id in (:ids)",
+                    new MapSqlParameterSource("ids", ids),
+                    refBookMapperFactory.new TaxPayerStatusMapper<>());
+        }
+        return new ArrayList<>();
     }
 }

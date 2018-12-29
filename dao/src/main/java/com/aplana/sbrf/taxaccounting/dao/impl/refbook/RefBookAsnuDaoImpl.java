@@ -11,7 +11,10 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
  * Реализация дао для работы со справочником АСНУ
@@ -29,16 +32,19 @@ public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
     }
 
     @Override
-    public List<RefBookAsnu> fetchByIds(List<Long> ids) {
-        return getNamedParameterJdbcTemplate().query("select id, code, name, type, priority " +
-                        "from ref_book_asnu " +
-                        "where id in (:ids)",
-                new MapSqlParameterSource("ids", ids),
-                new RefBookAsnuRowMapper());
+    public List<RefBookAsnu> findAllByIdIn(List<Long> ids) {
+        if (!isEmpty(ids)) {
+            return getNamedParameterJdbcTemplate().query("select id, code, name, type, priority " +
+                            "from ref_book_asnu " +
+                            "where id in (:ids)",
+                    new MapSqlParameterSource("ids", ids),
+                    new RefBookAsnuRowMapper());
+        }
+        return new ArrayList<>();
     }
 
     @Override
-    public RefBookAsnu fetchById(Long id) {
+    public RefBookAsnu findById(Long id) {
         return getNamedParameterJdbcTemplate().queryForObject("select id, code, name, type, priority " +
                         "from ref_book_asnu " +
                         "where id = :id",
@@ -47,7 +53,7 @@ public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
     }
 
     @Override
-    public RefBookAsnu fetchByName(String name) {
+    public RefBookAsnu findByName(String name) {
         try {
             return getNamedParameterJdbcTemplate().queryForObject(
                     "select id, code, name, type, priority from ref_book_asnu " +

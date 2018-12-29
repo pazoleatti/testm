@@ -3,7 +3,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentName;
+import com.aplana.sbrf.taxaccounting.model.DepartmentShortInfo;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +24,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Repository
 @Transactional(readOnly = true)
@@ -424,12 +438,14 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Department> fetchAllDepartmentByIds(Collection<Integer> ids) {
-        String where = "where" + SqlUtils.transformToSqlInStatement("id", ids);
-        return getNamedParameterJdbcTemplate().query(
-                "select * from department " + where,
-                new DepartmentJdbcMapper()
-        );
+    public List<Department> findAllByIdIn(Collection<Integer> ids) {
+        if (!isEmpty(ids)) {
+            return getNamedParameterJdbcTemplate().query("select * from department " +
+                            "where id in (:ids)",
+                    new MapSqlParameterSource("ids", ids),
+                    new DepartmentJdbcMapper());
+        }
+        return new ArrayList<>();
     }
 
     @Override

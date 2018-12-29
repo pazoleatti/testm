@@ -12,4 +12,12 @@ public interface RefBookTaxpayerStateDao {
      * Найти все действующие записи
      */
     List<RefBookTaxpayerState> findAllActive();
+
+    /**
+     * Возвращяет список записей справочника по списку идентификаторов
+     *
+     * @param ids список идентификаторов
+     * @return список записей справочника
+     */
+    List<RefBookTaxpayerState> findAllByIdIn(List<Long> ids);
 }

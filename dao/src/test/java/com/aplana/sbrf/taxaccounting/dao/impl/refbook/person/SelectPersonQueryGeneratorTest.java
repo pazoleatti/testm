@@ -76,7 +76,7 @@ public class SelectPersonQueryGeneratorTest {
     @Test
     public void test_generateFilteredQuery_filterByEmptyDocs() {
         filter.setDocumentNumber("");
-        filter.setDocumentTypes(new ArrayList<Long>());
+        filter.setDocTypeIds(new ArrayList<Long>());
 
         String query = generator.generateFilteredQuery();
 
@@ -85,7 +85,7 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generateFilteredQuery_filterByDocTypes() {
-        filter.setDocumentTypes(Arrays.asList(1L, 2L));
+        filter.setDocTypeIds(Arrays.asList(1L, 2L));
         String query = generator.generateFilteredQuery();
         assertThat(query).contains("doc_id in (1, 2)");
     }
@@ -100,21 +100,21 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generateFilteredQuery_filterByCitizenshipCountry() {
-        filter.setCitizenshipCountries(Arrays.asList(1L, 2L));
+        filter.setCitizenshipCountryIds(Arrays.asList(1L, 2L));
         String query = generator.generateFilteredQuery();
         assertThat(query).endsWith("and citizenship_country.id in (1, 2)");
     }
 
     @Test
     public void test_generateFilteredQuery_filterByTaxpayerStates() {
-        filter.setTaxpayerStates(Arrays.asList(1L, 2L));
+        filter.setTaxpayerStateIds(Arrays.asList(1L, 2L));
         String query = generator.generateFilteredQuery();
         assertThat(query).endsWith("and person.taxpayer_state in (1, 2)");
     }
 
     @Test
     public void test_generateFilteredQuery_filterByAsnu() {
-        filter.setSourceSystems(Arrays.asList(1L, 2L));
+        filter.setSourceSystemIds(Arrays.asList(1L, 2L));
         String query = generator.generateFilteredQuery();
         assertThat(query).endsWith("and person.source_id in (1, 2)");
     }
@@ -169,7 +169,7 @@ public class SelectPersonQueryGeneratorTest {
 
     @Test
     public void test_generateFilteredQuery_filterByForeignAddressCountry() {
-        filter.setCountries(Arrays.asList(1L, 2L));
+        filter.setCountryIds(Arrays.asList(1L, 2L));
         String query = generator.generateFilteredQuery();
         assertThat(query).contains("and address_country.id in (1, 2)");
     }

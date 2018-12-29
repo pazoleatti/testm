@@ -261,8 +261,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> fetchAllDepartmentByIds(List<Integer> ids) {
-        return departmentDao.fetchAllDepartmentByIds(ids);
+    public List<Department> findAllByIdIn(List<Integer> ids) {
+        return departmentDao.findAllByIdIn(ids);
     }
 
     @Override

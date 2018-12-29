@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookCountryDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDocTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxpayerStateDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -17,7 +21,13 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -75,6 +85,14 @@ public class PrintingServiceImpl implements PrintingService {
     private DepartmentService departmentService;
     @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
+    @Autowired
+    private RefBookDocTypeDao refBookDocTypeDao;
+    @Autowired
+    private RefBookCountryDao refBookCountryDao;
+    @Autowired
+    private RefBookTaxpayerStateDao refBookTaxpayerStateDao;
+    @Autowired
+    private RefBookAsnuDao refBookAsnuDao;
 
     @Override
     public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
@@ -276,11 +294,18 @@ public class PrintingServiceImpl implements PrintingService {
     public String generateExcelPersons(RefBookPersonFilter filter, PagingParams pagingParams, TAUser user) {
         pagingParams.setNoPaging();
         List<RegistryPersonDTO> persons = personService.getPersonsData(pagingParams, filter);
+        filter.setTerBanks(departmentService.findAllByIdIn(filter.getTerBankIds()));
+        filter.setDocTypes(refBookDocTypeDao.findAllByIdIn(filter.getDocTypeIds()));
+        filter.setCitizenshipCountries(refBookCountryDao.findAllByIdIn(filter.getCitizenshipCountryIds()));
+        filter.setTaxpayerStates(refBookTaxpayerStateDao.findAllByIdIn(filter.getTaxpayerStateIds()));
+        filter.setSourceSystems(refBookAsnuDao.findAllByIdIn(filter.getSourceSystemIds()));
+        filter.setCountries(refBookCountryDao.findAllByIdIn(filter.getCountryIds()));
+
         PersonsReportBuilder reportBuilder = new PersonsReportBuilder(persons, filter);
         String reportPath = null;
         try {
             reportPath = reportBuilder.createReport();
-            return blobDataService.create(reportPath, "Физические_лица_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsx");
+            return blobDataService.create(reportPath, "Физические_лица_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsm");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());

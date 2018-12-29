@@ -146,9 +146,9 @@ class SelectPersonQueryGenerator {
             addBirthDateConditions();
             addTBCondition();
             addDocumentsConditions();
-            addSearchIn("citizenship_country.id", filter.getCitizenshipCountries());
-            addSearchIn("person.taxpayer_state", filter.getTaxpayerStates());
-            addSearchIn("person.source_id", filter.getSourceSystems());
+            addSearchIn("citizenship_country.id", filter.getCitizenshipCountryIds());
+            addSearchIn("person.taxpayer_state", filter.getTaxpayerStateIds());
+            addSearchIn("person.source_id", filter.getSourceSystemIds());
             addInpCondition();
             addAddressConditions();
             addForeignAddressConditions();
@@ -178,7 +178,7 @@ class SelectPersonQueryGenerator {
     }
 
     private void addTBCondition() {
-        List<Long> terBanks = filter.getTerBanks();
+        List<Integer> terBanks = filter.getTerBankIds();
         if (isNotEmpty(terBanks)) {
             query = query + "\n" +
                     "and person.record_id in ( \n" +
@@ -204,14 +204,14 @@ class SelectPersonQueryGenerator {
                     "       from ref_book_id_doc d \n" +
                     whereMultiple(
                             likeIgnoreCaseAndDelimiters("d.doc_number", filter.getDocumentNumber()),
-                            searchIn("d.doc_id", filter.getDocumentTypes())) +
+                            searchIn("d.doc_id", filter.getDocTypeIds())) +
                     "    ) \n" +
                     ")";
         }
     }
 
     private boolean isDocumentsFilterNotEmpty() {
-        return isNotEmpty(filter.getDocumentTypes()) || isNotEmpty(filter.getDocumentNumber());
+        return isNotEmpty(filter.getDocTypeIds()) || isNotEmpty(filter.getDocumentNumber());
     }
 
     private void addInpCondition() {
@@ -240,7 +240,7 @@ class SelectPersonQueryGenerator {
 
     private void addForeignAddressConditions() {
         addLikeIgnoreCase("person.address_foreign", filter.getForeignAddress());
-        addSearchIn("address_country.id", filter.getCountries());
+        addSearchIn("address_country.id", filter.getCountryIds());
     }
 
     private void addDuplicatesCondition() {
@@ -262,7 +262,7 @@ class SelectPersonQueryGenerator {
     }
 
     private boolean notAllVersions() {
-        return (filter.isAllVersions() != null && !filter.isAllVersions() && filter.getVersionDate() != null);
+        return (filter.getAllVersions() != null && !filter.getAllVersions() && filter.getVersionDate() != null);
     }
 
     protected void addLike(String field, String value) {
