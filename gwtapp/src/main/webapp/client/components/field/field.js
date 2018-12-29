@@ -123,6 +123,9 @@
                                     // and use a directive controller to wire it all up
                                     // KSS попробовал реализовать через другую директиву - стокнулся с проблемой: не компилируются вложенные валидаторы при использовании атрибута ng-options из-за параметра terminal. Пока оставил так
                                     childScope.$validationMessages = {};
+                                    if (scope.$validationMessages) {
+                                        childScope.$validationMessages = scope.$validationMessages;
+                                    }
                                     angular.forEach(validationMessages, function (validationMessage) {
                                         // We need to watch incase it has interpolated values that need processing
                                         //  scope.$watch(validationMessage.getMessage, function (message) {
