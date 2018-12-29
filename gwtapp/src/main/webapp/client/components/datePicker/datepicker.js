@@ -287,8 +287,8 @@
         /**
          * Директива предназначена для установки времени на начало дня
          */
-        .directive('aplanaDateWithoutTime', ['$parse', '$exceptionHandler',
-            function ($parse, $exceptionHandler) {
+        .directive('aplanaDateWithoutTime', ['$parse', '$exceptionHandler', 'dateFilter',
+            function ($parse, $exceptionHandler, dateFilter) {
                 return {
                     require: 'ngModel',
                     restrict: 'A',
@@ -297,8 +297,8 @@
                         var ngModelGet = $parse(attr.ngModel),
                             ngModelSet = ngModelGet.assign;
 
-                        controller.$setViewValueNotDirty = function (value) {
-                            this.$viewValue = value;
+                        controller.$setViewValueNotDirty = function (viewValue) {
+                            var value = dateFilter(viewValue, scope.mask);
 
                             angular.forEach(this.$parsers, function (fn) {
                                 value = fn(value);
