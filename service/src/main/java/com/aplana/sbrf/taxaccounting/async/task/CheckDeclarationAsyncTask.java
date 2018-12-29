@@ -87,33 +87,10 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
-    public boolean prohibitiveLockExists(Map<String, Object> params, Logger logger) {
-        long declarationDataId = (Long) params.get("declarationDataId");
-        String checkKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.CHECK_DEC);
-        String acceptKey = declarationDataService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC);
-
-        if (lockDataService.isLockExists(checkKey, false)) {
-            logger.error(createLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), checkKey));
-            return true;
-        }
-        if (lockDataService.isLockExists(acceptKey, false)) {
-            logger.error(createLockExistErrorMessage(declarationDataService.getStandardDeclarationDescription(declarationDataId), acceptKey));
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
         return String.format(getAsyncTaskType().getDescription(),
                 declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
-    }
-
-    @Override
-    public LockData establishLock(String lockKey, TAUserInfo user, Map<String, Object> params) {
-        return lockDataService.lock(lockKey, user.getUser().getId(), createDescription(user, params));
     }
 
 }

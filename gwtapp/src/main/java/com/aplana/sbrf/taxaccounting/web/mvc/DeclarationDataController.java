@@ -380,20 +380,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Идентифицировать ФЛ
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @param cancelTask        признак для отмены задачи
-     * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/identify")
-    public RecalculateDeclarationResult identify(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.identifyDeclarationData(userInfo, declarationDataId, force, cancelTask);
-    }
-
-    /**
      * Консолидировать
      *
      * @param declarationDataId идентификатор декларации

@@ -67,12 +67,13 @@ public interface AsyncManager {
      * Создает асинхронную задачу, выполняет проверки и размещает ее в очереди. При конкуррентном вызове метода есть вероятность
      * что 2 потока одновременно проверят возможность установления взаимоисключающих блокировок, а потом одновременно установят
      * взаимоисключающие блокировки. Если сделать реализацию synchronized, то для одного узла исключится такая ситуация.
-     * @param lockKey блокировка, к которой будет привязана задача
-     * @param taskType тип задачи
-     * @param user пользователь, от имени которого была запущена задача
-     * @param params кастомные параметры задачи
+     * @param operationType                 тип задачи
+     * @param operationObjectDescription    описание объекта по которому создается задача
+     * @param user                          пользователь, от имени которого была запущена задача
+     * @param params                        кастомные параметры задачи
+     * @param logger                        логгер
      */
-    void createTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger);
+    Boolean createTask(final OperationType operationType, String operationObjectDescription, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
 
     /**
      * Выполняет попытку запуска асинхронной задачи, если не удалось - возвращает сообщение для диалога
@@ -189,18 +190,4 @@ public interface AsyncManager {
      * @return задача активна?
      */
     boolean isTaskActive(long taskId);
-
-    /**
-     * Проверить и создать блокировку. Метод делегирует объекту {@param task} проверку на блокировки и в случае успеха создает блокировку для задачи.
-     * При конкуррентном вызове метода есть вероятность
-     * что 2 потока одновременно проверят возможность установления взаимоисключающих блокировок, а потом одновременно установят
-     * взаимоисключающие блокировки. Если сделать реализацию synchronized, то для одного узла исключится такая ситуация.
-     * @param task      задача для которой создается болкировка
-     * @param params    параметры задачи
-     * @param logger    логгер
-     * @param lockKey   сгененрированный ключ блокировки
-     * @param userInfo  информация опользователе
-     * @return  {@code true} если блокировка установлена
-     */
-    boolean checkAndCreateLocks(Task task, Map<String, Object> params, Logger logger, String lockKey, TAUserInfo userInfo);
 }

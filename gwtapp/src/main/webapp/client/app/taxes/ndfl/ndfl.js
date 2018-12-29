@@ -493,13 +493,12 @@
                 $scope.identify = function (force, cancelTask) {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/identify",
-                        params: {
-                            force: !!force,
-                            cancelTask: !!cancelTask
-                        }
+                        url: "controller/actions/declarationData/identify",
+                        data: [$stateParams.declarationDataId]
                     }).then(function (response) {
-                        calculateResult(response, force, cancelTask, $scope.identify);
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 

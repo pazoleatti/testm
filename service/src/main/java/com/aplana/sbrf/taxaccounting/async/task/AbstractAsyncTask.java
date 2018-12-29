@@ -276,20 +276,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         return result;
     }
 
-    @Override
-    public String createLockExistErrorMessage(String objectName, String lockKey) {
-        AsyncTaskData asyncTaskData = asyncTaskDao.findAsyncTaskByLockKey(lockKey);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        TAUser user = userService.getUser(asyncTaskData.getUserId());
-        return String.format("Для %s запущены задачи, \n" +
-                        "блокирующие задачу %s : \"%s пользователем %s запущена задача \"%s\".",
-                objectName,
-                getAsyncTaskType().getViewName(),
-                dateFormat.format(asyncTaskData.getCreateDate()),
-                user.getName(),
-                asyncTaskData.getType().getViewName());
-    }
-
     /**
      * Отправка оповещений подписчикам на указанную задачу
      */
