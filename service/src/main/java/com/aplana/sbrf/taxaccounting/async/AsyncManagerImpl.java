@@ -28,7 +28,8 @@ import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationLocker;
+import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
+import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -79,6 +80,8 @@ public class AsyncManagerImpl implements AsyncManager {
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private DeclarationLocker declarationLocker;
+    @Autowired
+    private AsyncTaskDescriptor asyncTaskDescriptor;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -245,7 +248,7 @@ public class AsyncManagerImpl implements AsyncManager {
                     try {
                         //Постановка новой задачи в очередь
                         LOG.info(String.format("Постановка в очередь задачи с ключом %s", lockData.getKey()));
-                        String description = task.createDescription(user, params);
+                        String description = asyncTaskDescriptor.createDescription(params, operationType);
                         AsyncQueue queue = task.defineTaskLimit(description, user, params);
 
                         // Сохранение в очереди асинхронных задач - запись в БД
@@ -253,7 +256,7 @@ public class AsyncManagerImpl implements AsyncManager {
                         AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
                         taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
                         lockDataService.bindTask(lockData.getKey(), taskData.getId());
-                        logger.info("Задача %s поставлена в очередь на исполнение", operationType.getName());
+                        logger.info("Задача %s поставлена в очередь на исполнение", description);
                         LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
                                 taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));
                         return true;

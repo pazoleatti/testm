@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.component.lock;
+package com.aplana.sbrf.taxaccounting.service.component.lock.descriptor;
 
 import com.aplana.sbrf.taxaccounting.model.OperationType;
 

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.component.lock;
+package com.aplana.sbrf.taxaccounting.service.component.lock.locker;
 
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.OperationType;

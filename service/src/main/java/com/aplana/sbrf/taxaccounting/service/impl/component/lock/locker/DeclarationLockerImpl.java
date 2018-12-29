@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.impl.component.lock;
+package com.aplana.sbrf.taxaccounting.service.impl.component.lock.locker;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
@@ -15,8 +15,8 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataKeyLockDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationLocker;
+import com.aplana.sbrf.taxaccounting.service.component.lock.descriptor.DeclarationDataKeyLockDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

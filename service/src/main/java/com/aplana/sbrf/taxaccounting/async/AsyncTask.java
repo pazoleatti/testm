@@ -43,11 +43,16 @@ public interface AsyncTask {
     AsyncQueue defineTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params) throws AsyncTaskException;
 
     /**
-     * Возвращает описание задачи с указание конкретных объектов, над которыми она выполняется. Шаблон описания берется из {@link AsyncTaskType}
+     * Возвращает описание задачи с указание конкретных объектов, над которыми она выполняется. Шаблон описания берется из {@link AsyncTaskType}.
+     * В новом механизме асинок планируется что шаблон описания будет браться из
+     * {@link com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataAsyncTaskDescriptor}, поэтому этот
+     * метод устарел. Позже нужно выпилить описание также из {@link AsyncTaskType}, т.к. в постановке в определении данных у типа
+     * асинхронной задачи нет описания.
      *
      * @param userInfo текущий пользователь
      * @param params   произвольные параметры для выполнения задачи
      * @return описание задачи
      */
+    @Deprecated
     String createDescription(TAUserInfo userInfo, Map<String, Object> params);
 }

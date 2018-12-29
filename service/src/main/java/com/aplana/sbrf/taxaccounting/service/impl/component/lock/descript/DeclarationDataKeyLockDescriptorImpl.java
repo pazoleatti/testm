@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.impl.component.lock;
+package com.aplana.sbrf.taxaccounting.service.impl.component.lock.descript;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataKeyLockDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.lock.descriptor.DeclarationDataKeyLockDescriptor;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;

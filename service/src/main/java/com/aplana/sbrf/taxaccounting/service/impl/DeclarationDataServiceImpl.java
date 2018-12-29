@@ -246,7 +246,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
 
-    private static final String STANDARD_DECLARATION_DESCRIPTION = "налоговой формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"";
+    private static final String STANDARD_DECLARATION_DESCRIPTION = "налоговой формы: Вид: \"%s\",  №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"";
 
     private static final String FAIL = "Не выполнена операция \"%s\" для %s.";
 
@@ -3688,8 +3688,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declaration = declarationDataDao.get(declarationDataId);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        DeclarationType declarationType = declarationTemplate.getType();
 
         return String.format(STANDARD_DECLARATION_DESCRIPTION,
+                declarationType.getName(),
                 declaration.getId(),
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 reportPeriod.getReportPeriod().getName(),
