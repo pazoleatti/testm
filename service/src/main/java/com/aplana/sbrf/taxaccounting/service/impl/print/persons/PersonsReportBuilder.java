@@ -193,7 +193,7 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
         cell = row4.createCell(3);
         if (filter != null) {
             List<String> values = new ArrayList<>();
-            if (filter.getVersionDate() != null) {
+            if (filter.getAllVersions() != null && !filter.getAllVersions() && filter.getVersionDate() != null) {
                 values.add("Версия на дату " + dateFormat.format(filter.getVersionDate()));
             } else {
                 values.add("Все версии");
