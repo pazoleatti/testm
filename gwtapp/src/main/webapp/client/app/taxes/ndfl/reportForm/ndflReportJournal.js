@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReportJournal', {
                 url: '/taxes/ndflReportJournal',
-                templateUrl: 'client/app/taxes/ndfl/ndflReportJournal.html',
+                templateUrl: 'client/app/taxes/ndfl/reportForm/ndflReportJournal.html',
                 controller: 'ndflReportJournalCtrl',
                 params: {uuid: null},
                 onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', '$rootScope',
@@ -57,7 +57,7 @@
                 $scope.createReport = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('title.creatingReport'),
-                        templateUrl: 'client/app/taxes/ndfl/createReport.html',
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/createReport.html',
                         controller: 'createReportCtrl',
                         windowClass: 'modal600',
                         resolve: {
