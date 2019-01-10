@@ -339,8 +339,8 @@ public class AsyncManagerImpl implements AsyncManager {
         }
 
         // Оператор (НДФЛ) может отменять только собственные задачи
-        if (user.hasRole(TARole.N_ROLE_OPER) && (user.getId() != task.getUserId())) {
-            return false;
+        if (user.hasRole(TARole.N_ROLE_OPER) && (user.getId() == task.getUserId())) {
+            return true;
         }
 
         return false;
