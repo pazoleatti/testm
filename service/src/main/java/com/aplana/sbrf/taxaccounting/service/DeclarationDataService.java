@@ -96,7 +96,12 @@ public interface DeclarationDataService {
     PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
 
     /**
-     * Получить декларацию
+     * Получить форму по id.
+     */
+    DeclarationData get(long declarationDataId);
+
+    /**
+     * Получить декларацию с проверкой доступа пользователя к ней
      *
      * @param declarationDataId идентификатор декларации
      * @param userInfo          пользователь
@@ -259,7 +264,7 @@ public interface DeclarationDataService {
      *
      * @param declarationDataId идентификатор декларации
      * @param alias             вид спецотчета (subreport)
-     * @param reportParams            параметры для формирования отчета
+     * @param reportParams      параметры для формирования отчета
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param force             признак для перезапуска задачи
      * @return результат о формировании отчета
@@ -764,6 +769,7 @@ public interface DeclarationDataService {
 
     /**
      * Описание налоговой формы
+     *
      * @param declarationDataId идентификатор налоговой формы
      * @return строка с описанием
      */

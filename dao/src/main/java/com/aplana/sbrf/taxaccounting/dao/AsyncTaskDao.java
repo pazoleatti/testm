@@ -12,7 +12,7 @@ import java.util.Map;
 public interface AsyncTaskDao {
 
     /**
-     * Возвращяет все асинхронные задачи
+     * Возвращает все асинхронные задачи
      *
      * @return список асинхронных задач
      */
