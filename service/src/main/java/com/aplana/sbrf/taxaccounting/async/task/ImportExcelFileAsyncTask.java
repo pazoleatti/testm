@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
@@ -58,6 +59,9 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
         declarationDataService.importExcel(declarationDataId, blobData, userInfo, logger);
+        if(logger.containsLevel(LogLevel.ERROR)) {
+            return new BusinessLogicResult(false, null);
+        }
         return new BusinessLogicResult(true, null);
     }
 

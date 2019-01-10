@@ -311,42 +311,12 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
-                $scope.accept = function (force, cancelTask) {
-                    {
-                        force = typeof force !== 'undefined' ? force : false;
-                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
-                    }
-                    acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
-                            taxType: 'NDFL',
-                            force: force,
-                            cancelTask: cancelTask
-                        },
+                $scope.accept = function () {
+                    acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId},
                         function (response) {
                             if (response.uuid && response.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.uuid);
-                                $scope.updateDeclarationInfo();
-                            } else {
-                                if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                    $dialogs.confirmDialog({
-                                        content: response.restartMsg,
-                                        okBtnCaption: $filter('translate')('common.button.yes'),
-                                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                                        okBtnClick: function () {
-                                            $scope.accept(true, cancelTask);
-                                        }
-                                    });
-                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST_TASK && !cancelTask) {
-                                    $dialogs.confirmDialog({
-                                        content: $filter('translate')('title.returnExistTask'),
-                                        okBtnCaption: $filter('translate')('common.button.yes'),
-                                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                                        okBtnClick: function () {
-                                            $scope.accept(force, true);
-                                        }
-                                    });
-                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                                    $window.alert($filter('translate')('title.acceptImpossible'));
-                                }
+                                updateDeclarationInfo();
                             }
                         }
                     );
@@ -355,31 +325,14 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"
                  */
-                $scope.check = function (force) {
-
-                    force = typeof force !== 'undefined' ? force : false;
-
-                    checkDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
-                        force: force
-                    }, function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                            $scope.updateDeclarationInfo();
-                        } else {
-                            if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                $dialogs.confirmDialog({
-                                    content: response.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.check(true);
-                                    }
-                                });
-                            } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                                $window.alert($filter('translate')('title.checkImpossible'));
+                $scope.check = function () {
+                    checkDeclarationData.query({declarationDataId: $stateParams.declarationDataId},
+                        function (response) {
+                            if (response.uuid && response.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.uuid);
+                                updateDeclarationInfo();
                             }
-                        }
-                    });
+                        });
                 };
 
                 /**
@@ -422,9 +375,14 @@
                         okBtnClick: function () {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
-                            }).success(function () {
-                                $state.go("ndflReportJournal", {});
+                                url: "controller/actions/declarationData/delete",
+                                data: [$stateParams.declarationDataId]
+                            }).then(function (response) {
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    //Обновить страницу и, если есть сообщения, показать их
+                                    var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                    $state.go("ndflReportJournal", params, {reload: true});
+                                }
                             });
                         }
                     });

@@ -113,15 +113,6 @@ public interface DeclarationDataService {
     List<DeclarationData> get(List<Long> ids);
 
     /**
-     * Удалить декларацию, при этом создается блокировка
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-     */
-    ActionResult delete(long declarationDataId, TAUserInfo userInfo);
-
-    /**
      * Удаление налоговой формы без использования асинхронной задачи
      *
      * @param declarationDataId идентификатор НФ
@@ -131,22 +122,13 @@ public interface DeclarationDataService {
     void deleteSync(long declarationDataId, TAUserInfo userInfo, boolean createLock);
 
     /**
-     * Удалить налоговую форму, если она существует, при этом создается блокировка
-     *
-     * @param declarationDataId идентификатор налоговой формы
-     * @param userInfo          информация о пользователе, выполняющем действие
-     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-     */
-    ActionResult deleteIfExists(long declarationDataId, TAUserInfo userInfo);
-
-    /**
      * Удалить все налоговые формы из списка
      *
      * @param userInfo           информация о пользователе, выполняющем действие
      * @param declarationDataIds список идентификаторов налоговых форм
      * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult deleteDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult createDeleteDeclarationDataTask(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Метод запускает скрипты с событием проверить
@@ -159,22 +141,13 @@ public interface DeclarationDataService {
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
-     * Создает задачу по постановке операции "Консолидировать НФ" в очередь
-     *
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param declarationDataId идентификатор НФ
-     * @return модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
-     */
-    RecalculateDeclarationResult createConsolidateDeclarationTask(TAUserInfo userInfo, long declarationDataId);
-
-    /**
      * Идентифицировать ФЛ в списке налоговых форм
      *
      * @param userInfo           информация о пользователе, выполняющем действие
      * @param declarationDataIds список идентификаторов налоговых форм
      * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult identifyDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult createIdentifyDeclarationDataTask(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Консолидировать список налоговых форм
@@ -183,7 +156,7 @@ public interface DeclarationDataService {
      * @param declarationDataIds список идентификаторов налоговых форм
      * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult createConsolidateDeclarationListTask(final TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult consolidateDeclarationDataList(final TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Формирует DeclarationResult
@@ -206,7 +179,7 @@ public interface DeclarationDataService {
      * @param declarationDataIds список идентификаторов налоговых форм
      * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult checkDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult createCheckDeclarationDataTask(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Получение дополнительной информации о файлах декларации с комментариями
@@ -332,7 +305,7 @@ public interface DeclarationDataService {
      * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      * @throws AccessDeniedException если у пользователя нет прав на такое изменение статуса у декларации
      */
-    ActionResult acceptDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult createAcceptDeclarationDataTask(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Метод, передающий управление на проверку декларации сторонней утилите
@@ -665,10 +638,9 @@ public interface DeclarationDataService {
      * @param fileName          имя загружаемого файла
      * @param inputStream       данные файла
      * @param userInfo          информация о пользователе
-     * @param force             будет ли остановлена уже запущенная задача и запущена занова
      * @return результат создания задачи
      */
-    ImportDeclarationExcelResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force);
+    ActionResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo);
 
     /**
      * Выполняет загрузку данных из Excel-файла в форму
