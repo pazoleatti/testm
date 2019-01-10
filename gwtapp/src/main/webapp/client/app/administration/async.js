@@ -99,6 +99,21 @@
                         $scope.refreshGrid(1);
                     });
                 };
+
+                // Проверка, все ли выбранные задачи позволено останавливать
+                $scope.allSelectedAreAllowedToInterrupt = function () {
+                    var selectedTasks = $scope.asyncGrid.value;
+                    if (selectedTasks && selectedTasks.length > 0) {
+                        for (var i in selectedTasks) {
+                            var task = selectedTasks[i];
+                            if (!task.allowedToInterrupt) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+                }
             }])
 
 }());

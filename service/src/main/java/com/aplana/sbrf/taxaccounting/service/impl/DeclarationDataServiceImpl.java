@@ -1203,6 +1203,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public DeclarationData get(long id) {
+        return declarationDataDao.get(id);
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public DeclarationData get(long id, TAUserInfo userInfo) {
         return declarationDataDao.get(id);

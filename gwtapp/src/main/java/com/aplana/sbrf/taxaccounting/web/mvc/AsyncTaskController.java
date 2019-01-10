@@ -46,7 +46,8 @@ public class AsyncTaskController {
      */
     @GetMapping(value = "/rest/async")
     public JqgridPagedList<AsyncTaskDTO> fetchAsyncs(@RequestParam(required = false) String filter, @RequestParam PagingParams pagingParams) {
-        PagingResult<AsyncTaskDTO> tasks = asyncManager.getTasks(filter, pagingParams);
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        PagingResult<AsyncTaskDTO> tasks = asyncManager.getTasks(filter, pagingParams, userInfo);
         return JqgridPagedResourceAssembler.buildPagedList(
                 tasks,
                 tasks.getTotalCount(),

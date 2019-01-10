@@ -4,30 +4,12 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
-import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.OperationType;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.ServerInfo;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
@@ -38,6 +20,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +58,12 @@ public class AsyncManagerImpl implements AsyncManager {
     private TAUserService userService;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
     @Autowired
@@ -263,12 +253,13 @@ public class AsyncManagerImpl implements AsyncManager {
                     } catch (Exception e) {
                         LOG.error("Async task creation has been failed!", e);
 
-                            logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
-                                    operationObjectDescription,
-                                    operationType.getName());
+                        logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
+                                operationObjectDescription,
+                                operationType.getName());
                         if (taskData != null) {
                             asyncTaskDao.delete(taskData.getId());
-                            lockDataService.unlockAllByTask(taskData.getId());;
+                            lockDataService.unlockAllByTask(taskData.getId());
+                            ;
                         } else {
                             lockDataService.unlock(lockData.getKey(), user.getUser().getId(), true);
                         }
@@ -310,50 +301,108 @@ public class AsyncManagerImpl implements AsyncManager {
         return null;
     }
 
-    public void interruptTask(final long taskId, final TAUserInfo user, final TaskInterruptCause cause) {
-        final AsyncTaskData taskData = asyncTaskDao.findByIdLight(taskId);
-        interruptTask(taskData, user, cause);
-    }
 
     @Override
-    public void interruptTask(final AsyncTaskData taskData, final TAUserInfo user, final TaskInterruptCause cause) {
-        LOG.info(String.format("AsyncManagerImpl.interruptTask by %s. taskData: %s; cause: %s", user, taskData, cause));
-        if (taskData != null) {
-            tx.executeInNewTransaction(new TransactionLogic() {
-                                           @Override
-                                           public Object execute() {
-                                               try {
-                                                   if (taskData.getState() != AsyncTaskState.CANCELLED) {
-                                                       List<Integer> waitingUsers = getUsersWaitingForTask(taskData.getId());
-                                                       if (!waitingUsers.contains(user.getUser().getId())) {
-                                                           waitingUsers.add(user.getUser().getId());
-                                                       }
-                                                       String msg = String.format(AsyncTask.CANCEL_TASK, user.getUser().getName(), taskData.getDescription(), cause.toString());
-                                                       List<Notification> notifications = new ArrayList<Notification>();
-                                                       //Создаем оповещение для каждого пользователя из списка
-                                                       if (!waitingUsers.isEmpty()) {
-                                                           for (Integer waitingUser : waitingUsers) {
-                                                               Notification notification = new Notification();
-                                                               notification.setUserId(waitingUser);
-                                                               notification.setCreateDate(new Date());
-                                                               notification.setText(msg);
-                                                               notifications.add(notification);
-                                                           }
-                                                           notificationService.create(notifications);
-                                                       }
-                                                       asyncTaskDao.updateState(taskData.getId(), AsyncTaskState.CANCELLED);
-                                                   } else {
-                                                       asyncTaskDao.delete(taskData.getId());
-                                                   }
-                                               } catch (Exception e) {
-                                                   throw new ServiceException("Не удалось прервать задачу", e);
-                                               }
-                                               return null;
-                                           }
-                                       }
-            );
+    public void interruptTask(final long taskId, final TAUserInfo userInfo, final TaskInterruptCause cause) {
+        final AsyncTaskData task = asyncTaskDao.findById(taskId);
+        TAUser currentUser = userInfo.getUser();
+
+        if (userHasPrivilegesToInterruptTask(currentUser, task)) {
+            interruptTask(task, userInfo, cause);
+        } else {
+            throw new AccessDeniedException("Недостаточно прав для отмены задачи №" + task.getId());
         }
     }
+
+    /**
+     * Проверка, достаточно ли у пользователя прав для отмены асинхронной задачи.
+     */
+    private boolean userHasPrivilegesToInterruptTask(TAUser user, AsyncTaskData task) {
+
+        if (userHasAllTaskPermissions(user)) {
+            return true;
+        }
+
+        // Контролёр НС (НДФЛ) может отменять задачи только по ТБ, к которым у него есть доступ
+        if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
+            List<Integer> userAvailableTerbankIds = departmentService.findAllAvailableTBIds(user);
+
+            Integer taskTerbankId = getTaskTerbankId(task);
+            if (taskTerbankId != null && userAvailableTerbankIds.contains(taskTerbankId)) {
+                return true;
+            }
+
+            Integer taskCreatorTerbankId = getTaskCreatorTerbankId(task);
+            if (taskCreatorTerbankId != null && userAvailableTerbankIds.contains(taskCreatorTerbankId)) {
+                return true;
+            }
+        }
+
+        // Оператор (НДФЛ) может отменять только собственные задачи
+        if (user.hasRole(TARole.N_ROLE_OPER) && (user.getId() == task.getUserId())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Имеет ли пользователь все права для работы с асинхронными задачами.
+     */
+    private boolean userHasAllTaskPermissions(TAUser user) {
+        return (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.N_ROLE_CONTROL_UNP));
+    }
+
+    /**
+     * Определение тербанка, по данным которого запущена задача.
+     */
+    private Integer getTaskTerbankId(AsyncTaskData task) {
+        Integer taskTerbankId = null;
+
+        Map<String, Object> taskParams = task.getParams();
+
+        if (taskParams != null) {
+            Integer taskDepartmentId = null;
+
+            if (taskParams.containsKey("departmentId")) {
+                taskDepartmentId = (Integer) taskParams.get("departmentId");
+            }
+
+            if (taskParams.containsKey("departmentReportPeriodId")) {
+                Integer departmentReportPeriodId = (Integer) taskParams.get("departmentReportPeriodId");
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
+                taskDepartmentId = departmentReportPeriod.getDepartmentId();
+            }
+
+            DeclarationData declaration = null;
+            if (taskParams.containsKey("declarationDataId")) {
+                Long declarationId = (Long) taskParams.get("declarationDataId");
+                declaration = declarationDataService.get(declarationId);
+            }
+            if (taskParams.containsKey("declaration")) {
+                declaration = (DeclarationData) taskParams.get("declaration");
+            }
+            if (declaration != null) {
+                taskDepartmentId = declaration.getDepartmentId();
+            }
+
+            if (taskDepartmentId != null) {
+                taskTerbankId = departmentService.getParentTBId(taskDepartmentId);
+            }
+        }
+
+        return taskTerbankId;
+    }
+
+    /**
+     * Определение тербанка пользователя, запустившего задачу.
+     */
+    private Integer getTaskCreatorTerbankId(AsyncTaskData task) {
+        int taskCreatorId = task.getUserId();
+        TAUser taskCreator = userService.getUser(taskCreatorId);
+        return departmentService.getParentTBId(taskCreator.getDepartmentId());
+    }
+
 
     @Override
     public void interruptTask(String lockKey, TAUserInfo user, TaskInterruptCause cause) {
@@ -363,6 +412,47 @@ public class AsyncManagerImpl implements AsyncManager {
             interruptTask(taskData, user, cause);
         }
     }
+
+    private void interruptTask(final AsyncTaskData taskData, final TAUserInfo user, final TaskInterruptCause cause) {
+        LOG.info(String.format("AsyncManagerImpl.interruptTask by %s. taskData: %s; cause: %s", user, taskData, cause));
+        if (taskData != null) {
+            tx.executeInNewTransaction(
+                    new TransactionLogic() {
+                        @Override
+                        public Object execute() {
+                            try {
+                                if (taskData.getState() != AsyncTaskState.CANCELLED) {
+                                    List<Integer> waitingUsers = getUsersWaitingForTask(taskData.getId());
+                                    if (!waitingUsers.contains(user.getUser().getId())) {
+                                        waitingUsers.add(user.getUser().getId());
+                                    }
+                                    String msg = String.format(AsyncTask.CANCEL_TASK, user.getUser().getName(), taskData.getDescription(), cause.toString());
+                                    List<Notification> notifications = new ArrayList<>();
+                                    //Создаем оповещение для каждого пользователя из списка
+                                    if (!waitingUsers.isEmpty()) {
+                                        for (Integer waitingUser : waitingUsers) {
+                                            Notification notification = new Notification();
+                                            notification.setUserId(waitingUser);
+                                            notification.setCreateDate(new Date());
+                                            notification.setText(msg);
+                                            notifications.add(notification);
+                                        }
+                                        notificationService.create(notifications);
+                                    }
+                                    asyncTaskDao.updateState(taskData.getId(), AsyncTaskState.CANCELLED);
+                                } else {
+                                    asyncTaskDao.delete(taskData.getId());
+                                }
+                            } catch (Exception e) {
+                                throw new ServiceException("Не удалось прервать задачу", e);
+                            }
+                            return null;
+                        }
+                    }
+            );
+        }
+    }
+
 
     @Override
     public void finishTask(final long taskId) {
@@ -384,6 +474,7 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public void interruptAllTasks(List<Long> taskIds, TAUserInfo user, TaskInterruptCause cause) {
         for (Long id : taskIds) {
             interruptTask(id, user, cause);
@@ -438,9 +529,31 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams) {
-        return asyncTaskDao.findAll(filter, pagingParams);
+    public PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams, TAUserInfo userInfo) {
+        PagingResult<AsyncTaskDTO> tasks = asyncTaskDao.findAll(filter, pagingParams);
+
+        if (tasks != null && tasks.size() > 0) {
+            TAUser user = userInfo.getUser();
+            for (AsyncTaskDTO task : tasks) {
+                setTaskAllowedToInterruptByUser(task, user);
+            }
+        }
+
+        return tasks;
     }
+
+    /**
+     * Проставить поле AsyncTaskDTO.allowedToInterrupt в зависимости от пользователя
+     */
+    private void setTaskAllowedToInterruptByUser(AsyncTaskDTO task, TAUser user) {
+        if (userHasAllTaskPermissions(user)) {
+            task.setAllowedToInterrupt(true);
+        } else {
+            AsyncTaskData taskData = asyncTaskDao.findById(task.getId());
+            task.setAllowedToInterrupt(userHasPrivilegesToInterruptTask(user, taskData));
+        }
+    }
+
 
     @Override
     public void releaseNodeTasks() {

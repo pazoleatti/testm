@@ -88,7 +88,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     protected AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {
         long blobLength = blobDataService.getLength((String) params.get("blobDataId"));
         long fileSize = (long) Math.ceil(blobLength / 1024.);
-        String msg = String.format("Размер файла(%s) превышает максимально допустимый(%s)!", fileSize, "%s");
+        String msg = String.format("размер файла (%s Кбайт) превышает максимально допустимый (%s Кбайт).", fileSize, "%s");
         return checkTask(fileSize, taskDescription, msg);
     }
 
