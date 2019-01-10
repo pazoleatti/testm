@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -50,6 +51,9 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
                     asyncManager.updateState(taskData.getId(), state);
                 }
             });
+        }
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return new BusinessLogicResult(false, null);
         }
         return new BusinessLogicResult(true, null);
     }

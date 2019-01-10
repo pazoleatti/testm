@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
@@ -58,6 +59,9 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
         declarationDataService.importExcel(declarationDataId, blobData, userInfo, logger);
+        if(logger.containsLevel(LogLevel.ERROR)) {
+            return new BusinessLogicResult(false, null);
+        }
         return new BusinessLogicResult(true, null);
     }
 
@@ -90,7 +94,7 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
     protected AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {
         long blobLength = blobDataService.getLength((String) params.get("blobDataId"));
         long fileSize = (long) Math.ceil(blobLength / 1024.);
-        String msg = String.format("Размер файла(%s) превышает максимально допустимый(%s)!", fileSize, "%s");
+        String msg = String.format("размер файла (%s Кбайт) превышает максимально допустимый (%s Кбайт).", fileSize, "%s");
         return checkTask(fileSize, taskDescription, msg);
     }
 

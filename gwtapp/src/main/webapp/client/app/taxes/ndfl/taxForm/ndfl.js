@@ -394,35 +394,6 @@
                 }
 
                 /**
-                 * @description Обработать результат операций "Идентифицировать ФЛ" и "Консолидировать"
-                 */
-                function calculateResult(response, force, cancelTask, retryFunc) {
-                    if (response.data && response.data.uuid && response.data.uuid !== null) {
-                        $logPanel.open('log-panel-container', response.data.uuid);
-                    } else {
-                        if (response.data.status === "LOCKED" && !force) {
-                            $dialogs.confirmDialog({
-                                content: response.data.restartMsg,
-                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick: function () {
-                                    retryFunc(true, cancelTask);
-                                }
-                            });
-                        } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
-                            $dialogs.confirmDialog({
-                                content: $filter('translate')('title.returnExistTask'),
-                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick: function () {
-                                    retryFunc(force, true);
-                                }
-                            });
-                        }
-                    }
-                }
-
-                /**
                  * Флаг, означающий, может ли текущий пользоватеть выполнить редактирование строки в таблице
                  * Зависит от выделенных строк на вкладках, поэтому реализовано через события
                  */
@@ -490,7 +461,7 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Идентифицировать ФЛ"
                  */
-                $scope.identify = function (force, cancelTask) {
+                $scope.identify = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/identify",
@@ -505,16 +476,15 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Консолидировать"
                  */
-                $scope.consolidate = function (force, cancelTask) {
+                $scope.consolidate = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/consolidate",
-                        params: {
-                            force: !!force,
-                            cancelTask: !!cancelTask
-                        }
+                        url: "controller/actions/declarationData/consolidate",
+                        data: [$stateParams.declarationDataId]
                     }).then(function (response) {
-                        calculateResult(response, force, cancelTask, $scope.consolidate);
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 
@@ -585,11 +555,14 @@
                         okBtnClick: function () {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
+                                url: "controller/actions/declarationData/delete",
+                                data: [$stateParams.declarationDataId]
                             }).then(function (response) {
-                                //Обновить страницу и, если есть сообщения, показать их
-                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                                $state.go("ndflJournal", params, {reload: true});
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    //Обновить страницу и, если есть сообщения, показать их
+                                    var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                    $state.go("ndflJournal", params, {reload: true});
+                                }
                             });
                         }
                     });
@@ -617,32 +590,15 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Загрузить из ТФ (Excel)"
                  */
-                $scope.doImport = function (file, force) {
+                $scope.doImport = function (file) {
                     if (file) {
                         Upload.upload({
                             url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/import",
                             data: {uploader: file},
-                            params: {force: !!force}
                         }).progress(function (e) {
                         }).then(function (response) {
                             if (response.data.uuid && response.data.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.data.uuid);
-                            }
-                            if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                                $dialogs.confirmDialog({
-                                    title: $filter('translate')('title.confirm'),
-                                    content: response.data.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.doImport(file, true);
-                                    },
-                                    cancelBtnClick: function () {
-                                        file.msClose && file.msClose();
-                                    }
-                                });
-                            } else {
-                                file.msClose && file.msClose();
                             }
                         });
                     }

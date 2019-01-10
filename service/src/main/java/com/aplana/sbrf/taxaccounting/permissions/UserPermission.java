@@ -38,9 +38,9 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
     /**
      * Право доступа к пунктам меню:
      * "Администрирование->Список блокировок"
-     * "Администрирование->Журнал аудита"
+     * "Администрирование->Асинхронные задачи"
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_BLOCK = new ViewAdministrationBlockAndAuditPermission(1L << 4);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_BLOCK = new ViewAdministrationBlockAndAsyncPermission(1L << 4);
     /**
      * Право доступа к пунктам меню:
      * "Администрирование->Конфигурационные параметр"
@@ -259,9 +259,9 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * "Администрирование->Список блокировок"
      * "Администрирование->Журнал аудита"
      */
-    public static final class ViewAdministrationBlockAndAuditPermission extends UserPermission {
+    public static final class ViewAdministrationBlockAndAsyncPermission extends UserPermission {
 
-        public ViewAdministrationBlockAndAuditPermission(long mask) {
+        public ViewAdministrationBlockAndAsyncPermission(long mask) {
             super(mask);
         }
 

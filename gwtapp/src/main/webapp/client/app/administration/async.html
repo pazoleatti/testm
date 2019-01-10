@@ -12,7 +12,7 @@
                         <button type="button"
                                 class="btn btn-default"
                                 data-ng-click="interruptTask()"
-                                data-ng-disabled="asyncGrid.value.length == 0">
+                                data-ng-disabled="!allSelectedAreAllowedToInterrupt()">
                             <span data-translate-once="async.button.interrupt"></span>
                         </button>
                     </span>

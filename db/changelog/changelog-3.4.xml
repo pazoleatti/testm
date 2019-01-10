@@ -260,4 +260,12 @@
         </sql>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6338 Реализовать общую логику работы с асинхронными задачами в рамках UC по операциям-->
+	<changeSet id="3.4-ytrofimov-1" author="ytrofimov">
+		<delete tableName="decl_template_event_script">
+			<where>event_id = 105</where>
+		</delete>
+	</changeSet>
+
+
 </databaseChangeLog>

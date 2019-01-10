@@ -288,17 +288,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Удаление налоговой формы
-     *
-     * @param declarationDataId Идентификатор налоговой формы
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/delete")
-    public ActionResult deleteDeclaration(@PathVariable int declarationDataId) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.deleteIfExists(declarationDataId, userInfo);
-    }
-
-    /**
      * Формирует шаблон ТФ (Excel) для формы
      *
      * @param declarationDataId Идентификатор налоговой формы
@@ -318,8 +307,7 @@ public class DeclarationDataController {
      * @return Результат запуска задачи
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/import")
-    public ImportDeclarationExcelResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
-                                                    @RequestParam boolean force,
+    public ActionResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
                                                     @PathVariable int declarationDataId)
             throws IOException {
         if (file.isEmpty()) {
@@ -327,7 +315,7 @@ public class DeclarationDataController {
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
         try (InputStream inputStream = file.getInputStream()) {
-            return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, userInfo, force);
+            return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, userInfo);
         }
     }
 
@@ -340,7 +328,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/delete")
     public ActionResult deleteDeclarations(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.deleteDeclarationList(userInfo, declarationDataIds);
+        return declarationService.createDeleteDeclarationDataTask(userInfo, declarationDataIds);
     }
 
     /**
@@ -380,18 +368,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Консолидировать
-     *
-     * @param declarationDataId идентификатор декларации
-     * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/consolidate")
-    public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createConsolidateDeclarationTask(userInfo, declarationDataId);
-    }
-
-    /**
      * Идентификация ФЛ налоговых форм
      *
      * @param declarationDataIds Идентификаторы налоговых форм
@@ -400,7 +376,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/identify")
     public ActionResult identifyDeclarationList(@RequestBody Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.identifyDeclarationDataList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.createIdentifyDeclarationDataTask(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -410,9 +386,9 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/consolidate")
-    public ActionResult recalculateDeclarationList(@RequestBody Long[] declarationDataIds) {
+    public ActionResult consolidateDeclarationList(@RequestBody Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createConsolidateDeclarationListTask(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.consolidateDeclarationDataList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -424,7 +400,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/check", produces = MediaType.APPLICATION_JSON_VALUE)
     public ActionResult checkDeclaration(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.checkDeclarationList(userInfo, Collections.singletonList(declarationDataId));
+        return declarationService.createCheckDeclarationDataTask(userInfo, Collections.singletonList(declarationDataId));
     }
 
     /**
@@ -436,7 +412,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/check")
     public ActionResult checkDeclaration(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.checkDeclarationList(userInfo, declarationDataIds);
+        return declarationService.createCheckDeclarationDataTask(userInfo, declarationDataIds);
     }
 
     /**
@@ -446,7 +422,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/accept", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ActionResult accept(@PathVariable final long declarationDataId) {
-        return declarationService.acceptDeclarationList(securityService.currentUserInfo(), Collections.singletonList(declarationDataId));
+        return declarationService.createAcceptDeclarationDataTask(securityService.currentUserInfo(), Collections.singletonList(declarationDataId));
     }
 
     /**
@@ -458,7 +434,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/accept")
     public ActionResult acceptDeclarationList(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.acceptDeclarationList(userInfo, declarationDataIds);
+        return declarationService.createAcceptDeclarationDataTask(userInfo, declarationDataIds);
     }
 
     /**
