@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с формой "Отчетность"
      */
-    angular.module('app.ndflReportJournal', ['ui.router', 'app.createReport'])
+    angular.module('app.ndflReportJournal', ['ui.router', 'app.createReport', 'app.updateDocStateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReportJournal', {
                 url: '/taxes/ndflReportJournal',
@@ -323,6 +323,61 @@
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
                             $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Выгрузить отчетность по фильтру
+                 */
+                $scope.updateDocStateByFilter = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.creatingReport'),
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/updateDocStateModal.html',
+                        controller: 'UpdateDocStateCtrl',
+                        windowClass: 'modal600'
+                    }).result.then(function (docState) {
+                        if (docState) {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/updateDocStateByFilter",
+                                params: {
+                                    filter: JSON.stringify(getFilter()),
+                                    docStateId: docState.id
+                                }
+                            }).then(function (response) {
+                                if (response.data && response.data.uuid) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                            });
+                        }
+                    });
+                };
+
+                /**
+                 * @description Выгрузить отчетность по фильтру по выбранным формам
+                 */
+                $scope.updateDocStateBySelected = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.updateDocState'),
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/updateDocStateModal.html',
+                        controller: 'UpdateDocStateCtrl',
+                        windowClass: 'modal600'
+                    }).result.then(function (docState) {
+                        if (docState) {
+                            var selectedItems = $scope.ndflReportJournalGrid.value;
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/updateDocState",
+                                data: $filter('idExtractor')(selectedItems, 'declarationDataId'),
+                                params: {
+                                    docStateId: docState.id
+                                }
+                            }).then(function (response) {
+                                if (response.data && response.data.uuid) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                            });
                         }
                     });
                 };

@@ -6,9 +6,11 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
@@ -36,6 +38,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     protected TAUserService taUserService;
     @Autowired
     protected DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
+    @Autowired
+    protected PeriodService reportPeriodService;
 
     private static final String KIND_ERROR = "операция \"%s\" не допустима для форм типа %s";
     private static final String ACTIVE_ERROR = "период формы закрыт";
@@ -104,6 +108,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      * Право на редактирование строк формы
      */
     public static final Permission<DeclarationData> EDIT = new EditPermission(1 << 13);
+
+    /**
+     * Право на редактирование строк формы
+     */
+    public static final Permission<DeclarationData> UPDATE_DOC_STATE = new UpdateDocStatePermission(1 << 14);
 
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
@@ -408,7 +417,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             } else {
                 logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ACTIVE_ERROR, logger);
             }
-            return  false;
+            return false;
         }
     }
 
@@ -647,6 +656,53 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 return true;
             }
             return false;
+        }
+    }
+
+    /**
+     * Право на изменение состояния ЭД
+     */
+    public static final class UpdateDocStatePermission extends DeclarationDataPermission {
+
+        public UpdateDocStatePermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            TAUser taUser = taUserService.getUser(user.getUsername());
+            DeclarationTemplate template = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+            ReportPeriodType reportPeriodType = reportPeriodService.getPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+
+            boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
+            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+
+            List<String> errMsgs = new ArrayList<>();
+            if (!(canView && hasRoles)) {
+                errMsgs.add("недостаточно прав (обратитесь к администратору)");
+            }
+            if (!(targetDomainObject.getState() == State.ACCEPTED)) {
+                errMsgs.add("операция \"" + AsyncTaskType.UPDATE_DOC_STATE.getDescription() + "\" не допустима для форм в состоянии \"" +
+                        targetDomainObject.getState().getTitle() + "\"");
+            }
+            if (template.getDeclarationFormKind() == DeclarationFormKind.REPORTS && errMsgs.isEmpty()) {
+                return true;
+            } else {
+                if (logger != null) {
+                    logger.error("Не выполнена операция \"%s\" для налоговой формы: " +
+                                    "№ %s, Период: \"%s, %s %s\", Подразделение: \"%s\". Причина: %s",
+                            AsyncTaskType.UPDATE_DOC_STATE.getDescription(),
+                            targetDomainObject.getId(),
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            reportPeriodType.getName(),
+                            departmentReportPeriod.getCorrectionDate() != null ? " корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) : "",
+                            department.getName(),
+                            StringUtils.join(errMsgs, ", "));
+                }
+                return false;
+            }
         }
     }
 }

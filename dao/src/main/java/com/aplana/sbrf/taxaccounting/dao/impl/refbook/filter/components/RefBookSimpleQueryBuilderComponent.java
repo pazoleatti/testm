@@ -242,13 +242,14 @@ public class RefBookSimpleQueryBuilderComponent {
         q.append("SELECT frb.*").append(getSelectPart(sortAttribute)).append(" FROM ").append(refBook.getTableName()).append(" frb\n")
                 .append(getJoinPart(refBook, null, sortAttribute));
 
+        q.append(" WHERE frb.id != -1");
         if (!refBook.isReadOnly()) {
-            q.append(" WHERE frb.status = 0");
+            q.append(" and frb.status = 0");
         }
 
         // Добавляем фильтрацию по выбранным столбцам
         if (!CollectionUtils.isEmpty(columns) && (StringUtils.isNotEmpty(searchPattern) || StringUtils.isNotEmpty(filter))) {
-            q.append(refBook.isReadOnly() ? " WHERE " : " AND ").append(getColumnFilterQuery(columns, searchPattern, filter));
+            q.append(" AND ").append(getColumnFilterQuery(columns, searchPattern, filter));
         }
 
         return q.withSort(getSortColumnName(sortAttribute), direction)

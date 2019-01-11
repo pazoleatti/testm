@@ -268,4 +268,33 @@
 	</changeSet>
 
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5472 - Новые состояния ЭД-->
+	<changeSet id="3.4-dnovikov-18" author="dnovikov">
+		<sql>
+			insert into REF_BOOK_DOC_STATE(id, knd, name) values(SEQ_REF_BOOK_RECORD.nextval, null, 'Не отправлен в ФНС');
+			insert into REF_BOOK_DOC_STATE(id, knd, name) values(SEQ_REF_BOOK_RECORD.nextval, null, 'Отправлен в ФНС');
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5472 - Новая ассинхронная задача изменения состояние ЭД-->
+	<changeSet id="3.4-dnovikov-19" author="dnovikov">
+		<insert tableName="async_task_type">
+			<column name="id" value="42"/>
+			<column name="name" value="Изменение состояния ЭД"/>
+			<column name="handler_bean" value="UpdateDocStateAsyncTask"/>
+		</insert>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5472 - Заполнение состояния ЭД у уже созданных ОНФ-->
+	<changeSet id="3.4-dnovikov-20" author="dnovikov">
+		<sql>
+			update declaration_data dd set doc_state_id = (select id from ref_book_doc_state where name = 'Не отправлен в ФНС')
+			where id in (
+			select dd.id from declaration_data dd
+			join declaration_template dt on dt.id = dd.declaration_template_id
+			join declaration_kind dk on dk.id = dt.form_kind
+			where dk.id = 7);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

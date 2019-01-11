@@ -664,6 +664,24 @@ public class DeclarationDataController {
     }
 
     /**
+     * Изменение состояния ЭД по списку ид форм
+     */
+    @PostMapping(value = "/actions/declarationData/updateDocState")
+    public ActionResult updateDocState(@RequestBody List<Long> declarationDataIds, @RequestParam long docStateId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToUpdateDocState(declarationDataIds, docStateId, userInfo);
+    }
+
+    /**
+     * Изменение состояния ЭД по фильтру форм
+     */
+    @PostMapping(value = "/actions/declarationData/updateDocStateByFilter")
+    public ActionResult updateDocState(@RequestParam DeclarationDataFilter filter, @RequestParam long docStateId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToUpdateDocState(filter, docStateId, userInfo);
+    }
+
+    /**
      * Создание отчетов и спецотчетов
      */
     @PostMapping(value = "/rest/createReport", consumes = MediaType.APPLICATION_JSON_VALUE)

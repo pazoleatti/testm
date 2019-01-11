@@ -19,7 +19,8 @@
             'app.reportNdflPersonFace',
             'app.returnToCreatedDialog',
             'app.resizer',
-            'app.pager'])
+            'app.pager',
+            'app.updateDocStateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReport', {
                 url: '/taxes/ndfl/ndflReport/{declarationDataId}?uuid',
@@ -111,10 +112,12 @@
                 }
 
                 var updateDeclarationInfoInterval;
+
                 function startUpdateDeclarationInfoInterval() {
                     updateDeclarationInfoInterval = $interval(updateDeclarationInfo, 3000);
                     updateDeclarationInfo();
                 }
+
                 startUpdateDeclarationInfoInterval();
 
                 function cancelUpdateDeclarationInfoInterval() {
@@ -163,12 +166,14 @@
                 }
 
                 var updateAvailableReportsInterval;
+
                 function startUpdateAvailableReportsInterval() {
                     updateAvailableReportsInterval = $interval(function () {
                         updateAvailableReports();
                     }, 10000);
                     updateAvailableReports();
                 }
+
                 startUpdateAvailableReportsInterval();
 
                 function cancelUpdateAvailableReportsInterval() {
@@ -414,6 +419,33 @@
                             }
                         }
                     );
+                };
+
+                /**
+                 * @description Изменить состояние ЭД
+                 */
+                $scope.updateDocState = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.updateDocState'),
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/updateDocStateModal.html',
+                        controller: 'UpdateDocStateCtrl',
+                        windowClass: 'modal600'
+                    }).result.then(function (docState) {
+                        if (docState) {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/updateDocState",
+                                data: [$stateParams.declarationDataId],
+                                params: {
+                                    docStateId: docState.id
+                                }
+                            }).then(function (response) {
+                                if (response.data && response.data.uuid) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                            });
+                        }
+                    });
                 };
 
                 /**

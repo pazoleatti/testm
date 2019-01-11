@@ -911,6 +911,16 @@
                         );
                     }
                 };
+
+                $scope.initBasicSingleSelect = function (refBookId) {
+                    $scope.select = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/refBook/" + refBookId + "/records"
+                    }).success(function (data) {
+                        $scope.select.options.data.results = data.rows;
+                    });
+                };
             }
         ])
 

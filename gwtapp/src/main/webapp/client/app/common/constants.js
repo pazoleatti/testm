@@ -78,7 +78,8 @@
                 DOC_TYPE: 360,
                 ID_DOC: 902,
                 KNF_TYPE: 909,
-                DEDUCTION_MARK: 927
+                DEDUCTION_MARK: 927,
+                DOC_STATE: 929
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -94,7 +95,8 @@
                 IMPORT_EXCEL: 1 << 10,
                 IDENTIFY: 1 << 11,
                 CONSOLIDATE: 1 << 12,
-                EDIT: 1 << 13
+                EDIT: 1 << 13,
+                UPDATE_DOC_STATE: 1 << 14
             },
             USER_ACTIVITY: {
                 YES: {id: 1, name: 'Да'},

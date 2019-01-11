@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
@@ -246,4 +245,12 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return идентификаторы найденных налоговых форм
      */
     List<Long> findApplication2DeclarationDataId(int reportYear);
+
+    /**
+     * Изменяет состояние ЭД форм
+     *
+     * @param declarationId ид формы
+     * @param docStateId    ид состояния ЭД
+     */
+    void updateDocState(long declarationId, long docStateId);
 }

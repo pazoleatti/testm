@@ -600,6 +600,36 @@ public interface DeclarationDataService {
     String exportReports(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
 
     /**
+     * Запускает ассинхронную задачу на изменение состояния ЭД для форм по фильтру
+     *
+     * @param filter     фильтр, по которому выбираются формы
+     * @param docStateId ид состояния ЭД
+     * @param userInfo   пользователь запустивший операцию
+     * @return результат запуска задачи
+     */
+    ActionResult createTaskToUpdateDocState(DeclarationDataFilter filter, long docStateId, TAUserInfo userInfo);
+
+    /**
+     * Запускает ассинхронную задачу на изменение состояния ЭД для форм по списку ил
+     *
+     * @param declarationDataIds список ид форм
+     * @param docStateId         ид состояния ЭД
+     * @param userInfo           пользователь запустивший операцию
+     * @return результат запуска задачи
+     */
+    ActionResult createTaskToUpdateDocState(List<Long> declarationDataIds, long docStateId, TAUserInfo userInfo);
+
+    /**
+     * Изменяет состояние ЭД форм
+     *
+     * @param declarationDataIds список ид форм
+     * @param docStateId         ид состояния ЭД
+     * @param userInfo           пользователь запустивший операцию
+     * @param logger             логгер
+     */
+    void updateDocState(List<Long> declarationDataIds, long docStateId, TAUserInfo userInfo, Logger logger);
+
+    /**
      * Создание отчета для отчетной НФ
      *
      * @param userInfo информация о пользователе

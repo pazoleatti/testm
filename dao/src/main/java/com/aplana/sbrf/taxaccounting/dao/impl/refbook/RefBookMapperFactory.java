@@ -41,6 +41,8 @@ public class RefBookMapperFactory {
             return new ReorganizationMapper();
         } else if (RefBook.Id.KNF_TYPE.getId() == refBookId) {
             return new KnfTypeMapper();
+        } else if (RefBook.Id.DOC_STATE.getId() == refBookId) {
+            return new DocStateMapper();
         }
         throw new IllegalArgumentException("Unknown mapper for refBook = " + refBookId);
     }
@@ -183,6 +185,16 @@ public class RefBookMapperFactory {
         public RefBookKnfType mapRow(ResultSet resultSet, int i) throws SQLException {
             RefBookKnfType result = new RefBookKnfType();
             result.setId(resultSet.getInt("id"));
+            result.setName(resultSet.getString("name"));
+            return result;
+        }
+    }
+
+    public class DocStateMapper<T> implements RowMapper<RefBookDocState> {
+        @Override
+        public RefBookDocState mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookDocState result = new RefBookDocState();
+            result.setId(resultSet.getLong("id"));
             result.setName(resultSet.getString("name"));
             return result;
         }

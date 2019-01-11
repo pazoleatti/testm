@@ -933,4 +933,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource("reportYear", reportYear);
         return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
     }
+
+    @Override
+    public void updateDocState(long declarationId, long docStateId) {
+        getJdbcTemplate().update("update declaration_data set doc_state_id = ? " +
+                "where id = ?",
+                docStateId, declarationId);
+    }
 }

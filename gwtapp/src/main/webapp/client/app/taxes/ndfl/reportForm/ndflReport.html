@@ -224,12 +224,20 @@
                     </span>
                     <!-- Показать -->
                     <span>
-                            <button type="button" class="btn btn-default"
-                                    data-ng-click="createPdf()"
-                                    data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.SHOW) || availablePdf">
-                                <span data-translate-once="button.show"></span>
-                            </button>
-                        </span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="createPdf()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.SHOW) || availablePdf">
+                            <span data-translate-once="button.show"></span>
+                        </button>
+                    </span>
+                    <!-- Изменить состояние ЭД -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="updateDocState()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_DOC_STATE)">
+                            <span data-translate-once="ndflReportJournal.button.updateDocState"></span>
+                        </button>
+                    </span>
                 </div>
             </div>
         </div>

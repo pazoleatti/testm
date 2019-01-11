@@ -1,0 +1,32 @@
+<form class="form-horizontal" name="updateDocStateForm" data-aplana-submit-valid="confirm()">
+    <div class="modal-body">
+        <div class="row-fluid form-group">
+            <div class="span3">
+                <label class="control-label">{{::'ndflReportJournal.filter.documentState' | translate}}:</label>
+            </div>
+            <div class="span8">
+                <div data-aplana-field>
+                    <div data-ng-controller="SelectRefBookCtrl"
+                         data-ui-select2="select.options"
+                         data-ng-init="initBasicSingleSelect(APP_CONSTANTS.REFBOOK.DOC_STATE)"
+                         data-ng-model="form.docState"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key='required'>
+                        {{::'common.validation.required' | translate}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn">
+            <span data-translate-once="button.set"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="cancelButton" ng-click="cancel()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

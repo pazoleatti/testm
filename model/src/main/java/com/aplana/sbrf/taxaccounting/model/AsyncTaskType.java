@@ -36,6 +36,7 @@ public enum AsyncTaskType {
     CREATE_APPLICATION_2(36, "CREATE_APPLICATION_2", "Формирование файла Приложения 2 для декларации по налогу на прибыль за %s год", 36L),
     CREATE_NOT_HOLDING_TAX_NOTIFICATIONS(40, "CREATE_NOT_HOLDING_TAX_NOTIFICATIONS", "Формирование Уведомлений о неудержанном налоге", 40L),
     EXPORT_REPORTS(41, "EXPORT_REPORTS", "Выгрузка отчетности", 41L),
+    UPDATE_DOC_STATE(42, "UPDATE_DOC_STATE", "Изменение состояния ЭД", 42L),
 
     //Типы отчетов
     JASPER_DEC(3, "JASPER", ""),
