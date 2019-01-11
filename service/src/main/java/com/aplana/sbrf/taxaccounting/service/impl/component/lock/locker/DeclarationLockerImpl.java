@@ -60,6 +60,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
     private final Set<OperationType> SET_SPEC_REPORT = new HashSet<>();
     private final Set<OperationType> SET_EXCEL_TEMPLATE = new HashSet<>();
     private final Set<OperationType> SET_REPORT_KPP_OKTMO = new HashSet<>();
+    private final Set<OperationType> SET_UPDATE_DOC_STATE = new HashSet<>();
 
     public DeclarationLockerImpl() {
         SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY.addAll(Arrays.asList(OperationType.UPDATE_PERSONS_DATA,
@@ -81,7 +82,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         SET_CHECK__ACCEPT__TOCREATE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
                 OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
                 OperationType.LOAD_TRANSPORT_FILE, OperationType.RETURN_DECLARATION,
-                OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL));
+                OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE));
 
         SET_EDIT.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
                 OperationType.DELETE_DEC, OperationType.REPORT_KPP_OKTMO, OperationType.RETURN_DECLARATION,
@@ -102,13 +103,15 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
                 OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
                 OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
-                OperationType.IMPORT_DECLARATION_EXCEL));
+                OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE));
         SET_XLSX.addAll(Arrays.asList(OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL));
         SET_SPEC_REPORT.addAll(Arrays.asList(OperationType.CONSOLIDATE, OperationType.DELETE_DEC,
                 OperationType.EDIT, OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE,
                 OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL));
         SET_EXCEL_TEMPLATE.addAll(Arrays.asList(OperationType.DELETE_DEC, OperationType.IDENTIFY_PERSON,
                 OperationType.LOAD_TRANSPORT_FILE, OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL));
+        SET_UPDATE_DOC_STATE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
+                OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION));
 
     }
 
