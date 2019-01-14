@@ -46,21 +46,13 @@ public class PersonsReportBuilder extends AbstractReportBuilder {
     private StyleBuilder styleBuilder;
 
     public PersonsReportBuilder(List<RegistryPersonDTO> persons, RefBookPersonFilter filter) {
-        super("tmp_физические_лица_", ".xlsm");
+        super("tmp_физические_лица_", ".xlsx");
         this.persons = persons;
         this.filter = filter;
 
-        XSSFWorkbook template;
-        try {
-            InputStream templateInputStream = this.getClass().getResourceAsStream("/excelTemplate/personExcelTemplate.xlsm");
-            template = new XSSFWorkbook(templateInputStream);
-            workBook = new SXSSFWorkbook(template);
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage(), e);
-        }
+        workBook = new SXSSFWorkbook();
         workBook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK);
-        sheet = template.getSheetAt(0);
-        this.workBook.setSheetName(0, "Физические лица");
+        this.sheet = workBook.createSheet("Физические лица");
         sheet.setRowSumsBelow(false);
         styleBuilder = new StyleBuilder(workBook);
     }
