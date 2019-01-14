@@ -6,6 +6,9 @@
     <import resource="classpath:testServiceContext.xml"/>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
