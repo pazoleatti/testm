@@ -26,4 +26,6 @@ public class LockDataDTO implements Serializable {
     private String user;
     /* Дата установки блокировки */
     private Date dateLock;
+    /* Позволено ли текущему пользователю удалять блокировку */
+    private boolean allowedToUnlock = false;
 }

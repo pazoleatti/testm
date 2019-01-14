@@ -77,6 +77,16 @@ public interface LockDataService {
     LockData findLock(String key);
 
     /**
+     * Получает список всех блокировок в виде объектов предназначенных для отображения в GUI
+     *
+     * @param filter       ограничение по имени пользователя или ключу
+     * @param pagingParams параметры пэйджинга
+     * @param user         пользователь запрашивающий данные
+     * @return все блокировки
+     */
+    PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user);
+
+    /**
      * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
      *
      * @param key    код блокировки
@@ -104,30 +114,11 @@ public interface LockDataService {
     void unlockAll(TAUserInfo userInfo, boolean ignoreError);
 
     /**
-     * Проверяет, установлена ли блокировка на указанном объекте
-     *
-     * @param key  код блокировки
-     * @param like проверяем неполное совпадение ключа?
-     * @return блокировка установлена?
-     */
-    boolean isLockExists(String key, boolean like);
-
-    /**
-     * Получает список всех блокировок в виде объектов предназначенных для отображения в GUI
-     *
-     * @param filter       ограничение по имени пользователя или ключу
-     * @param pagingParams параметры пэйджинга
-     * @param user         пользователь запрашивающий данные
-     * @return все блокировки
-     */
-    PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user);
-
-    /**
      * Удаляет все указанные блокировки
      *
      * @param keys ключи блокировок
      */
-    void unlockAll(TAUserInfo userInfo, List<String> keys);
+    void unlockAllWithCheckingTasks(TAUserInfo userInfo, List<String> keys);
 
     /**
      * Удаляет блокировки, созданные ранее "seconds" секунд назад. Предполагается, что данный метод
@@ -144,6 +135,15 @@ public interface LockDataService {
      * @param taskId идентификатор задачи
      */
     void unlockAllByTask(long taskId);
+
+    /**
+     * Проверяет, установлена ли блокировка на указанном объекте
+     *
+     * @param key  код блокировки
+     * @param like проверяем неполное совпадение ключа?
+     * @return блокировка установлена?
+     */
+    boolean lockExists(String key, boolean like);
 
     /**
      * Связывает блокировку с асинхронной задачей

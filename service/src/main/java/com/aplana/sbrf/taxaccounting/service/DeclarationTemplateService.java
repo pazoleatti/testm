@@ -224,7 +224,7 @@ public interface DeclarationTemplateService {
 
     void deleteXsd(int dtId);
 
-    void deleteJrxml(int dtId);
+    void deleteJrxml(int declarationTemplateId);
 
     /**
      * Проверка существования активного шаблона декларации
@@ -274,9 +274,6 @@ public interface DeclarationTemplateService {
 
     /**
      * Обновляет скрипт макета
-     *
-     * @param declarationTemplateId идентификатор макета
-     * @param script                скрипт
      */
     void updateScript(DeclarationTemplate declarationTemplate, Logger log, TAUserInfo userInfo);
 
@@ -360,6 +357,7 @@ public interface DeclarationTemplateService {
 
     /**
      * Выгрузить xsd шаблон
+     *
      * @param declarationTemplateId идентификатор макета
      * @return данные xsd файла
      */
@@ -392,7 +390,7 @@ public interface DeclarationTemplateService {
     /**
      * Экспорт скриптов, xsd и jrxml из всех макетов в архив
      *
-     * @param os                    поток, в который надо записать результирующий файл
+     * @param os поток, в который надо записать результирующий файл
      */
     void exportAllDeclarationTemplates(TAUserInfo userInfo, OutputStream os);
 }

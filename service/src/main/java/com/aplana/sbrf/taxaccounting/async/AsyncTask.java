@@ -7,8 +7,6 @@ import java.util.Map;
 
 /**
  * Интерфейс асинхронной задачи, выполняющей некую бизнес логику асинхронно
- *
- * @author dloshkarev
  */
 public interface AsyncTask {
 

@@ -2590,7 +2590,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private String generateTaskKey(CreateDeclarationReportAction action) {
         return isReportByKnf(action) ?
-                LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getKnfId() :
+                LockData.LockObjects.DECLARATION_DATA.name() + "_" + action.getKnfId() :
                 LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getDeclarationTypeId() + "_" + action.getPeriodId() + "_" + action.getDepartmentId();
     }
 

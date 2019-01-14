@@ -1,21 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -45,7 +33,17 @@ public class LockDataServiceImpl implements LockDataService {
     @Autowired
     private TransactionHelper tx;
     @Autowired
-    AuditService auditService;
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private TAUserService userService;
+    @Autowired
+    private AuditService auditService;
+    @Autowired
+    private AsyncManager asyncManager;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public LockData lock(final String key, final int userId, final String description) {
@@ -69,6 +67,14 @@ public class LockDataServiceImpl implements LockDataService {
             }
         });
     }
+
+    /**
+     * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
+     */
+    private void internalLock(String key, int userId, String description) {
+        dao.lock(key, userId, description);
+    }
+
 
     @Override
     public LockData lockAsync(final String key, final int userId) {
@@ -98,6 +104,17 @@ public class LockDataServiceImpl implements LockDataService {
         synchronized (LockDataServiceImpl.class) {
             return dao.get(key, false);
         }
+    }
+
+    @Override
+    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user) {
+        PagingResult<LockDataDTO> locks = dao.getLocks(filter, pagingParams, user);
+        for (LockDataDTO lock : locks) {
+            if (userHasPrivilegesToUnlock(user, lock.getKey())) {
+                lock.setAllowedToUnlock(true);
+            }
+        }
+        return locks;
     }
 
     @Override
@@ -136,6 +153,19 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
+    /**
+     * Простое удаление блокировки без каких-либо проверок.
+     */
+    private Boolean unlock(final String lockKey) {
+        return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
+            @Override
+            public Boolean execute() {
+                dao.unlock(lockKey);
+                return true;
+            }
+        });
+    }
+
     @Override
     public void unlockAll(TAUserInfo userInfo, boolean ignoreError) {
         LOG.info(String.format("All locks was removed by user: %s", userInfo.getUser().getId()));
@@ -143,33 +173,72 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public boolean isLockExists(final String key, boolean like) {
-        synchronized (LockDataServiceImpl.class) {
-            return dao.get(key, like) != null;
+    public void unlockAllWithCheckingTasks(TAUserInfo userInfo, List<String> keys) {
+        TAUser user = userInfo.getUser();
+        for (String lockKey : keys) {
+            if (userHasPrivilegesToUnlock(user, lockKey)) {
+                unlockWithCheckingAsyncTask(lockKey, user);
+            } else {
+                throw new ServiceException("Удаление блокировки не может быть выполнено. Причина: \"недостаточно прав (обратитесь к администратору)\"");
+            }
         }
     }
 
-    @Override
-    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user) {
-        return dao.getLocks(filter, pagingParams, user);
-    }
-
-    @Override
-    public void unlockAll(TAUserInfo userInfo, List<String> keys) {
-        boolean unlockForced = userInfo.getUser().hasRole(TARole.ROLE_ADMIN);
-        for (String key : keys) {
-            unlock(key, userInfo.getUser().getId(), unlockForced);
-        }
-    }
-
-    private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {
+    /**
+     * Снятие блокировки, если для неё не запущена Асинхронная задача
+     */
+    private void unlockWithCheckingAsyncTask(String lockKey, TAUser user) {
         try {
-            String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
-            auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, null, note, null);
+            LockData lock = findLock(lockKey);
+            checkLockIsNotByAsyncTask(lock);
+            unlock(lockKey);
+            sendUnlockNotification(lock, user);
         } catch (Exception e) {
-            LOG.error("Ошибка при логировании", e);
+            throw new ServiceException("Удаление блокировки не может быть выполнено. Причина: " + e.getMessage());
         }
     }
+
+    /**
+     * Проверка блокировки на наличие Асинхронной задачи
+     *
+     * @throws ServiceException Если задача присутствует
+     */
+    private void checkLockIsNotByAsyncTask(LockData lock) throws ServiceException {
+        Long taskId = lock.getTaskId();
+        if (taskId != null) {
+            AsyncTaskData taskData = asyncManager.getLightTaskData(taskId);
+            if (taskData != null) {
+                int userId = taskData.getUserId();
+                TAUser taskCreator = userService.getUser(userId);
+                String errorMessage = "Удаление блокировки невозможно. Выполняется операция \"%s\". Пользователь: %s (%s)";
+                throw new ServiceException(errorMessage, taskData.getDescription(), taskCreator.getName(), taskCreator.getLogin());
+            }
+        }
+    }
+
+    /**
+     * Отправка оповещения о снятии блокировки пользователю.
+     *
+     * @param lock данные о снятой блокировке
+     * @param user пользователь, которому отправляем оповещение
+     */
+    private void sendUnlockNotification(LockData lock, TAUser user) {
+
+        String message = String.format(
+                "Пользователем \"%s (%s)\" отменена операция \"%s\". Причина отмены: Задача отменена",
+                user.getName(),
+                user.getLogin(),
+                lock.getDescription()
+        );
+
+        Notification notification = new Notification();
+        notification.setUserId(user.getId());
+        notification.setCreateDate(new Date());
+        notification.setText(message);
+
+        notificationService.create(Collections.singletonList(notification));
+    }
+
 
     @Override
     public int unlockIfOlderThan(long seconds) {
@@ -190,9 +259,26 @@ public class LockDataServiceImpl implements LockDataService {
         return keyList.size();
     }
 
+    private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {
+        try {
+            String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
+            auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, null, note, null);
+        } catch (Exception e) {
+            LOG.error("Ошибка при логировании", e);
+        }
+    }
+
+
     @Override
     public void unlockAllByTask(long taskId) {
         dao.unlockAllByTask(taskId);
+    }
+
+    @Override
+    public boolean lockExists(final String key, boolean like) {
+        synchronized (LockDataServiceImpl.class) {
+            return dao.get(key, like) != null;
+        }
     }
 
     @Override
@@ -224,10 +310,97 @@ public class LockDataServiceImpl implements LockDataService {
         return lockDataItems;
     }
 
+
     /**
-     * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
+     * Проверка, имеет ли пользователь права на снятие данной блокировки.
      */
-    private void internalLock(String key, int userId, String description) {
-        dao.lock(key, userId, description);
+    private boolean userHasPrivilegesToUnlock(TAUser user, String lockKey) {
+        // Проверка ролей, имеющих полный доступ
+        if (userHasAllLocksPermissions(user)) {
+            return true;
+        }
+        // Контролёр НС (НДФЛ) может снимать блокировки только по ТБ, к которым у него есть доступ
+        if (user.hasRole(TARole.N_ROLE_CONTROL_NS) && userHasAccessToLockByTerbank(user, lockKey)) {
+            return true;
+        }
+        // Оператор (НДФЛ) может снимать только собственные блокировки
+        // noinspection RedundantIfStatement // Можно упростить, но лучше, чтобы было видно, что в конце есть return false
+        if (user.hasRole(TARole.N_ROLE_OPER) && isLockSetByUser(lockKey, user)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Имеет ли пользователь все права для работы с блокировками.
+     */
+    private boolean userHasAllLocksPermissions(TAUser user) {
+        return (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.N_ROLE_CONTROL_UNP));
+    }
+
+    /**
+     * Установлена ли блокировка этим пользователем
+     */
+    private boolean isLockSetByUser(String lockKey, TAUser user) {
+        LockData lock = findLock(lockKey);
+        return lock.getUserId() == user.getId();
+    }
+
+    /**
+     * Проверка, имеет ли пользователь доступ к блокировке по её Тербанку
+     */
+    private boolean userHasAccessToLockByTerbank(TAUser user, String lockKey) {
+        List<Integer> userAvailableTerbankIds = departmentService.findAllAvailableTBIds(user);
+        Integer lockTerbankId = getLockTerbankId(lockKey);
+        return (lockTerbankId != null && userAvailableTerbankIds.contains(lockTerbankId));
+    }
+
+    /**
+     * Определение Тербанка блокировки
+     */
+    private Integer getLockTerbankId(String lockKey) {
+        if (isLockByDeclaration(lockKey)) {
+            return getLockDeclarationTerbankId(lockKey);
+        } else {
+            return getLockCreatorTerbankId(lockKey);
+        }
+    }
+
+    /**
+     * Проверка, поставлена ли блокировка по Налоговой Форме (declarationData)
+     */
+    private boolean isLockByDeclaration(String lockKey) {
+        return lockKey.startsWith("DECLARATION_DATA");
+    }
+
+    /**
+     * Определение ИД Тербанка Налоговой формы для блокировки.
+     */
+    private Integer getLockDeclarationTerbankId(String lockKey) {
+        try {
+            // Ключ блокировки по Налоговой Форме должен начинаться с DECLARATION_DATA_<ID>
+            String[] lockKeyWords = lockKey.split("_");
+            long declarationId = Long.parseLong(lockKeyWords[2]);
+            DeclarationData declaration = declarationDataService.get(declarationId);
+
+            if (declaration != null) {
+                int declarationDepartmentId = declaration.getDepartmentId();
+                return departmentService.getParentTBId(declarationDepartmentId);
+            }
+        } catch (Exception e) {
+            LOG.warn("Получено исключение в ходе определения Налоговой формы и Тербанка блокировки " + lockKey);
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * Определение Тербанка пользователя, поставившего блокировку.
+     */
+    private Integer getLockCreatorTerbankId(String lockKey) {
+        LockData lock = findLock(lockKey);
+        int creatorId = lock.getUserId();
+        TAUser taskCreator = userService.getUser(creatorId);
+        return departmentService.getParentTBId(taskCreator.getDepartmentId());
     }
 }

@@ -14,8 +14,6 @@ import java.util.Arrays;
 
 /**
  * Контроллер для работы с асинхронными задачами
- *
- * @author dloshkarev
  */
 @RestController
 public class AsyncTaskController {

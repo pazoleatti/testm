@@ -20,8 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +34,6 @@ import java.util.Map;
 /**
  * Реализация менеджера асинхронных задач на Spring
  * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer}
- *
- * @author dloshkarev
  */
 @Transactional
 @Component
@@ -310,7 +306,7 @@ public class AsyncManagerImpl implements AsyncManager {
         if (userHasPrivilegesToInterruptTask(currentUser, task)) {
             interruptTask(task, userInfo, cause);
         } else {
-            throw new AccessDeniedException("Недостаточно прав для отмены задачи №" + task.getId());
+            throw new ServiceException("Удаление асинхронной задачи не может быть выполнено. Причина: \"недостаточно прав (обратитесь к администратору)\"");
         }
     }
 
@@ -339,6 +335,7 @@ public class AsyncManagerImpl implements AsyncManager {
         }
 
         // Оператор (НДФЛ) может отменять только собственные задачи
+        // noinspection RedundantIfStatement // Можно упростить, но лучше, чтобы было видно, что в конце есть return false
         if (user.hasRole(TARole.N_ROLE_OPER) && (user.getId() == task.getUserId())) {
             return true;
         }
@@ -474,7 +471,6 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public void interruptAllTasks(List<Long> taskIds, TAUserInfo user, TaskInterruptCause cause) {
         for (Long id : taskIds) {
             interruptTask(id, user, cause);

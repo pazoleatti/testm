@@ -86,6 +86,21 @@
                         $scope.refreshGrid(1);
                     });
                 };
+
+                // Проверка, все ли выбранные блокировки позволено снимать
+                $scope.allSelectedAreAllowedToUnlock = function () {
+                    var selectedBlocks = $scope.locksGrid.value;
+                    if (selectedBlocks && selectedBlocks.length > 0) {
+                        for (var i in selectedBlocks) {
+                            var block = selectedBlocks[i];
+                            if (!block.allowedToUnlock) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+                }
             }])
 
 }());

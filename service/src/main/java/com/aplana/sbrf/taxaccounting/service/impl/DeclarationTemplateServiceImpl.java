@@ -63,8 +63,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return new SimpleDateFormat("dd.MM.yyyy");
         }
     };
-    private static final String DEC_DATA_EXIST_IN_TASK =
-            "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s";
     private static final int SUBREPORT_NAME_MAX_VALUE = 1000;
     private static final int SUBREPORT_ALIAS_MAX_VALUE = 128;
 
@@ -144,11 +142,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return declarationTemplate;
     }
 
-	@Override
-	public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
+    @Override
+    public int save(DeclarationTemplate declarationTemplate, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationTemplateServiceImpl.save. declarationTemplate: %s",
                 declarationTemplate.getId()));
-        if (declarationTemplate.getId() == null){
+        if (declarationTemplate.getId() == null) {
             int declarationTemplateId = declarationTemplateDao.create(declarationTemplate);
             saveDeclarationTemplateFile(declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
             return declarationTemplateId;
@@ -373,11 +371,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public void deleteJrxml(int dtId) {
-        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxml. declarationTemplate: %s", dtId));
+    public void deleteJrxml(int declarationTemplateId) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxml. declarationTemplate: %s", declarationTemplateId));
         try {
-            DeclarationTemplate template = get(dtId);
-            declarationTemplateDao.deleteJrxml(dtId);
+            DeclarationTemplate template = get(declarationTemplateId);
+            declarationTemplateDao.deleteJrxml(declarationTemplateId);
             blobDataService.delete(template.getJrxmlBlobId());
         } catch (DaoException e) {
             throw new ServiceException("Ошибка при удалении jrxml", e);
@@ -393,9 +391,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public boolean checkExistingDataJrxml(int dtId, Logger logger) {
         boolean isExist = false;
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
-        TAUserInfo currUser = logger.getTaUserInfo();
-        ArrayList<String> existDec = new ArrayList<String>();
-        ArrayList<String> existInLockDec = new ArrayList<String>();
+        ArrayList<String> existDec = new ArrayList<>();
+        ArrayList<String> existInLockDec = new ArrayList<>();
 
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             DeclarationData data = declarationDataDao.get(dataId);
@@ -403,34 +400,22 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             ReportPeriod rp = periodService.fetchReportPeriod(data.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.fetchOne(data.getDepartmentReportPeriodId());
-            if (
-                    reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
-                            ||
-                            reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
-                existDec.add(String.format(
-                        DEC_DATA_EXIST_IN_TASK,
-                        template.getName(),
-                        departmentService.getDepartment(data.getDepartmentId()).getName(),
-                        rp.getName(),
-                        rp.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                sdf.get().format(drp.getCorrectionDate())) : "",
-                        data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
-                        data.getKpp() != null ? ", КПП " + data.getKpp() : ""
-                ));
 
-            } else if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
-                existInLockDec.add(String.format(
-                        DEC_DATA_EXIST_IN_TASK,
-                        template.getName(),
-                        departmentService.getDepartment(data.getDepartmentId()).getName(),
-                        rp.getName(),
-                        rp.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                sdf.get().format(drp.getCorrectionDate())) : "",
-                        data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
-                        data.getKpp() != null ? ", КПП " + data.getKpp() : ""
-                ));
+            String message = String.format(
+                    "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s",
+                    template.getName(),
+                    departmentService.getDepartment(data.getDepartmentId()).getName(),
+                    rp.getName(),
+                    rp.getTaxPeriod().getYear(),
+                    drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s", sdf.get().format(drp.getCorrectionDate())) : "",
+                    data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
+                    data.getKpp() != null ? ", КПП " + data.getKpp() : ""
+            );
+
+            if (reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null || reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
+                existDec.add(message);
+            } else if (lockDataService.lockExists(decKeyPDF, false) || lockDataService.lockExists(decKeyXLSM, false)) {
+                existInLockDec.add(message);
             }
         }
         if (!existInLockDec.isEmpty()) {
@@ -474,7 +459,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
-            if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
+            if (lockDataService.lockExists(decKeyPDF, false) || lockDataService.lockExists(decKeyXLSM, false)) {
                 lockDataIds.add(dataId);
             }
         }
@@ -739,8 +724,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             for (DeclarationTemplate dt : allTemplates) {
                 dt.setCreateScript(getDeclarationTemplateScript(dt.getId()));
                 String folderTemplateName = String.format("%s" + File.separator + "%s" + File.separator,
-                                "declarationType_" + dt.getType().getId(),
-                                SIMPLE_DATE_FORMAT_YEAR.get().format(dt.getVersion()));
+                        "declarationType_" + dt.getType().getId(),
+                        SIMPLE_DATE_FORMAT_YEAR.get().format(dt.getVersion()));
                 ZipArchiveEntry ze = new ZipArchiveEntry(folderTemplateName);
                 zos.putNextEntry(ze);
                 doExportDeclarationTemplate(folderTemplateName, dt, zos);

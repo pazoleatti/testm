@@ -10,7 +10,8 @@
                 <span>
                     <!-- Удалить блокировку -->
                     <button type="button" class="btn btn-default"
-                            data-ng-click="deleteLock()" data-ng-disabled="locksGrid.value.length == 0">
+                            data-ng-click="deleteLock()"
+                            data-ng-disabled="!allSelectedAreAllowedToUnlock()">
                         <span data-translate-once="locks.button.delete"></span>
                     </button>
                 </span>

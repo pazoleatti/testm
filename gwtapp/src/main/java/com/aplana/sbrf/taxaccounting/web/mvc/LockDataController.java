@@ -14,8 +14,6 @@ import java.util.Arrays;
 
 /**
  * Контроллер для работы с блокировками
- *
- * @author dloshkarev
  */
 @RestController
 public class LockDataController {
@@ -57,6 +55,6 @@ public class LockDataController {
     @PostMapping(value = "/actions/lock/delete")
     public void deleteLocks(@RequestParam String[] keys) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        lockDataService.unlockAll(userInfo, Arrays.asList(keys));
+        lockDataService.unlockAllWithCheckingTasks(userInfo, Arrays.asList(keys));
     }
 }
