@@ -207,16 +207,6 @@
         )
 
         /**
-         * Контроллер для выбора состояния документа
-         */
-        .controller('SelectDocStateCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
-            function ($scope, APP_CONSTANTS, GetSelectOption) {
-                var docStates = [APP_CONSTANTS.DOC_STATE.ACCEPTED, APP_CONSTANTS.DOC_STATE.REFUSED, APP_CONSTANTS.DOC_STATE.REVISION, APP_CONSTANTS.DOC_STATE.SUCCESSFUL, APP_CONSTANTS.DOC_STATE.ERROR];
-                $scope.docStateSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, docStates);
-            }]
-        )
-
-        /**
          * Контроллер для выбора АСНУ
          */
         .controller('SelectAsnuCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource',
@@ -914,6 +904,16 @@
 
                 $scope.initBasicSingleSelect = function (refBookId) {
                     $scope.select = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/refBook/" + refBookId + "/records"
+                    }).success(function (data) {
+                        $scope.select.options.data.results = data.rows;
+                    });
+                };
+
+                $scope.initBasicMultipleSelect = function (refBookId) {
+                    $scope.select = GetSelectOption.getBasicMultipleSelectOptions(true);
                     $http({
                         method: "GET",
                         url: "controller/rest/refBook/" + refBookId + "/records"

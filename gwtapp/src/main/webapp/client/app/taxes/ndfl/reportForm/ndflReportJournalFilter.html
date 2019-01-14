@@ -96,8 +96,9 @@
                                 <label class="control-label">{{::'ndflReportJournal.filter.documentState' |
                                     translate}}:</label>
                             </div>
-                            <div data-ng-controller="SelectDocStateCtrl"
-                                 data-ui-select2="docStateSelect.options"
+                            <div data-ng-controller="SelectRefBookCtrl"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initBasicMultipleSelect(APP_CONSTANTS.REFBOOK.DOC_STATE)"
                                  data-ng-model="searchFilter.params.docState"
                                  class="span8">
                             </div>
