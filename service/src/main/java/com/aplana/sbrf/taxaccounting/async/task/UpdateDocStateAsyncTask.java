@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,10 @@ public class UpdateDocStateAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        return "Выполнение операции \"" + getAsyncTaskType().getDescription() + "\" завершено.";
+        Map<String, Object> params = taskData.getParams();
+        long docStateId = (Long) params.get("docStateId");
+        RefBookDocState docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), docStateId);
+        return "Выполнение операции \"" + getAsyncTaskType().getDescription() + "\"  на состояние ЭД: " + docState.getName() + " завершено.";
     }
 
     @Override
