@@ -180,7 +180,7 @@
                 RNU_NDFL_DETAIL_REPORT: "rnu_ndfl_detail_report", // Спецотчет "Детализация – доходы, вычеты, налоги"
                 REPORT_KPP_OKTMO: "report_kpp_oktmo", // Реестр сформированной отчетности
                 REPORT_2NDFL: "report_2ndfl", // 2-НДФЛ (1) по физическому лицу
-                DEPT_NOTICE: "DEPT_NOTICE" // Уведомление о задолженности
+                DEPT_NOTICE: "DEPT_NOTICE_DEC" // Уведомление о задолженности
             },
             CREATE_ASYNC_TASK_STATUS: {
                 NOT_EXIST_XML: "NOT_EXIST_XML", //не существует XML

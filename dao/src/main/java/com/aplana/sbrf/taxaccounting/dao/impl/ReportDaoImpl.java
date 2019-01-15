@@ -18,7 +18,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 @Transactional(readOnly = true)
@@ -119,6 +123,18 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         } catch (DataAccessException e) {
             throw new DaoException("Не удалось удалить записи", e);
         }
+    }
+
+    @Override
+    public void deleteSubreport(long declarationDataId, String subreportAlias) {
+        String query = "delete from declaration_report dr\n" +
+                "where\n" +
+                "dr.declaration_data_id = :declarationDataId\n" +
+                "and dr.subreport_id in (select id from declaration_subreport where alias = :subreportAlias)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId)
+                .addValue("subreportAlias", subreportAlias);
+        getNamedParameterJdbcTemplate().update(query, params);
     }
 
     @Override

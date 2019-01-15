@@ -320,5 +320,24 @@
 			where dk.id = 7);
 		</sql>
 	</changeSet>
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6338 Реализовать общую логику работы с асинхронными задачами в рамках UC по операциям-->
+	<changeSet id="3.4-ytrofimov-2" author="ytrofimov">
+		<update tableName="declaration_subreport">
+			<column name="alias" value="report_2ndfl1"/>
+			<where>declaration_template_id = 102 and alias = 'report_2ndfl'</where>
+		</update>
+		<update tableName="declaration_subreport">
+			<column name="alias" value="report_2ndfl2"/>
+			<where>declaration_template_id = 104 and alias = 'report_2ndfl'</where>
+		</update>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6338 Реализовать общую логику работы с асинхронными задачами в рамках UC по операциям-->
+	<changeSet id="3.4-ytrofimov-3" author="ytrofimov">
+		<sql>
+			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
+			values(SEQ_DECLARATION_SUBREPORT.nextval, 104, 'Уведомление о задолженности', 2, 'dept_notice_dec');
+		</sql>
+	</changeSet>
 
 </databaseChangeLog>

@@ -78,7 +78,7 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)");
         else if (operationType.equals(OperationType.PDF_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Создание формы предварительного просмотра.");
+            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Создание формы предварительного просмотра");
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"РНУ НДФЛ по физическому лицу\"");
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
@@ -98,7 +98,7 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         else if (operationType.equals(OperationType.REPORT_2NDFL1))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (1) по физическому лицу\" ");
         else if (operationType.equals(OperationType.REPORT_2NDFL2))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (1) по физическому лицу\" ");
+            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (2) по физическому лицу\" ");
         else if (operationType.equals(OperationType.DECLARATION_2NDFL1) || operationType.equals(OperationType.DECLARATION_2NDFL2) || operationType.equals(OperationType.DECLARATION_6NDFL))
             return createReportsAsyncTaskDescriptor.createDescription(departmentReportPeriodId, declarationTypeId);
         else if (operationType.equals(OperationType.EXPORT_REPORTS))

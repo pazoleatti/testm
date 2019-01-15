@@ -72,4 +72,12 @@ public interface ReportService {
      * @param declarationDataId идентификатор декларации
      */
     void deleteNotXmlDec(long declarationDataId);
+
+    /**
+     * Удаляет спецотчет налоговой формы
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param subreportAlias    альяс спецотчета
+     */
+    void deleteSubreport(long declarationDataId, String subreportAlias);
 }

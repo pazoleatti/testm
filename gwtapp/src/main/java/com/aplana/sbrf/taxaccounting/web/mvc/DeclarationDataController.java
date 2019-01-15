@@ -538,13 +538,14 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      * @param ndflPersonId      идентификатор данных о физическом лице {@link com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}
-     * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
-    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long ndflPersonId, @RequestParam NdflPersonFilter ndflPersonFilter) {
+    public String createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long ndflPersonId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createReportRnu(userInfo, declarationDataId, ndflPersonId, ndflPersonFilter);
+        Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("PERSON_ID", ndflPersonId);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, SubreportAliasConstants.RNU_NDFL_PERSON_DB, reportParams, userInfo);
     }
 
     /**
@@ -553,25 +554,18 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
-    public CreateDeclarationReportResult createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias, @RequestParam boolean force,
+    public String createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias,
                                                               @RequestBody(required = false) Ndfl2_6DataReportParams params) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("params", params);
-        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo, force);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
     }
 
-    /**
-     * Формирование реестра сформированной отчетности
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @return информация о создании отчета
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/pairKppOktmoReport")
-    public CreateDeclarationReportResult createPairKppOktmo(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/pdf")
+    public String createPdfReport(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createPairKppOktmoReport(userInfo, declarationDataId, force);
+        return declarationService.createPdfTask(userInfo, declarationDataId);
     }
 
     /**
@@ -685,7 +679,7 @@ public class DeclarationDataController {
      * Создание отчетов и спецотчетов
      */
     @PostMapping(value = "/rest/createReport", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public CreateReportResult createReport(@RequestBody CreateReportAction action) {
+    public ActionResult createReport(@RequestBody CreateReportAction action) {
         return declarationService.createReportForReportDD(securityService.currentUserInfo(), action);
     }
 

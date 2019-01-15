@@ -48,4 +48,21 @@ public enum OperationType {
     private Long asyncTaskTypeId;
     private String name;
 
+    public static OperationType getOperationTypeBySubreport(String subreportAlias) {
+        switch (subreportAlias) {
+            case SubreportAliasConstants.REPORT_KPP_OKTMO: return REPORT_KPP_OKTMO;
+            case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB: return RNU_NDFL_PERSON_ALL_DB;
+            case SubreportAliasConstants.RNU_NDFL_PERSON_DB: return RNU_NDFL_PERSON_DB;
+            case SubreportAliasConstants.RNU_RATE_REPORT: return RNU_RATE_REPORT;
+            case SubreportAliasConstants.RNU_PAYMENT_REPORT: return RNU_PAYMENT_REPORT;
+            case SubreportAliasConstants.RNU_NDFL_DETAIL_REPORT: return RNU_NDFL_DETAIL_REPORT;
+            case SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT: return RNU_NDFL_2_6_DATA_TXT_REPORT;
+            case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT: return RNU_NDFL_2_6_DATA_XLSX_REPORT;
+            case SubreportAliasConstants.REPORT_2NDFL1: return REPORT_2NDFL1;
+            case SubreportAliasConstants.REPORT_2NDFL2: return REPORT_2NDFL2;
+            case SubreportAliasConstants.DEPT_NOTICE_DEC: return DEPT_NOTICE_DEC;
+            default: throw new IllegalArgumentException("unknown subreport alias");
+        }
+    }
+
 }

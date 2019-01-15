@@ -25,6 +25,13 @@ public class SpecificReportByPersonDescriptorImpl implements SpecReportByPersonD
     private DeclarationTemplateService declarationTemplateService;
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    public SpecificReportByPersonDescriptorImpl(DeclarationDataService declarationDataService, DepartmentService departmentService, DeclarationTemplateService declarationTemplateService, DepartmentReportPeriodService departmentReportPeriodService) {
+        this.declarationDataService = declarationDataService;
+        this.departmentService = departmentService;
+        this.declarationTemplateService = declarationTemplateService;
+        this.departmentReportPeriodService = departmentReportPeriodService;
+    }
+
     @Override
     public String createDescription(Long declarationDataId, Map<String, Object> subreportParamValues, String name) {
         DeclarationData declaration = declarationDataService.get(Collections.singletonList(declarationDataId)).get(0);

@@ -3,14 +3,58 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.async.task.UpdateDocStateAsyncTask;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.AttachFileType;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFileComment;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateFile;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DescriptionTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
+import com.aplana.sbrf.taxaccounting.model.OperationType;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
+import com.aplana.sbrf.taxaccounting.model.Relation;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder;
+import com.aplana.sbrf.taxaccounting.model.ScriptTaskComplexityHolder;
+import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
@@ -19,7 +63,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -33,14 +76,45 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationExcelTemplateResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationReportResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataExistenceAndKindResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationLockResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationResult;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
+import com.aplana.sbrf.taxaccounting.model.result.PrepareSubreportResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableReportDDResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
@@ -81,13 +155,39 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -861,164 +961,25 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    //Формирование рну ндфл для физ лица
     @Override
-    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId,
-                                                         long ndflPersonId, final NdflPersonFilter ndflPersonFilter) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportRnu by %s. declarationDataId: %s; ndflPersonId: %s; ndflPersonFilter: %s",
-                userInfo, declarationDataId, ndflPersonId, ndflPersonFilter));
-        final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
-        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
-        if (!existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-        } else {
-            if (ddReportType.isSubreport()) {
-                DeclarationData declaration = get(declarationDataId, userInfo);
-                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), SubreportAliasConstants.RNU_NDFL_PERSON_DB));
-            } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && !isVisiblePDF(get(declarationDataId, userInfo), userInfo)) {
-                throw new ServiceException("Данное действие недоступно");
-            }
+    public String createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams,
+                                                   final TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateSpecificReport by %s. declarationDataId: %s",
+                userInfo, declarationDataId));
+        Logger logger = new Logger();
 
-            Map<String, Object> filterParams = new HashMap<String, Object>();
-            NdflPerson ndflPerson = ndflPersonService.findOne(ndflPersonId);
-
-            filterParams.put("PERSON_ID", ndflPerson.getId());
-
-            //Узнаем статус налогоплательщика
-            if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
-                ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
-                        get("NAME").getStringValue());
-            } else {
-                ndflPerson.setStatus("");
-            }
-
-            Logger logger = new Logger();
-            String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
-            if (restartStatus != null && restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                result.setRestartMsg(restartStatus.getSecond());
-            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                reportService.deleteByDeclarationAndType(declarationDataId, ddReportType);
-                Map<String, Object> params = new HashMap<String, Object>(10);
-                params.put("declarationDataId", declarationDataId);
-                if (ddReportType.isSubreport()) {
-                    params.put("alias", ddReportType.getReportAlias());
-                    params.put("viewParamValues", new LinkedHashMap<String, String>());
-                    if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-                        params.put("subreportParamValues", filterParams);
-                        params.put("PERSON_ID", ndflPerson.getId());
-                    }
-                }
-                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                    @Override
-                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                getDeclarationFullName(declarationDataId, ddReportType));
-                    }
-                });
-                result.setUuid(logEntryService.save(logger.getEntries()));
-            }
+        reportService.deleteSubreport(declarationDataId, alias);
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
+        params.put("alias", alias);
+        params.put("viewParamValues", new LinkedHashMap<String, String>());
+        if (reportParams != null) {
+            params.put("subreportParamValues", reportParams);
         }
-        return result;
-    }
 
-    @Override
-    public CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams,
-                                                                          final TAUserInfo userInfo, boolean force) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateSpecificReport by %s. declarationDataId: %s; force: %s",
-                userInfo, declarationDataId, force));
-        DeclarationData declaration = get(declarationDataId, userInfo);
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        asyncManager.createTask(OperationType.getOperationTypeBySubreport(alias), getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
 
-        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
-
-        if (!existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-        } else {
-            Logger logger = new Logger();
-            for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
-                final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
-
-                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
-
-                final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                    result.setRestartMsg(restartStatus.getSecond());
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    reportService.deleteByDeclarationAndType(declarationDataId, ddReportType);
-                    Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationDataId", declarationDataId);
-                    params.put("alias", ddReportType.getReportAlias());
-                    params.put("viewParamValues", new LinkedHashMap<String, String>());
-                    if (reportParams != null) {
-                        params.put("subreportParamValues", reportParams);
-                    }
-
-                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                        @Override
-                        public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                        }
-                    });
-                }
-            }
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
-        return result;
-    }
-
-    @Override
-    public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId,
-                                                                  boolean force) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createPairKppOktmoReport by %s. declarationDataId: %s; force: %s",
-                userInfo, declarationDataId, force));
-        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
-        if (!existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-        } else {
-            DeclarationData declarationData = get(declarationDataId, userInfo);
-            DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), SubreportAliasConstants.REPORT_KPP_OKTMO);
-            final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
-            Logger logger = new Logger();
-            String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-            if (restartStatus != null && restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                result.setRestartMsg(restartStatus.getSecond());
-            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                reportService.deleteByDeclarationAndType(declarationDataId, ddReportType);
-                Map<String, Object> params = new HashMap<>();
-                params.put("declarationDataId", declarationDataId);
-                params.put("alias", ddReportType.getReportAlias());
-                params.put("viewParamValues", new LinkedHashMap<String, String>());
-                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                    @Override
-                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                getDeclarationFullName(declarationDataId, ddReportType));
-                    }
-                });
-            }
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
-        return result;
+        return logEntryService.save(logger.getEntries());
     }
 
     @Override
@@ -2816,77 +2777,47 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateReportResult createReportForReportDD(TAUserInfo userInfo, final CreateReportAction action) {
+    public ActionResult createReportForReportDD(TAUserInfo userInfo, final CreateReportAction action) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportForReportDD by %s. action: %s",
                 userInfo, action));
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
-        CreateReportResult result = new CreateReportResult();
-        if (!existDeclarationData(action.getDeclarationDataId())) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(action.getDeclarationDataId());
-        } else {
-            if (ddReportType.isSubreport()) {
-                DeclarationData declaration = get(action.getDeclarationDataId(), userInfo);
-                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
-            }
-            String uuidXml = reportService.getReportFileUuidSafe(action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
-            if (uuidXml == null) {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
-            } else {
-                final String uuid = reportService.getReportFileUuidSafe(action.getDeclarationDataId(), ddReportType);
-                if (uuid != null && !action.isCreate()) {
-                    result.setStatus(CreateAsyncTaskStatus.EXIST);
-                } else {
-                    Logger logger = new Logger();
-                    String keyTask = generateAsyncTaskKey(action.getDeclarationDataId(), ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                        result.setRestartMsg(restartStatus.getSecond());
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    } else {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("declarationDataId", action.getDeclarationDataId());
-                        if (ddReportType.isSubreport()) {
-                            params.put("alias", ddReportType.getReportAlias());
-                            params.put("viewParamValues", new LinkedHashMap<String, String>());
-                            if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-                                params.put("subreportParamValues", action.getSubreportParamValues());
-                            }
-                        }
-                        if (action.getSelectedRow() != null) {
-                            List<Cell> cellList = new ArrayList<>();
-                            for (Map.Entry<String, Object> cellData : action.getSelectedRow().entrySet()) {
-                                Column column = new StringColumn();
-                                column.setAlias(cellData.getKey());
-                                Cell cell = new Cell(column, new ArrayList<FormStyle>());
-                                cell.setStringValue(cellData.getValue().toString());
-                                cellList.add(cell);
-                            }
-                            DataRow<Cell> dataRow = new DataRow<>(cellList);
-                            params.put("selectedRecord", dataRow);
-                        }
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                            @Override
-                            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                        getDeclarationFullName(action.getDeclarationDataId(), ddReportType));
-                            }
+        ActionResult result = new ActionResult();
+        DeclarationData declaration = get(action.getDeclarationDataId(), userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        String alias = "";
 
-                            @Override
-                            public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
-                                if (uuid != null) {
-                                    reportService.deleteDec(uuid);
-                                }
-                            }
-                        });
-                    }
-                    result.setUuid(logEntryService.save(logger.getEntries()));
-                }
+        if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_1) {
+            alias = SubreportAliasConstants.REPORT_2NDFL1;
+        } else if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_2) {
+            if (action.getType().equalsIgnoreCase(SubreportAliasConstants.DEPT_NOTICE_DEC)) {
+                alias = SubreportAliasConstants.DEPT_NOTICE_DEC;
+            } else {
+                alias = SubreportAliasConstants.REPORT_2NDFL2;
             }
         }
+
+        Logger logger = new Logger();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", action.getDeclarationDataId());
+
+        params.put("alias", alias);
+        params.put("viewParamValues", new LinkedHashMap<String, String>());
+        params.put("subreportParamValues", action.getSubreportParamValues());
+
+        if (action.getSelectedRow() != null) {
+            List<Cell> cellList = new ArrayList<>();
+            for (Map.Entry<String, Object> cellData : action.getSelectedRow().entrySet()) {
+                Column column = new StringColumn();
+                column.setAlias(cellData.getKey());
+                Cell cell = new Cell(column, new ArrayList<FormStyle>());
+                cell.setStringValue(cellData.getValue().toString());
+                cellList.add(cell);
+            }
+            DataRow<Cell> dataRow = new DataRow<>(cellList);
+            params.put("selectedRecord", dataRow);
+        }
+        asyncManager.createTask(OperationType.getOperationTypeBySubreport(alias), getStandardDeclarationDescription(action.getDeclarationDataId()), userInfo, params, logger);
+        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
@@ -2902,8 +2833,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else {
             Logger logger = new Logger();
             DeclarationData declarationData = get(action.getDeclarationDataId(), userInfo);
-            DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
-            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), action.getType()));
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            String alias = "";
+            if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_1) {
+                alias = SubreportAliasConstants.REPORT_2NDFL1;
+            } else if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_2) {
+                if (action.getType().equalsIgnoreCase(SubreportAliasConstants.DEPT_NOTICE_DEC)) {
+                    alias = action.getType();
+                } else {
+                    alias = SubreportAliasConstants.REPORT_2NDFL2;
+                }
+            }
+            DeclarationDataReportType ddReportType = DeclarationDataReportType.SPECIFIC_REPORT_DEC;
+            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias.toLowerCase()));
 
             Map<String, Object> subreportParamValues = null;
             if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
@@ -3235,6 +3177,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 reportPeriod.getReportPeriod().getName(),
                 getCorrectionDateString(reportPeriod),
                 department.getName());
+    }
+
+    @Override
+    public String createPdfTask(TAUserInfo userInfo, long declarationDataId) {
+        final Logger logger = new Logger();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
+        asyncManager.createTask(OperationType.PDF_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+
+        return logEntryService.save(logger.getEntries());
     }
 
     /**

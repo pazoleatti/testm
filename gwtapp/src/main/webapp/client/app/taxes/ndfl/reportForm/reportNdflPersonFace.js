@@ -162,8 +162,7 @@
 
                     prepareSpecificReport.doOperation({
                             declarationDataId: $shareData.declarationDataId,
-                            taxType: 'NDFL',
-                            type: 'report_2ndfl',
+                            type: 'report_2ndfl2',
                             subreportParamValues: {
                                 pNumSpravka: $scope.searchFilter.params.refNumber,
                                 lastName: $scope.searchFilter.params.lastName,
@@ -228,31 +227,17 @@
 
                 /**
                  * @description Сформировать спецотчет
-                 * @param force
-                 * @param create
                  */
-                $scope.createSubreport = function (force, create) {
-                    {
-                        force = typeof force !== 'undefined' ? force : false;
-                        create = typeof create !== 'undefined' ? create : false;
-                    }
-
+                $scope.createSubreport = function () {
                     createReport.query({
                             declarationDataId: $shareData.declarationDataId,
-                            isForce: force,
-                            taxType: 'NDFL',
                             type: $shareData.reportType,
-                            create: create,
                             selectedRow: $scope.reportNdflGrid.value[0],
                             subreportParamValues: {
-                                pNumSpravka: $scope.searchFilter.params.refNumber,
-                                lastName: $scope.searchFilter.params.lastName,
-                                firstName: $scope.searchFilter.params.firstName,
-                                middleName: $scope.searchFilter.params.middleName,
-                                inn: $scope.searchFilter.params.inn,
-                                idDocNumber: $scope.searchFilter.params.idDocNumber,
-                                fromBirthDay: $scope.searchFilter.params.dateFrom,
-                                toBirthDay: $scope.searchFilter.params.dateTo
+                                lastName: $scope.reportNdflGrid.value[0].lastName,
+                                firstName: $scope.reportNdflGrid.value[0].firstName,
+                                middleName: $scope.reportNdflGrid.value[0].middleName,
+                                inn: $scope.reportNdflGrid.value[0].innNp
                             }
                         },
                         function (response) {

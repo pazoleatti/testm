@@ -662,75 +662,70 @@
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate";
                 };
 
-                $scope.createReportXlsx = function (force) {
+                $scope.createReportXlsx = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
-                        params: {
-                            force: !!force
-                        }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createReportXlsx, "availableXlsxReport");
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
+                        }
                     });
                 };
 
                 /**
                  * формирование спецотчета "РНУ НДФЛ по всем ФЛ"
                  */
-                $scope.createReportAllRnu = function (force) {
+                $scope.createReportAllRnu = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB,
-                        params: {
-                            force: !!force
-                        }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createReportAllRnu, "availableRnuNdflPersonAllDb");
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
+                        }
                     });
                 };
 
                 /**
                  * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе ставок"
                  */
-                $scope.createRateReport = function (force) {
+                $scope.createRateReport = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT,
-                        params: {
-                            force: !!force
-                        }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createRateReport, "availableRateReport");
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
+                        }
                     });
                 };
 
                 /**
                  * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе платёжных поручений"
                  */
-                $scope.createPaymentReport = function (force) {
+                $scope.createPaymentReport = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT,
-                        params: {
-                            force: !!force
-                        }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createPaymentReport, "availablePaymentReport");
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
+                        }
                     });
                 };
 
                 /**
                  * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе платёжных поручений"
                  */
-                $scope.createNdflDetailReport = function (force) {
+                $scope.createNdflDetailReport = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT,
-                        params: {
-                            force: !!force
-                        }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createNdflDetailReport, "availableNdflDetailReport");
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
+                        }
                     });
                 };
 
@@ -765,28 +760,24 @@
                 /**+
                  * Создание спецотчета "Реестр сформированной отчетности"
                  */
-                $scope.createPairKppOktmo = function (force) {
+                $scope.createPairKppOktmo = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pairKppOktmoReport",
-                        params: {
-                            force: !!force
-                        }
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO
                     }).success(function (response) {
-                        performReportSuccessResponse(response, $scope.createPairKppOktmo, "availableReportKppOktmo");
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
+                        }
                     });
                 };
 
                 /**
                  * Формирует запрос на создание шаблона Excel-файла для загрузки
                  */
-                $scope.createExcelTemplate = function (force) {
+                $scope.createExcelTemplate = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",
-                        params: {
-                            force: !!force
-                        }
                     }).then(function (response) {
                         performReportSuccessResponse(response.data, $scope.createExcelTemplate, "availableExcelTemplate");
                     });

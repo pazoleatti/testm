@@ -178,7 +178,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         for (OperationType lockingTask : lockingTasks) {
             lockKeys.add(simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, lockingTask));
         }
-
+        lockingTasks.remove(currentTask);
         DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataId)).get(0);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         final DeclarationType declarationType = declarationTemplate.getType();

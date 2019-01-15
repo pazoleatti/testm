@@ -62,4 +62,10 @@ public class ReportServiceImpl implements ReportService {
     public void deleteNotXmlDec(long declarationDataId) {
         reportDao.deleteNotXmlDec(declarationDataId);
     }
+
+    @Override
+    @Transactional
+    public void deleteSubreport(long declarationDataId, String subreportAlias) {
+        reportDao.deleteSubreport(declarationDataId, subreportAlias);
+    }
 }

@@ -50,6 +50,14 @@ public interface ReportDao {
     void deleteDec(long declarationDataId, DeclarationDataReportType type);
 
     /**
+     * Удаляет спецотчет налоговой формы
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param subreportAlias    альяс спецотчета
+     */
+    void deleteSubreport(long declarationDataId, String subreportAlias);
+
+    /**
      * Удаляет отчеты деклараций по типам
      *
      * @param declarationDataIds идентификаторы декларации

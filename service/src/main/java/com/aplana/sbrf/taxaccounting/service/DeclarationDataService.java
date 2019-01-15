@@ -1,15 +1,44 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFileComment;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
+import com.aplana.sbrf.taxaccounting.model.Relation;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationExcelTemplateResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationReportResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataExistenceAndKindResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationLockResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationResult;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
+import com.aplana.sbrf.taxaccounting.model.result.PrepareSubreportResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableReportDDResult;
+import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableResult;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
@@ -223,36 +252,15 @@ public interface DeclarationDataService {
     PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams);
 
     /**
-     * Формирование рну ндфл для отдельного физ лица`
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param ndflPersonId      идентификатор данных о физическом лице {@link com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}
-     * @param ndflPersonFilter  заполненные поля при поиске
-     * @return источники и приемники декларации
-     */
-    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long ndflPersonId, NdflPersonFilter ndflPersonFilter);
-
-    /**
      * Формирование спецотчета по форме
      *
      * @param declarationDataId идентификатор декларации
      * @param alias             вид спецотчета (subreport)
      * @param reportParams      параметры для формирования отчета
      * @param userInfo          информация о пользователе, выполняющего действие
-     * @param force             признак для перезапуска задачи
-     * @return результат о формировании отчета
-     */
-    CreateDeclarationReportResult createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams, TAUserInfo userInfo, boolean force);
-
-    /**
-     * Формирование Реестра сформированной отчетности
-     *
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
      * @return результат с даннымми для представления об операции формирования отчета
      */
-    CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force);
+    String createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams, TAUserInfo userInfo);
 
     /**
      * Формирование отчета в xlsx
@@ -634,9 +642,9 @@ public interface DeclarationDataService {
      *
      * @param userInfo информация о пользователе
      * @param action   объект с параметрами для создания отчета для отчетной налоговой формы
-     * @return объект с результатом для представления об операции создания отчета для отчетной налоговой формы
+     * @return результат создания задачи
      */
-    CreateReportResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
+    ActionResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
 
     /**
      * Подготовка данных для спецотчета
@@ -776,4 +784,12 @@ public interface DeclarationDataService {
      * @return строка с описанием
      */
     String getStandardDeclarationDescription(Long declarationDataId);
+
+    /**
+     * Создает задачу для генерации pdf отчета
+     * @param userInfo          информация о пользователе
+     * @param declarationDataId идентификатор формы
+     * @return  итоговый uuid
+     */
+    String createPdfTask(TAUserInfo userInfo, long declarationDataId);
 }

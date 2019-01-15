@@ -1757,9 +1757,6 @@ class Report2Ndfl extends AbstractScriptClass {
 
     def prepareSpecificReport() {
         def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias
-        if (SubreportAliasConstants.REPORT_2NDFL != reportAlias) {
-            throw new ServiceException("Обработка данного спец. отчета не предусмотрена!")
-        }
         PrepareSpecificReportResult result = new PrepareSpecificReportResult()
         List<Column> tableColumns = createTableColumns()
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>()

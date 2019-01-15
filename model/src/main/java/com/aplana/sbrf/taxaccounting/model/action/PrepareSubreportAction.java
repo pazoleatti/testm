@@ -1,9 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Map;
 
+@Getter
+@Setter
+@ToString
 public class PrepareSubreportAction {
 
     private long declarationDataId;
@@ -11,45 +17,4 @@ public class PrepareSubreportAction {
     private String type;
     private Map<String, Object> subreportParamValues;
 
-    public long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Map<String, Object> getSubreportParamValues() {
-        return subreportParamValues;
-    }
-
-    public void setSubreportParamValues(Map<String, Object> subreportParamValues) {
-        this.subreportParamValues = subreportParamValues;
-    }
-
-    @Override
-    public String toString() {
-        return "PrepareSubreportAction{" +
-                "declarationDataId=" + declarationDataId +
-                ", taxType=" + taxType +
-                ", type='" + type + '\'' +
-                ", subreportParamValues=" + subreportParamValues +
-                '}';
-    }
 }

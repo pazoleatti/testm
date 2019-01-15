@@ -105,24 +105,12 @@
                         method: "POST",
                         url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/rnuDoc",
                         params: {
-                            ndflPersonFilter: JSON.stringify({
-                                lastName: $scope.searchFilter.params.lastName,
-                                firstName: $scope.searchFilter.params.firstName,
-                                middleName: $scope.searchFilter.params.middleName,
-                                innNp: $scope.searchFilter.params.innNp,
-                                innForeign: $scope.searchFilter.params.innForeign,
-                                snils: $scope.searchFilter.params.snils,
-                                idDocNumber: $scope.searchFilter.params.idDocNumber,
-                                dateFrom: $scope.searchFilter.params.dateFrom,
-                                dateTo: $scope.searchFilter.params.dateTo
-                            }),
                             ndflPersonId: $scope.rnuNdflGrid.value[0].id
                         }
-
-
                     }).then(function (response) {
-                        if (response && response.data && response.data.uuid) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
+                        console.log(response)
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
                         }
                     });
                     $modalInstance.dismiss();

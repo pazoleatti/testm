@@ -399,26 +399,16 @@
                  * @param create
                  */
                 $scope.createPdf = function (force, create) {
-                    {
-                        force = typeof force !== 'undefined' ? force : false;
-                        create = typeof create !== 'undefined' ? create : false;
-                    }
                     $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Идет формирование формы предварительного просмотра";
                     $scope.pdfLoading = true;
-                    createReport.query({
-                            declarationDataId: $stateParams.declarationDataId,
-                            isForce: force,
-                            taxType: 'NDFL',
-                            type: 'PDF',
-                            create: create
-                        },
-                        function (response) {
-                            if (response.uuid && response.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.uuid);
-                                $scope.updateDeclarationInfo();
-                            }
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pdf"
+                    }).success(function (response) {
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
                         }
-                    );
+                    });
                 };
 
                 /**
