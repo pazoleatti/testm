@@ -141,6 +141,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
+    public PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter filter, PagingParams pagingParams) {
+        return departmentConfigDao.findAllKppOktmoPairsByFilter(filter, pagingParams);
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#departmentConfig, T(com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission).CREATE)")
     public ActionResult create(DepartmentConfig departmentConfig, TAUserInfo userInfo) {
         LOG.info("create: kpp=" + departmentConfig.getKpp() + ", oktmo=" + departmentConfig.getOktmo().getCode());

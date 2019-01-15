@@ -646,5 +646,14 @@
                 return $filter('codeNameFormatter')(data.value);
             };
         }])
+
+        /**
+         * @description Форматтер для получения полного пути
+         */
+        .filter('kppOktmoPairFormatter', function () {
+            return function (kppOktmoPair) {
+                return kppOktmoPair.kpp + ' / ' + kppOktmoPair.oktmo + (kppOktmoPair.relevance ? ' (' + kppOktmoPair.relevance + ')' : '');
+            };
+        })
     ;
 }());

@@ -475,8 +475,8 @@
                                 // если выбранный период есть в списке, то оставляем, иначе установливаем самый последний
                                 var currentValue = _.deep($scope, modelPath);
                                 if (!currentValue || !_.find(departments, function (department) {
-                                    return department.id === currentValue.id;
-                                })) {
+                                        return department.id === currentValue.id;
+                                    })) {
                                     var defaultValue = departments[0];
                                     _.deep($scope, modelPath, defaultValue);
                                     angular.forEach(departments, function (period) {
@@ -965,21 +965,22 @@
             function ($scope, GetSelectOption) {
                 $scope.selectFromArray = {};
 
-                $scope.init = function (values) {
-                    $scope.selectFromArray = GetSelectOption.getBasicSingleSelectOptions(false);
-                    $scope.selectFromArray.options.data.results = values;
+                $scope.initBasicSingleSelectFromArray = function (values, allowClear) {
+                    var array = [];
+                    if (angular.isArray(values)) {
+                        array = values;
+                    } else {
+                        var keys = Object.keys(values);
+                        for (var i in keys) {
+                            var key = keys[i];
+                            array.push(values[key]);
+                        }
+                    }
+                    $scope.selectFromArray = GetSelectOption.getBasicSingleSelectOptions(allowClear);
+                    $scope.selectFromArray.options.data.results = array;
                 };
-            }
-        ])
 
-        /**
-         * Bыборка множественного значения из заданого массива объектов
-         */
-        .controller('SelectMultipleFromArrayCtrl', ['$scope', 'GetSelectOption', 'RefBookValuesResource',
-            function ($scope, GetSelectOption) {
-                $scope.selectFromArray = {};
-
-                $scope.init = function (values, allowClear) {
+                $scope.initBasicMultipleSelectFromArray = function (values, allowClear) {
                     $scope.selectFromArray = GetSelectOption.getBasicMultipleSelectOptions(allowClear);
                     $scope.selectFromArray.options.data.results = values;
                 };
@@ -1060,7 +1061,7 @@
                     });
                 };
 
-                $scope.initSingleAsnu = function(asnu) {
+                $scope.initSingleAsnu = function (asnu) {
                     $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [asnu], true, 'codeNameFormatter');
                     $scope.asnuSelect.options.data.results = [asnu];
                 };
@@ -1124,7 +1125,7 @@
                  * Инициализировать список ТБ
                  * @param presentedTbIdList
                  */
-                $scope.loadTBs = function (presentedTbIdList){
+                $scope.loadTBs = function (presentedTbIdList) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [], true, 'nameFormatter');
                     RefBookValuesResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
@@ -1135,10 +1136,53 @@
                     });
                 };
 
-                $scope.initSingleTb = function(tb) {
+                $scope.initSingleTb = function (tb) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, [tb], true, 'codeNameFormatter');
                     $scope.departmentsSelect.options.data.results = [tb];
                 };
-            }])
+            }]
+        )
+
+        /**
+         * Bыборка пар КПП/ОКТМО
+         */
+        .controller('SelectKppOktmoPairsCtrl', ['$scope', 'GetSelectOption', 'RefBookValuesResource',
+            function ($scope, GetSelectOption) {
+                $scope.kppOkmtoPairsSelect = {};
+
+                // Определение пар КПП/ОКТМО по параметрам Тербанк и период
+                $scope.initSelectKppOktmoPairsByParams = function (knf, departmentModelPath, periodModelPath) {
+                    if (knf) {
+                        $scope.filter = {
+                            declarationId: knf.id,
+                            departmentId: knf.departmentId,
+                            reportPeriodId: knf.reportPeriodId
+                        };
+                    } else {
+                        var department = _.deep($scope, departmentModelPath);
+                        var period = _.deep($scope, periodModelPath);
+                        $scope.filter = {
+                            departmentId: department && department.id,
+                            reportPeriodId: period && period.id
+                        };
+                        $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
+                            var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
+                            var period = newValues && newValues[1], oldPeriod = oldValues && oldValues[1];
+                            if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
+                                period && (!oldPeriod || period.id !== oldPeriod.id)
+                            ) {
+                                $scope.filter.departmentId = department.id;
+                                $scope.filter.reportPeriodId = period.id;
+                            }
+                        });
+                    }
+                    $scope.kppOkmtoPairsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/departmentConfig/kppOktmoPairsSelect",
+                        {filter: $scope.filter}, {
+                            property: "kpp, oktmo, relevance",
+                            direction: "asc"
+                        }, "kppOktmoPairFormatter");
+                };
+            }
+        ])
     ;
 }());

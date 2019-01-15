@@ -6,6 +6,7 @@
                 <col style="width:65%">
             </colgroup>
             <tbody>
+            <!--Подразделение-->
             <tr>
                 <td>
                     <label class="control-label">{{::'createReport.department' | translate}}:</label>
@@ -17,27 +18,18 @@
                     <div data-ng-if="!knf" data-aplana-field>
                         <div style="width: 375px;" data-ng-controller="SelectDepartmentCtrl"
                              data-ui-select2="departmentsSelect.options"
-                             data-ng-init="initAvailableTBSelect(userTBDepartment)"
-                             data-ng-model="reportData.department">
+                             data-ng-init="initAvailableTBSelect(reportData)"
+                             data-ng-model="reportData.department"
+                             data-required>
                         </div>
-                        <div class="control-group"
-                             data-ng-class="{'error' : true}"
-                             data-ng-show="showDepError">
-                            <div class="controls">
-                                <div class="help-bottom-popup"
-                                     data-ng-style="{'display' : 'block'}">
-                                    <div class="help-container">
-                                        <div class="help-top-arrow"></div>
-                                        <div class="help-text">{{::'common.validation.required' | translate}}</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                     </div>
                 </td>
             </tr>
-
-            <tr data-ng-if="hasLoaded || reportData.department" >
+            <!--Период-->
+            <tr>
                 <td>
                     <label class="control-label">{{::'createReport.period' | translate}}:</label>
                 </td>
@@ -50,26 +42,17 @@
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenDepartmentPeriods(reportData.department.id, 'reportData.period')"
                              data-ng-model="reportData.period"
-                             data-ng-disabled="depErased">
+                             data-ng-disabled="!reportData.department"
+                             data-required>
                         </div>
-                        <div class="control-group"
-                             data-ng-class="{'error' : true}"
-                             data-ng-show="showPeriodError">
-                            <div class="controls">
-                                <div class="help-bottom-popup"
-                                     data-ng-style="{'display' : 'block'}">
-                                    <div class="help-container">
-                                        <div class="help-top-arrow"></div>
-                                        <div class="help-text">{{::'common.validation.required' | translate}}</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                     </div>
                 </td>
             </tr>
-
-            <tr data-ng-if="hasLoaded || (reportData.department && reportData.period)">
+            <!--Вид отчетности-->
+            <tr data-ng-if="reportData.department && reportData.period">
                 <td>
                     <label class="control-label">{{::'createReport.reportType' | translate}}:</label>
                 </td>
@@ -79,36 +62,79 @@
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-model="reportData.declarationType"
                              data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportData.period.id, reportData.department.id, knf)"
-                             data-ng-disabled="depErased || reportErased">
+                             data-ng-disabled="!reportData.department || !reportData.period"
+                             data-required>
                         </div>
-                        <div class="control-group"
-                             data-ng-class="{'error' : true}"
-                             data-ng-show="showFormError">
-                            <div class="controls">
-                                <div class="help-bottom-popup"
-                                     data-ng-style="{'display' : 'block'}">
-                                    <div class="help-container">
-                                        <div class="help-top-arrow"></div>
-                                        <div class="help-text">{{::'common.validation.required' | translate}}</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                     </div>
-
                 </td>
             </tr>
-
+            <!--Отрицательные значения Раздела 2-->
             <tr data-ng-if="reportData.declarationType && reportData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
                 <td>
-                    <label class="control-label" style="white-space: normal">{{::'createReport.section2Negative' | translate}}</label>
+                    <label class="control-label" style="white-space: normal">{{::'createReport.section2Negative' | translate}}:</label>
                 </td>
                 <td>
                     <div data-aplana-field>
                         <div style="width: 375px;" data-ng-controller="SelectFromArrayCtrl"
                              data-ui-select2="selectFromArray.options"
                              data-ng-model="reportData.negativeValuesAdjustment"
-                             data-ng-init="init([APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT, APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT])">
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT)">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!--Возвращенный налог-->
+            <tr data-ng-if="reportData.declarationType && reportData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
+                <td>
+                    <label class="control-label" style="white-space: normal">{{::'createReport.taxRefund' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 375px;" data-ng-controller="SelectFromArrayCtrl"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.TAX_REFUND_REFLECT_MODE)"
+                             data-ng-model="reportData.taxRefundReflectMode"
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!--Формировать отчетность-->
+            <tr>
+                <td>
+                    <label class="control-label" style="white-space: normal">{{::'createReport.reportFormCreateType' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 375px;" data-ng-controller="SelectFromArrayCtrl"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.REPORT_FORM_CREATION_MODE)"
+                             data-ng-model="reportData.reportFormCreateType"
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!--КПП/ОКТМО-->
+            <tr data-ng-if="reportData.department && reportData.period">
+                <td>
+                    <label class="control-label" style="white-space: normal">{{::'createReport.kppOktmo' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 375px;" data-ng-controller="SelectKppOktmoPairsCtrl"
+                             data-ui-select2="kppOkmtoPairsSelect.options"
+                             data-ng-model="reportData.kppOktmoPairs"
+                             data-ng-init="initSelectKppOktmoPairsByParams(knf, 'reportData.department', 'reportData.period')">
                         </div>
                     </div>
                 </td>

@@ -312,6 +312,19 @@
                 BY_KPP: {id: 3, name: "КНФ по обособленному подразделению"},
                 BY_PERSON: {id: 4, name: "КНФ по ФЛ"},
                 FOR_APP2: {id: 5, name: "КНФ для Приложения 2"}
+            },
+            TAX_REFUND_REFLECT_MODE: {
+                NORMAL: {id: 1, name: "Показывать в строке 090 Раздела 1", enumName: "NORMAL"},
+                AS_NEGATIVE_WITHHOLDING_TAX: {
+                    id: 2,
+                    name: "Учитывать возврат как отрицательное удержание в Разделе 2",
+                    enumName: "AS_NEGATIVE_WITHHOLDING_TAX"
+                }
+            },
+            REPORT_FORM_CREATION_MODE: {
+                BY_ALL_DATA: {id: 1, name: "По всем данным", enumName: "BY_ALL_DATA"},
+                BY_NEW_DATA: {id: 2, name: "По новым данным", enumName: "BY_NEW_DATA"},
+                UNACCEPTED_BY_FNS: {id: 3, name: "Для отчетных форм, не принятых ФНС", enumName: "UNACCEPTED_BY_FNS"}
             }
         });
 }());

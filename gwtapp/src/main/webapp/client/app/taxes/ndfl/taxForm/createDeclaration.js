@@ -36,8 +36,8 @@
                         var isKnf = $scope.declarationData.declarationType && $scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id;
                         $scope.departmentSelectFilter.assignedToDeclarationTypeId = $scope.declarationData.declarationType.id;
                         $scope.departmentSelectFilter.onlyTB = isKnf;
-                        if ($scope.declarationData.setDefaultDepartment) {
-                            $scope.declarationData.setDefaultDepartment();
+                        if ($scope.declarationData.resetDepartmentToDefault) {
+                            $scope.declarationData.resetDepartmentToDefault();
                         }
                     }
                     if (!newValue || oldValue && newValue.id !== oldValue.id) {

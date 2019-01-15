@@ -34,7 +34,7 @@
                             <div style="width: 355px;"
                                  data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="declarationData.setDefaultDepartment=initActiveDepartmentSelectWithOpenPeriod(departmentSelectFilter, 'declarationData.department')"
+                                 data-ng-init="declarationData.resetDepartmentToDefault=initActiveDepartmentSelectWithOpenPeriod(departmentSelectFilter, 'declarationData.department')"
                                  data-ng-model="declarationData.department"
                                  data-required>
                             </div>
@@ -97,7 +97,7 @@
                             <div style="width: 355px;"
                                  data-ng-controller="SelectFromArrayCtrl"
                                  data-ui-select2="selectFromArray.options"
-                                 data-ng-init="init([APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX, APP_CONSTANTS.KNF_TYPE.BY_KPP, APP_CONSTANTS.KNF_TYPE.FOR_APP2])"
+                                 data-ng-init="initBasicSingleSelectFromArray([APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX, APP_CONSTANTS.KNF_TYPE.BY_KPP, APP_CONSTANTS.KNF_TYPE.FOR_APP2])"
                                  data-ng-model="declarationData.knfType"
                                  data-required>
                             </div>

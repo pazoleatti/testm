@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
@@ -57,6 +59,15 @@ public interface DepartmentConfigService {
      * @return страница из значений КПП тербанка
      */
     PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams);
+
+    /**
+     * Возвращяет пары КПП/ОКТМО для формы создания отчетности
+     *
+     * @param filter       фильтр
+     * @param pagingParams параметры пагинации и сортировки
+     * @return страница пар КПП/ОКТМО
+     */
+    PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет кол-во записей настроек подразделений по фильтру

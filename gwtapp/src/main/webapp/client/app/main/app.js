@@ -766,7 +766,10 @@
         "createReport.department": "Подразделение",
         "createReport.reportType": "Вид отчетности",
         "createReport.correctionString": "(корр. {{correctionDate}})",
-        "createReport.section2Negative": "Отрицательные значения Раздела 2:",
+        "createReport.section2Negative": "Отрицательные значения Раздела 2",
+        "createReport.taxRefund": "Возвращенный налог",
+        "createReport.reportFormCreateType": "Формировать отчетность",
+        "createReport.kppOktmo": "КПП/ОКТМО",
         "createReport.correctionMessage": "Отчетности будут созданы в корректирующем периоде, дата сдачи корректировки: ",
 
         "createDeclaration.title": "Создание налоговой формы",

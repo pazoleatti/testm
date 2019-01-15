@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
@@ -54,6 +56,7 @@ public class DepartmentConfigController {
         binder.registerCustomEditor(RefBookDepartment.class, new RequestParamEditor(RefBookDepartment.class));
         binder.registerCustomEditor(DepartmentType.class, new RequestParamEditor(DepartmentType.class));
         binder.registerCustomEditor(ImportDepartmentConfigsAction.class, new RequestParamEditor(ImportDepartmentConfigsAction.class));
+        binder.registerCustomEditor(ReportFormCreationKppOktmoPairFilter.class, new RequestParamEditor(ReportFormCreationKppOktmoPairFilter.class));
     }
 
     /**
@@ -106,6 +109,28 @@ public class DepartmentConfigController {
     }
 
     /**
+     * Возвращяет страницу пар КПП/ОКТМО по фильтру для формы создания отчетности
+     *
+     * @param filter       фильтр
+     * @param name         значение поиска из select2, отдельно от фильтра, т.к. select2 иначе не умеет
+     * @param pagingParams параметры пагинации
+     * @return возвращает страницу из списка пар КПП/ОКТМО
+     */
+    @GetMapping(value = "/rest/departmentConfig/kppOktmoPairsSelect")
+    public JqgridPagedList<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByDepartmentAndPeriod(@RequestParam ReportFormCreationKppOktmoPairFilter filter,
+                                                                                                     @RequestParam(required = false) String name,
+                                                                                                     @RequestParam PagingParams pagingParams) {
+        filter.setName(name);
+        PagingResult<ReportFormCreationKppOktmoPair> result = departmentConfigService.findAllKppOktmoPairsByFilter(filter, pagingParams);
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                result,
+                result.getTotalCount(),
+                pagingParams
+        );
+    }
+
+    /**
      * Создание записи настроек подразделений
      */
     @PostMapping(value = "/actions/departmentConfig/create")
@@ -144,7 +169,9 @@ public class DepartmentConfigController {
     public ImportDepartmentConfigsResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
                                                      @RequestParam ImportDepartmentConfigsAction action)
             throws IOException {
-        if (file.isEmpty()) throw new ServiceException("Загружаемый файл пуст. Загружать в Систему пустые файлы настроек подразделений запрещено.");
+        if (file.isEmpty()) {
+            throw new ServiceException("Загружаемый файл пуст. Загружать в Систему пустые файлы настроек подразделений запрещено.");
+        }
 
         TAUserInfo userInfo = securityService.currentUserInfo();
         try (InputStream inputStream = file.getInputStream()) {
