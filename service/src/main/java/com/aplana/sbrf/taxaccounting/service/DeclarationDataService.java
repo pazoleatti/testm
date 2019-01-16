@@ -577,7 +577,7 @@ public interface DeclarationDataService {
      * @param userInfo информация о пользователе
      * @return результат создания отчетности
      */
-    CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo);
+    ActionResult createReportsCreateTask(CreateDeclarationReportAction action, TAUserInfo userInfo);
 
     /**
      * Запускает ассинхронную задачу на выгрузку отчетности для форм

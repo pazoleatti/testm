@@ -875,9 +875,7 @@ class Report6Ndfl extends AbstractScriptClass {
 
     def createForm() {
         try {
-            if ((declarationDataConsolidated = findConsolidatedDeclarationForReport()) == null) {
-                return
-            }
+            declarationDataConsolidated = declarationService.getDeclarationData(knfId)
             scriptParams.put("sourceFormId", declarationDataConsolidated.id)
             // Список физлиц для каждой пары КПП и ОКТМО
             Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
@@ -942,26 +940,6 @@ class Report6Ndfl extends AbstractScriptClass {
     Map<Long, Map<String, RefBookValue>> getOktmoByIdList(List<Long> idList) {
         RefBookDataProvider provider = getProvider(REF_BOOK_OKTMO_ID)
         return provider.getRecordData(idList)
-    }
-
-    DeclarationData findConsolidatedDeclarationForReport() {
-        DeclarationData consolidatedDeclaration
-        if (knfId != null) {
-            consolidatedDeclaration = declarationService.getDeclarationData(knfId)
-        } else {
-            consolidatedDeclaration = declarationService.findKnfByKnfTypeAndPeriodId(RefBookKnfType.ALL, departmentReportPeriod.id)
-            if (consolidatedDeclaration == null) {
-                logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                        " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
-                return null
-            }
-            if (consolidatedDeclaration.state != State.ACCEPTED) {
-                logger.error("Отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                        " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № ${consolidatedDeclaration?.id} должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
-                return null
-            }
-        }
-        return consolidatedDeclaration
     }
 
     def addNdflPersons(Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo, PairKppOktmo pairKppOktmoBeingComparing, List<NdflPerson> ndflPersonList) {

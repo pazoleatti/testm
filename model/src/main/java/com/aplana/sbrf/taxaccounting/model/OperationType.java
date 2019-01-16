@@ -61,7 +61,16 @@ public enum OperationType {
             case SubreportAliasConstants.REPORT_2NDFL1: return REPORT_2NDFL1;
             case SubreportAliasConstants.REPORT_2NDFL2: return REPORT_2NDFL2;
             case SubreportAliasConstants.DEPT_NOTICE_DEC: return DEPT_NOTICE_DEC;
-            default: throw new IllegalArgumentException("unknown subreport alias");
+            default: throw new IllegalArgumentException("unknown subreport alias " + subreportAlias);
+        }
+    }
+
+    public static OperationType getOperationByDeclarationTypeId(Integer declarationTypeId) {
+        switch (declarationTypeId) {
+            case DeclarationType.NDFL_2_1: return DECLARATION_2NDFL1;
+            case DeclarationType.NDFL_2_2: return DECLARATION_2NDFL2;
+            case DeclarationType.NDFL_6: return DECLARATION_6NDFL;
+            default: throw new IllegalArgumentException("unknown declarationTypeId " + declarationTypeId);
         }
     }
 

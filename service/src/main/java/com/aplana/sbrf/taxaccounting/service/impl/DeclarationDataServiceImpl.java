@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
@@ -315,7 +316,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private TransactionHelper transactionHelper;
     @Autowired
     private CommonRefBookService commonRefBookService;
-
+    @Autowired
+    private DeclarationTypeDao declarationTypeDao;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
@@ -2364,7 +2366,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional
     public void createReportForms(Long knfId, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean adjustNegativeValues, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
                 userInfo, departmentReportPeriod, declarationTypeId));
@@ -2497,89 +2499,78 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReports(CreateDeclarationReportAction action, TAUserInfo userInfo) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. action: %s", userInfo, action));
+    public ActionResult createReportsCreateTask(CreateDeclarationReportAction action, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportsCreateTask by %s. action: %s", userInfo, action));
         Logger logger = new Logger();
-        CreateDeclarationReportResult taskResult = new CreateDeclarationReportResult();
+        ActionResult taskResult = new ActionResult();
 
-        // Пропускаем случай запуска по непринятой КНФ
-        if (!isTaskByUnacceptedKnf(action, logger)) {
+        DeclarationData declarationData = findConsolidatedDeclarationForReport(action, logger);
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            final Map<String, Object> params = generateTaskParams(action, declarationData);
+            asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
+                    getStandardDeclarationDescription(declarationData.getId()),
+                    userInfo, params, logger);
 
-            String taskKey = generateTaskKey(action);
-            Pair<Boolean, String> restartStatus = asyncManager.restartTask(taskKey, userInfo, false, logger);
-
-            if (restartStatus != null) {
-                taskResult.setStatus(CreateAsyncTaskStatus.EXIST);
-
-                String restartMessage = getRestartMessage(restartStatus);
-                taskResult.setRestartMsg(restartMessage);
-            } else {
-                taskResult.setStatus(CreateAsyncTaskStatus.CREATE);
-
-                final Map<String, Object> params = generateTaskParams(action);
-                asyncManager.executeTask(taskKey, AsyncTaskType.CREATE_FORMS_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                    @Override
-                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                        return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
-                    }
-                });
-            }
         }
-
         taskResult.setUuid(logEntryService.save(logger.getEntries()));
         return taskResult;
     }
 
-    /**
-     * Отчёт может быть вызван из КНФ или из меню отчетов. Проверяем это.
-     */
-    private boolean isReportByKnf(CreateDeclarationReportAction action) {
-        return action.getKnfId() != null;
-    }
-
-    // Если задача запущена по непринятой КНФ, возвращаем true
-    private boolean isTaskByUnacceptedKnf(CreateDeclarationReportAction action, Logger logger) {
-        if (isReportByKnf(action)) {
-            DeclarationData knf = declarationDataDao.get(action.getKnfId());
-            if (knf.getState() != State.ACCEPTED) {
-                logger.error("Создание отчетных форм невозможно. Отчетные формы могут быть сформированы только для РНУ НДФЛ (консолидированной), находящейся в состоянии \"Принята\"");
-                return true;
+    private DeclarationData findConsolidatedDeclarationForReport(CreateDeclarationReportAction action, Logger logger) {
+        DeclarationData consolidatedDeclaration;
+        if (action.getKnfId() != null) {
+            consolidatedDeclaration = declarationDataDao.get(action.getKnfId());
+            if (consolidatedDeclaration.getState() != State.ACCEPTED) {
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(consolidatedDeclaration.getDepartmentReportPeriodId());
+                DeclarationType declarationType = declarationTypeDao.get(action.getDeclarationTypeId());
+                Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                logger.error("Отчетность %s для %s за период %s, %s%s" +
+                                " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
+                        declarationType.getName(),
+                        department.getName(),
+                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        departmentReportPeriod.getReportPeriod().getName(),
+                        formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                        consolidatedDeclaration.getId());
+            }
+        } else {
+            RefBookKnfType knfType = action.getDeclarationTypeId() == DeclarationType.NDFL_2_2 ? RefBookKnfType.BY_NONHOLDING_TAX : RefBookKnfType.ALL;
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
+            consolidatedDeclaration = declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.getId());
+            if (consolidatedDeclaration == null || consolidatedDeclaration.getState() != State.ACCEPTED) {
+                DeclarationType declarationType = declarationTypeDao.get(action.getDeclarationTypeId());
+                Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                if (consolidatedDeclaration == null) {
+                    logger.error("Отчетность %s для %s за период %s, %s%s" +
+                                    " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).",
+                            declarationType.getName(),
+                            department.getName(),
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            departmentReportPeriod.getReportPeriod().getName(),
+                            formatCorrectionDate(departmentReportPeriod.getCorrectionDate()));
+                } else if (consolidatedDeclaration.getState() != State.ACCEPTED) {
+                    logger.error("Отчетность %s для %s за период %s, %s%s" +
+                                    " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
+                            declarationType.getName(),
+                            department.getName(),
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            departmentReportPeriod.getReportPeriod().getName(),
+                            formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                            consolidatedDeclaration.getId());
+                }
+                return null;
             }
         }
-        return false;
+        return consolidatedDeclaration;
     }
 
-    private String generateTaskKey(CreateDeclarationReportAction action) {
-        return isReportByKnf(action) ?
-                LockData.LockObjects.DECLARATION_DATA.name() + "_" + action.getKnfId() :
-                LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + action.getDeclarationTypeId() + "_" + action.getPeriodId() + "_" + action.getDepartmentId();
-    }
-
-    private String getRestartMessage(Pair<Boolean, String> restartStatus) {
-        Boolean lockExists = restartStatus.getFirst();
-        String restartMessage = restartStatus.getSecond();
-
-        return lockExists ? restartMessage : null;
-    }
-
-    private Map<String, Object> generateTaskParams(CreateDeclarationReportAction action) {
+    private Map<String, Object> generateTaskParams(CreateDeclarationReportAction action, DeclarationData declarationData) {
         Map<String, Object> params = new HashMap<>();
 
         params.put("declarationTypeId", action.getDeclarationTypeId());
         params.put("adjustNegativeValues", action.isAdjustNegativeValues());
-
-        int departmentReportPeriodId;
-        if (action.getKnfId() == null) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
-            if (departmentReportPeriod == null) {
-                throw new ServiceException("Не удалось определить налоговый период.");
-            }
-            departmentReportPeriodId = departmentReportPeriod.getId();
-        } else {
-            departmentReportPeriodId = declarationDataDao.get(action.getKnfId()).getDepartmentReportPeriodId();
-            params.put("knfId", action.getKnfId());
-        }
-        params.put("departmentReportPeriodId", departmentReportPeriodId);
+        params.put("declarationDataId", declarationData.getId());
+        params.put("departmentReportPeriodId", declarationData.getDepartmentReportPeriodId());
 
         return params;
     }

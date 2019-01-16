@@ -2,11 +2,21 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,17 +60,12 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         Map<String, Object> params = taskData.getParams();
         Integer declarationTypeId = (Integer) params.get("declarationTypeId");
-        Long knfId = (Long) params.get("knfId");
+        Long knfId = (Long) params.get("declarationDataId");
         Integer departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         boolean adjustNegativeValues = (Boolean) params.get("adjustNegativeValues");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
-
-        if (departmentReportPeriod == null) {
-            throw new ServiceException("Не удалось определить налоговый период.");
-        }
 
         declarationDataService.createReportForms(knfId, departmentReportPeriod, declarationTypeId, adjustNegativeValues, new LockStateLogger() {
             @Override

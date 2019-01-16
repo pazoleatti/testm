@@ -255,7 +255,6 @@ public class AsyncManagerImpl implements AsyncManager {
                         if (taskData != null) {
                             asyncTaskDao.delete(taskData.getId());
                             lockDataService.unlockAllByTask(taskData.getId());
-                            ;
                         } else {
                             lockDataService.unlock(lockData.getKey(), user.getUser().getId(), true);
                         }

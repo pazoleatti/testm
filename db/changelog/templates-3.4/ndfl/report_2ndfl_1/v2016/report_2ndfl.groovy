@@ -7,11 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
@@ -1276,15 +1272,12 @@ class Report2Ndfl extends AbstractScriptClass {
     // консолидированная форма рну-ндфл по которой будут создаваться отчетные формы
     DeclarationData declarationDataConsolidated
 
-    final int RNU_NDFL_DECLARATION_TYPE = 101
-
     Map<Integer, List<Map<String, RefBookValue>>> departmentConfigsCache = [:]
 
     def createForm() {
         try {
-            if ((declarationDataConsolidated = findConsolidatedDeclarationForReport()) == null) {
-                return
-            }
+            declarationDataConsolidated = declarationService.getDeclarationData(knfId)
+
             scriptParams.put("sourceFormId", declarationDataConsolidated.id)
 
             // Мапа где значение физлица для каждой пары КПП и ОКТМО
@@ -1618,26 +1611,6 @@ class Report2Ndfl extends AbstractScriptClass {
         return prevDepartmentReportPeriod
     }
 
-    DeclarationData findConsolidatedDeclarationForReport() {
-        DeclarationData consolidatedDeclaration
-        if (knfId != null) {
-            consolidatedDeclaration = declarationService.getDeclarationData(knfId)
-        } else {
-            def knfType = declarationData.declarationTemplateId == DeclarationType.NDFL_2_1 ? RefBookKnfType.ALL : RefBookKnfType.BY_NONHOLDING_TAX
-            consolidatedDeclaration = declarationService.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.id)
-            if (consolidatedDeclaration == null) {
-                logger.error("Отчетность $reportType для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                        " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
-                return null
-            }
-            if (consolidatedDeclaration.state != State.ACCEPTED) {
-                logger.error("Отчетность $reportType для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + getCorrectionDateExpression(departmentReportPeriod) +
-                        " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № ${consolidatedDeclaration?.id} должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
-                return null
-            }
-        }
-        return consolidatedDeclaration
-    }
     /************************************* ВЫГРУЗКА ***********************************************************************/
 
     void preCreateReports() {

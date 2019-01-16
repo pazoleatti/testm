@@ -338,8 +338,8 @@ public class DeclarationDataController {
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
     @PostMapping(value = "/actions/declarationData/createReport")
-    public CreateDeclarationReportResult createReport(@RequestBody CreateDeclarationReportAction action) {
-        return declarationService.createReports(action, securityService.currentUserInfo());
+    public ActionResult createReport(@RequestBody CreateDeclarationReportAction action) {
+        return declarationService.createReportsCreateTask(action, securityService.currentUserInfo());
     }
 
     /**
