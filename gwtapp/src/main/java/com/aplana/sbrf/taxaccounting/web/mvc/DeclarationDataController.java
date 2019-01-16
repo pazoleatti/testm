@@ -345,7 +345,7 @@ public class DeclarationDataController {
     /**
      * Создание налоговой формы
      *
-     * @param action
+     * @param action параметры создания формы
      * @return Результат создания
      */
     @PostMapping(value = "/actions/declarationData/create")

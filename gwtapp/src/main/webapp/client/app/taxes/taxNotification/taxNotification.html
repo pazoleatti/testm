@@ -21,7 +21,7 @@
                  data-ng-disabled="!params.department"
                  data-ng-controller="SelectPeriodCtrl"
                  data-ui-select2="periodSelect.options"
-                 data-ng-init="initSelectWithOpenDepartmentPeriods(params.department.id, 'params.period', false)"
+                 data-ng-init="initSelectWithOpenDepartmentPeriods('params.department', 'params.period')"
                  data-ng-model="params.period">
             </div>
         </div>
