@@ -16,7 +16,7 @@
                 $scope.knf = angular.copy($shareData.knf);
                 $scope.reportData = {
                     negativeValuesAdjustment: APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT,
-                    taxRefundReflectMode: APP_CONSTANTS.TAX_REFUND_REFLECT_MODE.NORMAL
+                    taxRefundReflectionMode: APP_CONSTANTS.TAX_REFUND_REFLECT_MODE.NORMAL
                 };
 
                 if ($scope.knf) {
@@ -26,21 +26,16 @@
                     $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
 
                     $scope.$watch("reportData.department", function (department) {
-                        if (department) {
-                            $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, $scope.reportData.department.id);
-                        } else if (department === null) {
+                        if (!department) {
                             $scope.reportData.period = null;
                             $scope.reportData.declarationType = null;
                         }
                     });
 
                     $scope.$watch("reportData.period", function (period) {
-                        if (period) {
-                            $scope.$broadcast(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, $scope.reportData.period.id, $scope.reportData.department.id);
-                        } else if (period === null) {
+                        if (!period) {
                             $scope.reportData.declarationType = null;
                         }
-
                     });
                 }
 
@@ -53,16 +48,26 @@
                         APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
                         $scope.reportData.period,
                         true);
+                    var params = {
+                        knfId: $scope.knf ? $scope.knf.id : undefined,
+                        declarationTypeId: $scope.reportData.declarationType.id,
+                        departmentId: $scope.knf ? undefined : $scope.reportData.department.id,
+                        periodId: $scope.knf ? undefined : $scope.reportData.period.id
+                    };
+                    if ($scope.reportData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id) {
+                        params.adjustNegativeValues = $scope.reportData.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT;
+                        params.taxRefundReflectionMode = $scope.reportData.taxRefundReflectionMode.enumName;
+                        params.reportFormCreationMode = $scope.reportData.reportFormCreationMode.enumName;
+                        if ($scope.reportData.kppOktmoPairs) {
+                            params.kppOktmoPairs = $scope.reportData.kppOktmoPairs.map(function (kppOktmoPair) {
+                                return {kpp: kppOktmoPair.kpp, oktmo: kppOktmoPair.oktmo};
+                            });
+                        }
+                    }
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/createReport",
-                        data: {
-                            knfId: $scope.knf ? $scope.knf.id : undefined,
-                            declarationTypeId: $scope.reportData.declarationType.id,
-                            departmentId: $scope.knf ? undefined : $scope.reportData.department.id,
-                            periodId: $scope.knf ? undefined : $scope.reportData.period.id,
-                            adjustNegativeValues: $scope.reportData.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT
-                        }
+                        data: params
                     }).then(function (response) {
                         $modalInstance.close(response);
                     }).catch(function () {

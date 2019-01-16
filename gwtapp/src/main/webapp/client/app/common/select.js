@@ -119,7 +119,11 @@
                         dataObject[searchField] = term;
                         //Добавить в запрос поля для фильтрации данных
                         if (select.options.dataFilter) {
-                            angular.forEach(select.options.dataFilter, function (value, key) {
+                            var dataFilter = select.options.dataFilter;
+                            if (angular.isFunction(dataFilter)) {
+                                dataFilter = dataFilter();
+                            }
+                            angular.forEach(dataFilter, function (value, key) {
                                 if (angular.isObject(value) && !angular.isArray(value)) {
                                     dataObject[key] = JSON.stringify(value);
                                 } else {
@@ -238,7 +242,7 @@
                 };
 
                 $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, department) {
-                    $scope.initSelectWithReportDeclarationTypesForCreate(period, department)
+                    $scope.initSelectWithReportDeclarationTypesForCreate(period, department);
                 });
             }]
         )
@@ -353,37 +357,56 @@
 
                 /**
                  * Инициализировать список с видами отчетных форм, которые можно создать
-                 * @param periodId Выражение из scope, по которому отслеживается изменение периода
-                 * @param departmentId Выражение из scope, по которому отслеживается изменение подразделения
-                 * @param knf КНФ, по которой создаётся отчетность
+                 * @param knf КНФ, из которой брать пары КПП/ОКТМО
+                 * @param departmentModelPath путь в scope до модели подразделения
+                 * @param periodModelPath путь в scope до модели периода
                  */
-                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
-                $scope.initSelectWithReportDeclarationTypesForCreate = function (periodId, departmentId, knf) {
+                $scope.initSelectWithReportDeclarationTypesForCreate = function (knf, departmentModelPath, periodModelPath) {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
-                    DeclarationTypeForCreateResource.query({
-                        formDataKindIdList: APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id,
-                        departmentId: departmentId,
-                        periodId: periodId
-                    }, function (data) {
-                        data = data.filter(function (declarationType) {
-                            return isReportForm(declarationType) && (!knf || isReportTypeAvailableByKnfType(declarationType, knf.knfType));
-                        });
-                        $scope.declarationTypeSelect.options.data.results = data;
+                    var department = _.deep($scope, departmentModelPath);
+                    var period = _.deep($scope, periodModelPath);
+
+                    loadReportFormTypes(knf, department, period);
+
+                    $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
+                        var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
+                        var period = newValues && newValues[1], oldPeriod = oldValues && oldValues[1];
+                        if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
+                            period && (!oldPeriod || period.id !== oldPeriod.id)
+                        ) {
+                            loadReportFormTypes(knf, department, period);
+                        }
                     });
                 };
+
+                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
+                function loadReportFormTypes(knf, department, period) {
+                    if (department && period) {
+                        DeclarationTypeForCreateResource.query({
+                            formDataKindIdList: APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id,
+                            departmentId: department.id,
+                            periodId: period.id
+                        }, function (data) {
+                            data = data.filter(function (declarationType) {
+                                return isReportForm(declarationType) && (!knf || isReportTypeAvailableByKnfType(declarationType, knf.knfType));
+                            });
+                            $scope.declarationTypeSelect.options.data.results = data;
+                        });
+                    }
+                }
 
                 /**
                  * Определение доступности вида отчетности по типу КНФ
                  */
                 function isReportTypeAvailableByKnfType(declarationType, knfType) {
-                    return knfType.id !== APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id
+                    return knfType.id !== APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id;
                 }
 
                 /**
                  * Событие возникающие при выборе подразделения и периода
                  */
                 $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_AND_PERIOD_SELECTED, function (event, period, departmentId) {
-                    $scope.initSelectWithReportDeclarationTypesForCreate(period, departmentId)
+                    $scope.initSelectWithReportDeclarationTypesForCreate(period, departmentId);
                 });
             }])
 
@@ -441,45 +464,46 @@
 
                 /**
                  * Инициализировать выпадающий список периодами, коорые активны и открыты для определенного подразделения
-                 * @param departmentId идентификатор подразделения
+                 *
+                 * @param departmentModelPath путь в scope до модели подразделения
                  * @param modelPath путь до объекта в scope, содержащем значение периода, для установки его значения через _.deep
                  * @param allowClear добавлять ли крестик очистки
                  */
-                $scope.initSelectWithOpenDepartmentPeriods = function (departmentId, modelPath, allowClear) {
-                    if (allowClear !== false) allowClear = true;
-
-                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(allowClear, true, 'periodFormatterWithCorrectionDate');
+                $scope.initSelectWithOpenDepartmentPeriods = function (departmentModelPath, modelPath, allowClear) {
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(!!allowClear, true, 'periodFormatterWithCorrectionDate');
                     $scope.periodSelect.options.data = function () {
                         // select2 копирует results и его потом изменить уже нельзя, поэтому используем функцию, возвращяющую последние запрошенные данные
                         return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
                     };
-                    loadPeriods(departmentId, modelPath);
-                    // При событии выбора подразделения из списка обновляет периоды
-                    $scope.$on(APP_CONSTANTS.EVENTS.DEPARTMENT_SELECTED, function (event, departmentId) {
-                        loadPeriods(departmentId, modelPath);
+                    var department = _.deep($scope, departmentModelPath);
+                    loadPeriodsAndSetDefault(department, modelPath);
+                    $scope.$watch(departmentModelPath, function (newValue, oldValue) {
+                        if (newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                            loadPeriodsAndSetDefault(newValue, modelPath);
+                        }
                     });
                 };
 
-                function loadPeriods(departmentId, modelPath) {
-                    if (departmentId) {
+                function loadPeriodsAndSetDefault(department, modelPath) {
+                    if (department) {
                         ReportPeriodResource.query({
                             projection: "forDepartment",
-                            departmentId: departmentId
-                        }, function (departments) {
-                            $scope.results = departments;
-                            if (departments && departments.length > 0) {
-                                angular.forEach(departments, function (period) {
+                            departmentId: department.id
+                        }, function (periods) {
+                            $scope.results = periods;
+                            if (periods && periods.length > 0) {
+                                angular.forEach(periods, function (period) {
                                     // поиск работает по полю text
                                     period.text = $filter('periodFormatterWithCorrectionDate')(period);
                                 });
                                 // если выбранный период есть в списке, то оставляем, иначе установливаем самый последний
                                 var currentValue = _.deep($scope, modelPath);
-                                if (!currentValue || !_.find(departments, function (department) {
+                                if (!currentValue || !_.find(periods, function (department) {
                                         return department.id === currentValue.id;
                                     })) {
-                                    var defaultValue = departments[0];
+                                    var defaultValue = periods[0];
                                     _.deep($scope, modelPath, defaultValue);
-                                    angular.forEach(departments, function (period) {
+                                    angular.forEach(periods, function (period) {
                                         if (Date.parse(defaultValue.endDate) <= Date.parse(period.endDate)) {
                                             defaultValue = period;
                                         }
@@ -624,7 +648,7 @@
                         },
                         'departmentActivityFormatter'
                     );
-                }
+                };
             }
         ])
 
@@ -966,6 +990,16 @@
                 $scope.selectFromArray = {};
 
                 $scope.initBasicSingleSelectFromArray = function (values, allowClear) {
+                    $scope.selectFromArray = GetSelectOption.getBasicSingleSelectOptions(!!allowClear);
+                    $scope.selectFromArray.options.data.results = toArray(values);
+                };
+
+                $scope.initBasicMultipleSelectFromArray = function (values, allowClear) {
+                    $scope.selectFromArray = GetSelectOption.getBasicMultipleSelectOptions(!!allowClear);
+                    $scope.selectFromArray.options.data.results = toArray(values);
+                };
+
+                function toArray(values) {
                     var array = [];
                     if (angular.isArray(values)) {
                         array = values;
@@ -976,14 +1010,8 @@
                             array.push(values[key]);
                         }
                     }
-                    $scope.selectFromArray = GetSelectOption.getBasicSingleSelectOptions(allowClear);
-                    $scope.selectFromArray.options.data.results = array;
-                };
-
-                $scope.initBasicMultipleSelectFromArray = function (values, allowClear) {
-                    $scope.selectFromArray = GetSelectOption.getBasicMultipleSelectOptions(allowClear);
-                    $scope.selectFromArray.options.data.results = values;
-                };
+                    return array;
+                }
             }
         ])
 
@@ -1011,22 +1039,22 @@
                         var doc_number1 = obj1.documentNumber;
                         var doc_number2 = obj2.documentNumber;
                         if (priority1 < priority2) {
-                            return -1
+                            return -1;
                         }
                         if (priority1 > priority2) {
-                            return 1
+                            return 1;
                         }
                         if (doc_code1 < doc_code2) {
-                            return -1
+                            return -1;
                         }
                         if (doc_code1 > doc_code2) {
-                            return 1
+                            return 1;
                         }
                         if (doc_number1 < doc_number2) {
-                            return -1
+                            return -1;
                         }
                         if (doc_number1 > doc_number2) {
-                            return 1
+                            return 1;
                         }
                         return 0;
                     });
@@ -1034,7 +1062,7 @@
                 };
 
                 $scope.$on("addIdDoc", function (event, person) {
-                    $scope.initIdDocs(person)
+                    $scope.initIdDocs(person);
                 });
 
                 /**
@@ -1150,37 +1178,43 @@
             function ($scope, GetSelectOption) {
                 $scope.kppOkmtoPairsSelect = {};
 
-                // Определение пар КПП/ОКТМО по параметрам Тербанк и период
-                $scope.initSelectKppOktmoPairsByParams = function (knf, departmentModelPath, periodModelPath) {
-                    if (knf) {
-                        $scope.filter = {
-                            declarationId: knf.id,
-                            departmentId: knf.departmentId,
-                            reportPeriodId: knf.reportPeriodId
-                        };
-                    } else {
-                        var department = _.deep($scope, departmentModelPath);
-                        var period = _.deep($scope, periodModelPath);
-                        $scope.filter = {
-                            departmentId: department && department.id,
-                            reportPeriodId: period && period.id
-                        };
+                /**
+                 * Определение пар КПП/ОКТМО по параметрам Тербанк и период
+                 *
+                 * @param modelPath путь в scope до модели со значением select2
+                 * @param knf КНФ, из которой брать пары КПП/ОКТМО
+                 * @param departmentModelPath путь в scope до модели подразделения
+                 * @param periodModelPath путь в scope до модели периода
+                 */
+                $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath) {
+                    if (!knf) {
                         $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
                             var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
                             var period = newValues && newValues[1], oldPeriod = oldValues && oldValues[1];
                             if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
                                 period && (!oldPeriod || period.id !== oldPeriod.id)
                             ) {
-                                $scope.filter.departmentId = department.id;
-                                $scope.filter.reportPeriodId = period.id;
+                                // при изменении зависимых параметров сбрасываем значение
+                                _.deep($scope, modelPath, []);
                             }
                         });
                     }
+
                     $scope.kppOkmtoPairsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/departmentConfig/kppOktmoPairsSelect",
-                        {filter: $scope.filter}, {
+                        getFilter, {
                             property: "kpp, oktmo, relevance",
                             direction: "asc"
                         }, "kppOktmoPairFormatter");
+
+                    function getFilter() {
+                        return {
+                            filter: {
+                                declarationId: knf && knf.id,
+                                departmentId: knf ? knf.departmentId : _.deep($scope, departmentModelPath).id,
+                                reportPeriodId: knf ? knf.reportPeriodId : _.deep($scope, periodModelPath).id
+                            }
+                        };
+                    }
                 };
             }
         ])
