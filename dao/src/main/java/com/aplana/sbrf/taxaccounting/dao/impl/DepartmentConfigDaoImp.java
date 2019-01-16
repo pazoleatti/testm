@@ -135,7 +135,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     "      case when dep_conf.id is null then 'не относится к ТБ в периоде' \n" +
                     "      else dep_conf.relevance end as relevance \n" +
                     "   from (" +
-                    "       select kpp, oktmo from ndfl_person np\n" +
+                    "       select distinct kpp, oktmo from ndfl_person np\n" +
                     "       join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
                     "       where np.declaration_data_id = :declarationId" +
                     "   ) npi\n" +
