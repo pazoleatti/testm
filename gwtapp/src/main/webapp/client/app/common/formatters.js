@@ -648,7 +648,7 @@
         }])
 
         /**
-         * @description Форматтер для получения полного пути
+         * @description Форматтер для пары КПП/ОКТМО с указанием актуальности
          */
         .filter('kppOktmoPairFormatter', function () {
             return function (kppOktmoPair) {
