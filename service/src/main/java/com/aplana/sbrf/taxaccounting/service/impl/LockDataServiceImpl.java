@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,10 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-/**
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 17.07.14 17:32
- */
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS)
@@ -43,7 +41,7 @@ public class LockDataServiceImpl implements LockDataService {
     @Autowired
     private AsyncManager asyncManager;
     @Autowired
-    private NotificationService notificationService;
+    private LogEntryService logEntryService;
 
     @Override
     public LockData lock(final String key, final int userId, final String description) {
@@ -107,14 +105,29 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user) {
+    public PagingResult<LockDataDTO> findAllByFilter(String filter, PagingParams pagingParams, TAUser user) {
         PagingResult<LockDataDTO> locks = dao.getLocks(filter, pagingParams, user);
         for (LockDataDTO lock : locks) {
-            if (userHasPrivilegesToUnlock(user, lock.getKey())) {
+            if (userHasPrivilegesToUnlock(lock.getKey(), user)) {
                 lock.setAllowedToUnlock(true);
             }
         }
         return locks;
+    }
+
+    @Override
+    public void unlock(final String lockKey) {
+        try {
+            tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
+                @Override
+                public Boolean execute() {
+                    dao.unlock(lockKey);
+                    return true;
+                }
+            });
+        } catch (Exception e) {
+            throw new ServiceException("При удалении блокировки \"%s\" возникла системная ошибка. Удаление блокировки невозможно. Обратитесь за разъяснениями к Администратору.", lockKey);
+        }
     }
 
     @Override
@@ -136,7 +149,7 @@ public class LockDataServiceImpl implements LockDataService {
                                 throw new ServiceException(String.format("Невозможно удалить блокировку, так как она установлена " +
                                         "пользователем \"%s\"", blocker.getLogin()));
                             }
-                            dao.unlock(key);
+                            dao.unlockOld(key);
                             LOG.info(String.format("Lock with key \"%s\" was removed by user: %s", key, userId));
                         } else if (!force) {
                             LOG.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
@@ -153,19 +166,6 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
-    /**
-     * Простое удаление блокировки без каких-либо проверок.
-     */
-    private Boolean unlock(final String lockKey) {
-        return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
-            @Override
-            public Boolean execute() {
-                dao.unlock(lockKey);
-                return true;
-            }
-        });
-    }
-
     @Override
     public void unlockAll(TAUserInfo userInfo, boolean ignoreError) {
         LOG.info(String.format("All locks was removed by user: %s", userInfo.getUser().getId()));
@@ -173,28 +173,58 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void unlockAllWithCheckingTasks(TAUserInfo userInfo, List<String> keys) {
-        TAUser user = userInfo.getUser();
-        for (String lockKey : keys) {
-            if (userHasPrivilegesToUnlock(user, lockKey)) {
-                unlockWithCheckingAsyncTask(lockKey, user);
-            } else {
-                throw new ServiceException("Удаление блокировки не может быть выполнено. Причина: \"недостаточно прав (обратитесь к администратору)\"");
+    public ActionResult unlockAllWithoutTasks(List<String> lockKeys, TAUser user) {
+        Logger logger = new Logger();
+        ActionResult result = new ActionResult();
+        try {
+            checkPrivilegesToUnlock(lockKeys, user);
+        } catch (ServiceException e) {
+            logger.error(e.getMessage());
+            String logsUuid = logEntryService.save(logger.getEntries());
+            result.setUuid(logsUuid);
+            return result;
+        }
+
+        for (String lockKey : lockKeys) {
+            unlockIfNoTask(lockKey, user, logger);
+        }
+
+        String logsUuid = logEntryService.save(logger.getEntries());
+        result.setUuid(logsUuid);
+        return result;
+    }
+
+    /**
+     * Проверка прав пользователя на удаление списка задач.
+     *
+     * @param lockKeys ключи задач
+     * @param user     пользователь
+     * @throws ServiceException если нет прав на удаление хотя бы одной задачи
+     */
+    private void checkPrivilegesToUnlock(List<String> lockKeys, TAUser user) throws ServiceException {
+        for (String lockKey : lockKeys) {
+            if (!userHasPrivilegesToUnlock(lockKey, user)) {
+                throw new ServiceException("Блокировка %s не может быть удалена. Причина: \"недостаточно прав (обратитесь к администратору)\"", lockKey);
             }
         }
     }
 
     /**
-     * Снятие блокировки, если для неё не запущена Асинхронная задача
+     * Снятие блокировки, если для неё не запущена Асинхронная задача.
+     * Создает оповещение пользователю о результате.
      */
-    private void unlockWithCheckingAsyncTask(String lockKey, TAUser user) {
+    private void unlockIfNoTask(String lockKey, TAUser user, Logger logger) {
+        LockData lock = findLock(lockKey);
+        if (lock == null) {
+            logger.error("Блокировка %s не может быть удалена. Причина: \"блокировка не существует\"", lockKey);
+            return;
+        }
         try {
-            LockData lock = findLock(lockKey);
-            checkLockIsNotByAsyncTask(lock);
+            checkLockHasNoTask(lock);
             unlock(lockKey);
-            sendUnlockNotification(lock, user);
-        } catch (Exception e) {
-            throw new ServiceException("Удаление блокировки не может быть выполнено. Причина: " + e.getMessage());
+            logger.info("Блокировка: \"%s\" удалена пользователем: \"%s (%s)\"", lock.getDescription(), user.getName(), user.getLogin());
+        } catch (ServiceException e) {
+            logger.error(e.getMessage());
         }
     }
 
@@ -203,40 +233,17 @@ public class LockDataServiceImpl implements LockDataService {
      *
      * @throws ServiceException Если задача присутствует
      */
-    private void checkLockIsNotByAsyncTask(LockData lock) throws ServiceException {
+    private void checkLockHasNoTask(LockData lock) throws ServiceException {
         Long taskId = lock.getTaskId();
         if (taskId != null) {
             AsyncTaskData taskData = asyncManager.getLightTaskData(taskId);
             if (taskData != null) {
                 int userId = taskData.getUserId();
                 TAUser taskCreator = userService.getUser(userId);
-                String errorMessage = "Удаление блокировки невозможно. Выполняется операция \"%s\". Пользователь: %s (%s)";
-                throw new ServiceException(errorMessage, taskData.getDescription(), taskCreator.getName(), taskCreator.getLogin());
+                String errorMessage = "Удаление блокировки %s невозможно. Выполняется операция \"%s\". Пользователь: %s (%s)";
+                throw new ServiceException(errorMessage, lock.getKey(), taskData.getDescription(), taskCreator.getName(), taskCreator.getLogin());
             }
         }
-    }
-
-    /**
-     * Отправка оповещения о снятии блокировки пользователю.
-     *
-     * @param lock данные о снятой блокировке
-     * @param user пользователь, которому отправляем оповещение
-     */
-    private void sendUnlockNotification(LockData lock, TAUser user) {
-
-        String message = String.format(
-                "Пользователем \"%s (%s)\" отменена операция \"%s\". Причина отмены: Задача отменена",
-                user.getName(),
-                user.getLogin(),
-                lock.getDescription()
-        );
-
-        Notification notification = new Notification();
-        notification.setUserId(user.getId());
-        notification.setCreateDate(new Date());
-        notification.setText(message);
-
-        notificationService.create(Collections.singletonList(notification));
     }
 
 
@@ -314,7 +321,7 @@ public class LockDataServiceImpl implements LockDataService {
     /**
      * Проверка, имеет ли пользователь права на снятие данной блокировки.
      */
-    private boolean userHasPrivilegesToUnlock(TAUser user, String lockKey) {
+    private boolean userHasPrivilegesToUnlock(String lockKey, TAUser user) {
         // Проверка ролей, имеющих полный доступ
         if (userHasAllLocksPermissions(user)) {
             return true;

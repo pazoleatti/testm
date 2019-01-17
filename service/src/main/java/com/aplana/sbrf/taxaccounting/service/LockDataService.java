@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import java.util.List;
 import java.util.Set;
@@ -84,7 +85,14 @@ public interface LockDataService {
      * @param user         пользователь запрашивающий данные
      * @return все блокировки
      */
-    PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user);
+    PagingResult<LockDataDTO> findAllByFilter(String filter, PagingParams pagingParams, TAUser user);
+
+    /**
+     * Простое снятие блокировки по ключу.
+     *
+     * @param key уникальный ключ блокировки
+     */
+    void unlock(String key);
 
     /**
      * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
@@ -92,7 +100,9 @@ public interface LockDataService {
      * @param key    код блокировки
      * @param userId код установившего блокировку пользователя
      * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
+     * @deprecated аналитика сведена к единому алгоритму, реализованному в {@link #unlock(String)}, проверки, если требуются, выполняем в вызывающих алгоритмах.
      */
+    @Deprecated
     Boolean unlock(String key, int userId);
 
     /**
@@ -102,7 +112,9 @@ public interface LockDataService {
      * @param userId код установившего блокировку пользователя
      * @param force  при force = true блокировка снимается принудительно, без вывода ошибки при отсутсвии блокировки
      * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
+     * @deprecated аналитика сведена к единому алгоритму, реализованному в {@link #unlock(String)}, проверки, если требуются, выполняем в вызывающих алгоритмах.
      */
+    @Deprecated
     Boolean unlock(String key, int userId, boolean force);
 
     /**
@@ -114,11 +126,11 @@ public interface LockDataService {
     void unlockAll(TAUserInfo userInfo, boolean ignoreError);
 
     /**
-     * Удаляет все указанные блокировки
+     * Удаляет все указанные блокировки, но только если к ним не привязаны незавершенные асинхронные задачи.
      *
-     * @param keys ключи блокировок
+     * @param lockKeys ключи блокировок
      */
-    void unlockAllWithCheckingTasks(TAUserInfo userInfo, List<String> keys);
+    ActionResult unlockAllWithoutTasks(List<String> lockKeys, TAUser user);
 
     /**
      * Удаляет блокировки, созданные ранее "seconds" секунд назад. Предполагается, что данный метод

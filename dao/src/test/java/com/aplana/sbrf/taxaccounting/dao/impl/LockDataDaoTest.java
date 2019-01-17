@@ -85,13 +85,13 @@ public class LockDataDaoTest extends Assert {
 
     @Test
     public void deleteLockTest() {
-        dao.unlock("a");
+        dao.unlockOld("a");
         Assert.assertNull(dao.get("a", false));
     }
 
     @Test(expected = LockException.class)
     public void deleteLockTest2() {
-        dao.unlock("qwerty");
+        dao.unlockOld("qwerty");
     }
 
     @Test
@@ -118,7 +118,7 @@ public class LockDataDaoTest extends Assert {
     private int unlockIfOlderThan(long seconds) {
         List<String> keyList = dao.getLockIfOlderThan(seconds);
         for (String key : keyList) {
-            dao.unlock(key);
+            dao.unlockOld(key);
         }
         return keyList.size();
     }
@@ -162,7 +162,7 @@ public class LockDataDaoTest extends Assert {
             assertTrue(e.getMessage().startsWith("Ошибка при поиске блокировки"));
         }
         try {
-            dao.unlock("asd");
+            dao.unlockOld("asd");
         } catch (LockException e) {
             assertTrue(e.getMessage().startsWith("Ошибка при удалении"));
         }

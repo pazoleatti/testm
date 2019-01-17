@@ -22,8 +22,8 @@
         /**
          * @description Контроллер страницы "Список блокировок"
          */
-        .controller('locksCtrl', ['$scope', '$filter', 'lockDataResource', '$http', 'APP_CONSTANTS',
-            function ($scope, $filter, lockDataResource, $http, APP_CONSTANTS) {
+        .controller('locksCtrl', ['$scope', '$http', '$filter', '$logPanel', 'lockDataResource', 'APP_CONSTANTS',
+            function ($scope, $http, $filter, $logPanel, lockDataResource, APP_CONSTANTS) {
 
                 $scope.searchFilter = {};
 
@@ -82,7 +82,10 @@
                         params: {
                             keys: $filter('idExtractor')($scope.locksGrid.value, 'key')
                         }
-                    }).then(function () {
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         $scope.refreshGrid(1);
                     });
                 };

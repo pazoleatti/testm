@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -39,7 +40,7 @@ public class LockDataController {
      */
     @GetMapping(value = "/rest/locks")
     public JqgridPagedList<LockDataDTO> fetchLocks(@RequestParam(required = false) String filter, @RequestParam PagingParams pagingParams) {
-        PagingResult<LockDataDTO> locks = lockDataService.getLocks(filter, pagingParams, securityService.currentUserInfo().getUser());
+        PagingResult<LockDataDTO> locks = lockDataService.findAllByFilter(filter, pagingParams, securityService.currentUserInfo().getUser());
         return JqgridPagedResourceAssembler.buildPagedList(
                 locks,
                 locks.getTotalCount(),
@@ -53,8 +54,8 @@ public class LockDataController {
      * @param keys ключи блокировок
      */
     @PostMapping(value = "/actions/lock/delete")
-    public void deleteLocks(@RequestParam String[] keys) {
+    public ActionResult deleteLocks(@RequestParam String[] keys) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        lockDataService.unlockAllWithCheckingTasks(userInfo, Arrays.asList(keys));
+        return lockDataService.unlockAllWithoutTasks(Arrays.asList(keys), userInfo.getUser());
     }
 }

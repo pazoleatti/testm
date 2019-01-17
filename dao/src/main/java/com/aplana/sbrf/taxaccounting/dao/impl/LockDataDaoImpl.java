@@ -108,6 +108,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     @Override
     public void unlock(String key) {
+        getJdbcTemplate().update("DELETE FROM lock_data WHERE key = ?",
+                new Object[]{key},
+                new int[]{Types.VARCHAR});
+    }
+
+    @Override
+    public void unlockOld(String key) {
         try {
             int affectedCount = getJdbcTemplate().update("DELETE FROM lock_data WHERE key = ?",
                     new Object[]{key},

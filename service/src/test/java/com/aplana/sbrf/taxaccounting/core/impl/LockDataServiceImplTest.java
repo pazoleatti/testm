@@ -30,10 +30,6 @@ import static org.mockito.Mockito.*;
 
 public class LockDataServiceImplTest {
 
-    private static final Date NOW = new Date();
-    private static final Date FUTURE = new Date(NOW.getTime() + 100000);
-    private static final Date PAST = new Date(NOW.getTime() - 100000);
-
     private static LockDataService service;
     private static TAUserDao userDao;
     private static LockDataDao dao;

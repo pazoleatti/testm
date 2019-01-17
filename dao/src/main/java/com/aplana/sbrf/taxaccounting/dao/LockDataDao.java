@@ -54,12 +54,21 @@ public interface LockDataDao extends PermissionDao {
     void lock(String key, int userId);
 
     /**
-     * Снимает блокировку
+     * Удаление блокировки по её ключу. Если блокировка не существует, ничего не делаем.
      *
-     * @param key код блокировки
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.LockException если блокировки нет в БД
+     * @param key ключ блокировки
      */
     void unlock(String key);
+
+    /**
+     * Старый метод снятия блокировки, выбрасывающий исключение в случае её отсутствия.
+     *
+     * @param key ключ блокировки
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.LockException если блокировки нет в БД
+     * @deprecated используйте {@link #unlock(String)}
+     */
+    @Deprecated
+    void unlockOld(String key);
 
     /**
      * Убрать все блокировки пользователя.
