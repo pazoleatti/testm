@@ -667,8 +667,8 @@
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
                     }).success(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
+                        if (response.uuid && response.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.uuid);
                         }
                     });
                 };

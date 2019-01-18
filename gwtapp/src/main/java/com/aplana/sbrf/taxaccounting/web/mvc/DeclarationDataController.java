@@ -572,13 +572,12 @@ public class DeclarationDataController {
      * Формирование отчета в xlsx
      *
      * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
-    public CreateDeclarationReportResult CreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+    public CreateDeclarationReportResult CreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createReportXlsx(userInfo, declarationDataId, force);
+        return declarationService.createReportXlsx(userInfo, declarationDataId, false);
     }
 
     /**
