@@ -117,6 +117,7 @@ import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
+import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
@@ -223,10 +224,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация).";
     private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
-    private static final String DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s";
     private static final String ACCESS_ERR_MSG_FMT = "Нет прав на доступ к налоговой форме. Проверьте назначение формы РНУ НДФЛ (первичная) для подразделения «%s» в «Назначении налоговых форм»%s.";
 
-    private final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(DeclarationDataReportType.ACCEPT_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.XML_DEC, DeclarationDataReportType.IMPORT_TF_DEC, DeclarationDataReportType.DELETE_DEC));
+    private final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(
+            DeclarationDataReportType.ACCEPT_DEC,
+            DeclarationDataReportType.CHECK_DEC,
+            DeclarationDataReportType.XML_DEC,
+            DeclarationDataReportType.IMPORT_TF_DEC,
+            DeclarationDataReportType.DELETE_DEC
+    ));
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -318,6 +324,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private CommonRefBookService commonRefBookService;
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
+    @Autowired
+    private DeclarationLocker declarationLocker;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
@@ -1239,18 +1247,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
+        int userId = userInfo.getUser().getId();
 
+        // Сортируем в порядке "КНФ, затем ПНФ", чтобы формы-приёмники не блокировали свои источники при массовом переводе в "Создана"
         List<Long> sortedDeclarationIds = sortDeclarationIdsByKnfThenPnf(declarationDataIds);
 
         for (Long declarationId : sortedDeclarationIds) {
             final Logger logger = new Logger();
+            LockData lockData = null;
             try {
+                // Проверяем права доступа
                 if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
                         new TargetIdAndLogger(declarationId, logger),
                         "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.RETURN_TO_CREATED)) {
-                    String declarationFullName = getDeclarationFullName(declarationId, DeclarationDataReportType.TO_CREATE_DEC);
-                    LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId(), declarationFullName);
-                    if (lockData == null) {
+
+                    // Блокируем текущую форму
+                    lockData = declarationLocker.establishLock(declarationId, OperationType.RETURN_DECLARATION, userInfo, logger);
+                    // Если блокировка успешная
+                    if (lockData != null) {
                         LOG.info(String.format("DeclarationDataServiceImpl.cancel by %s. id: %s; note: %s",
                                 userInfo, declarationId, note));
                         DeclarationData declarationData = declarationDataDao.get(declarationId);
@@ -1280,24 +1294,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 asnuClause);
 
                         logger.info(message);
-                        sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                        sendNotification(message, logEntryService.save(logger.getEntries()), userId);
                         logger.clear();
-                    } else {
-                        DeclarationData declaration = get(declarationId, userInfo);
-                        Department department = departmentService.getDepartment(declaration.getDepartmentId());
-                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-                        logger.error("Форма \"%s\" из \"%s\" заблокирована", declarationTemplate.getType().getName(), department.getName());
+                    } else { // Не удалось установить блокировку
+                        // Сообщение о причинах из алгоритма блокировки находится последним в logger
+                        String errorMessage = logger.getLastEntry().getMessage();
+                        String logsUuid = logEntryService.save(logger.getEntries());
+                        sendNotification(errorMessage, logsUuid, userId);
                     }
-                } else {
+                } else { // Нет прав доступа
                     makeNotificationForAccessDenied(logger);
                 }
             } catch (Throwable e) {
                 String errorMessage = String.format(FAIL, "Возврат в Создана", getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString()));
                 logger.error(errorMessage);
-                sendNotification(errorMessage, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                sendNotification(errorMessage, logEntryService.save(logger.getEntries()), userId);
                 LOG.error(e.getMessage(), e);
             } finally {
-                lockDataService.unlock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
+                if (lockData != null) {
+                    lockDataService.unlock(lockData.getKey());
+                }
             }
         }
     }
@@ -1327,6 +1343,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         sortedIds.addAll(otherIds);
 
         return sortedIds;
+    }
+
+    private void sendNotification(String msg, String logUuid, Integer userId) {
+        if (msg != null && !msg.isEmpty()) {
+            List<Notification> notifications = new ArrayList<>();
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setCreateDate(new Date());
+            notification.setText(msg);
+            notification.setLogId(logUuid);
+            notification.setNotificationType(NotificationType.DEFAULT);
+            notifications.add(notification);
+            notificationService.create(notifications);
+        }
     }
 
 
@@ -2575,20 +2605,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return params;
     }
 
-    private void sendNotification(String msg, String uuid, Integer userId, NotificationType notificationType, String reportId) {
-        if (msg != null && !msg.isEmpty()) {
-            List<Notification> notifications = new ArrayList<>();
-            Notification notification = new Notification();
-            notification.setUserId(userId);
-            notification.setCreateDate(new Date());
-            notification.setText(msg);
-            notification.setLogId(uuid);
-            notification.setReportId(reportId);
-            notification.setNotificationType(notificationType);
-            notifications.add(notification);
-            notificationService.create(notifications);
-        }
-    }
 
     @Override
     public ActionResult asyncExportReports(DeclarationDataFilter filter, TAUserInfo userInfo) {
@@ -3208,22 +3224,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private void makeNotificationForAccessDenied(Logger logger) {
         if (logger.getEntries().size() != 0) {
-            Notification notification = new Notification();
-            notification.setUserId(userService.getCurrentUser().getId());
-            notification.setCreateDate(new Date());
-            notification.setText(logger.getEntries().get(logger.getEntries().size() - 1).getMessage());
-            notification.setLogId(logEntryService.save(Collections.singletonList(logger.getEntries().get(logger.getEntries().size() - 1))));
-            notification.setReportId(null);
-            notification.setNotificationType(NotificationType.DEFAULT);
-            notificationService.create(Collections.singletonList(notification));
+            makeErrorNotification(logger.getEntries().get(logger.getEntries().size() - 1).getMessage(), logger);
         }
     }
 
     private void makeNotificationForUnexpected(Throwable e, Logger logger, String operationName, Long declarationId) {
+        makeErrorNotification(String.format(FAIL, operationName, getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString())), logger);
+    }
+
+    private void makeErrorNotification(String errorMessage, Logger logger) {
         Notification notification = new Notification();
         notification.setUserId(userService.getCurrentUser().getId());
         notification.setCreateDate(new Date());
-        notification.setText(String.format(FAIL, operationName, getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString())));
+        notification.setText(errorMessage);
         notification.setLogId(logEntryService.save(Collections.singletonList(logger.getEntries().get(logger.getEntries().size() - 1))));
         notification.setReportId(null);
         notification.setNotificationType(NotificationType.DEFAULT);

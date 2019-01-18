@@ -118,6 +118,12 @@ public class DeclarationLockerImpl implements DeclarationLocker {
     }
 
     @Override
+    public LockData establishLock(Long declarationDataId, OperationType operationType, TAUserInfo userInfo, Logger logger) {
+        List<LockData> lockDataList = establishLock(Collections.singletonList(declarationDataId), operationType, userInfo, logger);
+        return lockDataList.get(0);
+    }
+
+    @Override
     public List<LockData> establishLock(List<Long> declarationDataIdList, OperationType operationType, TAUserInfo userInfo, Logger logger) {
         try {
             if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))

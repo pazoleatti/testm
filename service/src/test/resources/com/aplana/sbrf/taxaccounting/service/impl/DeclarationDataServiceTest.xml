@@ -89,6 +89,10 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TransactionHelper"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker"/>
+    </bean>
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl"/>
-    <bean id="departmentReportPeriodFormatter" class="com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter"/>
+    <bean id="departmentReportPeriodFormatter"
+          class="com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter"/>
 </beans>
