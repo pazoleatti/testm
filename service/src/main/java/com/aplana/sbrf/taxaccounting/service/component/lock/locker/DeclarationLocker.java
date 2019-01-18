@@ -19,7 +19,7 @@ public interface DeclarationLocker {
      * @param operationType     операция
      * @param userInfo          информация о пользователе
      * @param logger            логгер
-     * @return список объектов блокировок в случае успешной установки блокировки иначе null
+     * @return объект блокировки в случае успешной установки блокировки иначе null
      */
     LockData establishLock(Long declarationDataId, OperationType operationType, TAUserInfo userInfo, Logger logger);
 
